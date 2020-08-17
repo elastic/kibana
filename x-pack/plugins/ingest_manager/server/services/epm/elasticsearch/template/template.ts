@@ -37,13 +37,22 @@ const DEFAULT_IGNORE_ABOVE = 1024;
  *
  * @param indexPattern String with the index pattern
  */
-export function getTemplate(
-  type: string,
-  templateName: string,
-  mappings: IndexTemplateMappings,
-  pipelineName?: string | undefined
-): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings);
+export function getTemplate({
+  type,
+  templateName,
+  mappings,
+  pipelineName,
+  packageName,
+  composedOfTemplates,
+}: {
+  type: string;
+  templateName: string;
+  mappings: IndexTemplateMappings;
+  pipelineName?: string | undefined;
+  packageName: string;
+  composedOfTemplates: string[];
+}): IndexTemplate {
+  const template = getBaseTemplate(type, templateName, mappings, packageName, composedOfTemplates);
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -236,11 +245,25 @@ export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record
 function getBaseTemplate(
   type: string,
   templateName: string,
-  mappings: IndexTemplateMappings
+  mappings: IndexTemplateMappings,
+  packageName: string,
+  composedOfTemplates: string[]
 ): IndexTemplate {
+  // Meta information to identify Ingest Manager's managed templates and indices
+  const _meta = {
+    package: {
+      name: packageName,
+    },
+    managed_by: 'ingest-manager',
+    managed: true,
+  };
+
   return {
-    // This takes precedence over all index templates installed with the 'base' package
-    priority: 1,
+    // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
+    // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
+    // is created. I'm using 200 here to give some room for users to create their own template and fit it between the
+    // default and the one the ingest manager uses.
+    priority: 200,
     // To be completed with the correct index patterns
     index_patterns: [`${templateName}-*`],
     template: {
@@ -248,7 +271,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: `${type}-default`,
+            name: type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
@@ -290,13 +313,14 @@ function getBaseTemplate(
         date_detection: false,
         // All the properties we know from the fields.yml file
         properties: mappings.properties,
+        _meta,
       },
       // To be filled with the aliases that we need
       aliases: {},
     },
-    data_stream: {
-      timestamp_field: '@timestamp',
-    },
+    data_stream: {},
+    composed_of: composedOfTemplates,
+    _meta,
   };
 }
 
@@ -304,11 +328,16 @@ export const updateCurrentWriteIndices = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
 ): Promise<void> => {
-  if (!templates) return;
+  if (!templates.length) return;
 
   const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  if (!allIndices.length) return;
   return updateAllIndices(allIndices, callCluster);
 };
+
+function isCurrentIndex(item: CurrentIndex[] | undefined): item is CurrentIndex[] {
+  return item !== undefined;
+}
 
 const queryIndicesFromTemplates = async (
   callCluster: CallESAsCurrentUser,
@@ -318,7 +347,7 @@ const queryIndicesFromTemplates = async (
     return getIndices(callCluster, template);
   });
   const indexObjects = await Promise.all(indexPromises);
-  return indexObjects.filter((item) => item !== undefined).flat();
+  return indexObjects.filter(isCurrentIndex).flat();
 };
 
 const getIndices = async (
@@ -326,14 +355,18 @@ const getIndices = async (
   template: TemplateRef
 ): Promise<CurrentIndex[] | undefined> => {
   const { templateName, indexTemplate } = template;
-  const res = await callCluster('search', getIndexQuery(templateName));
-  const indices: any[] = res?.aggregations?.index.buckets;
-  if (indices) {
-    return indices.map((index) => ({
-      indexName: index.key,
-      indexTemplate,
-    }));
-  }
+  // Until ES provides a way to update mappings of a data stream
+  // get the last index of the data stream, which is the current write index
+  const res = await callCluster('transport.request', {
+    method: 'GET',
+    path: `/_data_stream/${templateName}-*`,
+  });
+  const dataStreams = res.data_streams;
+  if (!dataStreams.length) return;
+  return dataStreams.map((dataStream: any) => ({
+    indexName: dataStream.indices[dataStream.indices.length - 1].index_name,
+    indexTemplate,
+  }));
 };
 
 const updateAllIndices = async (
@@ -355,18 +388,40 @@ const updateExistingIndex = async ({
   indexTemplate: IndexTemplate;
 }) => {
   const { settings, mappings } = indexTemplate.template;
+
+  // for now, remove from object so as not to update stream or dataset properties of the index until type and name
+  // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
+  // to skip updating and assume the value in the index mapping is correct
+  delete mappings.properties.stream;
+  delete mappings.properties.data_stream;
+
+  // get the data_stream values from the index template to compose data stream name
+  const indexMappings = await getIndexMappings(indexName, callCluster);
+  const dataStream = indexMappings[indexName].mappings.properties.data_stream.properties;
+  if (!dataStream.type.value || !dataStream.dataset.value || !dataStream.namespace.value)
+    throw new Error(`data_stream values are missing from the index template ${indexName}`);
+  const dataStreamName = `${dataStream.type.value}-${dataStream.dataset.value}-${dataStream.namespace.value}`;
+
   // try to update the mappings first
-  // for now we assume updates are compatible
   try {
     await callCluster('indices.putMapping', {
       index: indexName,
       body: mappings,
     });
+    // if update fails, rollover data stream
   } catch (err) {
-    throw new Error('incompatible mappings update');
+    try {
+      const path = `/${dataStreamName}/_rollover`;
+      await callCluster('transport.request', {
+        method: 'POST',
+        path,
+      });
+    } catch (error) {
+      throw new Error(`cannot rollover data stream ${dataStreamName}`);
+    }
   }
   // update settings after mappings was successful to ensure
-  // pointing to theme new pipeline is safe
+  // pointing to the new pipeline is safe
   // for now, only update the pipeline
   if (!settings.index.default_pipeline) return;
   try {
@@ -375,36 +430,17 @@ const updateExistingIndex = async ({
       body: { index: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
-    throw new Error('incompatible settings update');
+    throw new Error(`could not update index template settings for ${indexName}`);
   }
 };
 
-const getIndexQuery = (templateName: string) => ({
-  index: `${templateName}-*`,
-  size: 0,
-  body: {
-    query: {
-      bool: {
-        must: [
-          {
-            exists: {
-              field: 'stream.namespace',
-            },
-          },
-          {
-            exists: {
-              field: 'stream.dataset',
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      index: {
-        terms: {
-          field: '_index',
-        },
-      },
-    },
-  },
-});
+const getIndexMappings = async (indexName: string, callCluster: CallESAsCurrentUser) => {
+  try {
+    const indexMappings = await callCluster('indices.getMapping', {
+      index: indexName,
+    });
+    return indexMappings;
+  } catch (err) {
+    throw new Error(`could not get mapping from ${indexName}`);
+  }
+};

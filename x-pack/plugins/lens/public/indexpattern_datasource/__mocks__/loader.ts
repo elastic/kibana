@@ -19,7 +19,7 @@ export function loadInitialState() {
       [restricted.id]: restricted,
     },
     layers: {},
-    showEmptyFields: false,
+    isFirstExistenceFetch: false,
   };
   return result;
 }

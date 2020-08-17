@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerts/server';
@@ -25,6 +24,13 @@ const conditionsActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.conditionsActionVariableDescription',
   {
     defaultMessage: 'The conditions that log entries needed to fulfill',
+  }
+);
+
+const groupByActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.groupByActionVariableDescription',
+  {
+    defaultMessage: 'The name of the group responsible for triggering the alert',
   }
 );
 
@@ -50,6 +56,8 @@ const criteriaSchema = schema.object({
     schema.literal(Comparator.NOT_EQ),
     schema.literal(Comparator.MATCH),
     schema.literal(Comparator.NOT_MATCH),
+    schema.literal(Comparator.MATCH_PHRASE),
+    schema.literal(Comparator.NOT_MATCH_PHRASE),
   ]),
   value: schema.oneOf([schema.number(), schema.string()]),
 });
@@ -64,8 +72,6 @@ export async function registerLogThresholdAlertType(
     );
   }
 
-  const alertUUID = uuid.v4();
-
   alertingPlugin.registerType({
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     name: 'Log threshold',
@@ -75,15 +81,17 @@ export async function registerLogThresholdAlertType(
         criteria: schema.arrayOf(criteriaSchema),
         timeUnit: schema.string(),
         timeSize: schema.number(),
+        groupBy: schema.maybe(schema.arrayOf(schema.string())),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
-    executor: createLogThresholdExecutor(alertUUID, libs),
+    executor: createLogThresholdExecutor(libs),
     actionVariables: {
       context: [
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
+        { name: 'group', description: groupByActionVariableDescription },
       ],
     },
     producer: 'logs',

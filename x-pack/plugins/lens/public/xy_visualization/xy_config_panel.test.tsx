@@ -5,15 +5,15 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
-import { EuiButtonGroupProps } from '@elastic/eui';
-import { LayerContextMenu } from './xy_config_panel';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
+import { LayerContextMenu, XyToolbar } from './xy_config_panel';
 import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
 
-describe('LayerContextMenu', () => {
+describe('XY Config panels', () => {
   let frame: FramePublicAPI;
 
   function testState(): State {
@@ -39,11 +39,6 @@ describe('LayerContextMenu', () => {
     };
   });
 
-  test.skip('allows toggling of legend visibility', () => {});
-  test.skip('allows changing legend position', () => {});
-  test.skip('allows toggling the y axis gridlines', () => {});
-  test.skip('allows toggling the x axis gridlines', () => {});
-
   describe('LayerContextMenu', () => {
     test('enables stacked chart types even when there is no split series', () => {
       const state = testState();
@@ -57,7 +52,7 @@ describe('LayerContextMenu', () => {
       );
 
       const options = component
-        .find('[data-test-subj="lnsXY_seriesType"]')
+        .find(EuiButtonGroup)
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
@@ -84,12 +79,120 @@ describe('LayerContextMenu', () => {
       );
 
       const options = component
-        .find('[data-test-subj="lnsXY_seriesType"]')
+        .find(EuiButtonGroup)
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
       expect(options!.map(({ id }) => id)).toEqual(['bar_horizontal', 'bar_horizontal_stacked']);
       expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
+    });
+  });
+
+  describe('XyToolbar', () => {
+    it('should show currently selected fitting function', () => {
+      const state = testState();
+
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'line' }],
+            fittingFunction: 'Carry',
+          }}
+        />
+      );
+
+      expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
+    });
+
+    it('should disable the select if there is no unstacked area or line series', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [
+              { ...state.layers[0], seriesType: 'bar' },
+              { ...state.layers[0], seriesType: 'area_stacked' },
+            ],
+            fittingFunction: 'Carry',
+          }}
+        />
+      );
+
+      expect(component.find(EuiSuperSelect).prop('disabled')).toEqual(true);
+    });
+
+    it('should show the values of the X and Y axes titles on the corresponding input text', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            xTitle: 'My custom X axis title',
+            yTitle: 'My custom Y axis title',
+          }}
+        />
+      );
+
+      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('value')).toBe(
+        'My custom X axis title'
+      );
+      expect(component.find('[data-test-subj="lnsYAxisTitle"]').prop('value')).toBe(
+        'My custom Y axis title'
+      );
+    });
+
+    it('should disable the input texts if the switch is off', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            showXAxisTitle: false,
+            showYAxisTitle: false,
+          }}
+        />
+      );
+
+      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('disabled')).toBe(true);
+      expect(component.find('[data-test-subj="lnsYAxisTitle"]').prop('disabled')).toBe(true);
+    });
+
+    it('has the tick labels buttons enabled', () => {
+      const state = testState();
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      const options = component
+        .find('[data-test-subj="lnsTickLabelsSettings"]')
+        .prop('options') as EuiButtonGroupProps['options'];
+
+      expect(options!.map(({ label }) => label)).toEqual(['X-axis', 'Y-axis']);
+
+      const selections = component
+        .find('[data-test-subj="lnsTickLabelsSettings"]')
+        .prop('idToSelectedMap');
+
+      expect(selections!).toEqual({ x: true, y: true });
+    });
+
+    it('has the gridlines buttons enabled', () => {
+      const state = testState();
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      const selections = component
+        .find('[data-test-subj="lnsGridlinesSettings"]')
+        .prop('idToSelectedMap');
+
+      expect(selections!).toEqual({ x: true, y: true });
     });
   });
 });

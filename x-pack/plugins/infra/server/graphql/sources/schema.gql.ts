@@ -36,6 +36,10 @@ export const sourcesSchema = gql`
     metricAlias: String!
     "The alias to read log data from"
     logAlias: String!
+    "Default view for inventory"
+    inventoryDefaultView: String!
+    "Default view for Metrics Explorer"
+    metricsExplorerDefaultView: String!
     "The field mapping to use for this source"
     fields: InfraSourceFields!
     "The columns to use for log display"
@@ -128,6 +132,10 @@ export const sourcesSchema = gql`
     logAlias: String
     "The field mapping to use for this source"
     fields: UpdateSourceFieldsInput
+    "Name of default inventory view"
+    inventoryDefaultView: String
+    "Default view for Metrics Explorer"
+    metricsExplorerDefaultView: String
     "The log columns to display for this source"
     logColumns: [UpdateSourceLogColumnInput!]
   }

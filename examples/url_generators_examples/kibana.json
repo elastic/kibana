@@ -5,5 +5,8 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["share"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "extraPublicDirs": [
+    "public/url_generator"
+  ]
 }

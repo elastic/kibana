@@ -30,7 +30,7 @@ export interface EsDoc extends Record<string, any> {
   _source: EsDocSource;
 }
 
-export const MAX_COLUMNS = 20;
+export const MAX_COLUMNS = 10;
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
 export const BASIC_NUMERICAL_TYPES = new Set([
@@ -47,6 +47,7 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.SCALED_FLOAT,
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {

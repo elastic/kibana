@@ -5,15 +5,17 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
-import { Plugin, ClientSetup, ClientStart } from './plugin';
+import { Plugin, ObservabilityPluginSetup, ObservabilityPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<ClientSetup, ClientStart> = (
+export { ObservabilityPluginSetup, ObservabilityPluginStart };
+
+export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPluginStart> = (
   context: PluginInitializerContext
 ) => {
   return new Plugin(context);
 };
 
-export * from './components/action_menu';
+export * from './components/shared/action_menu/';
 
 export {
   useTrackPageview,

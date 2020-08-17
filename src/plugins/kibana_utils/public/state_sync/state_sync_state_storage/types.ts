@@ -25,7 +25,8 @@ import { Observable } from 'rxjs';
  * * state serialisation / deserialization
  * * persisting to and retrieving from storage
  *
- * For an example take a look at already implemented KbnUrl state storage
+ * For an example take a look at already implemented {@link IKbnUrlStateStorage} and {@link ISessionStorageStateStorage} state storages
+ * @public
  */
 export interface IStateStorage {
   /**
@@ -45,7 +46,7 @@ export interface IStateStorage {
 
   /**
    * Optional method to cancel any pending activity
-   * syncState() will call it, if it is provided by IStateStorage
+   * {@link syncState} will call it during destroy, if it is provided by IStateStorage
    */
   cancel?: () => void;
 }

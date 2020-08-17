@@ -87,31 +87,31 @@ describe('getNonExistingReferenceAsKeys()', () => {
     const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "fields": Array [
-            "id",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "1",
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
           ],
-          "id": "1",
-          "type": "index-pattern",
-        },
-      ],
-      Object {
-        "namespace": undefined,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test(`doesn't handle saved object types outside of ENFORCED_TYPES`, async () => {
@@ -186,38 +186,38 @@ describe('getNonExistingReferenceAsKeys()', () => {
     const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
     expect(result).toEqual(['index-pattern:1', 'search:3']);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "fields": Array [
-            "id",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "1",
+                "type": "index-pattern",
+              },
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "3",
+                "type": "search",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
           ],
-          "id": "1",
-          "type": "index-pattern",
-        },
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "3",
-          "type": "search",
-        },
-      ],
-      Object {
-        "namespace": undefined,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 });
 
@@ -231,11 +231,11 @@ describe('validateReferences()', () => {
   test('returns empty when no objects are passed in', async () => {
     const result = await validateReferences([], savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [],
-  "filteredObjects": Array [],
-}
-`);
+      Object {
+        "errors": Array [],
+        "filteredObjects": Array [],
+      }
+    `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
@@ -343,111 +343,111 @@ Object {
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "blocking": Array [],
-        "references": Array [
-          Object {
-            "id": "3",
-            "type": "index-pattern",
-          },
-        ],
-        "type": "missing_references",
-      },
-      "id": "2",
-      "title": "My Visualization 2",
-      "type": "visualization",
-    },
-    Object {
-      "error": Object {
-        "blocking": Array [],
-        "references": Array [
-          Object {
-            "id": "5",
-            "type": "index-pattern",
-          },
-          Object {
-            "id": "6",
-            "type": "index-pattern",
-          },
-          Object {
-            "id": "7",
-            "type": "search",
-          },
-        ],
-        "type": "missing_references",
-      },
-      "id": "4",
-      "title": "My Visualization 4",
-      "type": "visualization",
-    },
-  ],
-  "filteredObjects": Array [
-    Object {
-      "attributes": Object {},
-      "id": "1",
-      "references": Array [],
-      "type": "visualization",
-    },
-  ],
-}
-`);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "3",
-          "type": "index-pattern",
-        },
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "5",
-          "type": "index-pattern",
-        },
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "6",
-          "type": "index-pattern",
-        },
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "7",
-          "type": "search",
-        },
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "8",
-          "type": "search",
-        },
-      ],
       Object {
-        "namespace": undefined,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        "errors": Array [
+          Object {
+            "error": Object {
+              "blocking": Array [],
+              "references": Array [
+                Object {
+                  "id": "3",
+                  "type": "index-pattern",
+                },
+              ],
+              "type": "missing_references",
+            },
+            "id": "2",
+            "title": "My Visualization 2",
+            "type": "visualization",
+          },
+          Object {
+            "error": Object {
+              "blocking": Array [],
+              "references": Array [
+                Object {
+                  "id": "5",
+                  "type": "index-pattern",
+                },
+                Object {
+                  "id": "6",
+                  "type": "index-pattern",
+                },
+                Object {
+                  "id": "7",
+                  "type": "search",
+                },
+              ],
+              "type": "missing_references",
+            },
+            "id": "4",
+            "title": "My Visualization 4",
+            "type": "visualization",
+          },
+        ],
+        "filteredObjects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [],
+            "type": "visualization",
+          },
+        ],
+      }
+    `);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "3",
+                "type": "index-pattern",
+              },
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "5",
+                "type": "index-pattern",
+              },
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "6",
+                "type": "index-pattern",
+              },
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "7",
+                "type": "search",
+              },
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "8",
+                "type": "search",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test(`doesn't return errors when references exist in Elasticsearch`, async () => {
@@ -477,24 +477,24 @@ Object {
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [],
-  "filteredObjects": Array [
-    Object {
-      "attributes": Object {},
-      "id": "2",
-      "references": Array [
-        Object {
-          "id": "1",
-          "name": "ref_0",
-          "type": "index-pattern",
-        },
-      ],
-      "type": "visualization",
-    },
-  ],
-}
-`);
+      Object {
+        "errors": Array [],
+        "filteredObjects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "visualization",
+          },
+        ],
+      }
+    `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
   });
 
@@ -521,30 +521,30 @@ Object {
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [],
-  "filteredObjects": Array [
-    Object {
-      "attributes": Object {},
-      "id": "1",
-      "references": Array [],
-      "type": "index-pattern",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "2",
-      "references": Array [
-        Object {
-          "id": "1",
-          "name": "ref_0",
-          "type": "index-pattern",
-        },
-      ],
-      "type": "visualization",
-    },
-  ],
-}
-`);
+      Object {
+        "errors": Array [],
+        "filteredObjects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [],
+            "type": "index-pattern",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "visualization",
+          },
+        ],
+      }
+    `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
@@ -570,29 +570,29 @@ Object {
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [],
-  "filteredObjects": Array [
-    Object {
-      "attributes": Object {},
-      "id": "1",
-      "references": Array [
-        Object {
-          "id": "2",
-          "name": "ref_0",
-          "type": "visualization",
-        },
-        Object {
-          "id": "3",
-          "name": "ref_1",
-          "type": "other-type",
-        },
-      ],
-      "type": "dashboard",
-    },
-  ],
-}
-`);
+      Object {
+        "errors": Array [],
+        "filteredObjects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "2",
+                "name": "ref_0",
+                "type": "visualization",
+              },
+              Object {
+                "id": "3",
+                "name": "ref_1",
+                "type": "other-type",
+              },
+            ],
+            "type": "dashboard",
+          },
+        ],
+      }
+    `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 

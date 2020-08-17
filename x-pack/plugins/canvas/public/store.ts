@@ -9,9 +9,9 @@ import {
   destroyStore as destroy,
   getStore,
   cloneStore,
-  // @ts-ignore Untyped local
+  // @ts-expect-error untyped local
 } from './state/store';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { getInitialState } from './state/initial_state';
 
 import { CoreSetup } from '../../../../src/core/public';

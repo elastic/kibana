@@ -63,6 +63,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
     const {
       activePage,
       children,
+      docValueFields,
       endDate,
       filterQuery,
       id = ID,
@@ -84,6 +85,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       filterQuery: createFilter(filterQuery),
       defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
+      docValueFields: docValueFields ?? [],
     };
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>

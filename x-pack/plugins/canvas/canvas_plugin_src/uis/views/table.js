@@ -33,6 +33,9 @@ export const table = () => ({
       help: strings.getPaginateHelp(),
       argType: 'toggle',
       default: true,
+      options: {
+        labelValue: strings.getPaginateToggleSwitch(),
+      },
     },
     {
       name: 'showHeader',
@@ -40,6 +43,9 @@ export const table = () => ({
       help: strings.getShowHeaderHelp(),
       argType: 'toggle',
       default: true,
+      options: {
+        labelValue: strings.getShowHeaderToggleSwitch(),
+      },
     },
   ],
 });

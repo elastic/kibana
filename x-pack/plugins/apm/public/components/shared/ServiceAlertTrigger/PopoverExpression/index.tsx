@@ -13,7 +13,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const PopoverExpression = (props: Props) => {
+export function PopoverExpression(props: Props) {
   const { title, value, children } = props;
 
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -36,4 +36,4 @@ export const PopoverExpression = (props: Props) => {
       {children}
     </EuiPopover>
   );
-};
+}

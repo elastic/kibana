@@ -19,79 +19,78 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import chalk from 'chalk';
-import { green, always, pretty } from './utils';
-import { fromNullable } from './either';
-import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
+import { RESEARCH_CI_JOB_NAME, TEAM_ASSIGNMENT_PIPELINE_NAME } from './constants';
+import { errMsg, redact, whichIndex } from './ingest_helpers';
+import { pretty, green } from './utils';
+import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
-const redacted = redact(node);
-const client = new Client({ node });
 
-const indexName = (body) => (body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX);
+const client = new Client({ node });
+const redactedEsHostUrl = redact(node);
+const parse = JSON.parse.bind(null);
+const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
 
 export const ingest = (log) => async (body) => {
-  const index = indexName(body);
+  const isTotal = !!body.isTotal;
+  const index = whichIndex(isResearchJob)(isTotal);
+  const isACoverageIndex = isTotal ? false : true;
 
-  if (process.env.NODE_ENV === 'integration_test') {
-    log.debug(`### Just Logging, ${green('NOT actually sending')} to [${green(index)}]`);
-    logSuccess(log, index, body);
-  } else {
-    try {
-      log.debug(`### Actually sending to: ${green(index)}`);
-      await client.index({ index, body });
-      logSuccess(log, index, body);
-    } catch (e) {
-      throw createFailError(errMsg(index, body, e));
-    }
-  }
+  const stringified = pretty(body);
+  const pipeline = TEAM_ASSIGNMENT_PIPELINE_NAME;
+
+  const finalPayload = isACoverageIndex
+    ? { index, body: stringified, pipeline }
+    : { index, body: stringified };
+
+  const justLog = dontSendButLog(log);
+  const doSendToIndex = doSend(index);
+  const doSendRedacted = doSendToIndex(redactedEsHostUrl)(log)(client);
+
+  eitherSendOrNot(finalPayload).fold(justLog, doSendRedacted);
 };
-function logSuccess(log, index, body) {
-  const logShort = () => `### Sent:
-### ES HOST (redacted): ${redacted}
-### Index: ${green(index)}`;
 
-  logShort();
-  log.verbose(pretty(body));
-
-  const { staticSiteUrl } = body;
-
-  logShort();
-  log.debug(`### staticSiteUrl: ${staticSiteUrl}`);
-}
-function errMsg(index, body, e) {
-  const orig = fromNullable(e.body).fold(
-    always(''),
-    () => `### Orig Err:\n${pretty(e.body.error)}`
-  );
-
-  const red = color('red');
-
-  return `
-### ES HOST (redacted): \n\t${red(redacted)}
-### INDEX: \n\t${red(index)}
-### Partial orig err stack: \n\t${partial(e.stack)}
-### Item BODY:\n${pretty(body)}
-${orig}
-
-### Troubleshooting Hint:
-${red('Perhaps the coverage data was not merged properly?\n')}
-`;
+function doSend(index) {
+  return (redactedEsHostUrl) => (log) => (client) => async (payload) => {
+    const logF = logSend(true)(redactedEsHostUrl)(log);
+    await send(logF, index, redactedEsHostUrl, client, payload);
+  };
 }
 
-function partial(x) {
-  return x.split('\n').splice(0, 2).join('\n');
+function dontSendButLog(log) {
+  return (payload) => {
+    logSend(false)(null)(log)(payload);
+  };
 }
-function redact(x) {
-  const url = new URL(x);
-  if (url.password) {
-    return `${url.protocol}//${url.host}`;
-  } else {
-    return x;
+
+async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
+  try {
+    await client.index(requestBody);
+    logF(requestBody);
+  } catch (e) {
+    const { body } = requestBody;
+    const parsed = parse(body);
+    throw createFailError(errMsg(idx, redactedEsHostUrl, parsed, e));
   }
 }
-function color(whichColor) {
-  return function colorInner(x) {
-    return chalk[whichColor].bgWhiteBright(x);
+
+const sendMsg = (actuallySent, redactedEsHostUrl, payload) => {
+  const { index, body } = payload;
+  return `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
+${payload.pipeline ? `\t### Team Assignment Pipeline: ${green(payload.pipeline)}` : ''}
+${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
+\t### Index: ${green(index)}
+\t### payload.body: ${body}
+${process.env.NODE_ENV === 'integration_test' ? `ingest-pipe=>${payload.pipeline}` : ''}
+`;
+};
+
+function logSend(actuallySent) {
+  return (redactedEsHostUrl) => (log) => (payload) => {
+    log.verbose(sendMsg(actuallySent, redactedEsHostUrl, payload));
   };
+}
+
+function eitherSendOrNot(payload) {
+  return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
 }

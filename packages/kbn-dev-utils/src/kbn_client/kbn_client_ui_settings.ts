@@ -57,10 +57,11 @@ export class KbnClientUiSettings {
    * Unset a uiSetting
    */
   async unset(setting: string) {
-    return await this.requester.request<any>({
+    const { data } = await this.requester.request<any>({
       path: uriencode`/api/kibana/settings/${setting}`,
       method: 'DELETE',
     });
+    return data;
   }
 
   /**
@@ -105,11 +106,11 @@ export class KbnClientUiSettings {
   }
 
   private async getAll() {
-    const resp = await this.requester.request<UiSettingsApiResponse>({
+    const { data } = await this.requester.request<UiSettingsApiResponse>({
       path: '/api/kibana/settings',
       method: 'GET',
     });
 
-    return resp.settings;
+    return data.settings;
   }
 }

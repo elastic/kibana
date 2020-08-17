@@ -11,3 +11,5 @@ export { PageErrorForbidden } from './page_error';
 export { TemplateDeleteModal } from './template_delete_modal';
 export { TemplateForm } from './template_form';
 export * from './mappings_editor';
+export * from './component_templates';
+export * from './index_templates';

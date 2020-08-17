@@ -18,6 +18,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
@@ -25,18 +26,27 @@ import { includes, ascending, entriesToObject } from './array_helpers';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
+const DEFAULT_IMPLICIT_BUNDLE_DEPS = ['core'];
+
+const isStringArray = (input: any): input is string[] =>
+  Array.isArray(input) && input.every((x) => typeof x === 'string');
+
 export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
   /** Unique id for this bundle */
   readonly id: string;
-  /** Webpack entry request for this plugin, relative to the contextDir */
-  readonly entry: string;
+  /** directory names relative to the contextDir that can be imported from */
+  readonly publicDirNames: string[];
   /** Absolute path to the plugin source directory */
   readonly contextDir: string;
   /** Absolute path to the root of the repository */
   readonly sourceRoot: string;
   /** Absolute path to the directory where output should be written */
   readonly outputDir: string;
+  /** Banner that should be written to all bundle JS files */
+  readonly banner?: string;
+  /** Absolute path to a kibana.json manifest file, if omitted we assume there are not dependenices */
+  readonly manifestPath?: string;
 }
 
 export class Bundle {
@@ -44,8 +54,8 @@ export class Bundle {
   public readonly type: BundleSpec['type'];
   /** Unique identifier for this bundle */
   public readonly id: BundleSpec['id'];
-  /** Path, relative to `contextDir`, to the entry file for the Webpack bundle */
-  public readonly entry: BundleSpec['entry'];
+  /** directory names relative to the contextDir that can be imported from */
+  public readonly publicDirNames: BundleSpec['publicDirNames'];
   /**
    * Absolute path to the root of the bundle context (plugin directory)
    * where the entry is resolved relative to and the default output paths
@@ -56,16 +66,26 @@ export class Bundle {
   public readonly sourceRoot: BundleSpec['sourceRoot'];
   /** Absolute path to the output directory for this bundle */
   public readonly outputDir: BundleSpec['outputDir'];
+  /** Banner that should be written to all bundle JS files */
+  public readonly banner: BundleSpec['banner'];
+  /**
+   * Absolute path to a manifest file with "requiredBundles" which will be
+   * used to allow bundleRefs from this bundle to the exports of another bundle.
+   * Every bundle mentioned in the `requiredBundles` must be built together.
+   */
+  public readonly manifestPath: BundleSpec['manifestPath'];
 
   public readonly cache: BundleCache;
 
   constructor(spec: BundleSpec) {
     this.type = spec.type;
     this.id = spec.id;
-    this.entry = spec.entry;
+    this.publicDirNames = spec.publicDirNames;
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
+    this.manifestPath = spec.manifestPath;
+    this.banner = spec.banner;
 
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
   }
@@ -73,8 +93,6 @@ export class Bundle {
   /**
    * Calculate the cache key for this bundle based from current
    * mtime values.
-   *
-   * @param mtimes pre-fetched mtimes (ms || undefined) for all referenced files
    */
   createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
     return {
@@ -94,11 +112,58 @@ export class Bundle {
     return {
       type: this.type,
       id: this.id,
-      entry: this.entry,
+      publicDirNames: this.publicDirNames,
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
+      manifestPath: this.manifestPath,
+      banner: this.banner,
     };
+  }
+
+  readBundleDeps(): { implicit: string[]; explicit: string[] } {
+    if (!this.manifestPath) {
+      return {
+        implicit: [...DEFAULT_IMPLICIT_BUNDLE_DEPS],
+        explicit: [],
+      };
+    }
+
+    let json: string;
+    try {
+      json = Fs.readFileSync(this.manifestPath, 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+
+      json = '{}';
+    }
+
+    let parsedManifest: { requiredPlugins?: string[]; requiredBundles?: string[] };
+    try {
+      parsedManifest = JSON.parse(json);
+    } catch (error) {
+      throw new Error(
+        `unable to parse manifest at [${this.manifestPath}], error: [${error.message}]`
+      );
+    }
+
+    if (typeof parsedManifest === 'object' && parsedManifest) {
+      const explicit = parsedManifest.requiredBundles || [];
+      const implicit = [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(parsedManifest.requiredPlugins || [])];
+
+      if (isStringArray(explicit) && isStringArray(implicit)) {
+        return {
+          explicit,
+          implicit,
+        };
+      }
+    }
+
+    throw new Error(
+      `Expected "requiredBundles" and "requiredPlugins" in manifest file [${this.manifestPath}] to be arrays of strings`
+    );
   }
 }
 
@@ -134,9 +199,9 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have a string `id` property');
         }
 
-        const { entry } = spec;
-        if (!(typeof entry === 'string')) {
-          throw new Error('`bundles[]` must have a string `entry` property');
+        const { publicDirNames } = spec;
+        if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
+          throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
         }
 
         const { contextDir } = spec;
@@ -154,13 +219,29 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have an absolute path `outputDir` property');
         }
 
+        const { manifestPath } = spec;
+        if (manifestPath !== undefined) {
+          if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
+            throw new Error('`bundles[]` must have an absolute path `manifestPath` property');
+          }
+        }
+
+        const { banner } = spec;
+        if (banner !== undefined) {
+          if (!(typeof banner === 'string')) {
+            throw new Error('`bundles[]` must have a string `banner` property');
+          }
+        }
+
         return new Bundle({
           type,
           id,
-          entry,
+          publicDirNames,
           contextDir,
           sourceRoot,
           outputDir,
+          banner,
+          manifestPath,
         });
       }
     );

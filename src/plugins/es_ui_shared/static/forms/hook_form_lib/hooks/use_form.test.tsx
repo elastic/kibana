@@ -135,12 +135,13 @@ describe('use_form() hook', () => {
     test('should allow subscribing to the form data changes and provide a handler to build the form data', async () => {
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
         const { form } = useForm();
+        const { subscribe } = form;
 
         useEffect(() => {
           // Any time the form value changes, forward the data to the consumer
-          const subscription = form.subscribe(onData);
+          const subscription = subscribe(onData);
           return subscription.unsubscribe;
-        }, [form]);
+        }, [subscribe, onData]);
 
         return (
           <Form form={form}>
@@ -200,8 +201,9 @@ describe('use_form() hook', () => {
 
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
         const { form } = useForm({ defaultValue });
+        const { subscribe } = form;
 
-        useEffect(() => form.subscribe(onData).unsubscribe, [form]);
+        useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
 
         return (
           <Form form={form}>

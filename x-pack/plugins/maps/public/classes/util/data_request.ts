@@ -5,7 +5,6 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import _ from 'lodash';
 import { DataRequestDescriptor, DataMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {

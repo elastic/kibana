@@ -4,45 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { Observable } from 'rxjs';
-import {
-  ClusterClient,
-  KibanaRequest,
-  SavedObjectsServiceStart,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
+import { SpacesServiceSetup } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectsService: SavedObjectsServiceStart;
+  savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  spacesService?: SpacesServiceSetup;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClientService implements IEventLogClientService {
   private esContext: EsContext;
-  private savedObjectsService: SavedObjectsServiceStart;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  private spacesService?: SpacesServiceSetup;
 
-  constructor({ esContext, savedObjectsService }: EventLogServiceCtorParams) {
+  constructor({
+    esContext,
+    savedObjectProviderRegistry,
+    spacesService,
+  }: EventLogServiceCtorParams) {
     this.esContext = esContext;
-    this.savedObjectsService = savedObjectsService;
+    this.savedObjectProviderRegistry = savedObjectProviderRegistry;
+    this.spacesService = spacesService;
   }
 
-  getClient(
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract = this.savedObjectsService.getScopedClient(
-      request
-    )
-  ) {
+  getClient(request: KibanaRequest) {
     return new EventLogClient({
       esContext: this.esContext,
-      savedObjectsClient,
+      savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClient(request),
+      spacesService: this.spacesService,
+      request,
     });
   }
 }

@@ -3,17 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Unit } from '@elastic/datemath';
+import { Comparator, AlertStates } from '../common/types';
 
+export { Comparator, AlertStates };
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
-}
 
 export enum Aggregators {
   COUNT = 'count',
@@ -27,18 +21,9 @@ export enum Aggregators {
   P99 = 'p99',
 }
 
-export enum AlertStates {
-  OK,
-  ALERT,
-  NO_DATA,
-  ERROR,
-}
-
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
-
 interface BaseMetricExpressionParams {
   timeSize: number;
-  timeUnit: TimeUnit;
+  timeUnit: Unit;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
@@ -50,7 +35,7 @@ interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
 }
 
 interface CountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: 'count';
+  aggType: Aggregators.COUNT;
   metric: never;
 }
 

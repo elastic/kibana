@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
 import { ColorDot } from '../color_dot/color_dot';
 
@@ -15,6 +15,11 @@ import { ComponentStrings } from '../../../i18n/components';
 const { ColorManager: strings } = ComponentStrings;
 
 export interface Props {
+  /**
+   * Determines if the add/remove buttons are displayed.
+   * @default false
+   */
+  hasButtons?: boolean;
   /** The function to call when the Add Color button is clicked. The button will be disabled if there is no handler. */
   onAddColor?: (value: string) => void;
   /** The function to call when the value is changed */
@@ -22,23 +27,18 @@ export interface Props {
   /** The function to call when the Remove Color button is clicked. The button will be disabled if there is no handler. */
   onRemoveColor?: (value: string) => void;
   /**
-   * Determines if the add/remove buttons are displayed.
-   * @default false
-   */
-  hasButtons?: boolean;
-  /**
    * The value of the color manager. Only honors valid CSS values.
    * @default ''
    */
   value?: string;
 }
 
-export const ColorManager: FunctionComponent<Props> = ({
-  value = '',
-  onAddColor,
-  onRemoveColor,
-  onChange,
+export const ColorManager: FC<Props> = ({
   hasButtons = false,
+  onAddColor,
+  onChange,
+  onRemoveColor,
+  value = '',
 }) => {
   const tc = tinycolor(value);
   const validColor = tc.isValid();

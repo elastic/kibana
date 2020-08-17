@@ -10,27 +10,24 @@ import { StartServicesAccessor } from 'kibana/public';
 
 import {
   EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
+import { HttpService } from '../../application/services/http_service';
+import { MlPluginStart, MlStartDependencies } from '../../plugin';
+import { MlDependencies } from '../../application/app';
 import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddable,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableServices,
-} from './anomaly_swimlane_embeddable';
-import { MlStartDependencies } from '../../plugin';
-import { HttpService } from '../../application/services/http_service';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { ExplorerService } from '../../application/services/explorer_service';
-import { mlResultsService } from '../../application/services/results_service';
-import { resolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
+} from '..';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
-  constructor(private getStartServices: StartServicesAccessor<MlStartDependencies>) {}
+  constructor(
+    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  ) {}
 
   public async isEditable() {
     return true;
@@ -38,19 +35,16 @@ export class AnomalySwimlaneEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly Swimlane',
+      defaultMessage: 'ML Anomaly Swim Lane',
     });
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    const [{ overlays, uiSettings }, , { anomalyDetectorService }] = await this.getServices();
+    const [coreStart] = await this.getServices();
 
     try {
-      return await resolveAnomalySwimlaneUserInput({
-        anomalyDetectorService,
-        overlays,
-        uiSettings,
-      });
+      const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
+      return await resolveAnomalySwimlaneUserInput(coreStart);
     } catch (e) {
       return Promise.reject();
     }
@@ -59,23 +53,36 @@ export class AnomalySwimlaneEmbeddableFactory
   private async getServices(): Promise<AnomalySwimlaneEmbeddableServices> {
     const [coreStart, pluginsStart] = await this.getStartServices();
 
+    const { AnomalyDetectorService } = await import(
+      '../../application/services/anomaly_detector_service'
+    );
+    const { AnomalyTimelineService } = await import(
+      '../../application/services/anomaly_timeline_service'
+    );
+    const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
+    const { mlResultsServiceProvider } = await import('../../application/services/results_service');
+
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
-    const explorerService = new ExplorerService(
+    const anomalyTimelineService = new AnomalyTimelineService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
-      // TODO mlResultsService to use DI
-      mlResultsService
+      mlResultsServiceProvider(mlApiServicesProvider(httpService))
     );
 
-    return [coreStart, pluginsStart, { anomalyDetectorService, explorerService }];
+    return [
+      coreStart,
+      pluginsStart as MlDependencies,
+      { anomalyDetectorService, anomalyTimelineService },
+    ];
   }
 
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
-  ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
+  ): Promise<any> {
     const services = await this.getServices();
+    const { AnomalySwimlaneEmbeddable } = await import('./anomaly_swimlane_embeddable');
     return new AnomalySwimlaneEmbeddable(initialInput, services, parent);
   }
 }

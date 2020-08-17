@@ -5,11 +5,13 @@
  */
 
 import Boom from 'boom';
+import semver from 'semver';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import * as APIKeyService from '../api_keys';
+import { appContextService } from '../app_context';
 
 export async function enroll(
   soClient: SavedObjectsClientContract,
@@ -18,6 +20,8 @@ export async function enroll(
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
+  validateAgentVersion(metadata);
+
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
   if (existingAgent && existingAgent.active === true) {
@@ -42,7 +46,9 @@ export async function enroll(
 
   let agent;
   if (existingAgent) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, existingAgent.id, agentData);
+    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, existingAgent.id, agentData, {
+      refresh: false,
+    });
     agent = {
       ...existingAgent,
       ...agentData,
@@ -52,7 +58,9 @@ export async function enroll(
     } as Agent;
   } else {
     agent = savedObjectToAgent(
-      await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData)
+      await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData, {
+        refresh: false,
+      })
     );
   }
 
@@ -79,4 +87,26 @@ async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId
   }
 
   return null;
+}
+
+export function validateAgentVersion(metadata?: { local: any; userProvided: any }) {
+  const kibanaVersion = semver.parse(appContextService.getKibanaVersion());
+  if (!kibanaVersion) {
+    throw Boom.badRequest('Kibana version is not set');
+  }
+  const version = semver.parse(metadata?.local?.elastic?.agent?.version);
+  if (!version) {
+    throw Boom.badRequest('Agent version not provided in metadata.');
+  }
+
+  if (!version || !semver.lte(formatVersion(version), formatVersion(kibanaVersion))) {
+    throw Boom.badRequest('Agent version is not compatible with kibana version');
+  }
+}
+
+/**
+ * used to remove prelease from version as includePrerelease in not working as expected
+ */
+function formatVersion(version: semver.SemVer) {
+  return `${version.major}.${version.minor}.${version.patch}`;
 }

@@ -56,9 +56,15 @@ describe('creating index patterns from yaml fields', () => {
     expect(indexPattern).toMatchSnapshot('createIndexPattern');
   });
 
-  test('flattenFields function flattens recursively and handles copying alias fields', () => {
-    const flattened = flattenFields(fields);
-    expect(flattened).toMatchSnapshot('flattenFields');
+  describe('flattenFields function flattens recursively and handles copying alias fields', () => {
+    test('a field of type group with no nested fields is skipped', () => {
+      const flattened = flattenFields([{ name: 'nginx', type: 'group' }]);
+      expect(flattened.length).toBe(0);
+    });
+    test('flattenFields matches snapshot', () => {
+      const flattened = flattenFields(fields);
+      expect(flattened).toMatchSnapshot('flattenFields');
+    });
   });
 
   describe('dedupFields', () => {

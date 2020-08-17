@@ -54,7 +54,6 @@ module.exports = {
     'highlight.js',
     'html-entities',
     'jquery',
-    'lodash.clone',
     'lodash',
     'markdown-it',
     'mocha',
@@ -73,8 +72,6 @@ module.exports = {
     'rxjs',
     'sinon',
     'tinycolor2',
-    './src/legacy/ui/public/styles/font_awesome.less',
-    './src/legacy/ui/public/styles/bootstrap/bootstrap_light.less',
   ],
   plugins: [
     // Produce the DLL and its manifest
@@ -118,22 +115,6 @@ module.exports = {
               flags: 'g',
             },
           },
-        ],
-      },
-      {
-        test: /\.less$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader', options: { importLoaders: 2 } },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: path.resolve(REPO_ROOT, 'src/optimize/postcss.config.js'),
-              },
-            },
-          },
-          { loader: 'less-loader' },
         ],
       },
       {

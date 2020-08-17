@@ -200,12 +200,13 @@ export const createParser = () => {
 
       try {
         value();
+        white();
       } catch (e) {
         errored = true;
         annos.push({ type: AnnoTypes.error, at: e.at - 1, text: e.message });
       }
       if (!errored && ch) {
-        error('Syntax error');
+        annos.push({ type: AnnoTypes.error, at: at, text: 'Syntax Error' });
       }
       return { annotations: annos };
     }

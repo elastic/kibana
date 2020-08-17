@@ -21,7 +21,7 @@ import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { deserializeAggConfig } from '../../search/expressions';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
-import { ValueClickTriggerContext } from '../../../../embeddable/public';
+import type { ValueClickContext } from '../../../../embeddable/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -114,7 +114,7 @@ const createFilter = async (
 export const createFiltersFromValueClickAction = async ({
   data,
   negate,
-}: ValueClickTriggerContext['data']) => {
+}: ValueClickContext['data']) => {
   const filters: Filter[] = [];
 
   await Promise.all(

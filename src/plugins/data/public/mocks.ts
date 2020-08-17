@@ -19,7 +19,7 @@
 
 import { Plugin, IndexPatternsContract } from '.';
 import { fieldFormatsServiceMock } from './field_formats/mocks';
-import { searchSetupMock, searchStartMock } from './search/mocks';
+import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 
@@ -41,9 +41,10 @@ const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
     autocomplete: automcompleteSetupMock,
-    search: searchSetupMock,
+    search: searchServiceMock.createSetupContract(),
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
+    __enhance: jest.fn(),
   };
 };
 
@@ -55,7 +56,7 @@ const createStartContract = (): Start => {
       createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteStartMock,
-    search: searchStartMock,
+    search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: {
@@ -78,7 +79,7 @@ const createStartContract = (): Start => {
 };
 
 export { createSearchSourceMock } from './search/mocks';
-export { getCalculateAutoTimeExpression } from './search/aggs';
+export { getCalculateAutoTimeExpression } from '../common/search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,

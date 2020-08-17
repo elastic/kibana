@@ -36,7 +36,7 @@ export async function createPackage(
 
   // zip up the package
   await pipeline(
-    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget }),
+    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget, dot: true }),
     zip(`${buildId}.zip`),
     vfs.dest(buildTarget)
   );

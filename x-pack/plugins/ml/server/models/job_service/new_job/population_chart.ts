@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
-import { callWithRequestType } from '../../../../common/types/kibana';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -29,7 +29,7 @@ interface ProcessedResults {
   totalResults: number;
 }
 
-export function newJobPopulationChartProvider(callWithRequest: callWithRequestType) {
+export function newJobPopulationChartProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   async function newJobPopulationChart(
     indexPatternTitle: string,
     timeField: string,
@@ -52,7 +52,7 @@ export function newJobPopulationChartProvider(callWithRequest: callWithRequestTy
     );
 
     try {
-      const results = await callWithRequest('search', json);
+      const results = await callAsCurrentUser('search', json);
       return processSearchResults(
         results,
         aggFieldNamePairs.map((af) => af.field)

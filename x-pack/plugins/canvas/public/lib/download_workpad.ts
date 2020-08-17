@@ -7,7 +7,7 @@ import fileSaver from 'file-saver';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { ErrorStrings } from '../../i18n';
 import { notifyService } from '../services';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import * as workpadService from './workpad_service';
 import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 

@@ -6,7 +6,7 @@
 
 import React, { ReactNode, KeyboardEvent } from 'react';
 import PropTypes from 'prop-types';
-// @ts-ignore no @types definition
+// @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../../lib/is_text_input';
 

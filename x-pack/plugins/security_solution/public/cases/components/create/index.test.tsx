@@ -19,8 +19,10 @@ import { useGetTags } from '../../containers/use_get_tags';
 jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_case');
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { wait } from '../../../common/lib/helpers';
-import { SiemPageName } from '../../../app/types';
+
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
+
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
@@ -97,8 +99,7 @@ describe('Create case', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await wait();
-    expect(postCase).toBeCalledWith(sampleData);
+    await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
   });
 
   it('should redirect to all cases on cancel click', () => {
@@ -110,7 +111,7 @@ describe('Create case', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(`/${SiemPageName.case}`);
+    expect(mockHistory.push).toHaveBeenCalledWith('/');
   });
   it('should redirect to new case when caseData is there', () => {
     const sampleId = '777777';
@@ -122,9 +123,7 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(
-      `/${SiemPageName.case}/${sampleId}`
-    );
+    expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777');
   });
 
   it('should render spinner when loading', () => {

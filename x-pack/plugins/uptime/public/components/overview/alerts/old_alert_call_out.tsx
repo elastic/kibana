@@ -23,7 +23,7 @@ export const OldAlertCallOut: React.FC<Props> = ({ isOldAlert }) => {
         title={
           <FormattedMessage
             id="xpack.uptime.alerts.monitorStatus.oldAlertCallout.title"
-            defaultMessage="You are editing an older alert, some fields may not auto-populate."
+            defaultMessage="You may be editing an older alert, some fields may not auto-populate."
           />
         }
         iconType="alert"

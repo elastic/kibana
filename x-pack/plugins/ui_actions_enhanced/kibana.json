@@ -4,8 +4,14 @@
   "configPath": ["xpack", "ui_actions_enhanced"],
   "requiredPlugins": [
     "embeddable",
-    "uiActions"
+    "uiActions",
+    "licensing"
   ],
   "server": false,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "data"
+  ]
 }

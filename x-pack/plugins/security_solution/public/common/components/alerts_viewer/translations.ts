@@ -30,7 +30,7 @@ export const ALERTS_TABLE_TITLE = i18n.translate(
 export const ALERTS_GRAPH_TITLE = i18n.translate(
   'xpack.securitySolution.alertsView.alertsGraphTitle',
   {
-    defaultMessage: 'External alert count',
+    defaultMessage: 'External alert trend',
   }
 );
 

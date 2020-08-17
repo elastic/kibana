@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../lib/is_es_error';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { isEsError } from '../../../shared_imports';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-function fetchClusterSettings(client: IScopedClusterClient) {
+function fetchClusterSettings(client: ILegacyScopedClusterClient) {
   return client.callAsInternalUser('cluster.getSettings', {
     includeDefaults: true,
     filterPath: '**.xpack.notification',

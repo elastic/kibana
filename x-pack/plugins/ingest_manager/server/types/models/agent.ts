@@ -22,13 +22,16 @@ const AgentEventBase = {
   ]),
   subtype: schema.oneOf([
     // State
-    schema.literal('RUNNING'),
-    schema.literal('STARTING'),
-    schema.literal('IN_PROGRESS'),
-    schema.literal('CONFIG'),
-    schema.literal('FAILED'),
-    schema.literal('STOPPING'),
-    schema.literal('STOPPED'),
+    schema.oneOf([
+      schema.literal('RUNNING'),
+      schema.literal('STARTING'),
+      schema.literal('IN_PROGRESS'),
+      schema.literal('CONFIG'),
+      schema.literal('FAILED'),
+      schema.literal('STOPPING'),
+      schema.literal('STOPPED'),
+      schema.literal('DEGRADED'),
+    ]),
     // Action results
     schema.literal('DATA_DUMP'),
     // Actions

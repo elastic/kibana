@@ -74,7 +74,7 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   const transformId = match.params.transformId;
 
   const [transformConfig, setTransformConfig] = useState<TransformPivotConfig>();
-  const [errorMessage, setErrorMessage] = useState();
+  const [errorMessage, setErrorMessage] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const {
     getIndexPatternIdByTitle,

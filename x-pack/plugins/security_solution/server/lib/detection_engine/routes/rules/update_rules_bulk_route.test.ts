@@ -10,7 +10,6 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getResult,
-  typicalPayload,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
   getFindResultStatus,
@@ -19,7 +18,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -27,14 +26,6 @@ describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -129,7 +120,7 @@ describe('update_rules_bulk', () => {
       const noIdRequest = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), rule_id: undefined }],
+        body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
       const response = await server.inject(noIdRequest, context);
       expect(response.body).toEqual([
@@ -144,7 +135,7 @@ describe('update_rules_bulk', () => {
       const request = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), type: 'query' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
 
@@ -155,7 +146,7 @@ describe('update_rules_bulk', () => {
       const request = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), type: 'unknown_type' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'unknown_type' }],
       });
       const result = server.validate(request);
 

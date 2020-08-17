@@ -30,13 +30,19 @@ import {
   mockNoChartMappings,
   mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
-import { mockGlobalState, apolloClientObservable, SUB_PLUGINS_REDUCER } from '../../mock';
+import {
+  mockGlobalState,
+  apolloClientObservable,
+  SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
+} from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../../graphql/types';
 
-const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
-const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+const from = '2019-06-15T06:00:00.000Z';
+const to = '2019-06-18T06:00:00.000Z';
 
 jest.mock('../charts/areachart', () => {
   return { AreaChart: () => <div className="areachart" /> };
@@ -49,7 +55,14 @@ jest.mock('../charts/barchart', () => {
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   describe.each([
     [
@@ -91,10 +104,6 @@ describe('Stat Items Component', () => {
       ),
     ],
   ])('disable charts', (wrapper) => {
-    test('it renders the default widget', () => {
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('should render titles', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
@@ -122,18 +131,18 @@ describe('Stat Items Component', () => {
         {
           key: 'uniqueSourceIpsHistogram',
           value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
           ],
           color: '#D36086',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
           value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+            { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
+            { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
+            { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
           ],
           color: '#9170B8',
         },
@@ -179,9 +188,6 @@ describe('Stat Items Component', () => {
           <StatItemsComponent {...mockStatItemsData} />
         </ReduxStoreProvider>
       );
-    });
-    test('it renders the default widget', () => {
-      expect(wrapper).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {

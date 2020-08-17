@@ -20,12 +20,13 @@
 import { App, AppMountParameters, CoreSetup } from 'kibana/public';
 import { AppNavLinkStatus } from '../../../../core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { ForwardDefinition } from '../plugin';
+import { ForwardDefinition, KibanaLegacyStart } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
-  core: CoreSetup<{}, { getForwards: () => ForwardDefinition[] }>
+  core: CoreSetup<{}, KibanaLegacyStart>,
+  forwards: ForwardDefinition[]
 ): App => ({
-  id: 'url_migrate',
+  id: 'kibana',
   chromeless: true,
   title: 'Legacy URL migration',
   navLinkStatus: AppNavLinkStatus.hidden,
@@ -33,7 +34,8 @@ export const createLegacyUrlForwardApp = (
     const hash = params.history.location.hash.substr(1);
 
     if (!hash) {
-      throw new Error('Could not forward URL');
+      const [, , kibanaLegacyStart] = await core.getStartServices();
+      kibanaLegacyStart.navigateToDefaultApp();
     }
 
     const [
@@ -41,11 +43,14 @@ export const createLegacyUrlForwardApp = (
         application,
         http: { basePath },
       },
-      ,
-      { getForwards },
     ] = await core.getStartServices();
 
-    navigateToLegacyKibanaUrl(hash, getForwards(), basePath, application, window.location);
+    const result = await navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
+
+    if (!result.navigated) {
+      const [, , kibanaLegacyStart] = await core.getStartServices();
+      kibanaLegacyStart.navigateToDefaultApp();
+    }
 
     return () => {};
   },

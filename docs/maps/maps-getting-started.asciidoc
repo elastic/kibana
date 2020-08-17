@@ -1,8 +1,14 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Getting started with Elastic Maps
+== Get started with Maps
 
-You work with *Elastic Maps* by adding layers. The data for a layer can come from
+++++
+<titleabbrev>Get started</titleabbrev>
+++++
+
+
+
+You work with Maps by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map
 services, and more. You can symbolize the data in different ways.
 For example, you might show which airports have the longest flight
@@ -25,7 +31,7 @@ image::maps/images/read-only-badge.png[Example of Maps' read only access indicat
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Elastic Maps* and
+sample data set includes a map to go along with the data. Once you've added the data, open Maps and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
@@ -40,11 +46,11 @@ In this tutorial, you'll learn to:
 
 [role="xpack"]
 [[maps-create]]
-=== Creating a new map
+=== Create a map
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open *Elastic Maps*.
+. If you haven't already, open the menu, then click *{kib} > Maps*.
 . On the maps list page, click *Create map*.
 . Set the time range to *Last 7 days*.
 +
@@ -55,47 +61,24 @@ image::maps/images/gs_create_new_map.png[]
 
 [role="xpack"]
 [[maps-add-choropleth-layer]]
-=== Adding a choropleth layer
+=== Add a choropleth layer
 
 Now that you have a map, you'll want to add layers to it.
 The first layer you'll add is a choropleth layer to shade world countries
 by web log traffic. Darker shades symbolize countries with more web log traffic,
 and lighter shades symbolize countries with less traffic.
 
-==== Add a vector layer to display world country boundaries
-
 . Click *Add layer*.
-. Select the *EMS Boundaries* layer.
+. Select *Choropleth*.
 . From the *Layer* dropdown menu, select *World Countries*.
+. Under *Statistics source*, set *Index pattern* to *kibana_sample_data_logs*.
+. Set *Join field* to *geo.src*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests by Country`.
 . Set *Opacity* to 50%.
 . Click *Add* under *Tooltip fields*.
 . In the popover, select *ISO 3166-1 alpha-2 code* and *name* and click *Add*.
-
-===== Join the vector layer with the sample web log index
-
-You now have a vector layer containing the world countries.
-To symbolize countries by web traffic, you'll need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
-To do this, you'll create a <<terms-join, term join>> to link the vector source *World Countries* to
-the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
-
-. Click plus image:maps/images/gs_plus_icon.png[] next to the *Term Joins* label.
-. Click *Join --select--*
-. Set *Left field* to *ISO 3166-1 alpha-2 code*.
-. Set *Right source* to *kibana_sample_data_logs*.
-. Set *Right field* to *geo.src*.
-. Click *and use metric count*.
-. Set *Custom label* to *web logs count*.
-
-===== Set the layer style
-
-All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
-To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
-
-. Under *Fill color*, change the selected value from *Solid* to *By value*.
-. In the field select input, select *web logs count*.
-. Select the grey color ramp.
+. Under *Fill color*, select the grey color ramp.
 . Under *Border color*, change the selected color to *white*.
 . Click *Save & close*.
 +
@@ -106,7 +89,7 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 
 [role="xpack"]
 [[maps-add-elasticsearch-layer]]
-=== Adding layers for {es} data
+=== Add layers for the {es} data
 
 To avoid overwhelming the user with too much data at once, you'll add two layers for {es} data.
 
@@ -121,7 +104,7 @@ This layer displays web log documents as points.
 The layer is only visible when users zoom in the map past zoom level 9.
 
 . Click *Add layer*.
-. Click the *Documents* layer.
+. Select *Documents*.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Actual Requests`.
@@ -155,7 +138,7 @@ image::maps/images/grid_metrics_both.png[]
 ===== Add the layer
 
 . Click *Add layer*.
-. Click the *Clusters and grids* layer.
+. Select *Clusters and grids*.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests and Bytes`.
@@ -183,7 +166,7 @@ image::maps/images/sample_data_web_logs.png[]
 
 [role="xpack"]
 [[maps-save]]
-=== Saving the map
+=== Save the map
 Now that your map is complete, you'll want to save it so others can use it.
 
 . In the application toolbar, click *Save*.
@@ -202,11 +185,11 @@ You have completed the steps for re-creating the sample data map.
 
 [role="xpack"]
 [[maps-embedding]]
-=== Adding the map to a dashboard
+=== Add the map to a dashboard
 You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
-. In the side navigation, click *Dashboard*.
-. Click *Create new dashboard*.
+. Open the menu, then go to *Dashboard*.
+. Click *Create dashboard*.
 . Set the time range to *Last 7 days*.
 . Click *Add*.
 +
@@ -224,7 +207,7 @@ Your dashboard should look like this:
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-==== Exploring your data using filters
+==== Explore your data using filters
 
 You can apply filters to your dashboard to hone in on the data that you are most interested in.
 The dashboard is interactive--you can quickly create filters by clicking on the desired data in the map and visualizations.

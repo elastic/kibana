@@ -9,7 +9,13 @@
     "navigation",
     "savedObjects",
     "visualizations",
-    "dashboard"
+    "embeddable"
   ],
-  "optionalPlugins": ["home", "share"]
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "discover"
+  ]
 }

@@ -6,9 +6,9 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
+import { eventsIndexPattern, alertsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateTree } from '../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
-import { Tree } from './utils/tree';
 import { EndpointAppContext } from '../../types';
 
 export function handleTree(
@@ -16,37 +16,21 @@ export function handleTree(
   endpointAppContext: EndpointAppContext
 ): RequestHandler<TypeOf<typeof validateTree.params>, TypeOf<typeof validateTree.query>> {
   return async (context, req, res) => {
-    const {
-      params: { id },
-      query: {
-        children,
-        generations,
-        ancestors,
-        events,
-        afterEvent,
-        afterChild,
-        legacyEndpointID: endpointID,
-      },
-    } = req;
     try {
       const client = context.core.elasticsearch.legacy.client;
-      const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
-      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const fetcher = new Fetcher(client, id, indexPattern, endpointID);
+      const fetcher = new Fetcher(
+        client,
+        req.params.id,
+        eventsIndexPattern,
+        alertsIndexPattern,
+        req.query.legacyEndpointID
+      );
 
-      const [childrenNodes, ancestry, relatedEvents] = await Promise.all([
-        fetcher.children(children, generations, afterChild),
-        fetcher.ancestors(ancestors),
-        fetcher.events(events, afterEvent),
-      ]);
-
-      const tree = new Tree(id, { ancestry, children: childrenNodes, relatedEvents });
-
-      const enrichedTree = await fetcher.stats(tree);
+      const tree = await fetcher.tree(req.query);
 
       return res.ok({
-        body: enrichedTree.render(),
+        body: tree.render(),
       });
     } catch (err) {
       log.warn(err);

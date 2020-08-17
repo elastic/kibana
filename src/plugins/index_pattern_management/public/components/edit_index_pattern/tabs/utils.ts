@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Dictionary, countBy, defaults, unique } from 'lodash';
+import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';
@@ -84,9 +84,9 @@ export function getTabs(
   fieldFilter: string,
   indexPatternListProvider: IndexPatternManagementStart['list']
 ) {
-  const totalCount = getCounts(indexPattern.fields, indexPattern.getSourceFiltering());
+  const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
-    indexPattern.fields,
+    indexPattern.fields.getAll(),
     indexPattern.getSourceFiltering(),
     fieldFilter
   );
@@ -145,7 +145,7 @@ export function convertToEuiSelectOption(options: string[], type: string) {
         ]
       : [];
   return euiOptions.concat(
-    unique(options).map((option) => {
+    uniq(options).map((option) => {
       return {
         value: option,
         text: option,

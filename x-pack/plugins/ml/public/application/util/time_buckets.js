@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import isPlainObject from 'lodash/isPlainObject';
+import isString from 'lodash/isString';
+import ary from 'lodash/ary';
+import sortBy from 'lodash/sortBy';
+import assign from 'lodash/assign';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
@@ -14,7 +18,11 @@ import { getFieldFormats, getUiSettings } from './dependency_cache';
 import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
+
+// Index of the list of time interval units at which larger units (i.e. weeks, months, years) need
+// need to be converted to multiples of the largest unit supported in ES aggregation intervals (i.e. days).
+// Note that similarly the largest interval supported for ML bucket spans is 'd'.
+const timeUnitsMaxSupportedIndex = unitsDesc.indexOf('w');
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
@@ -76,16 +84,16 @@ TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
   let bounds;
-  if (_.isPlainObject(input)) {
+  if (isPlainObject(input)) {
     // accept the response from timefilter.getActiveBounds()
     bounds = [input.min, input.max];
   } else {
     bounds = Array.isArray(input) ? input : [];
   }
 
-  const moments = _(bounds).map(_.ary(moment, 1)).sortBy(Number);
+  const moments = sortBy(bounds.map(ary(moment, 1)), Number);
 
-  const valid = moments.size() === 2 && moments.every(isValidMoment);
+  const valid = moments.length === 2 && moments.every(isValidMoment);
   if (!valid) {
     this.clearBounds();
     throw new Error('invalid bounds set: ' + input);
@@ -171,7 +179,7 @@ TimeBuckets.prototype.setInterval = function (input) {
     return;
   }
 
-  if (_.isString(interval)) {
+  if (isString(interval)) {
     input = interval;
     interval = parseInterval(interval);
     if (+interval === 0) {
@@ -252,7 +260,7 @@ TimeBuckets.prototype.getInterval = function () {
     if (+scaled === +interval) return interval;
 
     decorateInterval(interval, duration);
-    return _.assign(scaled, {
+    return assign(scaled, {
       preScaled: interval,
       scale: interval / scaled,
       scaled: true,
@@ -283,7 +291,7 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
   decorateInterval(nearestMultipleInt, this.getDuration());
 
   // Check to see if the new interval is scaled compared to the original.
-  const preScaled = _.get(interval, 'preScaled');
+  const preScaled = interval.preScaled;
   if (preScaled !== undefined && preScaled < nearestMultipleInt) {
     nearestMultipleInt.preScaled = preScaled;
     nearestMultipleInt.scale = preScaled / nearestMultipleInt;
@@ -383,9 +391,11 @@ export function calcEsInterval(duration) {
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
-      // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
+      // Apart from for date histograms, ES only supports time units up to 'd',
+      // meaning we can't for example use 'w' for job bucket spans.
+      // See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#time-units
       // So keep going until we get out of the "large" units.
-      if (i <= largeMax && val !== 1) {
+      if (i <= timeUnitsMaxSupportedIndex) {
         continue;
       }
 

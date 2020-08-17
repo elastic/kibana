@@ -113,6 +113,7 @@ export const WindowsEvents = React.memo(() => {
             <EventsCheckbox
               name={item.name}
               key={index}
+              data-test-subj={`policyWindowsEvent_${item.protectionField}`}
               setter={(config, checked) =>
                 setIn(config)(item.os)('events')(item.protectionField)(checked)
               }
@@ -140,9 +141,6 @@ export const WindowsEvents = React.memo(() => {
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
-      })}
-      description={i18n.translate('xpack.securitySolution.endpoint.policy.details.windowsLabel', {
-        defaultMessage: 'Windows',
       })}
       supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.windows', {
         defaultMessage: 'Windows',

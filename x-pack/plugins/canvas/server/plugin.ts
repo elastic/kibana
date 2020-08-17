@@ -5,7 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { CoreSetup, PluginInitializerContext, Plugin, Logger } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
@@ -14,7 +14,8 @@ import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
-import { customElementType, workpadType } from './saved_objects';
+import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
+import { initializeTemplates } from './templates';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -32,6 +33,7 @@ export class CanvasPlugin implements Plugin {
   public async setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
+    coreSetup.savedObjects.registerType(workpadTemplateType);
 
     plugins.features.registerFeature({
       id: 'canvas',
@@ -81,7 +83,10 @@ export class CanvasPlugin implements Plugin {
     setupInterpreter(plugins.expressions);
   }
 
-  public start() {}
+  public start(coreStart: CoreStart) {
+    const client = coreStart.savedObjects.createInternalRepository();
+    initializeTemplates(client);
+  }
 
   public stop() {}
 }

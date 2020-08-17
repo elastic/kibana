@@ -42,7 +42,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -96,7 +96,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -147,7 +147,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -188,7 +188,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -222,7 +222,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -284,7 +284,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -331,6 +331,61 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should carry over label if customLabel flag is set', () => {
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My custom label',
+                customLabel: true,
+                dataType: 'date',
+                isBucketed: true,
+
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'h',
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(
+        changeColumn({
+          state,
+          layerId: 'first',
+          columnId: 'col2',
+          newColumn: {
+            label: 'Date histogram of order_date',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            params: {
+              interval: 'w',
+            },
+          },
+        }).layers.first.columns.col1
+      ).toEqual(
+        expect.objectContaining({
+          label: 'My custom label',
+          customLabel: true,
+        })
+      );
+    });
+
     it('should execute adjustments for other columns', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
@@ -362,7 +417,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',

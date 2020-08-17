@@ -1,0 +1,17 @@
+{
+  "name": "app_link_test",
+  "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/app_link_test",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.9.5"
+  }
+}

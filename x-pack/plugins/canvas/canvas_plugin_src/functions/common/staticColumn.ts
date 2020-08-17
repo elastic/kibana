@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
 import {
   ExpressionFunctionDefinition,

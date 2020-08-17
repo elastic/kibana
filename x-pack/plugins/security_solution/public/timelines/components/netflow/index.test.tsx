@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -119,6 +120,8 @@ const getNetflowInstance = () => (
     userName={asArrayIfExists(get(USER_NAME_FIELD_NAME, getMockNetflowData()))}
   />
 );
+
+jest.mock('../../../common/components/link_to');
 
 describe('Netflow', () => {
   const mount = useMountAppended();

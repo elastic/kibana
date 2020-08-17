@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
@@ -13,7 +14,11 @@ import { AppMountParameters } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import {
+  SavedObjectSaveModal,
+  checkForDuplicateTitle,
+} from '../../../../../src/plugins/saved_objects/public';
+import { createMemoryHistory, History } from 'history';
 import {
   esFilters,
   FilterManager,
@@ -30,6 +35,17 @@ import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
+jest.mock('../../../../../src/plugins/saved_objects/public', () => {
+  // eslint-disable-next-line no-shadow
+  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
+    '../../../../../src/plugins/saved_objects/public'
+  );
+  return {
+    SavedObjectSaveModal,
+    SavedObjectSaveModalOrigin,
+    checkForDuplicateTitle: jest.fn(),
+  };
+});
 
 const navigationStartMock = navigationPluginMock.createStartContract();
 
@@ -79,6 +95,14 @@ function createMockFilterManager() {
   };
 }
 
+function createMockQueryString() {
+  return {
+    getQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
+    setQuery: jest.fn(),
+    getDefaultQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
+  };
+}
+
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
@@ -90,6 +114,8 @@ function createMockTimefilter() {
         return unsubscribe;
       },
     }),
+    getRefreshInterval: () => {},
+    getRefreshIntervalDefaults: () => {},
   };
 }
 
@@ -106,14 +132,10 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (
-      id?: string,
-      returnToOrigin?: boolean,
-      originatingApp?: string | undefined,
-      newlyCreated?: boolean
-    ) => void;
+    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
+    history: History;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -134,6 +156,8 @@ describe('Lens App', () => {
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          queryString: createMockQueryString(),
+          state$: new Observable(),
         },
         indexPatterns: {
           get: jest.fn((id) => {
@@ -148,15 +172,9 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn(
-        (
-          id?: string,
-          returnToOrigin?: boolean,
-          originatingApp?: string | undefined,
-          newlyCreated?: boolean
-        ) => {}
-      ),
+      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
       onAppLeave: jest.fn(),
+      history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -165,14 +183,10 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (
-        id?: string,
-        returnToOrigin?: boolean,
-        originatingApp?: string | undefined,
-        newlyCreated?: boolean
-      ) => void;
+      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
+      history: History;
     }>;
   }
 
@@ -182,10 +196,12 @@ describe('Lens App', () => {
 
     core.uiSettings.get.mockImplementation(
       jest.fn((type) => {
-        if (type === 'timepicker:timeDefaults') {
+        if (type === UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS) {
           return { from: 'now-7d', to: 'now' };
         } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
+        } else if (type === 'state:storeInSessionStorage') {
+          return false;
         } else {
           return [];
         }
@@ -219,6 +235,7 @@ describe('Lens App', () => {
               "query": "",
             },
             "savedQuery": undefined,
+            "showNoDataPopover": [Function],
           },
         ],
       ]
@@ -230,6 +247,27 @@ describe('Lens App', () => {
     mount(<App {...defaultArgs} />);
 
     expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+  });
+
+  it('passes global filters to frame', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    args.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [pinnedFilter];
+    });
+    const component = mount(<App {...args} />);
+    component.update();
+    expect(frame.mount).toHaveBeenCalledWith(
+      expect.any(Element),
+      expect.objectContaining({
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'kuery' },
+        filters: [pinnedFilter],
+      })
+    );
   });
 
   it('sets breadcrumbs when the document title changes', async () => {
@@ -509,7 +547,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -529,7 +567,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -597,7 +635,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
@@ -632,6 +670,46 @@ describe('Lens App', () => {
             filters: [unpinned],
           },
         });
+      });
+
+      it('checks for duplicate title before saving', async () => {
+        const args = defaultArgs;
+        args.editorFrame = frame;
+        (args.docStorage.save as jest.Mock).mockReturnValue(Promise.resolve({ id: '123' }));
+
+        instance = mount(<App {...args} />);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        await act(async () =>
+          onChange({
+            filterableIndexPatterns: [],
+            doc: ({ id: '123', expression: 'valid expression' } as unknown) as Document,
+          })
+        );
+        instance.update();
+        await act(async () => {
+          getButton(instance).run(instance.getDOMNode());
+        });
+        instance.update();
+
+        const onTitleDuplicate = jest.fn();
+
+        await act(async () => {
+          instance.find(SavedObjectSaveModal).prop('onSave')({
+            onTitleDuplicate,
+            isTitleDuplicateConfirmed: false,
+            newCopyOnSave: false,
+            newDescription: '',
+            newTitle: 'test',
+          });
+        });
+
+        expect(checkForDuplicateTitle).toHaveBeenCalledWith(
+          expect.objectContaining({ id: '123' }),
+          false,
+          onTitleDuplicate,
+          expect.anything()
+        );
       });
 
       it('does not show the copy button on first save', async () => {

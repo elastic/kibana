@@ -174,7 +174,11 @@ kibana_vars=(
     xpack.infra.sources.default.fields.timestamp
     xpack.infra.sources.default.logAlias
     xpack.infra.sources.default.metricAlias
+    xpack.ingestManager.fleet.tlsCheckDisabled
+    xpack.ingestManager.registryUrl
     xpack.license_management.enabled
+    xpack.maps.enabled
+    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
@@ -235,6 +239,8 @@ kibana_vars=(
     xpack.security.session.lifespan
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
+    xpack.spaces.enabled
+    xpack.spaces.maxSpaces
     telemetry.allowChangingOptInStatus
     telemetry.enabled
     telemetry.optIn

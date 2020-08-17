@@ -5,6 +5,9 @@
  */
 
 import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+
+import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../store';
@@ -14,10 +17,12 @@ import {
   MatrixHisrogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
-const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
@@ -55,6 +60,19 @@ export const EventsQueryTabBody = ({
   setQuery,
   startDate,
 }: HostsComponentsQueryProps) => {
+  const { initializeTimeline } = useManageTimeline();
+  const dispatch = useDispatch();
+  const { globalFullScreen } = useFullScreen();
+  useEffect(() => {
+    initializeTimeline({
+      id: TimelineId.hostsPageEvents,
+      defaultModel: eventsDefaultModel,
+      timelineRowActions: () => [
+        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
+      ],
+    });
+  }, [dispatch, initializeTimeline]);
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -65,20 +83,22 @@ export const EventsQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
-        endDate={endDate}
-        filterQuery={filterQuery}
-        setQuery={setQuery}
-        sourceId="default"
-        startDate={startDate}
-        type={hostsModel.HostsType.page}
-        id={EVENTS_HISTOGRAM_ID}
-        {...histogramConfigs}
-      />
+      {!globalFullScreen && (
+        <MatrixHistogramContainer
+          endDate={endDate}
+          filterQuery={filterQuery}
+          setQuery={setQuery}
+          sourceId="default"
+          startDate={startDate}
+          type={hostsModel.HostsType.page}
+          id={EVENTS_HISTOGRAM_ID}
+          {...histogramConfigs}
+        />
+      )}
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}
-        id={HOSTS_PAGE_TIMELINE_ID}
+        id={TimelineId.hostsPageEvents}
         start={startDate}
         pageFilters={pageFilters}
       />

@@ -21,10 +21,12 @@ export async function getApmTimeseriesData(options: {
 }) {
   const { start, end } = options.setup;
   const { bucketSize } = getBucketSize(start, end, 'auto');
+  const durationAsMinutes = (end - start) / 1000 / 60;
 
   const timeseriesResponse = await timeseriesFetcher(options);
   return timeseriesTransformer({
     timeseriesResponse,
     bucketSize,
+    durationAsMinutes,
   });
 }

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
@@ -28,12 +26,12 @@ import { rawConfigServiceMock } from './raw_config_service.mock';
 import { schema } from '@kbn/config-schema';
 
 import { ConfigService, Env } from '.';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { getEnvOptions } from './__mocks__/env';
 
 const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 const getRawConfigProvider = (rawConfig: Record<string, any>) =>
   rawConfigServiceMock.create({ rawConfig });
@@ -443,9 +441,9 @@ test('logs deprecation warning during validation', async () => {
     return config;
   });
 
-  loggingServiceMock.clear(logger);
+  loggingSystemMock.clear(logger);
   await configService.validate();
-  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
     Array [
       Array [
         "some deprecation message",

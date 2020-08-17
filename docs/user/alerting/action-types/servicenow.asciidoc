@@ -1,0 +1,72 @@
+[role="xpack"]
+[[servicenow-action-type]]
+=== ServiceNow action
+
+The ServiceNow action type uses the https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI[V2 Table API] to create ServiceNow incidents.
+
+[float]
+[[servicenow-connector-configuration]]
+==== Connector configuration
+
+ServiceNow connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+URL::       ServiceNow instance URL.
+Username::  Username for HTTP Basic authentication.
+Password::  Password for HTTP Basic authentication.
+
+[float]
+[[Preconfigured-servicenow-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-servicenow:
+   name: preconfigured-servicenow-action-type
+   actionTypeId: .servicenow
+   config:
+     apiUrl: https://dev94428.service-now.com/
+   secrets:
+     username: testuser
+     password: passwordkeystorevalue
+--
+
+`config` defines the action type specific to the configuration and contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `apiUrl`
+| An address that corresponds to *Sender*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+| `username`
+| A string that corresponds to *User*.
+
+| `password`
+| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
+
+[[servicenow-action-configuration]]
+==== Action configuration
+
+ServiceNow actions have the following configuration properties:
+
+Urgency::              The extent to which the incident resolution can delay.
+Severity::             The severity of the incident.
+Impact::               The effect an incident has on business. Can be measured by the number of affected users or by how critical it is to the business in question.
+Short description::    A short description of the incident, used for searching the contents of the knowledge base. 
+Description::          The details about the incident.
+Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+
+[[configuring-servicenow]]
+==== Configuring and testing ServiceNow
+
+ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

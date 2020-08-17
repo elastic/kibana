@@ -42,7 +42,7 @@ describe('FilterAggForm', () => {
       </I18nProvider>
     );
 
-    expect(getByLabelText('Filter agg')).toBeInTheDocument();
+    expect(getByLabelText('Filter query')).toBeInTheDocument();
 
     const { options } = (await findByTestId('transformFilterAggTypeSelector')) as HTMLSelectElement;
 

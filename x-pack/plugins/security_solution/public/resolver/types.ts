@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Store } from 'redux';
+/* eslint-disable no-duplicate-imports */
 
+import { Store } from 'redux';
+import { Middleware, Dispatch } from 'redux';
+import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
-export { ResolverAction } from './store/actions';
-import { ResolverEvent } from '../../common/endpoint/types';
-import { eventType } from '../../common/endpoint/models/event';
+import {
+  ResolverRelatedEvents,
+  ResolverTree,
+  ResolverEntityIndex,
+  SafeResolverEvent,
+} from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -32,21 +38,21 @@ export interface ResolverState {
 }
 
 /**
- * Piece of redux state that models an animation for the camera.
+ * Piece of `redux` state that models an animation for the camera.
  */
 export interface ResolverUIState {
   /**
-   * The ID attribute of the resolver's aria-activedescendent.
+   * The `nodeID` for the process that is selected (in the `aria-activedescendent` sense of being selected.)
    */
-  readonly activeDescendantId: string | null;
+  readonly ariaActiveDescendant: string | null;
   /**
-   * The ID attribute of the resolver's currently selected descendant.
+   * `nodeID` of the selected node
    */
-  readonly selectedDescendantId: string | null;
+  readonly selectedNode: string | null;
 }
 
 /**
- * Piece of redux state that models an animation for the camera.
+ * Piece of `redux` state that models an animation for the camera.
  */
 export interface CameraAnimationState {
   /**
@@ -70,7 +76,7 @@ export interface CameraAnimationState {
 }
 
 /**
- * The redux state for the `useCamera` hook.
+ * The `redux` state for the `useCamera` hook.
  */
 export type CameraState = {
   /**
@@ -90,7 +96,7 @@ export type CameraState = {
   readonly translationNotCountingCurrentPanning: Vector2;
 
   /**
-   * The world coordinates that the pointing device was last over. This is used during mousewheel zoom.
+   * The world coordinates that the pointing device was last over. This is used during mouse-wheel zoom.
    */
   readonly latestFocusedWorldCoordinates: Vector2 | null;
 } & (
@@ -132,61 +138,82 @@ export type CameraState = {
 );
 
 /**
- * This represents all the raw data (sans statistics, metadata, etc.)
- * about a particular subject's related events
+ * Wrappers around our internal types that make them compatible with `rbush`.
  */
-export interface RelatedEventDataEntry {
-  relatedEvents: Array<{
-    relatedEvent: ResolverEvent;
-    relatedEventType: ReturnType<typeof eventType>;
-  }>;
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+
+/**
+ * The entity stored in `rbush` for resolver edge lines.
+ */
+export interface IndexedEdgeLineSegment extends BBox {
+  type: 'edgeLine';
+  entity: EdgeLineSegment;
 }
 
 /**
- * Represents the status of the request for related event data, which will be either the data,
- * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
+ * The entity store in `rbush` for resolver process nodes.
  */
-export type RelatedEventDataResults =
-  | RelatedEventDataEntry
-  | 'waitingForRelatedEventData'
-  | 'error';
+export interface IndexedProcessNode extends BBox {
+  type: 'processNode';
+  entity: SafeResolverEvent;
+  position: Vector2;
+}
 
 /**
- * This represents the raw related events data enhanced with statistics
- * (e.g. counts of items grouped by their related event types)
+ * A type containing all things to actually be rendered to the DOM.
  */
-export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
-  stats: Record<string, number>;
-};
+export interface VisibleEntites {
+  processNodePositions: ProcessPositions;
+  connectingEdgeLineSegments: EdgeLineSegment[];
+}
 
 /**
- * The status or value of any particular event's related events w.r.t. their valence to the current view.
- * One of:
- * `RelatedEventDataEntryWithStats` when results have been received and processed and are ready to display
- * `waitingForRelatedEventData` when related events have been requested but have not yet matriculated
- * `Error` when the request for any event encounters an error during service
- */
-export type RelatedEventEntryWithStatsOrWaiting =
-  | RelatedEventDataEntryWithStats
-  | `waitingForRelatedEventData`
-  | 'error';
-
-/**
- * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
- * or a `waitingForRelatedEventData` symbol when referenced with a unique event.
- */
-export type RelatedEventData = Map<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
-
-/**
- * State for `data` reducer which handles receiving Resolver data from the backend.
+ * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
-  readonly results: readonly ResolverEvent[];
-  isLoading: boolean;
-  hasError: boolean;
-  resultsEnrichedWithRelatedEventInfo: Map<ResolverEvent, RelatedEventDataResults>;
+  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
+  readonly relatedEventsReady: Map<string, boolean>;
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  readonly databaseDocumentID?: string;
+  /**
+   * The id used for the pending request, if there is one.
+   */
+  readonly pendingRequestDatabaseDocumentID?: string;
+  readonly resolverComponentInstanceID: string | undefined;
+
+  /**
+   * The parameters and response from the last successful request.
+   */
+  readonly lastResponse?: {
+    /**
+     * The id used in the request.
+     */
+    readonly databaseDocumentID: string;
+  } & (
+    | {
+        /**
+         * If a response with a success code was received, this is `true`.
+         */
+        readonly successful: true;
+        /**
+         * The ResolverTree parsed from the response.
+         */
+        readonly result: ResolverTree;
+      }
+    | {
+        /**
+         * If the request threw an exception or the response had a failure code, this will be false.
+         */
+        readonly successful: false;
+      }
+  );
 }
 
+/**
+ * Represents an ordered pair. Used for x-y coordinates and the like.
+ */
 export type Vector2 = readonly [number, number];
 
 /**
@@ -194,11 +221,11 @@ export type Vector2 = readonly [number, number];
  */
 export interface AABB {
   /**
-   * Vector who's `x` component is the _left_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
+   * Vector who's `x` component is the _left_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
    **/
   readonly minimum: Vector2;
   /**
-   * Vector who's `x` component is the _right_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
+   * Vector who's `x` component is the _right_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
    **/
   readonly maximum: Vector2;
 }
@@ -218,14 +245,14 @@ export type Matrix3 = readonly [
   number
 ];
 
-type eventSubtypeFull =
+type EventSubtypeFull =
   | 'creation_event'
   | 'fork_event'
   | 'exec_event'
   | 'already_running'
   | 'termination_event';
 
-type eventTypeFull = 'process_event';
+type EventTypeFull = 'process_event';
 
 /**
  * The 'events' which contain process data and are used to model Resolver.
@@ -236,8 +263,8 @@ export interface ProcessEvent {
   readonly machine_id: string;
   readonly data_buffer: {
     timestamp_utc: string;
-    event_subtype_full: eventSubtypeFull;
-    event_type_full: eventTypeFull;
+    event_subtype_full: EventSubtypeFull;
+    event_type_full: EventTypeFull;
     node_id: number;
     source_id?: number;
     process_name: string;
@@ -247,61 +274,83 @@ export interface ProcessEvent {
 }
 
 /**
- * A map of Process Ids that indicate which processes are adjacent to a given process along
- * directions in two axes: up/down and previous/next.
- */
-export interface AdjacentProcessMap {
-  readonly self: string;
-  parent: string | null;
-  firstChild: string | null;
-  previousSibling: string | null;
-  nextSibling: string | null;
-  /**
-   * To support aria-level, this must be >= 1
-   */
-  level: number;
-}
-
-/**
- * A represention of a process tree with indices for O(1) access to children and values by id.
+ * A representation of a process tree with indices for O(1) access to children and values by id.
  */
 export interface IndexedProcessTree {
   /**
-   * Map of ID to a process's children
+   * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, ResolverEvent[]>;
+  idToChildren: Map<string | undefined, SafeResolverEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<string, ResolverEvent>;
-  /**
-   * Map of ID to adjacent processes
-   */
-  idToAdjacent: Map<string, AdjacentProcessMap>;
+  idToProcess: Map<string, SafeResolverEvent>;
 }
 
 /**
- * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
+ * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ResolverEvent, number>;
+export type ProcessWidths = Map<SafeResolverEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ResolverEvent, Vector2>;
-/**
- * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
- */
-export type EdgeLineSegment = Vector2[];
+export type ProcessPositions = Map<SafeResolverEvent, Vector2>;
+
+export type DurationTypes =
+  | 'millisecond'
+  | 'milliseconds'
+  | 'second'
+  | 'seconds'
+  | 'minute'
+  | 'minutes'
+  | 'hour'
+  | 'hours'
+  | 'day'
+  | 'days'
+  | 'week'
+  | 'weeks'
+  | 'month'
+  | 'months'
+  | 'year'
+  | 'years';
 
 /**
- * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
+ * duration value and description string
+ */
+export interface DurationDetails {
+  duration: number | '<1';
+  durationType: DurationTypes;
+}
+/**
+ * Values shared between two vertices joined by an edge line.
+ */
+export interface EdgeLineMetadata {
+  elapsedTime?: DurationDetails;
+  // A string of the two joined process nodes concatenated together.
+  uniqueId: string;
+}
+/**
+ * A tuple of 2 vector2 points forming a poly-line. Used to connect process nodes in the graph.
+ */
+export type EdgeLinePoints = Vector2[];
+
+/**
+ * Edge line components including the points joining the edge-line and any optional associated metadata
+ */
+export interface EdgeLineSegment {
+  points: EdgeLinePoints;
+  metadata: EdgeLineMetadata;
+}
+
+/**
+ * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ResolverEvent;
+  process: SafeResolverEvent;
   width: number;
 } & (
   | {
-      parent: ResolverEvent;
+      parent: SafeResolverEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -376,3 +425,110 @@ export type ResolverProcessType =
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
+
+/**
+ * Describes the basic Resolver graph layout.
+ */
+export interface IsometricTaxiLayout {
+  /**
+   * A map of events to position. Each event represents its own node.
+   */
+  processNodePositions: Map<SafeResolverEvent, Vector2>;
+  /**
+   * A map of edge-line segments, which graphically connect nodes.
+   */
+  edgeLineSegments: EdgeLineSegment[];
+
+  /**
+   * defines the aria levels for nodes.
+   */
+  ariaLevels: Map<SafeResolverEvent, number>;
+}
+
+/**
+ * An object with methods that can be used to access data from the Kibana server.
+ * This is injected into Resolver.
+ * This allows tests to provide a mock data access layer.
+ * In the future, other implementations of Resolver could provide different data access layers.
+ */
+export interface DataAccessLayer {
+  /**
+   * Fetch related events for an entity ID
+   */
+  relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+
+  /**
+   * Fetch a ResolverTree for a entityID
+   */
+  resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
+
+  /**
+   * Get an array of index patterns that contain events.
+   */
+  indexPatterns: () => string[];
+
+  /**
+   * Get entities matching a document.
+   */
+  entities: (parameters: {
+    /** _id of the document to find an entity in. */
+    _id: string;
+    /** indices to search in */
+    indices: string[];
+    /** signal to abort the request */
+    signal: AbortSignal;
+  }) => Promise<ResolverEntityIndex>;
+}
+
+/**
+ * The externally provided React props.
+ */
+export interface ResolverProps {
+  /**
+   * Used by `styled-components`.
+   */
+  className?: string;
+  /**
+   * The `_id` value of an event in ES.
+   * Used as the origin of the Resolver graph.
+   */
+  databaseDocumentID?: string;
+  /**
+   * A string literal describing where in the application resolver is located.
+   * Used to prevent collisions in things like query parameters.
+   */
+  resolverComponentInstanceID: string;
+}
+
+/**
+ * Used by `SpyMiddleware`.
+ */
+export interface SpyMiddlewareStateActionPair {
+  /** An action dispatched, `state` is the state that the reducer returned when handling this action.
+   */
+  action: ResolverAction;
+  /**
+   * A resolver state that was returned by the reducer when handling `action`.
+   */
+  state: ResolverState;
+}
+
+/**
+ * A wrapper object that has a middleware along with an async generator that returns the actions dispatched to the store (along with state.)
+ */
+export interface SpyMiddleware {
+  /**
+   * A middleware to use with `applyMiddleware`.
+   */
+  middleware: Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
+  /**
+   * A generator that returns all state and action pairs that pass through the middleware.
+   */
+  actions: () => AsyncGenerator<SpyMiddlewareStateActionPair, never, unknown>;
+
+  /**
+   * Prints actions to the console.
+   * Call the returned function to stop debugging.
+   */
+  debugActions: () => () => void;
+}

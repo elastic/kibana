@@ -24,7 +24,9 @@ describe('positive_integer_greater_than_zero', () => {
     const decoded = PositiveIntegerGreaterThanZero.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -33,7 +35,9 @@ describe('positive_integer_greater_than_zero', () => {
     const decoded = PositiveIntegerGreaterThanZero.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -42,7 +46,9 @@ describe('positive_integer_greater_than_zero', () => {
     const decoded = PositiveIntegerGreaterThanZero.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "some string" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some string" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
     expect(message.schema).toEqual({});
   });
 });

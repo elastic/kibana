@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 const highlightOptions = {
   boundary_chars: {},
   boundary_max_scan: 20,
@@ -57,7 +56,6 @@ export const globals = (specService: SpecDefinitionsService) => {
     fields: {
       '{field}': {
         fragment_size: 20,
-        number_of_fragments: 3,
         ...highlightOptions,
       },
     },

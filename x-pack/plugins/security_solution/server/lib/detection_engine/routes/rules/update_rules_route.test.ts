@@ -10,7 +10,6 @@ import {
   getEmptyFindResult,
   getResult,
   getUpdateRequest,
-  typicalPayload,
   getFindResultWithSingleHit,
   getFindResultStatusEmpty,
   nonRuleFindResult,
@@ -18,9 +17,9 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { updateRulesRoute } from './update_rules_route';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/update_rules_notifications');
@@ -29,14 +28,6 @@ describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -139,7 +130,7 @@ describe('update_rules', () => {
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...typicalPayload(),
+          ...getCreateRulesSchemaMock(),
           rule_id: undefined,
         },
       });
@@ -154,7 +145,7 @@ describe('update_rules', () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), type: 'query' },
+        body: { ...getCreateRulesSchemaMock(), type: 'query' },
       });
       const result = await server.validate(request);
 
@@ -165,7 +156,7 @@ describe('update_rules', () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), type: 'unknown type' },
+        body: { ...getCreateRulesSchemaMock(), type: 'unknown type' },
       });
       const result = await server.validate(request);
 

@@ -5,10 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
+import { ToolbarButton } from '../../../toolbar_button';
 
 export function LayerSettings({
   layerId,
@@ -25,6 +26,10 @@ export function LayerSettings({
     return null;
   }
 
+  const a11yText = i18n.translate('xpack.lens.editLayerSettings', {
+    defaultMessage: 'Edit layer settings',
+  });
+
   return (
     <EuiPopover
       id={`lnsLayerPopover_${layerId}`}
@@ -36,11 +41,11 @@ export function LayerSettings({
             defaultMessage: 'Edit layer settings',
           })}
         >
-          <EuiButtonIcon
+          <ToolbarButton
+            size="s"
             iconType={activeVisualization.getLayerContextMenuIcon?.(layerConfigProps) || 'gear'}
-            aria-label={i18n.translate('xpack.lens.editLayerSettings', {
-              defaultMessage: 'Edit layer settings',
-            })}
+            aria-label={a11yText}
+            title={a11yText}
             onClick={() => setIsOpen(!isOpen)}
             data-test-subj="lns_layer_settings"
           />

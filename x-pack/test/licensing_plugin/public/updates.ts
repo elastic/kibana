@@ -27,8 +27,8 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -43,8 +43,8 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -59,8 +59,8 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -75,8 +75,8 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');

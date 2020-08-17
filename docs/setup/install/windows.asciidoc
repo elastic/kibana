@@ -1,11 +1,14 @@
 [[windows]]
 === Install {kib} on Windows
+++++
+<titleabbrev>Install on Windows</titleabbrev>
+++++
 
 Kibana can be installed on Windows using the `.zip` package.
 
 This package is free to use under the Elastic license. It contains open source
 and free commercial features and access to paid commercial features.
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+<<managing-licenses,Start a 30-day trial>> to try out all of the
 paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
@@ -91,12 +94,6 @@ important data later on.
 | data
   | The location of the data files written to disk by Kibana and its plugins
   | $KIBANA_HOME\data
- d|
-
-| optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
-    result in the source code being retranspiled on the fly.
-  | $KIBANA_HOME\data\optimize
  d|
 
 | plugins

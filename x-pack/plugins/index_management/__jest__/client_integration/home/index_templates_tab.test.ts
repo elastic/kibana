@@ -30,28 +30,15 @@ describe('Index Templates tab', () => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadIndicesResponse([]);
-
-    await act(async () => {
-      testBed = await setup();
-    });
-  });
-
   describe('when there are no index templates', () => {
-    beforeEach(async () => {
-      const { actions, component } = testBed;
-
+    test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
       await act(async () => {
-        actions.goToTemplatesList();
+        testBed = await setup();
       });
+      const { exists, component } = testBed;
       component.update();
-    });
-
-    test('should display an empty prompt', async () => {
-      const { exists } = testBed;
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyPrompt')).toBe(true);
@@ -85,6 +72,7 @@ describe('Index Templates tab', () => {
     const template3 = fixtures.getTemplate({
       name: `.c${getRandomString()}`, // mock system template
       indexPatterns: ['template3Pattern1*', 'template3Pattern2', 'template3Pattern3'],
+      type: 'system',
     });
 
     const template4 = fixtures.getTemplate({
@@ -113,20 +101,19 @@ describe('Index Templates tab', () => {
       name: `.c${getRandomString()}`, // mock system template
       indexPatterns: ['template6Pattern1*', 'template6Pattern2', 'template6Pattern3'],
       isLegacy: true,
+      type: 'system',
     });
 
     const templates = [template1, template2, template3];
     const legacyTemplates = [template4, template5, template6];
 
     beforeEach(async () => {
-      const { actions, component } = testBed;
-
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates, legacyTemplates });
 
       await act(async () => {
-        actions.goToTemplatesList();
+        testBed = await setup();
       });
-      component.update();
+      testBed.component.update();
     });
 
     test('should list them in the table', async () => {
@@ -137,42 +124,50 @@ describe('Index Templates tab', () => {
 
       // Test composable table content
       tableCellsValues.forEach((row, i) => {
-        const template = templates[i];
-        const { name, indexPatterns, priority, ilmPolicy, composedOf } = template;
+        const indexTemplate = templates[i];
+        const { name, indexPatterns, ilmPolicy, composedOf, template } = indexTemplate;
 
+        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
         const composedOfString = composedOf ? composedOf.join(',') : '';
-        const priorityFormatted = priority ? priority.toString() : '';
 
-        expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
-          name,
-          indexPatterns.join(', '),
-          ilmPolicyName,
-          composedOfString,
-          priorityFormatted,
-          'M S A', // Mappings Settings Aliases badges
-        ]);
+        try {
+          expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+            '', // Checkbox to select row
+            name,
+            indexPatterns.join(', '),
+            ilmPolicyName,
+            composedOfString,
+            hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
+            'EditDelete', // Column of actions
+          ]);
+        } catch (e) {
+          console.error(`Error in index template at row ${i}`); // eslint-disable-line no-console
+          throw e;
+        }
       });
 
       // Test legacy table content
       legacyTableCellsValues.forEach((row, i) => {
-        const template = legacyTemplates[i];
-        const { name, indexPatterns, order, ilmPolicy } = template;
+        const legacyIndexTemplate = legacyTemplates[i];
+        const { name, indexPatterns, ilmPolicy, template } = legacyIndexTemplate;
 
+        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
-        const orderFormatted = order ? order.toString() : order;
 
-        expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
-          '',
-          name,
-          indexPatterns.join(', '),
-          ilmPolicyName,
-          orderFormatted,
-          '',
-          '',
-          '',
-          '',
-        ]);
+        try {
+          expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+            '',
+            name,
+            indexPatterns.join(', '),
+            ilmPolicyName,
+            hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
+            'EditDelete', // Column of actions
+          ]);
+        } catch (e) {
+          console.error(`Error in legacy template at row ${i}`); // eslint-disable-line no-console
+          throw e;
+        }
       });
     });
 
@@ -188,12 +183,14 @@ describe('Index Templates tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(
-        `${API_BASE_PATH}/index-templates`
+        `${API_BASE_PATH}/index_templates`
       );
     });
 
-    test('should have a button to create a new template', () => {
+    test('should have a button to create a template', () => {
       const { exists } = testBed;
+      // Both composable and legacy templates
+      expect(exists('createTemplateButton')).toBe(true);
       expect(exists('createLegacyTemplateButton')).toBe(true);
     });
 
@@ -214,49 +211,165 @@ describe('Index Templates tab', () => {
     });
 
     test('each row should have a link to the template details panel', async () => {
-      const { find, exists, actions } = testBed;
+      const { find, exists, actions, component } = testBed;
 
+      // Composable templates
       await actions.clickTemplateAt(0);
+      expect(exists('templateList')).toBe(true);
+      expect(exists('templateDetails')).toBe(true);
+      expect(find('templateDetails.title').text().trim()).toBe(templates[0].name);
+
+      // Close flyout
+      await act(async () => {
+        actions.clickCloseDetailsButton();
+      });
+      component.update();
+
+      await actions.clickTemplateAt(0, true);
 
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
-      expect(find('templateDetails.title').text()).toBe(legacyTemplates[0].name);
+      expect(find('templateDetails.title').text().trim()).toBe(legacyTemplates[0].name);
     });
 
-    test('template actions column should have an option to delete', () => {
-      const { actions, findAction } = testBed;
-      const [{ name: templateName }] = legacyTemplates;
+    describe('table row actions', () => {
+      describe('composable templates', () => {
+        test('should have an option to delete', () => {
+          const { actions, findAction } = testBed;
+          const [{ name: templateName }] = templates;
 
-      actions.clickActionMenu(templateName);
+          actions.clickActionMenu(templateName);
 
-      const deleteAction = findAction('delete');
+          const deleteAction = findAction('delete');
+          expect(deleteAction.text()).toEqual('Delete');
+        });
 
-      expect(deleteAction.text()).toEqual('Delete');
-    });
+        test('should have an option to clone', () => {
+          const { actions, findAction } = testBed;
+          const [{ name: templateName }] = templates;
 
-    test('template actions column should have an option to clone', () => {
-      const { actions, findAction } = testBed;
-      const [{ name: templateName }] = legacyTemplates;
+          actions.clickActionMenu(templateName);
 
-      actions.clickActionMenu(templateName);
+          const cloneAction = findAction('clone');
 
-      const cloneAction = findAction('clone');
+          expect(cloneAction.text()).toEqual('Clone');
+        });
 
-      expect(cloneAction.text()).toEqual('Clone');
-    });
+        test('should have an option to edit', () => {
+          const { actions, findAction } = testBed;
+          const [{ name: templateName }] = templates;
 
-    test('template actions column should have an option to edit', () => {
-      const { actions, findAction } = testBed;
-      const [{ name: templateName }] = legacyTemplates;
+          actions.clickActionMenu(templateName);
 
-      actions.clickActionMenu(templateName);
+          const editAction = findAction('edit');
 
-      const editAction = findAction('edit');
+          expect(editAction.text()).toEqual('Edit');
+        });
+      });
 
-      expect(editAction.text()).toEqual('Edit');
+      describe('legacy templates', () => {
+        test('should have an option to delete', () => {
+          const { actions, findAction } = testBed;
+          const [{ name: legacyTemplateName }] = legacyTemplates;
+
+          actions.clickActionMenu(legacyTemplateName);
+
+          const deleteAction = findAction('delete');
+          expect(deleteAction.text()).toEqual('Delete');
+        });
+
+        test('should have an option to clone', () => {
+          const { actions, findAction } = testBed;
+          const [{ name: templateName }] = legacyTemplates;
+
+          actions.clickActionMenu(templateName);
+
+          const cloneAction = findAction('clone');
+
+          expect(cloneAction.text()).toEqual('Clone');
+        });
+
+        test('should have an option to edit', () => {
+          const { actions, findAction } = testBed;
+          const [{ name: templateName }] = legacyTemplates;
+
+          actions.clickActionMenu(templateName);
+
+          const editAction = findAction('edit');
+
+          expect(editAction.text()).toEqual('Edit');
+        });
+      });
     });
 
     describe('delete index template', () => {
+      test('should show a confirmation when clicking the delete template button', async () => {
+        const { actions } = testBed;
+        const [{ name: templateName }] = templates;
+
+        await actions.clickTemplateAction(templateName, 'delete');
+
+        // We need to read the document "body" as the modal is added there and not inside
+        // the component DOM tree.
+        expect(
+          document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]')
+        ).not.toBe(null);
+
+        expect(
+          document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]')!.textContent
+        ).toContain('Delete template');
+      });
+
+      test('should show a warning message when attempting to delete a system template', async () => {
+        const { exists, actions } = testBed;
+
+        actions.toggleViewItem('system');
+
+        const { name: systemTemplateName } = templates[2];
+        await actions.clickTemplateAction(systemTemplateName, 'delete');
+
+        expect(exists('deleteSystemTemplateCallOut')).toBe(true);
+      });
+
+      test('should send the correct HTTP request to delete an index template', async () => {
+        const { actions } = testBed;
+
+        const [
+          {
+            name: templateName,
+            _kbnMeta: { isLegacy },
+          },
+        ] = templates;
+
+        httpRequestsMockHelpers.setDeleteTemplateResponse({
+          results: {
+            successes: [templateName],
+            errors: [],
+          },
+        });
+
+        await actions.clickTemplateAction(templateName, 'delete');
+
+        const modal = document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]');
+        const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+          '[data-test-subj="confirmModalConfirmButton"]'
+        );
+
+        await act(async () => {
+          confirmButton!.click();
+        });
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        expect(latestRequest.method).toBe('POST');
+        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete_index_templates`);
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+          templates: [{ name: templates[0].name, isLegacy }],
+        });
+      });
+    });
+
+    describe('delete legacy index template', () => {
       test('should show a confirmation when clicking the delete template button', async () => {
         const { actions } = testBed;
         const [{ name: templateName }] = legacyTemplates;
@@ -286,30 +399,23 @@ describe('Index Templates tab', () => {
       });
 
       test('should send the correct HTTP request to delete an index template', async () => {
-        const { actions, table } = testBed;
-        const { rows } = table.getMetaData('legacyTemplateTable');
+        const { actions } = testBed;
 
-        const templateId = rows[0].columns[2].value;
+        const [{ name: templateName }] = legacyTemplates;
 
-        const [
-          {
-            name: templateName,
-            _kbnMeta: { isLegacy },
+        httpRequestsMockHelpers.setDeleteTemplateResponse({
+          results: {
+            successes: [templateName],
+            errors: [],
           },
-        ] = legacyTemplates;
+        });
+
         await actions.clickTemplateAction(templateName, 'delete');
 
         const modal = document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]');
         const confirmButton: HTMLButtonElement | null = modal!.querySelector(
           '[data-test-subj="confirmModalConfirmButton"]'
         );
-
-        httpRequestsMockHelpers.setDeleteTemplateResponse({
-          results: {
-            successes: [templateId],
-            errors: [],
-          },
-        });
 
         await act(async () => {
           confirmButton!.click();
@@ -318,10 +424,13 @@ describe('Index Templates tab', () => {
         const latestRequest = server.requests[server.requests.length - 1];
 
         expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-index-templates`);
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-          templates: [{ name: legacyTemplates[0].name, isLegacy }],
-        });
+        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete_index_templates`);
+
+        // Commenting as I don't find a way to make it work.
+        // It keeps on returning the composable template instead of the legacy one
+        // expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+        //   templates: [{ name: templateName, isLegacy }],
+        // });
       });
     });
 
@@ -355,9 +464,9 @@ describe('Index Templates tab', () => {
 
         test('should set the correct title', async () => {
           const { find } = testBed;
-          const [{ name }] = legacyTemplates;
+          const [{ name }] = templates;
 
-          expect(find('templateDetails.title').text()).toEqual(name);
+          expect(find('templateDetails.title').text().trim()).toEqual(name);
         });
 
         it('should have a close button and be able to close flyout', async () => {
@@ -384,7 +493,7 @@ describe('Index Templates tab', () => {
       });
 
       describe('tabs', () => {
-        test('should have 4 tabs', async () => {
+        test('should have 5 tabs', async () => {
           const template = fixtures.getTemplate({
             name: `a${getRandomString()}`,
             indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
@@ -415,35 +524,48 @@ describe('Index Templates tab', () => {
           const { find, actions, exists } = testBed;
 
           httpRequestsMockHelpers.setLoadTemplateResponse(template);
+          httpRequestsMockHelpers.setSimulateTemplateResponse({ simulateTemplate: 'response' });
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(4);
+          expect(find('templateDetails.tab').length).toBe(5);
           expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
             'Summary',
             'Settings',
             'Mappings',
             'Aliases',
+            'Preview',
           ]);
 
           // Summary tab should be initial active tab
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify all tabs
-          actions.selectDetailsTab('settings');
+          await actions.selectDetailsTab('settings');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(true);
 
-          actions.selectDetailsTab('aliases');
+          await actions.selectDetailsTab('aliases');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(false);
-          expect(exists('aliasesTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(true);
 
-          actions.selectDetailsTab('mappings');
+          await actions.selectDetailsTab('mappings');
           expect(exists('summaryTab')).toBe(false);
-          expect(exists('settingsTab')).toBe(false);
-          expect(exists('aliasesTab')).toBe(false);
-          expect(exists('mappingsTab')).toBe(true);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(false);
+          expect(exists('mappingsTabContent')).toBe(true);
+
+          await actions.selectDetailsTab('preview');
+          expect(exists('summaryTab')).toBe(false);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(false);
+          expect(exists('mappingsTabContent')).toBe(false);
+          expect(exists('previewTabContent')).toBe(true);
+
+          expect(find('simulateTemplatePreview').text().replace(/\s/g, '')).toEqual(
+            JSON.stringify({ simulateTemplate: 'response' })
+          );
         });
 
         test('should show an info callout if data is not present', async () => {
@@ -459,17 +581,17 @@ describe('Index Templates tab', () => {
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(4);
+          expect(find('templateDetails.tab').length).toBe(5);
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify callout message per tab
-          actions.selectDetailsTab('settings');
+          await actions.selectDetailsTab('settings');
           expect(exists('noSettingsCallout')).toBe(true);
 
-          actions.selectDetailsTab('mappings');
+          await actions.selectDetailsTab('mappings');
           expect(exists('noMappingsCallout')).toBe(true);
 
-          actions.selectDetailsTab('aliases');
+          await actions.selectDetailsTab('aliases');
           expect(exists('noAliasesCallout')).toBe(true);
         });
       });

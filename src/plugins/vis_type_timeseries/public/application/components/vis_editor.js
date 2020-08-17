@@ -50,7 +50,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler(getDataStart().query.timefilter.timefilter);
+    this.onBrush = createBrushHandler((data) => props.vis.API.events.applyFilter(data));
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -80,7 +80,7 @@ export class VisEditor extends Component {
 
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
-    this.props.eventEmitter.emit('updateVis');
+    this.props.embeddableHandler.reload();
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
@@ -187,6 +187,7 @@ export class VisEditor extends Component {
               autoApply={this.state.autoApply}
               model={model}
               embeddableHandler={this.props.embeddableHandler}
+              eventEmitter={this.props.eventEmitter}
               vis={this.props.vis}
               timeRange={this.props.timeRange}
               uiState={this.uiState}

@@ -33,7 +33,7 @@ export const combineRangeWithFilters = (
       },
     },
   };
-  if (!filters) return range;
+  if (!filters?.bool) return range;
   const clientFiltersList = Array.isArray(filters?.bool?.filter ?? {})
     ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
       filters.bool.filter

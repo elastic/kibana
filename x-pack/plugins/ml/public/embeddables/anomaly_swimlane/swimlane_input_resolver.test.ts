@@ -8,17 +8,15 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { processFilters, useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
+import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
 describe('useSwimlaneInputResolver', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
   let refresh: Subject<any>;
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  let onInputChange: jest.Mock;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -41,7 +39,7 @@ describe('useSwimlaneInputResolver', () => {
       } as CoreStart,
       (null as unknown) as MlStartDependencies,
       ({
-        explorerService: {
+        anomalyTimelineService: {
           setTimeRange: jest.fn(),
           loadOverallData: jest.fn(() =>
             Promise.resolve({
@@ -69,6 +67,7 @@ describe('useSwimlaneInputResolver', () => {
         },
       } as unknown) as AnomalySwimlaneServices,
     ];
+    onInputChange = jest.fn();
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -79,9 +78,11 @@ describe('useSwimlaneInputResolver', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useSwimlaneInputResolver(
         embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
+        onInputChange,
         refresh,
         services,
-        1000
+        1000,
+        1
       )
     );
 
@@ -94,7 +95,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
-    expect(services[2].explorerService.loadOverallData).toHaveBeenCalledTimes(1);
+    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       embeddableInput.next({
@@ -109,7 +110,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(services[2].explorerService.loadOverallData).toHaveBeenCalledTimes(2);
+    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(2);
 
     await act(async () => {
       embeddableInput.next({
@@ -124,7 +125,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(services[2].explorerService.loadOverallData).toHaveBeenCalledTimes(3);
+    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
   });
 });
 
@@ -156,8 +157,8 @@ describe('processFilters', () => {
                 minimum_should_match: 1,
               },
             },
-            // @ts-ignore
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },
@@ -178,8 +179,9 @@ describe('processFilters', () => {
                 instance: 'i-16fd8d2a',
               },
             },
-            // @ts-ignore
+
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },
@@ -196,8 +198,8 @@ describe('processFilters', () => {
             exists: {
               field: 'instance',
             },
-            // @ts-ignore
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },
@@ -214,8 +216,8 @@ describe('processFilters', () => {
             exists: {
               field: 'region',
             },
-            // @ts-ignore
             $state: {
+              // @ts-ignore
               store: 'appState',
             },
           },

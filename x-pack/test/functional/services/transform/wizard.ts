@@ -76,6 +76,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
+    async assertPivotPreviewChartHistogramButtonMissing() {
+      // the button should not exist because histogram charts
+      // for the pivot preview are not supported yet
+      await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
+    },
+
     async parseEuiDataGrid(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
@@ -153,6 +159,58 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async assertPivotPreviewEmpty() {
       await this.assertPivotPreviewExists('empty');
+    },
+
+    async assertIndexPreviewHistogramChartButtonExists() {
+      await testSubjects.existOrFail('transformIndexPreviewHistogramButton');
+    },
+
+    async enableIndexPreviewHistogramCharts() {
+      await this.assertIndexPreviewHistogramChartButtonCheckState(false);
+      await testSubjects.click('transformIndexPreviewHistogramButton');
+      await this.assertIndexPreviewHistogramChartButtonCheckState(true);
+    },
+
+    async assertIndexPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'transformIndexPreviewHistogramButton',
+          'aria-checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertIndexPreviewHistogramCharts(
+      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+    ) {
+      // For each chart, get the content of each header cell and assert
+      // the legend text and column id and if the chart should be present or not.
+      await retry.tryForTime(5000, async () => {
+        for (const [index, expected] of expectedHistogramCharts.entries()) {
+          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+
+          if (expected.chartAvailable) {
+            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+          } else {
+            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+          }
+
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
+          expect(actualLegend).to.eql(
+            expected.legend,
+            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+          );
+
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          expect(actualId).to.eql(
+            expected.id,
+            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+          );
+        }
+      });
     },
 
     async assertQueryInputExists() {
@@ -242,14 +300,20 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertGroupByEntryExists(index, expectedLabel, expectedIntervalLabel);
     },
 
-    async assertAggregationInputExists() {
-      await testSubjects.existOrFail('transformAggregationSelection > comboBoxInput');
+    getAggComboBoxInputSelector(parentSelector = ''): string {
+      return `${parentSelector && `${parentSelector} > `}${
+        parentSelector ? 'transformSubAggregationSelection' : 'transformAggregationSelection'
+      } > comboBoxInput`;
     },
 
-    async assertAggregationInputValue(expectedIdentifier: string[]) {
+    async assertAggregationInputExists(parentSelector?: string) {
+      await testSubjects.existOrFail(this.getAggComboBoxInputSelector(parentSelector));
+    },
+
+    async assertAggregationInputValue(expectedIdentifier: string[], parentSelector?: string) {
       await retry.tryForTime(2000, async () => {
         const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-          'transformAggregationSelection > comboBoxInput'
+          this.getAggComboBoxInputSelector(parentSelector)
         );
         expect(comboBoxSelectedOptions).to.eql(
           expectedIdentifier,
@@ -258,11 +322,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertAggregationEntryExists(index: number, expectedLabel: string) {
-      await testSubjects.existOrFail(`transformAggregationEntry ${index}`);
+    async assertAggregationEntryExists(index: number, expectedLabel: string, parentSelector = '') {
+      const aggEntryPanelSelector = `${
+        parentSelector && `${parentSelector} > `
+      }transformAggregationEntry_${index}`;
+      await testSubjects.existOrFail(aggEntryPanelSelector);
 
       const actualLabel = await testSubjects.getVisibleText(
-        `transformAggregationEntry ${index} > transformAggregationEntryLabel`
+        `${aggEntryPanelSelector} > transformAggregationEntryLabel`
       );
       expect(actualLabel).to.eql(
         expectedLabel,
@@ -270,15 +337,31 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async addAggregationEntries(aggregationEntries: any[], parentSelector?: string) {
+      for (const [index, agg] of aggregationEntries.entries()) {
+        await this.assertAggregationInputExists(parentSelector);
+        await this.assertAggregationInputValue([], parentSelector);
+        await this.addAggregationEntry(index, agg.identifier, agg.label, agg.form, parentSelector);
+
+        if (agg.subAggs) {
+          await this.addAggregationEntries(
+            agg.subAggs,
+            `${parentSelector ? `${parentSelector} > ` : ''}transformAggregationEntry_${index}`
+          );
+        }
+      }
+    },
+
     async addAggregationEntry(
       index: number,
       identifier: string,
       expectedLabel: string,
-      formData?: Record<string, any>
+      formData?: Record<string, any>,
+      parentSelector = ''
     ) {
-      await comboBox.set('transformAggregationSelection > comboBoxInput', identifier);
-      await this.assertAggregationInputValue([]);
-      await this.assertAggregationEntryExists(index, expectedLabel);
+      await comboBox.set(this.getAggComboBoxInputSelector(parentSelector), identifier);
+      await this.assertAggregationInputValue([], parentSelector);
+      await this.assertAggregationEntryExists(index, expectedLabel, parentSelector);
 
       if (formData !== undefined) {
         await this.fillPopoverForm(identifier, expectedLabel, formData);

@@ -1,13 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Ip Details it matches the snapshot 1`] = `
-<Fragment>
-  <WithSource
-    data-test-subj="ip-details-page"
-    sourceId="default"
-  >
-    <Component />
-  </WithSource>
-  <withRouter(undefined) />
-</Fragment>
+<div
+  data-test-subj="ip-details-page"
+>
+  <Memo(WrapperPageComponent)>
+    <Memo(HeaderPageComponent)
+      border={true}
+      title="123.456.78.90"
+    />
+    <Memo(OverviewEmptyComponent) />
+  </Memo(WrapperPageComponent)>
+  <withRouter(undefined)
+    pageName="network"
+  />
+</div>
 `;

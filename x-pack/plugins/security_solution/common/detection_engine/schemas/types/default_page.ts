@@ -14,19 +14,17 @@ import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_
  *   - If null or undefined, then a default of 1 will be used
  *   - If the number is 0 or less this will not validate as it has to be a positive number greater than zero
  */
-export const DefaultPage = new t.Type<number, number, unknown>(
+export const DefaultPage = new t.Type<number, number | undefined, unknown>(
   'DefaultPerPage',
   t.number.is,
-  (input): Either<t.Errors, number> => {
+  (input, context): Either<t.Errors, number> => {
     if (input == null) {
       return t.success(1);
     } else if (typeof input === 'string') {
-      return PositiveIntegerGreaterThanZero.decode(parseInt(input, 10));
+      return PositiveIntegerGreaterThanZero.validate(parseInt(input, 10), context);
     } else {
-      return PositiveIntegerGreaterThanZero.decode(input);
+      return PositiveIntegerGreaterThanZero.validate(input, context);
     }
   },
   t.identity
 );
-
-export type DefaultPageC = typeof DefaultPage;

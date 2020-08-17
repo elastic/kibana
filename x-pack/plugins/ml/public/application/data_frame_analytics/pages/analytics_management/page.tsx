@@ -11,17 +11,21 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiTitle,
+  EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu';
+import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
-import { useCreateAnalyticsForm } from './hooks/use_create_analytics_form';
+import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 
@@ -29,8 +33,6 @@ export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
 
   useRefreshInterval(setBlockRefresh);
-
-  const createAnalyticsForm = useCreateAnalyticsForm();
 
   return (
     <Fragment>
@@ -43,7 +45,7 @@ export const Page: FC = () => {
                 <h1>
                   <FormattedMessage
                     id="xpack.ml.dataframe.analyticsList.title"
-                    defaultMessage="Analytics jobs"
+                    defaultMessage="Data frame analytics jobs"
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge
@@ -63,15 +65,24 @@ export const Page: FC = () => {
                 </h1>
               </EuiTitle>
             </EuiPageHeaderSection>
+            <EuiPageHeaderSection>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <RefreshAnalyticsListButton />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageHeaderSection>
           </EuiPageHeader>
 
           <NodeAvailableWarning />
           <UpgradeWarning />
 
-          <DataFrameAnalyticsList
-            blockRefresh={blockRefresh}
-            createAnalyticsForm={createAnalyticsForm}
-          />
+          <EuiPageContent>
+            <DataFrameAnalyticsList blockRefresh={blockRefresh} />
+          </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     </Fragment>

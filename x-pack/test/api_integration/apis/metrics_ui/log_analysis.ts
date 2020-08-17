@@ -23,7 +23,6 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -37,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
         before(() => esArchiver.load('empty_kibana'));
         after(() => esArchiver.unload('empty_kibana'));
 
-        it('should return buckets when the results index exists with matching documents', async () => {
+        it('should return buckets when there are matching ml result documents', async () => {
           const { body } = await supertest
             .post(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH)
             .set(COMMON_HEADERS)
@@ -68,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
           ).to.be(true);
         });
 
-        it('should return no buckets when the results index exists without matching documents', async () => {
+        it('should return no buckets when there are no matching ml result documents', async () => {
           const { body } = await supertest
             .post(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH)
             .set(COMMON_HEADERS)
@@ -78,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
                   sourceId: 'default',
                   timeRange: {
                     startTime: TIME_BEFORE_START - 10 * 15 * 60 * 1000,
-                    endTime: TIME_BEFORE_START,
+                    endTime: TIME_BEFORE_START - 1,
                   },
                   bucketDuration: 15 * 60 * 1000,
                 },
@@ -93,25 +92,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(logEntryRateBuckets.data.bucketDuration).to.be(15 * 60 * 1000);
           expect(logEntryRateBuckets.data.histogramBuckets).to.be.empty();
-        });
-
-        it('should return a NotFound error when the results index does not exist', async () => {
-          await supertest
-            .post(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH)
-            .set(COMMON_HEADERS)
-            .send(
-              getLogEntryRateRequestPayloadRT.encode({
-                data: {
-                  sourceId: 'does-not-exist',
-                  timeRange: {
-                    startTime: TIME_BEFORE_START,
-                    endTime: TIME_AFTER_END,
-                  },
-                  bucketDuration: 15 * 60 * 1000,
-                },
-              })
-            )
-            .expect(404);
         });
       });
     });

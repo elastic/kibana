@@ -6,10 +6,9 @@
 
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
-import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
-import { createDriverFactory } from '../browsers/chromium';
-import * as contexts from '../export_types/common/lib/screenshots/constants';
+import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
 import { LevelLogger } from '../lib';
+import * as contexts from '../lib/screenshots/constants';
 import { CaptureConfig, ElementsPositionAndAttribute } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
@@ -113,8 +112,12 @@ export const createMockBrowserDriverFactory = async (
     maxAttempts: 1,
   };
 
-  const binaryPath = '/usr/local/share/common/secure/';
-  const mockBrowserDriverFactory = await createDriverFactory(binaryPath, logger, captureConfig);
+  const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
+  const mockBrowserDriverFactory = await chromium.createDriverFactory(
+    binaryPath,
+    captureConfig,
+    logger
+  );
   const mockPage = {} as Page;
   const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
     inspect: true,
@@ -126,6 +129,7 @@ export const createMockBrowserDriverFactory = async (
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
   mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;
+  mockBrowserDriver.isPageOpen = () => true;
 
   mockBrowserDriverFactory.createPage = opts.getCreatePage
     ? opts.getCreatePage(mockBrowserDriver)

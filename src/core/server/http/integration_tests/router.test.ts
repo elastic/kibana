@@ -24,12 +24,12 @@ import { schema } from '@kbn/config-schema';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
-let logger: ReturnType<typeof loggingServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
 const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
@@ -37,7 +37,7 @@ const setupDeps = {
 };
 
 beforeEach(() => {
-  logger = loggingServiceMock.create();
+  logger = loggingSystemMock.create();
 
   server = createHttpServer({ logger });
 });
@@ -302,6 +302,130 @@ describe('Options', () => {
       });
     });
   });
+
+  describe('timeout', () => {
+    it('should timeout if configured with a small timeout value for a POST', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.post(
+        { path: '/a', validate: false, options: { timeout: 1000 } },
+        async (context, req, res) => {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return res.ok({});
+        }
+      );
+      router.post({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+      expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).post('/b').expect(200, {});
+    });
+
+    it('should timeout if configured with a small timeout value for a PUT', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.put(
+        { path: '/a', validate: false, options: { timeout: 1000 } },
+        async (context, req, res) => {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return res.ok({});
+        }
+      );
+      router.put({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+
+      expect(supertest(innerServer.listener).put('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).put('/b').expect(200, {});
+    });
+
+    it('should timeout if configured with a small timeout value for a DELETE', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.delete(
+        { path: '/a', validate: false, options: { timeout: 1000 } },
+        async (context, req, res) => {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return res.ok({});
+        }
+      );
+      router.delete({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+      expect(supertest(innerServer.listener).delete('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).delete('/b').expect(200, {});
+    });
+
+    it('should timeout if configured with a small timeout value for a GET', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        // Note: There is a bug within Hapi Server where it cannot set the payload timeout for a GET call but it also cannot configure a timeout less than the payload body
+        // so the least amount of possible time to configure the timeout is 10 seconds.
+        { path: '/a', validate: false, options: { timeout: 100000 } },
+        async (context, req, res) => {
+          // Cause a wait of 20 seconds to cause the socket hangup
+          await new Promise((resolve) => setTimeout(resolve, 200000));
+          return res.ok({});
+        }
+      );
+      router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+
+      expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).get('/b').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a POST', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.post(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+      await supertest(innerServer.listener).post('/a').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a PUT', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.put(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+
+      await supertest(innerServer.listener).put('/a').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a DELETE', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.delete(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+      await supertest(innerServer.listener).delete('/a').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a GET', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+      await supertest(innerServer.listener).get('/a').expect(200, {});
+    });
+  });
 });
 
 describe('Cache-Control', () => {
@@ -347,7 +471,7 @@ describe('Handler', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: unexpected error],
@@ -368,7 +492,7 @@ describe('Handler', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unauthorized],
@@ -387,7 +511,7 @@ describe('Handler', () => {
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
     expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
           [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
@@ -763,7 +887,7 @@ describe('Response factory', () => {
       await supertest(innerServer.listener).get('/').expect(500);
 
       // error happens within hapi when route handler already finished execution.
-      expect(loggingServiceMock.collect(logger).error).toHaveLength(0);
+      expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 
     it('200 OK with body', async () => {
@@ -855,7 +979,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected 'location' header to be set],
@@ -1261,7 +1385,7 @@ describe('Response factory', () => {
         message: 'An internal server error occurred.',
         statusCode: 500,
       });
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
@@ -1330,7 +1454,7 @@ describe('Response factory', () => {
 
       await supertest(innerServer.listener).get('/').expect(500);
 
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected 'location' header to be set],
@@ -1445,7 +1569,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('reason');
-      expect(loggingServiceMock.collect(logger).error).toHaveLength(0);
+      expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 
     it('throws an error if not valid error is provided', async () => {
@@ -1464,7 +1588,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected error message to be provided],
@@ -1488,7 +1612,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: expected error message to be provided],
@@ -1511,7 +1635,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: options.statusCode is expected to be set. given options: undefined],
@@ -1534,7 +1658,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
       expect(result.body.message).toBe('An internal server error occurred.');
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],

@@ -5,9 +5,10 @@
  */
 
 import {
-  COMMENT,
+  COMMENTS,
   DESCRIPTION,
   ENTRIES,
+  ITEM_ID,
   ITEM_TYPE,
   LIST_ID,
   META,
@@ -21,7 +22,7 @@ import { CreateExceptionListItemSchema } from './create_exception_list_item_sche
 
 export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
   _tags: _TAGS,
-  comment: COMMENT,
+  comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
   item_id: undefined,
@@ -30,5 +31,28 @@ export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemS
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
   tags: TAGS,
+  type: ITEM_TYPE,
+});
+
+/**
+ * Useful for end to end testing
+ */
+export const getCreateExceptionListItemMinimalSchemaMock = (): CreateExceptionListItemSchema => ({
+  description: DESCRIPTION,
+  entries: ENTRIES,
+  item_id: ITEM_ID,
+  list_id: LIST_ID,
+  name: NAME,
+  type: ITEM_TYPE,
+});
+
+/**
+ * Useful for end to end testing
+ */
+export const getCreateExceptionListItemMinimalSchemaMockWithoutId = (): CreateExceptionListItemSchema => ({
+  description: DESCRIPTION,
+  entries: ENTRIES,
+  list_id: LIST_ID,
+  name: NAME,
   type: ITEM_TYPE,
 });

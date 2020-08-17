@@ -19,8 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('auditbeat/overview'));
       after(() => esArchiver.unload('auditbeat/overview'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         auditbeatAuditd: 2194,
         auditbeatFIM: 4,
@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: DEFAULT_INDEX_PATTERN,
+              docValueFields: [],
               inspect: false,
             },
           })

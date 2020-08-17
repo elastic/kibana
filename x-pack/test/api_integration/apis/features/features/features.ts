@@ -97,6 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
             'visualize',
             'dashboard',
             'dev_tools',
+            'actions',
+            'enterpriseSearch',
             'advancedSettings',
             'indexPatterns',
             'timelion',
@@ -105,12 +107,13 @@ export default function ({ getService }: FtrProviderContext) {
             'savedObjectsManagement',
             'ml',
             'apm',
+            'builtInAlerts',
             'canvas',
             'infrastructure',
             'logs',
             'maps',
             'uptime',
-            'securitySolution',
+            'siem',
             'ingestManager',
           ].sort()
         );

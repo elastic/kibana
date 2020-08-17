@@ -59,6 +59,7 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
+      sortMatchesBy="startsWith"
       {...otherProps}
     />
   );

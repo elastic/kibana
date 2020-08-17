@@ -37,22 +37,16 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     getInAppUrl(obj) {
       return {
         path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'management.kibana.index_patterns',
+        uiCapabilitiesPath: 'management.kibana.indexPatterns',
       };
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
-      fieldFormatMap: { type: 'text' },
-      fields: { type: 'text' },
-      intervalName: { type: 'keyword' },
-      notExpandable: { type: 'boolean' },
-      sourceFilters: { type: 'text' },
-      timeFieldName: { type: 'keyword' },
       title: { type: 'text' },
       type: { type: 'keyword' },
-      typeMeta: { type: 'keyword' },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations,
+  migrations: indexPatternSavedObjectTypeMigrations as any,
 };

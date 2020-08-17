@@ -9,5 +9,5 @@ Deletes an object
 <b>Signature:</b>
 
 ```typescript
-delete: (type: string, id: string) => Promise<{}>;
+delete: (type: string, id: string) => ReturnType<SavedObjectsApi['delete']>;
 ```

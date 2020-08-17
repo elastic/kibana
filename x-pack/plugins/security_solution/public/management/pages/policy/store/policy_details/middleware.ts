@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IHttpFetchError } from 'kibana/public';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
   isOnPolicyDetailsPage,
   policyDetails,
   policyDetailsForUpdate,
+  getPolicyDataForUpdate,
 } from './selectors';
 import {
-  sendGetDatasource,
+  sendGetPackageConfig,
   sendGetFleetAgentStatusForConfig,
-  sendPutDatasource,
+  sendPutPackageConfig,
 } from '../policy_list/services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
@@ -34,30 +35,13 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       let policyItem: PolicyData;
 
       try {
-        policyItem = (await sendGetDatasource(http, id)).item;
+        policyItem = (await sendGetPackageConfig(http, id)).item;
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
           payload: error.body || error,
         });
         return;
-      }
-
-      // Until we get the Default configuration into the Endpoint package so that the datasource has
-      // the expected data structure, we will add it here manually.
-      if (!policyItem.inputs.length) {
-        policyItem.inputs = [
-          {
-            type: 'endpoint',
-            enabled: true,
-            streams: [],
-            config: {
-              policy: {
-                value: policyConfigFactory(),
-              },
-            },
-          },
-        ];
       }
 
       dispatch({
@@ -84,7 +68,27 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       let apiResponse: UpdatePolicyResponse;
       try {
-        apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
+        apiResponse = await sendPutPackageConfig(http, id, updatedPolicyItem).catch(
+          (error: IHttpFetchError) => {
+            if (!error.response || error.response.status !== 409) {
+              return Promise.reject(error);
+            }
+            // Handle 409 error (version conflict) here, by using the latest document
+            // for the package config and adding the updated policy to it, ensuring that
+            // any recent updates to `manifest_artifacts` are retained.
+            return sendGetPackageConfig(http, id).then((packageConfig) => {
+              const latestUpdatedPolicyItem = packageConfig.item;
+              latestUpdatedPolicyItem.inputs[0].config.policy =
+                updatedPolicyItem.inputs[0].config.policy;
+
+              return sendPutPackageConfig(
+                http,
+                id,
+                getPolicyDataForUpdate(latestUpdatedPolicyItem) as NewPolicyData
+              );
+            });
+          }
+        );
       } catch (error) {
         dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',

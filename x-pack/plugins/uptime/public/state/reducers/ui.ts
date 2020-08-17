@@ -14,6 +14,7 @@ import {
   setAlertFlyoutType,
   setAlertFlyoutVisible,
   setSearchTextAction,
+  setSelectedMonitorId,
 } from '../actions';
 
 export interface UiState {
@@ -23,6 +24,7 @@ export interface UiState {
   esKuery: string;
   searchText: string;
   integrationsPopoverOpen: PopoverState | null;
+  monitorId: string;
 }
 
 const initialState: UiState = {
@@ -31,6 +33,7 @@ const initialState: UiState = {
   esKuery: '',
   searchText: '',
   integrationsPopoverOpen: null,
+  monitorId: '',
 };
 
 export const uiReducer = handleActions<UiState, UiPayload>(
@@ -63,6 +66,10 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setSearchTextAction)]: (state, action: Action<string>) => ({
       ...state,
       searchText: action.payload,
+    }),
+    [String(setSelectedMonitorId)]: (state, action: Action<string>) => ({
+      ...state,
+      monitorId: action.payload,
     }),
   },
   initialState

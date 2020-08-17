@@ -20,12 +20,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../plugins/expressions/public';
-import {
-  IAggConfig,
-  fieldFormats,
-  search,
-  TimefilterContract,
-} from '../../../../plugins/data/public';
+import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -57,16 +52,18 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (
+type BuildVisFunction = (
   params: VisParams,
   schemas: Schemas,
   uiState: any,
   meta?: { savedObjectId?: string }
 ) => string;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
-  [key: string]: buildVisFunction;
+  [key: string]: BuildVisFunction;
 }
 
 interface BuildVisConfigFunction {
@@ -113,11 +110,9 @@ const getSchemas = (
       'max_bucket',
     ].includes(agg.type.name);
 
-    const format = fieldFormats.serialize(
-      hasSubAgg
-        ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
-        : agg
-    );
+    const formatAgg = hasSubAgg
+      ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
+      : agg;
 
     const params: SchemaConfigParams = {};
 
@@ -130,7 +125,7 @@ const getSchemas = (
 
     return {
       accessor,
-      format,
+      format: formatAgg.toSerializedFieldFormat(),
       params,
       label,
       aggType: agg.type.name,
@@ -262,7 +257,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
-  metrics: (params, schemas, uiState = {}) => {
+  metrics: ({ title, ...params }, schemas, uiState = {}) => {
     const paramsJson = prepareJson('params', params);
     const uiStateJson = prepareJson('uiState', uiState);
 
@@ -497,7 +492,7 @@ export const buildPipeline = async (
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
   const filters = searchSource!.getField('filter');
-  const { uiState } = vis;
+  const { uiState, title } = vis;
 
   // context
   let pipeline = `kibana | kibana_context `;
@@ -526,7 +521,7 @@ export const buildPipeline = async (
     timefilter: params.timefilter,
   });
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](vis.params, schemas, uiState);
+    pipeline += buildPipelineVisFunction[vis.type.name]({ title, ...vis.params }, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = { ...vis.params };
     visConfig.dimensions = await buildVislibDimensions(vis, params);
@@ -542,7 +537,10 @@ export const buildPipeline = async (
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)}`;
+      pipeline += `${prepareString('index', indexPattern.id)} `;
+      if (vis.data.aggs) {
+        pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+      }
     }
   }
 

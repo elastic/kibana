@@ -8,21 +8,41 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../../common/mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
+} from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { createStore, State } from '../../../common/store';
 import { KpiNetworkComponent } from '.';
 import { mockData } from './mock';
 
 describe('KpiNetwork Component', () => {
   const state: State = mockGlobalState;
-  const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
-  const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+  const from = '2019-06-15T06:00:00.000Z';
+  const to = '2019-06-18T06:00:00.000Z';
   const narrowDateRange = jest.fn();
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

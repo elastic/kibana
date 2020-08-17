@@ -34,8 +34,8 @@ const kueryFilterQuery = `
 `;
 
 const dateRange = `
-  start: Float
-  end: Float
+  start: ToAny
+  end: ToAny
 `;
 
 const favoriteTimeline = `
@@ -84,6 +84,12 @@ export const timelineSchema = gql`
     kqlQuery: String
     queryMatch: QueryMatchInput
     and: [DataProviderInput!]
+    type: DataProviderType
+  }
+
+  enum DataProviderType {
+    default
+    template
   }
 
   input KueryFilterQueryInput {
@@ -133,6 +139,23 @@ export const timelineSchema = gql`
   enum TimelineStatus {
     active
     draft
+    immutable
+  }
+
+  enum RowRendererId {
+    auditd
+    auditd_file
+    netflow
+    plain
+    suricata
+    system
+    system_dns
+    system_endgame_process
+    system_file
+    system_fim
+    system_security_event
+    system_socket
+    zeek
   }
 
   input TimelineInput {
@@ -140,6 +163,7 @@ export const timelineSchema = gql`
     dataProviders: [DataProviderInput!]
     description: String
     eventType: String
+    excludedRowRendererIds: [RowRendererId!]
     filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
@@ -188,6 +212,7 @@ export const timelineSchema = gql`
     excluded: Boolean
     kqlQuery: String
     queryMatch: QueryMatchResult
+    type: DataProviderType
     and: [DataProviderResult!]
   }
 
@@ -239,6 +264,7 @@ export const timelineSchema = gql`
     description: String
     eventIdToNoteIds: [NoteResult!]
     eventType: String
+    excludedRowRendererIds: [RowRendererId!]
     favorite: [FavoriteTimelineResult!]
     filters: [FilterTimelineResult!]
     kqlMode: String
@@ -277,6 +303,11 @@ export const timelineSchema = gql`
   type ResponseTimelines {
     timeline: [TimelineResult]!
     totalCount: Float
+    defaultTimelineCount: Float
+    templateTimelineCount: Float
+    elasticTemplateTimelineCount: Float
+    customTemplateTimelineCount: Float
+    favoriteCount: Float
   }
 
   #########################
@@ -285,7 +316,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline!, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {

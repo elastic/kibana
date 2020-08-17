@@ -51,7 +51,7 @@ describe('ImportModal', () => {
     instance.setState(testState);
     wrapper.update();
     expect(wrapper.state('selectedEvents').length).toBe(2);
-    const deleteButton = wrapper.find('[data-test-subj="event_delete"]');
+    const deleteButton = wrapper.find('[data-test-subj="mlEventDelete"]');
     const button = deleteButton.find('EuiButtonEmpty').first();
     button.simulate('click');
 

@@ -9,5 +9,5 @@ Replaces the current location in the history stack. Does not remove forward or b
 <b>Signature:</b>
 
 ```typescript
-replace: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
 ```

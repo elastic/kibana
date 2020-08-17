@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { transformDataToNdjson } from './create_stream_from_ndjson';
-import { sampleRule } from '../../lib/detection_engine/signals/__mocks__/es_results';
 import { ImportRulesSchemaDecoded } from '../../../common/detection_engine/schemas/request/import_rules_schema';
+import { getRulesSchemaMock } from '../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 export const getOutputSample = (): Partial<ImportRulesSchemaDecoded> => ({
   rule_id: 'rule-1',
@@ -33,14 +33,14 @@ describe('create_rules_stream_from_ndjson', () => {
     });
 
     test('single rule will transform with new line ending character for ndjson', () => {
-      const rule = sampleRule();
+      const rule = getRulesSchemaMock();
       const ruleNdjson = transformDataToNdjson([rule]);
       expect(ruleNdjson.endsWith('\n')).toBe(true);
     });
 
     test('multiple rules will transform with two new line ending characters for ndjson', () => {
-      const result1 = sampleRule();
-      const result2 = sampleRule();
+      const result1 = getRulesSchemaMock();
+      const result2 = getRulesSchemaMock();
       result2.id = 'some other id';
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
@@ -52,8 +52,8 @@ describe('create_rules_stream_from_ndjson', () => {
     });
 
     test('you can parse two rules back out without errors', () => {
-      const result1 = sampleRule();
-      const result2 = sampleRule();
+      const result1 = getRulesSchemaMock();
+      const result2 = getRulesSchemaMock();
       result2.id = 'some other id';
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';

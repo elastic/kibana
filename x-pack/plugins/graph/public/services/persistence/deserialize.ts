@@ -128,11 +128,11 @@ function getFieldsWithWorkspaceSettings(
   return allFields;
 }
 
-function getBlacklistedNodes(
+function getBlocklistedNodes(
   serializedWorkspaceState: SerializedWorkspaceState,
   allFields: WorkspaceField[]
 ) {
-  return serializedWorkspaceState.blacklist.map((serializedNode) => {
+  return serializedWorkspaceState.blocklist.map((serializedNode) => {
     const currentField = allFields.find((field) => field.name === serializedNode.field)!;
     return {
       x: 0,
@@ -235,9 +235,9 @@ export function savedWorkspaceToAppState(
   workspaceInstance.mergeGraph(graph);
   resolveGroups(persistedWorkspaceState.vertices, workspaceInstance);
 
-  // ================== blacklist =============================
-  const blacklistedNodes = getBlacklistedNodes(persistedWorkspaceState, allFields);
-  workspaceInstance.blacklistedNodes.push(...blacklistedNodes);
+  // ================== blocklist =============================
+  const blocklistedNodes = getBlocklistedNodes(persistedWorkspaceState, allFields);
+  workspaceInstance.blocklistedNodes.push(...blocklistedNodes);
 
   return {
     urlTemplates,

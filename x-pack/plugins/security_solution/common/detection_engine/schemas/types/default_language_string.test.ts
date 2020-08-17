@@ -25,7 +25,9 @@ describe('default_language_string', () => {
     const decoded = DefaultLanguageString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultLanguageString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

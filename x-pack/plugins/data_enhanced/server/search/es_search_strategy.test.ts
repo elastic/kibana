@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock, pluginInitializerContextConfigMock } from '../../../../../src/core/server/mocks';
+import { RequestHandlerContext } from '../../../../../src/core/server';
+import { pluginInitializerContextConfigMock } from '../../../../../src/core/server/mocks';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 
 const mockAsyncResponse = {
@@ -29,25 +30,21 @@ const mockRollupResponse = {
 };
 
 describe('ES search strategy', () => {
-  const mockCoreSetup = coreMock.createSetup();
   const mockApiCaller = jest.fn();
-  const mockSearch = jest.fn();
+  const mockLogger: any = {
+    info: () => {},
+  };
+  const mockContext = {
+    core: { elasticsearch: { legacy: { client: { callAsCurrentUser: mockApiCaller } } } },
+  };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
   beforeEach(() => {
     mockApiCaller.mockClear();
-    mockSearch.mockClear();
   });
 
-  it('returns a strategy with `search`', () => {
-    const esSearch = enhancedEsSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-        config$: mockConfig$,
-      },
-      mockApiCaller,
-      mockSearch
-    );
+  it('returns a strategy with `search`', async () => {
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
     expect(typeof esSearch.search).toBe('function');
   });
@@ -56,16 +53,9 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'logstash-*', body: { query: {} } };
-    const esSearch = enhancedEsSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-        config$: mockConfig$,
-      },
-      mockApiCaller,
-      mockSearch
-    );
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search({ params });
+    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
@@ -79,16 +69,9 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'logstash-*', body: { query: {} } };
-    const esSearch = enhancedEsSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-        config$: mockConfig$,
-      },
-      mockApiCaller,
-      mockSearch
-    );
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search({ id: 'foo', params });
+    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
@@ -102,16 +85,9 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'foo-程', body: {} };
-    const esSearch = enhancedEsSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-        config$: mockConfig$,
-      },
-      mockApiCaller,
-      mockSearch
-    );
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search({ params });
+    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
@@ -124,21 +100,32 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
 
     const params = { index: 'foo-程', body: {} };
-    const esSearch = enhancedEsSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-        config$: mockConfig$,
-      },
-      mockApiCaller,
-      mockSearch
-    );
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search({ indexType: 'rollup', params });
+    await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
+      indexType: 'rollup',
+      params,
+    });
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
     const { method, path } = mockApiCaller.mock.calls[0][1];
     expect(method).toBe('POST');
     expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+  });
+
+  it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
+    mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+    const params = { index: 'foo-*', body: {} };
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+
+    expect(mockApiCaller).toBeCalled();
+    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
+    const { query } = mockApiCaller.mock.calls[0][1];
+    expect(query).toHaveProperty('wait_for_completion_timeout');
+    expect(query).toHaveProperty('keep_alive');
   });
 });

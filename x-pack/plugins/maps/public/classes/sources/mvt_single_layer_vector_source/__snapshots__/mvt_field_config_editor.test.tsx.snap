@@ -1,0 +1,491 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render error for dupes 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    key="0"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        compressed={true}
+        isInvalid={true}
+        onChange={[Function]}
+        placeholder="Field name"
+        value="foo"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={true}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  string
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  number
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="String"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    key="1"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        compressed={true}
+        isInvalid={true}
+        onChange={[Function]}
+        placeholder="Field name"
+        value="foo"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={true}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  string
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  number
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="Number"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        Add
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`should render error for empty name 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    key="0"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        compressed={true}
+        isInvalid={true}
+        onChange={[Function]}
+        placeholder="Field name"
+        value=""
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={true}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  string
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  number
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="String"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        Add
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`should render field editor 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    key="0"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        compressed={true}
+        isInvalid={false}
+        onChange={[Function]}
+        placeholder="Field name"
+        value="foo"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={true}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  string
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  number
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="String"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    key="1"
+  >
+    <EuiFlexItem>
+      <EuiFieldText
+        aria-label="Fieldname"
+        compressed={true}
+        isInvalid={false}
+        onChange={[Function]}
+        placeholder="Field name"
+        value="bar"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSuperSelect
+        compressed={true}
+        fullWidth={false}
+        hasDividers={false}
+        isInvalid={false}
+        isLoading={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="string"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  string
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "String",
+            },
+            Object {
+              "inputDisplay": <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={null}
+                >
+                  <FieldIcon
+                    fill="none"
+                    type="number"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  number
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              "value": "Number",
+            },
+          ]
+        }
+        valueOfSelected="Number"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Remove field"
+        color="danger"
+        iconType="trash"
+        onClick={[Function]}
+        title="Remove field"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        Add
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

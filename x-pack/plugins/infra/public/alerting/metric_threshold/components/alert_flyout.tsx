@@ -46,7 +46,7 @@ export const AlertFlyout = (props: Props) => {
             setAddFlyoutVisibility={props.setVisible}
             alertTypeId={METRIC_THRESHOLD_ALERT_TYPE_ID}
             canChangeTrigger={false}
-            consumer={'metrics'}
+            consumer={'infrastructure'}
           />
         </AlertsContextProvider>
       )}

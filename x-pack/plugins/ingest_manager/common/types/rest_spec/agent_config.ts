@@ -7,7 +7,9 @@ import { AgentConfig, NewAgentConfig, FullAgentConfig } from '../models';
 import { ListWithKuery } from './common';
 
 export interface GetAgentConfigsRequest {
-  query: ListWithKuery;
+  query: ListWithKuery & {
+    full?: boolean;
+  };
 }
 
 export type GetAgentConfigsResponseItem = AgentConfig & { agents?: number };
@@ -45,6 +47,15 @@ export type UpdateAgentConfigRequest = GetOneAgentConfigRequest & {
 };
 
 export interface UpdateAgentConfigResponse {
+  item: AgentConfig;
+  success: boolean;
+}
+
+export interface CopyAgentConfigRequest {
+  body: Pick<AgentConfig, 'name' | 'description'>;
+}
+
+export interface CopyAgentConfigResponse {
   item: AgentConfig;
   success: boolean;
 }

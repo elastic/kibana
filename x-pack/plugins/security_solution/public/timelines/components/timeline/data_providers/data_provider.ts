@@ -15,6 +15,11 @@ export const EXISTS_OPERATOR = ':*';
 /** The operator applied to a field */
 export type QueryOperator = ':' | ':*';
 
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
 export interface QueryMatch {
   field: string;
   displayField?: string;
@@ -39,7 +44,7 @@ export interface DataProvider {
    */
   excluded: boolean;
   /**
-   * Return the KQL query who have been added by user
+   * Returns the KQL query who have been added by user
    */
   kqlQuery: string;
   /**
@@ -50,6 +55,10 @@ export interface DataProvider {
    * Additional query clauses that are ANDed with this query to narrow results
    */
   and: DataProvidersAnd[];
+  /**
+   * Returns a DataProviderType
+   */
+  type?: DataProviderType.default | DataProviderType.template;
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

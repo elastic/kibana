@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import expect from '@kbn/expect';
 import { calculateNodeType } from '../calculate_node_type.js';
 

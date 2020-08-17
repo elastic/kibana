@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -26,6 +26,13 @@ import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, DimensionPopoverState } from './types';
 import { DimensionPopover } from './dimension_popover';
 
+const initialPopoverState = {
+  isOpen: false,
+  openId: null,
+  addingToGroupId: null,
+  tabId: null,
+};
+
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
@@ -41,15 +48,15 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
-    isOpen: false,
-    openId: null,
-    addingToGroupId: null,
-    tabId: null,
-  });
+  const [popoverState, setPopoverState] = useState<DimensionPopoverState>(initialPopoverState);
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+
+  useEffect(() => {
+    setPopoverState(initialPopoverState);
+  }, [props.activeVisualizationId]);
+
   if (
     !datasourcePublicAPI ||
     !props.activeVisualizationId ||
@@ -103,7 +110,7 @@ export function LayerPanel(
           </EuiFlexItem>
 
           {layerDatasource && (
-            <EuiFlexItem className="eui-textTruncate">
+            <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
               <NativeRenderer
                 render={layerDatasource.renderLayerPanel}
                 nativeProps={{
@@ -170,23 +177,20 @@ export function LayerPanel(
                         defaultMessage: 'Quick functions',
                       }),
                       content: (
-                        <>
-                          <EuiSpacer size="s" />
-                          <NativeRenderer
-                            render={props.datasourceMap[datasourceId].renderDimensionEditor}
-                            nativeProps={{
-                              ...layerDatasourceConfigProps,
-                              core: props.core,
-                              columnId: accessor,
-                              filterOperations: group.filterOperations,
-                            }}
-                          />
-                        </>
+                        <NativeRenderer
+                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                          nativeProps={{
+                            ...layerDatasourceConfigProps,
+                            core: props.core,
+                            columnId: accessor,
+                            filterOperations: group.filterOperations,
+                          }}
+                        />
                       ),
                     },
                   ];
 
-                  if (activeVisualization.renderDimensionEditor) {
+                  if (activeVisualization.renderDimensionEditor && group.enableDimensionEditor) {
                     tabs.push({
                       id: 'visualization',
                       name: i18n.translate('xpack.lens.editorFrame.formatStyleLabel', {
@@ -194,7 +198,6 @@ export function LayerPanel(
                       }),
                       content: (
                         <div className="lnsLayerPanel__styleEditor">
-                          <EuiSpacer size="s" />
                           <NativeRenderer
                             render={activeVisualization.renderDimensionEditor}
                             nativeProps={{
@@ -247,12 +250,7 @@ export function LayerPanel(
                               suggestedPriority: group.suggestedPriority,
                               togglePopover: () => {
                                 if (popoverState.isOpen) {
-                                  setPopoverState({
-                                    isOpen: false,
-                                    openId: null,
-                                    addingToGroupId: null,
-                                    tabId: null,
-                                  });
+                                  setPopoverState(initialPopoverState);
                                 } else {
                                   setPopoverState({
                                     isOpen: true,
@@ -268,7 +266,7 @@ export function LayerPanel(
                         panel={
                           <EuiTabbedContent
                             tabs={tabs}
-                            initialSelectedTab={tabs.find((t) => t.id === popoverState.tabId)}
+                            selectedTab={tabs.find((t) => t.id === popoverState.tabId) || tabs[0]}
                             size="s"
                             onTabClick={(tab) => {
                               setPopoverState({
@@ -362,12 +360,7 @@ export function LayerPanel(
                             })}
                             onClick={() => {
                               if (popoverState.isOpen) {
-                                setPopoverState({
-                                  isOpen: false,
-                                  openId: null,
-                                  addingToGroupId: null,
-                                  tabId: null,
-                                });
+                                setPopoverState(initialPopoverState);
                               } else {
                                 setPopoverState({
                                   isOpen: true,
@@ -433,7 +426,7 @@ export function LayerPanel(
               size="xs"
               iconType="trash"
               color="danger"
-              data-test-subj="lns_layer_remove"
+              data-test-subj="lnsLayerRemove"
               onClick={() => {
                 // If we don't blur the remove / clear button, it remains focused
                 // which is a strange UX in this case. e.target.blur doesn't work

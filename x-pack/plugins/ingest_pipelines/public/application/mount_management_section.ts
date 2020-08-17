@@ -30,6 +30,7 @@ export async function mountManagementSection(
     api: apiService,
     notifications,
     history,
+    uiSettings: coreStart.uiSettings,
   };
 
   return renderApp(element, I18nContext, services, { http });

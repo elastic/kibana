@@ -43,13 +43,13 @@ export const registerPermissionsRoute = ({
         });
 
         const missingClusterPrivileges = Object.keys(cluster).reduce(
-          (permissions: any, permissionName: any) => {
+          (permissions: string[], permissionName: string) => {
             if (!cluster[permissionName]) {
               permissions.push(permissionName);
-              return permissions;
             }
+            return permissions;
           },
-          [] as any[]
+          []
         );
 
         return response.ok({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { badRequest } from 'boom';
 import { WATCH_TYPES } from '../../../common/constants';
 import { JsonWatch } from './json_watch';

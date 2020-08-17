@@ -56,6 +56,7 @@ function getDefaultProps() {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
     },
+    showNoDataPopover: jest.fn(),
   };
 }
 
@@ -1006,7 +1007,8 @@ describe('editor_frame', () => {
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(
         expect.objectContaining({
           datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
-        })
+        }),
+        undefined
       );
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: { initial: true } })

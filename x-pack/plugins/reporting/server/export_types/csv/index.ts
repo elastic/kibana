@@ -13,23 +13,23 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
 import { CSV_JOB_TYPE as jobType } from '../../../constants';
-import { ESQueueCreateJobFn, ESQueueWorkerExecuteFn, ExportTypeDefinition } from '../../types';
+import { CreateJobFn, WorkerExecuteFn, ExportTypeDefinition } from '../../types';
+import { scheduleTaskFnFactory } from './create_job';
+import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { createJobFactory } from './server/create_job';
-import { executeJobFactory } from './server/execute_job';
-import { JobDocPayloadDiscoverCsv, JobParamsDiscoverCsv } from './types';
+import { JobParamsDiscoverCsv, ScheduledTaskParamsCSV } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   JobParamsDiscoverCsv,
-  ESQueueCreateJobFn<JobParamsDiscoverCsv>,
-  JobDocPayloadDiscoverCsv,
-  ESQueueWorkerExecuteFn<JobDocPayloadDiscoverCsv>
+  CreateJobFn<JobParamsDiscoverCsv>,
+  ScheduledTaskParamsCSV,
+  WorkerExecuteFn<ScheduledTaskParamsCSV>
 > => ({
   ...metadata,
   jobType,
   jobContentExtension: 'csv',
-  createJobFactory,
-  executeJobFactory,
+  scheduleTaskFnFactory,
+  runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_BASIC,

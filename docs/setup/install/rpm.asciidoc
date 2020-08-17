@@ -1,5 +1,9 @@
 [[rpm]]
 === Install {kib} with RPM
+++++
+<titleabbrev>Install with RPM</titleabbrev>
+++++
+
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
 or from our <<rpm-repo,RPM repository>>. It can be used to install
@@ -11,7 +15,7 @@ such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
 
 This package is free to use under the Elastic license. It contains open source
 and free commercial features and access to paid commercial features.
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+<<managing-licenses,Start a 30-day trial>> to try out all of the
 paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
@@ -201,12 +205,6 @@ locations for an RPM-based system:
     | Logs files location
     |  /var/log/kibana
     | path.logs
-
-| optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
-    result in the source code being retranspiled on the fly.
-  | /var/lib/kibana/optimize
- d|
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

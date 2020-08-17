@@ -19,10 +19,10 @@ import {
   PartitionConfig,
   PartitionLayer,
   PartitionLayout,
-  PartialTheme,
   PartitionFillLabel,
   RecursivePartial,
   LayerValue,
+  Position,
 } from '@elastic/charts';
 import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
@@ -32,6 +32,7 @@ import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -40,15 +41,14 @@ const sortedColors = euiPaletteColorBlindBehindText();
 export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
-    chartTheme: Exclude<PartialTheme, undefined>;
-    isDarkMode: boolean;
+    chartsThemeService: ChartsPluginSetup['theme'];
     onClickValue: (data: LensFilterEvent['data']) => void;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartTheme, isDarkMode, onClickValue } = props;
+  const { chartsThemeService, onClickValue } = props;
   const {
     shape,
     groups,
@@ -56,10 +56,14 @@ export function PieComponent(
     numberDisplay,
     categoryDisplay,
     legendDisplay,
+    legendPosition,
     nestedLegend,
     percentDecimals,
     hideLabels,
   } = props.args;
+  const isDarkMode = chartsThemeService.useDarkMode();
+  const chartTheme = chartsThemeService.useChartsTheme();
+  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
   if (!hideLabels) {
     firstTable.columns.forEach((column) => {
@@ -235,6 +239,7 @@ export function PieComponent(
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
           }
+          legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={(args) => {
             const context = getFilterContext(
@@ -245,6 +250,8 @@ export function PieComponent(
 
             onClickValue(desanitizeFilterContext(context));
           }}
+          theme={chartTheme}
+          baseTheme={chartBaseTheme}
         />
         <Partition
           id={shape}

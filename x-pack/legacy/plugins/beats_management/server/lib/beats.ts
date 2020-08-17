@@ -7,7 +7,6 @@
 import { uniq } from 'lodash';
 import moment from 'moment';
 import { CMBeat } from '../../common/domain_types';
-import { findNonExistentItems } from '../utils/find_non_existent_items';
 import {
   BeatsRemovalReturn,
   BeatsTagAssignment,
@@ -94,8 +93,8 @@ export class CMBeatsDomain {
     remoteAddress: string,
     beat: Partial<CMBeat>
   ): Promise<{ status: string; accessToken?: string }> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { token, expires_on } = await this.tokens.getEnrollmentToken(enrollmentToken);
-    // eslint-disable-next-line @typescript-eslint/camelcase
     if (expires_on && moment(expires_on).isBefore(moment())) {
       return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
     }
@@ -248,4 +247,13 @@ function addToResultsToResponse(key: string, response: any, assignmentResults: a
     response[key][idxInRequest].result = result;
   });
   return response;
+}
+
+export function findNonExistentItems(items: Array<{ id: string }>, requestedItems: string[]) {
+  return requestedItems.reduce((nonExistentItems: string[], requestedItem: string, idx: number) => {
+    if (items.findIndex((item) => item && item.id === requestedItem) === -1) {
+      nonExistentItems.push(requestedItems[idx]);
+    }
+    return nonExistentItems;
+  }, []);
 }

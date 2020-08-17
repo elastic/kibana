@@ -5,13 +5,14 @@
  */
 
 import createContainer from 'constate';
-import { useState, useMemo, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useMountedState } from 'react-use';
 import { HttpSetup } from 'src/core/public';
 import {
   LogSourceConfiguration,
-  LogSourceStatus,
-  LogSourceConfigurationPropertiesPatch,
   LogSourceConfigurationProperties,
+  LogSourceConfigurationPropertiesPatch,
+  LogSourceStatus,
 } from '../../../../common/http_api/log_sources';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
@@ -32,6 +33,7 @@ export const useLogSource = ({
   sourceId: string;
   fetch: HttpSetup['fetch'];
 }) => {
+  const getIsMounted = useMountedState();
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined
   >(undefined);
@@ -45,6 +47,10 @@ export const useLogSource = ({
         return await callFetchLogSourceConfigurationAPI(sourceId, fetch);
       },
       onResolve: ({ data }) => {
+        if (!getIsMounted()) {
+          return;
+        }
+
         setSourceConfiguration(data);
       },
     },
@@ -58,6 +64,10 @@ export const useLogSource = ({
         return await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties, fetch);
       },
       onResolve: ({ data }) => {
+        if (!getIsMounted()) {
+          return;
+        }
+
         setSourceConfiguration(data);
         loadSourceStatus();
       },
@@ -72,16 +82,15 @@ export const useLogSource = ({
         return await callFetchLogSourceStatusAPI(sourceId, fetch);
       },
       onResolve: ({ data }) => {
+        if (!getIsMounted()) {
+          return;
+        }
+
         setSourceStatus(data);
       },
     },
     [sourceId, fetch]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const logIndicesExist = useMemo(() => (sourceStatus?.logIndexNames?.length ?? 0) > 0, [
-    sourceStatus,
-  ]);
 
   const derivedIndexPattern = useMemo(
     () => ({
@@ -160,7 +169,6 @@ export const useLogSource = ({
     loadSourceFailureMessage,
     loadSourceConfiguration,
     loadSourceStatus,
-    logIndicesExist,
     sourceConfiguration,
     sourceId,
     sourceStatus,

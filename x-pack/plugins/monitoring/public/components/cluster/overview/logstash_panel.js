@@ -11,7 +11,11 @@ import {
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
-import { LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  LOGSTASH,
+  LOGSTASH_SYSTEM_ID,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+} from '../../../../common/constants';
 
 import {
   EuiFlexGrid,
@@ -30,30 +34,49 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
+
+const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
   const nodesCount = props.node_count || 0;
   const queueTypes = props.queue_types || {};
+  const alerts = props.alerts;
 
   // Do not show if we are not in setup mode
   if (!nodesCount && !setupMode.enabled) {
     return null;
   }
 
-  const goToLogstash = () => props.changeUrl('logstash');
-  const goToNodes = () => props.changeUrl('logstash/nodes');
-  const goToPipelines = () => props.changeUrl('logstash/pipelines');
+  const goToLogstash = () => getSafeForExternalLink('#/logstash');
+  const goToNodes = () => getSafeForExternalLink('#/logstash/nodes');
+  const goToPipelines = () => getSafeForExternalLink('#/logstash/pipelines');
 
   const setupModeData = get(setupMode.data, 'logstash');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={LOGSTASH_SYSTEM_ID}
-        badgeClickAction={goToNodes}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={LOGSTASH_SYSTEM_ID}
+      badgeClickLink={goToNodes()}
+    />
+  ) : null;
+
+  let nodesAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    nodesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <ClusterItemContainer
@@ -71,7 +94,7 @@ export function LogstashPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToLogstash}
+                  href={goToLogstash()}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
                     {
@@ -112,12 +135,12 @@ export function LogstashPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      onClick={goToNodes}
+                      href={goToNodes()}
                       data-test-subj="lsNodes"
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
@@ -140,7 +163,12 @@ export function LogstashPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeMetricbeatMigrationTooltip}
+                  {nodesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
@@ -179,7 +207,7 @@ export function LogstashPanel(props) {
                     <DisabledIfNoDataAndInSetupModeLink
                       setupModeEnabled={setupMode.enabled}
                       setupModeData={setupModeData}
-                      onClick={goToPipelines}
+                      href={goToPipelines()}
                       data-test-subj="lsPipelines"
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',

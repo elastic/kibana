@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { ICON_TYPES } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../../../../common/types/models';
+import { PackageInfo, PackageListItem } from '../types';
 import { useLinks } from '../sections/epm/hooks';
 import { sendGetPackageInfoByKey } from './index';
 

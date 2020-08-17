@@ -34,6 +34,7 @@ const createMockKbnServer = () => ({
 
 describe('csp collector', () => {
   let kbnServer: ReturnType<typeof createMockKbnServer>;
+  const mockCallCluster = null as any;
 
   function updateCsp(config: Partial<ICspConfig>) {
     kbnServer.newPlatform.setup.core.http.csp = new CspConfig(config);
@@ -46,28 +47,28 @@ describe('csp collector', () => {
   test('fetches whether strict mode is enabled', async () => {
     const collector = createCspCollector(kbnServer as any);
 
-    expect((await collector.fetch()).strict).toEqual(true);
+    expect((await collector.fetch(mockCallCluster)).strict).toEqual(true);
 
     updateCsp({ strict: false });
-    expect((await collector.fetch()).strict).toEqual(false);
+    expect((await collector.fetch(mockCallCluster)).strict).toEqual(false);
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
     const collector = createCspCollector(kbnServer as any);
 
-    expect((await collector.fetch()).warnLegacyBrowsers).toEqual(true);
+    expect((await collector.fetch(mockCallCluster)).warnLegacyBrowsers).toEqual(true);
 
     updateCsp({ warnLegacyBrowsers: false });
-    expect((await collector.fetch()).warnLegacyBrowsers).toEqual(false);
+    expect((await collector.fetch(mockCallCluster)).warnLegacyBrowsers).toEqual(false);
   });
 
   test('fetches whether the csp rules have been changed or not', async () => {
     const collector = createCspCollector(kbnServer as any);
 
-    expect((await collector.fetch()).rulesChangedFromDefault).toEqual(false);
+    expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(false);
 
     updateCsp({ rules: ['not', 'default'] });
-    expect((await collector.fetch()).rulesChangedFromDefault).toEqual(true);
+    expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(true);
   });
 
   test('does not include raw csp rules under any property names', async () => {
@@ -79,7 +80,7 @@ describe('csp collector', () => {
     //
     // We use a snapshot here to ensure csp.rules isn't finding its way into the
     // payload under some new and unexpected variable name (e.g. cspRules).
-    expect(await collector.fetch()).toMatchInlineSnapshot(`
+    expect(await collector.fetch(mockCallCluster)).toMatchInlineSnapshot(`
       Object {
         "rulesChangedFromDefault": false,
         "strict": true,

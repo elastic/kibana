@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
@@ -43,8 +43,12 @@ type Validator = (obj: {
   messages: Messages;
 }>;
 
-const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validator => {
-  const dv = new DataVisualizer(callWithRequest);
+const validateFactory = (
+  mlClusterClient: ILegacyScopedClusterClient,
+  job: CombinedJob
+): Validator => {
+  const { callAsCurrentUser } = mlClusterClient;
+  const dv = new DataVisualizer(mlClusterClient);
 
   const modelPlotConfigTerms = job?.model_plot_config?.terms ?? '';
   const modelPlotConfigFieldCount =
@@ -73,7 +77,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
         ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const fieldCaps = await callWithRequest('fieldCaps', {
+        const fieldCaps = await callAsCurrentUser('fieldCaps', {
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
@@ -150,7 +154,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 };
 
 export async function validateCardinality(
-  callWithRequest: APICaller,
+  mlClusterClient: ILegacyScopedClusterClient,
   job?: CombinedJob
 ): Promise<Messages> | never {
   const messages: Messages = [];
@@ -170,7 +174,7 @@ export async function validateCardinality(
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(callWithRequest, job);
+  const validate = validateFactory(mlClusterClient, job);
 
   const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
 

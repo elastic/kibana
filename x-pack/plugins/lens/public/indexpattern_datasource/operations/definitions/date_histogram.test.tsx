@@ -10,7 +10,6 @@ import { dateHistogramOperation } from './index';
 import { shallow } from 'enzyme';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { coreMock } from 'src/core/public/mocks';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 import {
@@ -21,14 +20,13 @@ import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
 const dataStart = dataPluginMock.createStartContract();
-dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression({
-  ...coreMock.createStart().uiSettings,
-  get: (path: string) => {
+dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
+  (path: string) => {
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
       return 10;
     }
-  },
-} as IUiSettingsClient);
+  }
+);
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
@@ -51,7 +49,7 @@ describe('date_histogram', () => {
       indexPatternRefs: [],
       existingFields: {},
       currentIndexPatternId: '1',
-      showEmptyFields: false,
+      isFirstExistenceFetch: false,
       indexPatterns: {
         1: {
           id: '1',

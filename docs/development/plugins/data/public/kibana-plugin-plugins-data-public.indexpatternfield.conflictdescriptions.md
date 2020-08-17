@@ -7,5 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-conflictDescriptions?: Record<string, string[]>;
+get conflictDescriptions(): Record<string, string[]> | undefined;
+
+set conflictDescriptions(conflictDescriptions: Record<string, string[]> | undefined);
 ```

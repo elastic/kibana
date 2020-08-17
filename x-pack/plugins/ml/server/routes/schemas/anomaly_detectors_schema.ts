@@ -11,7 +11,7 @@ const customRulesSchema = schema.maybe(
     schema.maybe(
       schema.object({
         actions: schema.arrayOf(schema.string()),
-        conditions: schema.arrayOf(schema.any()),
+        conditions: schema.maybe(schema.arrayOf(schema.any())),
         scope: schema.maybe(schema.any()),
       })
     )
@@ -69,6 +69,8 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
     })
   ),
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+  model_snapshot_retention_days: schema.maybe(schema.number()),
+  daily_model_snapshot_retention_after_days: schema.maybe(schema.number()),
 });
 
 export const analysisConfigSchema = schema.object({
@@ -177,10 +179,24 @@ export const getOverallBucketsSchema = schema.object({
 });
 
 export const getCategoriesSchema = schema.object({
-  /** Category id */
+  /** Category ID */
   categoryId: schema.string(),
-  /** Job id */
+  /** Job ID */
   jobId: schema.string(),
+});
+
+export const getModelSnapshotsSchema = schema.object({
+  /** Snapshot ID */
+  snapshotId: schema.maybe(schema.string()),
+  /** Job ID */
+  jobId: schema.string(),
+});
+
+export const updateModelSnapshotSchema = schema.object({
+  /** description */
+  description: schema.maybe(schema.string()),
+  /** retain */
+  retain: schema.maybe(schema.boolean()),
 });
 
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });

@@ -10,7 +10,7 @@ import {
   AgentConfiguration,
   AgentConfigurationIntake,
 } from '../../../../common/agent_configuration/configuration_types';
-import { APMIndexDocumentParams } from '../../helpers/es_client';
+import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
 export async function createOrUpdateConfiguration({
   configurationId,

@@ -12,8 +12,7 @@ import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 function DeleteButton({ onClick, canDeleteCalendar }) {
   return (
@@ -91,7 +90,7 @@ export const EventsTable = ({
       name: '',
       render: (event) => (
         <DeleteButton
-          data-test-subj="event_delete"
+          data-test-subj="mlEventDelete"
           canDeleteCalendar={canDeleteCalendar}
           onClick={() => {
             onDeleteClick(event.event_id);
@@ -106,7 +105,7 @@ export const EventsTable = ({
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_new_event"
-        data-test-subj="ml_new_event"
+        data-test-subj="mlNewEvent"
         size="s"
         iconType="plusInCircle"
         onClick={showNewEventModal}
@@ -119,7 +118,7 @@ export const EventsTable = ({
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_import_event"
-        data-test-subj="ml_import_events"
+        data-test-subj="mlImportEvents"
         size="s"
         iconType="importAction"
         onClick={showImportModal}

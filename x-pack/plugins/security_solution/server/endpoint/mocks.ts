@@ -4,34 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { xpackMocks } from '../../../../mocks';
-import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
-import { IndexPatternRetriever } from './alerts/index_pattern';
+import {
+  AgentService,
+  IngestManagerStartContract,
+  ExternalCallback,
+} from '../../../ingest_manager/server';
+import { createPackageConfigServiceMock } from '../../../ingest_manager/server/mocks';
+import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
+import {
+  EndpointAppContextService,
+  EndpointAppContextServiceStartContract,
+} from './endpoint_app_context_services';
+import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
+import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
+import { EndpointAppContext } from './types';
 
 /**
- * Creates a mock IndexPatternRetriever for use in tests.
- *
- * @param indexPattern a string index pattern to return when any of the mock's public methods are called.
- * @returns the same string passed in via `indexPattern`
+ * Creates a mocked EndpointAppContext.
  */
-export const createMockIndexPatternRetriever = (indexPattern: string): IndexPatternRetriever => {
-  const mockGetFunc = jest.fn().mockResolvedValue(indexPattern);
+export const createMockEndpointAppContext = (
+  mockManifestManager?: ManifestManager
+): EndpointAppContext => {
   return {
-    getIndexPattern: mockGetFunc,
-    getEventIndexPattern: mockGetFunc,
-    getMetadataIndexPattern: mockGetFunc,
-    getPolicyResponseIndexPattern: mockGetFunc,
+    logFactory: loggingSystemMock.create(),
+    config: () => Promise.resolve(createMockConfig()),
+    service: createMockEndpointAppContextService(mockManifestManager),
   };
 };
 
-export const MetadataIndexPattern = 'metrics-endpoint-*';
+/**
+ * Creates a mocked EndpointAppContextService
+ */
+export const createMockEndpointAppContextService = (
+  mockManifestManager?: ManifestManager
+): jest.Mocked<EndpointAppContextService> => {
+  return ({
+    start: jest.fn(),
+    stop: jest.fn(),
+    getAgentService: jest.fn(),
+    getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
+    getScopedSavedObjectsClient: jest.fn(),
+  } as unknown) as jest.Mocked<EndpointAppContextService>;
+};
 
 /**
- * Creates a mock IndexPatternRetriever for use in tests that returns `metrics-endpoint-*`
+ * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
-export const createMockMetadataIndexPatternRetriever = () => {
-  return createMockIndexPatternRetriever(MetadataIndexPattern);
+export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
+  EndpointAppContextServiceStartContract
+> => {
+  return {
+    agentService: createMockAgentService(),
+    logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
+    savedObjectsStart: savedObjectsServiceMock.createStartContract(),
+    manifestManager: getManifestManagerMock(),
+    registerIngestCallback: jest.fn<
+      ReturnType<IngestManagerStartContract['registerExternalCallback']>,
+      Parameters<IngestManagerStartContract['registerExternalCallback']>
+    >(),
+  };
 };
 
 /**
@@ -40,6 +74,9 @@ export const createMockMetadataIndexPatternRetriever = () => {
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+    authenticateAgentWithAccessToken: jest.fn(),
+    getAgent: jest.fn(),
+    listAgents: jest.fn(),
   };
 };
 
@@ -58,11 +95,13 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
+    packageConfigService: createPackageConfigServiceMock(),
   };
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<IScopedClusterClient>,
+  dataClient: jest.Mocked<ILegacyScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
   const context = xpackMocks.createRequestHandlerContext();

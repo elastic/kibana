@@ -51,7 +51,6 @@ const testDataList = [
   },
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -61,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -124,6 +124,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('anomalies table is not empty', async () => {
           await ml.anomaliesTable.assertTableNotEmpty();
+        });
+
+        // should be the last step because it navigates away from the Anomaly Explorer page
+        it('should allow to attach anomaly swimlane embeddable to the dashboard', async () => {
+          await ml.anomalyExplorer.openAddToDashboardControl();
+          await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
         });
       });
     }

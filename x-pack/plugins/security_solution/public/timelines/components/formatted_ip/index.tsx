@@ -114,7 +114,7 @@ const AddressLinksComponent: React.FC<{
           fieldName,
           address,
         })}`}
-        render={(_, __, snapshot) =>
+        render={(_props, _provided, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
               <Provider
@@ -122,7 +122,7 @@ const AddressLinksComponent: React.FC<{
               />
             </DragEffects>
           ) : (
-            <IPDetailsLink data-test-sub="ip-details" ip={address} />
+            <IPDetailsLink data-test-subj="ip-details" ip={address} />
           )
         }
         truncate={truncate}

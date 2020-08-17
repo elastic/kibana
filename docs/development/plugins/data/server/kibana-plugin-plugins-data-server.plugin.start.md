@@ -8,8 +8,12 @@
 
 ```typescript
 start(core: CoreStart): {
+        search: ISearchStart;
         fieldFormats: {
-            fieldFormatServiceFactory: (uiSettings: import("kibana/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
+            fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
+        };
+        indexPatterns: {
+            indexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
         };
     };
 ```
@@ -23,8 +27,12 @@ start(core: CoreStart): {
 <b>Returns:</b>
 
 `{
+        search: ISearchStart;
         fieldFormats: {
-            fieldFormatServiceFactory: (uiSettings: import("kibana/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
+            fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
+        };
+        indexPatterns: {
+            indexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
         };
     }`
 

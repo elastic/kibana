@@ -14,23 +14,22 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiToolTip,
   EuiCallOut,
   EuiSpacer,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { EuiMonitoringTable } from '../../table';
-import { AlertsIndicator } from '../../cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import './listing.scss';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
 };
-
-const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 /*
  * This checks if alerts feature is supported via monitoring cluster
@@ -59,6 +58,8 @@ const IsAlertsSupported = (props) => {
     </EuiToolTip>
   );
 };
+
+const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 const getColumns = (
   showLicenseExpiration,
@@ -118,7 +119,7 @@ const getColumns = (
       render: (_status, cluster) => (
         <IsClusterSupported {...cluster}>
           <IsAlertsSupported cluster={cluster}>
-            <AlertsIndicator alerts={cluster.alerts} />
+            <AlertsStatus alerts={cluster.alerts.list} />
           </IsAlertsSupported>
         </IsClusterSupported>
       ),
@@ -191,7 +192,7 @@ const getColumns = (
         if (!licenseType) {
           return (
             <div>
-              <div className="monTableCell__clusterCellLiscense">N/A</div>
+              <div className="monTableCell__clusterCellLicense">N/A</div>
             </div>
           );
         }
@@ -209,7 +210,7 @@ const getColumns = (
 
           return (
             <div>
-              <div className="monTableCell__clusterCellLiscense">{capitalize(licenseType)}</div>
+              <div className="monTableCell__clusterCellLicense">{capitalize(licenseType)}</div>
               <div className="monTableCell__clusterCellExpiration">
                 {showLicenseExpiration ? licenseExpiry() : null}
               </div>
@@ -230,12 +231,12 @@ const getColumns = (
   ];
 };
 
-const changeCluster = (scope, globalState, kbnUrl, clusterUuid, ccs) => {
+const changeCluster = (scope, globalState, clusterUuid, ccs) => {
   scope.$evalAsync(() => {
     globalState.cluster_uuid = clusterUuid;
     globalState.ccs = ccs;
     globalState.save();
-    kbnUrl.redirect('/overview');
+    window.history.replaceState(null, null, '#/overview');
   });
 };
 
@@ -398,12 +399,7 @@ export class Listing extends Component {
   render() {
     const { angular, clusters, sorting, pagination, onTableChange } = this.props;
 
-    const _changeCluster = partial(
-      changeCluster,
-      angular.scope,
-      angular.globalState,
-      angular.kbnUrl
-    );
+    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState);
     const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
     const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
     const hasStandaloneCluster = !!clusters.find(

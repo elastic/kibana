@@ -9,8 +9,8 @@ import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
 import { AgentConfigListPage } from './list_page';
 import { AgentConfigDetailsPage } from './details_page';
-import { CreateDatasourcePage } from './create_datasource_page';
-import { EditDatasourcePage } from './edit_datasource_page';
+import { CreatePackageConfigPage } from './create_package_config_page';
+import { EditPackageConfigPage } from './edit_package_config_page';
 
 export const AgentConfigApp: React.FunctionComponent = () => {
   useBreadcrumbs('configurations');
@@ -18,11 +18,11 @@ export const AgentConfigApp: React.FunctionComponent = () => {
   return (
     <Router>
       <Switch>
-        <Route path={PAGE_ROUTING_PATHS.edit_datasource}>
-          <EditDatasourcePage />
+        <Route path={PAGE_ROUTING_PATHS.edit_integration}>
+          <EditPackageConfigPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.add_datasource_from_configuration}>
-          <CreateDatasourcePage />
+        <Route path={PAGE_ROUTING_PATHS.add_integration_from_configuration}>
+          <CreatePackageConfigPage />
         </Route>
         <Route path={PAGE_ROUTING_PATHS.configuration_details}>
           <AgentConfigDetailsPage />

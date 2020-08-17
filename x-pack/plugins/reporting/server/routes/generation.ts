@@ -10,22 +10,28 @@ import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
+import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
-export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
+const getDownloadBaseUrl = (reporting: ReportingCore) => {
   const config = reporting.getConfig();
-  const downloadBaseUrl =
-    config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+  return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+};
 
+export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   /*
    * Generates enqueued job details to use in responses
    */
   const handler: HandlerFunction = async (user, exportTypeId, jobParams, context, req, res) => {
+    // ensure the async dependencies are loaded
+    if (!context.reporting) {
+      return res.custom({ statusCode: 503, body: 'Not Available' });
+    }
+
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
@@ -37,23 +43,31 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       return res.forbidden({ body: licenseResults.message });
     }
 
-    const enqueueJob = await reporting.getEnqueueJob();
-    const job = await enqueueJob(exportTypeId, jobParams, user, context, req);
+    try {
+      const enqueueJob = enqueueJobFactory(reporting, logger);
+      const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
-    // return the queue's job information
-    const jobJson = job.toJSON();
+      // return the queue's job information
+      const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
-    return res.ok({
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: {
-        path: `${downloadBaseUrl}/${jobJson.id}`,
-        job: jobJson,
-      },
-    });
+      return res.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: {
+          path: `${downloadBaseUrl}/${report._id}`,
+          job: report.toApiJSON(),
+        },
+      });
+    } catch (err) {
+      logger.error(err);
+      throw err;
+    }
   };
 
+  /*
+   * Error should already have been logged by the time we get here
+   */
   function handleError(res: typeof kibanaResponseFactory, err: Error | Boom) {
     if (err instanceof Boom) {
       return res.customError({
@@ -80,16 +94,10 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       });
     }
 
-    return res.badRequest({
-      body: err.message,
-    });
+    // unknown error, can't convert to 4xx
+    throw err;
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
-
-  // Register beta panel-action download-related API's
-  if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(reporting, handler, handleError);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
-  }
+  registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
 }

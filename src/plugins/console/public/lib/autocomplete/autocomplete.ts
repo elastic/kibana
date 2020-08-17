@@ -308,7 +308,7 @@ export function getCurrentMethodAndTokenPaths(
 }
 
 // eslint-disable-next-line
-export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
+export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
   function isUrlPathToken(token: Token | null) {
     switch ((token || ({} as any)).type) {
       case 'url.slash':
@@ -548,7 +548,6 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     if (editor.getLineValue(pos.lineNumber).trim() === '') {
       // check if the previous line is a single line beginning of a new request
       rowMode = parser.getRowParseMode(pos.lineNumber - 1);
-      // eslint-disable-next-line no-bitwise
       if (
         // eslint-disable-next-line no-bitwise
         rowMode & parser.MODE.REQUEST_START &&

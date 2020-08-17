@@ -42,8 +42,8 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { CoreApp } from './core_app';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -163,7 +163,7 @@ export class CoreSystem {
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
-      const docLinks = this.docLinks.setup({ injectedMetadata });
+      this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
@@ -180,12 +180,11 @@ export class CoreSystem {
         ]),
       });
       const application = this.application.setup({ context, http, injectedMetadata });
-      this.coreApp.setup({ application, http });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
         context,
-        docLinks,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -217,7 +216,7 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
-      const docLinks = this.docLinks.start();
+      const docLinks = this.docLinks.start({ injectedMetadata });
       const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
@@ -300,6 +299,10 @@ export class CoreSystem {
         plugins: mapToObject(plugins.contracts),
         targetDomElement: rendering.legacyTargetDomElement,
       });
+
+      return {
+        application,
+      };
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);

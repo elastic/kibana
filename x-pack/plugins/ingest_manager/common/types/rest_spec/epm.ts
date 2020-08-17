@@ -12,13 +12,21 @@ import {
   PackageInfo,
 } from '../models/epm';
 
+export interface GetCategoriesRequest {
+  query: {
+    experimental?: boolean;
+  };
+}
+
 export interface GetCategoriesResponse {
   response: CategorySummaryList;
   success: boolean;
 }
+
 export interface GetPackagesRequest {
   query: {
     category?: string;
+    experimental?: boolean;
   };
 }
 
@@ -31,6 +39,11 @@ export interface GetPackagesResponse {
       >
     >
   >;
+  success: boolean;
+}
+
+export interface GetLimitedPackagesResponse {
+  response: string[];
   success: boolean;
 }
 

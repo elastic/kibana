@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
 
@@ -13,7 +13,7 @@ describe('alertType', () => {
     indexThreshold: {
       timeSeriesQuery: jest.fn(),
     },
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
   };
 
   const alertType = getAlertType(service);
@@ -45,6 +45,52 @@ describe('alertType', () => {
           Object {
             "description": "The value that exceeded the threshold.",
             "name": "value",
+          },
+        ],
+        "params": Array [
+          Object {
+            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+            "name": "threshold",
+          },
+          Object {
+            "description": "A comparison function to use to determine if the threshold as been met.",
+            "name": "thresholdComparator",
+          },
+          Object {
+            "description": "index",
+            "name": "index",
+          },
+          Object {
+            "description": "timeField",
+            "name": "timeField",
+          },
+          Object {
+            "description": "aggType",
+            "name": "aggType",
+          },
+          Object {
+            "description": "aggField",
+            "name": "aggField",
+          },
+          Object {
+            "description": "groupBy",
+            "name": "groupBy",
+          },
+          Object {
+            "description": "termField",
+            "name": "termField",
+          },
+          Object {
+            "description": "termSize",
+            "name": "termSize",
+          },
+          Object {
+            "description": "timeWindowSize",
+            "name": "timeWindowSize",
+          },
+          Object {
+            "description": "timeWindowUnit",
+            "name": "timeWindowUnit",
           },
         ],
       }

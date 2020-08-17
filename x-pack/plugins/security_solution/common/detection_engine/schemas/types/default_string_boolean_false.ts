@@ -12,10 +12,10 @@ import { Either } from 'fp-ts/lib/Either';
  *   - If a string this will convert the string to a boolean
  *   - If null or undefined, then a default false will be set
  */
-export const DefaultStringBooleanFalse = new t.Type<boolean, boolean, unknown>(
+export const DefaultStringBooleanFalse = new t.Type<boolean, boolean | undefined | string, unknown>(
   'DefaultStringBooleanFalse',
   t.boolean.is,
-  (input): Either<t.Errors, boolean> => {
+  (input, context): Either<t.Errors, boolean> => {
     if (input == null) {
       return t.success(false);
     } else if (typeof input === 'string' && input.toLowerCase() === 'true') {
@@ -23,7 +23,7 @@ export const DefaultStringBooleanFalse = new t.Type<boolean, boolean, unknown>(
     } else if (typeof input === 'string' && input.toLowerCase() === 'false') {
       return t.success(false);
     } else {
-      return t.boolean.decode(input);
+      return t.boolean.validate(input, context);
     }
   },
   t.identity

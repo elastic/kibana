@@ -15,7 +15,7 @@ export const ComponentStrings = {
       }),
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
   },
   AdvancedFilter: {
@@ -110,26 +110,24 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.asset.thumbnailAltText', {
         defaultMessage: 'Asset thumbnail',
       }),
+    getConfirmModalButtonLabel: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalButtonLabel', {
+        defaultMessage: 'Remove',
+      }),
+    getConfirmModalMessageText: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalDetail', {
+        defaultMessage: 'Are you sure you want to remove this asset?',
+      }),
+    getConfirmModalTitle: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalTitle', {
+        defaultMessage: 'Remove Asset',
+      }),
   },
   AssetManager: {
     getButtonLabel: () =>
       i18n.translate('xpack.canvas.assetManager.manageButtonLabel', {
         defaultMessage: 'Manage assets',
       }),
-    getConfirmModalButtonLabel: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalButtonLabel', {
-        defaultMessage: 'Remove',
-      }),
-    getConfirmModalMessageText: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalDetail', {
-        defaultMessage: 'Are you sure you want to remove this asset?',
-      }),
-    getConfirmModalTitle: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalTitle', {
-        defaultMessage: 'Remove Asset',
-      }),
-  },
-  AssetModal: {
     getDescription: () =>
       i18n.translate('xpack.canvas.assetModal.modalDescription', {
         defaultMessage:
@@ -160,6 +158,13 @@ export const ComponentStrings = {
         defaultMessage: '{percentageUsed}% space used',
         values: {
           percentageUsed,
+        },
+      }),
+    getCopyAssetMessage: (id: string) =>
+      i18n.translate('xpack.canvas.assetModal.copyAssetMessage', {
+        defaultMessage: `Copied '{id}' to clipboard`,
+        values: {
+          id,
         },
       }),
   },
@@ -545,7 +550,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.pageConfig.title', {
-        defaultMessage: 'Page styles',
+        defaultMessage: 'Page settings',
       }),
     getTransitionLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.transitionLabel', {
@@ -567,6 +572,22 @@ export const ComponentStrings = {
           pageNumber,
         },
       }),
+    getAddPageTooltip: () =>
+      i18n.translate('xpack.canvas.pageManager.addPageTooltip', {
+        defaultMessage: 'Add a new page to this workpad',
+      }),
+    getConfirmRemoveTitle: () =>
+      i18n.translate('xpack.canvas.pageManager.confirmRemoveTitle', {
+        defaultMessage: 'Remove Page',
+      }),
+    getConfirmRemoveDescription: () =>
+      i18n.translate('xpack.canvas.pageManager.confirmRemoveDescription', {
+        defaultMessage: 'Are you sure you want to remove this page?',
+      }),
+    getConfirmRemoveButtonLabel: () =>
+      i18n.translate('xpack.canvas.pageManager.removeButtonLabel', {
+        defaultMessage: 'Remove',
+      }),
   },
   PagePreviewPageControls: {
     getClonePageAriaLabel: () =>
@@ -584,6 +605,16 @@ export const ComponentStrings = {
     getDeletePageTooltip: () =>
       i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
         defaultMessage: 'Delete',
+      }),
+  },
+  PalettePicker: {
+    getEmptyPaletteLabel: () =>
+      i18n.translate('xpack.canvas.palettePicker.emptyPaletteLabel', {
+        defaultMessage: 'None',
+      }),
+    getNoPaletteFoundErrorTitle: () =>
+      i18n.translate('xpack.canvas.palettePicker.noPaletteFoundErrorTitle', {
+        defaultMessage: 'Color palette not found',
       }),
   },
   SavedElementsModal: {
@@ -882,11 +913,156 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.toolbar.errorMessage', {
+        defaultMessage: 'TOOLBAR ERROR: {message}',
+        values: {
+          message,
+        },
+      }),
   },
   ToolbarTray: {
     getCloseTrayAriaLabel: () =>
       i18n.translate('xpack.canvas.toolbarTray.closeTrayAriaLabel', {
         defaultMessage: 'Close tray',
+      }),
+  },
+  VarConfig: {
+    getAddButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.addButtonLabel', {
+        defaultMessage: 'Add a variable',
+      }),
+    getAddTooltipLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.addTooltipLabel', {
+        defaultMessage: 'Add a variable',
+      }),
+    getCopyActionButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.copyActionButtonLabel', {
+        defaultMessage: 'Copy snippet',
+      }),
+    getCopyActionTooltipLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.copyActionTooltipLabel', {
+        defaultMessage: 'Copy variable syntax to clipboard',
+      }),
+    getCopyNotificationDescription: () =>
+      i18n.translate('xpack.canvas.varConfig.copyNotificationDescription', {
+        defaultMessage: 'Variable syntax copied to clipboard',
+      }),
+    getDeleteActionButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.deleteActionButtonLabel', {
+        defaultMessage: 'Delete variable',
+      }),
+    getDeleteNotificationDescription: () =>
+      i18n.translate('xpack.canvas.varConfig.deleteNotificationDescription', {
+        defaultMessage: 'Variable successfully deleted',
+      }),
+    getEditActionButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.editActionButtonLabel', {
+        defaultMessage: 'Edit variable',
+      }),
+    getEmptyDescription: () =>
+      i18n.translate('xpack.canvas.varConfig.emptyDescription', {
+        defaultMessage:
+          'This workpad has no variables currently. You may add variables to store and edit common values. These variables can then be used in elements or within the expression editor.',
+      }),
+    getTableNameLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.tableNameLabel', {
+        defaultMessage: 'Name',
+      }),
+    getTableTypeLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.tableTypeLabel', {
+        defaultMessage: 'Type',
+      }),
+    getTableValueLabel: () =>
+      i18n.translate('xpack.canvas.varConfig.tableValueLabel', {
+        defaultMessage: 'Value',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.varConfig.titleLabel', {
+        defaultMessage: 'Variables',
+      }),
+    getTitleTooltip: () =>
+      i18n.translate('xpack.canvas.varConfig.titleTooltip', {
+        defaultMessage: 'Add variables to store and edit common values',
+      }),
+  },
+  VarConfigDeleteVar: {
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDeleteButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.deleteButtonLabel', {
+        defaultMessage: 'Delete variable',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.titleLabel', {
+        defaultMessage: 'Delete variable?',
+      }),
+    getWarningDescription: () =>
+      i18n.translate('xpack.canvas.varConfigDeleteVar.warningDescription', {
+        defaultMessage:
+          'Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?',
+      }),
+  },
+  VarConfigEditVar: {
+    getAddTitle: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.addTitleLabel', {
+        defaultMessage: 'Add variable',
+      }),
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDuplicateNameError: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.duplicateNameError', {
+        defaultMessage: 'Variable name already in use',
+      }),
+    getEditTitle: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.editTitleLabel', {
+        defaultMessage: 'Edit variable',
+      }),
+    getEditWarning: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.editWarning', {
+        defaultMessage: 'Editing a variable in use may adversely affect your workpad',
+      }),
+    getNameFieldLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.nameFieldLabel', {
+        defaultMessage: 'Name',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.saveButtonLabel', {
+        defaultMessage: 'Save changes',
+      }),
+    getTypeBooleanLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeBooleanLabel', {
+        defaultMessage: 'Boolean',
+      }),
+    getTypeFieldLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeFieldLabel', {
+        defaultMessage: 'Type',
+      }),
+    getTypeNumberLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeNumberLabel', {
+        defaultMessage: 'Number',
+      }),
+    getTypeStringLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.typeStringLabel', {
+        defaultMessage: 'String',
+      }),
+    getValueFieldLabel: () =>
+      i18n.translate('xpack.canvas.varConfigEditVar.valueFieldLabel', {
+        defaultMessage: 'Value',
+      }),
+  },
+  VarConfigVarValueField: {
+    getFalseOption: () =>
+      i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {
+        defaultMessage: 'False',
+      }),
+    getTrueOption: () =>
+      i18n.translate('xpack.canvas.varConfigVarValueField.trueOption', {
+        defaultMessage: 'True',
       }),
   },
   WorkpadConfig: {
@@ -1132,7 +1308,7 @@ export const ComponentStrings = {
       }),
     getEmbedObjectMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
     getFilterMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {
@@ -1593,6 +1769,13 @@ export const ComponentStrings = {
     getTemplateSearchPlaceholder: () =>
       i18n.translate('xpack.canvas.workpadTemplate.searchPlaceholder', {
         defaultMessage: 'Find template',
+      }),
+    getCreatingTemplateLabel: (templateName: string) =>
+      i18n.translate('xpack.canvas.workpadTemplate.creatingTemplateLabel', {
+        defaultMessage: `Creating from template '{templateName}'`,
+        values: {
+          templateName,
+        },
       }),
   },
 };

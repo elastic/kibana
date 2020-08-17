@@ -18,7 +18,7 @@ import {
 
 import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
 import { EUI_SIZE } from '../../../../constants';
-import { useDispatch } from '../../../../mappings_state';
+import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
 import { Field, NormalizedFields } from '../../../../types';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
@@ -50,13 +50,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
     options: { stripEmptyFields: false },
   });
 
+  const { subscribe } = form;
+
   useEffect(() => {
-    const subscription = form.subscribe((updatedFieldForm) => {
+    const subscription = subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch, subscribe]);
 
   const cancel = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
@@ -162,8 +164,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
       >
         <div
           className={classNames('mappingsEditor__createFieldWrapper', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'mappingsEditor__createFieldWrapper--toggle':
               Boolean(maxNestedDepth) && maxNestedDepth! > 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'mappingsEditor__createFieldWrapper--multiField': isMultiField,
           })}
           style={{

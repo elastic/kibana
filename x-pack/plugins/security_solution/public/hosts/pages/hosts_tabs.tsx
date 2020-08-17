@@ -26,6 +26,7 @@ import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
+    docValueFields,
     filterQuery,
     setAbsoluteRangeDatePicker,
     to,
@@ -62,7 +63,11 @@ export const HostsTabs = memo<HostsTabsProps>(
             return;
           }
           const [min, max] = x;
-          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: new Date(min).toISOString(),
+            to: new Date(max).toISOString(),
+          });
         },
         [setAbsoluteRangeDatePicker]
       ),
@@ -70,22 +75,22 @@ export const HostsTabs = memo<HostsTabsProps>(
 
     return (
       <Switch>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
+        <Route path={`/:tabName(${HostsTableType.hosts})`}>
+          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+        <Route path={`/:tabName(${HostsTableType.authentications})`}>
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+        <Route path={`/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+        <Route path={`/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
+        <Route path={`/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
+        <Route path={`/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

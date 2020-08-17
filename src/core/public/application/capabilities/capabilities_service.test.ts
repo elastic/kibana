@@ -48,7 +48,7 @@ describe('#start', () => {
       appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
     });
 
-    // @ts-ignore TypeScript knows this shouldn't be possible
+    // @ts-expect-error TypeScript knows this shouldn't be possible
     expect(() => (capabilities.foo = 'foo')).toThrowError();
   });
 
@@ -59,7 +59,7 @@ describe('#start', () => {
       appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
     });
 
-    // @ts-ignore TypeScript knows this shouldn't be possible
+    // @ts-expect-error TypeScript knows this shouldn't be possible
     expect(() => (capabilities.foo = 'foo')).toThrowError();
   });
 });

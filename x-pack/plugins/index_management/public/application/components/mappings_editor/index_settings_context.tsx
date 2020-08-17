@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { createContext, useContext } from 'react';
+
 import { IndexSettings } from './types';
 
 const IndexSettingsContext = createContext<IndexSettings | undefined>(undefined);
@@ -13,7 +14,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const IndexSettingsProvider = ({ indexSettings, children }: Props) => (
+export const IndexSettingsProvider = ({ indexSettings = {}, children }: Props) => (
   <IndexSettingsContext.Provider value={indexSettings}>{children}</IndexSettingsContext.Provider>
 );
 

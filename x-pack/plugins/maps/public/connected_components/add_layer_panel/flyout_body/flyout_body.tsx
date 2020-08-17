@@ -5,35 +5,36 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LayerWizardSelect } from './layer_wizard_select';
 import { LayerWizard, RenderWizardArguments } from '../../../classes/layers/layer_wizard_registry';
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 type Props = RenderWizardArguments & {
   layerWizard: LayerWizard | null;
   onClear: () => void;
   onWizardSelect: (layerWizard: LayerWizard) => void;
+  showBackButton: boolean;
 };
 
 export const FlyoutBody = (props: Props) => {
   function renderContent() {
-    if (!props.layerWizard) {
+    if (!props.layerWizard || !props.currentStepId) {
       return <LayerWizardSelect onSelect={props.onWizardSelect} />;
     }
 
     const renderWizardArgs = {
       previewLayers: props.previewLayers,
       mapColors: props.mapColors,
-      isIndexingTriggered: props.isIndexingTriggered,
-      onRemove: props.onRemove,
-      onIndexReady: props.onIndexReady,
-      importSuccessHandler: props.importSuccessHandler,
-      importErrorHandler: props.importErrorHandler,
+      currentStepId: props.currentStepId,
+      enableNextBtn: props.enableNextBtn,
+      disableNextBtn: props.disableNextBtn,
+      startStepLoading: props.startStepLoading,
+      stopStepLoading: props.stopStepLoading,
+      advanceToNextStep: props.advanceToNextStep,
     };
 
-    const backButton = props.isIndexingTriggered ? null : (
+    const backButton = props.showBackButton ? (
       <Fragment>
         <EuiButtonEmpty size="xs" flush="left" onClick={props.onClear} iconType="arrowLeft">
           <FormattedMessage
@@ -43,12 +44,12 @@ export const FlyoutBody = (props: Props) => {
         </EuiButtonEmpty>
         <EuiSpacer size="s" />
       </Fragment>
-    );
+    ) : null;
 
     return (
       <Fragment>
         {backButton}
-        <EuiPanel>{props.layerWizard.renderWizard(renderWizardArgs)}</EuiPanel>
+        {props.layerWizard.renderWizard(renderWizardArgs)}
       </Fragment>
     );
   }

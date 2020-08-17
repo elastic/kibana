@@ -57,6 +57,26 @@ export default function ({ getService }: FtrProviderContext) {
               transformFilterAggTypeSelector: 'term',
               transformFilterTermValueSelector: 'New York',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.base_price)',
+                label: 'products.base_price.max',
+              },
+              {
+                identifier: 'filter(customer_gender)',
+                label: 'customer_gender.filter',
+                form: {
+                  transformFilterAggTypeSelector: 'term',
+                  transformFilterTermValueSelector: 'FEMALE',
+                },
+                subAggs: [
+                  {
+                    identifier: 'avg(taxful_total_price)',
+                    label: 'taxful_total_price.avg',
+                  },
+                ],
+              },
+            ],
           },
         ],
         transformId: `ec_1_${Date.now()}`,
@@ -87,10 +107,31 @@ export default function ({ getService }: FtrProviderContext) {
                   field: 'products.base_price',
                 },
               },
-              'geoip.city_name.filter': {
+              'New York': {
                 filter: {
                   term: {
                     'geoip.city_name': 'New York',
+                  },
+                },
+                aggs: {
+                  'products.base_price.max': {
+                    max: {
+                      field: 'products.base_price',
+                    },
+                  },
+                  FEMALE: {
+                    filter: {
+                      term: {
+                        customer_gender: 'FEMALE',
+                      },
+                    },
+                    aggs: {
+                      'taxful_total_price.avg': {
+                        avg: {
+                          field: 'taxful_total_price',
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -106,9 +147,25 @@ export default function ({ getService }: FtrProviderContext) {
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [
+            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'currency', legend: '1 category' },
+            {
+              chartAvailable: false,
+              id: 'customer_birth_date',
+              legend: '0 documents contain field.',
+            },
+            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
+            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_gender', legend: '2 categories' },
+            { chartAvailable: true, id: 'customer_id', legend: 'top 20 of 46 categories' },
+            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_phone', legend: '1 category' },
+            { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
+          ],
         },
       },
       {
@@ -131,6 +188,12 @@ export default function ({ getService }: FtrProviderContext) {
             form: {
               transformFilterAggTypeSelector: 'exists',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.discount_amount)',
+                label: 'products.discount_amount.max',
+              },
+            ],
           },
         ],
         transformId: `ec_2_${Date.now()}`,
@@ -162,6 +225,13 @@ export default function ({ getService }: FtrProviderContext) {
                     field: 'customer_phone',
                   },
                 },
+                aggs: {
+                  'products.discount_amount.max': {
+                    max: {
+                      field: 'products.discount_amount',
+                    },
+                  },
+                },
               },
             },
           },
@@ -175,9 +245,10 @@ export default function ({ getService }: FtrProviderContext) {
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [],
         },
       },
     ];
@@ -186,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -235,6 +306,16 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
         });
 
+        it('enables the index preview histogram charts', async () => {
+          await transform.wizard.enableIndexPreviewHistogramCharts();
+        });
+
+        it('displays the index preview histogram charts', async () => {
+          await transform.wizard.assertIndexPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+        });
+
         it('adds the group by entries', async () => {
           for (const [index, entry] of testData.groupByEntries.entries()) {
             await transform.wizard.assertGroupByInputExists();
@@ -249,11 +330,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label, agg.form);
-          }
+          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
         });
 
         it('displays the advanced pivot editor switch', async () => {
@@ -273,6 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('shows the pivot preview', async () => {
+          await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
             testData.expected.pivotPreview.column,
             testData.expected.pivotPreview.values
@@ -354,12 +432,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
-        it('job creation displays details for the created job in the job list', async () => {
+        it('transform creation displays details for the created transform in the transform list', async () => {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.source,
-            destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

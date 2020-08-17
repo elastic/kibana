@@ -12,14 +12,13 @@ import {
   getFindResultStatus,
   getResult,
   getPatchRequest,
-  typicalPayload,
   getFindResultWithSingleHit,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -27,14 +26,6 @@ describe('patch_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -165,7 +156,7 @@ describe('patch_rules', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), rule_id: undefined },
+        body: { ...getCreateRulesSchemaMock(), rule_id: undefined },
       });
       const response = await server.inject(request, context);
       expect(response.body).toEqual({
@@ -178,7 +169,7 @@ describe('patch_rules', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), type: 'query' },
+        body: { ...getCreateRulesSchemaMock(), type: 'query' },
       });
       const result = server.validate(request);
 
@@ -189,7 +180,7 @@ describe('patch_rules', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...typicalPayload(), type: 'unknown_type' },
+        body: { ...getCreateRulesSchemaMock(), type: 'unknown_type' },
       });
       const result = server.validate(request);
 

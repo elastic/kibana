@@ -4,7 +4,8 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["licensing", "data", "navigation", "savedObjects"],
+  "requiredPlugins": ["licensing", "data", "navigation", "savedObjects", "kibanaLegacy"],
   "optionalPlugins": ["home", "features"],
-  "configPath": ["xpack", "graph"]
+  "configPath": ["xpack", "graph"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]
 }

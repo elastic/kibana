@@ -20,7 +20,18 @@ export interface IField {
   isValid(): boolean;
   getOrdinalFieldMetaRequest(): Promise<unknown>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
+
+  // Determines whether Maps-app can automatically determine the domain of the field-values
+  // if this is not the case (e.g. for .mvt tiled data),
+  // then styling properties that require the domain to be known cannot use this property.
+  supportsAutoDomain(): boolean;
+
+  // Determinse wheter Maps-app can automatically deterime the domain of the field-values
+  // _without_ having to retrieve the data as GeoJson
+  // e.g. for ES-sources, this would use the extended_stats API
   supportsFieldMeta(): boolean;
+
+  canReadFromGeoJson(): boolean;
 }
 
 export class AbstractField implements IField {
@@ -79,5 +90,13 @@ export class AbstractField implements IField {
 
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return null;
+  }
+
+  supportsAutoDomain(): boolean {
+    return true;
+  }
+
+  canReadFromGeoJson(): boolean {
+    return true;
   }
 }

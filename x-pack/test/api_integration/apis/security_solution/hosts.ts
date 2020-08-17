@@ -18,8 +18,8 @@ import { HostFirstLastSeenGqlQuery } from '../../../../plugins/security_solution
 import { HostsTableQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/hosts_table.gql_query';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+const FROM = '2000-01-01T00:00:00.000Z';
+const TO = '3000-01-01T00:00:00.000Z';
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const HOST_NAME = 'Ubuntu';
@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
               from: FROM,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             sort: {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
@@ -84,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
               direction: Direction.asc,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             pagination: {
               activePage: 2,
               cursorStart: 1,
@@ -105,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get Host Overview data', () => {
       const expectedHost: Omit<GetHostOverviewQuery.HostOverview, 'inspect'> = {
         _id: 'zeek-sensor-san-francisco',
+        endpoint: null,
         host: {
           architecture: ['x86_64'],
           id: [CURSOR_ID],
@@ -149,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
               from: FROM,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
             inspect: false,
           },
         })
@@ -166,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
           },
         })
         .then((resp) => {

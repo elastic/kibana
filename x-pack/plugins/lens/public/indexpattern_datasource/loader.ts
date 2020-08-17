@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract, SavedObjectAttributes, HttpSetup } from 'kibana/public';
 import { SimpleSavedObject } from 'kibana/public';
 import { StateSetter } from '../types';
@@ -24,6 +25,7 @@ import {
   IFieldType,
   IndexPatternTypeMeta,
 } from '../../../../../src/plugins/data/public';
+import { readFromStorage, writeToStorage } from '../settings_storage';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -68,39 +70,56 @@ export async function loadIndexPatterns({
   );
 }
 
+const getLastUsedIndexPatternId = (
+  storage: IStorageWrapper,
+  indexPatternRefs: IndexPatternRef[]
+) => {
+  const indexPattern = readFromStorage(storage, 'indexPatternId');
+  return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
+};
+
+const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
+  writeToStorage(storage, 'indexPatternId', value);
+};
+
 export async function loadInitialState({
   state,
   savedObjectsClient,
   defaultIndexPatternId,
+  storage,
 }: {
   state?: IndexPatternPersistedState;
   savedObjectsClient: SavedObjectsClient;
   defaultIndexPatternId?: string;
+  storage: IStorageWrapper;
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
-  const requiredPatterns = _.unique(
+  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+
+  const requiredPatterns = _.uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [defaultIndexPatternId || indexPatternRefs[0].id]
+      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
   );
 
   const currentIndexPatternId = requiredPatterns[0];
+  setLastUsedIndexPatternId(storage, currentIndexPatternId);
+
   const indexPatterns = await loadIndexPatterns({
     savedObjectsClient,
     cache: {},
     patterns: requiredPatterns,
   });
-
   if (state) {
     return {
       ...state,
       currentIndexPatternId,
       indexPatternRefs,
       indexPatterns,
-      showEmptyFields: false,
       existingFields: {},
+      isFirstExistenceFetch: true,
     };
   }
 
@@ -109,8 +128,8 @@ export async function loadInitialState({
     indexPatternRefs,
     indexPatterns,
     layers: {},
-    showEmptyFields: false,
     existingFields: {},
+    isFirstExistenceFetch: true,
   };
 }
 
@@ -120,12 +139,14 @@ export async function changeIndexPattern({
   state,
   setState,
   onError,
+  storage,
 }: {
   id: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
   setState: SetState;
   onError: ErrorHandler;
+  storage: IStorageWrapper;
 }) {
   try {
     const indexPatterns = await loadIndexPatterns({
@@ -145,6 +166,7 @@ export async function changeIndexPattern({
       },
       currentIndexPatternId: id,
     }));
+    setLastUsedIndexPatternId(storage, id);
   } catch (err) {
     onError(err);
   }
@@ -158,6 +180,7 @@ export async function changeLayerIndexPattern({
   setState,
   onError,
   replaceIfPossible,
+  storage,
 }: {
   indexPatternId: string;
   layerId: string;
@@ -166,6 +189,7 @@ export async function changeLayerIndexPattern({
   setState: SetState;
   onError: ErrorHandler;
   replaceIfPossible?: boolean;
+  storage: IStorageWrapper;
 }) {
   try {
     const indexPatterns = await loadIndexPatterns({
@@ -186,6 +210,7 @@ export async function changeLayerIndexPattern({
       },
       currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
     }));
+    setLastUsedIndexPatternId(storage, indexPatternId);
   } catch (err) {
     onError(err);
   }
@@ -215,39 +240,72 @@ export async function syncExistingFields({
   dateRange,
   fetchJson,
   setState,
+  isFirstExistenceFetch,
+  currentIndexPatternTitle,
   dslQuery,
+  showNoDataPopover,
 }: {
   dateRange: DateRange;
-  indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
+  indexPatterns: Array<{
+    id: string;
+    title: string;
+    fields: IndexPatternField[];
+    timeFieldName?: string | null;
+  }>;
   fetchJson: HttpSetup['post'];
   setState: SetState;
+  isFirstExistenceFetch: boolean;
+  currentIndexPatternTitle: string;
   dslQuery: object;
+  showNoDataPopover: () => void;
 }) {
-  const emptinessInfo = await Promise.all(
-    indexPatterns.map((pattern) => {
-      const body: Record<string, string | object> = {
-        dslQuery,
-        fromDate: dateRange.fromDate,
-        toDate: dateRange.toDate,
-      };
+  const existenceRequests = indexPatterns.map((pattern) => {
+    const body: Record<string, string | object> = {
+      dslQuery,
+      fromDate: dateRange.fromDate,
+      toDate: dateRange.toDate,
+    };
 
-      if (pattern.timeFieldName) {
-        body.timeFieldName = pattern.timeFieldName;
+    if (pattern.timeFieldName) {
+      body.timeFieldName = pattern.timeFieldName;
+    }
+
+    return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+      body: JSON.stringify(body),
+    }) as Promise<ExistingFields>;
+  });
+
+  try {
+    const emptinessInfo = await Promise.all(existenceRequests);
+    if (isFirstExistenceFetch) {
+      const fieldsCurrentIndexPattern = emptinessInfo.find(
+        (info) => info.indexPatternTitle === currentIndexPatternTitle
+      );
+      if (fieldsCurrentIndexPattern && fieldsCurrentIndexPattern.existingFieldNames.length === 0) {
+        showNoDataPopover();
       }
+    }
 
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
-        body: JSON.stringify(body),
-      }) as Promise<ExistingFields>;
-    })
-  );
-
-  setState((state) => ({
-    ...state,
-    existingFields: emptinessInfo.reduce((acc, info) => {
-      acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-      return acc;
-    }, state.existingFields),
-  }));
+    setState((state) => ({
+      ...state,
+      isFirstExistenceFetch: false,
+      existenceFetchFailed: false,
+      existingFields: emptinessInfo.reduce((acc, info) => {
+        acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+        return acc;
+      }, state.existingFields),
+    }));
+  } catch (e) {
+    // show all fields as available if fetch failed
+    setState((state) => ({
+      ...state,
+      existenceFetchFailed: true,
+      existingFields: indexPatterns.reduce((acc, pattern) => {
+        acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+        return acc;
+      }, state.existingFields),
+    }));
+  }
 }
 
 function booleanMap(keys: string[]) {

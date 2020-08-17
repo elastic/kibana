@@ -18,6 +18,7 @@ import {
   getUpdateRulesSchemaDecodedMock,
 } from './update_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import { getListArrayMock } from '../types/lists.mock';
 
 describe('update rules schema', () => {
   test('empty objects do not validate', () => {
@@ -247,6 +248,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -316,6 +320,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -363,6 +370,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -408,6 +418,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -451,6 +464,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -529,6 +545,9 @@ describe('update rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: UpdateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -608,7 +627,7 @@ describe('update rules schema', () => {
     const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
     expect(message.schema).toEqual({});
   });
 
@@ -645,6 +664,7 @@ describe('update rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getUpdateRulesSchemaMock();
     const payload: UpdateRulesSchema = {
       ...noMaxSignals,
@@ -756,7 +776,9 @@ describe('update rules schema', () => {
     const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "max_signals"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -769,7 +791,7 @@ describe('update rules schema', () => {
     const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
     expect(message.schema).toEqual({});
   });
 
@@ -817,9 +839,9 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to ""',
-      'Invalid value "1" supplied to ""',
-      'Invalid value "2" supplied to ""',
+      'Invalid value "0" supplied to "tags"',
+      'Invalid value "1" supplied to "tags"',
+      'Invalid value "2" supplied to "tags"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -851,7 +873,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "framework"',
+      'Invalid value "undefined" supplied to "threat,framework"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -879,7 +901,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "tactic"',
+      'Invalid value "undefined" supplied to "threat,tactic"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -905,7 +927,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "technique"',
+      'Invalid value "undefined" supplied to "threat,technique"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -937,8 +959,8 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to ""',
-      'Invalid value "4" supplied to ""',
+      'Invalid value "5" supplied to "false_positives"',
+      'Invalid value "4" supplied to "false_positives"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1173,7 +1195,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "group"',
+      'Invalid value "undefined" supplied to "actions,group"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1187,7 +1209,9 @@ describe('update rules schema', () => {
     const decoded = updateRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,id"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -1201,7 +1225,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "action_type_id"',
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1216,7 +1240,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "params"',
+      'Invalid value "undefined" supplied to "actions,params"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1238,7 +1262,7 @@ describe('update rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "action_type_id"',
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -1323,8 +1347,7 @@ describe('update rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        // TODO: Fix/Change the formatErrors to be better able to handle objects
-        'Invalid value "[object Object]" supplied to "note"',
+        'Invalid value "{"somethingHere":"something else"}" supplied to "note"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -1349,6 +1372,9 @@ describe('update rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1374,14 +1400,197 @@ describe('update rules schema', () => {
     });
   });
 
-  // TODO: The exception_list tests are skipped and empty until we re-integrate it from the lists plugin
-  describe.skip('exception_list', () => {
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and exceptions_list] does validate', () => {});
+  describe('exception_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and exceptions_list] does validate', () => {
+      const payload: UpdateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+        exceptions_list: getListArrayMock(),
+      };
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {});
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        filters: [],
+        exceptions_list: [
+          {
+            id: 'some_uuid',
+            list_id: 'list_id_single',
+            namespace_type: 'single',
+            type: 'detection',
+          },
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            namespace_type: 'agnostic',
+            type: 'endpoint',
+          },
+        ],
+      };
+      expect(message.schema).toEqual(expected);
+    });
 
-    test('rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid exceptions_list] does NOT validate', () => {});
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
+      const payload: UpdateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+        exceptions_list: [],
+      };
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {});
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        filters: [],
+        exceptions_list: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
+      const payload: Omit<UpdateRulesSchema, 'exceptions_list'> & {
+        exceptions_list: Array<{ id: string; namespace_type: string }>;
+      } = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+        exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
+      };
+
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
+        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
+      const payload: UpdateRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        filters: [],
+        note: '# some markdown',
+      };
+
+      const decoded = updateRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: UpdateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        exceptions_list: [],
+        filters: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
   });
 });

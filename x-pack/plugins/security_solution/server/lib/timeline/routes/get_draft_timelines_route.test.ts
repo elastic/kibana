@@ -17,6 +17,7 @@ import {
   getDraftTimelinesRequest,
   createTimelineWithTimelineId,
 } from './__mocks__/request_responses';
+import { draftTimelineDefaults } from '../default_timeline';
 
 describe('get draft timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -80,12 +81,14 @@ describe('get draft timelines', () => {
         mockGetDraftTimeline.mockResolvedValue({
           timeline: [],
         });
-
-        const response = await server.inject(
-          getDraftTimelinesRequest(TimelineType.default),
-          context
-        );
+        const req = getDraftTimelinesRequest(TimelineType.default);
+        const response = await server.inject(req, context);
         expect(mockPersistTimeline).toHaveBeenCalled();
+        expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+          ...draftTimelineDefaults,
+          timelineType: req.query.timelineType,
+        });
+
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
           data: {

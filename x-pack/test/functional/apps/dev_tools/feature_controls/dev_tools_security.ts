@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.contain('Dev Tools');
+        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools', 'Stack Management']);
       });
 
       describe('console', () => {
@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows 'Dev Tools' navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Dev Tools');
+        expect(navLinks).to.eql(['Dev Tools', 'Stack Management']);
       });
 
       describe('console', () => {

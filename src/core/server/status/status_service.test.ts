@@ -28,6 +28,12 @@ import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('StatusService', () => {
+  let service: StatusService;
+
+  beforeEach(() => {
+    service = new StatusService(mockCoreContext.create());
+  });
+
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -40,7 +46,7 @@ describe('StatusService', () => {
   describe('setup', () => {
     describe('core$', () => {
       it('rolls up core status observables into single observable', async () => {
-        const setup = new StatusService(mockCoreContext.create()).setup({
+        const setup = await service.setup({
           elasticsearch: {
             status$: of(available),
           },
@@ -55,7 +61,7 @@ describe('StatusService', () => {
       });
 
       it('replays last event', async () => {
-        const setup = new StatusService(mockCoreContext.create()).setup({
+        const setup = await service.setup({
           elasticsearch: {
             status$: of(available),
           },
@@ -80,10 +86,10 @@ describe('StatusService', () => {
         });
       });
 
-      it('does not emit duplicate events', () => {
+      it('does not emit duplicate events', async () => {
         const elasticsearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
-        const setup = new StatusService(mockCoreContext.create()).setup({
+        const setup = await service.setup({
           elasticsearch: {
             status$: elasticsearch$,
           },
@@ -145,7 +151,7 @@ describe('StatusService', () => {
 
     describe('overall$', () => {
       it('exposes an overall summary', async () => {
-        const setup = new StatusService(mockCoreContext.create()).setup({
+        const setup = await service.setup({
           elasticsearch: {
             status$: of(degraded),
           },
@@ -160,7 +166,7 @@ describe('StatusService', () => {
       });
 
       it('replays last event', async () => {
-        const setup = new StatusService(mockCoreContext.create()).setup({
+        const setup = await service.setup({
           elasticsearch: {
             status$: of(degraded),
           },
@@ -185,10 +191,10 @@ describe('StatusService', () => {
         });
       });
 
-      it('does not emit duplicate events', () => {
+      it('does not emit duplicate events', async () => {
         const elasticsearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
-        const setup = new StatusService(mockCoreContext.create()).setup({
+        const setup = await service.setup({
           elasticsearch: {
             status$: elasticsearch$,
           },

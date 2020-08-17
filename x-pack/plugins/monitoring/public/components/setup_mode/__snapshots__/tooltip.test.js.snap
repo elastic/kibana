@@ -2,6 +2,7 @@
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -11,8 +12,8 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
   >
     <EuiBadge
       color="danger"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring"
     >
       Self monitoring
@@ -23,6 +24,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -32,8 +34,8 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
   >
     <EuiBadge
       color="danger"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring"
     >
       Self monitoring
@@ -44,6 +46,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -53,8 +56,8 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
   >
     <EuiBadge
       color="danger"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring"
     >
       Self monitoring
@@ -65,6 +68,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -74,8 +78,8 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
   >
     <EuiBadge
       color="danger"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring"
     >
       Self monitoring
@@ -86,6 +90,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
 
 exports[`setupMode SetupModeTooltip allInternalCollection should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -95,8 +100,8 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
   >
     <EuiBadge
       color="danger"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring"
     >
       Self monitoring
@@ -107,6 +112,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -116,8 +122,8 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
   >
     <EuiBadge
       color="secondary"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
@@ -128,6 +134,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -137,8 +144,8 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
   >
     <EuiBadge
       color="secondary"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
@@ -149,6 +156,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -158,8 +166,8 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
   >
     <EuiBadge
       color="secondary"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
@@ -170,6 +178,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -179,8 +188,8 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
   >
     <EuiBadge
       color="secondary"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
@@ -191,6 +200,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
 
 exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -200,8 +210,8 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
   >
     <EuiBadge
       color="secondary"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
@@ -212,6 +222,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -221,8 +232,8 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
@@ -233,6 +244,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -242,8 +254,8 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
@@ -254,6 +266,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -263,8 +276,8 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
@@ -275,6 +288,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -284,8 +298,8 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
@@ -296,6 +310,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
 
 exports[`setupMode SetupModeTooltip internalCollectionOn should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -305,8 +320,8 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
@@ -317,6 +332,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -326,8 +342,8 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
   >
     <EuiBadge
       color="hollow"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No usage"
     >
       No usage
@@ -338,6 +354,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -347,8 +364,8 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
   >
     <EuiBadge
       color="hollow"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No usage"
     >
       No usage
@@ -359,6 +376,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -368,8 +386,8 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
   >
     <EuiBadge
       color="hollow"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No usage"
     >
       No usage
@@ -380,6 +398,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -389,8 +408,8 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
   >
     <EuiBadge
       color="hollow"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No usage"
     >
       No usage
@@ -401,6 +420,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
 
 exports[`setupMode SetupModeTooltip no detectable instances should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -410,8 +430,8 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
   >
     <EuiBadge
       color="hollow"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No usage"
     >
       No usage
@@ -422,6 +442,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for apm 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -431,8 +452,8 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No monitoring"
     >
       No monitoring
@@ -443,6 +464,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for beats 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -452,8 +474,8 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No monitoring"
     >
       No monitoring
@@ -464,6 +486,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for elasticsearch 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -473,8 +496,8 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No monitoring"
     >
       No monitoring
@@ -485,6 +508,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for kibana 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -494,8 +518,8 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No monitoring"
     >
       No monitoring
@@ -506,6 +530,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
 
 exports[`setupMode SetupModeTooltip only detectable instances should render for logstash 1`] = `
 <EuiFlexItem
+  data-test-subj="monitoringSetupModeMetricbeatMigrationTooltip"
   grow={false}
 >
   <EuiToolTip
@@ -515,8 +540,8 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   >
     <EuiBadge
       color="warning"
+      href=""
       iconType="flag"
-      onClick={[Function]}
       onClickAriaLabel="No monitoring"
     >
       No monitoring

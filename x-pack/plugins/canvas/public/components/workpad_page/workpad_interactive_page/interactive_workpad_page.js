@@ -6,13 +6,15 @@
 
 import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
-import { AlignmentGuide } from '../../alignment_guide';
-import { DragBoxAnnotation } from '../../dragbox_annotation';
-import { HoverAnnotation } from '../../hover_annotation';
-import { TooltipAnnotation } from '../../tooltip_annotation';
-import { RotationHandle } from '../../rotation_handle';
-import { BorderConnection } from '../../border_connection';
-import { BorderResizeHandle } from '../../border_resize_handle';
+import {
+  AlignmentGuide,
+  DragBoxAnnotation,
+  HoverAnnotation,
+  TooltipAnnotation,
+  RotationHandle,
+  BorderConnection,
+  BorderResizeHandle,
+} from '../../layout_annotations';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
 import { InteractionBoundary } from './interaction_boundary';

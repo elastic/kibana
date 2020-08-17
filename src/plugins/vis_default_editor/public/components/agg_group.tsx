@@ -152,7 +152,7 @@ function DefaultEditorAggGroup({
         <EuiSpacer size="s" />
         {bucketsError && (
           <>
-            <EuiFormErrorText>{bucketsError}</EuiFormErrorText>
+            <EuiFormErrorText data-test-subj="bucketsError">{bucketsError}</EuiFormErrorText>
             <EuiSpacer size="s" />
           </>
         )}

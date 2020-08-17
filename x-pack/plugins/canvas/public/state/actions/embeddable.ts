@@ -6,9 +6,8 @@
 
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
-// @ts-ignore Untyped
-import { createThunk } from 'redux-thunks';
-// @ts-ignore Untyped Local
+import { createThunk } from '../../lib/create_thunk';
+// @ts-expect-error untyped local
 import { fetchRenderable } from './elements';
 import { State } from '../../../types';
 

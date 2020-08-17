@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const renderable = getService('renderable');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'header', 'visChart']);
 
-  describe.skip('data table with index without time filter', function indexPatternCreation() {
+  describe('data table with index without time filter', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable without time filter';
 
     before(async function () {
@@ -112,65 +112,48 @@ export default function ({ getService, getPageObjects }) {
       expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
-    it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch(
-        PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
-      );
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      log.debug(data.split('\n'));
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20',
-        '4,757',
-        '2015-09-21',
-        '4,614',
-        '2015-09-22',
-        '4,633',
-      ]);
-    });
+    describe('data table with date histogram', async () => {
+      before(async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickDataTable();
+        await PageObjects.visualize.clickNewSearch(
+          PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
+        );
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.setInterval('Day');
+        await PageObjects.visEditor.clickGo();
+      });
 
-    it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch(
-        PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
-      );
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20',
-        '4,757',
-        '2015-09-21',
-        '4,614',
-        '2015-09-22',
-        '4,633',
-      ]);
-    });
+      it('should show correct data', async () => {
+        const data = await PageObjects.visChart.getTableVisData();
+        log.debug(data.split('\n'));
+        expect(data.trim().split('\n')).to.be.eql([
+          '2015-09-20',
+          '4,757',
+          '2015-09-21',
+          '4,614',
+          '2015-09-22',
+          '4,633',
+        ]);
+      });
 
-    it('should correctly filter for applied time filter on the main timefield', async () => {
-      await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
-    });
+      it('should correctly filter for applied time filter on the main timefield', async () => {
+        await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+        const data = await PageObjects.visChart.getTableVisData();
+        expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+      });
 
-    it('should correctly filter for pinned filters', async () => {
-      await filterBar.toggleFilterPinned('@timestamp');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+      it('should correctly filter for pinned filters', async () => {
+        await filterBar.toggleFilterPinned('@timestamp');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+        const data = await PageObjects.visChart.getTableVisData();
+        expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
+      });
     });
   });
 }

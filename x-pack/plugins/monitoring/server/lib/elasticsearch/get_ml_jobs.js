@@ -5,7 +5,7 @@
  */
 
 import Bluebird from 'bluebird';
-import { contains, get } from 'lodash';
+import { includes, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
@@ -59,7 +59,7 @@ export function getMlJobs(req, esIndexPattern) {
 export function getMlJobsForCluster(req, esIndexPattern, cluster) {
   const license = get(cluster, 'license', {});
 
-  if (license.status === 'active' && contains(ML_SUPPORTED_LICENSES, license.type)) {
+  if (license.status === 'active' && includes(ML_SUPPORTED_LICENSES, license.type)) {
     // ML is supported
     const start = req.payload.timeRange.min; // no wrapping in moment :)
     const end = req.payload.timeRange.max;

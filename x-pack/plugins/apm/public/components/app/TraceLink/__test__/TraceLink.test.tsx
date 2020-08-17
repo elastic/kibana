@@ -36,16 +36,19 @@ describe('TraceLink', () => {
   });
 
   it('renders trace page when transaction is not found', () => {
-    spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+    jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
       urlParams: {
         traceIdLink: '123',
         rangeFrom: 'now-24h',
         rangeTo: 'now',
       },
+      refreshTimeRange: jest.fn(),
+      uiFilters: {},
     });
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: { transaction: undefined },
-      status: 'success',
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
     const component = shallow(<TraceLink />);
@@ -56,12 +59,14 @@ describe('TraceLink', () => {
 
   describe('transaction page', () => {
     beforeAll(() => {
-      spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+      jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
         urlParams: {
           traceIdLink: '123',
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
       });
     });
     it('renders with date range params', () => {
@@ -74,9 +79,10 @@ describe('TraceLink', () => {
         },
         trace: { id: 123 },
       };
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction },
-        status: 'success',
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
       const component = shallow(<TraceLink />);
       expect(component.prop('to')).toEqual(

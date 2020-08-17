@@ -33,12 +33,20 @@ import {
   colors,
   Axis,
 } from '../helpers/panel_utils';
+
 import { Series, Sheet } from '../helpers/timelion_request_handler';
 import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
+import { ExprVisAPIEvents } from '../../../visualizations/public';
+
+interface CrosshairPlot extends jquery.flot.plot {
+  setCrosshair: (pos: Position) => void;
+  clearCrosshair: () => void;
+}
 
 interface PanelProps {
+  applyFilter: ExprVisAPIEvents['applyFilter'];
   interval: string;
   seriesList: Sheet;
   renderComplete(): void;
@@ -67,29 +75,29 @@ const DEBOUNCE_DELAY = 50;
 // ensure legend is the same height with or without a caption so legend items do not move around
 const emptyCaption = '<br>';
 
-function Panel({ interval, seriesList, renderComplete }: PanelProps) {
+function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const [canvasElem, setCanvasElem] = useState();
-  const [chartElem, setChartElem] = useState();
+  const [canvasElem, setCanvasElem] = useState<HTMLDivElement>();
+  const [chartElem, setChartElem] = useState<HTMLDivElement>();
 
   const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
   const [highlightedSeries, setHighlightedSeries] = useState<number | null>(null);
-  const [focusedSeries, setFocusedSeries] = useState();
-  const [plot, setPlot] = useState();
+  const [focusedSeries, setFocusedSeries] = useState<number | null>();
+  const [plot, setPlot] = useState<jquery.flot.plot>();
 
   // Used to toggle the series, and for displaying values on hover
-  const [legendValueNumbers, setLegendValueNumbers] = useState();
-  const [legendCaption, setLegendCaption] = useState();
+  const [legendValueNumbers, setLegendValueNumbers] = useState<JQuery<HTMLElement>>();
+  const [legendCaption, setLegendCaption] = useState<JQuery<HTMLElement>>();
 
-  const canvasRef = useCallback((node) => {
+  const canvasRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
       setCanvasElem(node);
     }
   }, []);
 
-  const elementRef = useCallback((node) => {
+  const elementRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
       setChartElem(node);
     }
@@ -97,7 +105,9 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   useEffect(
     () => () => {
-      $(chartElem).off('plotselected').off('plothover').off('mouseleave');
+      if (chartElem) {
+        $(chartElem).off('plotselected').off('plothover').off('mouseleave');
+      }
     },
     [chartElem]
   );
@@ -149,7 +159,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   const updateCaption = useCallback(
     (plotData: any) => {
-      if (get(plotData, '[0]._global.legend.showTime', true)) {
+      if (canvasElem && get(plotData, '[0]._global.legend.showTime', true)) {
         const caption = $('<caption class="timChart__legendCaption"></caption>');
         caption.html(emptyCaption);
         setLegendCaption(caption);
@@ -199,7 +209,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
           });
         }
 
-        const newPlot = $.plot(canvasElem, updatedSeries, options);
+        const newPlot = $.plot($(canvasElem), updatedSeries, options);
         setPlot(newPlot);
         renderComplete();
 
@@ -249,12 +259,12 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     (pos: Position) => {
       unhighlightSeries();
 
-      const axes = plot.getAxes();
-      if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max) {
+      const axes = plot!.getAxes();
+      if (pos.x < axes.xaxis.min! || pos.x > axes.xaxis.max!) {
         return;
       }
 
-      const dataset = plot.getData();
+      const dataset = plot!.getData();
       if (legendCaption) {
         legendCaption.text(
           moment(pos.x).format(get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT))
@@ -262,10 +272,11 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       }
       for (let i = 0; i < dataset.length; ++i) {
         const series = dataset[i];
-        const useNearestPoint = series.lines.show && !series.lines.steps;
+        const useNearestPoint = series.lines!.show && !series.lines!.steps;
         const precision = get(series, '_meta.precision', 2);
 
-        if (series._hide) {
+        // We're setting this flag on top on the series object belonging to the flot library, so we're simply casting here.
+        if ((series as { _hide?: boolean })._hide) {
           continue;
         }
 
@@ -282,14 +293,17 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
         const y = currentPoint[1];
 
-        if (y != null && legendValueNumbers) {
-          let label = y.toFixed(precision);
-          if (series.yaxis.tickFormatter) {
-            label = series.yaxis.tickFormatter(Number(label), series.yaxis);
+        if (legendValueNumbers) {
+          if (y == null) {
+            legendValueNumbers.eq(i).empty();
+          } else {
+            let label = y.toFixed(precision);
+            const formatter = ((series.yaxis as unknown) as Axis).tickFormatter;
+            if (formatter) {
+              label = formatter(Number(label), (series.yaxis as unknown) as Axis);
+            }
+            legendValueNumbers.eq(i).text(`(${label})`);
           }
-          legendValueNumbers.eq(i).text(`(${label})`);
-        } else {
-          legendValueNumbers.eq(i).empty();
         }
       }
     },
@@ -310,7 +324,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     if (legendCaption) {
       legendCaption.html(emptyCaption);
     }
-    each(legendValueNumbers, (num: Node) => {
+    each(legendValueNumbers!, (num: Node) => {
       $(num).empty();
     });
   }, [legendCaption, legendValueNumbers]);
@@ -320,7 +334,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       if (!plot) {
         return;
       }
-      plot.setCrosshair(pos);
+      (plot as CrosshairPlot).setCrosshair(pos);
       debouncedSetLegendNumbers(pos);
     },
     [plot, debouncedSetLegendNumbers]
@@ -329,18 +343,27 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     if (!plot) {
       return;
     }
-    plot.clearCrosshair();
+    (plot as CrosshairPlot).clearCrosshair();
     clearLegendNumbers();
   }, [plot, clearLegendNumbers]);
 
   const plotSelectedHandler = useCallback(
     (event: JQuery.TriggeredEvent, ranges: Ranges) => {
-      kibana.services.timefilter.setTime({
-        from: moment(ranges.xaxis.from),
-        to: moment(ranges.xaxis.to),
+      applyFilter({
+        timeFieldName: '*',
+        filters: [
+          {
+            range: {
+              '*': {
+                gte: ranges.xaxis.from,
+                lte: ranges.xaxis.to,
+              },
+            },
+          },
+        ],
       });
     },
-    [kibana.services.timefilter]
+    [applyFilter]
   );
 
   useEffect(() => {

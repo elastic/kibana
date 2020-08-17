@@ -104,17 +104,16 @@ NodeList [
                 type="button"
               >
                 <span
-                  class="euiButton__content"
+                  class="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    class="euiButton__icon"
+                    class="euiButtonContent__icon"
                     data-euiicon-type="help"
                   />
                   <span
                     class="euiButton__text"
                   >
-                    Setup Instructions
+                    Setup instructions
                   </span>
                 </span>
               </button>
@@ -157,7 +156,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary c0"
-            href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Go Service/transactions?"
             rel="noreferrer"
           >
             My Go Service
@@ -203,7 +202,7 @@ NodeList [
       <div
         class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
       >
-        1 ms
+        0.6 ms
       </div>
     </td>
     <td
@@ -263,7 +262,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary c0"
-            href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Python Service/transactions?"
             rel="noreferrer"
           >
             My Python Service
@@ -338,7 +337,7 @@ NodeList [
       <div
         class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
       >
-        0 ms
+        0.3 ms
       </div>
     </td>
     <td

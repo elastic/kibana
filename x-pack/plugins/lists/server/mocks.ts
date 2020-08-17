@@ -18,6 +18,6 @@ const createSetupMock = (): jest.Mocked<ListPluginSetup> => {
 
 export const listMock = {
   createSetup: createSetupMock,
-  getExceptionList: getExceptionListClientMock,
+  getExceptionListClient: getExceptionListClientMock,
   getListClient: getListClientMock,
 };

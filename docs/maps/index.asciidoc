@@ -1,13 +1,13 @@
 [role="xpack"]
 [[maps]]
-= Elastic Maps
+= Maps
 
 [partintro]
 --
 
-*Elastic Maps* enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
+Maps enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
 
-With *Elastic Maps*, you can:
+With Maps, you can:
 
 * Create maps with multiple layers and indices.
 * Upload GeoJSON files into Elasticsearch.
@@ -15,7 +15,7 @@ With *Elastic Maps*, you can:
 * Symbolize features using data values.
 * Focus in on just the data you want.
 
-*Ready to get started?* Start your tour of *Elastic Maps* with the <<maps-getting-started, getting started tutorial>>.
+*Ready to get started?* Start your tour of Maps with the <<maps-getting-started, getting started tutorial>>.
 
 [float]
 === Create maps with multiple layers and indices
@@ -26,7 +26,7 @@ image::maps/images/sample_data_ecommerce.png[]
 
 [float]
 === Upload GeoJSON files into Elasticsearch
-Elastic Maps makes it easy to import geospatial data into the Elastic Stack. Using the GeoJSON Upload feature, you can drag and drop your point and shape data files directly into Elasticsearch, and then use them as layers in the map.
+Maps makes it easy to import geospatial data into the Elastic Stack. Using the GeoJSON Upload feature, you can drag and drop your point and shape data files directly into Elasticsearch, and then use them as layers in the map.
 
 [float]
 === Embed your map in dashboards

@@ -1,8 +1,8 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Packetbeat: Looks for unusual HTTP or TLS destination domain activity that could indicate execution, persistence, command-and-control or data exfiltration activity (beta)",
+  "description": "Security: Packetbeat - Looks for unusual HTTP or TLS destination domain activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
   "groups": [
-    "siem",
+    "security",
     "packetbeat",
     "web"
   ],
@@ -33,7 +33,7 @@
     "custom_urls": [
       {
         "url_name": "Host Details",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

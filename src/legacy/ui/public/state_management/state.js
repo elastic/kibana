@@ -341,7 +341,7 @@ export function StateProvider(
    * @return {object}
    */
   State.prototype.toObject = function () {
-    return _.omit(this, (value, key) => {
+    return _.omitBy(this, (value, key) => {
       return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
     });
   };

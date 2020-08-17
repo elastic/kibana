@@ -3,17 +3,75 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LegacyEndpointEvent, ResolverEvent } from '../types';
+import {
+  LegacyEndpointEvent,
+  ResolverEvent,
+  SafeResolverEvent,
+  SafeLegacyEndpointEvent,
+} from '../types';
+import { firstNonNullValue } from './ecs_safety_helpers';
 
+/*
+ * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
+ */
+export function isLegacyEventSafeVersion(
+  event: SafeResolverEvent
+): event is SafeLegacyEndpointEvent {
+  return 'endgame' in event && event.endgame !== undefined;
+}
+
+/*
+ * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`. See `isLegacyEventSafeVersion`
+ */
 export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEvent {
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessStart(event: ResolverEvent): boolean {
+export function isProcessRunning(event: ResolverEvent): boolean {
   if (isLegacyEvent(event)) {
-    return event.event?.type === 'process_start' || event.event?.action === 'fork_event';
+    return (
+      event.event?.type === 'process_start' ||
+      event.event?.action === 'fork_event' ||
+      event.event?.type === 'already_running'
+    );
   }
-  return event.event.type === 'start';
+
+  if (Array.isArray(event.event.type)) {
+    return (
+      event.event.type.includes('start') ||
+      event.event.type.includes('change') ||
+      event.event.type.includes('info')
+    );
+  }
+
+  return (
+    event.event.type === 'start' || event.event.type === 'change' || event.event.type === 'info'
+  );
+}
+
+export function timestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
+  return isLegacyEventSafeVersion(event)
+    ? firstNonNullValue(event.endgame?.timestamp_utc)
+    : firstNonNullValue(event?.['@timestamp']);
+}
+
+/**
+ * The `@timestamp` for the event, as a `Date` object.
+ * If `@timestamp` couldn't be parsed as a `Date`, returns `undefined`.
+ */
+export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | undefined {
+  const value = timestampSafeVersion(event);
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const date = new Date(value);
+  // Check if the date is valid
+  if (isFinite(date.getTime())) {
+    return date;
+  } else {
+    return undefined;
+  }
 }
 
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
@@ -32,11 +90,39 @@ export function eventName(event: ResolverEvent): string {
   }
 }
 
-export function eventId(event: ResolverEvent): string {
+export function processNameSafeVersion(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return firstNonNullValue(event.endgame.process_name);
+  } else {
+    return firstNonNullValue(event.process?.name);
+  }
+}
+
+export function eventId(event: ResolverEvent): number | undefined | string {
   if (isLegacyEvent(event)) {
-    return event.endgame.serial_event_id ? String(event.endgame.serial_event_id) : '';
+    return event.endgame.serial_event_id;
   }
   return event.event.id;
+}
+
+export function eventSequence(event: ResolverEvent): number | undefined {
+  if (isLegacyEvent(event)) {
+    return firstNonNullValue(event.endgame.serial_event_id);
+  }
+  return firstNonNullValue(event.event?.sequence);
+}
+
+export function eventSequenceSafeVersion(event: SafeResolverEvent): number | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return firstNonNullValue(event.endgame.serial_event_id);
+  }
+  return firstNonNullValue(event.event?.sequence);
+}
+
+export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {
+  return firstNonNullValue(
+    isLegacyEventSafeVersion(event) ? event.endgame?.serial_event_id : event.event?.id
+  );
 }
 
 export function entityId(event: ResolverEvent): string {
@@ -46,6 +132,16 @@ export function entityId(event: ResolverEvent): string {
   return event.process.entity_id;
 }
 
+export function entityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return event.endgame?.unique_pid === undefined
+      ? undefined
+      : String(firstNonNullValue(event.endgame.unique_pid));
+  } else {
+    return firstNonNullValue(event.process?.entity_id);
+  }
+}
+
 export function parentEntityId(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
@@ -53,9 +149,44 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   return event.process.parent?.entity_id;
 }
 
-export function eventType(event: ResolverEvent): string {
-  // Returning "Process" as a catch-all here because it seems pretty general
-  let eventCategoryToReturn: string = 'Process';
+export function parentEntityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return String(firstNonNullValue(event.endgame.unique_ppid));
+  }
+  return firstNonNullValue(event.process?.parent?.entity_id);
+}
+
+export function ancestryArray(event: ResolverEvent): string[] | undefined {
+  if (isLegacyEvent(event)) {
+    return undefined;
+  }
+  // this is to guard against the endpoint accidentally not sending the ancestry array
+  // otherwise the request will fail when really we should just try using the parent entity id
+  return event.process.Ext?.ancestry;
+}
+
+export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
+  if (!event) {
+    return [];
+  }
+
+  const ancestors = ancestryArray(event);
+  if (ancestors) {
+    return ancestors;
+  }
+
+  const parentID = parentEntityId(event);
+  if (parentID) {
+    return [parentID];
+  }
+
+  return [];
+}
+
+/**
+ * @param event The event to get the category for
+ */
+export function primaryEventCategory(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
     const legacyFullType = event.endgame.event_type_full;
     if (legacyFullType) {
@@ -63,12 +194,96 @@ export function eventType(event: ResolverEvent): string {
     }
   } else {
     const eventCategories = event.event.category;
-    const eventCategory =
-      typeof eventCategories === 'string' ? eventCategories : eventCategories[0] || '';
+    const category = typeof eventCategories === 'string' ? eventCategories : eventCategories[0];
 
-    if (eventCategory) {
-      eventCategoryToReturn = eventCategory;
-    }
+    return category;
   }
-  return eventCategoryToReturn;
+}
+
+/**
+ * @param event The event to get the full ECS category for
+ */
+export function allEventCategories(event: ResolverEvent): string | string[] | undefined {
+  if (isLegacyEvent(event)) {
+    const legacyFullType = event.endgame.event_type_full;
+    if (legacyFullType) {
+      return legacyFullType;
+    }
+  } else {
+    return event.event.category;
+  }
+}
+
+/**
+ * ECS event type will be things like 'creation', 'deletion', 'access', etc.
+ * see: https://www.elastic.co/guide/en/ecs/current/ecs-event.html
+ * @param event The ResolverEvent to get the ecs type for
+ */
+export function ecsEventType(event: ResolverEvent): Array<string | undefined> {
+  if (isLegacyEvent(event)) {
+    return [event.endgame.event_subtype_full];
+  }
+  return typeof event.event.type === 'string' ? [event.event.type] : event.event.type;
+}
+
+/**
+ * #Descriptive Names For Related Events:
+ *
+ * The following section provides facilities for deriving **Descriptive Names** for ECS-compliant event data.
+ * There are drawbacks to trying to do this: It *will* require ongoing maintenance. It presents temptations to overarticulate.
+ * On balance, however, it seems that the benefit of giving the user some form of information they can recognize & scan outweighs the drawbacks.
+ */
+type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
+/**
+ * Based on the ECS category of the event, attempt to provide a more descriptive name
+ * (e.g. the `event.registry.key` for `registry` or the `dns.question.name` for `dns`, etc.).
+ * This function returns the data in the form of `{subject, descriptor}` where `subject` will
+ * tend to be the more distinctive term (e.g. 137.213.212.7 for a network event) and the
+ * `descriptor` can be used to present more useful/meaningful view (e.g. `inbound 137.213.212.7`
+ * in the example above).
+ * see: https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html
+ * @param event The ResolverEvent to get the descriptive name for
+ * @returns { descriptiveName } An attempt at providing a readable name to the user
+ */
+export function descriptiveName(event: ResolverEvent): { subject: string; descriptor?: string } {
+  if (isLegacyEvent(event)) {
+    return { subject: eventName(event) };
+  }
+
+  // To be somewhat defensive, we'll check for the presence of these.
+  const partialEvent: DeepPartial<ResolverEvent> = event;
+
+  /**
+   * This list of attempts can be expanded/adjusted as the underlying model changes over time:
+   */
+
+  // Stable, per ECS 1.5: https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html
+
+  if (partialEvent.network?.forwarded_ip) {
+    return {
+      subject: String(partialEvent.network?.forwarded_ip),
+      descriptor: String(partialEvent.network?.direction),
+    };
+  }
+
+  if (partialEvent.file?.path) {
+    return {
+      subject: String(partialEvent.file?.path),
+    };
+  }
+
+  // Extended categories (per ECS 1.5):
+  const pathOrKey = partialEvent.registry?.path || partialEvent.registry?.key;
+  if (pathOrKey) {
+    return {
+      subject: String(pathOrKey),
+    };
+  }
+
+  if (partialEvent.dns?.question?.name) {
+    return { subject: String(partialEvent.dns?.question?.name) };
+  }
+
+  // Fall back on entityId if we can't fish a more descriptive name out.
+  return { subject: entityId(event) };
 }

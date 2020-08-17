@@ -4,37 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { getMlJobId } from '../../../../../common/ml_job_constants';
-import { MLLink } from './MLLink';
+import React, { ReactNode } from 'react';
+import { EuiLink } from '@elastic/eui';
+import { useTimeSeriesExplorerHref } from './useTimeSeriesExplorerHref';
 
-interface PropsServiceName {
-  serviceName: string;
+interface Props {
+  children?: ReactNode;
+  jobId: string;
+  external?: boolean;
+  serviceName?: string;
   transactionType?: string;
 }
-interface PropsJobId {
-  jobId: string;
-}
 
-type Props = (PropsServiceName | PropsJobId) & {
-  external?: boolean;
-};
-
-export const MLJobLink: React.FC<Props> = (props) => {
-  const jobId =
-    'jobId' in props
-      ? props.jobId
-      : getMlJobId(props.serviceName, props.transactionType);
-  const query = {
-    ml: { jobIds: [jobId] },
-  };
+export function MLJobLink({
+  jobId,
+  serviceName,
+  transactionType,
+  external,
+  children,
+}: Props) {
+  const href = useTimeSeriesExplorerHref({
+    jobId,
+    serviceName,
+    transactionType,
+  });
 
   return (
-    <MLLink
-      children={props.children}
-      query={query}
-      path="/timeseriesexplorer"
-      external={props.external}
+    <EuiLink
+      children={children}
+      href={href}
+      external={external}
+      target={external ? '_blank' : undefined}
     />
   );
-};
+}

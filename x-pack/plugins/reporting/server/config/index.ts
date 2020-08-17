@@ -7,7 +7,6 @@
 import { PluginConfigDescriptor } from 'kibana/server';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
-export { createConfig$ } from './create_config';
 export { ConfigSchema, ReportingConfigType };
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {

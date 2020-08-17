@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -13,10 +13,19 @@ import {
   changeLayerIndexPattern,
   syncExistingFields,
 } from './loader';
-import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { IndexPatternPersistedState, IndexPatternPrivateState, IndexPatternField } from './types';
 import { documentField } from './document_field';
 
 jest.mock('./operations');
+
+const createMockStorage = (lastData?: Record<string, string>) => {
+  return {
+    get: jest.fn().mockImplementation(() => lastData),
+    set: jest.fn(),
+    remove: jest.fn(),
+    clear: jest.fn(),
+  };
+};
 
 const sampleIndexPatterns = {
   a: {
@@ -269,8 +278,10 @@ describe('loader', () => {
 
   describe('loadInitialState', () => {
     it('should load a default state', async () => {
+      const storage = createMockStorage();
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
+        storage,
       });
 
       expect(state).toMatchObject({
@@ -283,14 +294,39 @@ describe('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'a',
       });
     });
 
-    it('should use the default index pattern id, if provided', async () => {
+    it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
+      const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
-        defaultIndexPatternId: 'b',
         savedObjectsClient: mockClient(),
+        storage,
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: 'a',
+        indexPatternRefs: [
+          { id: 'a', title: sampleIndexPatterns.a.title },
+          { id: 'b', title: sampleIndexPatterns.b.title },
+        ],
+        indexPatterns: {
+          a: sampleIndexPatterns.a,
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'a',
+      });
+    });
+
+    it('should load lastUsedIndexPatternId if in localStorage', async () => {
+      const state = await loadInitialState({
+        savedObjectsClient: mockClient(),
+        storage: createMockStorage({ indexPatternId: 'b' }),
       });
 
       expect(state).toMatchObject({
@@ -303,7 +339,30 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
+      });
+    });
+
+    it('should use the default index pattern id, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        defaultIndexPatternId: 'b',
+        savedObjectsClient: mockClient(),
+        storage,
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: 'b',
+        indexPatternRefs: [
+          { id: 'a', title: sampleIndexPatterns.a.title },
+          { id: 'b', title: sampleIndexPatterns.b.title },
+        ],
+        indexPatterns: {
+          b: sampleIndexPatterns.b,
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'b',
       });
     });
 
@@ -336,9 +395,11 @@ describe('loader', () => {
           },
         },
       };
+      const storage = createMockStorage({ indexPatternId: 'a' });
       const state = await loadInitialState({
         state: savedState,
         savedObjectsClient: mockClient(),
+        storage,
       });
 
       expect(state).toMatchObject({
@@ -351,7 +412,10 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: savedState.layers,
-        showEmptyFields: false,
+      });
+
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'b',
       });
     });
   });
@@ -365,8 +429,9 @@ describe('loader', () => {
         indexPatterns: {},
         existingFields: {},
         layers: {},
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
+      const storage = createMockStorage({ indexPatternId: 'b' });
 
       await changeIndexPattern({
         state,
@@ -374,6 +439,7 @@ describe('loader', () => {
         id: 'a',
         savedObjectsClient: mockClient(),
         onError: jest.fn(),
+        storage,
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -382,6 +448,9 @@ describe('loader', () => {
         indexPatterns: {
           a: sampleIndexPatterns.a,
         },
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'a',
       });
     });
 
@@ -395,8 +464,10 @@ describe('loader', () => {
         existingFields: {},
         indexPatterns: {},
         layers: {},
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
+
+      const storage = createMockStorage({ indexPatternId: 'b' });
 
       await changeIndexPattern({
         state,
@@ -409,9 +480,11 @@ describe('loader', () => {
           }),
         },
         onError,
+        storage,
       });
 
       expect(setState).not.toHaveBeenCalled();
+      expect(storage.set).not.toHaveBeenCalled();
       expect(onError).toHaveBeenCalledWith(err);
     });
   });
@@ -449,8 +522,10 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
+
+      const storage = createMockStorage({ indexPatternId: 'a' });
 
       await changeLayerIndexPattern({
         state,
@@ -459,6 +534,7 @@ describe('loader', () => {
         layerId: 'l1',
         savedObjectsClient: mockClient(),
         onError: jest.fn(),
+        storage,
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -492,6 +568,9 @@ describe('loader', () => {
           },
         },
       });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: 'b',
+      });
     });
 
     it('handles errors', async () => {
@@ -512,8 +591,10 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
       };
+
+      const storage = createMockStorage({ indexPatternId: 'b' });
 
       await changeLayerIndexPattern({
         state,
@@ -527,9 +608,11 @@ describe('loader', () => {
           }),
         },
         onError,
+        storage,
       });
 
       expect(setState).not.toHaveBeenCalled();
+      expect(storage.set).not.toHaveBeenCalled();
       expect(onError).toHaveBeenCalledWith(err);
     });
   });
@@ -546,7 +629,7 @@ describe('loader', () => {
 
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = jest.fn((path: string) => {
+      const fetchJson = (jest.fn((path: string) => {
         const indexPatternTitle = _.last(path.split('/'));
         return {
           indexPatternTitle,
@@ -554,15 +637,21 @@ describe('loader', () => {
             (fieldName) => `${indexPatternTitle}_${fieldName}`
           ),
         };
-      });
+      }) as unknown) as HttpHandler;
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fetchJson: fetchJson as any,
-        indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+        fetchJson,
+        indexPatterns: [
+          { id: 'a', title: 'a', fields: [] },
+          { id: 'b', title: 'a', fields: [] },
+          { id: 'c', title: 'a', fields: [] },
+        ],
         setState,
         dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
       });
 
       expect(fetchJson).toHaveBeenCalledTimes(3);
@@ -576,11 +665,90 @@ describe('loader', () => {
 
       expect(newState).toEqual({
         foo: 'bar',
+        isFirstExistenceFetch: false,
+        existenceFetchFailed: false,
         existingFields: {
           a: { a_field_1: true, a_field_2: true },
           b: { b_field_1: true, b_field_2: true },
           c: { c_field_1: true, c_field_2: true },
         },
+      });
+    });
+
+    it('should call showNoDataPopover callback if current index pattern returns no fields', async () => {
+      const setState = jest.fn();
+      const showNoDataPopover = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        const indexPatternTitle = _.last(path.split('/'));
+        return {
+          indexPatternTitle,
+          existingFieldNames:
+            indexPatternTitle === 'a'
+              ? ['field_1', 'field_2'].map((fieldName) => `${indexPatternTitle}_${fieldName}`)
+              : [],
+        };
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          { id: 'a', title: 'a', fields: [] },
+          { id: 'b', title: 'a', fields: [] },
+          { id: 'c', title: 'a', fields: [] },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      expect(showNoDataPopover).not.toHaveBeenCalled();
+
+      await syncExistingFields({ ...args, isFirstExistenceFetch: true });
+      expect(showNoDataPopover).not.toHaveBeenCalled();
+    });
+
+    it('should set all fields to available and existence error flag if the request fails', async () => {
+      const setState = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        return new Promise((resolve, reject) => {
+          reject(new Error());
+        });
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          {
+            id: 'a',
+            title: 'a',
+            fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
+          },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      }) as IndexPatternPrivateState;
+
+      expect(newState.existenceFetchFailed).toEqual(true);
+      expect(newState.existingFields.a).toEqual({
+        field1: true,
+        field2: true,
       });
     });
   });

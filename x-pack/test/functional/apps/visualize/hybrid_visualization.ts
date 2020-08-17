@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const toTime = 'Aug 22, 2019 @ 23:09:36.205';
 
       await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.clickVisualizationByName('hybrid_histogram_line_chart');
+      await PageObjects.visualize.openSavedVisualization('hybrid_histogram_line_chart');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await inspector.open();

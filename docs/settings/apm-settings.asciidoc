@@ -47,7 +47,7 @@ Changing these settings may disable features of the APM App.
   | Set to `false` to hide the APM app from the menu. Defaults to `true`.
 
 | `xpack.apm.ui.transactionGroupBucketSize`
-  | Number of top transaction groups displayed in the APM app. Defaults to `100`.
+  | Number of top transaction groups displayed in the APM app. Defaults to `1000`.
 
 | `xpack.apm.ui.maxTraceItems` {ess-icon}
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.

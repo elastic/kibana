@@ -4,22 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
 
-jest.mock('../../overview/components/events_by_dataset');
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
 
-jest.mock('../../common/lib/kibana', () => {
   return {
+    ...originalModule,
+    useParams: jest.fn().mockReturnValue({
+      tabName: 'default',
+    }),
+  };
+});
+jest.mock('../../overview/components/events_by_dataset');
+jest.mock('../../common/containers/source', () => {
+  const originalModule = jest.requireActual('../../common/containers/source');
+
+  return {
+    ...originalModule,
+    useWithSource: jest.fn().mockReturnValue({
+      indicesExist: true,
+    }),
+  };
+});
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...originalModule,
     useKibana: jest.fn(),
   };
 });
+
 describe('TimelinesPageComponent', () => {
-  const mockAppollloClient = {} as ApolloClient<object>;
   let wrapper: ShallowWrapper;
 
   describe('If the user is authorized', () => {
@@ -28,14 +49,14 @@ describe('TimelinesPageComponent', () => {
         services: {
           application: {
             capabilities: {
-              securitySolution: {
+              siem: {
                 crud: true,
               },
             },
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent apolloClient={mockAppollloClient} />);
+      wrapper = shallow(<TimelinesPageComponent />);
     });
 
     afterAll(() => {
@@ -58,22 +79,30 @@ describe('TimelinesPageComponent', () => {
         wrapper.find('[data-test-subj="stateful-open-timeline"]').prop('importDataModalToggle')
       ).toEqual(true);
     });
+
+    test('it renders create timeline btn', () => {
+      expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
+    });
+
+    test('it renders no create timeline template btn', () => {
+      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeFalsy();
+    });
   });
 
-  describe('If the user is not authorised', () => {
+  describe('If the user is not authorized', () => {
     beforeAll(() => {
       ((useKibana as unknown) as jest.Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
-              securitySolution: {
+              siem: {
                 crud: false,
               },
             },
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent apolloClient={mockAppollloClient} />);
+      wrapper = shallow(<TimelinesPageComponent />);
     });
 
     afterAll(() => {

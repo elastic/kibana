@@ -6,9 +6,10 @@
 
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { actionsMock } from '../../../actions/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { KibanaRequest } from 'kibana/server';
 
 const alertType: AlertType = {
   id: 'test',
@@ -19,9 +20,10 @@ const alertType: AlertType = {
   ],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
-  producer: 'alerting',
+  producer: 'alerts',
 };
 
+const actionsClient = actionsClientMock.create();
 const createExecutionHandlerParams = {
   actionsPlugin: actionsMock.createStart(),
   spaceId: 'default',
@@ -32,7 +34,7 @@ const createExecutionHandlerParams = {
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   eventLogger: eventLoggerMock.create(),
   actions: [
     {
@@ -47,15 +49,24 @@ const createExecutionHandlerParams = {
       },
     },
   ],
+  request: {} as KibanaRequest,
+  alertParams: {
+    foo: true,
+    contextVal: 'My other {{context.value}} goes here',
+    stateVal: 'My other {{state.value}} goes here',
+  },
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
   createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+  createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
+    actionsClient
+  );
 });
 
-test('calls actionsPlugin.execute per selected action', async () => {
+test('enqueues execution per selected action', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   await executionHandler({
     actionGroup: 'default',
@@ -63,8 +74,11 @@ test('calls actionsPlugin.execute per selected action', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(
+    createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest
+  ).toHaveBeenCalledWith(createExecutionHandlerParams.request);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKey": "MTIzOmFiYw==",
@@ -139,8 +153,8 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledWith({
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
     id: '2',
     params: {
       foo: true,
@@ -180,7 +194,7 @@ test('trow error error message when action type is disabled', async () => {
     alertInstanceId: '2',
   });
 
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(0);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
   createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockImplementation(() => true);
   const executionHandlerForPreconfiguredAction = createExecutionHandler({
@@ -193,7 +207,7 @@ test('trow error error message when action type is disabled', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
 });
 
 test('limits actionsPlugin.execute per action group', async () => {
@@ -204,7 +218,7 @@ test('limits actionsPlugin.execute per action group', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).not.toHaveBeenCalled();
+  expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
 });
 
 test('context attribute gets parameterized', async () => {
@@ -215,8 +229,8 @@ test('context attribute gets parameterized', async () => {
     state: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKey": "MTIzOmFiYw==",
@@ -241,8 +255,8 @@ test('state attribute gets parameterized', async () => {
     state: { value: 'state-val' },
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "apiKey": "MTIzOmFiYw==",

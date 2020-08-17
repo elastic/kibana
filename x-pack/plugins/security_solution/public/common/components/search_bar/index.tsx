@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';

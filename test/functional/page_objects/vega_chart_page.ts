@@ -17,73 +17,105 @@
  * under the License.
  */
 
+import { Key } from 'selenium-webdriver';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const compareSpecs = (first: string, second: string) => {
+  const normalizeSpec = (spec: string) => spec.replace(/[\n ]/g, '');
+  return normalizeSpec(first) === normalizeSpec(second);
+};
 
 export function VegaChartPageProvider({
   getService,
   getPageObjects,
-  updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const screenshot = getService('screenshots');
-  const log = getService('log');
-  const { visEditor, visChart } = getPageObjects(['visEditor', 'visChart']);
+  const { common } = getPageObjects(['common']);
+  const retry = getService('retry');
 
   class VegaChartPage {
-    public async getSpec() {
+    public getEditor() {
+      return testSubjects.find('vega-editor');
+    }
+
+    public getViewContainer() {
+      return find.byCssSelector('div.vgaVis__view');
+    }
+
+    public getControlContainer() {
+      return find.byCssSelector('div.vgaVis__controls');
+    }
+
+    public async getRawSpec() {
       // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
-      const editor = await testSubjects.find('vega-editor');
+      const editor = await this.getEditor();
       const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Promise.all(
+
+      return await Promise.all(
         lines.map(async (line) => {
           return await line.getVisibleText();
         })
       );
-      return linesText.join('\n');
     }
 
-    public async getViewContainer() {
-      return await find.byCssSelector('div.vgaVis__view');
+    public async getSpec() {
+      return (await this.getRawSpec()).join('\n');
     }
 
-    public async getControlContainer() {
-      return await find.byCssSelector('div.vgaVis__controls');
+    public async focusEditor() {
+      const editor = await this.getEditor();
+      const textarea = await editor.findByClassName('ace_content');
+
+      await textarea.click();
     }
 
-    /**
-     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
-     * @param {string} name The name of the baseline image.
-     * @param {object} opts Options object.
-     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
-     */
-    public async expectVisToMatchScreenshot(name: string, opts = { threshold: 0.05 }) {
-      log.debug(`expectVisToMatchScreenshot(${name})`);
+    public async fillSpec(newSpec: string) {
+      await retry.try(async () => {
+        await this.cleanSpec();
+        await this.focusEditor();
+        await browser.pressKeys(newSpec);
 
-      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
-      await visEditor.clickEditorSidebarCollapse();
-      await visChart.waitForVisualizationRenderingStabilized();
-      await browser.execute(`
-          var el = document.createElement('style');
-          el.id = '__data-test-style';
-          el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
-          el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
-          el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
-          document.body.appendChild(el);
-        `);
+        expect(compareSpecs(await this.getSpec(), newSpec)).to.be(true);
+      });
+    }
 
-      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+    public async typeInSpec(text: string) {
+      await this.focusEditor();
 
-      // Reset the chart to its original state
-      await browser.execute(`
-          var el = document.getElementById('__data-test-style');
-          document.body.removeChild(el);
-        `);
-      await visEditor.clickEditorSidebarCollapse();
-      await visChart.waitForVisualizationRenderingStabilized();
-      expect(percentDifference).to.be.lessThan(opts.threshold);
+      let repeats = 20;
+      while (--repeats > 0) {
+        await browser.pressKeys(Key.ARROW_UP);
+        await common.sleep(50);
+      }
+      await browser.pressKeys(Key.ARROW_RIGHT);
+      await browser.pressKeys(text);
+    }
+
+    public async cleanSpec() {
+      const editor = await this.getEditor();
+      const aceGutter = await editor.findByClassName('ace_gutter');
+
+      await retry.try(async () => {
+        await aceGutter.doubleClick();
+        await browser.pressKeys(Key.BACK_SPACE);
+
+        expect(await this.getSpec()).to.be('');
+      });
+    }
+
+    public async getYAxisLabels() {
+      const chart = await testSubjects.find('visualizationLoader');
+      const yAxis = await chart.findByCssSelector('[aria-label^="Y-axis"]');
+      const tickGroup = await yAxis.findByClassName('role-axis-label');
+      const labels = await tickGroup.findAllByCssSelector('text');
+      const labelTexts: string[] = [];
+      for (const label of labels) {
+        labelTexts.push(await label.getVisibleText());
+      }
+      return labelTexts;
     }
   }
 

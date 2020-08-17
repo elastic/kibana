@@ -5,11 +5,10 @@
  */
 import Boom from 'boom';
 import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
   PluginInitializerContext,
@@ -17,20 +16,18 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CoreStart,
-  IRouter,
-  IClusterClient,
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_ALERTING_ENABLED,
   KIBANA_STATS_TYPE_MONITORING,
+  ALERTS,
 } from '../common/constants';
-import { MonitoringConfig } from './config';
+import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
 import { requireUIRoutes } from './routes';
 // @ts-ignore
@@ -40,56 +37,18 @@ import { initInfraSource } from './lib/logs/init_infra_source';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringCollection } from './telemetry_collection';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { LicenseService } from './license_service';
-import { MonitoringLicenseService } from './types';
+import { AlertsFactory } from './alerts';
 import {
-  PluginStartContract as AlertingPluginStartContract,
-  PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerts/server';
-import { getLicenseExpiration } from './alerts/license_expiration';
-import { getClusterState } from './alerts/cluster_state';
-import { InfraPluginSetup } from '../../infra/server';
-
-export interface LegacyAPI {
-  getServerStatus: () => string;
-}
-
-interface PluginsSetup {
-  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  licensing: LicensingPluginSetup;
-  features: FeaturesPluginSetupContract;
-  alerts: AlertingPluginSetupContract;
-  infra: InfraPluginSetup;
-}
-
-interface PluginsStart {
-  alerts: AlertingPluginStartContract;
-}
-
-interface MonitoringCoreConfig {
-  get: (key: string) => string | undefined;
-}
-
-interface MonitoringCore {
-  config: () => MonitoringCoreConfig;
-  log: Logger;
-  route: (options: any) => void;
-}
-
-interface LegacyShimDependencies {
-  router: IRouter;
-  instanceUuid: string;
-  esDataClient: IClusterClient;
-  kibanaStatsCollector: any;
-}
-
-interface IBulkUploader {
-  setKibanaStatusGetter: (getter: () => string | undefined) => void;
-  getKibanaStats: () => any;
-}
+  MonitoringCore,
+  MonitoringLicenseService,
+  LegacyShimDependencies,
+  IBulkUploader,
+  PluginsSetup,
+  PluginsStart,
+  LegacyAPI,
+  LegacyRequest,
+} from './types';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -108,7 +67,7 @@ export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  private cluster = {} as ILegacyCustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -122,14 +81,17 @@ export class Plugin {
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
     const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
+      this.initializerContext.config
+        .create<TypeOf<typeof configSchema>>()
+        .pipe(map((rawConfig) => createConfig(rawConfig))),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
       .toPromise();
 
+    const router = core.http.createRouter();
     this.legacyShimDependencies = {
-      router: core.http.createRouter(),
+      router,
       instanceUuid: core.uuid.getInstanceUuid(),
       esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
@@ -155,29 +117,27 @@ export class Plugin {
     });
     await this.licenseService.refresh();
 
-    if (KIBANA_ALERTING_ENABLED) {
-      plugins.alerts.registerType(
-        getLicenseExpiration(
-          async () => {
-            const coreStart = (await core.getStartServices())[0];
-            return coreStart.uiSettings;
-          },
-          cluster,
-          this.getLogger,
-          config.ui.ccs.enabled
-        )
+    const serverInfo = core.http.getServerInfo();
+    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
+    if (core.http.basePath.serverBasePath) {
+      kibanaUrl += `/${core.http.basePath.serverBasePath}`;
+    }
+    const getUiSettingsService = async () => {
+      const coreStart = (await core.getStartServices())[0];
+      return coreStart.uiSettings;
+    };
+    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
+    const alerts = AlertsFactory.getAll();
+    for (const alert of alerts) {
+      alert.initializeAlertType(
+        getUiSettingsService,
+        cluster,
+        this.getLogger,
+        config,
+        kibanaUrl,
+        isCloud
       );
-      plugins.alerts.registerType(
-        getClusterState(
-          async () => {
-            const coreStart = (await core.getStartServices())[0];
-            return coreStart.uiSettings;
-          },
-          cluster,
-          this.getLogger,
-          config.ui.ccs.enabled
-        )
-      );
+      plugins.alerts.registerType(alert.getAlertType());
     }
 
     // Initialize telemetry
@@ -197,7 +157,6 @@ export class Plugin {
     const kibanaCollectionEnabled = config.kibana.collection.enabled;
     if (kibanaCollectionEnabled) {
       // Start kibana internal collection
-      const serverInfo = core.http.getServerInfo();
       const bulkUploader = (this.bulkUploader = initBulkUploader({
         elasticsearch: core.elasticsearch,
         config,
@@ -206,10 +165,10 @@ export class Plugin {
           uuid: core.uuid.getInstanceUuid(),
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
-          host: serverInfo.host,
+          host: serverInfo.hostname,
           locale: i18n.getLocale(),
           port: serverInfo.port.toString(),
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          transport_address: `${serverInfo.hostname}:${serverInfo.port}`,
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
@@ -249,7 +208,11 @@ export class Plugin {
       );
 
       this.registerPluginInUI(plugins);
-      requireUIRoutes(this.monitoringCore);
+      requireUIRoutes(this.monitoringCore, {
+        router,
+        licenseService: this.licenseService,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
+      });
       initInfraSource(config, plugins.infra);
     }
 
@@ -287,6 +250,7 @@ export class Plugin {
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
+      alerting: ALERTS,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -300,6 +264,9 @@ export class Plugin {
               savedObject: {
                 all: [],
                 read: [],
+              },
+              alerting: {
+                all: ALERTS,
               },
               ui: [],
             },
@@ -319,7 +286,7 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ICustomClusterClient
+    cluster: ILegacyCustomClusterClient
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
@@ -350,14 +317,30 @@ export class Plugin {
           res: KibanaResponseFactory
         ) => {
           const plugins = (await getCoreServices())[1];
-          const legacyRequest = {
+          const legacyRequest: LegacyRequest = {
             ...req,
             logger: this.log,
             getLogger: this.getLogger,
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
-            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
+            getActionTypeRegistry: () => context.actions?.listTypes(),
+            getAlertsClient: () => {
+              try {
+                return plugins.alerts.getAlertsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
+            getActionsClient: () => {
+              try {
+                return plugins.actions.getActionsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
             server: {
               config: legacyConfigWrapper,
               newPlatform: {
@@ -385,7 +368,8 @@ export class Plugin {
             const result = await options.handler(legacyRequest);
             return res.ok({ body: result });
           } catch (err) {
-            const statusCode: number = err.output?.statusCode || err.statusCode || err.status;
+            const statusCode: number =
+              err.output?.statusCode || err.statusCode || err.status || 500;
             if (Boom.isBoom(err) || statusCode !== 500) {
               return res.customError({ statusCode, body: err });
             }

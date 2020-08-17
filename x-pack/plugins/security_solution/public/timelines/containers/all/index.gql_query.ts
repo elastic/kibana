@@ -13,6 +13,7 @@ export const allTimelinesQuery = gql`
     $sort: SortTimeline
     $onlyUserFavorite: Boolean
     $timelineType: TimelineType
+    $status: TimelineStatus
   ) {
     getAllTimeline(
       pageInfo: $pageInfo
@@ -20,8 +21,14 @@ export const allTimelinesQuery = gql`
       sort: $sort
       onlyUserFavorite: $onlyUserFavorite
       timelineType: $timelineType
+      status: $status
     ) {
       totalCount
+      defaultTimelineCount
+      templateTimelineCount
+      elasticTemplateTimelineCount
+      customTemplateTimelineCount
+      favoriteCount
       timeline {
         savedObjectId
         description
@@ -42,6 +49,7 @@ export const allTimelinesQuery = gql`
           updatedBy
           version
         }
+        excludedRowRendererIds
         notes {
           eventId
           note
@@ -56,6 +64,7 @@ export const allTimelinesQuery = gql`
         }
         noteIds
         pinnedEventIds
+        status
         title
         timelineType
         templateTimelineId

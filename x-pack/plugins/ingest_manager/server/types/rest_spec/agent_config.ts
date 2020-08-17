@@ -8,7 +8,9 @@ import { NewAgentConfigSchema } from '../models';
 import { ListWithKuerySchema } from './index';
 
 export const GetAgentConfigsRequestSchema = {
-  query: ListWithKuerySchema,
+  query: ListWithKuerySchema.extends({
+    full: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const GetOneAgentConfigRequestSchema = {
@@ -29,6 +31,14 @@ export const UpdateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
 };
 
+export const CopyAgentConfigRequestSchema = {
+  ...GetOneAgentConfigRequestSchema,
+  body: schema.object({
+    name: schema.string({ minLength: 1 }),
+    description: schema.maybe(schema.string()),
+  }),
+};
+
 export const DeleteAgentConfigRequestSchema = {
   body: schema.object({
     agentConfigId: schema.string(),
@@ -41,5 +51,6 @@ export const GetFullAgentConfigRequestSchema = {
   }),
   query: schema.object({
     download: schema.maybe(schema.boolean()),
+    standalone: schema.maybe(schema.boolean()),
   }),
 };

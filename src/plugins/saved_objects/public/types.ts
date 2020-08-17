@@ -63,6 +63,7 @@ export interface SavedObjectSaveOpts {
   confirmOverwrite?: boolean;
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void;
+  returnToOrigin?: boolean;
 }
 
 export interface SavedObjectCreationOpts {

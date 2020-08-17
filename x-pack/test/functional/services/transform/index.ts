@@ -7,6 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { TransformAPIProvider } from './api';
+import { TransformEditFlyoutProvider } from './edit_flyout';
 import { TransformManagementProvider } from './management';
 import { TransformNavigationProvider } from './navigation';
 import { TransformSecurityCommonProvider } from './security_common';
@@ -19,6 +20,7 @@ import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
+  const editFlyout = TransformEditFlyoutProvider(context);
   const management = TransformManagementProvider(context);
   const navigation = TransformNavigationProvider(context);
   const securityCommon = TransformSecurityCommonProvider(context);
@@ -30,6 +32,7 @@ export function TransformProvider(context: FtrProviderContext) {
 
   return {
     api,
+    editFlyout,
     management,
     navigation,
     securityCommon,

@@ -35,7 +35,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     };
 
     const response = await this.database.search(user, params);
-    const configs = get<any>(response, 'hits.hits', []);
+    const configs = get(response, 'hits.hits', []);
 
     return configs.map((tag: any) => ({ ...tag._source.tag, config: JSON.parse(tag._source.tag) }));
   }
@@ -71,7 +71,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     } else {
       response = await this.database.search(user, params);
     }
-    const configs = get<any>(response, 'hits.hits', []);
+    const configs = get(response, 'hits.hits', []);
 
     return {
       blocks: configs.map((block: any) => ({
@@ -137,12 +137,13 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
       configs.map((config) => {
-        const id = config.id || uuidv4();
+        const { id: configId, ...configWithoutId } = config;
+        const id = configId || uuidv4();
         return [
           { index: { _id: `configuration_block:${id}` } },
           {
             type: 'configuration_block',
-            configuration_block: { id, ...config, config: JSON.stringify(config.config) },
+            configuration_block: { id, ...configWithoutId, config: JSON.stringify(config.config) },
           },
         ];
       })

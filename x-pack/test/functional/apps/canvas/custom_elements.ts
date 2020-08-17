@@ -65,6 +65,7 @@ export default function canvasCustomElementTest({
       // ensure the custom element is the one expected and click it to add to the workpad
       const customElement = await find.byCssSelector('.canvasElementCard__wrapper');
       const elementName = await customElement.findByCssSelector('.euiCard__title');
+
       expect(await elementName.getVisibleText()).to.contain('My New Element');
       customElement.click();
 

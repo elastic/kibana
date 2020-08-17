@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './info_tooltip.scss';
 
 export function InfoTooltip({ series, bucketSize }) {
   const tableRows = series.map((item, index) => {

@@ -36,17 +36,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedSearch;
+  savedSearch: SavedObject;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedObject;
   vis: Vis;
   eventEmitter: EventEmitter;
 }
@@ -65,7 +65,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   }, [eventEmitter]);
   const onClickViewInDiscover = useCallback(() => {
     application.navigateToApp('discover', {
-      path: `#/${savedSearch.id}`,
+      path: `#/view/${savedSearch.id}`,
     });
   }, [application, savedSearch.id]);
 
@@ -128,7 +128,12 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           <div style={{ width: 260 }}>
             <EuiText size="s">
               <p>
-                <EuiButtonEmpty flush="left" onClick={onClickViewInDiscover} size="xs">
+                <EuiButtonEmpty
+                  data-test-subj="viewSavedSearch"
+                  flush="left"
+                  onClick={onClickViewInDiscover}
+                  size="xs"
+                >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
                     defaultMessage="View this search in Discover"

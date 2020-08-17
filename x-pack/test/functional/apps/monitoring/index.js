@@ -12,7 +12,6 @@ export default function ({ loadTestFile }) {
 
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));
-    loadTestFile(require.resolve('./cluster/alerts'));
     // loadTestFile(require.resolve('./cluster/license'));
 
     loadTestFile(require.resolve('./elasticsearch/overview'));
@@ -40,5 +39,7 @@ export default function ({ loadTestFile }) {
 
     loadTestFile(require.resolve('./time_filter'));
     loadTestFile(require.resolve('./enable_monitoring'));
+
+    loadTestFile(require.resolve('./setup/metricbeat_migration'));
   });
 }

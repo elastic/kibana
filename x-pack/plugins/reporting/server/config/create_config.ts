@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n/';
 import crypto from 'crypto';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { CoreSetup } from 'src/core/server';
@@ -23,8 +23,9 @@ import { ReportingConfigType } from './schema';
 export function createConfig$(
   core: CoreSetup,
   config$: Observable<ReportingConfigType>,
-  logger: LevelLogger
+  parentLogger: LevelLogger
 ) {
+  const logger = parentLogger.clone(['config']);
   return config$.pipe(
     map((config) => {
       // encryption key
@@ -44,7 +45,7 @@ export function createConfig$(
       // kibanaServer.hostname, default to server.host, don't allow "0"
       let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
-        : serverInfo.host;
+        : serverInfo.hostname;
       if (kibanaServerHostname === '0') {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
@@ -83,7 +84,7 @@ export function createConfig$(
 
       // disableSandbox was not set by user, apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = [os.os, os.dist, os.release].filter(Boolean).map(capitalize).join(' ');
+      const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
 
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {

@@ -1,0 +1,136 @@
+[[development-best-practices]]
+== Best practices
+
+Consider these best practices, whether developing code directly to the {kib} repo or building your own plugins.
+They are intended to support our https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md[{kib} development principals].
+
+[discrete]
+=== Performance
+
+Are you planning with scalability in mind?
+
+* Consider data with many fields
+* Consider data with high cardinality fields
+* Consider large data sets, that span a long time range
+* Do you make lots of requests to the server?
+** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
+
+[discrete]
+=== Accessibility
+
+Did you know {kib} makes a public statement about our commitment to
+creating an accessible product for people with disabilities?
+https://www.elastic.co/guide/en/kibana/master/accessibility.html[We do]!
+It’s very important all of our apps are accessible.
+
+* Learn how https://elastic.github.io/eui/#/guidelines/accessibility[EUI
+tackles accessibility]
+* If you don’t use EUI, follow the same EUI accessibility standards
+
+[[kibana-localization-best-practices]]
+[discrete]
+=== Localization
+
+{kib} is translated into other languages. Use our i18n utilities to
+ensure your public facing strings will be translated to ensure all
+{kib} apps are localized.
+
+* Read and adhere to our
+{kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n
+guidelines]
+
+[discrete]
+=== Conventions
+
+* Become familiar with our
+{kib-repo}blob/{branch}/STYLEGUIDE.md[styleguide]
+(use Typescript!)
+* Write all new code on
+{kib-repo}blob/{branch}/src/core/README.md[the
+platform], and following
+{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions]
+* _Always_ use the `SavedObjectClient` for reading and writing Saved
+Objects.
+* Add `README`s to all your plugins and services.
+* Make your public APIs as small as possible. You will have to maintain
+them, and consider backward compatibility when making any changes to
+them.
+* Use https://elastic.github.io/eui[EUI] for all your basic UI
+components to create a consistent UI experience.
+
+[discrete]
+=== Re-inventing the wheel
+
+Over-refactoring can be a problem in it’s own right, but it’s still
+important to be aware of the existing services that are out there and
+use them when it makes sense. We have service oriented teams dedicated
+to providing our solution developers the tools needed to iterate faster.
+They take care of the nitty gritty so you can focus on creative
+solutions to your particular problem sphere. Some examples of common
+services you should consider:
+
+* {kib-repo}tree/{branch}/src/plugins/data/README.md[Data
+services]
+** {kib-repo}tree/{branch}/src/plugins/data/public/search/README.md[Search
+strategies]
+*** Use the `esSearchStrategy` to make raw queries to ES that will
+support async searching and partial results, as well as injecting the
+right advanced settings like whether to include frozen indices or not.
+* {kib-repo}tree/{branch}/src/plugins/embeddable/README.md[Embeddables]
+** Rendering maps, visualizations, dashboards in your application
+** Register new widgets that will can be added to a dashboard or Canvas
+workpad, or rendered in another plugin.
+* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.md[UiActions]
+** Let other plugins inject functionality into your application
+** Inject custom functionality into other plugins
+* Stateless helper utilities
+* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync/README.md[state
+syncing] and
+* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_containers/README.md[state
+container] utilities provided by
+* {kib-repo}tree/{branch}/src/plugins/kibana_utils/README.md[kibana_utils]
+if you want to sync your application state to the URL?
+** {kib-repo}tree/{branch}/src/plugins/kibana_react/README.md[kibana_react]
+for react specific helpers
+
+Re-using these services will help create a consistent experience across
+{kib} from every solution.
+
+[discrete]
+=== Backward compatibility
+
+Eventually we want to garauntee to our plugin developers that their plugins will not break from minor to minor.
+
+Any time you create or change a public API, keep this in mind, and consider potential
+backward compatibility issues. While we have a formal
+{kib-repo}tree/{branch}/src/core/server/saved_objects/migrations/README.md[saved
+object migration system] and are working on adding a formal state migration system, introducing state changes and migrations in a
+minor always comes with a risk. Consider this before making huge and
+risky changes in minors, _especially_ to saved objects.
+
+* Are you persisting state from registries? Consider what will happen if
+the author of the implementation changed their interfaces.
+* Are you adding implementations to registries? Consider that someone
+may be persisting your data, and that making changes to your public
+interfaces can break their code.
+
+Be very careful when changing the shape of saved objects or persistable
+data.
+
+Saved object exported from past {kib} versions should continue to work.
+In addition, if users are relying on state stored in your app’s URL as
+part of your public contract, keep in mind that you may also need to
+provide backwards compatibility for bookmarked URLs.
+
+[discrete]
+=== Testing & stability
+
+Review:
+
+* <<development-unit-tests>>
+* <<stability>>
+* <<security-best-practices>>
+
+include::stability.asciidoc[leveloffset=+1]
+
+include::security.asciidoc[leveloffset=+1]

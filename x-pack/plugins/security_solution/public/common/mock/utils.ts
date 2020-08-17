@@ -10,8 +10,6 @@ import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import { ManagementPluginReducer } from '../../management';
 import { SubPluginsInitReducer } from '../store';
-import { EndpointAlertsPluginReducer } from '../../endpoint_alerts';
-import { alertListReducer } from '../../endpoint_alerts/store/reducer';
 
 interface Global extends NodeJS.Global {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,6 +26,5 @@ export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.
    */
-  alertList: alertListReducer as EndpointAlertsPluginReducer['alertList'],
   management: managementReducer as ManagementPluginReducer['management'],
 };

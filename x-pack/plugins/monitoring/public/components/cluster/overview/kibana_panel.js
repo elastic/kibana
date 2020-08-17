@@ -28,10 +28,18 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { KIBANA_SYSTEM_ID, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
+
+const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH];
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
+  const alerts = props.alerts;
   const showDetectedKibanas =
     setupMode.enabled && get(setupMode.data, 'kibana.detected.doesExist', false);
   if (!props.count && !showDetectedKibanas) {
@@ -40,18 +48,29 @@ export function KibanaPanel(props) {
 
   const statusIndicator = <HealthStatusIndicator status={props.status} />;
 
-  const goToKibana = () => props.changeUrl('kibana');
-  const goToInstances = () => props.changeUrl('kibana/instances');
+  const goToKibana = () => getSafeForExternalLink('#/kibana');
+  const goToInstances = () => getSafeForExternalLink('#/kibana/instances');
 
   const setupModeData = get(setupMode.data, 'kibana');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={KIBANA_SYSTEM_ID}
-        badgeClickAction={goToInstances}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={KIBANA_SYSTEM_ID}
+      badgeClickLink={goToInstances()}
+    />
+  ) : null;
+
+  let instancesAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS)) {
+    const alertsList = INSTANCES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    instancesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <ClusterItemContainer
@@ -70,7 +89,7 @@ export function KibanaPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToKibana}
+                  href={goToKibana()}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel',
                     {
@@ -119,12 +138,12 @@ export function KibanaPanel(props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      onClick={goToInstances}
+                      href={goToInstances()}
                       data-test-subj="kbnInstances"
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
@@ -147,7 +166,12 @@ export function KibanaPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeMetricbeatMigrationTooltip}
+                  {instancesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

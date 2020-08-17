@@ -10,13 +10,13 @@ import { Legacy } from '../legacy_shims';
 import { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
 import { localAppModule, appModuleName } from './app_modules';
 
-import { MonitoringPluginDependencies } from '../types';
+import { MonitoringStartPluginDependencies } from '../types';
 
-const APP_WRAPPER_CLASS = 'monitoringApplicationWrapper';
+const APP_WRAPPER_CLASS = 'monApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
-  constructor(deps: MonitoringPluginDependencies) {
+  constructor(deps: MonitoringStartPluginDependencies) {
     const {
       core,
       element,
@@ -25,12 +25,24 @@ export class AngularApp {
       isCloud,
       pluginInitializerContext,
       externalConfig,
+      triggersActionsUi,
+      kibanaLegacy,
     } = deps;
     const app: IModule = localAppModule(deps);
     app.run(($injector: angular.auto.IInjectorService) => {
       this.injector = $injector;
       Legacy.init(
-        { core, element, data, navigation, isCloud, pluginInitializerContext, externalConfig },
+        {
+          core,
+          element,
+          data,
+          navigation,
+          isCloud,
+          pluginInitializerContext,
+          externalConfig,
+          kibanaLegacy,
+          triggersActionsUi,
+        },
         this.injector
       );
     });

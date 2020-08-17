@@ -43,8 +43,6 @@ type StatusReducerAction =
       payload: FetchJobStatusResponsePayload;
     }
   | { type: 'failedFetchingJobStatuses' }
-  | { type: 'requestedJobConfigurationUpdate' }
-  | { type: 'requestedJobDefinitionUpdate' }
   | { type: 'viewedResults' };
 
 const createInitialState = <JobType extends string>({
@@ -173,18 +171,6 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         ),
       };
     }
-    case 'requestedJobConfigurationUpdate': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'reconfiguration' },
-      };
-    }
-    case 'requestedJobDefinitionUpdate': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'update' },
-      };
-    }
     case 'viewedResults': {
       return {
         ...state,
@@ -251,8 +237,8 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
 ): SetupStatus =>
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
     if (jobStatus === 'missing') {
-      return { type: 'required', reason: 'missing' };
-    } else if (setupStatus.type === 'required') {
+      return { type: 'required' };
+    } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
       return setupStatus;
     } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
       return {
@@ -265,8 +251,9 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
     return setupStatus;
   }, previousSetupStatus);
 
-const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
-  value.error != null;
+const hasError = <Value extends { error?: any }>(
+  value: Value
+): value is MandatoryProperty<Value, 'error'> => value.error != null;
 
 export const useModuleStatus = <JobType extends string>(jobTypes: JobType[]) => {
   return useReducer(createStatusReducer(jobTypes), { jobTypes }, createInitialState);

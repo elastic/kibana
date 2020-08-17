@@ -11,12 +11,26 @@
     {
       "field": "actingProcess.file.signer",
       "operator": "included",
-      "match": "Elastic, N.V."
+      "type": "match",
+      "value": "Elastic, N.V."
     },
     {
-      "field": "event.category",
-      "operator": "included",
-      "match_any": ["process", "malware"]
+      "field": "file.signature",
+      "type": "nested",
+      "entries": [
+        {
+          "field": "signer",
+          "type": "match",
+          "operator": "included",
+          "value": "Evil"
+        },
+        {
+          "field": "trusted",
+          "type": "match",
+          "operator": "included",
+          "value": "true"
+        }
+      ]
     }
   ]
 }

@@ -22,10 +22,7 @@ interface Props {
 }
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
-  return breadcrumbs
-    .map(({ value }) => value)
-    .reverse()
-    .join(' | ');
+  return breadcrumbs.map(({ value }) => value).reverse();
 }
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
@@ -43,7 +40,9 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
       }
     );
 
-    document.title = getTitleFromBreadCrumbs(this.props.breadcrumbs);
+    this.props.core.chrome.docTitle.change(
+      getTitleFromBreadCrumbs(this.props.breadcrumbs)
+    );
     this.props.core.chrome.setBreadcrumbs(breadcrumbs);
   }
 

@@ -5,7 +5,7 @@
  */
 import { UnwrapPromise } from '@kbn/utility-types';
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   CoreSetup,
   KibanaRequest,
   LoggerFactory,
@@ -40,7 +40,7 @@ interface SetupAuthenticationParams {
   auditLogger: SecurityAuditLogger;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   http: CoreSetup['http'];
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;
@@ -100,6 +100,7 @@ export async function setupAuthentication({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
+      sameSite: config.sameSiteCookies,
       validate: (session: ProviderSession | ProviderSession[]) => {
         const array: ProviderSession[] = Array.isArray(session) ? session : [session];
         for (const sess of array) {
@@ -186,7 +187,8 @@ export async function setupAuthentication({
     areAPIKeysEnabled: () => apiKeys.areAPIKeysEnabled(),
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
-    grantAPIKeyAsInternalUser: (request: KibanaRequest) => apiKeys.grantAsInternalUser(request),
+    grantAPIKeyAsInternalUser: (request: KibanaRequest, params: CreateAPIKeyParams) =>
+      apiKeys.grantAsInternalUser(request, params),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
     invalidateAPIKeyAsInternalUser: (params: InvalidateAPIKeyParams) =>

@@ -13,23 +13,24 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 
 import { PLUGIN } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError, wrapEsError } from './lib';
+import { wrapEsError } from './lib';
+import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
 import { Dependencies } from './types';
 import { SnapshotRestoreConfig } from './config';
 
 export interface SnapshotRestoreContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -42,7 +43,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
-  private snapshotRestoreESClient?: ICustomClusterClient;
+  private snapshotRestoreESClient?: ILegacyCustomClusterClient;
 
   constructor(private context: PluginInitializerContext) {
     const { logger } = this.context;

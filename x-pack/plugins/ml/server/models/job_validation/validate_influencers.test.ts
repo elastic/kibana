@@ -4,25 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 import { validateInfluencers } from './validate_influencers';
 
 describe('ML - validateInfluencers', () => {
   it('called without arguments throws an error', (done) => {
-    validateInfluencers(
-      (undefined as unknown) as APICaller,
-      (undefined as unknown) as CombinedJob
-    ).then(
+    validateInfluencers((undefined as unknown) as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
     );
   });
 
   it('called with non-valid job argument #1, missing analysis_config', (done) => {
-    validateInfluencers((undefined as unknown) as APICaller, ({} as unknown) as CombinedJob).then(
+    validateInfluencers(({} as unknown) as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -34,7 +29,7 @@ describe('ML - validateInfluencers', () => {
       datafeed_config: { indices: [] },
       data_description: { time_field: '@timestamp' },
     };
-    validateInfluencers((undefined as unknown) as APICaller, (job as unknown) as CombinedJob).then(
+    validateInfluencers((job as unknown) as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -46,7 +41,7 @@ describe('ML - validateInfluencers', () => {
       datafeed_config: { indices: [] },
       data_description: { time_field: '@timestamp' },
     };
-    validateInfluencers((undefined as unknown) as APICaller, (job as unknown) as CombinedJob).then(
+    validateInfluencers((job as unknown) as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -66,7 +61,7 @@ describe('ML - validateInfluencers', () => {
 
   it('success_influencer', () => {
     const job = getJobConfig(['airline']);
-    return validateInfluencers((undefined as unknown) as APICaller, job).then((messages) => {
+    return validateInfluencers(job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['success_influencers']);
     });
@@ -84,7 +79,7 @@ describe('ML - validateInfluencers', () => {
       ]
     );
 
-    return validateInfluencers((undefined as unknown) as APICaller, job).then((messages) => {
+    return validateInfluencers(job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([]);
     });
@@ -92,7 +87,7 @@ describe('ML - validateInfluencers', () => {
 
   it('influencer_low', () => {
     const job = getJobConfig();
-    return validateInfluencers((undefined as unknown) as APICaller, job).then((messages) => {
+    return validateInfluencers(job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['influencer_low']);
     });
@@ -100,7 +95,7 @@ describe('ML - validateInfluencers', () => {
 
   it('influencer_high', () => {
     const job = getJobConfig(['i1', 'i2', 'i3', 'i4']);
-    return validateInfluencers((undefined as unknown) as APICaller, job).then((messages) => {
+    return validateInfluencers(job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['influencer_high']);
     });
@@ -118,7 +113,7 @@ describe('ML - validateInfluencers', () => {
         },
       ]
     );
-    return validateInfluencers((undefined as unknown) as APICaller, job).then((messages) => {
+    return validateInfluencers(job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['influencer_low_suggestion']);
     });
@@ -148,7 +143,7 @@ describe('ML - validateInfluencers', () => {
         },
       ]
     );
-    return validateInfluencers((undefined as unknown) as APICaller, job).then((messages) => {
+    return validateInfluencers(job).then((messages) => {
       expect(messages).toStrictEqual([
         {
           id: 'influencer_low_suggestions',

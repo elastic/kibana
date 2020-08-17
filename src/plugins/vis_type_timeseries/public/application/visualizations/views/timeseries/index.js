@@ -38,7 +38,7 @@ import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constan
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
-import { getTheme, getChartClasses } from './utils/theme';
+import { getBaseTheme, getChartClasses } from './utils/theme';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -56,7 +56,6 @@ const handleCursorUpdate = (cursor) => {
 };
 
 export const TimeSeries = ({
-  darkMode,
   backgroundColor,
   showGrid,
   legend,
@@ -90,15 +89,15 @@ export const TimeSeries = ({
   const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
-  // compute the theme based on the bg color
-  const theme = getTheme(darkMode, backgroundColor);
   // apply legend style change if bgColor is configured
   const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
 
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { colors } = getChartsSetup();
+  const { colors, theme: themeService } = getChartsSetup();
+  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
+
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
 
   const onBrushEndListener = ({ x }) => {
@@ -118,7 +117,7 @@ export const TimeSeries = ({
         onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
-        theme={
+        theme={[
           hasBarChart
             ? {}
             : {
@@ -127,9 +126,14 @@ export const TimeSeries = ({
                     fill: '#F00',
                   },
                 },
-              }
-        }
-        baseTheme={theme}
+              },
+          {
+            background: {
+              color: backgroundColor,
+            },
+          },
+        ]}
+        baseTheme={baseTheme}
         tooltip={{
           snap: true,
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
@@ -269,7 +273,6 @@ TimeSeries.defaultProps = {
 };
 
 TimeSeries.propTypes = {
-  darkMode: PropTypes.bool,
   backgroundColor: PropTypes.string,
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,

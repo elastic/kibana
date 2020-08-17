@@ -13,8 +13,10 @@ import { EMSFileSource, sourceTitle } from './ems_file_source';
 // @ts-ignore
 import { getIsEmsEnabled } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: () => {
     return getIsEmsEnabled();
   },

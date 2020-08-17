@@ -5,7 +5,7 @@ The *Saved Objects* UI helps you keep track of and manage your saved objects. Th
 store data for later use, including dashboards, visualizations, maps, index patterns,
 Canvas workpads, and more.
 
-To get started, go to *Management > {kib} > Saved Objects*. With this UI, you can:
+To get started, open the menu, then go to *Stack Management > {kib} > Saved Objects*. With this UI, you can:
 
 * <<managing-saved-objects-view, View&#44; edit&#44; and delete saved objects>>
 * <<managing-saved-objects-export-objects, Import and export saved objects>>
@@ -62,7 +62,7 @@ the NDJSON includes related objects. Exported dashboards include their associate
 [float]
 [role="xpack"]
 [[managing-saved-objects-copy-to-space]]
-=== [xpack]#Copy to other {kib} spaces#
+=== Copy to other {kib} spaces
 
 To copy a saved object to another space, click the actions icon image:images/actions_icon.png[Actions icon]
 and select *Copy to space*. From here, you can select the spaces in which to copy the object.

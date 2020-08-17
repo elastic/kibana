@@ -5,19 +5,18 @@
  */
 
 import { createEsContext } from './context';
-import { ClusterClient, Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-jest.mock('../lib/../../../../package.json', () => ({
-  version: '1.2.3',
-}));
-type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
+import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
+jest.mock('./init');
+type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
 
 beforeEach(() => {
-  logger = loggingServiceMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createClusterClient();
+  logger = loggingSystemMock.createLogger();
+  clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 });
 
 describe('createEsContext', () => {
@@ -91,5 +90,17 @@ describe('createEsContext', () => {
       context.esNames.indexTemplate
     );
     expect(doesIndexTemplateExist).toBeTruthy();
+  });
+
+  test('should handled failed initialization', async () => {
+    jest.requireMock('./init').initializeEs.mockResolvedValue(false);
+    const context = createEsContext({
+      logger,
+      clusterClientPromise: Promise.resolve(clusterClient),
+      indexNameRoot: 'test2',
+    });
+    context.initialize();
+    const success = await context.waitTillReady();
+    expect(success).toBe(false);
   });
 });

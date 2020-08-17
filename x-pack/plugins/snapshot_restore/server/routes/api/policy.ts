@@ -5,10 +5,10 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { SlmPolicyEs } from '../../../common/types';
+import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { getManagedPolicyNames } from '../../lib';
-import { RouteDependencies } from '../../types';
+import { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
 import { addBasePath } from '../helpers';
 import { nameParameterSchema, policySchema } from './validate_schemas';
 
@@ -232,17 +232,26 @@ export function registerPolicyRoutes({
       const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
       try {
-        const indices: Array<{
-          index: string;
-        }> = await callAsCurrentUser('cat.indices', {
-          format: 'json',
-          h: 'index',
-        });
+        const resolvedIndicesResponse: ResolveIndexResponseFromES = await callAsCurrentUser(
+          'transport.request',
+          {
+            method: 'GET',
+            path: `/_resolve/index/*`,
+            query: {
+              expand_wildcards: 'all',
+            },
+          }
+        );
+
+        const body: PolicyIndicesResponse = {
+          dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
+          indices: resolvedIndicesResponse.indices
+            .flatMap((index) => (index.data_stream ? [] : index.name))
+            .sort(),
+        };
 
         return res.ok({
-          body: {
-            indices: indices.map(({ index }) => index).sort(),
-          },
+          body,
         });
       } catch (e) {
         if (isEsError(e)) {

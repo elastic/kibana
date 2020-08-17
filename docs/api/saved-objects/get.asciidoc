@@ -39,7 +39,7 @@ Retrieve the index pattern object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/api/saved_objects/index-pattern/my-pattern"
+$ curl -X GET api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
@@ -61,7 +61,7 @@ Retrieve a dashboard object in the `testspace` by ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d"
+$ curl -X GET s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
 --------------------------------------------------
 // KIBANA
 

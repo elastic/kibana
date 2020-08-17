@@ -20,6 +20,8 @@ export interface NewOutput {
   config?: Record<string, any>;
 }
 
+export type OutputSOAttributes = NewOutput;
+
 export type Output = NewOutput & {
   id: string;
 };

@@ -12,6 +12,8 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../mock';
 import { createStore, State } from '../../store';
 import { AddFilterToGlobalSearchBar } from '.';
@@ -33,10 +35,24 @@ jest.mock('../../lib/kibana', () => ({
 
 describe('AddFilterToGlobalSearchBar Component', () => {
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    jest.useFakeTimers();
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     mockAddFilters.mockClear();
   });
 
@@ -142,8 +158,12 @@ describe('AddFilterToGlobalSearchBar Component', () => {
       </TestProviders>
     );
 
+    wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+    wrapper.update();
+    jest.runAllTimers();
+    wrapper.update();
+
     wrapper
-      .simulate('mouseenter')
       .find('[data-test-subj="hover-actions-container"] [data-euiicon-type]')
       .first()
       .simulate('click');

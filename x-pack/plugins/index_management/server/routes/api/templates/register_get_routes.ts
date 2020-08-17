@@ -6,32 +6,32 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import {
+  deserializeTemplate,
+  deserializeTemplateList,
   deserializeLegacyTemplate,
   deserializeLegacyTemplateList,
-  deserializeTemplateList,
 } from '../../../../common/lib';
-import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
+import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
 export function registerGetAllRoute({ router, license }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/index-templates'), validate: false },
+    { path: addBasePath('/index_templates'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
-      const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
+      const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
-      const _legacyTemplates = await callAsCurrentUser('indices.getTemplate');
-      const { index_templates: _templates } = await callAsCurrentUser('transport.request', {
-        path: '_index_template',
-        method: 'GET',
-      });
+      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
+      const { index_templates: templatesEs } = await callAsCurrentUser(
+        'dataManagement.getComposableIndexTemplates'
+      );
 
       const legacyTemplates = deserializeLegacyTemplateList(
-        _legacyTemplates,
-        managedTemplatePrefix
+        legacyTemplatesEs,
+        cloudManagedTemplatePrefix
       );
-      const templates = deserializeTemplateList(_templates, managedTemplatePrefix);
+      const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
       const body = {
         templates,
@@ -49,36 +49,48 @@ const paramsSchema = schema.object({
 
 // Require the template format version (V1 or V2) to be provided as Query param
 const querySchema = schema.object({
-  legacy: schema.maybe(schema.boolean()),
+  legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
 export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
   router.get(
     {
-      path: addBasePath('/index-templates/{name}'),
+      path: addBasePath('/index_templates/{name}'),
       validate: { params: paramsSchema, query: querySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { name } = req.params as TypeOf<typeof paramsSchema>;
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
 
-      const { legacy } = req.query as TypeOf<typeof querySchema>;
-
-      if (!legacy) {
-        return res.badRequest({ body: 'Only index template version 1 can be fetched.' });
-      }
+      const isLegacy = (req.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
-        const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
-        const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
+        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
-        if (indexTemplateByName[name]) {
-          return res.ok({
-            body: deserializeLegacyTemplate(
-              { ...indexTemplateByName[name], name },
-              managedTemplatePrefix
-            ),
-          });
+        if (isLegacy) {
+          const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
+
+          if (indexTemplateByName[name]) {
+            return res.ok({
+              body: deserializeLegacyTemplate(
+                { ...indexTemplateByName[name], name },
+                cloudManagedTemplatePrefix
+              ),
+            });
+          }
+        } else {
+          const {
+            index_templates: indexTemplates,
+          } = await callAsCurrentUser('dataManagement.getComposableIndexTemplate', { name });
+
+          if (indexTemplates.length > 0) {
+            return res.ok({
+              body: deserializeTemplate(
+                { ...indexTemplates[0].index_template, name },
+                cloudManagedTemplatePrefix
+              ),
+            });
+          }
         }
 
         return res.notFound();

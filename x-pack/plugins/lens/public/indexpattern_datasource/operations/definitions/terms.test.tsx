@@ -34,7 +34,7 @@ describe('terms', () => {
       indexPatterns: {},
       existingFields: {},
       currentIndexPatternId: '1',
-      showEmptyFields: false,
+      isFirstExistenceFetch: false,
       layers: {
         first: {
           indexPatternId: '1',

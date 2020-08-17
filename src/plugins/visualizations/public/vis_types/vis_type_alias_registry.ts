@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TriggerContextMapping } from '../../../ui_actions/public';
 
 export interface VisualizationListItem {
   editUrl: string;
@@ -25,7 +26,10 @@ export interface VisualizationListItem {
   stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
+  description?: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   typeTitle: string;
+  image?: string;
 }
 
 export interface VisualizationsAppExtension {
@@ -51,6 +55,7 @@ export interface VisTypeAlias {
   icon: string;
   promotion?: VisTypeAliasPromotion;
   description: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';
 
   appExtensions?: {

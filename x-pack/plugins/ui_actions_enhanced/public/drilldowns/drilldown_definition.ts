@@ -5,6 +5,8 @@
  */
 
 import { ActionFactoryDefinition } from '../dynamic_actions';
+import { LicenseType } from '../../../licensing/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -27,6 +29,12 @@ export interface DrilldownDefinition<
    * Globally unique identifier for this drilldown.
    */
   id: string;
+
+  /**
+   * Minimal licence level
+   * Empty means no restrictions
+   */
+  minimalLicense?: LicenseType;
 
   /**
    * Determines the display order of the drilldowns in the flyout picker.
@@ -86,10 +94,16 @@ export interface DrilldownDefinition<
    * @param context Object that represents context in which the underlying
    *  `UIAction` of this drilldown is being executed in.
    */
-  execute(config: Config, context: ExecutionContext): void;
+  execute(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): void;
 
   /**
    * A link where drilldown should navigate on middle click or Ctrl + click.
    */
-  getHref?(config: Config, context: ExecutionContext): Promise<string | undefined>;
+  getHref?(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): Promise<string | undefined>;
 }

@@ -13,9 +13,9 @@ import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {
   chartHeight?: number;
-  from: number;
+  from: string;
   legendPosition?: Position;
-  to: number;
+  to: string;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;

@@ -19,7 +19,8 @@ export const callGetLogEntryRateAPI = async (
   sourceId: string,
   startTime: number,
   endTime: number,
-  bucketDuration: number
+  bucketDuration: number,
+  datasets?: string[]
 ) => {
   const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH, {
     method: 'POST',
@@ -32,6 +33,7 @@ export const callGetLogEntryRateAPI = async (
             endTime,
           },
           bucketDuration,
+          datasets,
         },
       })
     ),

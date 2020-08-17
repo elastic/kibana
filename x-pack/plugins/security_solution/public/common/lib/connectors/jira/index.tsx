@@ -34,11 +34,11 @@ const validateConnector = (action: JiraActionConnector): ValidationResult => {
   }
 
   if (!action.secrets.email) {
-    errors.email = [...errors.email, i18n.EMAIL_REQUIRED];
+    errors.email = [...errors.email, i18n.JIRA_EMAIL_REQUIRED];
   }
 
   if (!action.secrets.apiToken) {
-    errors.apiToken = [...errors.apiToken, i18n.API_TOKEN_REQUIRED];
+    errors.apiToken = [...errors.apiToken, i18n.JIRA_API_TOKEN_REQUIRED];
   }
 
   return { errors };

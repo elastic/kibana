@@ -1,0 +1,63 @@
+@import '../shared';
+
+.pipelineProcessorsEditor__item {
+  transition: border-color $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
+  min-height: 50px;
+
+  &--selected {
+    border: $euiBorderThin;
+    border-color: $euiColorPrimary;
+  }
+
+  &--displayNone {
+    display: none;
+  }
+
+  &--dimmed {
+    box-shadow: none;
+  }
+
+  // Remove the box-shadow on all nested items
+  .pipelineProcessorsEditor__item {
+    box-shadow: none !important;
+  }
+
+  &__processorTypeLabel {
+    line-height: $euiButtonHeightSmall;
+  }
+
+  &__textContainer {
+    cursor: text;
+    border-bottom: 1px dashed transparent;
+
+    &--notEditing {
+      border-bottom: $euiBorderEditable;
+      border-width: $euiBorderWidthThin;
+      &:hover {
+        border-color: $euiColorMediumShade;
+      }
+    }
+  }
+
+  &__description {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 600px;
+  }
+
+  &__textInput {
+    height: $euiSizeL;
+    min-width: 200px;
+  }
+
+  &__moveButton {
+    &:hover {
+      transform: none !important;
+    }
+    &--cancel {
+      // Ensure that the cancel button is above the drop zones
+      z-index: $cancelButtonZIndex;
+    }
+  }
+}

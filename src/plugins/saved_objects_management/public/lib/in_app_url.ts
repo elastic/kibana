@@ -30,7 +30,7 @@ export function canViewInApp(uiCapabilities: Capabilities, type: string): boolea
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
-      return uiCapabilities.management.kibana.index_patterns as boolean;
+      return uiCapabilities.management.kibana.indexPatterns as boolean;
     case 'dashboard':
     case 'dashboards':
       return uiCapabilities.dashboard.show as boolean;

@@ -6,9 +6,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-import { useDispatch } from 'react-redux';
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../common/components/markdown';
 import { Form, useForm, UseField } from '../../../shared_imports';
@@ -16,18 +15,10 @@ import { schema, Content } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
-
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
-import { useApolloClient } from '../../../common/utils/apollo_context';
+import { useTimelineClick } from '../utils/use_timeline_click';
 
 const ContentWrapper = styled.div`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
-  `}
+  padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
 `;
 
 interface UserActionMarkdownProps {
@@ -44,13 +35,13 @@ export const UserActionMarkdown = ({
   onChangeEditable,
   onSaveContent,
 }: UserActionMarkdownProps) => {
-  const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
+  const initialState = { content };
   const { form } = useForm<Content>({
-    defaultValue: { content },
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+  const { submit } = form;
   const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<Content>(
     form,
     'content'
@@ -59,65 +50,46 @@ export const UserActionMarkdown = ({
     onChangeEditable(id);
   }, [id, onChangeEditable]);
 
-  const handleTimelineClick = useCallback(
-    (timelineId: string) => {
-      queryTimelineById({
-        apolloClient,
-        timelineId,
-        updateIsLoading: ({
-          id: currentTimelineId,
-          isLoading,
-        }: {
-          id: string;
-          isLoading: boolean;
-        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
-        updateTimeline: dispatchUpdateTimeline(dispatch),
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apolloClient]
-  );
+  const handleTimelineClick = useTimelineClick();
 
   const handleSaveAction = useCallback(async () => {
-    const { isValid, data } = await form.submit();
+    const { isValid, data } = await submit();
     if (isValid) {
       onSaveContent(data.content);
     }
     onChangeEditable(id);
-  }, [form, id, onChangeEditable, onSaveContent]);
+  }, [id, onChangeEditable, onSaveContent, submit]);
 
   const renderButtons = useCallback(
-    ({ cancelAction, saveAction }) => {
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="user-action-cancel-markdown"
-              size="s"
-              onClick={cancelAction}
-              iconType="cross"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="user-action-save-markdown"
-              color="secondary"
-              fill
-              iconType="save"
-              onClick={saveAction}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [handleCancelAction, handleSaveAction]
+    ({ cancelAction, saveAction }) => (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="user-action-cancel-markdown"
+            size="s"
+            onClick={cancelAction}
+            iconType="cross"
+          >
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="user-action-save-markdown"
+            color="secondary"
+            fill
+            iconType="save"
+            onClick={saveAction}
+            size="s"
+          >
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
   );
+
   return isEditable ? (
     <Form form={form} data-test-subj="user-action-markdown-form">
       <UseField

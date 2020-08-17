@@ -7,45 +7,53 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
+import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
 import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
+import { MappingsEditorProvider } from '../../../mappings_editor_context';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-      data-currentvalue={props.selectedOptions}
-      onChange={async (syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-currentvalue={props.value}
-      onChange={(e: any) => {
-        props.onChange(e.jsonContent);
-      }}
-    />
-  ),
-  // Mocking EuiSuperSelect to be able to easily change its value
-  // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
-  EuiSuperSelect: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
-      value={props.valueOfSelected}
-      onChange={(e) => {
-        props.onChange(e.target.value);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+        data-currentvalue={props.selectedOptions}
+        onChange={async (syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+    // Mocking EuiSuperSelect to be able to easily change its value
+    // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
+    EuiSuperSelect: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+        value={props.valueOfSelected}
+        onChange={(e) => {
+          props.onChange(e.target.value);
+        }}
+      />
+    ),
+  };
+});
+
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface DomFields {
   [key: string]: {
@@ -243,7 +251,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 };
 
 export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const setupTestBed = registerTestBed<TestSubjects>(MappingsEditor, {
+  const ComponentToTest = (propsOverride: { [key: string]: any }) => (
+    <MappingsEditorProvider>
+      <GlobalFlyoutProvider>
+        <MappingsEditor {...props} {...propsOverride} />
+      </GlobalFlyoutProvider>
+    </MappingsEditorProvider>
+  );
+
+  const setupTestBed = registerTestBed<TestSubjects>(ComponentToTest, {
     memoryRouter: {
       wrapComponent: false,
     },

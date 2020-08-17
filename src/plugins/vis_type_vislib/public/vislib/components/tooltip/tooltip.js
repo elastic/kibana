@@ -218,7 +218,7 @@ Tooltip.prototype.render = function () {
 
         if (html) allContents.push({ id, html, order });
 
-        const allHtml = _(allContents).sortBy('order').pluck('html').compact().join('\n');
+        const allHtml = _(allContents).sortBy('order').map('html').compact().join('\n');
 
         if (allHtml) {
           $tooltip.html(allHtml);

@@ -10,12 +10,12 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
-import _ from 'lodash';
+import uniq from 'lodash/uniq';
+
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
-
 import React, { Component, Fragment } from 'react';
-
+import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -43,15 +43,19 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../common/util/job_utils';
+import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 
 import {
   annotation$,
   annotationsRefresh$,
   annotationsRefreshed,
 } from '../../../services/annotations_service';
+import {
+  ANNOTATION_EVENT_USER,
+  ANNOTATION_EVENT_DELAYED_DATA,
+} from '../../../../../common/constants/annotations';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
+const CURRENT_SERIES = 'current_series';
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
@@ -67,13 +71,19 @@ export class AnnotationsTable extends Component {
     super(props);
     this.state = {
       annotations: [],
+      aggregations: null,
       isLoading: false,
+      queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
+      searchError: undefined,
       jobId:
         Array.isArray(this.props.jobs) &&
         this.props.jobs.length > 0 &&
         this.props.jobs[0] !== undefined
           ? this.props.jobs[0].job_id
           : undefined,
+    };
+    this.sorting = {
+      sort: { field: 'timestamp', direction: 'asc' },
     };
   }
 
@@ -93,11 +103,18 @@ export class AnnotationsTable extends Component {
           earliestMs: null,
           latestMs: null,
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+          fields: [
+            {
+              field: 'event',
+              missing: ANNOTATION_EVENT_USER,
+            },
+          ],
         })
         .toPromise()
         .then((resp) => {
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
+            aggregations: resp.aggregations,
             errorMessage: undefined,
             isLoading: false,
             jobId: props.jobs[0].job_id,
@@ -114,6 +131,25 @@ export class AnnotationsTable extends Component {
         });
     }
   }
+
+  getAnnotationsWithExtraInfo = memoizeOne((annotations) => {
+    // if there is a specific view/chart entities that the annotations can be scoped to
+    // add a new column called 'current_series'
+    if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
+      return annotations.map((annotation) => {
+        const allMatched = this.props.chartDetails?.entityData?.entities.every(
+          ({ fieldType, fieldValue }) => {
+            const field = `${fieldType}_value`;
+            return !(!annotation[field] || annotation[field] !== fieldValue);
+          }
+        );
+        return { ...annotation, [CURRENT_SERIES]: allMatched };
+      });
+    } else {
+      // if not make it return the original annotations
+      return annotations;
+    }
+  });
 
   getJob(jobId) {
     // check if the job was supplied via props and matches the supplied jobId
@@ -135,9 +171,9 @@ export class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) &&
       this.props.jobs.length > 0
     ) {
-      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() =>
-        this.getAnnotations()
-      );
+      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => {
+        this.getAnnotations();
+      });
       annotationsRefreshed();
     }
   }
@@ -199,9 +235,11 @@ export class AnnotationsTable extends Component {
         },
       },
     };
+    let mlTimeSeriesExplorer = {};
+    const entityCondition = {};
 
     if (annotation.timestamp !== undefined && annotation.end_timestamp !== undefined) {
-      appState.mlTimeSeriesExplorer = {
+      mlTimeSeriesExplorer = {
         zoom: {
           from: new Date(annotation.timestamp).toISOString(),
           to: new Date(annotation.end_timestamp).toISOString(),
@@ -216,6 +254,27 @@ export class AnnotationsTable extends Component {
         globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
       }
     }
+
+    // if the annotation is at the series level
+    // then pass the partitioning field(s) and detector index to the Single Metric Viewer
+    if (annotation.detector_index !== undefined) {
+      mlTimeSeriesExplorer.detectorIndex = annotation.detector_index;
+    }
+    if (annotation.partition_field_value !== undefined) {
+      entityCondition[annotation.partition_field_name] = annotation.partition_field_value;
+    }
+
+    if (annotation.over_field_value !== undefined) {
+      entityCondition[annotation.over_field_name] = annotation.over_field_value;
+    }
+
+    if (annotation.by_field_value !== undefined) {
+      // Note that analyses with by and over fields, will have a top-level by_field_name,
+      // but the by_field_value(s) will be in the nested causes array.
+      entityCondition[annotation.by_field_name] = annotation.by_field_value;
+    }
+    mlTimeSeriesExplorer.entities = entityCondition;
+    appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
     const _g = rison.encode(globalSettings);
     const _a = rison.encode(appState);
@@ -251,6 +310,8 @@ export class AnnotationsTable extends Component {
 
   render() {
     const { isSingleMetricViewerLinkVisible = true, isNumberBadgeVisible = false } = this.props;
+
+    const { queryText, searchError } = this.state;
 
     if (this.props.annotations === undefined) {
       if (this.state.isLoading === true) {
@@ -315,7 +376,7 @@ export class AnnotationsTable extends Component {
           defaultMessage: 'Annotation',
         }),
         sortable: true,
-        width: '50%',
+        width: '40%',
         scope: 'row',
       },
       {
@@ -352,9 +413,17 @@ export class AnnotationsTable extends Component {
         }),
         sortable: true,
       },
+      {
+        field: 'event',
+        name: i18n.translate('xpack.ml.annotationsTable.eventColumnName', {
+          defaultMessage: 'Event',
+        }),
+        sortable: true,
+        width: '10%',
+      },
     ];
 
-    const jobIds = _.uniq(annotations.map((a) => a.job_id));
+    const jobIds = uniq(annotations.map((a) => a.job_id));
     if (jobIds.length > 1) {
       columns.unshift({
         field: 'job_id',
@@ -371,7 +440,7 @@ export class AnnotationsTable extends Component {
         name: i18n.translate('xpack.ml.annotationsTable.labelColumnName', {
           defaultMessage: 'Label',
         }),
-        sortable: true,
+        sortable: (key) => +key,
         width: '60px',
         render: (key) => {
           return <EuiBadge color="default">{key}</EuiBadge>;
@@ -383,22 +452,23 @@ export class AnnotationsTable extends Component {
 
     actions.push({
       render: (annotation) => {
+        // find the original annotation because the table might not show everything
+        const annotationId = annotation._id;
+        const originalAnnotation = annotations.find((d) => d._id === annotationId);
         const editAnnotationsTooltipText = (
           <FormattedMessage
             id="xpack.ml.annotationsTable.editAnnotationsTooltip"
             defaultMessage="Edit annotation"
           />
         );
-        const editAnnotationsTooltipAriaLabelText = (
-          <FormattedMessage
-            id="xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel"
-            defaultMessage="Edit annotation"
-          />
+        const editAnnotationsTooltipAriaLabelText = i18n.translate(
+          'xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel',
+          { defaultMessage: 'Edit annotation' }
         );
         return (
           <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
             <EuiButtonIcon
-              onClick={() => annotation$.next(annotation)}
+              onClick={() => annotation$.next(originalAnnotation ?? annotation)}
               iconType="pencil"
               aria-label={editAnnotationsTooltipAriaLabelText}
             />
@@ -422,17 +492,14 @@ export class AnnotationsTable extends Component {
               defaultMessage="Job configuration not supported in Single Metric Viewer"
             />
           );
-          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable ? (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel"
-              defaultMessage="Open in Single Metric Viewer"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel"
-              defaultMessage="Job configuration not supported in Single Metric Viewer"
-            />
-          );
+          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable
+            ? i18n.translate('xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel', {
+                defaultMessage: 'Open in Single Metric Viewer',
+              })
+            : i18n.translate(
+                'xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel',
+                { defaultMessage: 'Job configuration not supported in Single Metric Viewer' }
+              );
 
           return (
             <EuiToolTip position="bottom" content={openInSingleMetricViewerTooltipText}>
@@ -448,38 +515,171 @@ export class AnnotationsTable extends Component {
       });
     }
 
-    columns.push({
-      align: RIGHT_ALIGNMENT,
-      width: '60px',
-      name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions,
-    });
-
     const getRowProps = (item) => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
+    let filterOptions = [];
+    const aggregations = this.props.aggregations ?? this.state.aggregations;
+    if (aggregations) {
+      const buckets = aggregations.event.buckets;
+      let foundUser = false;
+      let foundDelayedData = false;
 
+      buckets.forEach((bucket) => {
+        if (bucket.key === ANNOTATION_EVENT_USER) {
+          foundUser = true;
+        }
+        if (bucket.key === ANNOTATION_EVENT_DELAYED_DATA) {
+          foundDelayedData = true;
+        }
+      });
+      const adjustedBuckets = [];
+      if (!foundUser) {
+        adjustedBuckets.push({ key: ANNOTATION_EVENT_USER, doc_count: 0 });
+      }
+      if (!foundDelayedData) {
+        adjustedBuckets.push({ key: ANNOTATION_EVENT_DELAYED_DATA, doc_count: 0 });
+      }
+
+      filterOptions = [...adjustedBuckets, ...buckets];
+    }
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'event',
+        name: 'Event',
+        multiSelect: 'or',
+        options: filterOptions.map((field) => ({
+          value: field.key,
+          name: field.key,
+          view: `${field.key} (${field.doc_count})`,
+        })),
+      },
+    ];
+
+    if (this.props.detectors) {
+      columns.push({
+        name: i18n.translate('xpack.ml.annotationsTable.detectorColumnName', {
+          defaultMessage: 'Detector',
+        }),
+        width: '10%',
+        render: (item) => {
+          if ('detector_index' in item) {
+            return this.props.detectors[item.detector_index].detector_description;
+          }
+          return '';
+        },
+      });
+    }
+
+    if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
+      // only show the column if the field exists in that job in SMV
+      this.props.chartDetails?.entityData?.entities.forEach((entity) => {
+        if (entity.fieldType === 'partition_field') {
+          columns.push({
+            field: 'partition_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.partitionSMVColumnName', {
+              defaultMessage: 'Partition',
+            }),
+            sortable: true,
+          });
+        }
+        if (entity.fieldType === 'over_field') {
+          columns.push({
+            field: 'over_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.overColumnSMVName', {
+              defaultMessage: 'Over',
+            }),
+            sortable: true,
+          });
+        }
+        if (entity.fieldType === 'by_field') {
+          columns.push({
+            field: 'by_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.byColumnSMVName', {
+              defaultMessage: 'By',
+            }),
+            sortable: true,
+          });
+        }
+      });
+      filters.push({
+        type: 'is',
+        field: CURRENT_SERIES,
+        name: i18n.translate('xpack.ml.annotationsTable.seriesOnlyFilterName', {
+          defaultMessage: 'Filter to series',
+        }),
+      });
+    } else {
+      // else show all the partition columns in AE because there might be multiple jobs
+      columns.push({
+        field: 'partition_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.partitionAEColumnName', {
+          defaultMessage: 'Partition',
+        }),
+        sortable: true,
+      });
+      columns.push({
+        field: 'over_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.overAEColumnName', {
+          defaultMessage: 'Over',
+        }),
+        sortable: true,
+      });
+
+      columns.push({
+        field: 'by_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.byAEColumnName', {
+          defaultMessage: 'By',
+        }),
+        sortable: true,
+      });
+    }
+    const search = {
+      defaultQuery: queryText,
+      box: {
+        incremental: true,
+        schema: true,
+      },
+      filters: filters,
+    };
+
+    columns.push(
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '60px',
+        name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
+          defaultMessage: 'Actions',
+        }),
+        actions,
+      },
+      {
+        // hidden column, for search only
+        field: CURRENT_SERIES,
+        name: CURRENT_SERIES,
+        dataType: 'boolean',
+        width: '0px',
+        render: () => '',
+      }
+    );
+
+    const items = this.getAnnotationsWithExtraInfo(annotations);
     return (
       <Fragment>
         <EuiInMemoryTable
+          error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}
-          items={annotations}
+          items={items}
           columns={columns}
           pagination={{
             pageSizeOptions: [5, 10, 25],
           }}
-          sorting={{
-            sort: {
-              field: 'timestamp',
-              direction: 'asc',
-            },
-          }}
+          sorting={this.sorting}
+          search={search}
           rowProps={getRowProps}
         />
       </Fragment>

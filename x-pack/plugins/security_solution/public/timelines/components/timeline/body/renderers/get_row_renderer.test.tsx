@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
+import '../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData } from '../../../../../common/mock';
@@ -16,6 +17,8 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { rowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
+
+jest.mock('../../../../../common/components/link_to');
 
 describe('get_column_renderer', () => {
   let nonSuricata: Ecs;

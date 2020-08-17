@@ -6,12 +6,16 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
 import { ResolverEvent, EventStats } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { AggBucket } from '../utils/pagination';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 export interface StatsResult {
   alerts: Record<string, number>;
   events: Record<string, EventStats>;
+}
+
+interface AggBucket {
+  key: string;
+  doc_count: number;
 }
 
 interface CategoriesAgg extends AggBucket {

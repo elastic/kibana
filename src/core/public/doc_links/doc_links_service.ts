@@ -20,23 +20,25 @@
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { deepFreeze } from '../../utils';
 
-interface SetupDeps {
+interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
 /** @internal */
 export class DocLinksService {
-  private service?: DocLinksSetup;
-
-  public setup({ injectedMetadata }: SetupDeps): DocLinksSetup {
+  public setup() {}
+  public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
 
-    this.service = deepFreeze({
+    return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        dashboard: {
+          drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
+        },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
           installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`,
@@ -107,10 +109,11 @@ export class DocLinksService {
           loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
         },
+        addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/install-siem.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
         },
         query: {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
@@ -126,24 +129,17 @@ export class DocLinksService {
         },
       },
     });
-
-    return this.service;
-  }
-
-  public start(): DocLinksStart {
-    if (!this.service) {
-      throw new Error(`DocLinksService#setup() must be called first!`);
-    }
-
-    return this.service;
   }
 }
 
 /** @public */
-export interface DocLinksSetup {
+export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly dashboard: {
+      readonly drilldowns: string;
+    };
     readonly filebeat: {
       readonly base: string;
       readonly installation: string;
@@ -214,6 +210,7 @@ export interface DocLinksSetup {
       readonly loadingData: string;
       readonly introduction: string;
     };
+    readonly addData: string;
     readonly kibana: string;
     readonly siem: {
       readonly guide: string;
@@ -230,6 +227,3 @@ export interface DocLinksSetup {
     readonly management: Record<string, string>;
   };
 }
-
-/** @public */
-export type DocLinksStart = DocLinksSetup;

@@ -12,7 +12,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { AnomaliesResponse } from './get_service_map';
 import {
   transformServiceMapResponses,
   ServiceMapResponse,
@@ -36,14 +35,21 @@ const javaService = {
   [AGENT_NAME]: 'java',
 };
 
-const anomalies = ({
-  aggregations: { jobs: { buckets: [] } },
-} as unknown) as AnomaliesResponse;
+const anomalies = {
+  mlJobIds: ['apm-test-1234-ml-module-name'],
+  serviceAnomalies: {
+    'opbeans-test': {
+      transactionType: 'request',
+      actualValue: 10000,
+      anomalyScore: 50,
+      jobId: 'apm-test-1234-ml-module-name',
+    },
+  },
+};
 
 describe('transformServiceMapResponses', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -57,6 +63,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsExternal,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -75,7 +82,6 @@ describe('transformServiceMapResponses', () => {
 
   it('collapses external destinations based on span.destination.resource.name', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -96,6 +102,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -111,7 +118,6 @@ describe('transformServiceMapResponses', () => {
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -134,6 +140,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -150,7 +157,6 @@ describe('transformServiceMapResponses', () => {
 
   it('processes connections without a matching "service" aggregation', () => {
     const response: ServiceMapResponse = {
-      anomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -159,6 +165,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsService,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);

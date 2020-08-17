@@ -52,7 +52,10 @@ export interface DashboardAppScope extends ng.IScope {
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
-  updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
+  handleRefresh: (
+    { query, dateRange }: { query?: Query; dateRange: TimeRange },
+    isUpdate?: boolean
+  ) => void;
   topNavMenu: any;
   showAddPanel: any;
   showSaveQuery: boolean;

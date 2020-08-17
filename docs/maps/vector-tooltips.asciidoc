@@ -15,7 +15,7 @@ image::maps/images/multifeature_tooltip.png[]
 [float]
 [[maps-vector-tooltip-formatting]]
 
-==== Formatting tooltips
+==== Format tooltips
 
 You can format the attributes in a tooltip by adding <<managing-fields, field formatters>> to your
 Kibana index pattern. You can use field formatters to round numbers, provide units,
@@ -23,7 +23,7 @@ and even display images in your tooltip.
 
 [float]
 [[maps-vector-tooltip-locking]]
-==== Locking a tooltip at the current location
+==== Lock a tooltip at the current location
 You can lock a tooltip in place by clicking a location on the map.
 With locked tooltips you can:
 

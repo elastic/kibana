@@ -92,9 +92,8 @@ describe('patch_rules_bulk_schema', () => {
     const decoded = patchRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
-    // TODO: Fix the formatter to give something better than [object Object]
     expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "[object Object]" supplied to "note"',
+      'Invalid value "{"someprop":"some value here"}" supplied to "note"',
     ]);
     expect(output.schema).toEqual({});
   });

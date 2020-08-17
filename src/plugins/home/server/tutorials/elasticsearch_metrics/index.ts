@@ -36,6 +36,7 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
     name: i18n.translate('home.tutorials.elasticsearchMetrics.nameTitle', {
       defaultMessage: 'Elasticsearch metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.elasticsearchMetrics.shortDescription', {

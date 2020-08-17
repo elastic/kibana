@@ -17,12 +17,6 @@ export const SPACE_SEARCH_COUNT_THRESHOLD = 8;
 export const MAX_SPACE_INITIALS = 2;
 
 /**
- * The type name used within the Monitoring index to publish spaces stats.
- * @type {string}
- */
-export const KIBANA_SPACES_STATS_TYPE = 'spaces';
-
-/**
  * The path to enter a space.
  */
 export const ENTER_SPACE_PATH = '/spaces/enter';

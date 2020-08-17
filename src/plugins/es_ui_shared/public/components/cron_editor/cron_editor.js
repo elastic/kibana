@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { padLeft } from 'lodash';
+import { padStart } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -55,12 +55,12 @@ function makeSequence(min, max) {
 
 const MINUTE_OPTIONS = makeSequence(0, 59).map((value) => ({
   value: value.toString(),
-  text: padLeft(value, 2, '0'),
+  text: padStart(value, 2, '0'),
 }));
 
 const HOUR_OPTIONS = makeSequence(0, 23).map((value) => ({
   value: value.toString(),
-  text: padLeft(value, 2, '0'),
+  text: padStart(value, 2, '0'),
 }));
 
 const DAY_OPTIONS = makeSequence(1, 7).map((value) => ({

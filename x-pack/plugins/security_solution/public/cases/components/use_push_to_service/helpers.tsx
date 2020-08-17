@@ -10,8 +10,10 @@ import React from 'react';
 
 import * as i18n from './translations';
 import { ActionLicense } from '../../containers/types';
+import { ErrorMessage } from '../callout/types';
 
 export const getLicenseError = () => ({
+  id: 'license-error',
   title: i18n.PUSH_DISABLE_BY_LICENSE_TITLE,
   description: (
     <FormattedMessage
@@ -29,6 +31,7 @@ export const getLicenseError = () => ({
 });
 
 export const getKibanaConfigError = () => ({
+  id: 'kibana-config-error',
   title: i18n.PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE,
   description: (
     <FormattedMessage
@@ -45,10 +48,8 @@ export const getKibanaConfigError = () => ({
   ),
 });
 
-export const getActionLicenseError = (
-  actionLicense: ActionLicense | null
-): Array<{ title: string; description: JSX.Element }> => {
-  let errors: Array<{ title: string; description: JSX.Element }> = [];
+export const getActionLicenseError = (actionLicense: ActionLicense | null): ErrorMessage[] => {
+  let errors: ErrorMessage[] = [];
   if (actionLicense != null && !actionLicense.enabledInLicense) {
     errors = [...errors, getLicenseError()];
   }

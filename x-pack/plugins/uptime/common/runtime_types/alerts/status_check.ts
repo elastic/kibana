@@ -24,6 +24,7 @@ export const AtomicStatusCheckParamsType = t.intersection([
   t.partial({
     search: t.string,
     filters: StatusCheckFiltersType,
+    shouldCheckStatus: t.boolean,
   }),
 ]);
 
@@ -32,6 +33,7 @@ export type AtomicStatusCheckParams = t.TypeOf<typeof AtomicStatusCheckParamsTyp
 export const StatusCheckParamsType = t.intersection([
   t.partial({
     filters: t.string,
+    shouldCheckStatus: t.boolean,
   }),
   t.type({
     locations: t.array(t.string),
@@ -43,4 +45,42 @@ export const StatusCheckParamsType = t.intersection([
   }),
 ]);
 
+export const RangeUnitType = t.union([
+  t.literal('s', 'Second'),
+  t.literal('m', 'Minute'),
+  t.literal('h', 'Hour'),
+  t.literal('d', 'Day'),
+  t.literal('w', 'Week'),
+  t.literal('M', 'Month'),
+  t.literal('y', 'Year'),
+]);
+
+export type RangeUnit = t.TypeOf<typeof RangeUnitType>;
+
 export type StatusCheckParams = t.TypeOf<typeof StatusCheckParamsType>;
+
+export const GetMonitorAvailabilityParamsType = t.intersection([
+  t.type({
+    range: t.number,
+    rangeUnit: RangeUnitType,
+    threshold: t.string,
+  }),
+  t.partial({
+    filters: t.string,
+  }),
+]);
+
+export type GetMonitorAvailabilityParams = t.TypeOf<typeof GetMonitorAvailabilityParamsType>;
+
+export const MonitorAvailabilityType = t.intersection([
+  t.type({
+    availability: GetMonitorAvailabilityParamsType,
+    shouldCheckAvailability: t.boolean,
+  }),
+  t.partial({
+    filters: StatusCheckFiltersType,
+    search: t.string,
+  }),
+]);
+
+export type MonitorAvailability = t.Type<typeof MonitorAvailabilityType>;

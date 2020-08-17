@@ -21,7 +21,7 @@ on the `kibana_sample_data_*` indices. See
 
 Install the Flights sample data set, if you haven't already.
 
-. On the {kib} home page, click the link underneath *Add sample data*. 
+. On the home page, click *Load a data set and a {kib} dashboard*. 
 . On the *Sample flight data* card, click *Add data*.
 . Once the data is added, click *View data > Dashboard*.
 +
@@ -29,7 +29,7 @@ You’re taken to the *Global Flight* dashboard, a collection of charts, graphs,
 maps, and other visualizations of the the data in the `kibana_sample_data_flights` index.
 +
 [role="screenshot"]
-image::images/tutorial-sample-dashboard.png[]
+image::getting-started/images/tutorial-sample-dashboard.png[]
 
 [float]
 [[tutorial-sample-filter]]
@@ -43,19 +43,19 @@ For more detailed information on these actions, see
 [float]
 ==== Filter the data
 
-. In the *Controls* visualization, set an *Origin City* and a *Destination City*.
+. In the *Controls* visualization, select an *Origin City* and a *Destination City*.
 . Click *Apply changes*.
 +
-The `OriginCityName` and the `DestCityName` fields are filtered to match 
+The `OriginCityName` and the `DestCityName` fields filter the data on the dasbhoard to match 
 the data you specified. 
 +
-For example, this dashboard shows the data for flights from London to Oslo. 
+For example, the following dashboard shows the data for flights from London to Milan. 
 +
 [role="screenshot"]
-image::images/tutorial-sample-filter.png[]
+image::getting-started/images/tutorial-sample-filter.png[]
 
-. To add a filter manually, click *Add filter* in the filter bar,
-and specify the data you want to view.
+. To add a filter manually, click *Add filter*,
+then specify the data you want to view.
 
 . When you are finished experimenting, remove all filters.
 
@@ -78,7 +78,7 @@ The dashboard updates to show data for the flights out of Rome on JetBeats and
 {kib} Airlines.  
 +
 [role="screenshot"]
-image::images/tutorial-sample-query.png[]
+image::getting-started/images/tutorial-sample-query.png[]
 
 . When you are finished exploring the dashboard, remove the query by 
 clearing the contents in the query bar and clicking *Update*.
@@ -92,7 +92,7 @@ matches the selected index pattern. The index pattern tells {kib} which {es} ind
 exploring. You can submit search queries, filter the 
 search results, and view document data.
 
-. In the side navigation, click *Discover*.
+. From the menu, click *Discover*.
 
 . Ensure `kibana_sample_data_flights` is the current index pattern. 
 You might need to click *New* in the menu bar to refresh the data.
@@ -102,7 +102,7 @@ documents over time. A table lists the fields for
 each matching document. By default, all fields are shown.
 +
 [role="screenshot"]
-image::images/tutorial-sample-discover1.png[]
+image::getting-started/images/tutorial-sample-discover1.png[]
 
 . To choose which fields to display, 
 hover the pointer over the list of *Available fields*, and then click *add* next 
@@ -112,7 +112,7 @@ For example, if you add the `DestAirportID` and `DestWeather` fields,
 the display includes columns for those two fields.
 +
 [role="screenshot"]
-image::images/tutorial-sample-discover2.png[]
+image::getting-started/images/tutorial-sample-discover2.png[]
 
 [float]
 [[tutorial-sample-edit]]
@@ -146,7 +146,7 @@ categories, or buckets.
 You now see the average ticket price for all four airlines.
 +
 [role="screenshot"]
-image::images/tutorial-sample-edit1.png[]
+image::getting-started/images/tutorial-sample-edit1.png[]
 
 [float]
 ==== Save the visualization
@@ -160,7 +160,7 @@ handle in the lower right. You can also rearrange the visualizations by clicking
 the header and dragging. Be sure to save the dashboard.
 +
 [role="screenshot"]
-image::images/tutorial-sample-edit2.png[]
+image::getting-started/images/tutorial-sample-edit2.png[]
 
 [float]
 [[tutorial-sample-inspect]]
@@ -177,7 +177,7 @@ and view the {es} query used to retrieve it.
 The initial view shows the document count. 
 +
 [role="screenshot"]
-image::images/tutorial-sample-inspect1.png[]
+image::getting-started/images/tutorial-sample-inspect1.png[]
 
 . To look at the query used to fetch the data for the visualization, select *View > Requests*
 in the upper right of the Inspect pane.

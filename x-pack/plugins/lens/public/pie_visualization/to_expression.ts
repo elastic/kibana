@@ -41,6 +41,7 @@ function expressionHelper(
           numberDisplay: [layer.numberDisplay],
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
+          legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
         },

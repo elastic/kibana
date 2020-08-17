@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { IFieldFormatsRegistry } from '.';
+import { identity } from 'lodash';
+import { FieldFormat, IFieldFormatsRegistry } from '.';
 
 export const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn().mockImplementation(() => ({
+    convert: jest.fn().mockImplementation((t: string) => t),
     getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
   })) as any,
   getDefaultInstanceCacheResolver: jest.fn(),
@@ -35,6 +37,9 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
   init: jest.fn(),
   register: jest.fn(),
   parseDefaultTypeMap: jest.fn(),
-  deserialize: jest.fn(),
+  deserialize: jest.fn().mockImplementation(() => {
+    const DefaultFieldFormat = FieldFormat.from(identity);
+    return new DefaultFieldFormat();
+  }),
   getTypeWithoutMetaParams: jest.fn(),
 };

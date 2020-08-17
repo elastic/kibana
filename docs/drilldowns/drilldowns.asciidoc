@@ -1,0 +1,108 @@
+[[drilldowns]]
+== Use drilldowns for dashboard actions
+
+Drilldowns, also known as custom actions, allow you to configure a
+workflow for analyzing and troubleshooting your data.
+Using a drilldown, you can navigate from one dashboard to another,
+taking the current time range, filters, and other parameters with you,
+so the context remains the same. You can continue your analysis from a new perspective.
+
+For example, you might have a dashboard that shows the overall status of multiple data centers.
+You can create a drilldown that navigates from this dashboard to a dashboard
+that shows a single data center or server.
+
+[float]
+[[how-drilldowns-work]]
+=== How drilldowns work
+
+Drilldowns are user-configurable {kib} actions that are stored with the
+dashboard metadata. Drilldowns are specific to the dashboard panel
+for which you create them&mdash;they are not shared across panels.
+A panel can have multiple drilldowns.
+
+This example shows a dashboard panel that contains a pie chart.
+Typically, clicking a pie slice applies the current filter.
+When a panel has a drilldown, clicking a pie slice opens a menu with
+the default action and your drilldowns. Refer to the <<drilldowns-example, Try it section>>
+for instructions on how to create this drilldown.
+
+[role="screenshot"]
+image::images/drilldown_on_piechart.gif[Drilldown on pie chart that navigates to another dashboard]
+
+Third-party developers can create drilldowns.
+Refer to https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples[this example plugin]
+to learn how to code drilldowns.
+
+[float]
+[[create-manage-drilldowns]]
+=== Create and manage drilldowns
+
+Your dashboard must be in *Edit* mode to create a drilldown.
+Once a panel has at least one drilldown, the menu also includes a *Manage drilldowns* action
+for editing and deleting drilldowns.
+
+[role="screenshot"]
+image::images/drilldown_menu.png[Panel menu with Create drilldown and Manage drilldown actions]
+
+[float]
+[[drilldowns-example]]
+=== Try it: Create a drilldown
+
+This example shows how to create the *Host Overview* drilldown shown earlier in this doc.
+
+[float]
+==== Set up the dashboards
+
+. Add the <<get-data-in, sample web logs>> data set.
+
+. Create a new dashboard, called `Host Overview`, and include these visualizations
+from the sample data set:
++
+[%hardbreaks]
+*[Logs] Heatmap*
+*[Logs] Visitors by OS*
+*[Logs] Host, Visits, and Bytes Table*
+*[Logs] Total Requests and Bytes*
++
+TIP: If you don’t see data for a panel, try changing the time range.
+
+. Open the *[Logs] Web traffic* dashboard.
+
+. Set a search and filter.
++
+[%hardbreaks]
+Search: `extension.keyword:( “gz” or “css” or “deb”)`
+Filter: `geo.src : CN`
+
+[float]
+==== Create the drilldown
+
+
+. In the dashboard menu bar, click *Edit*.
+
+. In *[Logs] Visitors by OS*, open the panel menu, and then select *Create drilldown*.
+
+. Give the drilldown a name.
+
+. Select *Host Overview* as the destination dashboard.
+
+. Keep both filters enabled so that the drilldown carries over the global filters and date range.
++
+Your input should look similar to this:
++
+[role="screenshot"]
+image::images/drilldown_create.png[Create drilldown with entries for drilldown name and destination]
+
+. Click *Create drilldown.*
+
+. Save the dashboard.
++
+If you don’t save the drilldown, and then navigate away, the drilldown is lost.
+
+. In *[Logs] Visitors by OS*, click the `win 8` slice of the pie, and then select the name of your drilldown.
++
+[role="screenshot"]
+image::images/drilldown_on_panel.png[Drilldown on pie chart that navigates to another dashboard]
++
+You are navigated to your destination dashboard. Verify that the search query, filters,
+and time range are carried over.

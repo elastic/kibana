@@ -20,6 +20,10 @@ class KibanaService {
     apiService.http = this._core.http;
   }
 
+  public get toasts() {
+    return this._core.notifications.toasts;
+  }
+
   private constructor() {}
 
   static getInstance(): KibanaService {

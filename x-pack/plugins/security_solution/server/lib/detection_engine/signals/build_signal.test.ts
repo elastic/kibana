@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sampleDocNoSortId, sampleRule } from './__mocks__/es_results';
+import { sampleDocNoSortId } from './__mocks__/es_results';
 import {
   buildSignal,
   buildAncestor,
@@ -13,6 +13,7 @@ import {
 } from './build_signal';
 import { Signal, Ancestor } from './types';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
+import { getPartialRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -22,7 +23,7 @@ describe('buildSignal', () => {
   test('it builds a signal as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const signal = buildSignal(doc, rule);
     const expected: Signal = {
       parent: {
@@ -82,7 +83,7 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const signal = buildSignal(doc, rule);
     const expected: Signal = {
       parent: {
@@ -148,7 +149,7 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     rule.tags = [
       'some fake tag 1',
       'some fake tag 2',
@@ -220,7 +221,7 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const signal = buildAncestor(doc, rule);
     const expected: Ancestor = {
       rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -258,7 +259,7 @@ describe('buildSignal', () => {
         },
       ],
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const signal = buildAncestor(doc, rule);
     const expected: Ancestor = {
       rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -296,7 +297,7 @@ describe('buildSignal', () => {
         },
       ],
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     rule.tags = [
       'some fake tag 1',
       'some fake tag 2',
@@ -323,7 +324,7 @@ describe('buildSignal', () => {
       kind: 'event',
       module: 'system',
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const signal = buildAncestorsSignal(doc, rule);
     const expected: Ancestor[] = [
       {
@@ -363,7 +364,7 @@ describe('buildSignal', () => {
         },
       ],
     };
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const signal = buildAncestorsSignal(doc, rule);
     const expected: Ancestor[] = [
       {
@@ -385,7 +386,7 @@ describe('buildSignal', () => {
   });
 
   test('it removes internal tags from a typical rule', () => {
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     rule.tags = [
       'some fake tag 1',
       'some fake tag 2',
@@ -393,29 +394,29 @@ describe('buildSignal', () => {
       `${INTERNAL_IMMUTABLE_KEY}:true`,
     ];
     const noInternals = removeInternalTagsFromRule(rule);
-    expect(noInternals).toEqual(sampleRule());
+    expect(noInternals).toEqual(getPartialRulesSchemaMock());
   });
 
   test('it works with an empty array', () => {
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     rule.tags = [];
     const noInternals = removeInternalTagsFromRule(rule);
-    const expected = sampleRule();
+    const expected = getPartialRulesSchemaMock();
     expected.tags = [];
     expect(noInternals).toEqual(expected);
   });
 
   test('it works if tags does not exist', () => {
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     delete rule.tags;
     const noInternals = removeInternalTagsFromRule(rule);
-    const expected = sampleRule();
+    const expected = getPartialRulesSchemaMock();
     delete expected.tags;
     expect(noInternals).toEqual(expected);
   });
 
   test('it works if tags contains normal values and no internal values', () => {
-    const rule = sampleRule();
+    const rule = getPartialRulesSchemaMock();
     const noInternals = removeInternalTagsFromRule(rule);
     expect(noInternals).toEqual(rule);
   });

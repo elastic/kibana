@@ -9,8 +9,8 @@ import { findInventoryModel, findInventoryFields } from '../../../common/invento
 import { InfraSnapshotRequestOptions } from './types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import {
-  SnapshotModelRT,
-  SnapshotModel,
+  MetricsUIAggregation,
+  MetricsUIAggregationRT,
   InventoryItemType,
 } from '../../../common/inventory_models/types';
 import {
@@ -54,14 +54,18 @@ export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
   return [{ id: { terms: { field: fields.id } } }];
 };
 
-export const metricToAggregation = (nodeType: InventoryItemType, metric: SnapshotMetricInput) => {
+export const metricToAggregation = (
+  nodeType: InventoryItemType,
+  metric: SnapshotMetricInput,
+  index: number
+) => {
   const inventoryModel = findInventoryModel(nodeType);
   if (SnapshotCustomMetricInputRT.is(metric)) {
     if (metric.aggregation === 'rate') {
-      return networkTraffic(metric.type, metric.field);
+      return networkTraffic(`custom_${index}`, metric.field);
     }
     return {
-      custom: {
+      [`custom_${index}`]: {
         [metric.aggregation]: {
           field: metric.field,
         },
@@ -71,20 +75,25 @@ export const metricToAggregation = (nodeType: InventoryItemType, metric: Snapsho
   return inventoryModel.metrics.snapshot?.[metric.type];
 };
 
-export const getMetricsAggregations = (options: InfraSnapshotRequestOptions): SnapshotModel => {
-  const aggregation = metricToAggregation(options.nodeType, options.metric);
-  if (!SnapshotModelRT.is(aggregation)) {
-    throw new Error(
-      i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {
-        defaultMessage: 'The aggregation for {metric} for {nodeType} is not available.',
-        values: {
-          nodeType: options.nodeType,
-          metric: options.metric.type,
-        },
-      })
-    );
-  }
-  return aggregation;
+export const getMetricsAggregations = (
+  options: InfraSnapshotRequestOptions
+): MetricsUIAggregation => {
+  const { metrics } = options;
+  return metrics.reduce((aggs, metric, index) => {
+    const aggregation = metricToAggregation(options.nodeType, metric, index);
+    if (!MetricsUIAggregationRT.is(aggregation)) {
+      throw new Error(
+        i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {
+          defaultMessage: 'The aggregation for {metric} for {nodeType} is not available.',
+          values: {
+            nodeType: options.nodeType,
+            metric: metric.type,
+          },
+        })
+      );
+    }
+    return { ...aggs, ...aggregation };
+  }, {});
 };
 
 export const getDateHistogramOffset = (from: number, interval: string): string => {

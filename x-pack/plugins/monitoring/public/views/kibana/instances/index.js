@@ -12,7 +12,11 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { KibanaInstances } from '../../../components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { KIBANA_SYSTEM_ID, CODE_PATH_KIBANA } from '../../../../common/constants';
+import {
+  KIBANA_SYSTEM_ID,
+  CODE_PATH_KIBANA,
+  ALERT_KIBANA_VERSION_MISMATCH,
+} from '../../../../common/constants';
 
 uiRoutes.when('/kibana/instances', {
   template,
@@ -33,9 +37,13 @@ uiRoutes.when('/kibana/instances', {
         reactNodeId: 'monitoringKibanaInstancesApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+          },
+        },
       });
-
-      const kbnUrl = $injector.get('kbnUrl');
 
       const renderReact = () => {
         this.renderReact(
@@ -48,15 +56,12 @@ uiRoutes.when('/kibana/instances', {
                 {flyoutComponent}
                 <KibanaInstances
                   instances={this.data.kibanas}
+                  alerts={this.alerts}
                   setupMode={setupMode}
                   sorting={this.sorting}
                   pagination={this.pagination}
                   onTableChange={this.onTableChange}
                   clusterStatus={this.data.clusterStatus}
-                  angular={{
-                    $scope,
-                    kbnUrl,
-                  }}
                 />
                 {bottomBarComponent}
               </Fragment>

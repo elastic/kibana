@@ -14,7 +14,7 @@ import { serializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 
 const paramsValidation = schema.object({
   nameOrNames: schema.string(),

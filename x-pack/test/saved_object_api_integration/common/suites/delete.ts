@@ -28,7 +28,7 @@ const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' }
 export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('delete');
+  const expectForbidden = expectResponses.forbiddenTypes('delete');
   const expectResponseBody = (testCase: DeleteTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {

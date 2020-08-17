@@ -142,7 +142,7 @@ export function populateValidationMessages(
     basicValidations.bucketSpan.message = msg;
   } else if (validationResults.contains('bucket_span_invalid')) {
     basicValidations.bucketSpan.valid = false;
-    basicValidations.bucketSpan.message = invalidTimeFormatMessage(
+    basicValidations.bucketSpan.message = invalidTimeIntervalMessage(
       jobConfig.analysis_config.bucket_span
     );
   }
@@ -163,12 +163,12 @@ export function populateValidationMessages(
 
   if (validationResults.contains('query_delay_invalid')) {
     basicValidations.queryDelay.valid = false;
-    basicValidations.queryDelay.message = invalidTimeFormatMessage(datafeedConfig.query_delay);
+    basicValidations.queryDelay.message = invalidTimeIntervalMessage(datafeedConfig.query_delay);
   }
 
   if (validationResults.contains('frequency_invalid')) {
     basicValidations.frequency.valid = false;
-    basicValidations.frequency.message = invalidTimeFormatMessage(datafeedConfig.frequency);
+    basicValidations.frequency.message = invalidTimeIntervalMessage(datafeedConfig.frequency);
   }
 }
 
@@ -202,16 +202,18 @@ export function checkForExistingJobAndGroupIds(
   };
 }
 
-function invalidTimeFormatMessage(value: string | undefined) {
+function invalidTimeIntervalMessage(value: string | undefined) {
   return i18n.translate(
     'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
     {
       defaultMessage:
-        '{value} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+        '{value} is not a valid time interval format e.g. {thirtySeconds}, {tenMinutes}, {oneHour}, {sevenDays}. It also needs to be higher than zero.',
       values: {
         value,
+        thirtySeconds: '30s',
         tenMinutes: '10m',
         oneHour: '1h',
+        sevenDays: '7d',
       },
     }
   );

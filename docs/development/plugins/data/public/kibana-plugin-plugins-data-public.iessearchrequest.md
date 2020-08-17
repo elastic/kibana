@@ -15,5 +15,5 @@ export interface IEsSearchRequest extends IKibanaSearchRequest
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [indexType](./kibana-plugin-plugins-data-public.iessearchrequest.indextype.md) | <code>string</code> |  |
-|  [params](./kibana-plugin-plugins-data-public.iessearchrequest.params.md) | <code>SearchParams</code> |  |
+|  [params](./kibana-plugin-plugins-data-public.iessearchrequest.params.md) | <code>ISearchRequestParams</code> |  |
 

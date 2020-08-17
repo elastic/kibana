@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, round, sortBy } from 'lodash';
+import { isNumber, sortBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
@@ -14,16 +14,22 @@ export type ApmTimeSeriesResponse = ReturnType<typeof timeseriesTransformer>;
 export function timeseriesTransformer({
   timeseriesResponse,
   bucketSize,
+  durationAsMinutes,
 }: {
   timeseriesResponse: ESResponse;
   bucketSize: number;
+  durationAsMinutes: number;
 }) {
   const aggs = timeseriesResponse.aggregations;
   const overallAvgDuration = aggs?.overall_avg_duration.value || null;
   const responseTimeBuckets = aggs?.response_times.buckets || [];
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
   const transactionResultBuckets = aggs?.transaction_results.buckets || [];
-  const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
+  const tpmBuckets = getTpmBuckets({
+    transactionResultBuckets,
+    bucketSize,
+    durationAsMinutes,
+  });
 
   return {
     responseTimes: {
@@ -36,18 +42,28 @@ export function timeseriesTransformer({
   };
 }
 
-export function getTpmBuckets(
-  transactionResultBuckets: Required<
-    ESResponse
-  >['aggregations']['transaction_results']['buckets'] = [],
-  bucketSize: number
-) {
+type TransactionResultBuckets = Required<
+  ESResponse
+>['aggregations']['transaction_results']['buckets'];
+
+export function getTpmBuckets({
+  transactionResultBuckets = [],
+  bucketSize,
+  durationAsMinutes,
+}: {
+  transactionResultBuckets: TransactionResultBuckets;
+  bucketSize: number;
+  durationAsMinutes: number;
+}) {
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
       const dataPoints = timeseries.buckets.map((bucket) => {
+        // calculate request/minute. Avoid up-scaling numbers if bucketSize is below 60s (1 minute).
+        // Eg. 1 request during a 10 second window should be displayed as "1 rpm" instead of "6 rpm".
+        const tmpValue = bucket.doc_count * (60 / Math.max(60, bucketSize));
         return {
           x: bucket.key,
-          y: round(bucket.doc_count * (60 / bucketSize), 1),
+          y: tmpValue,
         };
       });
 
@@ -55,7 +71,14 @@ export function getTpmBuckets(
       const key =
         resultKey === '' ? NOT_AVAILABLE_LABEL : (resultKey as string);
 
-      return { key, dataPoints };
+      const docCountTotal = timeseries.buckets
+        .map((bucket) => bucket.doc_count)
+        .reduce((a, b) => a + b, 0);
+
+      // calculate request/minute
+      const avg = docCountTotal / durationAsMinutes;
+
+      return { key, dataPoints, avg };
     }
   );
 
@@ -65,11 +88,11 @@ export function getTpmBuckets(
   );
 }
 
-function getResponseTime(
-  responseTimeBuckets: Required<
-    ESResponse
-  >['aggregations']['response_times']['buckets'] = []
-) {
+type ResponseTimeBuckets = Required<
+  ESResponse
+>['aggregations']['response_times']['buckets'];
+
+function getResponseTime(responseTimeBuckets: ResponseTimeBuckets = []) {
   return responseTimeBuckets.reduce(
     (acc, bucket) => {
       const { '95.0': p95, '99.0': p99 } = bucket.pct.values;

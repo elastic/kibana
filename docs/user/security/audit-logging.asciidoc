@@ -1,6 +1,6 @@
 [role="xpack"]
 [[xpack-security-audit-logging]]
-===  Audit Logging
+=== Audit logs
 
 You can enable auditing to keep track of security-related events such as
 authorization success and failures. Logging these events enables you

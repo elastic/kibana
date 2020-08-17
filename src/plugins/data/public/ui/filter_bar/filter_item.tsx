@@ -135,9 +135,10 @@ export function FilterItem(props: Props) {
     const dataTestSubjValue = filter.meta.value
       ? `filter-value-${isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status}`
       : '';
+    const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
     const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
-    return `filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned}`;
+    return `filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned} ${dataTestSubjNegated}`;
   }
 
   function getPanels() {

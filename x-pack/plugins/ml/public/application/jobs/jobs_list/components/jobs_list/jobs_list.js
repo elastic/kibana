@@ -14,7 +14,8 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../../../../util/get_job_id_url';
+import { getJobIdUrl, TAB_IDS } from '../../../../util/get_selected_ids_url';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
+    return <EuiLink href={getJobIdUrl(TAB_IDS.ANOMALY_DETECTION, id)}>{id}</EuiLink>;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
@@ -189,7 +189,9 @@ export class JobsList extends Component {
         sortable: true,
         field: 'description',
         'data-test-subj': 'mlJobListColumnDescription',
-        render: (description, item) => <JobDescription job={item} />,
+        render: (description, item) => (
+          <JobDescription job={item} isManagementTable={isManagementTable} />
+        ),
         textOnly: true,
         width: '20%',
       },

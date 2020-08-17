@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import '../input_focus';
+import uiRoutes from 'ui/routes';
 
 describe('Input focus directive', function () {
   let $compile;
@@ -31,6 +32,8 @@ describe('Input focus directive', function () {
   let selectedEl;
   let selectedText;
   const inputValue = 'Input Text Value';
+
+  uiRoutes.enable();
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(

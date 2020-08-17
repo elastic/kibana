@@ -162,7 +162,9 @@ export class SavedObjectsClient {
             });
 
             if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+              return queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
             }
 
             queueItem.resolve(foundObject);
@@ -292,6 +294,8 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      namespaces: 'namespaces',
+      preference: 'preference',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
@@ -302,7 +306,6 @@ export class SavedObjectsClient {
       query,
     });
     return request.then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['find']>>,
         SavedObjectsFindResponsePublic
@@ -313,7 +316,10 @@ export class SavedObjectsClient {
           per_page: 'perPage',
           page: 'page',
         },
-        resp
+        {
+          ...resp,
+          saved_objects: resp.saved_objects.map((d) => this.createSavedObject(d)),
+        }
       ) as SavedObjectsFindResponsePublic<T>;
     });
   };

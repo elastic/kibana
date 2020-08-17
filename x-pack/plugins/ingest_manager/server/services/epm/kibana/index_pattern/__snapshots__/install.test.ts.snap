@@ -611,7 +611,7 @@ exports[`creating index patterns from yaml fields createIndexPatternFields funct
 }
 `;
 
-exports[`creating index patterns from yaml fields flattenFields function flattens recursively and handles copying alias fields: flattenFields 1`] = `
+exports[`creating index patterns from yaml fields flattenFields function flattens recursively and handles copying alias fields flattenFields matches snapshot: flattenFields 1`] = `
 [
   {
     "name": "coredns.id",

@@ -20,7 +20,7 @@
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config.test.mock';
 
 import { SavedObjectsClient } from '../saved_objects';
@@ -28,7 +28,7 @@ import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_c
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
 
-const logger = loggingServiceMock.create().get();
+const logger = loggingSystemMock.create().get();
 
 const TYPE = 'config';
 const ID = 'kibana-version';
@@ -375,7 +375,7 @@ describe('ui settings', () => {
         },
       });
 
-      expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
             "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
@@ -517,7 +517,7 @@ describe('ui settings', () => {
         user: 'foo',
       });
 
-      expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
             "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
@@ -645,7 +645,7 @@ describe('ui settings', () => {
 
       expect(await uiSettings.get('id')).toBe(42);
 
-      expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
             "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",

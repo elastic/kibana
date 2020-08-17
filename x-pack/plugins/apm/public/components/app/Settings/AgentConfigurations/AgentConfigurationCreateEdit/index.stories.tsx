@@ -21,13 +21,13 @@ import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../../../../context/ApmPluginContext';
+import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 storiesOf(
   'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',
   module
-).add(
-  'with config',
-  () => {
+)
+  .addDecorator((storyFn) => {
     const httpMock = {};
 
     // mock
@@ -40,10 +40,21 @@ storiesOf(
         },
       },
     };
+
     return (
-      <ApmPluginContext.Provider
-        value={(contextMock as unknown) as ApmPluginContextValue}
-      >
+      <EuiThemeProvider>
+        <ApmPluginContext.Provider
+          value={(contextMock as unknown) as ApmPluginContextValue}
+        >
+          {storyFn()}
+        </ApmPluginContext.Provider>
+      </EuiThemeProvider>
+    );
+  })
+  .add(
+    'with config',
+    () => {
+      return (
         <AgentConfigurationCreateEdit
           pageStep="choose-settings-step"
           existingConfigResult={{
@@ -54,12 +65,11 @@ storiesOf(
             } as AgentConfiguration,
           }}
         />
-      </ApmPluginContext.Provider>
-    );
-  },
-  {
-    info: {
-      source: false,
+      );
     },
-  }
-);
+    {
+      info: {
+        source: false,
+      },
+    }
+  );

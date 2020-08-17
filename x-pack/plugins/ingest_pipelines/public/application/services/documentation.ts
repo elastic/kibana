@@ -15,6 +15,10 @@ export class DocumentationService {
     this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
   }
 
+  public getEsDocsBasePath() {
+    return this.esDocBasePath;
+  }
+
   public getIngestNodeUrl() {
     return `${this.esDocBasePath}/ingest.html`;
   }
@@ -29,10 +33,6 @@ export class DocumentationService {
 
   public getPutPipelineApiUrl() {
     return `${this.esDocBasePath}/put-pipeline-api.html`;
-  }
-
-  public getSimulatePipelineApiUrl() {
-    return `${this.esDocBasePath}/simulate-pipeline-api.html`;
   }
 }
 

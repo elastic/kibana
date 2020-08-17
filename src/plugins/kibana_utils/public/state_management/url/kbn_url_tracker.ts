@@ -38,6 +38,10 @@ export interface KbnUrlTracker {
   stop: () => void;
   setActiveUrl: (newUrl: string) => void;
   getActiveUrl: () => string;
+  /**
+   * Resets internal state to the last active url, discarding the most recent change
+   */
+  restorePreviousUrl: () => void;
 }
 
 /**
@@ -122,6 +126,8 @@ export function createKbnUrlTracker({
 }): KbnUrlTracker {
   const storageInstance = storage || sessionStorage;
 
+  // local state storing previous active url to make restore possible
+  let previousActiveUrl: string = '';
   // local state storing current listeners and active url
   let activeUrl: string = '';
   let unsubscribeURLHistory: UnregisterCallback | undefined;
@@ -157,6 +163,7 @@ export function createKbnUrlTracker({
       toastNotifications.addDanger(e.message);
     }
 
+    previousActiveUrl = activeUrl;
     activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
     storageInstance.setItem(storageKey, activeUrl);
   }
@@ -183,6 +190,7 @@ export function createKbnUrlTracker({
           { useHash: false },
           baseUrl + (activeUrl || defaultSubUrl)
         );
+        previousActiveUrl = activeUrl;
         // remove baseUrl prefix (just storing the sub url part)
         activeUrl = getActiveSubUrl(updatedUrl);
         storageInstance.setItem(storageKey, activeUrl);
@@ -198,6 +206,7 @@ export function createKbnUrlTracker({
   const storedUrl = storageInstance.getItem(storageKey);
   if (storedUrl) {
     activeUrl = storedUrl;
+    previousActiveUrl = storedUrl;
     setNavLink(storedUrl);
   }
 
@@ -216,6 +225,9 @@ export function createKbnUrlTracker({
     setActiveUrl,
     getActiveUrl() {
       return activeUrl;
+    },
+    restorePreviousUrl() {
+      activeUrl = previousActiveUrl;
     },
   };
 }

@@ -15,7 +15,7 @@ export interface HttpServerInfo
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [host](./kibana-plugin-core-server.httpserverinfo.host.md) | <code>string</code> | The hostname of the server |
+|  [hostname](./kibana-plugin-core-server.httpserverinfo.hostname.md) | <code>string</code> | The hostname of the server |
 |  [name](./kibana-plugin-core-server.httpserverinfo.name.md) | <code>string</code> | The name of the Kibana server |
 |  [port](./kibana-plugin-core-server.httpserverinfo.port.md) | <code>number</code> | The port the server is listening on |
 |  [protocol](./kibana-plugin-core-server.httpserverinfo.protocol.md) | <code>'http' &#124; 'https' &#124; 'socket'</code> | The protocol used by the server |

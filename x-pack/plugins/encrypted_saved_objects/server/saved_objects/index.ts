@@ -15,6 +15,7 @@ import {
 import { SecurityPluginSetup } from '../../../security/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
+import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
@@ -84,7 +85,7 @@ export function setupSavedObjects({
             {
               type,
               id,
-              namespace: typeRegistry.isSingleNamespace(type) ? options?.namespace : undefined,
+              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
             },
             savedObject.attributes as Record<string, unknown>
           )) as T,

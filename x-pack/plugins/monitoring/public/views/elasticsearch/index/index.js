@@ -57,7 +57,6 @@ uiRoutes.when('/elasticsearch/indices/:index', {
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
       const indexName = $route.current.params.index;
 
       super({
@@ -97,7 +96,6 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           this.renderReact(
             <Index
               scope={$scope}
-              kbnUrl={kbnUrl}
               onBrush={this.onBrush}
               indexUuid={this.indexName}
               clusterUuid={$scope.cluster.cluster_uuid}

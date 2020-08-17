@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
@@ -62,19 +61,21 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     coreMock.createStart()
   );
 
-  const field = {
-    name: 'bytes',
-    type: 'number',
-    esTypes: ['long'],
-    count: 10,
-    scripted: false,
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: true,
-    format: null,
-    routes: {},
-    $$spec: {},
-  } as IndexPatternField;
+  const field = new IndexPatternField(
+    indexPattern,
+    {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    },
+    'bytes',
+    () => {}
+  );
 
   const props = {
     indexPattern,

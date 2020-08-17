@@ -15,25 +15,26 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  */
 
 export const AGENT_NAMES: AgentName[] = [
-  'java',
-  'js-base',
-  'rum-js',
   'dotnet',
   'go',
   'java',
+  'js-base',
   'nodejs',
   'python',
   'ruby',
+  'rum-js',
 ];
 
 export function isAgentName(agentName: string): agentName is AgentName {
   return AGENT_NAMES.includes(agentName as AgentName);
 }
 
+export const RUM_AGENTS = ['js-base', 'rum-js'];
+
 export function isRumAgentName(
-  agentName: string | undefined
+  agentName?: string
 ): agentName is 'js-base' | 'rum-js' {
-  return agentName === 'js-base' || agentName === 'rum-js';
+  return RUM_AGENTS.includes(agentName!);
 }
 
 export function isJavaAgentName(

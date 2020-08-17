@@ -7,7 +7,6 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { difference, zipObject } from 'lodash';
-import mean from 'lodash.mean';
 import { rgba } from 'polished';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
@@ -18,7 +17,7 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
+import { asDecimal, asDuration, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
@@ -34,6 +33,7 @@ export interface ITpmBucket {
 export interface ITransactionChartData {
   tpmSeries: ITpmBucket[];
   responseTimeSeries: TimeSeries[];
+  mlJobId: string | undefined;
 }
 
 const INITIAL_DATA = {
@@ -63,6 +63,7 @@ export function getTransactionCharts(
   return {
     tpmSeries,
     responseTimeSeries,
+    mlJobId: anomalyTimeseries?.jobId,
   };
 }
 
@@ -72,10 +73,6 @@ export function getResponseTimeSeries({
 }: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
-  const formattedDuration = convertTo({
-    unit: 'milliseconds',
-    microseconds: overallAvgDuration,
-  }).formatted;
 
   const series: TimeSeries[] = [
     {
@@ -83,7 +80,7 @@ export function getResponseTimeSeries({
         defaultMessage: 'Avg.',
       }),
       data: avg,
-      legendValue: formattedDuration,
+      legendValue: asDuration(overallAvgDuration),
       type: 'linemark',
       color: theme.euiColorVis1,
     },
@@ -174,11 +171,10 @@ export function getTpmSeries(
   }
 
   return tpmBuckets.map((bucket) => {
-    const average = mean(bucket.dataPoints.map((p) => p.y));
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(average)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
       color: getColor(bucket.key),
     };

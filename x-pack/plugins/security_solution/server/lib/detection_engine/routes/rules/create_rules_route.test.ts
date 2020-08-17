@@ -9,7 +9,6 @@ import {
   getEmptyFindResult,
   getResult,
   getCreateRequest,
-  typicalPayload,
   getFindResultStatus,
   getNonEmptyIndex,
   getEmptyIndex,
@@ -20,8 +19,8 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 jest.mock('../../rules/update_rules_notifications');
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -29,14 +28,6 @@ describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -114,7 +105,7 @@ describe('create_rules', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        message: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
+        message: 'To create a rule, the index must exist first. Index undefined does not exist',
         status_code: 400,
       });
     });
@@ -149,7 +140,7 @@ describe('create_rules', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...typicalPayload(),
+          ...getCreateRulesSchemaMock(),
           type: 'query',
         },
       });
@@ -163,7 +154,7 @@ describe('create_rules', () => {
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...typicalPayload(),
+          ...getCreateRulesSchemaMock(),
           type: 'unexpected_type',
         },
       });

@@ -21,6 +21,8 @@ export {
   calculateObjectHash,
   defer,
   Defer,
+  fieldWildcardFilter,
+  fieldWildcardMatcher,
   Get,
   JsonArray,
   JsonObject,
@@ -31,13 +33,9 @@ export {
   UiComponentInstance,
   url,
   createGetterSetter,
-  defaultFeedbackMessage,
 } from '../common';
 export * from './core';
-export * from './errors';
-export * from './field_mapping';
-export * from './field_wildcard';
-export * from './parse';
+export * from '../common/errors';
 export * from './render_complete';
 export * from './resize_checker';
 export * from '../common/state_containers';
@@ -60,6 +58,7 @@ export {
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
   setStateToKbnUrl,
+  withNotifyOnErrors,
 } from './state_management/url';
 export {
   syncState,

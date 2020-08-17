@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DocLinksService, DocLinksSetup, DocLinksStart } from './doc_links_service';
+export { DocLinksService, DocLinksStart } from './doc_links_service';

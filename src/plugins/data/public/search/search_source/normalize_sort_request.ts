@@ -61,6 +61,7 @@ function normalize(
   }
 
   // Don't include unmapped_type for _score field
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
   return {
     [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions) },
@@ -69,7 +70,7 @@ function normalize(
 
 // The ES API only supports sort scripts of type 'number' and 'string'
 function castSortType(type: string) {
-  if (['number', 'string'].includes(type)) {
+  if (['number'].includes(type)) {
     return 'number';
   } else if (['string', 'boolean'].includes(type)) {
     return 'string';

@@ -615,7 +615,7 @@
           "__typename": "MonitorSummary"
         }
       ],
-      "__typename": "MonitorSummaryResult"
+      "__typename": "MonitorSummariesResult"
     }
   }
 }

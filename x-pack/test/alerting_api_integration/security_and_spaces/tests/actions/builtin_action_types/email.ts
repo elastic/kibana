@@ -11,11 +11,8 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('create email action', () => {
-    after(() => esArchiver.unload('empty_kibana'));
-
     let createdActionId = '';
 
     it('should return 200 when creating an email action successfully', async () => {

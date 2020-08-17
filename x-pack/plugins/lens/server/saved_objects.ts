@@ -29,6 +29,9 @@ export function setupSavedObjects(core: CoreSetup) {
         title: {
           type: 'text',
         },
+        description: {
+          type: 'text',
+        },
         visualizationType: {
           type: 'keyword',
         },
@@ -37,6 +40,7 @@ export function setupSavedObjects(core: CoreSetup) {
         },
         expression: {
           index: false,
+          doc_values: false,
           type: 'keyword',
         },
       },

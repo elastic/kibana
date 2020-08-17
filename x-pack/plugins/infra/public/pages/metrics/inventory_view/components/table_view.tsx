@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { last } from 'lodash';
+import { last, first } from 'lodash';
 import React, { useState, useCallback, useEffect } from 'react';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
@@ -15,7 +15,7 @@ import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
-import { CONTAINER_CLASSNAME } from '../../../../apps/start_app';
+import { CONTAINER_CLASSNAME } from '../../../../apps/common_styles';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -142,6 +142,7 @@ export const TableView = (props: Props) => {
 
   const items = nodes.map((node) => {
     const name = last(node.path);
+    const metric = first(node.metrics);
     return {
       name: (name && name.label) || 'unknown',
       ...getGroupPaths(node.path).reduce(
@@ -151,9 +152,9 @@ export const TableView = (props: Props) => {
         }),
         {}
       ),
-      value: node.metric.value,
-      avg: node.metric.avg,
-      max: node.metric.max,
+      value: (metric && metric.value) || 0,
+      avg: (metric && metric.avg) || 0,
+      max: (metric && metric.max) || 0,
       node: createWaffleMapNode(node),
     };
   });

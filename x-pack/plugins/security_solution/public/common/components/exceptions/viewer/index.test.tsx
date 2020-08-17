@@ -9,108 +9,135 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { ExceptionItem } from './';
-import { getExceptionItemMock } from '../mocks';
+import { ExceptionsViewer } from './';
+import { useKibana } from '../../../../common/lib/kibana';
+import {
+  ExceptionListTypeEnum,
+  useExceptionList,
+  useApi,
+} from '../../../../../public/lists_plugin_deps';
+import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 
-describe('ExceptionItem', () => {
-  it('it renders ExceptionDetails and ExceptionEntries', () => {
-    const exceptionItem = getExceptionItemMock();
+jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../public/lists_plugin_deps');
 
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          handleDelete={jest.fn()}
-          handleEdit={jest.fn()}
-          exceptionItem={exceptionItem}
-        />
-      </ThemeProvider>
-    );
+describe('ExceptionsViewer', () => {
+  const ruleName = 'test rule';
 
-    expect(wrapper.find('ExceptionDetails')).toHaveLength(1);
-    expect(wrapper.find('ExceptionEntries')).toHaveLength(1);
+  beforeEach(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        http: {},
+        application: {
+          getUrlForApp: () => 'some/url',
+        },
+      },
+    });
+
+    (useApi as jest.Mock).mockReturnValue({
+      deleteExceptionItem: jest.fn().mockResolvedValue(true),
+      getExceptionListsItems: jest.fn().mockResolvedValue(getFoundExceptionListItemSchemaMock()),
+    });
+
+    (useExceptionList as jest.Mock).mockReturnValue([
+      false,
+      [],
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
   });
 
-  it('it invokes "handleEdit" when edit button clicked', () => {
-    const mockHandleEdit = jest.fn();
-    const exceptionItem = getExceptionItemMock();
-
+  it('it renders loader if "loadingList" is true', () => {
+    (useExceptionList as jest.Mock).mockReturnValue([
+      true,
+      [],
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          handleDelete={jest.fn()}
-          handleEdit={mockHandleEdit}
-          exceptionItem={exceptionItem}
+        <ExceptionsViewer
+          ruleId={'123'}
+          ruleIndices={['filebeat-*']}
+          ruleName={ruleName}
+          exceptionListsMeta={[
+            {
+              id: '5b543420',
+              listId: 'list_id',
+              type: 'endpoint',
+              namespaceType: 'single',
+            },
+          ]}
+          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
+          commentsAccordionId="commentsAccordion"
         />
       </ThemeProvider>
     );
 
-    const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
-    editBtn.simulate('click');
-
-    expect(mockHandleEdit).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('[data-test-subj="loadingPanelAllRulesTable"]').exists()).toBeTruthy();
   });
 
-  it('it invokes "handleDelete" when delete button clicked', () => {
-    const mockHandleDelete = jest.fn();
-    const exceptionItem = getExceptionItemMock();
-
+  it('it renders empty prompt if no "exceptionListMeta" passed in', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
-          exceptionItem={exceptionItem}
+        <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
+          ruleId={'123'}
+          ruleName={ruleName}
+          exceptionListsMeta={[]}
+          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
+          commentsAccordionId="commentsAccordion"
         />
       </ThemeProvider>
     );
 
-    const editBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
-    editBtn.simulate('click');
-
-    expect(mockHandleDelete).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
   });
 
-  it('it renders comment accordion closed to begin with', () => {
-    const mockHandleDelete = jest.fn();
-    const exceptionItem = getExceptionItemMock();
+  it('it renders empty prompt if no exception items exist', () => {
+    (useExceptionList as jest.Mock).mockReturnValue([
+      false,
+      [getExceptionListSchemaMock()],
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
-          exceptionItem={exceptionItem}
+        <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
+          ruleId={'123'}
+          ruleName={ruleName}
+          exceptionListsMeta={[
+            {
+              id: '5b543420',
+              listId: 'list_id',
+              type: 'endpoint',
+              namespaceType: 'single',
+            },
+          ]}
+          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
+          commentsAccordionId="commentsAccordion"
         />
       </ThemeProvider>
     );
 
-    expect(wrapper.find('.euiAccordion-isOpen')).toHaveLength(0);
-  });
-
-  it('it renders comment accordion open when showComments is true', () => {
-    const mockHandleDelete = jest.fn();
-    const exceptionItem = getExceptionItemMock();
-
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionItem
-          commentsAccordionId={'accordion--comments'}
-          handleDelete={mockHandleDelete}
-          handleEdit={jest.fn()}
-          exceptionItem={exceptionItem}
-        />
-      </ThemeProvider>
-    );
-
-    const commentsBtn = wrapper
-      .find('.euiButtonEmpty[data-test-subj="exceptionsViewerItemCommentsBtn"]')
-      .at(0);
-    commentsBtn.simulate('click');
-
-    expect(wrapper.find('.euiAccordion-isOpen')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
   });
 });

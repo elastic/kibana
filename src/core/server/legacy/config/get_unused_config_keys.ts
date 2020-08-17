@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { difference, get, set } from 'lodash';
-// @ts-ignore
+import { set } from '@elastic/safer-lodash-set';
+import { difference, get } from 'lodash';
+// @ts-expect-error
 import { getTransform } from '../../../../legacy/deprecation/index';
 import { unset } from '../../../../legacy/utils';
 import { getFlattenedObject } from '../../../utils';

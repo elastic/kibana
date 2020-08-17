@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MonitorSummaryResultType } from '../../../../../plugins/uptime/common/runtime_types';
+import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 interface ExpectedMonitorStatesPage {
@@ -38,7 +38,7 @@ const checkMonitorStatesResponse = ({
   prevPagination,
   nextPagination,
 }: ExpectedMonitorStatesPage) => {
-  const decoded = MonitorSummaryResultType.decode(response);
+  const decoded = MonitorSummariesResultType.decode(response);
   expect(isRight(decoded)).to.be.ok();
   if (isRight(decoded)) {
     const { summaries, prevPagePagination, nextPagePagination, totalSummaryCount } = decoded.right;

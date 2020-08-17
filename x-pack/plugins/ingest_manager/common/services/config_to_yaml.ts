@@ -10,12 +10,14 @@ const CONFIG_KEYS_ORDER = [
   'id',
   'name',
   'revision',
+  'dataset',
   'type',
   'outputs',
-  'settings',
-  'datasources',
+  'agent',
+  'inputs',
   'enabled',
-  'package',
+  'use_output',
+  'meta',
   'input',
 ];
 

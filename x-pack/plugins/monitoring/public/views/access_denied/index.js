@@ -8,10 +8,10 @@ import { kbnBaseUrl } from '../../../../../../src/plugins/kibana_legacy/common/k
 import { uiRoutes } from '../../angular/helpers/routes';
 import template from './index.html';
 
-const tryPrivilege = ($http, kbnUrl) => {
+const tryPrivilege = ($http) => {
   return $http
     .get('../api/monitoring/v1/check_access')
-    .then(() => kbnUrl.redirect('/home'))
+    .then(() => window.history.replaceState(null, null, '#/home'))
     .catch(() => true);
 };
 
@@ -25,21 +25,20 @@ uiRoutes.when('/access-denied', {
      * privilege one time up front (doing it in the resolve makes it happen
      * before the template renders), and then keep retrying every 5 seconds.
      */
-    initialCheck($http, kbnUrl) {
-      return tryPrivilege($http, kbnUrl);
+    initialCheck($http) {
+      return tryPrivilege($http);
     },
   },
   controllerAs: 'accessDenied',
   controller: function ($scope, $injector) {
     const $http = $injector.get('$http');
-    const kbnUrl = $injector.get('kbnUrl');
     const $interval = $injector.get('$interval');
 
     // The template's "Back to Kibana" button click handler
     this.goToKibanaURL = kbnBaseUrl;
 
     // keep trying to load data in the background
-    const accessPoller = $interval(() => tryPrivilege($http, kbnUrl), 5 * 1000); // every 5 seconds
+    const accessPoller = $interval(() => tryPrivilege($http), 5 * 1000); // every 5 seconds
     $scope.$on('$destroy', () => $interval.cancel(accessPoller));
   },
 });

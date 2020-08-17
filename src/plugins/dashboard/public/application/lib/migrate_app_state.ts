@@ -39,7 +39,7 @@ import {
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: unknown } & DashboardAppState,
+  appState: { [key: string]: any } & DashboardAppState,
   kibanaVersion: string,
   usageCollection?: UsageCollectionSetup
 ): DashboardAppState {

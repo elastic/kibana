@@ -16,12 +16,23 @@ import { PolicyListState } from '../../types';
  */
 export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
   policyItems: [],
+  endpointPackageInfo: undefined,
   isLoading: false,
+  isDeleting: false,
+  deleteStatus: undefined,
   apiError: undefined,
   pageIndex: 0,
   pageSize: 10,
   total: 0,
   location: undefined,
+  agentStatusSummary: {
+    error: 0,
+    events: 0,
+    offline: 0,
+    online: 0,
+    total: 0,
+    other: 0,
+  },
 });
 
 export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
@@ -33,6 +44,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
       ...state,
       ...action.payload,
       isLoading: false,
+      isDeleting: false,
     };
   }
 
@@ -41,6 +53,54 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
       ...state,
       apiError: action.payload,
       isLoading: false,
+      isDeleting: false,
+    };
+  }
+
+  if (action.type === 'serverDeletedPolicyFailure') {
+    return {
+      ...state,
+      ...action.payload,
+      isLoading: false,
+      isDeleting: false,
+    };
+  }
+
+  if (action.type === 'serverDeletedPolicy') {
+    return {
+      ...state,
+      deleteStatus: action.payload.success,
+      isLoading: true,
+      isDeleting: false,
+    };
+  }
+
+  if (action.type === 'userClickedPolicyListDeleteButton') {
+    return {
+      ...state,
+      isLoading: false,
+      isDeleting: true,
+    };
+  }
+
+  if (action.type === 'serverReturnedPolicyAgentsSummaryForDelete') {
+    return {
+      ...state,
+      ...action.payload,
+    };
+  }
+
+  if (action.type === 'serverReturnedPolicyAgentsSummaryForDeleteFailure') {
+    return {
+      ...state,
+      ...action.payload,
+    };
+  }
+
+  if (action.type === 'serverReturnedEndpointPackageInfo') {
+    return {
+      ...state,
+      endpointPackageInfo: action.payload,
     };
   }
 
@@ -60,6 +120,7 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
           ...newState,
           apiError: undefined,
           isLoading: true,
+          isDeleting: false,
         };
       }
       return newState;

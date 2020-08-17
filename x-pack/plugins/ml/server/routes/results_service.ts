@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -15,9 +16,10 @@ import {
   partitionFieldValuesSchema,
 } from './schemas/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
+import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 
-function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+function getAnomaliesTableData(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const {
     jobIds,
     criteriaFields,
@@ -46,25 +48,25 @@ function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
   );
 }
 
-function getCategoryDefinition(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+function getCategoryDefinition(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
-function getCategoryExamples(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+function getCategoryExamples(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const { jobId, categoryIds, maxExamples } = payload;
   return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
 
-function getMaxAnomalyScore(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+function getMaxAnomalyScore(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const { jobIds, earliestMs, latestMs } = payload;
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
-function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+function getPartitionFieldsValues(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }
@@ -92,9 +94,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getAnomaliesTableData(context, request.body);
+        const resp = await getAnomaliesTableData(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -124,9 +126,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getCategoryDefinition(context, request.body);
+        const resp = await getCategoryDefinition(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -156,9 +158,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getMaxAnomalyScore(context, request.body);
+        const resp = await getMaxAnomalyScore(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -188,9 +190,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getCategoryExamples(context, request.body);
+        const resp = await getCategoryExamples(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -220,15 +222,46 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getPartitionFieldsValues(context, request.body);
+        const resp = await getPartitionFieldsValues(legacyClient, request.body);
 
         return response.ok({
           body: resp,
         });
       } catch (e) {
         return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/anomaly_search Performs a search on the anomaly results index
+   * @apiName AnomalySearch
+   */
+  router.post(
+    {
+      path: '/api/ml/results/anomaly_search',
+      validate: {
+        body: schema.maybe(schema.any()),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+      const body = {
+        ...request.body,
+        index: ML_RESULTS_INDEX_PATTERN,
+      };
+      try {
+        return response.ok({
+          body: await legacyClient.callAsInternalUser('search', body),
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
       }
     })
   );

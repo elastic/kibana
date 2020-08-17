@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, APICaller, KibanaRequest } from 'src/core/server';
+import { IRouter, LegacyAPICaller, KibanaRequest } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 
@@ -12,7 +12,7 @@ import { IndexManagementPluginSetup } from '../../index_management/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { License } from './services';
 import { IndexPatternsFetcher } from './shared_imports';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
@@ -42,4 +42,4 @@ export interface RouteDependencies {
 export type CallWithRequestFactoryShim = (
   elasticsearchServiceShim: CallWithRequestFactoryShim,
   request: KibanaRequest
-) => APICaller;
+) => LegacyAPICaller;

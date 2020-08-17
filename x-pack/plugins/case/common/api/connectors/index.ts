@@ -6,3 +6,4 @@
 
 export * from './jira';
 export * from './servicenow';
+export * from './resilient';

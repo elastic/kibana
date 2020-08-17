@@ -24,7 +24,12 @@ interface Arguments {
   name: string;
 }
 
-type ExpressionFunctionVar = ExpressionFunctionDefinition<'var', unknown, Arguments, unknown>;
+export type ExpressionFunctionVar = ExpressionFunctionDefinition<
+  'var',
+  unknown,
+  Arguments,
+  unknown
+>;
 
 export const variable: ExpressionFunctionVar = {
   name: 'var',

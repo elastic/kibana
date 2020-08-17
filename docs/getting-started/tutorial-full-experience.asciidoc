@@ -94,7 +94,7 @@ You must also have the `create`, `manage` `read`, `write,` and `delete`
 index privileges. See {ref}/security-privileges.html[Security privileges] 
 for more information.
 
-In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:
+Open *Dev Tools*. On the *Console* page, set up a mapping for the Shakespeare data set:
 
 [source,js]
 PUT /shakespeare

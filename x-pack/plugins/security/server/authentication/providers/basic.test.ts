@@ -8,7 +8,7 @@ import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 
-import { IClusterClient, ScopeableRequest } from '../../../../../../src/core/server';
+import { ILegacyClusterClient, ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BasicAuthenticationProvider } from './basic';
@@ -18,7 +18,7 @@ function generateAuthorizationHeader(username: string, password: string) {
 }
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<IClusterClient>,
+  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -43,7 +43,7 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -65,7 +65,7 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
       const authenticationError = new Error('Some error');
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -107,7 +107,7 @@ describe('BasicAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/base-path/login?next=%2Fbase-path%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
         )
       );
     });
@@ -147,7 +147,7 @@ describe('BasicAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -163,7 +163,7 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const authenticationError = new Error('Forbidden');
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -186,7 +186,7 @@ describe('BasicAuthenticationProvider', () => {
 
     it('always redirects to the login page.', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
     });
 
@@ -199,7 +199,9 @@ describe('BasicAuthenticationProvider', () => {
           {}
         )
       ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED')
+        DeauthenticationResult.redirectTo(
+          '/mock-server-basepath/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
+        )
       );
     });
   });

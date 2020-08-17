@@ -26,13 +26,19 @@ import { LogRecord } from '../log_record';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
 
-const appendersSchema = schema.oneOf([
+/**
+ * Config schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or
+ * {@link LoggingConfigType}.
+ *
+ * @public
+ */
+export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
   LegacyAppender.configSchema,
 ]);
 
-/** @internal */
+/** @public */
 export type AppenderConfigType = TypeOf<typeof appendersSchema>;
 
 /**

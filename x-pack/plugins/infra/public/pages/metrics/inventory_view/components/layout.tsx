@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useInterval } from 'react-use';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AutoSizer } from '../../../../components/auto_sizer';
 import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
-import { NodesOverview, calculateBoundsFromNodes } from './nodes_overview';
+import { NodesOverview } from './nodes_overview';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
@@ -20,14 +22,17 @@ import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../observability/public';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
-import { SavedViews } from './saved_views';
 import { IntervalLabel } from './waffle/interval_label';
 import { Legend } from './waffle/legend';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
+import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
+import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 
 export const Layout = () => {
   const { sourceId, source } = useSourceContext();
+  const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
     metric,
     groupBy,
@@ -45,13 +50,14 @@ export const Layout = () => {
   const { filterQueryAsJson, applyFilterQuery } = useWaffleFiltersContext();
   const { loading, nodes, reload, interval } = useSnapshot(
     filterQueryAsJson,
-    metric,
+    [metric],
     groupBy,
     nodeType,
     sourceId,
     currentTime,
     accountId,
-    region
+    region,
+    false
   );
 
   const options = {
@@ -78,6 +84,20 @@ export const Layout = () => {
   const bounds = autoBounds ? dataBounds : boundsOverride;
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+  const { viewState, onViewChange } = useWaffleViewState();
+
+  useEffect(() => {
+    if (currentView) {
+      onViewChange(currentView);
+    }
+  }, [currentView, onViewChange]);
+
+  useEffect(() => {
+    // load snapshot data after default view loaded, unless we're not loading a view
+    if (currentView != null || !shouldLoadDefault) {
+      reload();
+    }
+  }, [reload, currentView, shouldLoadDefault]);
 
   return (
     <>
@@ -91,37 +111,44 @@ export const Layout = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </TopActionContainer>
-          <NodesOverview
-            nodes={nodes}
-            options={options}
-            nodeType={nodeType}
-            loading={loading}
-            reload={reload}
-            onDrilldown={applyFilterQuery}
-            currentTime={currentTime}
-            view={view}
-            autoBounds={autoBounds}
-            boundsOverride={boundsOverride}
-            formatter={formatter}
-          />
-          <BottomActionContainer>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <SavedViews />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
-                <Legend
+          <AutoSizer bounds>
+            {({ measureRef, bounds: { height = 0 } }) => (
+              <>
+                <NodesOverview
+                  nodes={nodes}
+                  options={options}
+                  nodeType={nodeType}
+                  loading={loading}
+                  reload={reload}
+                  onDrilldown={applyFilterQuery}
+                  currentTime={currentTime}
+                  view={view}
+                  autoBounds={autoBounds}
+                  boundsOverride={boundsOverride}
                   formatter={formatter}
-                  bounds={bounds}
-                  dataBounds={dataBounds}
-                  legend={options.legend}
+                  bottomMargin={height}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <IntervalLabel intervalAsString={intervalAsString} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </BottomActionContainer>
+                <BottomActionContainer ref={measureRef}>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <SavedViewsToolbarControls viewState={viewState} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
+                      <Legend
+                        formatter={formatter}
+                        bounds={bounds}
+                        dataBounds={dataBounds}
+                        legend={options.legend}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <IntervalLabel intervalAsString={intervalAsString} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </BottomActionContainer>
+              </>
+            )}
+          </AutoSizer>
         </MainContainer>
       </PageContent>
     </>
@@ -140,9 +167,9 @@ const TopActionContainer = euiStyled.div`
 const BottomActionContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
   padding: ${(props) => props.theme.eui.paddingSizes.m} ${(props) =>
-  props.theme.eui.paddingSizes.m} ${(props) => props.theme.eui.paddingSizes.s};
-  position: absolute;
+  props.theme.eui.paddingSizes.m};
+  position: fixed;
   left: 0;
-  bottom: 4px;
+  bottom: 0;
   right: 0;
 `;

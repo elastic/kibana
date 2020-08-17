@@ -5,20 +5,19 @@
  */
 
 import { ReportingCore } from '../core';
-import { JobDocOutput, JobSource } from '../types';
-import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
+import { JobSource, TaskRunResult } from '../types';
 import { createWorkerFactory } from './create_worker';
-import { Job } from './enqueue_job';
 // @ts-ignore
 import { Esqueue } from './esqueue';
+import { createTaggedLogger } from './esqueue/create_tagged_logger';
 import { LevelLogger } from './level_logger';
+import { ReportingStore } from './store';
 
 interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
 export interface ESQueueInstance {
-  addJob: (type: string, payload: unknown, options: object) => Job;
   registerWorker: <JobParamsType>(
     pluginId: string,
     workerFn: GenericWorkerFn<JobParamsType>,
@@ -31,32 +30,31 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<ScheduledTaskParamsType>,
 type GenericWorkerFn<JobParamsType> = (
   jobSource: JobSource<JobParamsType>,
   ...workerRestArgs: any[]
-) => void | Promise<JobDocOutput>;
+) => void | Promise<TaskRunResult>;
 
-export async function createQueueFactory<JobParamsType, JobPayloadType>(
+export async function createQueueFactory(
   reporting: ReportingCore,
+  store: ReportingStore,
   logger: LevelLogger
 ): Promise<ESQueueInstance> {
   const config = reporting.getConfig();
-  const queueIndexInterval = config.get('queue', 'indexInterval');
+
+  // esqueue-related
   const queueTimeout = config.get('queue', 'timeout');
-  const queueIndex = config.get('index');
   const isPollingEnabled = config.get('queue', 'pollEnabled');
 
-  const elasticsearch = await reporting.getElasticsearchService();
+  const elasticsearch = reporting.getElasticsearchService();
   const queueOptions = {
-    interval: queueIndexInterval,
     timeout: queueTimeout,
-    dateSeparator: '.',
     client: elasticsearch.legacy.client,
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 
-  const queue: ESQueueInstance = new Esqueue(queueIndex, queueOptions);
+  const queue: ESQueueInstance = new Esqueue(store, queueOptions);
 
   if (isPollingEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed

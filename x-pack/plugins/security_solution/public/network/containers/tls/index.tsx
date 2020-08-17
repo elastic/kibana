@@ -92,8 +92,8 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       sourceId,
       timerange: {
         interval: '12h',
-        from: startDate ? startDate : 0,
-        to: endDate ? endDate : Date.now(),
+        from: startDate ? startDate : '',
+        to: endDate ? endDate : new Date(Date.now()).toISOString(),
       },
     };
     return (

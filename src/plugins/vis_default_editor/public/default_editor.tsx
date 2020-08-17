@@ -59,7 +59,7 @@ function DefaultEditor({
 
     embeddableHandler.render(visRef.current);
     setTimeout(() => {
-      eventEmitter.emit('apply');
+      eventEmitter.emit('embeddableRendered');
     });
 
     return () => embeddableHandler.destroy();
@@ -102,6 +102,7 @@ function DefaultEditor({
             initialWidth={editorInitialWidth}
           >
             <DefaultEditorSideBar
+              embeddableHandler={embeddableHandler}
               isCollapsed={isCollapsed}
               onClickCollapse={onClickCollapse}
               optionTabs={optionTabs}

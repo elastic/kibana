@@ -7,12 +7,10 @@
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { UpdateDateRange } from '../../../components/charts/common';
-import { SetQuery } from '../../../../hosts/pages/navigation/types';
+import { GlobalTimeArgs } from '../../use_global_time';
 import { FlowTarget } from '../../../../graphql/types';
 import { HostsType } from '../../../../hosts/store/model';
 import { NetworkType } from '../../../../network/store//model';
-import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
-import { AnomaliesNetworkTable } from '../../../components/ml/tables/anomalies_network_table';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType;
@@ -21,13 +19,14 @@ interface QueryTabBodyProps {
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   anomaliesFilterQuery?: object;
-  AnomaliesTableComponent: typeof AnomaliesHostTable | typeof AnomaliesNetworkTable;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  AnomaliesTableComponent: React.NamedExoticComponent<any>;
   deleteQuery?: ({ id }: { id: string }) => void;
-  endDate: number;
+  endDate: GlobalTimeArgs['to'];
   flowTarget?: FlowTarget;
   narrowDateRange: NarrowDateRange;
-  setQuery: SetQuery;
-  startDate: number;
+  setQuery: GlobalTimeArgs['setQuery'];
+  startDate: GlobalTimeArgs['from'];
   skip: boolean;
   updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;

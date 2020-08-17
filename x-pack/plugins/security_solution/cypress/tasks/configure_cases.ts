@@ -15,7 +15,7 @@ import {
   URL,
   USERNAME,
 } from '../screens/configure_cases';
-import { MAIN_PAGE } from '../screens/siem_main';
+import { MAIN_PAGE } from '../screens/security_main';
 
 import { Connector } from '../objects/case';
 

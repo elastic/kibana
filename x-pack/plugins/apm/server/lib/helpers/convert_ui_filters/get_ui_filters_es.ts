@@ -11,15 +11,9 @@ import {
   localUIFilters,
   localUIFilterNames,
 } from '../../ui_filters/local_ui_filters/config';
-import {
-  esKuery,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/server';
+import { esKuery } from '../../../../../../../src/plugins/data/server';
 
-export function getUiFiltersES(
-  indexPattern: IIndexPattern | undefined,
-  uiFilters: UIFilters
-) {
+export function getUiFiltersES(uiFilters: UIFilters) {
   const { kuery, environment, ...localFilterValues } = uiFilters;
   const mappedFilters = localUIFilterNames
     .filter((name) => name in localFilterValues)
@@ -33,25 +27,19 @@ export function getUiFiltersES(
       };
     }) as ESFilter[];
 
-  // remove undefined items from list
   const esFilters = [
-    getKueryUiFilterES(indexPattern, uiFilters.kuery),
-    getEnvironmentUiFilterES(uiFilters.environment),
-  ]
-    .filter((filter) => !!filter)
-    .concat(mappedFilters) as ESFilter[];
+    ...getKueryUiFilterES(uiFilters.kuery),
+    ...getEnvironmentUiFilterES(uiFilters.environment),
+  ].concat(mappedFilters) as ESFilter[];
 
   return esFilters;
 }
 
-function getKueryUiFilterES(
-  indexPattern: IIndexPattern | undefined,
-  kuery?: string
-) {
-  if (!kuery || !indexPattern) {
-    return;
+function getKueryUiFilterES(kuery?: string) {
+  if (!kuery) {
+    return [];
   }
 
   const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast, indexPattern) as ESFilter;
+  return [esKuery.toElasticsearchQuery(ast) as ESFilter];
 }

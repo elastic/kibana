@@ -6,7 +6,6 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
@@ -38,17 +37,20 @@ export class IndexLifecycleManagementPlugin {
       initUiMetric(usageCollection);
       initNotification(toasts, fatalErrors);
 
-      management.sections.getSection(ManagementSectionId.Data).registerApp({
+      management.sections.section.data.registerApp({
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
         mount: async ({ element, history }) => {
           const [coreStart] = await getStartServices();
           const {
+            chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-            application: { navigateToApp },
+            application: { navigateToApp, getUrlForApp },
           } = coreStart;
+
+          docTitle.change(PLUGIN.TITLE);
 
           // Initialize additional services.
           initDocumentation(
@@ -56,7 +58,19 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          return renderApp(element, I18nContext, history, navigateToApp);
+
+          const unmountAppCallback = renderApp(
+            element,
+            I18nContext,
+            history,
+            navigateToApp,
+            getUrlForApp
+          );
+
+          return () => {
+            docTitle.reset();
+            unmountAppCallback();
+          };
         },
       });
 

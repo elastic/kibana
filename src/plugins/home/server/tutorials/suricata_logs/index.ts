@@ -37,6 +37,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.suricataLogs.nameTitle', {
       defaultMessage: 'Suricata logs',
     }),
+    moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.suricataLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by Suricata IDS/IPS/NSM.',

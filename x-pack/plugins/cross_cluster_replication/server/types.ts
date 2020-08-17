@@ -9,7 +9,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { RemoteClustersPluginSetup } from '../../remote_clusters/server';
 import { License } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 export interface Dependencies {

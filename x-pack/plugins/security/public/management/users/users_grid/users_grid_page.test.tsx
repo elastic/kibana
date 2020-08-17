@@ -22,7 +22,7 @@ describe('UsersGridPage', () => {
   let coreStart: CoreStart;
 
   beforeEach(() => {
-    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    history = scopedHistoryMock.create();
     history.createHref = (location: LocationDescriptorObject) => {
       return `${location.pathname}${location.search ? '?' + location.search : ''}`;
     };

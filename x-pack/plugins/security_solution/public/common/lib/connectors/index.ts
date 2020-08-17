@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getActionType as serviceNowActionType } from './servicenow';
 export { getActionType as jiraActionType } from './jira';
+export { getActionType as resilientActionType } from './resilient';

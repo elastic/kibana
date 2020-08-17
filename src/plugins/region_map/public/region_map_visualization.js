@@ -19,12 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
-import { getFormatService, getNotifications } from './kibana_services';
+import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
-import { mapTooltipProvider } from '../../maps_legacy/public';
+import { mapTooltipProvider, ORIGIN } from '../../maps_legacy/public';
+import _ from 'lodash';
 
 export function createRegionMapVisualization({
+  regionmapsConfig,
   serviceSettings,
   uiSettings,
   BaseMapsVisualization,
@@ -38,6 +40,7 @@ export function createRegionMapVisualization({
     }
 
     async render(esResponse, visParams) {
+      getKibanaLegacy().loadFontAwesome();
       await super.render(esResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
@@ -59,17 +62,18 @@ export function createRegionMapVisualization({
         });
       }
 
-      if (!this._params.selectedJoinField && this._params.selectedLayer) {
-        this._params.selectedJoinField = this._params.selectedLayer.fields[0];
+      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
+      if (!this._params.selectedJoinField && selectedLayer) {
+        this._params.selectedJoinField = selectedLayer.fields[0];
       }
 
-      if (!this._params.selectedLayer) {
+      if (!selectedLayer) {
         return;
       }
 
       this._updateChoroplethLayerForNewMetrics(
-        this._params.selectedLayer.name,
-        this._params.selectedLayer.attribution,
+        selectedLayer.name,
+        selectedLayer.attribution,
         this._params.showAllShapes,
         results
       );
@@ -89,29 +93,57 @@ export function createRegionMapVisualization({
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
 
-    async _updateParams() {
-      await super._updateParams();
-      const visParams = this._params;
+    async _loadConfig(fileLayerConfig) {
+      // Load the selected layer from the metadata-service.
+      // Do not use the selectedLayer from the visState.
+      // These settings are stored in the URL and can be used to inject dirty display content.
 
-      if (!visParams.selectedJoinField && visParams.selectedLayer) {
-        visParams.selectedJoinField = visParams.selectedLayer.fields[0];
+      if (
+        fileLayerConfig.isEMS || //Hosted by EMS. Metadata needs to be resolved through EMS
+        (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) //fallback for older saved objects
+      ) {
+        return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
       }
 
-      if (!visParams.selectedJoinField || !visParams.selectedLayer) {
+      //Configured in the kibana.yml. Needs to be resolved through the settings.
+      const configuredLayer = regionmapsConfig.layers.find(
+        (layer) => layer.name === fileLayerConfig.name
+      );
+
+      if (configuredLayer) {
+        return {
+          ...configuredLayer,
+          attribution: _.escape(configuredLayer.attribution ? configuredLayer.attribution : ''),
+        };
+      }
+
+      return null;
+    }
+
+    async _updateParams() {
+      await super._updateParams();
+
+      const selectedLayer = await this._loadConfig(this._params.selectedLayer);
+
+      if (!this._params.selectedJoinField && selectedLayer) {
+        this._params.selectedJoinField = selectedLayer.fields[0];
+      }
+
+      if (!this._params.selectedJoinField || !selectedLayer) {
         return;
       }
 
       this._updateChoroplethLayerForNewProperties(
-        visParams.selectedLayer.name,
-        visParams.selectedLayer.attribution,
+        selectedLayer.name,
+        selectedLayer.attribution,
         this._params.showAllShapes
       );
 
       const metricFieldFormatter = getFormatService().deserialize(this._params.metric.format);
 
-      this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
-      this._choroplethLayer.setLineWeight(visParams.outlineWeight);
+      this._choroplethLayer.setJoinField(this._params.selectedJoinField.name);
+      this._choroplethLayer.setColorRamp(truncatedColorMaps[this._params.colorSchema].value);
+      this._choroplethLayer.setLineWeight(this._params.outlineWeight);
       this._choroplethLayer.setTooltipFormatter(
         this._tooltipFormatter,
         metricFieldFormatter,

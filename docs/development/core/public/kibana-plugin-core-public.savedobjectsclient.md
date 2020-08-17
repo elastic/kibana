@@ -20,11 +20,11 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [bulkCreate](./kibana-plugin-core-public.savedobjectsclient.bulkcreate.md) |  | <code>(objects?: SavedObjectsBulkCreateObject&lt;unknown&gt;[], options?: SavedObjectsBulkCreateOptions) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Creates multiple documents at once |
-|  [bulkGet](./kibana-plugin-core-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: {</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }[]) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Returns an array of objects by id |
+|  [bulkCreate](./kibana-plugin-core-public.savedobjectsclient.bulkcreate.md) |  | <code>(objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Creates multiple documents at once |
+|  [bulkGet](./kibana-plugin-core-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Returns an array of objects by id |
 |  [create](./kibana-plugin-core-public.savedobjectsclient.create.md) |  | <code>&lt;T = unknown&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Persists an object |
-|  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | <code>(type: string, id: string) =&gt; Promise&lt;{}&gt;</code> | Deletes an object |
-|  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | <code>&lt;T = unknown&gt;(options: Pick&lt;SavedObjectFindOptionsServer, &quot;search&quot; &#124; &quot;filter&quot; &#124; &quot;type&quot; &#124; &quot;page&quot; &#124; &quot;perPage&quot; &#124; &quot;sortField&quot; &#124; &quot;fields&quot; &#124; &quot;searchFields&quot; &#124; &quot;hasReference&quot; &#124; &quot;defaultSearchOperator&quot;&gt;) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T&gt;&gt;</code> | Search for objects |
+|  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | <code>(type: string, id: string) =&gt; ReturnType&lt;SavedObjectsApi['delete']&gt;</code> | Deletes an object |
+|  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | <code>&lt;T = unknown&gt;(options: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T&gt;&gt;</code> | Search for objects |
 |  [get](./kibana-plugin-core-public.savedobjectsclient.get.md) |  | <code>&lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Fetches a single object |
 
 ## Methods

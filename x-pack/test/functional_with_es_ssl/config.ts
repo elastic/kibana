@@ -25,7 +25,6 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
@@ -69,7 +68,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'my-slack1': {
             actionTypeId: '.slack',
             name: 'Slack#xyztest',
-            config: {
+            secrets: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
           },

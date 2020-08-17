@@ -25,21 +25,6 @@ class MockField extends AbstractField {
   }
 }
 
-export class MockMbMap {
-  _paintPropertyCalls: unknown[];
-
-  constructor() {
-    this._paintPropertyCalls = [];
-  }
-  setPaintProperty(...args: unknown[]) {
-    this._paintPropertyCalls.push([...args]);
-  }
-
-  getPaintPropertyCalls(): unknown[] {
-    return this._paintPropertyCalls;
-  }
-}
-
 export const mockField: IField = new MockField({
   fieldName: 'foobar',
   origin: FIELD_ORIGIN.SOURCE,

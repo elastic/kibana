@@ -53,6 +53,7 @@ export class PluginWrapper<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredPlugins: PluginManifest['requiredPlugins'];
   public readonly optionalPlugins: PluginManifest['optionalPlugins'];
+  public readonly requiredBundles: PluginManifest['requiredBundles'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
 
@@ -81,6 +82,7 @@ export class PluginWrapper<
     this.configPath = params.manifest.configPath;
     this.requiredPlugins = params.manifest.requiredPlugins;
     this.optionalPlugins = params.manifest.optionalPlugins;
+    this.requiredBundles = params.manifest.requiredBundles;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
   }
@@ -94,8 +96,6 @@ export class PluginWrapper<
    */
   public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
-
-    this.log.debug('Setting up plugin');
 
     return this.instance.setup(setupContext, plugins);
   }
@@ -112,8 +112,6 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.log.debug('Starting plugin');
-
     const startContract = await this.instance.start(startContext, plugins);
     this.startDependencies$.next([startContext, plugins, startContract]);
     return startContract;
@@ -126,8 +124,6 @@ export class PluginWrapper<
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
-
-    this.log.info('Stopping plugin');
 
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();

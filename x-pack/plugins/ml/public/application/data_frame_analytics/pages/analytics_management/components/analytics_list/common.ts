@@ -9,7 +9,11 @@ import { Query, Ast } from '@elastic/eui';
 import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
 export { DATA_FRAME_TASK_STATE };
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import {
+  DataFrameAnalyticsId,
+  DataFrameAnalyticsConfig,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -31,6 +35,11 @@ interface ProgressSection {
 export interface DataFrameAnalyticsStats {
   assignment_explanation?: string;
   id: DataFrameAnalyticsId;
+  memory_usage?: {
+    timestamp?: string;
+    peak_usage_bytes: number;
+    status: string;
+  };
   node?: {
     attributes: Record<string, any>;
     ephemeral_id: string;
@@ -98,10 +107,15 @@ export function getDataFrameAnalyticsProgressPhase(
 }
 
 export interface DataFrameAnalyticsListRow {
-  id: DataFrameAnalyticsId;
   checkpointing: object;
   config: DataFrameAnalyticsConfig;
+  id: DataFrameAnalyticsId;
+  job_type:
+    | ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+    | ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
+    | ANALYSIS_CONFIG_TYPE.REGRESSION;
   mode: string;
+  state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;
 }
 
@@ -112,6 +126,7 @@ export enum DataFrameAnalyticsListColumn {
   configCreateTime = 'config.create_time',
   description = 'config.description',
   id = 'id',
+  memoryStatus = 'stats.memory_usage.status',
 }
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
@@ -121,6 +136,6 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getResultsUrl(jobId: string, analysisType: string) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
+export function getResultsUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE | string) {
+  return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }

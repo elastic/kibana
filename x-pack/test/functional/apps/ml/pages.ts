@@ -35,20 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobManagement.assertCreateNewJobButtonExists();
     });
 
-    it('loads the anomaly explorer page', async () => {
-      await ml.navigation.navigateToAnomalyExplorer();
-      await ml.anomalyExplorer.assertAnomalyExplorerEmptyListMessageExists();
-    });
-
-    it('loads the single metric viewer page', async () => {
-      await ml.navigation.navigateToSingleMetricViewer();
-      await ml.singleMetricViewer.assertSingleMetricViewerEmptyListMessageExsist();
-    });
-
     it('loads the settings page', async () => {
       await ml.navigation.navigateToSettings();
-      await ml.settings.assertSettingsCalendarLinkExists();
-      await ml.settings.assertSettingsFilterlistLinkExists();
+      await ml.settings.assertSettingsManageCalendarsLinkExists();
+      await ml.settings.assertSettingsCreateCalendarLinkExists();
+      await ml.settings.assertSettingsManageFilterListsLinkExists();
+      await ml.settings.assertSettingsCreateFilterListLinkExists();
     });
 
     it('loads the data frame analytics page', async () => {
@@ -60,6 +52,18 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToDataVisualizer();
       await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
       await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
+    });
+
+    it('should load the stack management with the ML menu item being present', async () => {
+      await ml.navigation.navigateToStackManagement();
+    });
+
+    it('should load the jobs list page in stack management', async () => {
+      await ml.navigation.navigateToStackManagementJobsListPage();
+    });
+
+    it('should load the analytics jobs list page in stack management', async () => {
+      await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
     });
   });
 }

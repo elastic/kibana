@@ -19,7 +19,7 @@
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
@@ -29,12 +29,7 @@ import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
-import {
-  IIndexPatternFieldList,
-  IndexPatternField,
-  IndexPattern,
-  UI_SETTINGS,
-} from '../../../../../data/public';
+import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
@@ -99,12 +94,12 @@ export function DiscoverSidebar({
 }: DiscoverSidebarProps) {
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
-  const [fields, setFields] = useState<IIndexPatternFieldList | null>(null);
+  const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
 
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, services);
+    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
 
@@ -114,10 +109,12 @@ export function DiscoverSidebar({
         setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
       } else {
         setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        selectedIndexPattern.popularizeField(field.name, 1);
+        if (services.capabilities.discover.save) {
+          selectedIndexPattern.popularizeField(field.name, 1);
+        }
       }
     },
-    [openFieldMap, selectedIndexPattern]
+    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
   );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -197,6 +194,7 @@ export function DiscoverSidebar({
                   />
                 </h3>
               </EuiTitle>
+              <EuiSpacer size="xs" />
               <ul
                 className="dscSidebarList dscFieldList--selected"
                 aria-labelledby="selected_fields"

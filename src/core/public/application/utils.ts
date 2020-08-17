@@ -18,12 +18,7 @@
  */
 
 import { IBasePath } from '../http';
-import { App, LegacyApp, PublicAppInfo, PublicLegacyAppInfo } from './types';
-
-export interface AppUrlInfo {
-  app: string;
-  path?: string;
-}
+import { App, LegacyApp, PublicAppInfo, PublicLegacyAppInfo, ParsedAppUrl } from './types';
 
 /**
  * Utility to remove trailing, leading or duplicate slashes.
@@ -94,7 +89,7 @@ export const parseAppUrl = (
   basePath: IBasePath,
   apps: Map<string, App<unknown> | LegacyApp>,
   getOrigin: () => string = () => window.location.origin
-): AppUrlInfo | undefined => {
+): ParsedAppUrl | undefined => {
   url = removeBasePath(url, basePath, getOrigin());
   if (!url.startsWith('/')) {
     return undefined;
@@ -125,12 +120,17 @@ export function getAppInfo(app: App<unknown> | LegacyApp): PublicAppInfo | Publi
     const { updater$, ...infos } = app;
     return {
       ...infos,
+      status: app.status!,
+      navLinkStatus: app.navLinkStatus!,
       legacy: true,
     };
   } else {
     const { updater$, mount, ...infos } = app;
     return {
       ...infos,
+      status: app.status!,
+      navLinkStatus: app.navLinkStatus!,
+      appRoute: app.appRoute!,
       legacy: false,
     };
   }

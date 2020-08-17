@@ -25,6 +25,10 @@ export const DETECTION_ENGINE = i18n.translate(
   }
 );
 
+export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
+  defaultMessage: 'Alerts',
+});
+
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
 });
@@ -33,6 +37,6 @@ export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
 });
 
-export const MANAGEMENT = i18n.translate('xpack.securitySolution.navigation.management', {
-  defaultMessage: 'Management',
+export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
+  defaultMessage: 'Administration',
 });

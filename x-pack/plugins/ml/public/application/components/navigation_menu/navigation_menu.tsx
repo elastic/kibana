@@ -5,28 +5,19 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { isFullLicense } from '../../license';
 
-import { TopNav } from './top_nav';
 import { MainTabs } from './main_tabs';
-import { Tabs } from './tabs';
 
-export type TabId = string;
-type TabSupport = Record<TabId, string | null>;
-
-const tabSupport: TabSupport = {
-  overview: null,
-  jobs: 'anomaly_detection',
-  settings: 'anomaly_detection',
-  data_frame_analytics: null,
-  datavisualizer: null,
-  filedatavisualizer: null,
-  timeseriesexplorer: 'anomaly_detection',
-  'access-denied': null,
-  explorer: 'anomaly_detection',
-};
+export type TabId =
+  | 'access-denied'
+  | 'anomaly_detection'
+  | 'data_frame_analytics'
+  | 'datavisualizer'
+  | 'overview'
+  | 'settings';
 
 interface Props {
   tabId: TabId;
@@ -34,23 +25,14 @@ interface Props {
 
 export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
-  const showTabs = typeof tabSupport[tabId] !== 'undefined';
-  const mainTabId = tabSupport[tabId] || tabId;
-  // show horizontal rule if there are no subtabs
-  const showHorizontalRule = tabSupport[tabId] === null;
 
   return (
     <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" className="mlNavigationMenu" gutterSize="none">
         <EuiFlexItem grow={false}>
-          {showTabs && <MainTabs tabId={mainTabId} disableLinks={disableLinks} />}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TopNav />
+          <MainTabs tabId={tabId} disableLinks={disableLinks} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showHorizontalRule && <EuiHorizontalRule className="mlNavHorizontalRule" />}
-      {showTabs && <Tabs tabId={tabId} mainTabId={mainTabId} disableLinks={disableLinks} />}
     </Fragment>
   );
 };

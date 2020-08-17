@@ -56,7 +56,7 @@ export const configSchema = schema.object({
     })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
-    defaultValue: 'browser',
+    defaultValue: 'server',
   }),
 });
 

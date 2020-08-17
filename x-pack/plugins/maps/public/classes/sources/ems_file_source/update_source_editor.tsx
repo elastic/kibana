@@ -8,15 +8,14 @@ import React, { Component, Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
-// @ts-ignore
-import { getEMSClient } from '../../../meta';
+import { getEmsFileLayers } from '../../../meta';
 import { IEmsFileSource } from './ems_file_source';
 import { IField } from '../../fields/field';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
 interface Props {
   layerId: string;
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => void;
   source: IEmsFileSource;
   tooltipFields: IField[];
 }
@@ -42,22 +41,18 @@ export class UpdateSourceEditor extends Component<Props, State> {
   }
 
   async loadFields() {
-    let fields;
+    let fields: IField[] = [];
     try {
-      // @ts-ignore
-      const emsClient = getEMSClient();
-      // @ts-ignore
-      const emsFiles = await emsClient.getFileLayers();
-      // @ts-ignore
-      const taregetEmsFile = emsFiles.find((emsFile) => emsFile.getId() === this.props.layerId);
-      // @ts-ignore
-      const emsFields = taregetEmsFile.getFieldsInLanguage();
-      // @ts-ignore
-      fields = emsFields.map((field) => this.props.source.createField({ fieldName: field.name }));
+      const emsFiles = await getEmsFileLayers();
+      const targetEmsFile = emsFiles.find((emsFile) => emsFile.getId() === this.props.layerId);
+      if (targetEmsFile) {
+        fields = targetEmsFile
+          .getFieldsInLanguage()
+          .map((field) => this.props.source.createField({ fieldName: field.name }));
+      }
     } catch (e) {
       // When a matching EMS-config cannot be found, the source already will have thrown errors during the data request.
       // This will propagate to the vector-layer and be displayed in the UX
-      fields = [];
     }
 
     if (this._isMounted) {

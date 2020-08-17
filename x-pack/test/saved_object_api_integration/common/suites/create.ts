@@ -41,7 +41,7 @@ export const TEST_CASES = Object.freeze({
 });
 
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('create');
+  const expectForbidden = expectResponses.forbiddenTypes('create');
   const expectResponseBody = (
     testCase: CreateTestCase,
     spaceId = SPACES.DEFAULT.spaceId

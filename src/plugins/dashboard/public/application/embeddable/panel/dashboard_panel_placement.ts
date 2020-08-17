@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import { PanelNotFoundError } from '../../../embeddable_plugin';
 import { GridData } from '../../../../common';
 import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';

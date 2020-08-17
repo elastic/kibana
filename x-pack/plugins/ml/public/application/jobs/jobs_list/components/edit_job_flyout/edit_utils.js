@@ -16,6 +16,8 @@ export function saveJob(job, newJobData, finish) {
       ...extractDescription(job, newJobData),
       ...extractGroups(job, newJobData),
       ...extractMML(job, newJobData),
+      ...extractModelSnapshotRetentionDays(job, newJobData),
+      ...extractDailyModelSnapshotRetentionAfterDays(job, newJobData),
       ...extractDetectorDescriptions(job, newJobData),
       ...extractCustomSettings(job, newJobData),
     };
@@ -173,6 +175,22 @@ function extractMML(job, newJobData) {
     }
   }
   return mmlData;
+}
+
+function extractModelSnapshotRetentionDays(job, newJobData) {
+  const modelSnapshotRetentionDays = newJobData.modelSnapshotRetentionDays;
+  if (modelSnapshotRetentionDays !== job.model_snapshot_retention_days) {
+    return { model_snapshot_retention_days: modelSnapshotRetentionDays };
+  }
+  return {};
+}
+
+function extractDailyModelSnapshotRetentionAfterDays(job, newJobData) {
+  const dailyModelSnapshotRetentionAfterDays = newJobData.dailyModelSnapshotRetentionAfterDays;
+  if (dailyModelSnapshotRetentionAfterDays !== job.daily_model_snapshot_retention_after_days) {
+    return { daily_model_snapshot_retention_after_days: dailyModelSnapshotRetentionAfterDays };
+  }
+  return {};
 }
 
 function extractDetectorDescriptions(job, newJobData) {

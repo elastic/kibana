@@ -3,7 +3,7 @@
 exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__statement"
+  className="monPipelineViewer__pluginStatement"
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -75,7 +75,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 exports[`PluginStatement component adds warning highlight for event millis 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__statement"
+  className="monPipelineViewer__pluginStatement"
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -147,7 +147,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
 exports[`PluginStatement component does not render explicit id field if no id is specified 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__statement"
+  className="monPipelineViewer__pluginStatement"
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -197,7 +197,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
 exports[`PluginStatement component renders input metrics and explicit id fields 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__statement"
+  className="monPipelineViewer__pluginStatement"
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -257,7 +257,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
 exports[`PluginStatement component renders processor statement metrics 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__statement"
+  className="monPipelineViewer__pluginStatement"
   gutterSize="none"
   justifyContent="spaceBetween"
 >

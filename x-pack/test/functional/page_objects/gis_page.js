@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { APP_ID } from '../../../plugins/maps/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
@@ -16,6 +17,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const renderable = getService('renderable');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -131,14 +133,29 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openNewMap() {
       log.debug(`Open new Map`);
 
-      await this.gotoMapListingPage();
-      await testSubjects.click('newMapLink');
+      // Navigate directly because we don't need to go through the map listing
+      // page. The listing page is skipped if there are no saved objects
+      await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
+      await renderable.waitForRender();
     }
 
-    async saveMap(name) {
+    async saveMap(name, uncheckReturnToOriginModeSwitch = false) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
+      if (uncheckReturnToOriginModeSwitch) {
+        const redirectToOriginCheckboxExists = await testSubjects.exists(
+          'returnToOriginModeSwitch'
+        );
+        if (!redirectToOriginCheckboxExists) {
+          throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
+        }
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', 'uncheck');
+      }
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    }
+
+    async clickSaveAndReturnButton() {
+      await testSubjects.click('mapSaveAndReturnButton');
     }
 
     async expectMissingSaveButton() {
@@ -159,7 +176,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('mapsListingPage');
+      const exists = await testSubjects.exists('mapsListingPage', { timeout: 3500 });
       return exists;
     }
 
@@ -197,7 +214,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -209,8 +226,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
-      const links = await find.allByLinkText(name);
-      return links.length;
+      const buttons = await find.allByButtonText(name);
+      return buttons.length;
     }
 
     async isSetViewPopoverOpen() {
@@ -653,6 +670,24 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCategorySuggestions() {
       return await comboBox.getOptionsList(`colorStopInput1`);
+    }
+
+    async enableAutoFitToBounds() {
+      await testSubjects.click('openSettingsButton');
+      const isEnabled = await testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
+      if (!isEnabled) {
+        await retry.try(async () => {
+          await testSubjects.click('autoFitToDataBoundsSwitch');
+          const ensureEnabled = await testSubjects.getAttribute(
+            'autoFitToDataBoundsSwitch',
+            'checked'
+          );
+          if (!ensureEnabled) {
+            throw new Error('autoFitToDataBoundsSwitch is not enabled');
+          }
+        });
+      }
+      await testSubjects.click('mapSettingSubmitButton');
     }
   }
   return new GisPage();

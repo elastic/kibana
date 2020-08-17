@@ -7,24 +7,23 @@
 import { getEnvironmentUiFilterES } from '../get_environment_ui_filter_es';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
-import { ESFilter } from '../../../../../typings/elasticsearch';
 
 describe('getEnvironmentUiFilterES', () => {
-  it('should return undefined, when environment is undefined', () => {
+  it('should return empty array, when environment is undefined', () => {
     const uiFilterES = getEnvironmentUiFilterES();
-    expect(uiFilterES).toBeUndefined();
+    expect(uiFilterES).toHaveLength(0);
   });
 
   it('should create a filter for a service environment', () => {
-    const uiFilterES = getEnvironmentUiFilterES('test') as ESFilter;
-    expect(uiFilterES).toHaveProperty(['term', SERVICE_ENVIRONMENT], 'test');
+    const uiFilterES = getEnvironmentUiFilterES('test');
+    expect(uiFilterES).toHaveLength(1);
+    expect(uiFilterES[0]).toHaveProperty(['term', SERVICE_ENVIRONMENT], 'test');
   });
 
   it('should create a filter for missing service environments', () => {
-    const uiFilterES = getEnvironmentUiFilterES(
-      ENVIRONMENT_NOT_DEFINED
-    ) as ESFilter;
-    expect(uiFilterES).toHaveProperty(
+    const uiFilterES = getEnvironmentUiFilterES(ENVIRONMENT_NOT_DEFINED);
+    expect(uiFilterES).toHaveLength(1);
+    expect(uiFilterES[0]).toHaveProperty(
       ['bool', 'must_not', 'exists', 'field'],
       SERVICE_ENVIRONMENT
     );

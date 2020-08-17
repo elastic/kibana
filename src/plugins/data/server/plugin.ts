@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsService } from './index_patterns';
-import { ISearchSetup } from './search';
+import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
+import { ISearchSetup, ISearchStart } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -36,14 +37,27 @@ export interface DataPluginSetup {
 }
 
 export interface DataPluginStart {
+  search: ISearchStart;
   fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsServiceStart;
 }
 
 export interface DataPluginSetupDependencies {
+  expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
-export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart> {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataPluginStartDependencies {}
+
+export class DataServerPlugin
+  implements
+    Plugin<
+      DataPluginSetup,
+      DataPluginStart,
+      DataPluginSetupDependencies,
+      DataPluginStartDependencies
+    > {
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
@@ -51,15 +65,20 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.searchService = new SearchService(initializerContext);
+    this.logger = initializerContext.logger.get('data');
+    this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
-  public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
+    { expressions, usageCollection }: DataPluginSetupDependencies
+  ) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.queryService.setup(core);
@@ -69,18 +88,29 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     core.uiSettings.register(getUiSettings());
 
     return {
+      search: this.searchService.setup(core, {
+        registerFunction: expressions.registerFunction,
+        usageCollection,
+      }),
       fieldFormats: this.fieldFormats.setup(),
-      search: this.searchService.setup(core),
     };
   }
 
   public start(core: CoreStart) {
+    const fieldFormats = this.fieldFormats.start();
     return {
-      fieldFormats: this.fieldFormats.start(),
+      search: this.searchService.start(core, { fieldFormats }),
+      fieldFormats,
+      indexPatterns: this.indexPatterns.start(core, {
+        fieldFormats,
+        logger: this.logger.get('indexPatterns'),
+      }),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.searchService.stop();
+  }
 }
 
 export { DataServerPlugin as Plugin };

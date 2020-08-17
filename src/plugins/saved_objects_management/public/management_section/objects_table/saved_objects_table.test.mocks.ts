@@ -22,15 +22,19 @@ jest.doMock('@elastic/filesaver', () => ({
   saveAs: saveAsMock,
 }));
 
-jest.doMock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (func: Function) => {
-    function debounced(this: any, ...args: any[]) {
-      return func.apply(this, args);
-    }
-    return debounced;
-  },
-}));
+jest.doMock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (func: Function) => {
+      function debounced(this: any, ...args: any[]) {
+        return func.apply(this, args);
+      }
+      return debounced;
+    },
+  };
+});
 
 export const findObjectsMock = jest.fn();
 jest.doMock('../../lib/find_objects', () => ({

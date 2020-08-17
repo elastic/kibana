@@ -1,0 +1,89 @@
+[[contributing]]
+== Contributing
+
+Whether you want to fix a bug, implement a feature, or add some other improvements or apis, the following sections will 
+guide you on the process.
+
+Read <<development-getting-started>> to get your environment up and running, then read <<development-best-practices>>.
+
+* <<development-tests>>
+* <<development-github>>
+* <<interpreting-ci-failures>>
+* <<development-documentation>>
+* <<development-pull-request>>
+* <<kibana-issue-reporting>>
+* <<signing-contributor-agreement>>
+* <<kibana-localization>>
+* <<kibana-release-notes-process>>
+* <<kibana-linting>>
+
+[discrete]
+[[signing-contributor-agreement]]
+=== Signing the contributor license agreement
+
+Please make sure you have signed the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
+
+[discrete]
+[[kibana-localization]]
+=== Localization
+
+Read <<kibana-localization-best-practices>> for details on our localization practices.
+
+Note that we cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
+We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
+
+[discrete]
+[[kibana-release-notes-process]]
+=== Release Notes Process
+
+Part of this process only applies to maintainers, since it requires
+access to GitHub labels.
+
+{kib} publishes https://www.elastic.co/guide/en/kibana/current/release-notes.html[Release Notes] for major and minor releases. 
+The Release Notes summarize what the PRs accomplish in language that is meaningful to users.
+ To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
+
+[discrete]
+==== Create the Release Notes text
+
+The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description.
+
+To use a single paragraph of text, enter `Release note:` or a `## Release note` header in the PR description, followed by your text. For example, refer to this https://github.com/elastic/kibana/pull/65796[PR] that uses the `## Release note` header.
+
+When you create the Release Notes text, use the following best practices:
+
+* Use present tense. 
+* Use sentence case.
+* When you create a feature PR, start with `Adds`.
+* When you create an enhancement PR, start with `Improves`. 
+* When you create a bug fix PR, start with `Fixes`.
+* When you create a deprecation PR, start with `Deprecates`.
+
+[discrete]
+==== Add your labels
+
+[arabic]
+. Label the PR with the targeted version (ex: `v7.3.0`).
+. Label the PR with the appropriate GitHub labels:
+  * For a new feature or functionality, use `release_note:enhancement`.
+  * For an external-facing fix, use `release_note:fix`. We do not include docs, build, and test fixes in the Release Notes, or unreleased issues that are only on `master`.
+  * For a deprecated feature, use `release_note:deprecation`.
+  * For a breaking change, use `release_note:breaking`.
+  * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
+
+
+include::development-github.asciidoc[leveloffset=+1]
+
+include::development-tests.asciidoc[leveloffset=+1]
+
+include::interpreting-ci-failures.asciidoc[leveloffset=+1]
+
+include::development-documentation.asciidoc[leveloffset=+1]
+
+include::development-pull-request.asciidoc[leveloffset=+1]
+
+include::kibana-issue-reporting.asciidoc[leveloffset=+1]
+
+include::pr-review.asciidoc[leveloffset=+1]
+
+include::linting.asciidoc[leveloffset=+1]

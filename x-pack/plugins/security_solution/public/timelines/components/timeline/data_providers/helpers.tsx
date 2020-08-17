@@ -281,6 +281,7 @@ export const addProviderToGroup = ({
   }
 
   const destinationGroupIndex = getGroupIndexFromDroppableId(destination.droppableId);
+
   if (
     indexIsValid({
       index: destinationGroupIndex,

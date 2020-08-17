@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { SignalSourceHit, Signal, Ancestor } from './types';
-import { OutputRuleAlertRest } from '../types';
 
-export const buildAncestor = (
-  doc: SignalSourceHit,
-  rule: Partial<OutputRuleAlertRest>
-): Ancestor => {
+export const buildAncestor = (doc: SignalSourceHit, rule: Partial<RulesSchema>): Ancestor => {
   const existingSignal = doc._source.signal?.parent;
   if (existingSignal != null) {
     return {
@@ -34,7 +31,7 @@ export const buildAncestor = (
 
 export const buildAncestorsSignal = (
   doc: SignalSourceHit,
-  rule: Partial<OutputRuleAlertRest>
+  rule: Partial<RulesSchema>
 ): Signal['ancestors'] => {
   const newAncestor = buildAncestor(doc, rule);
   const existingAncestors = doc._source.signal?.ancestors;
@@ -45,11 +42,11 @@ export const buildAncestorsSignal = (
   }
 };
 
-export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleAlertRest>): Signal => {
+export const buildSignal = (doc: SignalSourceHit, rule: Partial<RulesSchema>): Signal => {
   const ruleWithoutInternalTags = removeInternalTagsFromRule(rule);
   const parent = buildAncestor(doc, rule);
   const ancestors = buildAncestorsSignal(doc, rule);
-  const signal: Signal = {
+  let signal: Signal = {
     parent,
     ancestors,
     original_time: doc._source['@timestamp'],
@@ -57,18 +54,20 @@ export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleAlertR
     rule: ruleWithoutInternalTags,
   };
   if (doc._source.event != null) {
-    return { ...signal, original_event: doc._source.event };
+    signal = { ...signal, original_event: doc._source.event };
+  }
+  if (doc._source.threshold_count != null) {
+    signal = { ...signal, threshold_count: doc._source.threshold_count };
+    delete doc._source.threshold_count;
   }
   return signal;
 };
 
-export const removeInternalTagsFromRule = (
-  rule: Partial<OutputRuleAlertRest>
-): Partial<OutputRuleAlertRest> => {
+export const removeInternalTagsFromRule = (rule: Partial<RulesSchema>): Partial<RulesSchema> => {
   if (rule.tags == null) {
     return rule;
   } else {
-    const ruleWithoutInternalTags: Partial<OutputRuleAlertRest> = {
+    const ruleWithoutInternalTags: Partial<RulesSchema> = {
       ...rule,
       tags: rule.tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER)),
     };

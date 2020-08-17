@@ -6,7 +6,8 @@
 
 import { IRouter } from 'kibana/server';
 
-import { buildSiemResponse, transformError, validate } from '../siem_server_deps';
+import { buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/shared_imports';
 import { LIST_INDEX } from '../../common/constants';
 import { acknowledgeSchema } from '../../common/schemas';
 
@@ -16,7 +17,7 @@ export const createListIndexRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_INDEX,
       validate: false,

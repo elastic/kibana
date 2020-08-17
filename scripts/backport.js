@@ -18,4 +18,10 @@
  */
 
 require('../src/setup_node_env/node_version_validator');
-require('backport');
+var process = require('process');
+
+// forward command line args to backport
+var args = process.argv.slice(2);
+
+var backport = require('backport');
+backport.run({}, args);

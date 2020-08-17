@@ -59,11 +59,12 @@ interface Props {
   transformId: string;
   transformConfig: any;
   overrides: StepDetailsExposedState;
+  timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
 }
 
 export const StepCreateForm: FC<Props> = React.memo(
-  ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
+  ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -187,8 +188,8 @@ export const StepCreateForm: FC<Props> = React.memo(
         Object.assign(newIndexPattern, {
           id: '',
           title: indexPatternName,
+          timeFieldName,
         });
-
         const id = await newIndexPattern.create();
 
         await indexPatterns.clearCache();

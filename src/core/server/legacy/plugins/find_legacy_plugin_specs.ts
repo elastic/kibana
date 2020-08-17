@@ -23,7 +23,7 @@ import { toArray, tap, distinct, map } from 'rxjs/operators';
 import {
   findPluginSpecs,
   defaultConfig,
-  // @ts-ignore
+  // @ts-expect-error
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';

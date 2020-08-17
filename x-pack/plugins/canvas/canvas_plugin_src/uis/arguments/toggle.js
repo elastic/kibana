@@ -41,8 +41,12 @@ ToggleArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.object]).isRequired,
   argId: PropTypes.string.isRequired,
-  labelValue: PropTypes.string,
-  showLabelValue: PropTypes.bool,
+  typeInstance: PropTypes.shape({
+    displayName: PropTypes.string.isRequired,
+    options: PropTypes.shape({
+      labelValue: PropTypes.string.isRequired,
+    }),
+  }).isRequired,
   renderError: PropTypes.func.isRequired,
 };
 

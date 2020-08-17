@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
@@ -14,16 +14,27 @@ import { useAgentRefresh } from '../hooks';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
-}> = memo(({ agent }) => {
+  assignFlyoutOpenByDefault?: boolean;
+  onCancelReassign?: () => void;
+}> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign }) => {
   const hasWriteCapabilites = useCapabilities().write;
   const refreshAgent = useAgentRefresh();
-  const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(false);
+  const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
+  const isUnenrolling = agent.status === 'unenrolling';
+
+  const onClose = useMemo(() => {
+    if (onCancelReassign) {
+      return onCancelReassign;
+    } else {
+      return () => setIsReassignFlyoutOpen(false);
+    }
+  }, [onCancelReassign, setIsReassignFlyoutOpen]);
 
   return (
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignConfigFlyout agent={agent} onClose={() => setIsReassignFlyoutOpen(false)} />
+          <AgentReassignConfigFlyout agent={agent} onClose={onClose} />
         </EuiPortal>
       )}
       <ContextMenuActions
@@ -42,6 +53,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             onClick={() => {
               setIsReassignFlyoutOpen(true);
             }}
+            disabled={!agent.active}
             key="reassignConfig"
           >
             <FormattedMessage
@@ -49,7 +61,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               defaultMessage="Assign new agent config"
             />
           </EuiContextMenuItem>,
-          <AgentUnenrollProvider key="unenrollAgent">
+          <AgentUnenrollProvider key="unenrollAgent" forceUnenroll={isUnenrolling}>
             {(unenrollAgentsPrompt) => (
               <EuiContextMenuItem
                 icon="cross"
@@ -58,10 +70,17 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                   unenrollAgentsPrompt([agent.id], 1, refreshAgent);
                 }}
               >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll"
-                />
+                {isUnenrolling ? (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                    defaultMessage="Force unenroll"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.unenrollOneButton"
+                    defaultMessage="Unenroll"
+                  />
+                )}
               </EuiContextMenuItem>
             )}
           </AgentUnenrollProvider>,

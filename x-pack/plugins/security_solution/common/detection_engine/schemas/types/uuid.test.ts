@@ -25,7 +25,7 @@ describe('uuid', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "4656dc92-5832-11ea-8e2d" supplied to ""',
+      'Invalid value "4656dc92-5832-11ea-8e2d" supplied to "UUID"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -35,7 +35,7 @@ describe('uuid', () => {
     const decoded = UUID.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "UUID"']);
     expect(message.schema).toEqual({});
   });
 });

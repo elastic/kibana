@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
 import { ILicense } from '../../../../licensing/common/types';
-import { isFullLicense, isMinimumLicense } from '../../../common/license';
+import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 
 export const setupCapabilitiesSwitcher = (
@@ -30,9 +30,10 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
 
     try {
       const license = await license$.pipe(take(1)).toPromise();
+      const mlEnabled = isMlEnabled(license);
 
       // full license, leave capabilities as they were
-      if (isFullLicense(license)) {
+      if (mlEnabled && isFullLicense(license)) {
         return capabilities;
       }
 
@@ -45,7 +46,7 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
       });
 
       // for a basic license, reapply the original capabilities for the basic license features
-      if (isMinimumLicense(license)) {
+      if (mlEnabled && isMinimumLicense(license)) {
         basicLicenseMlCapabilities.forEach((c) => (mlCaps[c] = originalCapabilities[c]));
       }
 

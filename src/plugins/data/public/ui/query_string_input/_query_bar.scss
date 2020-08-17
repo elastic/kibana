@@ -1,3 +1,41 @@
+.kbnQueryBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+// Uses the append style, but no bordering
+.kqlQueryBar__languageSwitcherButton {
+  border-right: none !important;
+}
+
+.kbnQueryBar__textarea {
+  z-index: $euiZContentMenu;
+  resize: none !important; // When in the group, it will autosize
+  height: $euiSizeXXL;
+  // Unlike most inputs within layout control groups, the text area still needs a border.
+  // These adjusts help it sit above the control groups shadow to line up correctly.
+  padding-top: $euiSizeS + 3px !important;
+  transform: translateY(-2px);
+  padding: $euiSizeS - 1px;
+
+  &:not(:focus) {
+    @include euiYScrollWithShadows;
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    border: none;
+    box-shadow: none;
+  }
+
+  // When focused, let it scroll
+  &:focus {
+    overflow-x: auto;
+    overflow-y: auto;
+    width: calc(100% + 1px); // To overtake the group's fake border
+    white-space: normal;
+  }
+}
+
 @include euiBreakpoint('xs', 's') {
   .kbnQueryBar--withDatePicker {
     > :first-child {
@@ -16,5 +54,11 @@
     // sass-lint:disable-block no-important
     flex-grow: 0 !important;
     flex-basis: auto !important;
+    margin-right: -$euiSizeXS !important;
+
+    &.kbnQueryBar__datePickerWrapper-isHidden {
+      width: 0;
+      overflow: hidden;
+    }
   }
 }

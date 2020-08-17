@@ -65,8 +65,6 @@ describe('Mappings editor: edit field', () => {
 
   test('should update form parameters when changing the field datatype', async () => {
     const defaultMappings = {
-      _meta: {},
-      _source: {},
       properties: {
         userName: {
           ...defaultTextParameters,
@@ -109,5 +107,5 @@ describe('Mappings editor: edit field', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 50000);
 });

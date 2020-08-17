@@ -5,5 +5,6 @@
   "ui": true,
   "requiredPlugins": ["licensing", "management"],
   "optionalPlugins": ["security", "usageCollection"],
-  "configPath": ["xpack", "ingest_pipelines"]
+  "configPath": ["xpack", "ingest_pipelines"],
+  "requiredBundles": ["esUiShared", "kibanaReact"]
 }

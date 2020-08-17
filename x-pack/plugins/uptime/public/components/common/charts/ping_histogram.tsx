@@ -13,7 +13,7 @@ import {
   timeFormatter,
   BrushEndListener,
 } from '@elastic/charts';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,6 +60,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 }) => {
   const {
     colors: { danger, gray },
+    chartTheme,
   } = useContext(UptimeThemeContext);
 
   const [, updateUrlParams] = useUrlParams();
@@ -128,6 +129,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             }}
             showLegend={false}
             onBrushEnd={onBrushEnd}
+            {...chartTheme}
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
@@ -171,14 +173,15 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h2>
+      <EuiTitle size="s">
+        <h3>
           <FormattedMessage
             id="xpack.uptime.snapshot.pingsOverTimeTitle"
             defaultMessage="Pings over time"
           />
-        </h2>
+        </h3>
       </EuiTitle>
+      <EuiSpacer size="m" />
       {content}
     </>
   );

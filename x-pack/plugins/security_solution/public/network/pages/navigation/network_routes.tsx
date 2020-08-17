@@ -53,7 +53,11 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
@@ -100,10 +104,10 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     return (
       <Switch>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}>
+        <Route path={`/:tabName(${NetworkRouteType.dns})`}>
           <DnsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}>
+        <Route path={`/:tabName(${NetworkRouteType.flows})`}>
           <>
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
@@ -129,19 +133,19 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             </ConditionalFlexGroup>
           </>
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}>
+        <Route path={`/:tabName(${NetworkRouteType.http})`}>
           <HttpQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}>
+        <Route path={`/:tabName(${NetworkRouteType.tls})`}>
           <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}>
+        <Route path={`/:tabName(${NetworkRouteType.anomalies})`}>
           <AnomaliesQueryTabBody
             {...anomaliesProps}
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}>
+        <Route path={`/:tabName(${NetworkRouteType.alerts})`}>
           <NetworkAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

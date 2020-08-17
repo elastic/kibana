@@ -8,9 +8,23 @@ import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { EuiText } from '@elastic/eui';
 
+import '../../../common/mock/match_media';
 import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
 import { TestProviders } from '../../../common/mock';
 import { searchURL } from './__mock__';
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../common/components/link_to');
 
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
@@ -35,7 +49,7 @@ describe('Configuration button', () => {
 
   test('it pass the correct props to the button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
-      href: `#/link-to/case/configure${searchURL}`,
+      href: `/configure`,
       iconType: 'controlsHorizontal',
       isDisabled: false,
       'aria-label': 'My label',
@@ -66,6 +80,9 @@ describe('Configuration button', () => {
   });
 
   test('it shows the tooltip when hovering the button', () => {
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
+
     const msgTooltip = 'My message tooltip';
     const titleTooltip = 'My title';
 
@@ -83,6 +100,13 @@ describe('Configuration button', () => {
 
     newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
 
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    newWrapper.update();
     expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`);
+
+    // Clearing all mocks will also reset fake timers.
+    jest.clearAllMocks();
   });
 });

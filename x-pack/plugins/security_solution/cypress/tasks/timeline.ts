@@ -12,6 +12,7 @@ import {
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
+  PIN_EVENT,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
   TIMELINE_DESCRIPTION,
@@ -21,6 +22,8 @@ import {
   TIMELINE_TITLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
+  REMOVE_COLUMN,
+  RESET_FIELDS,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -56,7 +59,7 @@ export const createNewTimeline = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${query} {enter}`);
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
 };
 
 export const expandFirstTimelineEventDetails = () => {
@@ -76,6 +79,10 @@ export const openTimelineSettings = () => {
   cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
 };
 
+export const pinFirstEvent = () => {
+  cy.get(PIN_EVENT).first().click({ force: true });
+};
+
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT)
@@ -84,6 +91,10 @@ export const populateTimeline = () => {
       const intCount = +strCount;
       cy.wrap(intCount).should('be.above', 0);
     });
+};
+
+export const unpinFirstEvent = () => {
+  cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const uncheckTimestampToggleField = () => {
@@ -100,4 +111,13 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
   cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
     drop(headersDropArea)
   );
+};
+
+export const removeColumn = (column: number) => {
+  cy.get(REMOVE_COLUMN).first().should('exist');
+  cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
+};
+
+export const resetFields = () => {
+  cy.get(RESET_FIELDS).click({ force: true });
 };

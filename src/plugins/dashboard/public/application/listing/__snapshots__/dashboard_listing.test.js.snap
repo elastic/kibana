@@ -101,7 +101,7 @@ exports[`after fetch initialFilter 1`] = `
                   id="dashboard.listing.createNewDashboard.newToKibanaDescription"
                   values={
                     Object {
-                      "sampleDataInstallLink": <ForwardRef
+                      "sampleDataInstallLink": <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -109,7 +109,7 @@ exports[`after fetch initialFilter 1`] = `
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           values={Object {}}
                         />
-                      </ForwardRef>,
+                      </EuiLink>,
                     }
                   }
                 />
@@ -202,7 +202,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                   id="dashboard.listing.createNewDashboard.newToKibanaDescription"
                   values={
                     Object {
-                      "sampleDataInstallLink": <ForwardRef
+                      "sampleDataInstallLink": <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -210,7 +210,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           values={Object {}}
                         />
-                      </ForwardRef>,
+                      </EuiLink>,
                     }
                   }
                 />
@@ -303,7 +303,7 @@ exports[`after fetch renders table rows 1`] = `
                   id="dashboard.listing.createNewDashboard.newToKibanaDescription"
                   values={
                     Object {
-                      "sampleDataInstallLink": <ForwardRef
+                      "sampleDataInstallLink": <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -311,7 +311,7 @@ exports[`after fetch renders table rows 1`] = `
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           values={Object {}}
                         />
-                      </ForwardRef>,
+                      </EuiLink>,
                     }
                   }
                 />
@@ -404,7 +404,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
                   id="dashboard.listing.createNewDashboard.newToKibanaDescription"
                   values={
                     Object {
-                      "sampleDataInstallLink": <ForwardRef
+                      "sampleDataInstallLink": <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -412,7 +412,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           values={Object {}}
                         />
-                      </ForwardRef>,
+                      </EuiLink>,
                     }
                   }
                 />
@@ -505,7 +505,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
                   id="dashboard.listing.createNewDashboard.newToKibanaDescription"
                   values={
                     Object {
-                      "sampleDataInstallLink": <ForwardRef
+                      "sampleDataInstallLink": <EuiLink
                         onClick={[Function]}
                       >
                         <FormattedMessage
@@ -513,7 +513,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           values={Object {}}
                         />
-                      </ForwardRef>,
+                      </EuiLink>,
                     }
                   }
                 />

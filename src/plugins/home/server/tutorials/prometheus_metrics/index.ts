@@ -36,6 +36,7 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.prometheusMetrics.nameTitle', {
       defaultMessage: 'Prometheus metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.prometheusMetrics.shortDescription', {

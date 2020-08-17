@@ -7,3 +7,4 @@
 export * from './errors';
 export * from './log_entry_categories_analysis';
 export * from './log_entry_rate_analysis';
+export * from './log_entry_anomalies';

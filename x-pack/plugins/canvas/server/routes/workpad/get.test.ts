@@ -6,17 +6,12 @@
 
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__tests__/fixtures/workpads';
 import { CanvasWorkpad } from '../../../types';
@@ -34,10 +29,10 @@ describe('GET workpad', () => {
 
   beforeEach(() => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeGetWorkpadRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

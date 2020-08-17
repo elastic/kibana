@@ -8,6 +8,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
+import { functions as externalFunctions } from '../canvas_plugin_src/functions/external';
 import { initFunctions } from '../public/functions';
 
 /**
@@ -87,6 +88,7 @@ export type FunctionFactory<FnFactory> =
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
 type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
 type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type ExternalFunction = FunctionFactory<typeof externalFunctions[number]>;
 type ClientFunctions = FunctionFactory<
   ReturnType<typeof initFunctions> extends Array<infer U> ? U : never
 >;
@@ -95,7 +97,12 @@ type ClientFunctions = FunctionFactory<
  * A collection of all Canvas Functions.
  */
 
-export type CanvasFunction = CommonFunction | BrowserFunction | ServerFunction | ClientFunctions;
+export type CanvasFunction =
+  | CommonFunction
+  | BrowserFunction
+  | ServerFunction
+  | ExternalFunction
+  | ClientFunctions;
 
 /**
  * Represents a function called by the `case` Function.

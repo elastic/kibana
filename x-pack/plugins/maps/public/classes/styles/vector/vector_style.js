@@ -7,7 +7,12 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
+import {
+  getDefaultProperties,
+  getDefaultStaticProperties,
+  LINE_STYLES,
+  POLYGON_STYLES,
+} from './vector_style_defaults';
 import { AbstractStyle } from '../style';
 import {
   GEO_JSON_TYPE,
@@ -16,12 +21,12 @@ import {
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
+  VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
@@ -42,6 +47,11 @@ import { DynamicIconProperty } from './properties/dynamic_icon_property';
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
 const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
+
+function getNumericalMbFeatureStateValue(value) {
+  const valueAsFloat = parseFloat(value);
+  return isNaN(valueAsFloat) ? null : valueAsFloat;
+}
 
 export class VectorStyle extends AbstractStyle {
   static type = LAYER_STYLE_TYPE.VECTOR;
@@ -191,7 +201,7 @@ export class VectorStyle extends AbstractStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextFields) {
+  getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors) {
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
@@ -201,6 +211,13 @@ export class VectorStyle extends AbstractStyle {
     });
 
     dynamicProperties.forEach((key) => {
+      // Convert dynamic styling to static stying when there are no nextFields
+      if (nextFields.length === 0) {
+        const staticProperties = getDefaultStaticProperties(mapColors);
+        updatedProperties[key] = staticProperties[key];
+        return;
+      }
+
       const dynamicProperty = originalProperties[key];
       const fieldName =
         dynamicProperty && dynamicProperty.options.field && dynamicProperty.options.field.name;
@@ -249,24 +266,24 @@ export class VectorStyle extends AbstractStyle {
 
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const hasFeatureType = {
-      [VECTOR_SHAPE_TYPES.POINT]: false,
-      [VECTOR_SHAPE_TYPES.LINE]: false,
-      [VECTOR_SHAPE_TYPES.POLYGON]: false,
+      [VECTOR_SHAPE_TYPE.POINT]: false,
+      [VECTOR_SHAPE_TYPE.LINE]: false,
+      [VECTOR_SHAPE_TYPE.POLYGON]: false,
     };
     if (supportedFeatures.length > 1) {
       for (let i = 0; i < features.length; i++) {
         const feature = features[i];
-        if (!hasFeatureType[VECTOR_SHAPE_TYPES.POINT] && POINTS.includes(feature.geometry.type)) {
-          hasFeatureType[VECTOR_SHAPE_TYPES.POINT] = true;
+        if (!hasFeatureType[VECTOR_SHAPE_TYPE.POINT] && POINTS.includes(feature.geometry.type)) {
+          hasFeatureType[VECTOR_SHAPE_TYPE.POINT] = true;
         }
-        if (!hasFeatureType[VECTOR_SHAPE_TYPES.LINE] && LINES.includes(feature.geometry.type)) {
-          hasFeatureType[VECTOR_SHAPE_TYPES.LINE] = true;
+        if (!hasFeatureType[VECTOR_SHAPE_TYPE.LINE] && LINES.includes(feature.geometry.type)) {
+          hasFeatureType[VECTOR_SHAPE_TYPE.LINE] = true;
         }
         if (
-          !hasFeatureType[VECTOR_SHAPE_TYPES.POLYGON] &&
+          !hasFeatureType[VECTOR_SHAPE_TYPE.POLYGON] &&
           POLYGONS.includes(feature.geometry.type)
         ) {
-          hasFeatureType[VECTOR_SHAPE_TYPES.POLYGON] = true;
+          hasFeatureType[VECTOR_SHAPE_TYPE.POLYGON] = true;
         }
       }
     }
@@ -274,17 +291,17 @@ export class VectorStyle extends AbstractStyle {
     const styleMeta = {
       geometryTypes: {
         isPointsOnly: isOnlySingleFeatureType(
-          VECTOR_SHAPE_TYPES.POINT,
+          VECTOR_SHAPE_TYPE.POINT,
           supportedFeatures,
           hasFeatureType
         ),
         isLinesOnly: isOnlySingleFeatureType(
-          VECTOR_SHAPE_TYPES.LINE,
+          VECTOR_SHAPE_TYPE.LINE,
           supportedFeatures,
           hasFeatureType
         ),
         isPolygonsOnly: isOnlySingleFeatureType(
-          VECTOR_SHAPE_TYPES.POLYGON,
+          VECTOR_SHAPE_TYPE.POLYGON,
           supportedFeatures,
           hasFeatureType
         ),
@@ -506,14 +523,14 @@ export class VectorStyle extends AbstractStyle {
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
         const rawValue = feature.properties[name];
         if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[name] = dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue); //the same value will be potentially overridden multiple times, if the name remains identical
+          tmpFeatureState[name] = getNumericalMbFeatureStateValue(rawValue); //the same value will be potentially overridden multiple times, if the name remains identical
         } else {
           //in practice, a new system property will only be created for:
           // - label text: this requires the value to be formatted first.
           // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
 
           const formattedValue = dynamicStyleProp.isOrdinal()
-            ? dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue)
+            ? getNumericalMbFeatureStateValue(rawValue)
             : dynamicStyleProp.formatField(rawValue);
 
           feature.properties[computedName] = formattedValue;

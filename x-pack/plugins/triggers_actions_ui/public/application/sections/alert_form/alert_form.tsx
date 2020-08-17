@@ -24,6 +24,7 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -38,6 +39,8 @@ import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
+import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -78,6 +81,7 @@ interface AlertFormProps {
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
+  operation: string;
 }
 
 export const AlertForm = ({
@@ -86,6 +90,7 @@ export const AlertForm = ({
   dispatch,
   errors,
   setHasActionsDisabled,
+  operation,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const {
@@ -96,6 +101,7 @@ export const AlertForm = ({
     docLinks,
     capabilities,
   } = alertsContext;
+  const canShowActions = hasShowActionsCapability(capabilities);
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
@@ -121,12 +127,12 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypes = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = {};
+        const index: AlertTypeIndex = new Map();
         for (const alertTypeItem of alertTypes) {
-          index[alertTypeItem.id] = alertTypeItem;
+          index.set(alertTypeItem.id, alertTypeItem);
         }
-        if (alert.alertTypeId && index[alert.alertTypeId]) {
-          setDefaultActionGroupId(index[alert.alertTypeId].defaultActionGroupId);
+        if (alert.alertTypeId && index.has(alert.alertTypeId)) {
+          setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
       } catch (e) {
@@ -167,21 +173,21 @@ export const AlertForm = ({
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeRegistryList =
-    alert.consumer === 'alerts'
-      ? alertTypeRegistry
-          .list()
-          .filter(
-            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
-          )
-      : alertTypeRegistry
-          .list()
-          .filter(
-            (alertTypeRegistryItem: AlertTypeModel) =>
-              alertTypesIndex &&
-              alertTypesIndex[alertTypeRegistryItem.id] &&
-              alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
-          );
+  const alertTypeRegistryList = alertTypesIndex
+    ? alertTypeRegistry
+        .list()
+        .filter(
+          (alertTypeRegistryItem: AlertTypeModel) =>
+            alertTypesIndex.has(alertTypeRegistryItem.id) &&
+            hasAllPrivilege(alert, alertTypesIndex.get(alertTypeRegistryItem.id))
+        )
+        .filter((alertTypeRegistryItem: AlertTypeModel) =>
+          alert.consumer === ALERTS_FEATURE_ID
+            ? !alertTypeRegistryItem.requiresAppContext
+            : alertTypesIndex.get(alertTypeRegistryItem.id)!.producer === alert.consumer
+        )
+    : [];
+
   const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
     return (
       <EuiKeyPadMenuItem
@@ -192,8 +198,8 @@ export const AlertForm = ({
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
           setAlertProperty('params', {});
-          if (alertTypesIndex && alertTypesIndex[item.id]) {
-            setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
+          if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+            setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
           }
         }}
       >
@@ -238,15 +244,7 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
+        <Suspense fallback={CenterJustifiedSpinner}>
           <AlertParamsExpressionComponent
             alertParams={alert.params}
             alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
@@ -257,14 +255,14 @@ export const AlertForm = ({
           />
         </Suspense>
       ) : null}
-      {defaultActionGroupId ? (
+      {canShowActions && defaultActionGroupId ? (
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
-            alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(
-                  (av) => av.name
+            alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
+              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>
+                  a.name.toUpperCase().localeCompare(b.name.toUpperCase())
                 )
               : undefined
           }
@@ -487,7 +485,7 @@ export const AlertForm = ({
       <EuiSpacer size="m" />
       {alertTypeModel ? (
         <Fragment>{alertTypeDetails}</Fragment>
-      ) : (
+      ) : alertTypeNodes.length ? (
         <Fragment>
           <EuiHorizontalRule />
           <EuiTitle size="s">
@@ -503,7 +501,47 @@ export const AlertForm = ({
             {alertTypeNodes}
           </EuiFlexGroup>
         </Fragment>
+      ) : alertTypesIndex ? (
+        <NoAuthorizedAlertTypes operation={operation} />
+      ) : (
+        <CenterJustifiedSpinner />
       )}
     </EuiForm>
   );
 };
+
+const CenterJustifiedSpinner = () => (
+  <EuiFlexGroup justifyContent="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="m" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
+  <EuiEmptyPrompt
+    iconType="lock"
+    data-test-subj="noAuthorizedAlertTypesPrompt"
+    titleSize="xs"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypesTitle"
+          defaultMessage="You have not been authorized to {operation} any Alert types"
+          values={{ operation }}
+        />
+      </h2>
+    }
+    body={
+      <div>
+        <p role="banner">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypes"
+            defaultMessage="In order to {operation} an Alert you need to have been granted the appropriate privileges."
+            values={{ operation }}
+          />
+        </p>
+      </div>
+    }
+  />
+);

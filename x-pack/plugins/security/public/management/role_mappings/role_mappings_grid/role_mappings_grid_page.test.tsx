@@ -24,7 +24,7 @@ describe('RoleMappingsGridPage', () => {
   let coreStart: CoreStart;
 
   beforeEach(() => {
-    history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+    history = scopedHistoryMock.create();
     coreStart = coreMock.createStart();
   });
 

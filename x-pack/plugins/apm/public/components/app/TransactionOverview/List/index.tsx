@@ -10,9 +10,9 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/transform';
+import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import { asDecimal, convertTo } from '../../../../utils/formatters';
+import { asDecimal, asMillisecondDuration } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -25,18 +25,12 @@ const TransactionNameLink = styled(TransactionDetailLink)`
 `;
 
 interface Props {
-  items: ITransactionGroup[];
+  items: TransactionGroup[];
   isLoading: boolean;
 }
 
-const toMilliseconds = (time: number) =>
-  convertTo({
-    unit: 'milliseconds',
-    microseconds: time,
-  }).formatted;
-
 export function TransactionList({ items, isLoading }: Props) {
-  const columns: Array<ITableColumn<ITransactionGroup>> = useMemo(
+  const columns: Array<ITableColumn<TransactionGroup>> = useMemo(
     () => [
       {
         field: 'name',
@@ -45,11 +39,11 @@ export function TransactionList({ items, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (transactionName: string, { sample }: ITransactionGroup) => {
+        render: (_, { sample }: TransactionGroup) => {
           return (
             <EuiToolTip
               id="transaction-name-link-tooltip"
-              content={transactionName || NOT_AVAILABLE_LABEL}
+              content={sample.transaction.name || NOT_AVAILABLE_LABEL}
             >
               <TransactionNameLink
                 serviceName={sample.service.name}
@@ -58,7 +52,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 transactionName={sample.transaction.name}
                 transactionType={sample.transaction.type}
               >
-                {transactionName || NOT_AVAILABLE_LABEL}
+                {sample.transaction.name || NOT_AVAILABLE_LABEL}
               </TransactionNameLink>
             </EuiToolTip>
           );
@@ -74,7 +68,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (time: number) => toMilliseconds(time),
+        render: (time: number) => asMillisecondDuration(time),
       },
       {
         field: 'p95',
@@ -86,7 +80,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (time: number) => toMilliseconds(time),
+        render: (time: number) => asMillisecondDuration(time),
       },
       {
         field: 'transactionsPerMinute',
