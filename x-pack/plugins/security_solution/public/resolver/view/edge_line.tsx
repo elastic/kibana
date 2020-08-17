@@ -127,7 +127,6 @@ const EdgeLineComponent = React.memo(
 
     return (
       <StyledEdgeLine
-        role="presentation"
         className={className}
         style={style}
         resolverEdgeColor={colorMap.resolverEdge}

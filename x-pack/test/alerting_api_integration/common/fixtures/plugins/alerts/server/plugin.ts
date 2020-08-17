@@ -40,6 +40,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.onlyStateVariables',
         'test.noop',
         'test.unrestricted-noop',
+        'test.patternFiring',
+        'test.throw',
       ],
       privileges: {
         all: {
@@ -60,6 +62,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.onlyStateVariables',
               'test.noop',
               'test.unrestricted-noop',
+              'test.patternFiring',
+              'test.throw',
             ],
           },
           ui: [],
@@ -82,6 +86,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.onlyStateVariables',
               'test.noop',
               'test.unrestricted-noop',
+              'test.patternFiring',
+              'test.throw',
             ],
           },
           ui: [],
