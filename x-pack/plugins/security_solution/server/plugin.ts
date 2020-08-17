@@ -62,6 +62,7 @@ import { AppRequestContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -105,6 +106,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly telemetryEventsSender = new TelemetryEventsSender();
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
 
@@ -330,11 +332,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.logger.debug('User artifacts task not available.');
     }
 
+    this.telemetryEventsSender.start({
+      logger: this.logger,
+    });
+
     return {};
   }
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
   }
 }
