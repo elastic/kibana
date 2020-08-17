@@ -17,82 +17,45 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
+import { Plugin, CoreSetup, CoreStart, PackageInfo } from 'src/core/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
-import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { getEsClient, LegacyApiCaller } from './legacy';
-import { getForceNow } from '../query/timefilter/lib/get_force_now';
-import { calculateBounds, TimeRange } from '../../common/query';
-
+import { AggsService, AggsSetupDependencies, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { GetInternalStartServicesFn } from '../types';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import {
-  getAggTypes,
-  getAggTypesFunctions,
-  AggTypesRegistry,
-  AggConfigs,
-  getCalculateAutoTimeExpression,
-} from './aggs';
 import { SessionService, ISessionService } from './session_service';
 import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
-interface SearchServiceSetupDependencies {
-  expressions: ExpressionsSetup;
-  usageCollection?: UsageCollectionSetup;
-  getInternalStartServices: GetInternalStartServicesFn;
+/** @internal */
+export interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
+  registerFunction: AggsSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
 }
 
-interface SearchServiceStartDependencies {
+/** @internal */
+export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
-  private readonly aggTypesRegistry = new AggTypesRegistry();
+  private readonly aggsService = new AggsService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
-
-  /**
-   * getForceNow uses window.location, so we must have a separate implementation
-   * of calculateBounds on the client and the server.
-   */
-  private calculateBounds = (timeRange: TimeRange) =>
-    calculateBounds(timeRange, { forceNow: getForceNow() });
-  sessionService!: ISessionService;
+  private sessionService!: ISessionService;
 
   public setup(
     core: CoreSetup,
-    {
-      expressions,
-      usageCollection,
-      packageInfo,
-      getInternalStartServices,
-    }: SearchServiceSetupDependencies
+    { packageInfo, registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(core, usageCollection);
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
-
-    const aggTypesSetup = this.aggTypesRegistry.setup();
-
-    // register each agg type
-    const aggTypes = getAggTypes({
-      calculateBounds: this.calculateBounds,
-      getInternalStartServices,
-      uiSettings: core.uiSettings,
-    });
-    aggTypes.buckets.forEach((b) => aggTypesSetup.registerBucket(b));
-    aggTypes.metrics.forEach((m) => aggTypesSetup.registerMetric(m));
-
-    // register expression functions for each agg type
-    const aggFunctions = getAggTypesFunctions();
-    aggFunctions.forEach((fn) => expressions.registerFunction(fn));
-
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -114,21 +77,22 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     return {
+      aggs: this.aggsService.setup({
+        registerFunction,
+        uiSettings: core.uiSettings,
+      }),
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
         this.sessionService = enhancements.sessionService;
       },
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
-        types: aggTypesSetup,
-      },
     };
   }
 
-  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
-    const aggTypesStart = this.aggTypesRegistry.start();
-
+  public start(
+    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+  ): ISearchStart {
     const search: ISearchGeneric = (request, options) => {
       return this.searchInterceptor.search(request, options);
     };
@@ -138,22 +102,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
-      uiSettings: core.uiSettings,
-      injectedMetadata: core.injectedMetadata,
+      uiSettings,
+      injectedMetadata,
       search,
       legacySearch,
     };
 
     return {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
-        createAggConfigs: (indexPattern, configStates = [], schemas) => {
-          return new AggConfigs(indexPattern, configStates, {
-            typesRegistry: aggTypesStart,
-          });
-        },
-        types: aggTypesStart,
-      },
+      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
       sendToBackground: () => {
         return this.searchInterceptor.sendToBackground();
@@ -161,7 +117,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       session: this.sessionService,
       usageCollector: this.usageCollector!,
       searchSource: {
-        create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
+        create: createSearchSource(indexPatterns, searchSourceDependencies),
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
@@ -170,5 +126,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.aggsService.stop();
+  }
 }

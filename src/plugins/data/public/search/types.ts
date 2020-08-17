@@ -19,12 +19,12 @@
 
 import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
-import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { LegacyApiCaller } from './legacy/es_client';
 import { ISearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { ISessionService } from './session_service';
 import { SearchUsageCollector } from './collectors';
+import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -32,9 +32,7 @@ import {
   IEsSearchResponse,
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
-import { ExpressionsSetup } from '../../../expressions/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { GetInternalStartServicesFn } from '../types';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
@@ -64,7 +62,7 @@ export interface SearchEnhancements {
  * point.
  */
 export interface ISearchSetup {
-  aggs: SearchAggsSetup;
+  aggs: AggsSetup;
   usageCollector?: SearchUsageCollector;
   /**
    * @internal
@@ -73,7 +71,7 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart {
-  aggs: SearchAggsStart;
+  aggs: AggsStart;
   search: ISearchGeneric;
   sendToBackground: () => Promise<boolean>;
   session: ISessionService;
@@ -91,13 +89,15 @@ export interface ISearchStart {
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 
+/** @internal */
 export interface SearchServiceSetupDependencies {
-  expressions: ExpressionsSetup;
-  usageCollection?: UsageCollectionSetup;
-  getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
+  registerFunction: AggsSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
 }
 
+/** @internal */
 export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
 }

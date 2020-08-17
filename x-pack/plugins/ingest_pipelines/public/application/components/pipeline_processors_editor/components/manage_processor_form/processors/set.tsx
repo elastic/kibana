@@ -64,11 +64,11 @@ const overrideConfig: FieldConfig = {
 export const SetProcessor: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldConfig} component={Field} path="field" />
+      <UseField config={fieldConfig} component={Field} path="fields.field" />
 
-      <UseField config={valueConfig} component={Field} path="value" />
+      <UseField config={valueConfig} component={Field} path="fields.value" />
 
-      <UseField config={overrideConfig} component={ToggleField} path="override" />
+      <UseField config={overrideConfig} component={ToggleField} path="fields.override" />
     </>
   );
 };

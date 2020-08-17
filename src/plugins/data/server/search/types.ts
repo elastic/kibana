@@ -19,6 +19,7 @@
 
 import { RequestHandlerContext, KibanaRequest } from '../../../../core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
@@ -34,6 +35,7 @@ export interface ISearchOptions {
 }
 
 export interface ISearchSetup {
+  aggs: AggsSetup;
   /**
    * Extension point exposed for other plugins to register their own search
    * strategies.
@@ -47,6 +49,7 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart {
+  aggs: AggsStart;
   /**
    * Get other registered search strategies. For example, if a new strategy needs to use the
    * already-registered ES search strategy, it can use this function to accomplish that.
