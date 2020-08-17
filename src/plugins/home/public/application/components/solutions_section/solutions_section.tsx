@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
   EuiTitle,
