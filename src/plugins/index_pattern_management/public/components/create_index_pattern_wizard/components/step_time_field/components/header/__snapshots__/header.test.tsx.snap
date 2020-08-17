@@ -17,9 +17,18 @@ exports[`Header should render normally 1`] = `
     size="m"
   />
   <EuiText>
-    <strong>
-      ki*
-    </strong>
+    <FormattedMessage
+      defaultMessage="Specify settings for your {indexPattern} {indexPatternName}."
+      id="indexPatternManagement.createIndexPattern.stepTimeLabel"
+      values={
+        Object {
+          "indexPattern": <strong>
+            ki*
+          </strong>,
+          "indexPatternName": "ki*",
+        }
+      }
+    />
   </EuiText>
 </div>
 `;

@@ -9,8 +9,8 @@ import { findInventoryModel, findInventoryFields } from '../../../common/invento
 import { InfraSnapshotRequestOptions } from './types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import {
-  SnapshotModelRT,
-  SnapshotModel,
+  MetricsUIAggregation,
+  MetricsUIAggregationRT,
   InventoryItemType,
 } from '../../../common/inventory_models/types';
 import {
@@ -75,11 +75,13 @@ export const metricToAggregation = (
   return inventoryModel.metrics.snapshot?.[metric.type];
 };
 
-export const getMetricsAggregations = (options: InfraSnapshotRequestOptions): SnapshotModel => {
+export const getMetricsAggregations = (
+  options: InfraSnapshotRequestOptions
+): MetricsUIAggregation => {
   const { metrics } = options;
   return metrics.reduce((aggs, metric, index) => {
     const aggregation = metricToAggregation(options.nodeType, metric, index);
-    if (!SnapshotModelRT.is(aggregation)) {
+    if (!MetricsUIAggregationRT.is(aggregation)) {
       throw new Error(
         i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {
           defaultMessage: 'The aggregation for {metric} for {nodeType} is not available.',
