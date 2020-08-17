@@ -246,6 +246,35 @@ describe('when on the list page', () => {
     let hostDetails: HostInfo;
     let agentId: string;
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+    const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        host_status,
+        metadata: { host, ...details },
+      } = mockEndpointDetailsApiResult();
+
+      hostDetails = {
+        host_status,
+        metadata: {
+          ...details,
+          host: {
+            ...host,
+            id: '1',
+          },
+        },
+      };
+
+      agentId = hostDetails.metadata.elastic.agent.id;
+
+      const policy = docGenerator.generatePolicyPackageConfig();
+      policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [hostDetails],
+        endpointPackageConfigs: [policy],
+        policyResponse: mockedPolicyResponse,
+      });
+    };
 
     const createPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
@@ -312,32 +341,7 @@ describe('when on the list page', () => {
     };
 
     beforeEach(async () => {
-      const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        host_status,
-        metadata: { host, ...details },
-      } = mockEndpointDetailsApiResult();
-
-      hostDetails = {
-        host_status,
-        metadata: {
-          ...details,
-          host: {
-            ...host,
-            id: '1',
-          },
-        },
-      };
-
-      agentId = hostDetails.metadata.elastic.agent.id;
-
-      const policy = docGenerator.generatePolicyPackageConfig();
-      policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
-
-      setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: [hostDetails],
-        endpointPackageConfigs: [policy],
-      });
+      mockEndpointListApi();
 
       reactTestingLibrary.act(() => {
         history.push('/endpoints?selected_endpoint=1');
@@ -406,9 +410,6 @@ describe('when on the list page', () => {
 
     it('should display Success overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.success);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Success');
 
@@ -419,10 +420,8 @@ describe('when on the list page', () => {
     });
 
     it('should display Warning overall policy status', async () => {
+      mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.warning));
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.warning);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Warning');
 
@@ -433,10 +432,8 @@ describe('when on the list page', () => {
     });
 
     it('should display Failed overall policy status', async () => {
+      mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.failure));
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.failure);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Failed');
 
@@ -447,10 +444,8 @@ describe('when on the list page', () => {
     });
 
     it('should display Unknown overall policy status', async () => {
+      mockEndpointListApi(createPolicyResponse('' as HostPolicyResponseActionStatus));
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse('' as HostPolicyResponseActionStatus);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Unknown');
 
