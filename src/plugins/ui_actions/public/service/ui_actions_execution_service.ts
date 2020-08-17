@@ -115,7 +115,7 @@ export class UiActionsExecutionService {
         context,
         trigger,
       })),
-      title: tasks[0].trigger.title, // title of context menu is title of trigger which originated the chain
+      title: '', // intentionally don't have any title
       closeMenu: () => {
         tasks.forEach((t) => t.defer.resolve());
         session.close();
