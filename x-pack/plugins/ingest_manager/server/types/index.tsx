@@ -37,6 +37,7 @@ export {
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
   Installation,
+  InstallStatus,
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,

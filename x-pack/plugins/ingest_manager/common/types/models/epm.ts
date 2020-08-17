@@ -234,6 +234,9 @@ export interface Installation extends SavedObjectAttributes {
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
+  install_status: InstallStatus;
+  install_version: string;
+  install_started_at: string;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
