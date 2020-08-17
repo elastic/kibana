@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
