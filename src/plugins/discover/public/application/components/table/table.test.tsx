@@ -18,7 +18,6 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
