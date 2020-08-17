@@ -34,6 +34,7 @@ describe('Actions Plugin', () => {
         enabledActionTypes: ['*'],
         whitelistedHosts: ['*'],
         preconfigured: {},
+        rejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -194,6 +195,7 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
+        rejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -217,7 +219,7 @@ describe('Actions Plugin', () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
       });
@@ -232,7 +234,7 @@ describe('Actions Plugin', () => {
             usingEphemeralEncryptionKey: false,
           },
         });
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
       });
@@ -241,7 +243,7 @@ describe('Actions Plugin', () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
         await expect(
