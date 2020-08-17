@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import {
-  JobParamsPanelCsv,
-  JobParamsPostPayloadPanelCsv,
-} from '../../export_types/csv_from_savedobject/types';
+import { JobParamsPanelCsv } from '../../export_types/csv_from_savedobject/types';
+import { CsvFromSavedObjectRequest } from '../generate_from_savedobject_immediate';
 
 export function getJobParamsFromRequest(
-  request: KibanaRequest,
+  request: CsvFromSavedObjectRequest,
   opts: { isImmediate: boolean }
 ): JobParamsPanelCsv {
-  const { savedObjectType, savedObjectId } = request.params as {
-    savedObjectType: string;
-    savedObjectId: string;
-  };
-  const { timerange, state } = request.body as JobParamsPostPayloadPanelCsv;
+  const { savedObjectType, savedObjectId } = request.params;
+  const { timerange, state } = request.body;
 
   const post = timerange || state ? { timerange, state } : undefined;
 

@@ -15,10 +15,7 @@ import React, {
   useRef,
 } from 'react';
 
-import { NotificationsSetup } from 'src/core/public';
-
 import { Processor } from '../../../../../common/types';
-import { ApiService } from '../../../services';
 
 import {
   EditorMode,
@@ -27,7 +24,6 @@ import {
   OnUpdateHandlerArg,
   ContextValue,
   ContextValueState,
-  Links,
   ProcessorInternal,
 } from '../types';
 
@@ -42,7 +38,7 @@ import { OnActionHandler } from '../components/processors_tree';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ProcessorSettingsForm,
+  ManageProcessorForm,
   OnSubmitHandler,
 } from '../components';
 
@@ -51,9 +47,6 @@ import { getValue } from '../utils';
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
 export interface Props {
-  links: Links;
-  api: ApiService;
-  toasts: NotificationsSetup['toasts'];
   value: {
     processors: Processor[];
     onFailure?: Processor[];
@@ -66,9 +59,6 @@ export interface Props {
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
-  links,
-  api,
-  toasts,
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
   onFlyoutOpen,
@@ -148,7 +138,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             },
           });
           break;
-        case 'editingProcessor':
+        case 'managingProcessor':
           processorsDispatch({
             type: 'updateProcessor',
             payload: {
@@ -211,9 +201,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   return (
     <PipelineProcessorsContext.Provider
       value={{
-        links,
-        api,
-        toasts,
         onTreeAction,
         state,
       }}
@@ -229,10 +216,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         />
       )}
 
-      {mode.id === 'editingProcessor' || mode.id === 'creatingProcessor' ? (
-        <ProcessorSettingsForm
+      {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
+        <ManageProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
-          processor={mode.id === 'editingProcessor' ? mode.arg.processor : undefined}
+          processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
