@@ -13,6 +13,7 @@ import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import { txtGoToDiscover } from './i18n';
+import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 const isOutputWithIndexPatterns = (
   output: unknown
@@ -25,7 +26,8 @@ export interface Params {
   start: StartServicesGetter<Pick<Start, 'data' | 'discover'>>;
 }
 
-export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionContext> {
+export class DashboardToDiscoverDrilldown
+  implements Drilldown<Config, typeof APPLY_FILTER_TRIGGER> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN;
@@ -35,6 +37,10 @@ export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionCon
   public readonly getDisplayName = () => txtGoToDiscover;
 
   public readonly euiIcon = 'discoverApp';
+
+  public supportedTriggers(): Array<typeof APPLY_FILTER_TRIGGER> {
+    return [APPLY_FILTER_TRIGGER];
+  }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = (props) => (
     <CollectConfigContainer {...props} params={this.params} />
