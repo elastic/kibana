@@ -9,7 +9,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { TransformListAction, TransformListRow, TransformPivotConfig } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
-import { editActionButtonText, EditButton } from './edit_button';
+import { editActionNameText, EditActionName } from './edit_action_name';
 
 export const useEditAction = (forceDisable: boolean) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
@@ -24,9 +24,9 @@ export const useEditAction = (forceDisable: boolean) => {
 
   const action: TransformListAction = useMemo(
     () => ({
-      name: () => <EditButton />,
+      name: () => <EditActionName />,
       enabled: () => canCreateTransform || !forceDisable,
-      description: editActionButtonText,
+      description: editActionNameText,
       icon: 'pencil',
       type: 'icon',
       onClick: (item: TransformListRow) => showFlyout(item.config),

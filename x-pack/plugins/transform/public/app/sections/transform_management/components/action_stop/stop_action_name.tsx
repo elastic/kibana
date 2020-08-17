@@ -16,9 +16,12 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-export const stopActionButtonText = i18n.translate('xpack.transform.transformList.stopActionName', {
-  defaultMessage: 'Stop',
-});
+export const stopActionNameText = i18n.translate(
+  'xpack.transform.transformList.stopActionNameText',
+  {
+    defaultMessage: 'Stop',
+  }
+);
 
 export const isStopActionDisabled = (
   items: TransformListRow[],
@@ -33,11 +36,11 @@ export const isStopActionDisabled = (
   return forceDisable === true || !canStartStopTransform || stoppedTransform === true;
 };
 
-interface StopButtonProps {
+export interface StopActionNameProps {
   items: TransformListRow[];
   forceDisable?: boolean;
 }
-export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
+export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
@@ -74,10 +77,10 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
             : stoppedTransformMessage
         }
       >
-        <>{stopActionButtonText}</>
+        <>{stopActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{stopActionButtonText}</>;
+  return <>{stopActionNameText}</>;
 };

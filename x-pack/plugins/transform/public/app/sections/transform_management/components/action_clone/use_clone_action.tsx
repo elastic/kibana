@@ -11,7 +11,7 @@ import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { SECTION_SLUG } from '../../../../constants';
 
-import { cloneActionButtonText, CloneButton } from './clone_button';
+import { cloneActionNameText, CloneActionName } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean) => {
@@ -28,9 +28,9 @@ export const useCloneAction = (forceDisable: boolean) => {
 
   const action: TransformListAction = useMemo(
     () => ({
-      name: (item: TransformListRow) => <CloneButton disabled={!canCreateTransform} />,
+      name: (item: TransformListRow) => <CloneActionName disabled={!canCreateTransform} />,
       enabled: () => canCreateTransform && !forceDisable,
-      description: cloneActionButtonText,
+      description: cloneActionNameText,
       icon: 'copy',
       type: 'icon',
       onClick: clickHandler,

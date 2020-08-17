@@ -15,20 +15,23 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-export const editActionButtonText = i18n.translate('xpack.transform.transformList.editActionName', {
-  defaultMessage: 'Edit',
-});
+export const editActionNameText = i18n.translate(
+  'xpack.transform.transformList.editActionNameText',
+  {
+    defaultMessage: 'Edit',
+  }
+);
 
-export const EditButton: FC = () => {
+export const EditActionName: FC = () => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   if (!canCreateTransform) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
-        <>{editActionButtonText}</>
+        <>{editActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{editActionButtonText}</>;
+  return <>{editActionNameText}</>;
 };

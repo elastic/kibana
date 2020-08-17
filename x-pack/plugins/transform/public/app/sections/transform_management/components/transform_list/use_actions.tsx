@@ -11,10 +11,10 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 import { TransformListRow } from '../../../../common';
 
 import { useCloneAction } from '../action_clone';
-import { useDeleteAction, DeleteButtonModal } from '../action_delete';
+import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
-import { useStartAction, StartButtonModal } from '../action_start';
+import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 
 export const useActions = ({
@@ -34,11 +34,11 @@ export const useActions = ({
   return {
     modals: (
       <>
-        {startAction.isModalVisible && <StartButtonModal {...startAction} />}
+        {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {editAction.config && editAction.isFlyoutVisible && (
           <EditTransformFlyout closeFlyout={editAction.closeFlyout} config={editAction.config} />
         )}
-        {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
+        {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
       </>
     ),
     actions: [

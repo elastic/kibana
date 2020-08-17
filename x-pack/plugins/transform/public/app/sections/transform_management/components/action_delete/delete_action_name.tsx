@@ -11,8 +11,8 @@ import { TRANSFORM_STATE } from '../../../../../../common';
 import { createCapabilityFailureMessage } from '../../../../lib/authorization';
 import { TransformListRow } from '../../../../common';
 
-export const deleteActionButtonText = i18n.translate(
-  'xpack.transform.transformList.deleteActionName',
+export const deleteActionNameText = i18n.translate(
+  'xpack.transform.transformList.deleteActionNameText',
   {
     defaultMessage: 'Delete',
   }
@@ -26,13 +26,13 @@ export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: 
   return forceDisable === true || disabled;
 };
 
-interface DeleteButtonProps {
+export interface DeleteActionNameProps {
   canDeleteTransform: boolean;
   disabled: boolean;
   isBulkAction: boolean;
 }
 
-export const DeleteButton: FC<DeleteButtonProps> = ({
+export const DeleteActionName: FC<DeleteActionNameProps> = ({
   canDeleteTransform,
   disabled,
   isBulkAction,
@@ -60,10 +60,10 @@ export const DeleteButton: FC<DeleteButtonProps> = ({
 
     return (
       <EuiToolTip position="top" content={content}>
-        <>{deleteActionButtonText}</>
+        <>{deleteActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{deleteActionButtonText}</>;
+  return <>{deleteActionNameText}</>;
 };

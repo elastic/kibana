@@ -20,7 +20,7 @@ import { TRANSFORM_STATE } from '../../../../../../common';
 
 import { DeleteAction } from './use_delete_action';
 
-export const DeleteButtonModal: FC<DeleteAction> = ({
+export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
   deleteAndCloseModal,
   deleteDestIndex,

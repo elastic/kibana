@@ -10,25 +10,25 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { createCapabilityFailureMessage } from '../../../../lib/authorization';
 
-export const cloneActionButtonText = i18n.translate(
-  'xpack.transform.transformList.cloneActionName',
+export const cloneActionNameText = i18n.translate(
+  'xpack.transform.transformList.cloneActionNameText',
   {
     defaultMessage: 'Clone',
   }
 );
 
-interface CloneActionProps {
+interface CloneActionNameProps {
   disabled: boolean;
 }
 
-export const CloneButton: FC<CloneActionProps> = ({ disabled }) => {
+export const CloneActionName: FC<CloneActionNameProps> = ({ disabled }) => {
   if (disabled) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
-        <>{cloneActionButtonText}</>
+        <>{cloneActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{cloneActionButtonText}</>;
+  return <>{cloneActionNameText}</>;
 };

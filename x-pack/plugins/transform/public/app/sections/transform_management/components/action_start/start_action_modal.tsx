@@ -10,12 +10,7 @@ import { EuiConfirmModal, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elas
 
 import { StartAction } from './use_start_action';
 
-export const StartButtonModal: FC<StartAction> = ({
-  closeModal,
-  isModalVisible,
-  items,
-  startAndCloseModal,
-}) => {
+export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndCloseModal }) => {
   const isBulkAction = items.length > 1;
 
   const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {

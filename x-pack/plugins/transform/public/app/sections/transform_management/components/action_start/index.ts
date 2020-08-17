@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StartButtonModal } from './start_button_modal';
+export { StartActionModal } from './start_action_modal';
 export { useStartAction } from './use_start_action';

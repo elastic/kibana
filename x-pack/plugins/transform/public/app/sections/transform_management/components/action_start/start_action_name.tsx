@@ -16,8 +16,8 @@ import {
 } from '../../../../lib/authorization';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
-export const startActionButtonText = i18n.translate(
-  'xpack.transform.transformList.startActionName',
+export const startActionNameText = i18n.translate(
+  'xpack.transform.transformList.startActionNameText',
   {
     defaultMessage: 'Start',
   }
@@ -39,11 +39,11 @@ export const isStartActionDisabled = (
   );
 };
 
-interface StartButtonProps {
+export interface StartActionNameProps {
   items: TransformListRow[];
   forceDisable?: boolean;
 }
-export const StartButton: FC<StartButtonProps> = ({ items, forceDisable }) => {
+export const StartActionName: FC<StartActionNameProps> = ({ items, forceDisable }) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const isBulkAction = items.length > 1;
 
@@ -104,10 +104,10 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable }) => {
   if ((forceDisable === true || actionIsDisabled) && content !== undefined) {
     return (
       <EuiToolTip position="top" content={content}>
-        <>{startActionButtonText}</>
+        <>{startActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{startActionButtonText}</>;
+  return <>{startActionNameText}</>;
 };

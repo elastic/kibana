@@ -12,7 +12,7 @@ import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useStartTransforms } from '../../../../hooks';
 
-import { isStartActionDisabled, startActionButtonText, StartButton } from './start_button';
+import { isStartActionDisabled, startActionNameText, StartActionName } from './start_action_name';
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (forceDisable: boolean) => {
@@ -41,10 +41,12 @@ export const useStartAction = (forceDisable: boolean) => {
 
   const action: TransformListAction = useMemo(
     () => ({
-      name: (item: TransformListRow) => <StartButton items={[item]} forceDisable={forceDisable} />,
+      name: (item: TransformListRow) => (
+        <StartActionName items={[item]} forceDisable={forceDisable} />
+      ),
       available: (item: TransformListRow) => item.stats.state === TRANSFORM_STATE.STOPPED,
       enabled: (item: TransformListRow) => !isStartActionDisabled([item], canStartStopTransform),
-      description: startActionButtonText,
+      description: startActionNameText,
       icon: 'play',
       type: 'icon',
       onClick: (item: TransformListRow) => openModal([item]),

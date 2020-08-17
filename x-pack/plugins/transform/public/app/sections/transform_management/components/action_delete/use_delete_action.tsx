@@ -12,7 +12,11 @@ import { TransformListAction, TransformListRow } from '../../../../common';
 import { useDeleteIndexAndTargetIndex, useDeleteTransforms } from '../../../../hooks';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
-import { deleteActionButtonText, isDeleteActionDisabled, DeleteButton } from './delete_button';
+import {
+  deleteActionNameText,
+  isDeleteActionDisabled,
+  DeleteActionName,
+} from './delete_action_name';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (forceDisable: boolean) => {
@@ -66,7 +70,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => (
-        <DeleteButton
+        <DeleteActionName
           {...{
             canDeleteTransform,
             isBulkAction: false,
@@ -76,7 +80,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
       ),
       enabled: (item: TransformListRow) =>
         !isDeleteActionDisabled([item], forceDisable) && canDeleteTransform,
-      description: deleteActionButtonText,
+      description: deleteActionNameText,
       icon: 'trash',
       type: 'icon',
       onClick: (item: TransformListRow) => openModal([item]),

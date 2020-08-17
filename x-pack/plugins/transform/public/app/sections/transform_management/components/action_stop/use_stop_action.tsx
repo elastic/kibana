@@ -12,7 +12,7 @@ import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useStopTransforms } from '../../../../hooks';
 
-import { isStopActionDisabled, stopActionButtonText, StopButton } from './stop_button';
+import { isStopActionDisabled, stopActionNameText, StopActionName } from './stop_action_name';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (forceDisable: boolean) => {
@@ -26,11 +26,13 @@ export const useStopAction = (forceDisable: boolean) => {
 
   const action: TransformListAction = useMemo(
     () => ({
-      name: (item: TransformListRow) => <StopButton items={[item]} forceDisable={forceDisable} />,
+      name: (item: TransformListRow) => (
+        <StopActionName items={[item]} forceDisable={forceDisable} />
+      ),
       available: (item: TransformListRow) => item.stats.state !== TRANSFORM_STATE.STOPPED,
       enabled: (item: TransformListRow) =>
         !isStopActionDisabled([item], canStartStopTransform, forceDisable),
-      description: stopActionButtonText,
+      description: stopActionNameText,
       icon: 'stop',
       type: 'icon',
       onClick: clickHandler,
