@@ -30,7 +30,6 @@ export const findInventoryModel = (type: InventoryItemType) => {
 };
 
 interface InventoryFields {
-  message: string[];
   host: string;
   pod: string;
   container: string;
