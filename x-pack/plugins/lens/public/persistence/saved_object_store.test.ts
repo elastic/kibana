@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract, SavedObjectsBulkUpdateObject } from 'kibana/public';
 import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {
   function testStore(testId?: string) {
     const client = {
       create: jest.fn(() => Promise.resolve({ id: testId || 'testid' })),
-      update: jest.fn((_type: string, id: string) => Promise.resolve({ id })),
+      bulkUpdate: jest.fn(([{ id }]: SavedObjectsBulkUpdateObject[]) =>
+        Promise.resolve({ savedObjects: [{ id }, { id }] })
+      ),
       get: jest.fn(),
     };
 
     return {
       client,
-      store: new SavedObjectIndexStore(client),
+      store: new SavedObjectIndexStore((client as unknown) as SavedObjectsClientContract),
     };
   }
 
@@ -108,19 +111,35 @@ describe('LensStore', () => {
         },
       });
 
-      expect(client.update).toHaveBeenCalledTimes(1);
-      expect(client.update).toHaveBeenCalledWith('lens', 'Gandalf', {
-        title: 'Even the very wise cannot see all ends.',
-        visualizationType: 'line',
-        expression: '',
-        state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
-          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
-          visualization: { gear: ['staff', 'pointy hat'] },
-          query: { query: '', language: 'lucene' },
-          filters: [],
+      expect(client.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(client.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: 'lens',
+          id: 'Gandalf',
+          attributes: {
+            title: null,
+            visualizationType: null,
+            expression: null,
+            state: null,
+          },
         },
-      });
+        {
+          type: 'lens',
+          id: 'Gandalf',
+          attributes: {
+            title: 'Even the very wise cannot see all ends.',
+            visualizationType: 'line',
+            expression: '',
+            state: {
+              datasourceMetaData: { filterableIndexPatterns: [] },
+              datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
+              visualization: { gear: ['staff', 'pointy hat'] },
+              query: { query: '', language: 'lucene' },
+              filters: [],
+            },
+          },
+        },
+      ]);
     });
   });
 
