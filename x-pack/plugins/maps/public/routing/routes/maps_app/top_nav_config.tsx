@@ -13,7 +13,7 @@ import {
   getInspector,
   getToasts,
   getCoreI18n,
-  navigateToApp,
+  getNavigateToApp,
 } from '../../../kibana_services';
 import {
   SavedObjectSaveModalOrigin,
@@ -117,7 +117,7 @@ export function getTopNavConfig({
           state: { id, type: MAP_SAVED_OBJECT_TYPE },
         });
       } else {
-        navigateToApp(originatingApp);
+        getNavigateToApp()(originatingApp);
       }
     }
 
