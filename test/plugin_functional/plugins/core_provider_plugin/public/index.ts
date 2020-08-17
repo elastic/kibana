@@ -31,7 +31,7 @@ class CoreProviderPlugin implements Plugin {
   }
 
   public start(core: CoreStart, plugins: Record<string, any>) {
-    window.__coreProvider = {
+    window._coreProvider = {
       setup: this.setupDeps!,
       start: {
         core,

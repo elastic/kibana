@@ -23,7 +23,6 @@ import { AlertMessage } from '../../server/alerts/types';
 import { Legacy } from '../legacy_shims';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertEdit } from '../../../triggers_actions_ui/public';
 import { isInSetupMode, hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { BASE_ALERT_API_PATH } from '../../../alerts/common';

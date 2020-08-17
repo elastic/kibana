@@ -67,7 +67,7 @@ test('renders RangeControlEditor', async () => {
 
   await updateComponent(component);
 
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('handleOptionsChange - step', async () => {

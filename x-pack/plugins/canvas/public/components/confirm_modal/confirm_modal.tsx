@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/forbid-elements */
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';

@@ -49,38 +49,35 @@ describe('DeleteAction', () => {
     jest.clearAllMocks();
   });
 
-  test('When isDisabled prop is true, inner button should be disabled.', () => {
-    const { getByTestId } = render(
-      <DeleteButton isDisabled={true} item={mockAnalyticsListItem} onClick={() => {}} />
-    );
+  it('should display a tooltip when isDisabled prop is true.', () => {
+    const { container } = render(<DeleteButton isDisabled={true} item={mockAnalyticsListItem} />);
 
-    expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
+    expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
   });
 
-  test('When isDisabled prop is true, inner button should not be disabled.', () => {
-    const { getByTestId } = render(
-      <DeleteButton isDisabled={false} item={mockAnalyticsListItem} onClick={() => {}} />
-    );
+  it('should not display a tooltip when isDisabled prop is false.', () => {
+    const { container } = render(<DeleteButton isDisabled={false} item={mockAnalyticsListItem} />);
 
-    expect(getByTestId('mlAnalyticsJobDeleteButton')).not.toHaveAttribute('disabled');
+    expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
   });
 
   describe('When delete model is open', () => {
-    test('should allow to delete target index by default.', () => {
+    it('should allow to delete target index by default.', () => {
       const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
 
       const TestComponent = () => {
-        const deleteAction = useDeleteAction();
+        const deleteAction = useDeleteAction(true);
 
         return (
           <>
             {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
-            <DeleteButton
-              isDisabled={false}
-              item={mockAnalyticsListItem}
+            <button
+              data-test-subj="mlAnalyticsJobDeleteButton"
               onClick={() => deleteAction.openModal(mockAnalyticsListItem)}
-            />
+            >
+              <DeleteButton isDisabled={false} item={mockAnalyticsListItem} />
+            </button>
           </>
         );
       };

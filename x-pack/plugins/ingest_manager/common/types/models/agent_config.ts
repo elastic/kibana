@@ -32,8 +32,8 @@ export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
 
 export interface FullAgentConfigInputStream {
   id: string;
-  dataset: {
-    name: string;
+  data_stream: {
+    dataset: string;
     type: string;
   };
   [key: string]: any;
@@ -43,7 +43,7 @@ export interface FullAgentConfigInput {
   id: string;
   name: string;
   type: string;
-  dataset: { namespace: string };
+  data_stream: { namespace: string };
   use_output: string;
   meta?: {
     package?: Pick<PackageConfigPackage, 'name' | 'version'>;

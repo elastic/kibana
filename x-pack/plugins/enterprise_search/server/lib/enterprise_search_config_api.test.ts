@@ -5,6 +5,7 @@
  */
 
 jest.mock('node-fetch');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
 const { Response } = jest.requireActual('node-fetch');
 

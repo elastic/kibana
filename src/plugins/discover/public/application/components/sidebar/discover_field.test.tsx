@@ -27,7 +27,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
-import { FieldSpecExportFmt } from '../../../../../data/common';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -62,20 +61,21 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     coreMock.createStart()
   );
 
-  const field = {
-    name: 'bytes',
-    type: 'number',
-    esTypes: ['long'],
-    count: 10,
-    scripted: false,
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: true,
-    format: null,
-    routes: {},
-    $$spec: {},
-    toSpec: () => (({} as unknown) as FieldSpecExportFmt),
-  } as IndexPatternField;
+  const field = new IndexPatternField(
+    indexPattern,
+    {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    },
+    'bytes',
+    () => {}
+  );
 
   const props = {
     indexPattern,

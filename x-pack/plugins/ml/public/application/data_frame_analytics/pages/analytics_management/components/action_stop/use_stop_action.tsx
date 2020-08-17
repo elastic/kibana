@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
+  isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
@@ -17,15 +18,39 @@ import { stopActionButtonText, StopButton } from './stop_button';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
-  const clickHandler = useCallback((item: DataFrameAnalyticsListRow) => stopAnalytics(item), [
-    stopAnalytics,
-  ]);
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const [item, setItem] = useState<DataFrameAnalyticsListRow>();
+
+  const closeModal = () => setModalVisible(false);
+  const forceStopAndCloseModal = () => {
+    if (item !== undefined) {
+      setModalVisible(false);
+      stopAnalytics(item);
+    }
+  };
+
+  const openModal = (newItem: DataFrameAnalyticsListRow) => {
+    setItem(newItem);
+    setModalVisible(true);
+  };
+
+  const clickHandler = useCallback(
+    (i: DataFrameAnalyticsListRow) => {
+      if (canStartStopDataFrameAnalytics) {
+        if (isDataFrameAnalyticsFailed(i.stats.state)) {
+          openModal(i);
+        } else {
+          stopAnalytics(i);
+        }
+      }
+    },
+    [stopAnalytics]
+  );
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: (item: DataFrameAnalyticsListRow) => (
-        <StopButton isDisabled={!canStartStopDataFrameAnalytics} />
-      ),
+      name: () => <StopButton isDisabled={!canStartStopDataFrameAnalytics} />,
       available: (i: DataFrameAnalyticsListRow) => isDataFrameAnalyticsRunning(i.stats.state),
       enabled: () => canStartStopDataFrameAnalytics,
       description: stopActionButtonText,
@@ -37,5 +62,5 @@ export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
     [clickHandler]
   );
 
-  return { action };
+  return { action, closeModal, isModalVisible, item, openModal, forceStopAndCloseModal };
 };

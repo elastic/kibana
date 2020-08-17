@@ -12,7 +12,6 @@ import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/anno
 import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
 import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
