@@ -300,17 +300,17 @@ export function useForm<T extends FormData = FormData>(
       setSubmitting(true);
 
       const isFormValid = await validateAllFields();
-      const formData = isFormValid ? getFormData() : null;
+      const formData = isFormValid ? getFormData() : ({} as T);
 
       if (onSubmit) {
-        await onSubmit(formData ?? ({} as T), isFormValid!);
+        await onSubmit(formData, isFormValid!);
       }
 
       if (isUnmounted.current === false) {
         setSubmitting(false);
       }
 
-      return { data: formData ?? ({} as T), isValid: isFormValid! };
+      return { data: formData, isValid: isFormValid! };
     },
     [validateAllFields, getFormData, onSubmit]
   );
