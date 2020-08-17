@@ -96,15 +96,12 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 `<provider-type>.<provider-name>.showInSelector`
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
-|===
-
+2+a|
+[TIP]
 [NOTE]
 ============
 You are unable to set this setting to `false` for `basic` and `token` authentication providers.
 ============
-
-[cols="2*<"]
-|===
 
 | `xpack.security.authc.providers.`
 `<provider-type>.<provider-name>.accessAgreement.message`
@@ -167,6 +164,8 @@ There is a very limited set of cases when you'd want to change these settings. F
 [[login-ui-settings]]
 ===== Login user interface settings
 
+You can configure the following settings in the `kibana.yml` file.
+
 [cols="2*<"]
 |===
 | `xpack.security.loginAssistanceMessage`
@@ -216,7 +215,7 @@ highly recommended. By default, this setting is not set.
 2+a|
 [TIP]
 ============
-The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '70ms', '5s', '3d', '1Y').
+The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
 | `xpack.security.session.lifespan`
@@ -227,7 +226,7 @@ recommended. By default, this setting is not set.
 2+a|
 [TIP]
 ============
-The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '70ms', '5s', '3d', '1Y').
+The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
 | `xpack.security.session.cleanupInterval`
