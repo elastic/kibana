@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { KbnError } from '../../../../kibana_utils/public';
-import { SearchResponse, SearchError } from '..';
+import { KbnError } from '../../../../kibana_utils/common';
+import { SearchError, SearchResponse } from './types';
 
 /**
  * Request Failure - When an entire multi request fails

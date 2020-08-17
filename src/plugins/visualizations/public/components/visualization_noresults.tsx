@@ -18,6 +18,7 @@
  */
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface VisualizationNoResultsProps {
@@ -37,7 +38,11 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
 
             <EuiSpacer size="s" />
 
-            <p>No results found</p>
+            <p>
+              {i18n.translate('visualizations.noResultsFoundTitle', {
+                defaultMessage: 'No results found',
+              })}
+            </p>
           </EuiText>
         </div>
         <div className="item bottom" />

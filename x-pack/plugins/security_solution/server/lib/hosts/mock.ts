@@ -588,7 +588,7 @@ export const mockEndpointMetadata = {
       type: 'endpoint',
       version: '7.9.0-SNAPSHOT',
     },
-    dataset: { name: 'endpoint.metadata', namespace: 'default', type: 'metrics' },
+    data_stream: { dataset: 'endpoint.metadata', namespace: 'default', type: 'metrics' },
     ecs: { version: '1.5.0' },
     elastic: { agent: { id: '' } },
     event: {

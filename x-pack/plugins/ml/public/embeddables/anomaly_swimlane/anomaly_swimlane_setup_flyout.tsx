@@ -16,12 +16,10 @@ import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  getDefaultPanelTitle,
-} from './anomaly_swimlane_embeddable';
+import { getDefaultPanelTitle } from './anomaly_swimlane_embeddable';
 import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
+import { AnomalySwimlaneEmbeddableInput } from '..';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,

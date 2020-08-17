@@ -249,9 +249,7 @@ export {
   IndexPatternsContract,
   IndexPattern,
   IIndexPatternFieldList,
-  Field as IndexPatternField,
-  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  getIndexPatternFieldListCreator,
+  IndexPatternField,
 } from './index_patterns';
 
 export {
@@ -264,6 +262,7 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
+  FieldList,
 } from '../common';
 
 /*
@@ -295,15 +294,6 @@ import {
   propFilter,
   siblingPipelineType,
   termsAggFilter,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  // tabify
-  tabifyAggResponse,
-  tabifyGetColumns,
-} from './search';
-
-import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
@@ -313,9 +303,13 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from '../common';
-
-export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
   // aggs
@@ -327,6 +321,7 @@ export {
   AggParamType,
   AggConfigOptions,
   BUCKET_TYPES,
+  EsaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
@@ -335,36 +330,39 @@ export {
   METRIC_TYPES,
   OptionedParamType,
   OptionedValueProp,
-  // search
-  ES_SEARCH_STRATEGY,
-  getEsPreference,
-  getSearchErrorType,
-  ISearch,
-  ISearchOptions,
-  ISearchGeneric,
-  IEsSearchResponse,
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  SearchRequest,
-  SearchResponse,
-  SearchError,
-  ISearchSource,
-  parseSearchSourceJSON,
-  injectSearchSourceReferences,
-  getSearchParamsFromRequest,
-  extractSearchSourceReferences,
-  SearchSourceFields,
-  EsQuerySortValue,
-  SortDirection,
-  FetchOptions,
+  ParsedInterval,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+} from '../common';
+
+export {
+  // search
+  ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
+  extractSearchSourceReferences,
+  FetchOptions,
+  getEsPreference,
+  getSearchParamsFromRequest,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectSearchSourceReferences,
+  ISearch,
+  ISearchGeneric,
+  ISearchOptions,
+  ISearchSource,
+  parseSearchSourceJSON,
+  RequestTimeoutError,
+  SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
-  RequestTimeoutError,
+  SearchRequest,
+  SearchResponse,
+  SearchSourceFields,
+  SortDirection,
 } from './search';
 
 // Search namespace

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 const BASE_URL = Cypress.config().baseUrl;
 
 /** The default time in ms to wait for a Cypress command to complete */

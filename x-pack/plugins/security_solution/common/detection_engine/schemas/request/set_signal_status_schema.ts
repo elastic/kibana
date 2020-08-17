@@ -6,9 +6,7 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { signal_ids, signal_status_query, status } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 export const setSignalsStatusSchema = t.intersection([
   t.type({

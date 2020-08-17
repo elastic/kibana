@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
 
 class DateFromStringType extends t.Type<Date, string, t.mixed> {
-  // eslint-disable-next-line
   public readonly _tag: 'DateFromISOStringType' = 'DateFromISOStringType';
   constructor() {
     super(

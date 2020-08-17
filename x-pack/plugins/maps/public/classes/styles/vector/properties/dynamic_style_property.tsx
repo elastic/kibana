@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import _ from 'lodash';
 import React from 'react';
@@ -11,9 +10,10 @@ import { Feature } from 'geojson';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
-  STYLE_TYPE,
-  SOURCE_META_DATA_REQUEST_ID,
   FIELD_ORIGIN,
+  MB_LOOKUP_FUNCTION,
+  SOURCE_META_DATA_REQUEST_ID,
+  STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
@@ -21,8 +21,8 @@ import { CategoricalFieldMetaPopover } from '../components/field_meta/categorica
 import {
   CategoryFieldMeta,
   FieldMetaOptions,
-  StyleMetaData,
   RangeFieldMeta,
+  StyleMetaData,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
@@ -41,12 +41,13 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
   supportsMbFeatureState(): boolean;
+  getMbLookupFunction(): MB_LOOKUP_FUNCTION;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
 }
 
-type fieldFormatter = (value: string | number | undefined) => string | number;
+export type FieldFormatter = (value: string | number | undefined) => string | number;
 
 export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
@@ -54,14 +55,14 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
 
   protected readonly _field: IField | null;
   protected readonly _layer: IVectorLayer;
-  protected readonly _getFieldFormatter: (fieldName: string) => null | fieldFormatter;
+  protected readonly _getFieldFormatter: (fieldName: string) => null | FieldFormatter;
 
   constructor(
     options: T,
     styleName: VECTOR_STYLES,
     field: IField | null,
     vectorLayer: IVectorLayer,
-    getFieldFormatter: (fieldName: string) => null | fieldFormatter
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter
   ) {
     super(options, styleName);
     this._field = field;
@@ -193,7 +194,13 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return true;
+    return !!this._field && this._field.canReadFromGeoJson();
+  }
+
+  getMbLookupFunction(): MB_LOOKUP_FUNCTION {
+    return this.supportsMbFeatureState()
+      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+      : MB_LOOKUP_FUNCTION.GET;
   }
 
   getFieldMetaOptions() {
