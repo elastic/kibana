@@ -196,12 +196,14 @@ export function DiscoverField({
             defaultMessage: 'Top 5 values',
           })}
         </EuiPopoverTitle>
-        <DiscoverFieldDetails
-          indexPattern={indexPattern}
-          field={field}
-          details={getDetails(field)}
-          onAddFilter={onAddFilter}
-        />
+        {infoIsOpen && (
+          <DiscoverFieldDetails
+            indexPattern={indexPattern}
+            field={field}
+            details={getDetails(field)}
+            onAddFilter={onAddFilter}
+          />
+        )}
       </EuiPopover>
     </>
   );
