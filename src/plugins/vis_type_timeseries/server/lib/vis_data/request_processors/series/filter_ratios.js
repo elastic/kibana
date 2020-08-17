@@ -24,18 +24,17 @@ import { esQuery } from '../../../../../../data/server';
 
 export function ratios(req, panel, series, esQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
-    const filters = !panel.ignore_global_filter ? req.payload.filters : [];
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach((metric) => {
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`,
-          esQuery.buildEsQuery(indexPatternObject, metric.numerator, filters, esQueryConfig)
+          esQuery.buildEsQuery(indexPatternObject, metric.numerator, [], esQueryConfig)
         );
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.filter`,
-          esQuery.buildEsQuery(indexPatternObject, metric.denominator, filters, esQueryConfig)
+          esQuery.buildEsQuery(indexPatternObject, metric.denominator, [], esQueryConfig)
         );
 
         let numeratorPath = `${metric.id}-numerator>_count`;
