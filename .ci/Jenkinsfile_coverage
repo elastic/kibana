@@ -25,12 +25,11 @@ kibanaPipeline(timeoutMinutes: 240) {
 
 def handleIngestion(timestamp) {
 //  def previousSha = handlePreviousSha()
-//  kibanaPipeline.downloadCoverageArtifacts()
-  kibanaCoverage.prokLinks("### Process HTML Links")
   def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
 
-  kibanaCoverage.storeStats("### Create the dat file using GSUTIL", statDatFilePath)
-  kibanaCoverage.prokVizData("### Process Visualization Data", statDatFilePath)
+//  kibanaPipeline.downloadCoverageArtifacts()
+  kibanaCoverage.prokLinks("### Process HTML Links")
+  kibanaCoverage.vizData("### Process Visualization Data", statDatFilePath)
 //  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
 //  kibanaCoverage.generateReports("### Merge coverage reports")
 //  kibanaCoverage.uploadCombinedReports()

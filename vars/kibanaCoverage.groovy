@@ -1,45 +1,13 @@
-def storeStats(title, dest) {
-//  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
-//  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/1000/coverage/"
-//  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
-//  return sh ( script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true ).trim()
 
-
-  kibanaPipeline.bash("""
-    touch ${dest}
-    gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$" > ${dest}
-  """, title)
-}
-
-def prokVizData(title, statDatFilePath) {
+def vizData(title, statDatFilePath) {
 
   kibanaPipeline.bash("""
 
     . src/dev/code_coverage/shell_scripts/bootstrap_stats.sh ${statDatFilePath}
 
-    echo "### List stat file contents: ..."
-    cat ${statDatFilePath}
-
-
-cat << EOF >> '${statDatFilePath}'
-
-if (!isInBrowser()) {
-  module.exports.default = {}
-  module.exports.default = artifactStats
-} else {
-  window.initialData = artifactStats;
-}
-
-function isInBrowser() {
-  return !!(typeof window !== 'undefined');
-}
-
-console.log('### Stat Data loaded!');
-
-EOF
-
     echo "### Generated Viz Data: ..."
     cat '${statDatFilePath}'
+
   """, title)
 }
 
