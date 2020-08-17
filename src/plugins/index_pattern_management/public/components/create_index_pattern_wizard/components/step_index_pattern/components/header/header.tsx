@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
       <h2>
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepHeader"
-          defaultMessage="Step 1 of 2: Define index pattern"
+          defaultMessage="Step 1 of 2: Define an index pattern"
         />
       </h2>
     </EuiTitle>
@@ -127,6 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
                 id="checkboxShowSystemIndices"
                 checked={isIncludingSystemIndices}
                 onChange={onChangeIncludingSystemIndices}
+                data-test-subj="showSystemAndHiddenIndices"
               />
             </EuiFormRow>
           ) : null}
