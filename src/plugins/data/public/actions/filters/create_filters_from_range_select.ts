@@ -20,9 +20,9 @@
 import { last } from 'lodash';
 import moment from 'moment';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
-import { getIndexPatterns } from '../../../public/services';
-import { deserializeAggConfig } from '../../search/expressions/utils';
-import type { RangeSelectContext } from '../../../../embeddable/public';
+import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { RangeSelectContext } from '../../../../embeddable/public';
+import { AggConfigSerialized } from '../../../common/search/aggs';
 
 export async function createFiltersFromRangeSelectAction(event: RangeSelectContext['data']) {
   const column: Record<string, any> = event.table.columns[event.column];
@@ -32,10 +32,8 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectConte
   }
 
   const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
-  const aggConfig = deserializeAggConfig({
-    ...column.meta,
-    indexPattern,
-  });
+  const aggConfigs = getSearchService().aggs.createAggConfigs(indexPattern, [column.meta.params as AggConfigSerialized]);
+  const aggConfig = aggConfigs.aggs[0];
   const field: IFieldType = aggConfig.params.field;
 
   if (!field || event.range.length <= 1) {

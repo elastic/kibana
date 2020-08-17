@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaDatatable } from 'src/plugins/expressions/public';
+import { Datatable } from 'src/plugins/expressions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
 
 describe('render helpers', () => {
@@ -83,11 +83,11 @@ describe('render helpers', () => {
 
   describe('#getFilterContext', () => {
     it('handles single slice click for single ring', () => {
-      const table: KibanaDatatable = {
-        type: 'kibana_datatable',
+      const table: Datatable = {
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'A' },
-          { id: 'b', name: 'B' },
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'number' } },
         ],
         rows: [
           { a: 'Hi', b: 2 },
@@ -108,12 +108,12 @@ describe('render helpers', () => {
     });
 
     it('handles single slice click with 2 rings', () => {
-      const table: KibanaDatatable = {
-        type: 'kibana_datatable',
+      const table: Datatable = {
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'A' },
-          { id: 'b', name: 'B' },
-          { id: 'c', name: 'C' },
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'string' } },
+          { id: 'c', name: 'C', meta: { type: 'number' } },
         ],
         rows: [
           { a: 'Hi', b: 'Two', c: 2 },
@@ -134,12 +134,12 @@ describe('render helpers', () => {
     });
 
     it('finds right row for multi slice click', () => {
-      const table: KibanaDatatable = {
-        type: 'kibana_datatable',
+      const table: Datatable = {
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'A' },
-          { id: 'b', name: 'B' },
-          { id: 'c', name: 'C' },
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'string' } },
+          { id: 'c', name: 'C', meta: { type: 'number' } },
         ],
         rows: [
           { a: 'Hi', b: 'Two', c: 2 },

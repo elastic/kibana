@@ -6,7 +6,7 @@
 
 import { LayerConfig } from './types';
 import {
-  KibanaDatatable,
+  Datatable,
   SerializedFieldFormat,
 } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
@@ -34,7 +34,7 @@ export function isFormatterCompatible(
 export function getAxesConfiguration(
   layers: LayerConfig[],
   shouldRotate: boolean,
-  tables?: Record<string, KibanaDatatable>,
+  tables?: Record<string, Datatable>,
   formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
 ): GroupsConfiguration {
   const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {

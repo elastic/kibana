@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 
-export type Input = KibanaDatatable;
+export type Input = Datatable;
 
 interface Arguments {
   visConfig: string | null;
@@ -46,7 +46,7 @@ export const createTableVisFn = (): ExpressionFunctionDefinition<
 > => ({
   name: 'kibana_table',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization',
   }),

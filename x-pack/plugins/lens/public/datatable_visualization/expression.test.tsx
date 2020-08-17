@@ -22,11 +22,12 @@ function sampleArgs() {
     type: 'lens_multitable',
     tables: {
       l1: {
-        type: 'kibana_datatable',
+        type: 'datatable',
+        meta: { type: 'esaggs', source: 'indexPatternId' },
         columns: [
-          { id: 'a', name: 'a', meta: { type: 'terms' } },
-          { id: 'b', name: 'b', meta: { type: 'date_histogram', aggConfigParams: { field: 'b' } } },
-          { id: 'c', name: 'c', meta: { type: 'count' } },
+          { id: 'a', name: 'a', meta: { type: 'string', params: { type: 'terms' } } },
+          { id: 'b', name: 'b', meta: { type: 'date', params: { type: 'date_histogram', params: { field: 'b' } } } },
+          { id: 'c', name: 'c', meta: { type: 'number', params: { type: 'count' } } },
         ],
         rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
       },

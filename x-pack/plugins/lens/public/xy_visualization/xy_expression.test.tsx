@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
-import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
+import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
 import {
@@ -45,7 +45,7 @@ const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
   tables: {
     timeLayer: {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: [
         {
           xAccessorId: 1585758120000,
@@ -98,54 +98,50 @@ const dateHistogramData: LensMultiTable = {
           yAccessorId: 1,
         },
       ],
+      meta: {
+        type: 'esaggs',
+        source: 'indexPatternId',
+      },
       columns: [
         {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date_histogram',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'order_date',
-              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-              useNormalizedEsInterval: true,
-              scaleMetricValues: false,
-              interval: '1m',
-              drop_partials: false,
-              min_doc_count: 0,
-              extended_bounds: {},
+            type: 'date',
+            field: 'order_date',
+            params: {
+              type: 'date_histogram',
+              params: {
+                field: 'order_date',
+                timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+                useNormalizedEsInterval: true,
+                scaleMetricValues: false,
+                interval: '1m',
+                drop_partials: false,
+                min_doc_count: 0,
+                extended_bounds: {},
+              }
             },
           },
-          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'terms',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'category.keyword',
-              orderBy: 'yAccessorId',
-              order: 'desc',
-              size: 3,
-              otherBucket: false,
-              otherBucketLabel: 'Other',
-              missingBucket: false,
-              missingBucketLabel: 'Missing',
-            },
-          },
-          formatHint: {
-            id: 'terms',
+            type: 'string',
+            field: 'category.keyword',
             params: {
-              id: 'string',
-              otherBucketLabel: 'Other',
-              missingBucketLabel: 'Missing',
-              parsedUrl: {
-                origin: 'http://localhost:5601',
-                pathname: '/jiy/app/kibana',
-                basePath: '/jiy',
-              },
+              type: 'terms',
+              params: {
+                field: 'category.keyword',
+                orderBy: 'yAccessorId',
+                order: 'desc',
+                size: 3,
+                otherBucket: false,
+                otherBucketLabel: 'Other',
+                missingBucket: false,
+                missingBucketLabel: 'Missing',
+              }
             },
           },
         },
@@ -180,22 +176,21 @@ const dateHistogramLayer: LayerArgs = {
   accessors: ['yAccessorId'],
 };
 
-const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatatable => ({
-  type: 'kibana_datatable',
+const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
+  type: 'datatable',
   columns: [
     {
       id: 'a',
       name: 'a',
-      formatHint: { id: 'number', params: { pattern: '0,0.000' } },
+      meta: { type: 'number' }
     },
-    { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
+    { id: 'b', name: 'b', meta: { type: 'number', params: { pattern: '000,0' } } },
     {
       id: 'c',
       name: 'c',
-      formatHint: { id: 'string' },
-      meta: { type: 'date-histogram', aggConfigParams: { interval: 'auto' } },
+      meta: { type: 'date', params: { type: 'date-histogram', params: { interval: 'auto' } } },
     },
-    { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
+    { id: 'd', name: 'ColD', meta: { type: 'string' } },
   ],
   rows,
 });
@@ -346,12 +341,12 @@ describe('xy_expression', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
-            { id: 'd', name: 'd' },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string' } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -364,12 +359,12 @@ describe('xy_expression', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
-            { id: 'd', name: 'd', formatHint: { id: 'custom' } },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string' } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -1556,11 +1551,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [
               { a: undefined, b: 2, c: 'I', d: 'Row 1' },
@@ -1568,11 +1563,11 @@ describe('xy_expression', () => {
             ],
           },
           second: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [
               { a: undefined, b: undefined, c: undefined },
@@ -1650,11 +1645,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'number' } },
             ],
             rows: [
               { a: 0, b: 2, c: 5 },
@@ -1722,11 +1717,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [{ a: 1, b: 5, c: 'J' }],
           },

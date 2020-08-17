@@ -5,13 +5,13 @@
  */
 
 import { LayerArgs } from './types';
-import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {
-  const tables: Record<string, KibanaDatatable> = {
+  const tables: Record<string, Datatable> = {
     first: {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: [
         {
           xAccessorId: 1585758120000,
@@ -94,96 +94,92 @@ describe('axes_configuration', () => {
           yAccessorId4: 4,
         },
       ],
+      meta: {
+        type: 'esaggs',
+        source: 'indexPatternId',
+      },
       columns: [
         {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date_histogram',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'order_date',
-              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-              useNormalizedEsInterval: true,
-              scaleMetricValues: false,
-              interval: '1m',
-              drop_partials: false,
-              min_doc_count: 0,
-              extended_bounds: {},
-            },
+            type: 'date',
+            field: 'order_date',
+            params: {
+              type: 'date_histogram',
+              params: {
+                field: 'order_date',
+                timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+                useNormalizedEsInterval: true,
+                scaleMetricValues: false,
+                interval: '1m',
+                drop_partials: false,
+                min_doc_count: 0,
+                extended_bounds: {},
+              },
+            }
           },
-          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'terms',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'category.keyword',
-              orderBy: 'yAccessorId',
-              order: 'desc',
-              size: 3,
-              otherBucket: false,
-              otherBucketLabel: 'Other',
-              missingBucket: false,
-              missingBucketLabel: 'Missing',
-            },
-          },
-          formatHint: {
-            id: 'terms',
+            type: 'string',
+            field: 'category.keyword',
             params: {
-              id: 'string',
-              otherBucketLabel: 'Other',
-              missingBucketLabel: 'Missing',
-              parsedUrl: {
-                origin: 'http://localhost:5601',
-                pathname: '/jiy/app/kibana',
-                basePath: '/jiy',
+              type: 'terms',
+              params: {
+                field: 'category.keyword',
+                orderBy: 'yAccessorId',
+                order: 'desc',
+                size: 3,
+                otherBucket: false,
+                otherBucketLabel: 'Other',
+                missingBucket: false,
+                missingBucketLabel: 'Missing',
               },
-            },
+            }
           },
         },
         {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'count',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            params: {
+              type: 'count',
+            },
           },
-          formatHint: { id: 'number' },
         },
         {
           id: 'yAccessorId2',
           name: 'Other column',
           meta: {
-            type: 'average',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            params: {
+              type: 'average'
+            },
           },
-          formatHint: { id: 'bytes' },
         },
         {
           id: 'yAccessorId3',
           name: 'Other column',
           meta: {
-            type: 'average',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            params: {
+              type: 'average'
+            },
           },
-          formatHint: { id: 'currency' },
         },
         {
           id: 'yAccessorId4',
           name: 'Other column',
           meta: {
-            type: 'average',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            params: {
+              type: 'average'
+            },
           },
-          formatHint: { id: 'currency' },
         },
       ],
     },
