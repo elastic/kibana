@@ -36,12 +36,10 @@ export function useRouteParams(params: Params) {
   const queryResult = rts.queryRt.decode(queryParams);
   const pathResult = rts.pathRt.decode(pathParams);
   if (isLeft(queryResult)) {
-    // eslint-disable-next-line no-console
     console.error(PathReporter.report(queryResult)[0]);
   }
 
   if (isLeft(pathResult)) {
-    // eslint-disable-next-line no-console
     console.error(PathReporter.report(pathResult)[0]);
   }
 

@@ -7,7 +7,8 @@
     "Security testing may produce events like this. Activity of this kind performed by non-engineers and ordinary users is unusual."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

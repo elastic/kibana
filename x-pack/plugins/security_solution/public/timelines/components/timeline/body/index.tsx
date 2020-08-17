@@ -42,7 +42,6 @@ export interface BodyProps {
   docValueFields: DocValueFields[];
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
-  height?: number;
   id: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -85,7 +84,6 @@ export const Body = React.memo<BodyProps>(
     eventIdToNoteIds,
     getNotesByIds,
     graphEventId,
-    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -129,17 +127,11 @@ export const Body = React.memo<BodyProps>(
     return (
       <>
         {graphEventId && (
-          <GraphOverlay
-            bodyHeight={height}
-            graphEventId={graphEventId}
-            timelineId={id}
-            timelineType={timelineType}
-          />
+          <GraphOverlay graphEventId={graphEventId} timelineId={id} timelineType={timelineType} />
         )}
         <TimelineBody
           data-test-subj="timeline-body"
           data-timeline-id={id}
-          bodyHeight={height}
           ref={containerElementRef}
           visible={show && !graphEventId}
         >

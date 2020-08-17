@@ -15,7 +15,6 @@ async function asyncForEach(array: any[], callback: Function) {
   }
 }
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');

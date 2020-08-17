@@ -12,6 +12,14 @@ export default async function ({ readConfigFile }) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
 
+  const testPolicyRules = [
+    { allow: true, protocol: 'http:' },
+    { allow: false, host: 'via.placeholder.com' },
+    { allow: true, protocol: 'https:' },
+    { allow: true, protocol: 'data:' },
+    { allow: false },
+  ];
+
   return {
     servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Reporting API Integration Tests' },
@@ -36,6 +44,7 @@ export default async function ({ readConfigFile }) {
         `--xpack.reporting.queue.pollInterval=3000`,
         `--xpack.security.session.idleTimeout=3600000`,
         `--xpack.spaces.enabled=false`,
+        `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
       ],
     },
     esArchiver: apiConfig.get('esArchiver'),

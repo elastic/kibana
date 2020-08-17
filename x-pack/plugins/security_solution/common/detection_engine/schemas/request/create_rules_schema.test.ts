@@ -1298,6 +1298,7 @@ describe('create rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getCreateRulesSchemaMock();
     const payload: CreateRulesSchema = {
       ...noMaxSignals,
@@ -1453,6 +1454,7 @@ describe('create rules schema', () => {
   });
 
   test('it generates a uuid v4 whenever you omit the rule_id', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { rule_id, ...noRuleId } = getCreateRulesSchemaMock();
     const decoded = createRulesSchema.decode(noRuleId);
     const checked = exactCheck(noRuleId, decoded);

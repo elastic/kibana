@@ -28,6 +28,7 @@ import {
   ExpressionFunctionKibana,
   ExpressionFunctionVarSet,
   ExpressionFunctionVar,
+  ExpressionFunctionTheme,
 } from './specs';
 
 /**
@@ -122,4 +123,5 @@ export interface ExpressionFunctionDefinitions {
   kibana: ExpressionFunctionKibana;
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
+  theme: ExpressionFunctionTheme;
 }

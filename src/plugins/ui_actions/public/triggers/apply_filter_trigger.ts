@@ -17,11 +17,16 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Trigger } from '.';
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
 export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
   id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
-  description: 'Triggered when user applies filter to an embeddable.',
+  title: i18n.translate('uiActions.triggers.applyFilterTitle', {
+    defaultMessage: 'Apply filter',
+  }),
+  description: i18n.translate('uiActions.triggers.applyFilterDescription', {
+    defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
+  }),
 };

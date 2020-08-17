@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
 import { CommentRequest } from '../../../../../case/common/api';
@@ -30,88 +30,98 @@ const initialCommentValue: CommentRequest = {
   comment: '',
 };
 
+export interface AddCommentRefObject {
+  addQuote: (quote: string) => void;
+}
+
 interface AddCommentProps {
   caseId: string;
   disabled?: boolean;
-  insertQuote: string | null;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
 }
 
-export const AddComment = React.memo<AddCommentProps>(
-  ({ caseId, disabled, insertQuote, showLoading = true, onCommentPosted, onCommentSaving }) => {
-    const { isLoading, postComment } = usePostComment(caseId);
-    const { form } = useForm<CommentRequest>({
-      defaultValue: initialCommentValue,
-      options: { stripEmptyFields: false },
-      schema,
-    });
-    const { getFormData, setFieldValue, reset, submit } = form;
-    const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
-      form,
-      'comment'
-    );
+export const AddComment = React.memo(
+  forwardRef<AddCommentRefObject, AddCommentProps>(
+    ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
+      const { isLoading, postComment } = usePostComment(caseId);
+      const { form } = useForm<CommentRequest>({
+        defaultValue: initialCommentValue,
+        options: { stripEmptyFields: false },
+        schema,
+      });
+      const { getFormData, setFieldValue, reset, submit } = form;
+      const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
+        form,
+        'comment'
+      );
 
-    useEffect(() => {
-      if (insertQuote !== null) {
-        const { comment } = getFormData();
-        setFieldValue('comment', `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`);
-      }
-    }, [getFormData, insertQuote, setFieldValue]);
+      const addQuote = useCallback(
+        (quote) => {
+          const { comment } = getFormData();
+          setFieldValue('comment', `${comment}${comment.length > 0 ? '\n\n' : ''}${quote}`);
+        },
+        [getFormData, setFieldValue]
+      );
 
-    const handleTimelineClick = useTimelineClick();
+      useImperativeHandle(ref, () => ({
+        addQuote,
+      }));
 
-    const onSubmit = useCallback(async () => {
-      const { isValid, data } = await submit();
-      if (isValid) {
-        if (onCommentSaving != null) {
-          onCommentSaving();
+      const handleTimelineClick = useTimelineClick();
+
+      const onSubmit = useCallback(async () => {
+        const { isValid, data } = await submit();
+        if (isValid) {
+          if (onCommentSaving != null) {
+            onCommentSaving();
+          }
+          postComment(data, onCommentPosted);
+          reset();
         }
-        postComment(data, onCommentPosted);
-        reset();
-      }
-    }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);
+      }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);
 
-    return (
-      <span id="add-comment-permLink">
-        {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-        <Form form={form}>
-          <UseField
-            path="comment"
-            component={MarkdownEditorForm}
-            componentProps={{
-              idAria: 'caseComment',
-              isDisabled: isLoading,
-              dataTestSubj: 'add-comment',
-              placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-              onCursorPositionUpdate: handleCursorChange,
-              onClickTimeline: handleTimelineClick,
-              bottomRightContent: (
-                <EuiButton
-                  data-test-subj="submit-comment"
-                  iconType="plusInCircle"
-                  isDisabled={isLoading || disabled}
-                  isLoading={isLoading}
-                  onClick={onSubmit}
-                  size="s"
-                >
-                  {i18n.ADD_COMMENT}
-                </EuiButton>
-              ),
-              topRightContent: (
-                <InsertTimelinePopover
-                  hideUntitled={true}
-                  isDisabled={isLoading}
-                  onTimelineChange={handleOnTimelineChange}
-                />
-              ),
-            }}
-          />
-        </Form>
-      </span>
-    );
-  }
+      return (
+        <span id="add-comment-permLink">
+          {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
+          <Form form={form}>
+            <UseField
+              path="comment"
+              component={MarkdownEditorForm}
+              componentProps={{
+                idAria: 'caseComment',
+                isDisabled: isLoading,
+                dataTestSubj: 'add-comment',
+                placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+                onCursorPositionUpdate: handleCursorChange,
+                onClickTimeline: handleTimelineClick,
+                bottomRightContent: (
+                  <EuiButton
+                    data-test-subj="submit-comment"
+                    iconType="plusInCircle"
+                    isDisabled={isLoading || disabled}
+                    isLoading={isLoading}
+                    onClick={onSubmit}
+                    size="s"
+                  >
+                    {i18n.ADD_COMMENT}
+                  </EuiButton>
+                ),
+                topRightContent: (
+                  <InsertTimelinePopover
+                    hideUntitled={true}
+                    isDisabled={isLoading}
+                    onTimelineChange={handleOnTimelineChange}
+                  />
+                ),
+              }}
+            />
+          </Form>
+        </span>
+      );
+    }
+  )
 );
 
 AddComment.displayName = 'AddComment';

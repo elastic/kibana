@@ -20,8 +20,8 @@ export type PackageConfigConfigRecord = Record<string, PackageConfigConfigRecord
 export interface NewPackageConfigInputStream {
   id: string;
   enabled: boolean;
-  dataset: {
-    name: string;
+  data_stream: {
+    dataset: string;
     type: string;
   };
   vars?: PackageConfigConfigRecord;
