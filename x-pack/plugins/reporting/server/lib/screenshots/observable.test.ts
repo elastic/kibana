@@ -17,22 +17,37 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
-import { LevelLogger } from '../';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../test_helpers';
-import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
+import {
+  createMockBrowserDriverFactory,
+  createMockConfig,
+  createMockConfigSchema,
+  createMockLayoutInstance,
+  createMockLevelLogger,
+} from '../../test_helpers';
+import { ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
 
 /*
  * Mocks
  */
-const mockLogger = jest.fn(loggingSystemMock.create);
-const logger = new LevelLogger(mockLogger());
+const logger = createMockLevelLogger();
 
-const mockConfig = { timeouts: { openUrl: moment.duration(13, 'ms') } } as CaptureConfig;
-const mockLayout = createMockLayoutInstance(mockConfig);
+const reportingConfig = {
+  capture: {
+    loadDelay: moment.duration(2, 's'),
+    timeouts: {
+      openUrl: moment.duration(2, 'm'),
+      waitForElements: moment.duration(20, 's'),
+      renderComplete: moment.duration(10, 's'),
+    },
+  },
+};
+const mockSchema = createMockConfigSchema(reportingConfig);
+const mockConfig = createMockConfig(mockSchema);
+const captureConfig = mockConfig.get('capture');
+const mockLayout = createMockLayoutInstance(captureConfig);
 
 /*
  * Tests
@@ -45,7 +60,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
       urls: ['/welcome/home/start/index.htm'],
@@ -106,7 +121,7 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     // test
-    const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
       urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
@@ -205,7 +220,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
@@ -300,7 +315,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
@@ -333,7 +348,7 @@ describe('Screenshot Observable Pipeline', () => {
       mockLayout.getViewport = () => null;
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,

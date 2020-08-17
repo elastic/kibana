@@ -30,7 +30,7 @@ const KibanaServerSchema = schema.object({
 }); // default values are all dynamic in createConfig$
 
 const QueueSchema = schema.object({
-  indexInterval: schema.string({ defaultValue: 'week' }), // no schema.duration: used to create weekly indices
+  indexInterval: schema.string({ defaultValue: 'week' }),
   pollEnabled: schema.boolean({ defaultValue: true }),
   pollInterval: schema.number({ defaultValue: 3000 }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),

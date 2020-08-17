@@ -4,24 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import { createMockReportingCore } from '../../test_helpers';
-import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import { ReportingInternalSetup } from '../../core';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../test_helpers';
+import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 
 let mockCore: ReportingCore;
-const kbnConfig = {
-  'server.basePath': '/sbp',
-};
-const reportingConfig = {
-  'roles.allow': ['reporting_user'],
-};
-const mockReportingConfig = {
-  get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')] || 'whoah!',
-  kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
-};
+const mockConfig: any = { 'server.basePath': '/sbp', 'roles.allow': ['reporting_user'] };
+const mockReportingConfigSchema = createMockConfigSchema(mockConfig);
+const mockReportingConfig = createMockConfig(mockReportingConfigSchema);
 
 const getMockContext = () =>
   (({

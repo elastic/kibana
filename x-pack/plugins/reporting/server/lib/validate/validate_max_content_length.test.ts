@@ -10,8 +10,9 @@ import { validateMaxContentLength } from './validate_max_content_length';
 const FIVE_HUNDRED_MEGABYTES = 524288000;
 const ONE_HUNDRED_MEGABYTES = 104857600;
 
+let elasticsearch: any;
 describe('Reporting: Validate Max Content Length', () => {
-  const elasticsearch = {
+  elasticsearch = {
     legacy: {
       client: {
         callAsInternalUser: () => ({
@@ -25,7 +26,7 @@ describe('Reporting: Validate Max Content Length', () => {
     },
   };
 
-  const logger = {
+  const logger: any = {
     warning: sinon.spy(),
   };
 
@@ -34,8 +35,8 @@ describe('Reporting: Validate Max Content Length', () => {
   });
 
   it('should log warning messages when reporting has a higher max-size than elasticsearch', async () => {
-    const config = { get: sinon.stub().returns(FIVE_HUNDRED_MEGABYTES) };
-    const elasticsearch = {
+    const config: any = { get: sinon.stub().returns(FIVE_HUNDRED_MEGABYTES) };
+    elasticsearch = {
       legacy: {
         client: {
           callAsInternalUser: () => ({
@@ -53,11 +54,11 @@ describe('Reporting: Validate Max Content Length', () => {
 
     sinon.assert.calledWithMatch(
       logger.warning,
-      `xpack.reporting.csv.maxSizeBytes (524288000) is higher`
+      `xpack.reporting.csv.maxSizeBytes (500mb) is higher`
     );
     sinon.assert.calledWithMatch(
       logger.warning,
-      `than ElasticSearch's http.max_content_length (104857600)`
+      `than ElasticSearch's http.max_content_length (100mb)`
     );
     sinon.assert.calledWithMatch(
       logger.warning,
@@ -70,7 +71,7 @@ describe('Reporting: Validate Max Content Length', () => {
   });
 
   it('should do nothing when reporting has the same max-size as elasticsearch', async () => {
-    const config = { get: sinon.stub().returns(ONE_HUNDRED_MEGABYTES) };
+    const config: any = { get: sinon.stub().returns(ONE_HUNDRED_MEGABYTES) };
 
     expect(
       async () => await validateMaxContentLength(config, elasticsearch, logger.warning)

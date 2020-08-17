@@ -42,6 +42,8 @@ export class ReportingStore {
   private logger: LevelLogger;
 
   constructor(reporting: ReportingCore, logger: LevelLogger) {
+    this.logger = logger;
+
     const config = reporting.getConfig();
     const elasticsearch = reporting.getElasticsearchService();
 
@@ -56,8 +58,6 @@ export class ReportingStore {
       max_attempts: config.get('capture', 'maxAttempts'),
       priority: 10, // unused
     };
-
-    this.logger = logger;
   }
 
   private async createIndex(indexName: string) {

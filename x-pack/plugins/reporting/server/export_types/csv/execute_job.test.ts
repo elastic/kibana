@@ -22,6 +22,7 @@ import { setFieldFormats } from '../../services';
 import { createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 import { ScheduledTaskParamsCSV } from './types';
+import moment from 'moment';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
@@ -73,6 +74,7 @@ describe('CSV Execute Job', function () {
 
   beforeEach(async function () {
     configGetStub = sinon.stub();
+    configGetStub.withArgs('queue', 'timeout').returns(moment.duration('2m'));
     configGetStub.withArgs('index').returns('.reporting-foo-test');
     configGetStub.withArgs('encryptionKey').returns(encryptionKey);
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB

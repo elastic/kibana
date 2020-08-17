@@ -125,10 +125,6 @@ describe('Reporting Config Schema', () => {
         "waitForElements": "PT30S",
       }
     `);
-
-    expect(
-      ConfigSchema.validate({ csv: { scroll: { duration: '1m' } } }).csv.scroll.duration
-    ).toMatchInlineSnapshot(`"1m"`);
   });
 
   it('allows ByteSizeValue values for certain keys', () => {
