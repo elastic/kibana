@@ -22,6 +22,15 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+
+jest.mock('../query_bar_wrapper', () => ({
+  QueryBarWrapper: jest.fn(() => null),
+}));
+
+jest.mock('../lib/get_default_query_language', () => ({
+  getDefaultQueryLanguage: jest.fn(() => 'lucene'),
+}));
+
 const runTest = (aggType, name, test, additionalProps = {}) => {
   describe(aggType, () => {
     const metric = {

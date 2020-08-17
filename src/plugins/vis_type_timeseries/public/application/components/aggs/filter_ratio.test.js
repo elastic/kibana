@@ -27,6 +27,10 @@ jest.mock('../query_bar_wrapper', () => ({
   QueryBarWrapper: jest.fn(() => null),
 }));
 
+jest.mock('../lib/get_default_query_language', () => ({
+  getDefaultQueryLanguage: jest.fn(() => 'lucene'),
+}));
+
 describe('TSVB Filter Ratio', () => {
   const setup = (metric) => {
     const series = { ...SERIES, metrics: [metric] };
