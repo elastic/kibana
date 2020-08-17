@@ -21,11 +21,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FeatureCatalogueCategory } from '../../services';
