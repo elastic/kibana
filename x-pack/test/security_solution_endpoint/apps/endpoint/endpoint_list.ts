@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds page title', async () => {
         const title = await testSubjects.getVisibleText('header-page-title');
-        expect(title).to.equal('Endpoints');
+        expect(title).to.equal('Endpoints BETA');
       });
 
       it('displays table data', async () => {
