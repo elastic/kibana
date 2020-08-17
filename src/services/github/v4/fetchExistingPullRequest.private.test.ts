@@ -12,14 +12,14 @@ describe('fetchExistingPullRequest', () => {
   describe('when PR does not exist', () => {
     it('returns undefined', async () => {
       const options = {
-        repoOwner: 'backport-org',
+        repoOwner: 'sqren',
         repoName: 'backport-e2e',
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as BackportOptions;
       const res = await fetchExistingPullRequest({
         options,
-        backportBranch: '',
+        backportBranch: 'backport/7.8/pr-9',
         targetBranch: 'master',
       });
 
@@ -27,23 +27,24 @@ describe('fetchExistingPullRequest', () => {
     });
   });
 
-  //  TODO: there are no open PRs to test this on so skipping for now
-  // eslint-disable-next-line jest/no-disabled-tests
-  describe.skip('when PR exists', () => {
+  describe('when PR exists', () => {
     it('returns the PR number and url', async () => {
       const options = {
-        repoOwner: 'backport-org',
+        repoOwner: 'sqren',
         repoName: 'backport-e2e',
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as BackportOptions;
       const res = await fetchExistingPullRequest({
         options,
-        backportBranch: '',
-        targetBranch: 'master',
+        backportBranch: 'backport/7.8/pr-9',
+        targetBranch: '7.8',
       });
 
-      expect(res).toBe({});
+      expect(res).toEqual({
+        html_url: 'https://github.com/backport-org/backport-e2e/pull/10',
+        number: 10,
+      });
     });
   });
 });

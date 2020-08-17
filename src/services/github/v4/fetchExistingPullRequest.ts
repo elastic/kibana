@@ -53,13 +53,16 @@ export async function fetchExistingPullRequest({
     },
   });
 
-  if (!res.repository.ref) {
+  const existingPullRequest =
+    res.repository.ref?.associatedPullRequests.edges[0];
+
+  if (!existingPullRequest) {
     return;
   }
 
   return {
-    html_url: res.repository.ref.associatedPullRequests.edges[0].node.url,
-    number: res.repository.ref.associatedPullRequests.edges[0].node.number,
+    html_url: existingPullRequest.node.url,
+    number: existingPullRequest.node.number,
   };
 }
 
