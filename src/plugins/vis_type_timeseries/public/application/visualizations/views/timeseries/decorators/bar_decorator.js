@@ -36,6 +36,7 @@ export function BarSeriesDecorator({
   xScaleType,
   yScaleType,
   timeZone,
+  enableHistogramMode,
   useDefaultGroupDomain,
   sortIndex,
   y1AccessorFormat,
@@ -62,10 +63,15 @@ export function BarSeriesDecorator({
     xScaleType,
     yScaleType,
     timeZone,
+    enableHistogramMode,
     useDefaultGroupDomain,
     sortIndex,
     ...barSeriesStyle,
   };
+
+  if (enableHistogramMode) {
+    seriesSettings.histogramModeAlignment = 'center';
+  }
 
   return <BarSeries {...seriesSettings} />;
 }

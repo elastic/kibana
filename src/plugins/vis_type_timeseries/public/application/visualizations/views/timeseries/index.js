@@ -180,6 +180,7 @@ export const TimeSeries = ({
         ) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
+          const isNonStacked = stack === STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
@@ -200,6 +201,7 @@ export const TimeSeries = ({
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
+                enableHistogramMode={!isNonStacked}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
@@ -225,6 +227,7 @@ export const TimeSeries = ({
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
+                enableHistogramMode={!isNonStacked}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
