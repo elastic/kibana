@@ -86,7 +86,7 @@ This case happens if the server is the one to invoke the `data.search` endpoint,
 
 ### Background Session Status
 
-```
+```ts
 export enum BackgroundSessionStatus {
   Running,   // The session has at least one running search ID associated with it.
   Done,      // All search IDs associated with this session have completed.
@@ -97,7 +97,7 @@ export enum BackgroundSessionStatus {
 
 ### Saved Object Structure
 
-```
+```ts
 interface BackgroundSessionAttributes extends SavedObjectAttributes {
   sessionId: string;
   status: BackgroundSessionStatus;
@@ -119,7 +119,7 @@ We will expose a new frontend `session` service on the `data` plugin `search` se
 
 The service will expose the following APIs:
 
-```
+```ts
 interface ISessionService {
    /** 
     * Returns the current session ID
@@ -197,7 +197,7 @@ Since all search requests go through the `search_interceptor`, it will take on t
 
 We're proposing the following changes to the `SearchInterceptor` API, and exposing them on the `search` service:
 
-```
+```ts
 interface ISearchInterceptor {
   /**
    * Execute a search request. Uses synchronous execution in OSS and asynchronous execution in x-pack.
@@ -233,7 +233,7 @@ When the server receives a search request that has a sessionId and is marked as 
 
 ### New Session Service
 
-```
+```ts
 interface ISessionService {
   /** 
    * Adds a search ID to a Background Session, if it exists.
@@ -349,6 +349,19 @@ We can simplify this flow by intoducing a mechanism, similar to the frontend one
 
 However, due to the fact that we are running in a potenitally multi-server architecture, each server will have to poll for a saved object with a corresponding sessionId to store the ids into it.
 
+```ts
+interface SearchService {
+  /**
+   * The search API will accept the option `trackId`, which will track the search ID, if available, on the server, until a corresponding saved object is created.  
+   **/
+  search: async (
+    context: RequestHandlerContext,	  
+    request: IEnhancedEsSearchRequest,
+    options?: ISearchOptions
+  ) => ISearchResponse<Payload=any>
+}
+```
+
 ### Server Routes
 
 Each route exposes the corresponding method from the Session Service
@@ -361,13 +374,15 @@ Each route exposes the corresponding method from the Session Service
 
 `GET /internal/session/list`
 
-`/internal/session/extend`
-
 ### Search Strategy Integration 
+
+If the `EnhancedEsSearchStrategy` receives a `restore` option, it will attempt reloading data using the Background Session saved object matching the provided `sessionId`. If there are any errors during that process, the strategy will return an error response and *not attempt to re-run the request.
+
+The strategy will track the asyncId on the server side, if `trackId` option is provided.
 
 ### Monitoring Service
 
-The `data` will register a task with the task manager, periodically monitoring the status of incomplete background sessions. 
+The `data` plugin will register a task with the task manager, periodically monitoring the status of incomplete background sessions. 
 
 It will query the list of all incomplete sessions, and check the status of each search that is executing. If the search requests are all complete, it will update the corresponding saved object to have a `status` of `complete`. If any of the searches return an error, it will update the saved object to an `error` state.
 
