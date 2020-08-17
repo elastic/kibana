@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { VisualizationControllerConstructor } from '../types';
+import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
 
@@ -42,6 +42,7 @@ export interface BaseVisTypeOptions {
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
+  toExpressionAst?: VisToExpressionAst;
 }
 
 export class BaseVisType {
@@ -66,6 +67,7 @@ export class BaseVisType {
   setup?: unknown;
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
+  toExpressionAst?: VisToExpressionAst;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -102,6 +104,7 @@ export class BaseVisType {
     this.hierarchicalData = opts.hierarchicalData || false;
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
     this.inspectorAdapters = opts.inspectorAdapters;
+    this.toExpressionAst = opts.toExpressionAst;
   }
 
   public get schemas() {

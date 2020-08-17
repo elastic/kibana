@@ -53,12 +53,14 @@ interface RenderValue {
   params: any;
 }
 
-export const createMetricVisFn = (): ExpressionFunctionDefinition<
+export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'metricVis',
   Input,
   Arguments,
   Render<RenderValue>
-> => ({
+>;
+
+export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
   name: 'metricVis',
   type: 'render',
   inputTypes: ['kibana_datatable'],
