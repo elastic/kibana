@@ -16,54 +16,6 @@ import {
 import { ReturnTypeBulkUpsert } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-/*
-import Joi from 'joi';
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/types';
-export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
-  method: 'PUT',
-  path: '/api/beats/configurations',
-  licenseRequired: REQUIRED_LICENSES,
-  requiredRoles: ['beats_admin'],
-  config: {
-    validate: {
-      payload: Joi.array().items(Joi.object({}).unknown(true)),
-    },
-  },
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkUpsert> => {
-    const result = await Promise.all<any>(
-      request.payload.map(async (block: ConfigurationBlock) => {
-        const assertData = createConfigurationBlockInterface().decode(block);
-        if (isLeft(assertData)) {
-          return {
-            error: `Error parsing block info, ${PathReporter.report(assertData)[0]}`,
-          };
-        }
-
-        const { blockID, success, error } = await libs.configurationBlocks.save(
-          request.user,
-          block
-        );
-        if (error) {
-          return { success, error };
-        }
-
-        return { success, blockID };
-      })
-    );
-
-    return {
-      results: result.map((r) => ({
-        success: r.success as boolean,
-        // TODO: we need to surface this data, not hard coded
-        action: 'created' as 'created' | 'updated',
-      })),
-      success: true,
-    };
-  },
-});
-*/
-
 export const registerUpsertConfigurationBlocksRoute = (router: IRouter) => {
   // TODO: write to Kibana audit log file
   router.put(

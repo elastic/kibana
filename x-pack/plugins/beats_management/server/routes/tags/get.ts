@@ -11,28 +11,6 @@ import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeBulkGet } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-/*
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/types';
-export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
-  method: 'GET',
-  path: '/api/beats/tags/{tagIds}',
-  requiredRoles: ['beats_admin'],
-  licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkGet<BeatTag>> => {
-    const tagIdString: string = request.params.tagIds;
-    const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
-
-    const tags = await libs.tags.getWithIds(request.user, tagIds);
-
-    return {
-      items: tags,
-      success: true,
-    };
-  },
-});
-*/
-
 export const registerGetTagsWithIdsRoute = (router: IRouter) => {
   router.get(
     {

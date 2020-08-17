@@ -10,31 +10,6 @@ import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkDelete } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-/*
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/types';
-export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
-  method: 'DELETE',
-  path: '/api/beats/tags/{tagIds}',
-  requiredRoles: ['beats_admin'],
-  licenseRequired: REQUIRED_LICENSES,
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkDelete> => {
-    const tagIdString: string = request.params.tagIds;
-    const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
-
-    const success = await libs.tags.delete(request.user, tagIds);
-
-    return {
-      results: tagIds.map(() => ({
-        success,
-        action: 'deleted',
-      })),
-      success,
-    } as ReturnTypeBulkDelete;
-  },
-});
-*/
-
 export const registerDeleteTagsWithIdsRoute = (router: IRouter) => {
   router.delete(
     {

@@ -12,55 +12,6 @@ import { ReturnTypeBulkAction } from '../../../common/return_types';
 import type { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-/*
-import Joi from 'joi';
-import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/types';
-export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
-  method: 'POST',
-  path: '/api/beats/agents_tags/assignments',
-  licenseRequired: REQUIRED_LICENSES,
-  requiredRoles: ['beats_admin'],
-  config: {
-    validate: {
-      payload: Joi.object({
-        assignments: Joi.array().items(
-          Joi.object({
-            beatId: Joi.string().required(),
-            tag: Joi.string().required(),
-          })
-        ),
-      }).required(),
-    },
-  },
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkAction> => {
-    const { assignments }: { assignments: BeatsTagAssignment[] } = request.payload;
-
-    const response = await libs.beats.assignTagsToBeats(request.user, assignments);
-
-    return {
-      success: true,
-      results: response.assignments.map((assignment) => ({
-        success: assignment.status && assignment.status >= 200 && assignment.status < 300,
-        error:
-          !assignment.status || assignment.status >= 300
-            ? {
-                code: assignment.status || 400,
-                message: assignment.result,
-              }
-            : undefined,
-        result:
-          assignment.status && assignment.status >= 200 && assignment.status < 300
-            ? {
-                message: assignment.result,
-              }
-            : undefined,
-      })),
-    } as ReturnTypeBulkAction;
-  },
-});
-*/
-
 export const registerTagAssignmentsRoute = (router: IRouter) => {
   // TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
   router.post(
