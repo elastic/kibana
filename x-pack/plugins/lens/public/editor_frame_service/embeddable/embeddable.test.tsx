@@ -25,7 +25,7 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
+import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -50,11 +50,12 @@ const savedVis: Document = {
 const attributeServiceMockFromSavedVis = (
   document: Document
 ): AttributeService<LensSavedObjectAttributes, LensByValueInput, LensByReferenceInput> => {
+  const core = coreMock.createStart();
   const service = new AttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
-  >('lens', coreMock.createStart().savedObjects.client);
+  >('lens', core.savedObjects.client, core.i18n.Context, core.notifications.toasts);
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({ ...document } as LensSavedObjectAttributes);
   });
