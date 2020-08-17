@@ -7,8 +7,9 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { useTestPipelineContext } from '../context';
-import { Document } from '../types';
+import { Document } from '../../types';
+
+import './documents_dropdown.scss';
 
 const i18nTexts = {
   ariaLabel: i18n.translate(
@@ -34,34 +35,31 @@ const getDocumentOptions = (documents: Document[]) =>
     text: doc._id,
   }));
 
-export const DocumentsDropdown: FunctionComponent = () => {
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+interface Props {
+  documents: Document[];
+  selectedDocumentIndex: number;
+  updateSelectedDocument: (index: number) => void;
+}
 
-  const {
-    config: { documents, selectedDocumentIndex },
-  } = testPipelineData;
-
+export const DocumentsDropdown: FunctionComponent<Props> = ({
+  documents,
+  selectedDocumentIndex,
+  updateSelectedDocument,
+}) => {
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="s">
+    <EuiFlexGroup alignItems="baseline" gutterSize="s" className="documentsDropdown">
       <EuiFlexItem grow={false}>
         <EuiText>
           <span>{i18nTexts.dropdownLabel}</span>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="documentsDropdown__selectContainer">
         <EuiSelect
           compressed
           options={getDocumentOptions(documents!)}
           value={selectedDocumentIndex}
           onChange={(e) => {
-            setCurrentTestPipelineData({
-              type: 'updateActiveDocument',
-              payload: {
-                config: {
-                  selectedDocumentIndex: Number(e.target.value),
-                },
-              },
-            });
+            updateSelectedDocument(Number(e.target.value));
           }}
           aria-label={i18nTexts.ariaLabel}
         />

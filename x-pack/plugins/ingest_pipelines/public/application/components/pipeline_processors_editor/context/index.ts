@@ -10,6 +10,7 @@ export {
   TestPipelineContextProvider,
   useTestPipelineContext,
   TestPipelineData,
+  TestPipelineContext,
 } from './test_pipeline_context';
 
 export {

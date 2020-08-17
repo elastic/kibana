@@ -14,14 +14,14 @@ const i18nTexts = {
 };
 
 interface Props {
-  openFlyout: () => void;
+  openTestPipelineFlyout: () => void;
 }
 
-export const AddDocumentsButton: FunctionComponent<Props> = ({ openFlyout }) => {
+export const AddDocumentsButton: FunctionComponent<Props> = ({ openTestPipelineFlyout }) => {
   return (
     <EuiButtonEmpty
       size="s"
-      onClick={openFlyout}
+      onClick={openTestPipelineFlyout}
       data-test-subj="addDocumentsButton"
       iconType="plusInCircleFilled"
     >

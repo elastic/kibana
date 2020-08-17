@@ -110,16 +110,27 @@ const getFlyoutTitle = (isOnFailure: boolean, isExistingProcessor: boolean) => {
 
 export const ManageProcessorForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
-    const { testPipelineData } = useTestPipelineContext();
+    const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
     const {
       testOutputByProcessor,
-      config: { selectedDocumentIndex },
+      config: { selectedDocumentIndex, documents },
     } = testPipelineData;
 
     const processorOutput =
       processor &&
       testOutputByProcessor &&
       testOutputByProcessor[selectedDocumentIndex][processor.id];
+
+    const updateSelectedDocument = (index: number) => {
+      setCurrentTestPipelineData({
+        type: 'updateActiveDocument',
+        payload: {
+          config: {
+            selectedDocumentIndex: index,
+          },
+        },
+      });
+    };
 
     useEffect(
       () => {
@@ -133,7 +144,14 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
     let flyoutContent: React.ReactNode;
 
     if (activeTab === 'output') {
-      flyoutContent = <ProcessorOutput processorOutput={processorOutput} />;
+      flyoutContent = (
+        <ProcessorOutput
+          processorOutput={processorOutput}
+          documents={documents!}
+          selectedDocumentIndex={selectedDocumentIndex}
+          updateSelectedDocument={updateSelectedDocument}
+        />
+      );
     } else {
       flyoutContent = <ProcessorSettingsFields processor={processor} />;
     }

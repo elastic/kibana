@@ -145,7 +145,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} className="pipelineProcessorsEditor__item__statusContainer">
                 {isExecuting ? (
                   <EuiLoadingSpinner size="s" />
                 ) : (

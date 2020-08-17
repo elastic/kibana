@@ -216,6 +216,8 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     };
   }, [mode, setMode, processorsState, processorsDispatch]);
 
+  // Update the test output whenever the processorsState changes (e.g., on move, update, delete)
+  // Note: updateTestOutputPerProcessor() will only simulate if the user has added sample documents
   useEffect(() => {
     updateTestOutputPerProcessor(documents, processorsState);
   }, [documents, processorsState, updateTestOutputPerProcessor]);

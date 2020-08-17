@@ -17,16 +17,20 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useTestPipelineContext } from '../../../context';
+import { TestPipelineContext } from '../../../context';
 import { HandleExecuteArgs } from '../test_pipeline_flyout';
 
 interface Props {
   handleExecute: (data: HandleExecuteArgs) => void;
   isExecuting: boolean;
+  testPipelineData: TestPipelineContext['testPipelineData'];
 }
 
-export const OutputTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
-  const { testPipelineData } = useTestPipelineContext();
+export const OutputTab: React.FunctionComponent<Props> = ({
+  handleExecute,
+  isExecuting,
+  testPipelineData,
+}) => {
   const {
     testOutput,
     config: { verbose: cachedVerbose, documents: cachedDocuments },

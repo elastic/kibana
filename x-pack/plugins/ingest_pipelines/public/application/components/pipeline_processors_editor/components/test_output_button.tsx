@@ -24,16 +24,19 @@ const i18nTexts = {
 
 interface Props {
   isDisabled: boolean;
-  openFlyout: () => void;
+  openTestPipelineFlyout: () => void;
 }
 
-export const TestOutputButton: FunctionComponent<Props> = ({ isDisabled, openFlyout }) => {
+export const TestOutputButton: FunctionComponent<Props> = ({
+  isDisabled,
+  openTestPipelineFlyout,
+}) => {
   if (isDisabled) {
     return (
       <EuiToolTip position="top" content={<p>{i18nTexts.disabledButtonTooltipLabel}</p>}>
         <EuiButton
           size="s"
-          onClick={openFlyout}
+          onClick={openTestPipelineFlyout}
           data-test-subj="outputButton"
           iconType="crossInACircleFilled"
           isDisabled={isDisabled}
@@ -47,7 +50,7 @@ export const TestOutputButton: FunctionComponent<Props> = ({ isDisabled, openFly
   return (
     <EuiButton
       size="s"
-      onClick={openFlyout}
+      onClick={openTestPipelineFlyout}
       data-test-subj="outputButton"
       iconType="checkInCircleFilled"
     >

@@ -20,6 +20,8 @@ export interface TestPipelineData {
     verbose?: boolean;
     selectedDocumentIndex: number;
   };
+  // This represents the complete output from the simulate API
+  // It may be the verbose output if the user has enabled the "Verbose" flag
   testOutput?: {
     [key: string]: any;
   };
@@ -56,7 +58,7 @@ type Action =
       payload: Pick<TestPipelineData, 'isExecuting'>;
     };
 
-interface TestPipelineContext {
+export interface TestPipelineContext {
   testPipelineData: TestPipelineData;
   setCurrentTestPipelineData: (data: Action) => void;
   updateTestOutputPerProcessor: (

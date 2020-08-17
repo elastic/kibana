@@ -33,15 +33,26 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
     links,
     state: { processors },
   } = usePipelineProcessorsContext();
-  const { testPipelineData } = useTestPipelineContext();
+  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
 
   const {
     testOutput,
-    config: { documents },
+    config: { documents, selectedDocumentIndex },
   } = testPipelineData;
 
   const [openTestPipelineFlyout, setOpenTestPipelineFlyout] = useState(false);
   const [activeFlyoutTab, setActiveFlyoutTab] = useState<TestPipelineFlyoutTab>('documents');
+
+  const updateSelectedDocument = (index: number) => {
+    setCurrentTestPipelineData({
+      type: 'updateActiveDocument',
+      payload: {
+        config: {
+          selectedDocumentIndex: index,
+        },
+      },
+    });
+  };
 
   return (
     <>
@@ -51,7 +62,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
         justifyContent="spaceBetween"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
@@ -91,25 +102,33 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {documents ? (
-            <DocumentsDropdown />
-          ) : (
-            <AddDocumentsButton
-              openFlyout={() => {
-                setOpenTestPipelineFlyout(true);
-                setActiveFlyoutTab('documents');
-              }}
-            />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TestOutputButton
-            isDisabled={Boolean(testOutput) === false}
-            openFlyout={() => {
-              setOpenTestPipelineFlyout(true);
-              setActiveFlyoutTab('output');
-            }}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {documents ? (
+                <DocumentsDropdown
+                  documents={documents}
+                  selectedDocumentIndex={selectedDocumentIndex}
+                  updateSelectedDocument={updateSelectedDocument}
+                />
+              ) : (
+                <AddDocumentsButton
+                  openTestPipelineFlyout={() => {
+                    setOpenTestPipelineFlyout(true);
+                    setActiveFlyoutTab('documents');
+                  }}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TestOutputButton
+                isDisabled={Boolean(testOutput) === false}
+                openTestPipelineFlyout={() => {
+                  setOpenTestPipelineFlyout(true);
+                  setActiveFlyoutTab('output');
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 

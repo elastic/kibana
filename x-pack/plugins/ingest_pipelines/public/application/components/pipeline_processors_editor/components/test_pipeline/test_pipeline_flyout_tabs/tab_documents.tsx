@@ -18,7 +18,7 @@ import {
   useForm,
 } from '../../../../../../shared_imports';
 
-import { usePipelineProcessorsContext, useTestPipelineContext } from '../../../context';
+import { usePipelineProcessorsContext, TestPipelineContext } from '../../../context';
 import { Document } from '../../../types';
 
 import { documentsSchema } from './documents_schema';
@@ -32,6 +32,7 @@ interface Props {
   setPerProcessorOutput: (documents: Document[] | undefined, processors: DeserializeResult) => void;
   isExecuting: boolean;
   processors: DeserializeResult;
+  testPipelineData: TestPipelineContext['testPipelineData'];
 }
 
 export const DocumentsTab: React.FunctionComponent<Props> = ({
@@ -39,10 +40,9 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   isExecuting,
   setPerProcessorOutput,
   processors,
+  testPipelineData,
 }) => {
   const { links } = usePipelineProcessorsContext();
-
-  const { testPipelineData } = useTestPipelineContext();
 
   const {
     config: { documents: cachedDocuments },
@@ -60,6 +60,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
     await handleExecute({ documents: documents! });
 
     // This is necessary to update the status and output of each processor
+    // as verbose is not enabled on initial execution
     setPerProcessorOutput(documents, processors);
   };
 

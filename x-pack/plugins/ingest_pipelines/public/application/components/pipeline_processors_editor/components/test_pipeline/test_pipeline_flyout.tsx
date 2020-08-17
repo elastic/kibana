@@ -102,7 +102,13 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   let tabContent;
 
   if (selectedTab === 'output') {
-    tabContent = <OutputTab handleExecute={handleExecute} isExecuting={isExecuting} />;
+    tabContent = (
+      <OutputTab
+        handleExecute={handleExecute}
+        isExecuting={isExecuting}
+        testPipelineData={testPipelineData}
+      />
+    );
   } else {
     // default to "Documents" tab
     tabContent = (
@@ -111,6 +117,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         handleExecute={handleExecute}
         setPerProcessorOutput={updateTestOutputPerProcessor}
         processors={processors}
+        testPipelineData={testPipelineData}
       />
     );
   }
@@ -137,7 +144,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
         <EuiSpacer />
 
-        {/* Execute error */}
+        {/* Execute error callout */}
         {executeError ? (
           <>
             <EuiCallOut

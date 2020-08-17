@@ -17,11 +17,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ProcessorResult } from '../../types';
+import { ProcessorResult, Document } from '../../types';
 import { DocumentsDropdown } from '../documents_dropdown';
 
 export interface Props {
   processorOutput?: ProcessorResult;
+  documents: Document[];
+  selectedDocumentIndex: number;
+  updateSelectedDocument: (index: number) => void;
 }
 
 const i18nTexts = {
@@ -67,8 +70,13 @@ const i18nTexts = {
   ),
 };
 
-export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutput }) => {
-  // A user should not reach this code,
+export const ProcessorOutput: React.FunctionComponent<Props> = ({
+  processorOutput,
+  documents,
+  selectedDocumentIndex,
+  updateSelectedDocument,
+}) => {
+  // This code should not be reached,
   // but if for some reason the output is undefined, we render a callout message
   if (!processorOutput) {
     return <EuiCallOut title={i18nTexts.noOutputCalloutTitle} color="danger" iconType="alert" />;
@@ -88,6 +96,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
         <p>{i18nTexts.tabDescription}</p>
       </EuiText>
 
+      {/* There is no output for "skipped" status, so we render an info callout */}
       {status === 'skipped' && (
         <>
           <EuiSpacer />
@@ -95,6 +104,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
         </>
       )}
 
+      {/* There is no output for "dropped status", so we render a warning callout */}
       {status === 'dropped' && (
         <>
           <EuiSpacer />
@@ -116,7 +126,11 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
               <p>{i18nTexts.processorOutputLabel}</p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <DocumentsDropdown />
+              <DocumentsDropdown
+                documents={documents}
+                selectedDocumentIndex={selectedDocumentIndex}
+                updateSelectedDocument={updateSelectedDocument}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 
@@ -137,7 +151,11 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
               <p>{i18nTexts.processorErrorLabel}</p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <DocumentsDropdown />
+              <DocumentsDropdown
+                documents={documents}
+                selectedDocumentIndex={selectedDocumentIndex}
+                updateSelectedDocument={updateSelectedDocument}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 
