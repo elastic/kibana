@@ -55,7 +55,7 @@ describe('When the add exception modal is opened', () => {
     }));
     (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
       { isLoading: false },
-      () => {},
+      jest.fn(),
     ]);
     (useFetchOrCreateRuleExceptionList as jest.Mock).mockImplementation(() => [
       false,
@@ -96,8 +96,8 @@ describe('When the add exception modal is opened', () => {
             ruleIndices={[]}
             ruleName={ruleName}
             exceptionListType={'endpoint'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -117,8 +117,8 @@ describe('When the add exception modal is opened', () => {
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
             exceptionListType={'endpoint'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -157,8 +157,8 @@ describe('When the add exception modal is opened', () => {
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
             exceptionListType={'endpoint'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
             alertData={alertDataMock}
           />
         </ThemeProvider>
@@ -208,8 +208,8 @@ describe('When the add exception modal is opened', () => {
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
             exceptionListType={'detection'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
             alertData={alertDataMock}
           />
         </ThemeProvider>
@@ -276,8 +276,8 @@ describe('When the add exception modal is opened', () => {
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
             exceptionListType={'endpoint'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
             alertData={alertDataMock}
           />
         </ThemeProvider>
@@ -290,7 +290,6 @@ describe('When the add exception modal is opened', () => {
         wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
       ).not.toBeDisabled();
     });
-
     it('should render the exception builder', () => {
       expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
     });

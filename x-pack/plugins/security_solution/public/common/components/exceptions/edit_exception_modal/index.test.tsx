@@ -55,7 +55,7 @@ describe('When the edit exception modal is opened', () => {
     });
     (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
       { isLoading: false },
-      () => {},
+      jest.fn(),
     ]);
     (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
       {
@@ -86,8 +86,8 @@ describe('When the edit exception modal is opened', () => {
             ruleIndices={[]}
             ruleName={ruleName}
             exceptionListType={'endpoint'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
             exceptionItem={getExceptionListItemSchemaMock()}
           />
         </ThemeProvider>
@@ -114,8 +114,8 @@ describe('When the edit exception modal is opened', () => {
               ruleIndices={['filebeat-*']}
               ruleName={ruleName}
               exceptionListType={'endpoint'}
-              onCancel={() => {}}
-              onConfirm={() => {}}
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
               exceptionItem={exceptionItemMock}
             />
           </ThemeProvider>
@@ -156,8 +156,8 @@ describe('When the edit exception modal is opened', () => {
               ruleIndices={['filebeat-*']}
               ruleName={ruleName}
               exceptionListType={'endpoint'}
-              onCancel={() => {}}
-              onConfirm={() => {}}
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
               exceptionItem={getExceptionListItemSchemaMock()}
             />
           </ThemeProvider>
@@ -199,8 +199,8 @@ describe('When the edit exception modal is opened', () => {
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
             exceptionListType={'detection'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
             exceptionItem={getExceptionListItemSchemaMock()}
           />
         </ThemeProvider>
@@ -238,8 +238,8 @@ describe('When the edit exception modal is opened', () => {
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
             exceptionListType={'detection'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
             exceptionItem={exceptionItemMock}
           />
         </ThemeProvider>
