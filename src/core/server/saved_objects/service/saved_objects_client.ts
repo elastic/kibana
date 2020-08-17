@@ -37,6 +37,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
+   **/
+  version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];

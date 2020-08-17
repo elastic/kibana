@@ -2173,6 +2173,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    version?: string;
 }
 
 // @public (undocumented)

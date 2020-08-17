@@ -1516,6 +1516,16 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalled();
       });
 
+      it(`should use the ES index with version of ID and version are defined and overwrite=true`, async () => {
+        await createSuccess(type, attributes, { id, overwrite: true, version: mockVersion });
+        expect(client.index).toHaveBeenCalled();
+
+        expect(client.index.mock.calls[0][0]).toMatchObject({
+          if_seq_no: mockVersionProps._seq_no,
+          if_primary_term: mockVersionProps._primary_term,
+        });
+      });
+
       it(`should use the ES create action if ID is defined and overwrite=false`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalled();

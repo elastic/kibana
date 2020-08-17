@@ -220,6 +220,7 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
+      version,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -259,6 +260,7 @@ export class SavedObjectsRepository {
       index: this.getIndexForType(type),
       refresh,
       body: raw._source,
+      ...(overwrite && version ? decodeRequestVersion(version) : {}),
     };
 
     const { body } =
