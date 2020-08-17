@@ -50,21 +50,33 @@ exports[`should disable clusters option when clustering is not supported 1`] = `
           onChange={[Function]}
         />
       </EuiToolTip>
-      <EuiRadio
-        checked={false}
-        disabled={true}
-        id="MVT"
-        label={
+      <EuiToolTip
+        content={
           <React.Fragment>
-            .mvt tile protocol
             <EuiBetaBadge
               label="beta"
-              tooltipContent="Using .mvt tiles is a beta feature."
             />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.
           </React.Fragment>
         }
-        onChange={[Function]}
-      />
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="MVT"
+          label={
+            <React.Fragment>
+              Use vector tiles
+            </React.Fragment>
+          }
+          onChange={[Function]}
+        />
+      </EuiToolTip>
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -129,21 +141,33 @@ exports[`should render 1`] = `
         label="Show clusters when results exceed 10000."
         onChange={[Function]}
       />
-      <EuiRadio
-        checked={false}
-        disabled={true}
-        id="MVT"
-        label={
+      <EuiToolTip
+        content={
           <React.Fragment>
-            .mvt tile protocol
             <EuiBetaBadge
               label="beta"
-              tooltipContent="Using .mvt tiles is a beta feature."
             />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.
           </React.Fragment>
         }
-        onChange={[Function]}
-      />
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="MVT"
+          label={
+            <React.Fragment>
+              Use vector tiles
+            </React.Fragment>
+          }
+          onChange={[Function]}
+        />
+      </EuiToolTip>
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -208,21 +232,33 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
         label="Show clusters when results exceed 10000."
         onChange={[Function]}
       />
-      <EuiRadio
-        checked={false}
-        disabled={true}
-        id="MVT"
-        label={
+      <EuiToolTip
+        content={
           <React.Fragment>
-            .mvt tile protocol
             <EuiBetaBadge
               label="beta"
-              tooltipContent="Using .mvt tiles is a beta feature."
             />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.
           </React.Fragment>
         }
-        onChange={[Function]}
-      />
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="MVT"
+          label={
+            <React.Fragment>
+              Use vector tiles
+            </React.Fragment>
+          }
+          onChange={[Function]}
+        />
+      </EuiToolTip>
     </div>
   </EuiFormRow>
   <EuiFormRow

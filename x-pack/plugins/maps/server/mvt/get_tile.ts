@@ -30,7 +30,7 @@ interface ESBounds {
 export async function getTile({
   logger,
   callElasticsearch,
-  indexPattern,
+  index,
   geometryFieldName,
   x,
   y,
@@ -41,7 +41,7 @@ export async function getTile({
   y: number;
   z: number;
   geometryFieldName: string;
-  indexPattern: string;
+  index: string;
   callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
   logger: Logger;
   requestBody: any;
@@ -64,12 +64,12 @@ export async function getTile({
       requestBody.query.bool.filter.push(geoShapeFilter);
 
       const esSearchQuery = {
-        index: indexPattern,
+        index,
         body: requestBody,
       };
 
       const esCountQuery = {
-        index: indexPattern,
+        index,
         body: {
           query: requestBody.query,
         },
@@ -82,7 +82,7 @@ export async function getTile({
         // Generate "too many features"-bounds
         const bboxAggName = 'data_bounds';
         const bboxQuery = {
-          index: indexPattern,
+          index,
           body: {
             size: 0,
             query: requestBody.query,

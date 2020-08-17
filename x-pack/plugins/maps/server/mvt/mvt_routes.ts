@@ -25,7 +25,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           geometryFieldName: schema.string(),
           fields: schema.string(),
           requestBody: schema.string(),
-          indexPattern: schema.string(),
+          index: schema.string(),
         }),
       },
     },
@@ -45,7 +45,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         x: query.x,
         y: query.y,
         z: query.z,
-        indexPattern: query.indexPattern,
+        index: query.index,
         requestBody: requestBodyDSL,
       });
 

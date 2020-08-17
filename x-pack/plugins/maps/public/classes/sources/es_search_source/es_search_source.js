@@ -578,16 +578,14 @@ export class ESSearchSource extends AbstractESSource {
     return reason;
   }
 
-  // MVT methods. Do we really need different source-type?????
   getLayerName() {
-    return 'water';
+    return MVT_SOURCE_LAYER_NAME;
   }
 
   async getUrlTemplateWithMeta(searchFilters) {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
-    //assuming only geo_shape fields for now
     const initialSearchContext = {};
 
     const searchSource = await this.makeSearchSource(
@@ -597,7 +595,7 @@ export class ESSearchSource extends AbstractESSource {
     );
     searchSource.setField('fields', searchFilters.fieldNames);
 
-    const ipTitle = indexPattern.title;
+    const indexPatternTitle = indexPattern.title;
     const geometryFieldName = this._descriptor.geoField;
     const fields = ['_id']; // todo needs to include correct fields
     const fieldsParam = fields.join(',');
@@ -610,13 +608,21 @@ export class ESSearchSource extends AbstractESSource {
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
     );
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldName}&indexPattern=${ipTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldName}&index=${indexPatternTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
     return {
-      layerName: MVT_SOURCE_LAYER_NAME,
-      minSourceZoom: MIN_ZOOM,
-      maxSourceZoom: MAX_ZOOM,
+      layerName: this.getLayerName(),
+      minSourceZoom: this.getMinZoom(),
+      maxSourceZoom: this.getMaxZoom(),
       urlTemplate: urlTemplate,
     };
+  }
+
+  getMinZoom() {
+    return MIN_ZOOM;
+  }
+
+  getMaxZoom() {
+    return MAX_ZOOM;
   }
 }
 

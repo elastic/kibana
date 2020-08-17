@@ -14,7 +14,6 @@ import {
   EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
-  EuiText,
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -165,33 +164,6 @@ export class ScalingForm extends Component<Props, State> {
     );
   }
 
-  _renderLimitResultsRadio() {
-    return (
-      <EuiRadio
-        id={SCALING_TYPES.LIMIT}
-        label={i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
-          defaultMessage: 'Limit results to {maxResultWindow}.',
-          values: { maxResultWindow: this.state.maxResultWindow },
-        })}
-        checked={this.props.scalingType === SCALING_TYPES.LIMIT}
-        onChange={() => this._onScalingTypeChange(SCALING_TYPES.LIMIT)}
-      />
-    );
-  }
-
-  _renderTopHitsRadio() {
-    return (
-      <EuiRadio
-        id={SCALING_TYPES.TOP_HITS}
-        label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-          defaultMessage: 'Show top hits per entity.',
-        })}
-        checked={this.props.scalingType === SCALING_TYPES.TOP_HITS}
-        onChange={() => this._onScalingTypeChange(SCALING_TYPES.TOP_HITS)}
-      />
-    );
-  }
-
   _renderClusteringRadio() {
     const clusteringRadio = (
       <EuiRadio
@@ -217,22 +189,9 @@ export class ScalingForm extends Component<Props, State> {
 
   _renderMVTRadio() {
     const labelText = i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
-      defaultMessage: '.mvt tile protocol',
+      defaultMessage: 'Use vector tiles',
     });
-    const label = (
-      <>
-        {labelText}
-        <EuiBetaBadge
-          label={'beta'}
-          tooltipContent={i18n.translate(
-            'xpack.maps.source.esSearch.useMVTVectorTilesBetaTooltip',
-            {
-              defaultMessage: 'Using .mvt tiles is a beta feature.',
-            }
-          )}
-        />
-      </>
-    );
+    const label = <>{labelText}</>;
     const mvtRadio = (
       <EuiRadio
         id={SCALING_TYPES.MVT}
@@ -243,12 +202,25 @@ export class ScalingForm extends Component<Props, State> {
       />
     );
 
+    const info = (
+      <>
+        <EuiBetaBadge label={'beta'} />
+        <EuiHorizontalRule margin="xs" />
+        {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
+          defaultMessage:
+            'Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.',
+        })}
+      </>
+    );
+
     return this.props.mvtDisabledReason ? (
       <EuiToolTip position="left" content={this.props.mvtDisabledReason}>
         {mvtRadio}
       </EuiToolTip>
     ) : (
-      mvtRadio
+      <EuiToolTip position="left" content={info}>
+        {mvtRadio}
+      </EuiToolTip>
     );
   }
 
@@ -282,21 +254,6 @@ export class ScalingForm extends Component<Props, State> {
       );
     }
 
-    let mvtDisclaimer = null;
-    if (this.props.scalingType === SCALING_TYPES.MVT) {
-      mvtDisclaimer = (
-        <Fragment>
-          <EuiHorizontalRule margin="xs" />
-          <EuiText grow={false} size={'s'}>
-            {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-              defaultMessage:
-                'Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.',
-            })}
-          </EuiText>
-        </Fragment>
-      );
-    }
-
     return (
       <Fragment>
         <EuiTitle size="xs">
@@ -309,8 +266,23 @@ export class ScalingForm extends Component<Props, State> {
 
         <EuiFormRow>
           <div>
-            {this._renderLimitResultsRadio()}
-            {this._renderTopHitsRadio()}
+            <EuiRadio
+              id={SCALING_TYPES.LIMIT}
+              label={i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
+                defaultMessage: 'Limit results to {maxResultWindow}.',
+                values: { maxResultWindow: this.state.maxResultWindow },
+              })}
+              checked={this.props.scalingType === SCALING_TYPES.LIMIT}
+              onChange={() => this._onScalingTypeChange(SCALING_TYPES.LIMIT)}
+            />
+            <EuiRadio
+              id={SCALING_TYPES.TOP_HITS}
+              label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+                defaultMessage: 'Show top hits per entity.',
+              })}
+              checked={this.props.scalingType === SCALING_TYPES.TOP_HITS}
+              onChange={() => this._onScalingTypeChange(SCALING_TYPES.TOP_HITS)}
+            />
             {this._renderClusteringRadio()}
             {this._renderMVTRadio()}
           </div>
@@ -318,7 +290,6 @@ export class ScalingForm extends Component<Props, State> {
 
         {filterByBoundsSwitch}
         {topHitsOptionsForm}
-        {mvtDisclaimer}
       </Fragment>
     );
   }

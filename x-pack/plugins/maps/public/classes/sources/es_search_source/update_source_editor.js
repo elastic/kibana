@@ -46,7 +46,7 @@ export class UpdateSourceEditor extends Component {
     supportsClustering: false,
     supportsMvt: false,
     mvtDisabledReason: null,
-    clusteringDisabledReasin: null,
+    clusteringDisabledReason: null,
   };
 
   componentDidMount() {
