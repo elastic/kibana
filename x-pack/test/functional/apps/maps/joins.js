@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { set } from '@elastic/safer-lodash-set';
 
 import { MAPBOX_STYLES } from './mapbox_styles';
 
@@ -93,22 +92,14 @@ export default function ({ getPageObjects, getService }) {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
       });
 
-      // Color is dynamically obtained from eui source lib
-      const dynamicColor =
-        layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX].paint['circle-stroke-color'];
-
       //circle layer for points
-      expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(
-        set(MAPBOX_STYLES.POINT_LAYER, 'paint.circle-stroke-color', dynamicColor)
-      );
+      expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.POINT_LAYER);
 
       //fill layer
       expect(layersForVectorSource[FILL_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.FILL_LAYER);
 
       //line layer for borders
-      expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(
-        set(MAPBOX_STYLES.LINE_LAYER, 'paint.line-color', dynamicColor)
-      );
+      expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.LINE_LAYER);
     });
 
     it('should flag only the joined features as visible', async () => {
