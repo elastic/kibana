@@ -55,7 +55,8 @@ export const number: ExpressionTypeDefinition<typeof name, number> = {
     },
     datatable: (value): Datatable => ({
       type: 'datatable',
-      columns: [{ name: 'value', type: 'number' }],
+      meta: {},
+      columns: [{ id: 'value', name: 'value', meta: { type: 'number' } }],
       rows: [{ value }],
     }),
   },

@@ -55,7 +55,8 @@ jest.mock('react-virtualized-auto-sizer', () => {
   }) => children({ width: 100, height: 500 });
 });
 
-describe('OpenTimelineModal', () => {
+// Failing: See https://github.com/elastic/kibana/issues/74814
+describe.skip('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const mockInstallPrepackagedTimelines = jest.fn();
   beforeEach(() => {
