@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { XJsonLang, monaco } from '@kbn/monaco';
+import { XJsonLang } from '@kbn/monaco';
 import React, { FunctionComponent, useCallback } from 'react';
 import { FieldHook, Monaco } from '../../../../../../shared_imports';
 
