@@ -15,6 +15,24 @@
 # Description:       Kibana
 ### END INIT INFO
 
+#
+# Source function libraries if present.
+# (It improves integration with systemd)
+#
+# Red Hat
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+
+# Debian
+elif [ -f /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+
+# SUSE
+elif [ -f /etc/rc.status ]; then
+    . /etc/rc.status
+    rc_reset
+fi
+
 name=kibana
 program=/usr/share/kibana/bin/kibana
 pidfile="/var/run/kibana/$name.pid"

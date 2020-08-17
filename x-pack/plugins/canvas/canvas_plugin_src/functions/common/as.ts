@@ -34,8 +34,9 @@ export function asFn(): ExpressionFunctionDefinition<'as', Input, Arguments, Dat
         type: 'datatable',
         columns: [
           {
+            id: args.name,
             name: args.name,
-            type: getType(input),
+            meta: { type: getType(input) },
           },
         ],
         rows: [
