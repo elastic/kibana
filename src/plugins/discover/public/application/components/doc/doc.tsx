@@ -23,17 +23,6 @@ import { IndexPatternsContract } from 'src/plugins/data/public';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
 import { getServices } from '../../../kibana_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
-
-export interface ElasticSearchResult {
-  hits: {
-    hits: [ElasticSearchHit];
-    max_score: number;
-  };
-  timed_out: boolean;
-  took: number;
-  shards: Record<string, unknown>;
-}
 
 export interface DocProps {
   /**
@@ -53,12 +42,6 @@ export interface DocProps {
    * IndexPatternService to get a given index pattern by ID
    */
   indexPatternService: IndexPatternsContract;
-  /**
-   * Client of ElasticSearch to use for the query
-   */
-  esClient: {
-    search: (payload: { index: string; body: Record<string, any> }) => Promise<ElasticSearchResult>;
-  };
 }
 
 export function Doc(props: DocProps) {
