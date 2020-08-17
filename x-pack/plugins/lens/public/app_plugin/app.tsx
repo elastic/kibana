@@ -203,7 +203,8 @@ export function App({
       // or when the user has configured something without saving
       if (
         core.application.capabilities.visualize.save &&
-        !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state)
+        !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state) &&
+        (state.isSaveable || state.persistedDoc)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -221,6 +222,7 @@ export function App({
     lastKnownDoc,
     onAppLeave,
     state.persistedDoc,
+    state.isSaveable,
     core.application.capabilities.visualize.save,
     getLastKnownDocWithoutPinnedFilters,
   ]);
