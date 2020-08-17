@@ -5,8 +5,9 @@
 ++++
 
 Here are the highlights of what's new and improved in {minor-version}.
-For detailed information about this release, check out the release
-notes and breaking changes.
+For detailed information about this release,
+check out the {kibana-ref-all}/7.9/release-notes-7.9.0.html[release notes] and
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[breaking changes].
 
 Other versions: {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
 {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
