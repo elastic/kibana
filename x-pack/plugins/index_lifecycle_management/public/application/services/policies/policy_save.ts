@@ -5,28 +5,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
+import { savePolicy as savePolicyApi } from '../api';
+import { showApiError } from '../api_errors';
+import { getUiMetricsForPhases, trackUiMetric } from '../ui_metric';
 import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
-import { showApiError } from '../../services/api_errors';
-import { toasts } from '../../services/notification';
-import { savePolicy as savePolicyApi } from '../../services/api';
-import { trackUiMetric, getUiMetricsForPhases } from '../../services/ui_metric';
+import { toasts } from '../notification';
+import { Policy, PolicyFromES } from './types';
+import { serializePolicy } from './policy_serialization';
 
-export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
+export const savePolicy = async (
+  policy: Policy,
+  isNew: boolean,
+  originalEsPolicy?: PolicyFromES
+): Promise<boolean> => {
   try {
-    await savePolicyApi(lifecycle);
+    await savePolicyApi(serializePolicy(policy, originalEsPolicy?.policy));
   } catch (err) {
     const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage', {
       defaultMessage: 'Error saving lifecycle policy {lifecycleName}',
-      values: { lifecycleName: lifecycle.name },
+      values: { lifecycleName: policy.name },
     });
     showApiError(err, title);
     return false;
   }
 
-  const uiMetrics = getUiMetricsForPhases(lifecycle.phases);
+  const uiMetrics = getUiMetricsForPhases(policy.phases);
   uiMetrics.push(isNew ? UIM_POLICY_CREATE : UIM_POLICY_UPDATE);
-  trackUiMetric('count', uiMetrics);
+  trackUiMetric(METRIC_TYPE.COUNT, uiMetrics);
 
   const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage', {
     defaultMessage: '{verb} lifecycle policy "{lifecycleName}"',
@@ -38,7 +45,7 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
         : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.updatedMessage', {
             defaultMessage: 'Updated',
           }),
-      lifecycleName: lifecycle.name,
+      lifecycleName: policy.name,
     },
   });
   toasts.addSuccess(message);

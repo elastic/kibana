@@ -16,6 +16,7 @@ import {
 
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
+import { PolicyFromES, SerializedPolicy } from './policies/types';
 
 interface GenericObject {
   [key: string]: any;
@@ -44,7 +45,22 @@ export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
 }
 
-export async function savePolicy(policy: GenericObject) {
+export const useLoadPoliciesList = (withIndices: boolean) => {
+  return useRequest<PolicyFromES[]>({
+    path: `policies`,
+    method: 'get',
+    query: { withIndices },
+  });
+};
+
+export const useLoadPolicy = (policyName: string) => {
+  return useRequest({
+    path: `policies/${encodeURIComponent(policyName)}`,
+    method: 'get',
+  });
+};
+
+export async function savePolicy(policy: SerializedPolicy) {
   return await sendPost(`policies`, policy);
 }
 
