@@ -10,13 +10,15 @@ exports[`ManageData render 1`] = `
     size="s"
   />
   <section
-    aria-labelledby="home.manageData.sectionTitle"
+    aria-labelledby="homManageData"
     className="homManageData"
   >
     <EuiTitle
       size="s"
     >
-      <h2>
+      <h2
+        id="homManageData__title"
+      >
         <FormattedMessage
           defaultMessage="Manage your data"
           id="home.manageData.sectionTitle"
