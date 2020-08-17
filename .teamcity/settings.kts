@@ -94,7 +94,7 @@ project {
       buildType(DefaultVisualRegression(DefaultBuild))
 
        subProject {
-         id("CIGroups")
+         id("Default_CIGroups")
          name = "CI Groups"
 
          for (ciGroup in ciGroups) buildType(ciGroup)
