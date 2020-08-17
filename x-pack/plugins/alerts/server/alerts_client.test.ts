@@ -217,7 +217,7 @@ describe('create()', () => {
         params: {},
         ownerId: null,
       });
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -315,7 +315,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -368,7 +368,7 @@ describe('create()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -437,11 +437,9 @@ describe('create()', () => {
                                                                           },
                                                                         ]
                                                 `);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -477,8 +475,10 @@ describe('create()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][2]).toMatchInlineSnapshot(`
       Object {
+        "id": "1",
+        "overwrite": true,
         "references": Array [
           Object {
             "id": "1",
@@ -584,7 +584,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -954,7 +954,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1067,7 +1067,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1158,7 +1158,7 @@ describe('enable()', () => {
     alertsClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
         ...existingAlert.attributes,
@@ -1226,7 +1226,7 @@ describe('enable()', () => {
   });
 
   test('enables an alert', async () => {
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
         ...existingAlert.attributes,
@@ -1244,9 +1244,8 @@ describe('enable()', () => {
     });
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -1268,6 +1267,8 @@ describe('enable()', () => {
         ],
       },
       {
+        id: '1',
+        overwrite: true,
         version: '123',
         references: existingAlert.references,
       }
@@ -1285,9 +1286,8 @@ describe('enable()', () => {
       },
       scope: ['alerting'],
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         ...existingAlert.attributes,
         enabled: true,
@@ -1297,6 +1297,8 @@ describe('enable()', () => {
         scheduledTaskId: 'task-123',
       },
       {
+        id: '1',
+        overwrite: true,
         version: '123',
         references: existingAlert.references,
       }
@@ -1332,7 +1334,7 @@ describe('enable()', () => {
     await alertsClient.enable({ id: '1' });
     expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
@@ -1343,9 +1345,8 @@ describe('enable()', () => {
     });
 
     await alertsClient.enable({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -1367,6 +1368,8 @@ describe('enable()', () => {
         ],
       },
       {
+        id: '1',
+        overwrite: true,
         references: [],
         version: '123',
       }
@@ -1392,33 +1395,33 @@ describe('enable()', () => {
     );
     expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error when failing to update the first time', async () => {
-    unsecuredSavedObjectsClient.update.mockReset();
-    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to update"`
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error when failing to update the second time', async () => {
-    unsecuredSavedObjectsClient.update.mockReset();
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
         ...existingAlert.attributes,
         enabled: true,
       },
     });
-    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
       new Error('Fail to update second time')
     );
 
@@ -1427,7 +1430,7 @@ describe('enable()', () => {
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(taskManager.schedule).toHaveBeenCalled();
   });
 
@@ -1439,7 +1442,7 @@ describe('enable()', () => {
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });
 });
 
@@ -1475,6 +1478,8 @@ describe('disable()', () => {
       ...existingAlert.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
+    version: '123',
+    references: [],
   };
 
   beforeEach(() => {
@@ -1509,9 +1514,8 @@ describe('disable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         consumer: 'myApp',
         schedule: { interval: '10s' },
@@ -1531,6 +1535,8 @@ describe('disable()', () => {
         ],
       },
       {
+        id: '1',
+        overwrite: true,
         references: [],
         version: '123',
       }
@@ -1547,9 +1553,8 @@ describe('disable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         consumer: 'myApp',
         schedule: { interval: '10s' },
@@ -1569,6 +1574,8 @@ describe('disable()', () => {
         ],
       },
       {
+        id: '1',
+        overwrite: true,
         version: '123',
         references: [],
       }
@@ -1588,7 +1595,7 @@ describe('disable()', () => {
     });
 
     await alertsClient.disable({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.remove).not.toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
@@ -1604,7 +1611,7 @@ describe('disable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.disable({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
     expect(taskManager.remove).toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
@@ -1613,7 +1620,7 @@ describe('disable()', () => {
   });
 
   test('throws when unsecuredSavedObjectsClient update fails', async () => {
-    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Failed to update'));
 
     await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
@@ -1662,9 +1669,8 @@ describe('muteAll()', () => {
     });
 
     await alertsClient.muteAll({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         actions: [
           {
@@ -1681,7 +1687,11 @@ describe('muteAll()', () => {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
       },
-      { references: [] }
+      {
+        id: '1',
+        overwrite: true,
+        references: [],
+      }
     );
   });
 
@@ -1760,12 +1770,12 @@ describe('unmuteAll()', () => {
         muteAll: true,
       },
       references: [],
+      version: '123',
     });
 
     await alertsClient.unmuteAll({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         actions: [
           {
@@ -1782,7 +1792,12 @@ describe('unmuteAll()', () => {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
       },
-      { references: [] }
+      {
+        id: '1',
+        overwrite: true,
+        version: '123',
+        references: [],
+      }
     );
   });
 
@@ -1859,9 +1874,8 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         actions: [],
         schedule: { interval: '10s' },
@@ -1871,7 +1885,12 @@ describe('muteInstance()', () => {
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
       },
-      { version: '123', references: [] }
+      {
+        id: '1',
+        overwrite: true,
+        version: '123',
+        references: [],
+      }
     );
   });
 
@@ -1892,7 +1911,7 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('skips muting when alert is muted', async () => {
@@ -1913,7 +1932,7 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   describe('authorization', () => {
@@ -1997,9 +2016,8 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         actions: [],
         schedule: { interval: '10s' },
@@ -2010,6 +2028,8 @@ describe('unmuteInstance()', () => {
         updatedBy: 'elastic',
       },
       {
+        id: '1',
+        overwrite: true,
         version: '123',
         references: [],
       }
@@ -2033,7 +2053,7 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('skips unmuting when alert is muted', async () => {
@@ -2054,7 +2074,7 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   describe('authorization', () => {
@@ -3076,7 +3096,7 @@ describe('update()', () => {
   });
 
   test('updates given parameters', async () => {
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3213,11 +3233,10 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -3265,8 +3284,10 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
+        "id": "1",
+        "overwrite": true,
         "references": Array [
           Object {
             "id": "1",
@@ -3307,7 +3328,7 @@ describe('update()', () => {
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3386,11 +3407,10 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -3422,18 +3442,20 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "references": Array [
-                                                    Object {
-                                                      "id": "1",
-                                                      "name": "action_0",
-                                                      "type": "action",
-                                                    },
-                                                  ],
-                                                  "version": "123",
-                                                }
-                                `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
   });
 
   it(`doesn't call the createAPIKey function when alert is disabled`, async () => {
@@ -3457,7 +3479,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3537,11 +3559,10 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -3573,18 +3594,20 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "references": Array [
-                                                    Object {
-                                                      "id": "1",
-                                                      "name": "action_0",
-                                                      "type": "action",
-                                                    },
-                                                  ],
-                                                  "version": "123",
-                                                }
-                                `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
   });
 
   it('should validate params', async () => {
@@ -3643,7 +3666,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3722,7 +3745,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3876,7 +3899,7 @@ describe('update()', () => {
         params: {},
         ownerId: null,
       });
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: alertId,
         type: 'alert',
         attributes: {
@@ -4048,7 +4071,7 @@ describe('update()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -4163,9 +4186,8 @@ describe('updateApiKey()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -4186,7 +4208,10 @@ describe('updateApiKey()', () => {
           },
         ],
       },
-      pick(existingAlert, 'version', 'references')
+      {
+        overwrite: true,
+        ...pick(existingAlert, 'id', 'version', 'references'),
+      }
     );
     expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
@@ -4199,9 +4224,8 @@ describe('updateApiKey()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
-      '1',
       {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -4222,7 +4246,10 @@ describe('updateApiKey()', () => {
           },
         ],
       },
-      pick(existingAlert, 'version', 'references')
+      {
+        overwrite: true,
+        ...pick(existingAlert, 'id', 'version', 'references'),
+      }
     );
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
@@ -4234,7 +4261,7 @@ describe('updateApiKey()', () => {
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
     );
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });
 
   test('swallows error when getting decrypted object throws', async () => {
@@ -4244,12 +4271,12 @@ describe('updateApiKey()', () => {
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
     );
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
   test('throws when unsecuredSavedObjectsClient update fails', async () => {
-    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
 
     await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
