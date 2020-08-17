@@ -39,9 +39,7 @@ export const generateCodeOwners = () => {
       description,
       flags: {
         string: ['codeOwnersPath'],
-        help: `
---codeOwnersPath       Required, path to CODEOWNERS file.
-        `,
+        help: '--codeOwnersPath       Required, path to CODEOWNERS file.',
       },
     }
   );
