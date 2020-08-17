@@ -328,9 +328,7 @@ export function App({
           ...s,
           isSaveModalVisible: false,
           originatingApp:
-            saveProps.newCopyOnSave && !saveProps.returnToOrigin
-              ? undefined
-              : currentOriginatingApp,
+            newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
