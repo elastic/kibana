@@ -39,7 +39,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
           id: 'metric-1',
           type: 'filter_ratio',
           numerator: { query: 'errors', language: 'lucene' },
-          denominator: { query: '', language: 'lucene' },
+          denominator: { query: 'warnings', language: 'lucene' },
           metric_agg: 'avg',
           field: 'cpu',
         },
@@ -99,7 +99,10 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
                     bool: {
                       must: [
                         {
-                          match_all: {},
+                          query_string: {
+                            query: 'warnings',
+                            analyze_wildcard: true,
+                          },
                         },
                       ],
                       filter: [],
@@ -167,7 +170,10 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
                     bool: {
                       must: [
                         {
-                          match_all: {},
+                          query_string: {
+                            query: 'warnings',
+                            analyze_wildcard: true,
+                          },
                         },
                       ],
                       filter: [],

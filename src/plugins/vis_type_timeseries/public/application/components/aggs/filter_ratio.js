@@ -104,7 +104,7 @@ export const FilterRatioAgg = (props) => {
             <QueryBarWrapper
               query={{
                 language: model.numerator.language,
-                query: model.numerator.query || '',
+                query: model.numerator.query,
               }}
               onChange={(query) => handleQueryChange('numerator', query)}
               indexPatterns={[indexPattern]}
@@ -125,7 +125,7 @@ export const FilterRatioAgg = (props) => {
             <QueryBarWrapper
               query={{
                 language: model.denominator.language,
-                query: model.denominator.query || '',
+                query: model.denominator.query,
               }}
               onChange={(query) => handleQueryChange('denominator', query)}
               indexPatterns={[indexPattern]}
