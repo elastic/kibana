@@ -52,13 +52,13 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    dispatchSetQuery: ({ refresh, filters, query, timeFilters }) => {
+    dispatchSetQuery: ({ forceRefresh, filters, query, timeFilters }) => {
       dispatch(
         setQuery({
           filters,
           query,
           timeFilters,
-          refresh,
+          forceRefresh,
         })
       );
     },

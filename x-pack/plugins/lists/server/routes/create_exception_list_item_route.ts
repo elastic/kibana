@@ -57,7 +57,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
         });
         if (exceptionList == null) {
           return siemResponse.error({
-            body: `list id: "${listId}" does not exist`,
+            body: `exception list id: "${listId}" does not exist`,
             statusCode: 404,
           });
         } else {
