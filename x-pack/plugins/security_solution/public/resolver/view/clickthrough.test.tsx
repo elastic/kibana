@@ -62,13 +62,13 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           selectedOriginCount: simulator.selectedProcessNode(entityIDs.origin).length,
           unselectedFirstChildCount: simulator.unselectedProcessNode(entityIDs.firstChild).length,
           unselectedSecondChildCount: simulator.unselectedProcessNode(entityIDs.secondChild).length,
-          processNodeCount: simulator.processNodeElements().length,
+          nodePrimaryButtonCount: simulator.testSubject('resolver:node:primary-button').length,
         }))
       ).toYieldEqualTo({
         selectedOriginCount: 1,
         unselectedFirstChildCount: 1,
         unselectedSecondChildCount: 1,
-        processNodeCount: 3,
+        nodePrimaryButtonCount: 3,
       });
     });
 
@@ -82,13 +82,14 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     });
 
     describe("when the second child node's first button has been clicked", () => {
-      beforeEach(() => {
-        // Click the first button under the second child element.
-        simulator
-          .processNodeElements({ entityID: entityIDs.secondChild })
-          .find('button')
-          .first()
-          .simulate('click');
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodePrimaryButton(entityIDs.secondChild)
+        );
+        // Click the second child node's primary button
+        if (button) {
+          button.simulate('click');
+        }
       });
       it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
         await expect(
@@ -141,23 +142,20 @@ describe('Resolver, when analyzing a tree that has two related events for the or
           graphElements: simulator.testSubject('resolver:graph').length,
           graphLoadingElements: simulator.testSubject('resolver:graph:loading').length,
           graphErrorElements: simulator.testSubject('resolver:graph:error').length,
-          originNode: simulator.processNodeElements({ entityID: entityIDs.origin }).length,
+          originNodeButton: simulator.processNodePrimaryButton(entityIDs.origin).length,
         }))
       ).toYieldEqualTo({
         graphElements: 1,
         graphLoadingElements: 0,
         graphErrorElements: 0,
-        originNode: 1,
+        originNodeButton: 1,
       });
     });
 
     it('should render a related events button', async () => {
       await expect(
         simulator.map(() => ({
-          relatedEventButtons: simulator.processNodeChildElements(
-            entityIDs.origin,
-            'resolver:submenu:button'
-          ).length,
+          relatedEventButtons: simulator.processNodeSubmenuButton(entityIDs.origin).length,
         }))
       ).toYieldEqualTo({
         relatedEventButtons: 1,
@@ -166,7 +164,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     describe('when the related events button is clicked', () => {
       beforeEach(async () => {
         const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeChildElements(entityIDs.origin, 'resolver:submenu:button')
+          simulator.processNodeSubmenuButton(entityIDs.origin)
         );
         if (button) {
           button.simulate('click');
@@ -183,7 +181,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     describe('and when the related events button is clicked again', () => {
       beforeEach(async () => {
         const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeChildElements(entityIDs.origin, 'resolver:submenu:button')
+          simulator.processNodeSubmenuButton(entityIDs.origin)
         );
         if (button) {
           button.simulate('click');
