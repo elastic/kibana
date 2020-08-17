@@ -7,8 +7,8 @@
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { CommonProps } from '@elastic/eui';
 
-import { CommonProps } from '@elastic/eui/src/components/common';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
