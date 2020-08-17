@@ -203,16 +203,16 @@
 {
   "type": "doc",
   "value": {
-    "id": "ingest-agent-policies:config1",
+    "id": "ingest-agent-policies:policy1",
     "index": ".kibana",
     "source": {
       "type": "ingest-agent-policies",
       "ingest-agent-policies": {
-        "name": "Test config",
+        "name": "Test policy",
         "namespace": "default",
-        "description": "Config 1",
+        "description": "Policy 1",
         "status": "active",
-        "package_configs": [],
+        "package_policies": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",

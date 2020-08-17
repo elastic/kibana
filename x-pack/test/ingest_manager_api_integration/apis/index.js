@@ -14,11 +14,12 @@ export default function ({ loadTestFile }) {
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 
-    // Package configs
+    // Package policies
     loadTestFile(require.resolve('./package_config/create'));
     loadTestFile(require.resolve('./package_config/update'));
     loadTestFile(require.resolve('./package_config/get'));
-    // Agent config
+
+    // Agent policies
     loadTestFile(require.resolve('./agent_config/index'));
   });
 }

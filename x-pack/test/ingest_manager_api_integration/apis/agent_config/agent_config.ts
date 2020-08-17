@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('ingest_manager_agent_configs', () => {
+  describe('ingest_manager_agent_policies', () => {
     describe('POST /api/ingest_manager/agent_policies', () => {
       it('should work with valid values', async () => {
         const { body: apiResponse } = await supertest
