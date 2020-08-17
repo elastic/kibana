@@ -93,7 +93,7 @@ export class MapsPlugin
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
     plugins.inspector.registerView(MapView);
-    if (home) {
+    if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
     plugins.visualizations.registerAlias(
