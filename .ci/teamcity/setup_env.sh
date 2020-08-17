@@ -19,7 +19,7 @@ tc_set_env CHROMEDRIVER_CDNURL "https://us-central1-elastic-kibana-184716.cloudf
 tc_set_env RE2_DOWNLOAD_MIRROR "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 tc_set_env CYPRESS_DOWNLOAD_MIRROR "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
-tc_set_env NODE_OPTIONS "$NODE_OPTIONS --max-old-space-size=4096"
+tc_set_env NODE_OPTIONS "${NODE_OPTIONS:-} --max-old-space-size=4096"
 tc_set_env BABEL_DISABLE_CACHE true
 
 tc_set_env FORCE_COLOR 1
