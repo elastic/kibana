@@ -11,16 +11,7 @@
 import { performance } from 'perf_hooks';
 import { after } from 'lodash';
 import { Subject, merge, interval, of, Observable } from 'rxjs';
-import {
-  mapTo,
-  filter,
-  scan,
-  concatMap,
-  tap,
-  catchError,
-  switchMap,
-  startWith,
-} from 'rxjs/operators';
+import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
@@ -38,7 +29,7 @@ import {
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
 interface Opts<T, H> {
-  pollInterval: number;
+  pollInterval$: Observable<number>;
   bufferCapacity: number;
   getCapacity: () => number;
   pollRequests$: Observable<Option<T>>;
@@ -59,7 +50,7 @@ interface Opts<T, H> {
  *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
  */
 export function createTaskPoller<T, H>({
-  pollInterval,
+  pollInterval$,
   getCapacity,
   pollRequests$,
   bufferCapacity,
@@ -67,23 +58,11 @@ export function createTaskPoller<T, H>({
 }: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
 
-  const root = new Subject<number>();
-  const interval$ = root.pipe(
-    startWith(pollInterval),
+  const interval$ = pollInterval$.pipe(
     switchMap((period) => interval(period)),
     mapTo(none)
   );
   const errors$ = new Subject<Err<PollingError<T>>>();
-
-  setTimeout(() => {
-    console.log('speed up');
-    root.next(200);
-  }, 10000);
-
-  setTimeout(() => {
-    console.log('slow down');
-    root.next(3000);
-  }, 15000);
 
   const requestWorkProcessing$ = merge(
     // emit a polling event on demand

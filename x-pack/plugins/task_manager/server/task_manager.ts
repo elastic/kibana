@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Subject, Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, startWith } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';
 
@@ -154,8 +154,9 @@ export class TaskManager {
       maxWorkers: opts.config.max_workers,
     });
 
+    const pollInterval$ = new Subject<number>();
     this.poller$ = createTaskPoller<string, FillPoolResult>({
-      pollInterval: opts.config.poll_interval,
+      pollInterval$: pollInterval$.pipe(startWith(opts.config.poll_interval)),
       bufferCapacity: opts.config.request_capacity,
       getCapacity: () => this.pool.availableWorkers,
       pollRequests$: this.claimRequests$,
