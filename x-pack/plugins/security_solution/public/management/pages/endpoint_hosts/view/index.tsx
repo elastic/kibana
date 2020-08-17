@@ -10,12 +10,10 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
-  EuiSpacer,
   EuiLink,
   EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
-  EuiPanel,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +31,6 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -44,12 +41,9 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
-import { WrapperPage } from '../../../../common/components/wrapper_page';
-import { HeaderPage } from '../../../../common/components/header_page';
-import { SiemNavigation } from '../../../../common/components/navigation';
-import { managementTabs } from '../../../components/management_tabs';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { AdministrationListPage } from '../../../components/administration_list_page';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -375,49 +369,36 @@ export const EndpointList = () => {
   ]);
 
   return (
-    <WrapperPage noTimeline data-test-subj="endpointPage">
-      <HeaderPage
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.list.pageTitle"
-            defaultMessage="Endpoints"
-          />
-        }
-        subtitle={
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.list.pageSubTitle"
-            defaultMessage="Hosts running Elastic Endpoint Security"
-          />
-        }
-        badgeOptions={{
-          beta: true,
-          text: i18n.translate('xpack.securitySolution.endpoint.list.beta', {
-            defaultMessage: 'Beta',
-          }),
-        }}
-      />
-
-      <SiemNavigation navTabs={managementTabs} />
-
-      <EuiSpacer />
-
-      <EuiPanel>
-        {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-        {listData && listData.length > 0 && (
-          <>
-            <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.totalCount"
-                defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
-                values={{ totalItemCount }}
-              />
-            </EuiText>
-            <EuiHorizontalRule margin="xs" />
-          </>
-        )}
-        {renderTableOrEmptyState}
-        <SpyRoute pageName={SecurityPageName.administration} />
-      </EuiPanel>
-    </WrapperPage>
+    <AdministrationListPage
+      data-test-subj="endpointPage"
+      beta={true}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.pageTitle"
+          defaultMessage="Endpoints"
+        />
+      }
+      subtitle={
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.pageSubTitle"
+          defaultMessage="Hosts running Elastic Endpoint Security"
+        />
+      }
+    >
+      {hasSelectedEndpoint && <EndpointDetailsFlyout />}
+      {listData && listData.length > 0 && (
+        <>
+          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.list.totalCount"
+              defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+              values={{ totalItemCount }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
+      {renderTableOrEmptyState}
+    </AdministrationListPage>
   );
 };
