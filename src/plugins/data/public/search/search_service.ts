@@ -22,19 +22,20 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { getEsClient, LegacyApiCaller } from './legacy';
-import { AggsService, AggsSetupDependencies, AggsStartDependencies } from './aggs';
+import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
+import { ExpressionsSetup } from '../../../expressions/public';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
-  registerFunction: AggsSetupDependencies['registerFunction'];
   usageCollection?: UsageCollectionSetup;
+  expressions: ExpressionsSetup;
 }
 
 /** @internal */
@@ -51,7 +52,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    { packageInfo, registerFunction, usageCollection }: SearchServiceSetupDependencies
+    { packageInfo, usageCollection, expressions }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(core, usageCollection);
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
@@ -77,7 +78,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     return {
       aggs: this.aggsService.setup({
-        registerFunction,
+        registerFunction: expressions.registerFunction,
         uiSettings: core.uiSettings,
       }),
       usageCollector: this.usageCollector!,
