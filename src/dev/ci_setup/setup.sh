@@ -16,6 +16,23 @@ echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 echo " -- installing node.js dependencies"
 yarn kbn bootstrap --prefer-offline
 
+
+###
+### Generate code owners
+###
+echo " -- generating code owners"
+node scripts/generate_code_owners.js --verbose --codeOwnersPath .github/CODEOWNERS
+
+###
+### verify no git modifications
+###
+GIT_CHANGES="$(git ls-files --modified)"
+if [ "$GIT_CHANGES" ]; then
+  echo -e "\n${RED}ERROR: 'node scripts/generate_code_owners.js' caused changes to the following files:${C_RESET}\n"
+  echo -e "$GIT_CHANGES\n"
+  exit 1
+fi
+
 ###
 ### Download es snapshots
 ###
