@@ -70,8 +70,8 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     });
     return (
       await this.client.bulkUpdate([
-        { type: DOC_TYPE, savedObjectId, attributes: resetAttributes },
-        { type: DOC_TYPE, savedObjectId, attributes },
+        { type: DOC_TYPE, id: savedObjectId, attributes: resetAttributes },
+        { type: DOC_TYPE, id: savedObjectId, attributes },
       ])
     ).savedObjects[1];
   }

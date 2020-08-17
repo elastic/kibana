@@ -29,7 +29,6 @@ import {
   EmbeddableOutput,
   IContainer,
   SavedObjectEmbeddableInput,
-  AttributeService,
   ReferenceOrValueEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { DOC_TYPE, Document } from '../../persistence';
@@ -40,6 +39,7 @@ import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
+import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
 
@@ -257,33 +257,17 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   public inputIsRefType = (
     input: LensByValueInput | LensByReferenceInput
   ): input is LensByReferenceInput => {
-    return Boolean((input as LensByReferenceInput).savedObjectId);
+    return this.deps.attributeService.inputIsRefType(input);
   };
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
-    if (this.inputIsRefType(this.input)) {
-      return this.input;
-    }
-    const wrappedInput = (await this.deps.attributeService.wrapAttributes(
-      this.input.attributes,
-      true
-    )) as Pick<LensByReferenceInput, 'savedObjectId'>;
-    return {
-      id: this.input.id,
-      ...wrappedInput,
-    };
+    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.deps.attributeService.getInputAsRefType(input);
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
-    if (!this.inputIsRefType(this.input)) {
-      return this.input;
-    }
-    const attributes = await this.deps.attributeService.unwrapAttributes(this.input);
-    return {
-      ...this.input,
-      savedObjectId: undefined,
-      attributes,
-    };
+    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.deps.attributeService.getInputAsValueType(input);
   };
 
   destroy() {

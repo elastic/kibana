@@ -27,6 +27,7 @@ import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -37,6 +38,7 @@ export interface EditorFrameSetupPlugins {
 export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
+  dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
 }
@@ -76,7 +78,7 @@ export class EditorFrameService {
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
-        embeddable: deps.embeddable,
+        dashboard: deps.dashboard,
       };
     };
 

@@ -15,8 +15,6 @@ import { ReactExpressionRendererType } from '../../../../../../src/plugins/expre
 import {
   EmbeddableFactoryDefinition,
   IContainer,
-  EmbeddableStart,
-  AttributeService,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   Embeddable,
@@ -27,6 +25,7 @@ import {
 } from './embeddable';
 import { DOC_TYPE } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { AttributeService, DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -35,7 +34,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
-  embeddable?: EmbeddableStart;
+  dashboard?: DashboardStart;
   uiActions?: UiActionsStart;
 }
 
@@ -87,10 +86,10 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       uiActions,
       coreHttp,
       indexPatternService,
-      embeddable,
+      dashboard,
     } = await this.getStartServices();
     if (!this.attributeService) {
-      this.attributeService = embeddable!.getAttributeService<
+      this.attributeService = dashboard!.getAttributeService<
         LensSavedObjectAttributes,
         LensByValueInput,
         LensByReferenceInput

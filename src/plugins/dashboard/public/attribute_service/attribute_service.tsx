@@ -24,6 +24,7 @@ import {
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   IEmbeddable,
+  Container,
 } from '../embeddable_plugin';
 import {
   SavedObjectsClientContract,
@@ -104,6 +105,15 @@ export class AttributeService<
   inputIsRefType = (input: ValType | RefType): input is RefType => {
     return isSavedObjectEmbeddableInput(input);
   };
+
+  public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
+    return embeddable.getRoot() &&
+      (embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput
+      ? ((embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput as
+          | ValType
+          | RefType)
+      : (embeddable.getInput() as ValType | RefType);
+  }
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
     if (!this.inputIsRefType(input)) {
