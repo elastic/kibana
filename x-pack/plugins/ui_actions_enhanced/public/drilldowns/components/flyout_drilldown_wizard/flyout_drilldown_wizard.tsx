@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { FlyoutFrame } from '../flyout_frame';
@@ -16,15 +16,21 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { ActionFactory } from '../../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { ExtraActionFactoryContext } from '../types';
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
+  selectedTriggers?: TriggerId[];
 }
 
-export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
+export interface FlyoutDrilldownWizardProps<
+  CurrentActionConfig extends object = object,
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   drilldownActionFactories: ActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
@@ -38,9 +44,16 @@ export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object =
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
 
-  actionFactoryContext?: object;
+  extraActionFactoryContext?: ExtraActionFactoryContext<ActionFactoryContext>;
 
   docsLink?: string;
+
+  getTrigger: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  supportedTriggers: TriggerId[];
 }
 
 function useWizardConfigState(
@@ -51,6 +64,7 @@ function useWizardConfigState(
     setName: (name: string) => void;
     setActionConfig: (actionConfig: object) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
+    setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
 ] {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
@@ -105,6 +119,12 @@ function useWizardConfigState(
           });
         }
       },
+      setSelectedTriggers: (selectedTriggers: TriggerId[] = []) => {
+        setWizardConfig({
+          ...wizardConfig,
+          selectedTriggers,
+        });
+      },
     },
   ];
 }
@@ -119,12 +139,15 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
-  actionFactoryContext,
+  extraActionFactoryContext,
   docsLink,
+  getTrigger,
+  supportedTriggers,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
-  const [wizardConfig, { setActionFactory, setActionConfig, setName }] = useWizardConfigState(
-    initialDrilldownWizardConfig
-  );
+  const [
+    wizardConfig,
+    { setActionFactory, setActionConfig, setName, setSelectedTriggers },
+  ] = useWizardConfigState(initialDrilldownWizardConfig);
 
   const isActionValid = (
     config: DrilldownWizardConfig
@@ -132,9 +155,18 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     if (!wizardConfig.name) return false;
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
+    if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0) return false;
 
     return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
   };
+
+  const actionFactoryContext: BaseActionFactoryContext = useMemo(
+    () => ({
+      ...extraActionFactoryContext,
+      triggers: wizardConfig.selectedTriggers ?? [],
+    }),
+    [extraActionFactoryContext, wizardConfig.selectedTriggers]
+  );
 
   const footer = (
     <EuiButton
@@ -171,7 +203,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         currentActionFactory={wizardConfig.actionFactory}
         onActionFactoryChange={setActionFactory}
         actionFactories={drilldownActionFactories}
-        actionFactoryContext={actionFactoryContext!}
+        actionFactoryContext={actionFactoryContext}
+        onSelectedTriggersChange={setSelectedTriggers}
+        supportedTriggers={supportedTriggers}
+        getTriggerInfo={getTrigger}
+        triggerPickerDocsLink={docsLink}
       />
       {mode === 'edit' && (
         <>

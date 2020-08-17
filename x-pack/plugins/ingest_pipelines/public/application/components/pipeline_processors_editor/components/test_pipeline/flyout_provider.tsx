@@ -17,6 +17,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { useKibana } from '../../../../../shared_imports';
+
 import { usePipelineProcessorsContext, useTestConfigContext } from '../../context';
 import { serialize } from '../../serialize';
 
@@ -27,10 +29,9 @@ export interface Props {
 }
 
 export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => {
+  const { services } = useKibana();
   const {
     state: { processors },
-    api,
-    toasts,
   } = usePipelineProcessorsContext();
 
   const serializedProcessors = serialize(processors.state);
@@ -53,7 +54,7 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
       setIsExecuting(true);
       setExecuteError(null);
 
-      const { error, data: output } = await api.simulatePipeline({
+      const { error, data: output } = await services.api.simulatePipeline({
         documents,
         verbose,
         pipeline: { ...serializedProcessors },
@@ -68,7 +69,7 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
 
       setExecuteOutput(output);
 
-      toasts.addSuccess(
+      services.notifications.toasts.addSuccess(
         i18n.translate('xpack.ingestPipelines.testPipelineFlyout.successNotificationText', {
           defaultMessage: 'Pipeline executed',
         }),
@@ -79,7 +80,7 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
 
       setSelectedTab('output');
     },
-    [serializedProcessors, api, toasts]
+    [services.api, services.notifications.toasts, serializedProcessors]
   );
 
   useEffect(() => {
