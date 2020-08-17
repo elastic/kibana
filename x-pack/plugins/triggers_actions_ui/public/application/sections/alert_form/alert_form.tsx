@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiIcon,
   EuiForm,
   EuiSpacer,
   EuiFieldText,
@@ -217,6 +216,10 @@ export const AlertForm = ({
         />
       </EuiFlexItem>
     );
+  });
+
+  const alertTypeOptions = alertTypeRegistryList.map(function (item, index) {
+    return { label: item.name };
   });
 
   const alertTypeDetails = (
@@ -509,9 +512,16 @@ export const AlertForm = ({
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGrid gutterSize="s" columns={1}>
+          <EuiComboBox
+            noSuggestions
+            fullWidth
+            data-test-subj="alertTypesComboBox"
+            singleSelection={{ asPlainText: true }}
+            options={alertTypeOptions}
+          />
+          {/* <EuiFlexGrid gutterSize="s" columns={1}>
             {alertTypeNodes}
-          </EuiFlexGrid>
+          </EuiFlexGrid> */}
           <EuiSpacer size="l" />
         </Fragment>
       ) : alertTypesIndex ? (
