@@ -14,12 +14,12 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiSpacer,
   EuiTabs,
   EuiTab,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
