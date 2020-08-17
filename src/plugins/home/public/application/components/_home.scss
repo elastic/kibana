@@ -20,39 +20,39 @@
 // Local page variables
 $homePageWidth: 1200px;
 
-.homPageContainer {
+.homWrapper {
   background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: column;
   height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.homPageHeaderContainer {
+.homHeaderPage {
   background-color: $euiPageBackgroundColor;
   border-bottom: 1px solid $euiColorLightShade;
 }
 
-.homPageHeader {
+.homHeaderPage__inner {
   margin: 0 auto;
   max-width: $homePageWidth;
   padding: $euiSizeXL $euiSize;
 
-  .homPageHeaderContainer--hasSolutions & {
+  .homHeaderPage--hasSolutions & {
     padding-bottom: $euiSizeXL + $euiSizeL;
   }
 }
 
-.homPageHeader__titleWrapper {
+.homHeaderPage__title {
   @include euiBreakpoint('xs', 's') {
     text-align: center;
   }
 }
 
-.homPageHeader__menu {
+.homHeaderPage__menu {
   @include euiBreakpoint('xs', 's') {
     margin-top: 0;
 
-    .homPageHeader__menuItem {
+    .homHeaderPage__menuItem {
       margin-bottom: 0 !important;
       margin-top: 0 !important;
     }

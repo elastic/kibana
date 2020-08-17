@@ -136,31 +136,25 @@ export class Home extends Component {
     }
 
     return (
-      <main
-        className="homPageContainer"
-        data-test-subj="homeApp"
-        aria-labelledby="homPageHeader__title"
-      >
-        <div
-          className={`homPageHeaderContainer ${
-            solutions.length
-              ? 'homPageHeaderContainer--hasSolutions'
-              : 'homPageHeaderContainer--noSolutions'
+      <main className="homWrapper" data-test-subj="homeApp">
+        <header
+          className={`homHeaderPage ${
+            solutions.length ? 'homHeaderPage--hasSolutions' : 'homHeaderPage--noSolutions'
           }`}
         >
-          <header className="homPageHeader">
+          <div className="homHeaderPage__inner">
             <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem className="homPageHeader__titleWrapper">
-                <EuiTitle size="m">
-                  <h1 id="homPageHeader__title">
+              <EuiFlexItem className="homHeaderPage__title">
+                <EuiTitle>
+                  <h1>
                     <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
-                  <EuiFlexItem className="homPageHeader__menuItem">
+                <EuiFlexGroup className="homHeaderPage__menu" alignItems="flexEnd">
+                  <EuiFlexItem className="homHeaderPage__menuItem">
                     <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
@@ -169,7 +163,7 @@ export class Home extends Component {
                   </EuiFlexItem>
 
                   {stackManagement ? (
-                    <EuiFlexItem className="homPageHeader__menuItem">
+                    <EuiFlexItem className="homHeaderPage__menuItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(stackManagement.path)}
                         iconType="gear"
@@ -182,7 +176,7 @@ export class Home extends Component {
                   ) : null}
 
                   {devTools ? (
-                    <EuiFlexItem className="homPageHeader__menuItem">
+                    <EuiFlexItem className="homHeaderPage__menuItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(devTools.path)}
                         iconType="wrench"
@@ -196,8 +190,8 @@ export class Home extends Component {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </header>
-        </div>
+          </div>
+        </header>
 
         <div className="homPageMainContainer">
           <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
