@@ -576,6 +576,7 @@ export interface DocLinksStart {
             readonly loadingData: string;
             readonly introduction: string;
         };
+        readonly addData: string;
         readonly kibana: string;
         readonly siem: {
             readonly guide: string;

@@ -61,6 +61,16 @@ export default function (providerContext: FtrProviderContext) {
           path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
         });
         expect(res.statusCode).equal(200);
+        const resPipeline1 = await es.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+        });
+        expect(resPipeline1.statusCode).equal(200);
+        const resPipeline2 = await es.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+        });
+        expect(resPipeline2.statusCode).equal(200);
       });
       it('should have installed the template components', async function () {
         const res = await es.transport.request({
@@ -85,11 +95,6 @@ export default function (providerContext: FtrProviderContext) {
           id: 'metrics-*',
         });
         expect(resIndexPatternMetrics.id).equal('metrics-*');
-        const resIndexPatternEvents = await kibanaServer.savedObjects.get({
-          type: 'index-pattern',
-          id: 'events-*',
-        });
-        expect(resIndexPatternEvents.id).equal('events-*');
         const resDashboard = await kibanaServer.savedObjects.get({
           type: 'dashboard',
           id: 'sample_dashboard',
@@ -138,6 +143,14 @@ export default function (providerContext: FtrProviderContext) {
           installed_es: [
             {
               id: 'logs-all_assets.test_logs-0.1.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.1.0-pipeline1',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.1.0-pipeline2',
               type: 'ingest_pipeline',
             },
             {
@@ -200,6 +213,26 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
         expect(res.statusCode).equal(404);
+        const resPipeline1 = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resPipeline1.statusCode).equal(404);
+        const resPipeline2 = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resPipeline2.statusCode).equal(404);
       });
       it('should have uninstalled the kibana assets', async function () {
         let resDashboard;
