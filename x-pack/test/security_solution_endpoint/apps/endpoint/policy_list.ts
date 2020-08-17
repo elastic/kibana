@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('policyListPage');
     });
     it('displays page title', async () => {
-      const policyTitle = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
+      const policyTitle = await testSubjects.getVisibleText('header-page-title');
       expect(policyTitle).to.equal('Policies');
     });
     it('shows header create policy button', async () => {
