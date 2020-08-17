@@ -41,9 +41,9 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => (
       </>
     ) : null}
 
-    <section className="homManageData" aria-labelledby="home.manageData.sectionTitle">
+    <section className="homManageData" aria-labelledby="homManageData__title">
       <EuiTitle size="s">
-        <h2>
+        <h2 id="homManageData__title">
           <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Manage your data" />
         </h2>
       </EuiTitle>
