@@ -18,9 +18,6 @@ interface Props extends ProcessorsContextProps {
 
 export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
   children,
-  links,
-  api,
-  toasts,
   onUpdate,
   value,
   onFlyoutOpen,
@@ -29,9 +26,6 @@ export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
     <TestPipelineContextProvider>
       <PipelineProcessorsContextProvider
         onFlyoutOpen={onFlyoutOpen}
-        links={links}
-        api={api}
-        toasts={toasts}
         onUpdate={onUpdate}
         value={value}
       >

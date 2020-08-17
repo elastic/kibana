@@ -5,3 +5,4 @@
  */
 
 export { getPublicUrl } from './get_enterprise_search_url';
+export { ExternalUrl, IExternalUrl } from './generate_external_url';

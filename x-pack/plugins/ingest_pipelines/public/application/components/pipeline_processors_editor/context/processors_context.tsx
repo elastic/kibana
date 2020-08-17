@@ -15,10 +15,7 @@ import React, {
   useRef,
 } from 'react';
 
-import { NotificationsSetup } from 'src/core/public';
-
 import { Processor } from '../../../../../common/types';
-import { ApiService } from '../../../services';
 
 import {
   EditorMode,
@@ -27,7 +24,6 @@ import {
   OnUpdateHandlerArg,
   ContextValue,
   ContextValueState,
-  Links,
   ProcessorInternal,
 } from '../types';
 
@@ -53,9 +49,6 @@ import { useTestPipelineContext } from './test_pipeline_context';
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
 export interface Props {
-  links: Links;
-  api: ApiService;
-  toasts: NotificationsSetup['toasts'];
   value: {
     processors: Processor[];
     onFailure?: Processor[];
@@ -68,9 +61,6 @@ export interface Props {
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
-  links,
-  api,
-  toasts,
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
   onFlyoutOpen,
@@ -225,9 +215,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   return (
     <PipelineProcessorsContext.Provider
       value={{
-        links,
-        api,
-        toasts,
         onTreeAction,
         state,
       }}

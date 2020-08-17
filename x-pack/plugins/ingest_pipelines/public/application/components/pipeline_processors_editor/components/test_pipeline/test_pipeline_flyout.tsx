@@ -17,7 +17,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { usePipelineProcessorsContext, useTestPipelineContext } from '../../context';
+import { useKibana } from '../../../../../shared_imports';
+import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
 import { Document } from '../../types';
 import { DeserializeResult } from '../../deserialize';
@@ -40,7 +41,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   activeTab,
   processors,
 }) => {
-  const { api, toasts } = usePipelineProcessorsContext();
+  const { services } = useKibana();
 
   const {
     testPipelineData,
@@ -61,7 +62,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       setIsExecuting(true);
       setExecuteError(null);
 
-      const { error, data: currentTestOutput } = await api.simulatePipeline({
+      const { error, data: currentTestOutput } = await services.api.simulatePipeline({
         documents,
         verbose,
         pipeline: { ...serializedProcessors },
@@ -85,7 +86,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         },
       });
 
-      toasts.addSuccess(
+      services.notifications.toasts.addSuccess(
         i18n.translate('xpack.ingestPipelines.testPipelineFlyout.successNotificationText', {
           defaultMessage: 'Pipeline executed',
         }),
@@ -96,7 +97,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
       setSelectedTab('output');
     },
-    [api, processors, setCurrentTestPipelineData, toasts]
+    [services.api, processors, setCurrentTestPipelineData, services.notifications.toasts]
   );
 
   let tabContent;

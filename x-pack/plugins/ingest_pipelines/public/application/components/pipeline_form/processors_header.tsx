@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { useKibana } from '../../../shared_imports';
+
 import {
   usePipelineProcessorsContext,
   useTestPipelineContext,
@@ -30,10 +32,10 @@ export interface Props {
 
 export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const {
-    links,
     state: { processors },
   } = usePipelineProcessorsContext();
   const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const { services } = useKibana();
 
   const {
     testOutput,
@@ -85,7 +87,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={links.esDocsBasePath + '/ingest-processors.html'}
+                    href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
                     target="_blank"
                     external
                   >

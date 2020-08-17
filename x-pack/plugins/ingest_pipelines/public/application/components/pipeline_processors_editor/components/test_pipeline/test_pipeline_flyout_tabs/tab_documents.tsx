@@ -16,9 +16,10 @@ import {
   JsonEditorField,
   Form,
   useForm,
+  useKibana,
 } from '../../../../../../shared_imports';
 
-import { usePipelineProcessorsContext, TestPipelineContext } from '../../../context';
+import { TestPipelineContext } from '../../../context';
 import { Document } from '../../../types';
 
 import { documentsSchema } from './documents_schema';
@@ -42,7 +43,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   processors,
   testPipelineData,
 }) => {
-  const { links } = usePipelineProcessorsContext();
+  const { services } = useKibana();
 
   const {
     config: { documents: cachedDocuments },
@@ -81,7 +82,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
             values={{
               learnMoreLink: (
                 <EuiLink
-                  href={`${links.esDocsBasePath}/simulate-pipeline-api.html`}
+                  href={`${services.documentation.getEsDocsBasePath()}/simulate-pipeline-api.html`}
                   target="_blank"
                   external
                 >
