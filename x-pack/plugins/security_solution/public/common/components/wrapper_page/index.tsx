@@ -13,7 +13,7 @@ import { useFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
-const Wrapper = styled.div<{ noTimeline?: boolean }>`
+const Wrapper = styled.div`
   padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
 
   &.siemWrapperPage--restrictWidthDefault,
@@ -56,6 +56,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
   style,
   noPadding,
   noTimeline,
+  ...otherProps
 }) => {
   const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
   useEffect(() => {
@@ -80,7 +81,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
   }
 
   return (
-    <Wrapper className={classes} style={customStyle || style}>
+    <Wrapper className={classes} style={customStyle || style} {...otherProps}>
       {children}
       <AppGlobalStyle />
     </Wrapper>
