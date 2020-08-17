@@ -56,7 +56,7 @@ xpack.security.encryptionKey: "something_at_least_32_characters"
 For more information, see <<security-settings-kb,Security settings in {kib}>>.
 --
 
-. Configure {kib}'s session expiration settings. We strongly recommend setting both idle timeout and lifespan settings:
+. Configure {kib}'s session expiration settings. Set both the idle timeout and lifespan settings:
 +
 --
 [source,yaml]
