@@ -75,7 +75,7 @@ project {
        val ciGroups = (1..10).map { DefaultCiGroup(it, DefaultBuild) }
 
        buildType {
-         id("CIGroups_Composite")
+         id("Default_CIGroups_Composite")
          name = "CI Groups"
          type = BuildTypeSettings.Type.COMPOSITE
 
