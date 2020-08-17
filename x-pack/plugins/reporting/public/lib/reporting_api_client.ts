@@ -189,7 +189,7 @@ export class ReportingAPIClient {
    * Diagnostic-related API calls
    */
   public verifyScreenCapture = (): Promise<DiagnoseResponse> =>
-    this.http.post(`${API_BASE_URL}/diagnose/screen-capture`, {
+    this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
 }

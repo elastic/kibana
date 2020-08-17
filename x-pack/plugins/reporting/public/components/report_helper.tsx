@@ -25,7 +25,7 @@ interface Props {
   apiClient: ReportingAPIClient;
 }
 
-type resultStatus = 'danger' | 'incomplete' | 'complete';
+type ResultStatus = 'danger' | 'incomplete' | 'complete';
 
 enum statuses {
   configStatus = 'configStatus',
@@ -35,9 +35,9 @@ enum statuses {
 
 interface State {
   isFlyoutVisible: boolean;
-  configStatus: resultStatus;
-  chromeStatus: resultStatus;
-  screenshotStatus: resultStatus;
+  configStatus: ResultStatus;
+  chromeStatus: ResultStatus;
+  screenshotStatus: ResultStatus;
   help: string[];
   logs: string;
   isBusy: boolean;
@@ -76,7 +76,7 @@ export const ReportHelper = ({ apiClient }: Props) => {
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
   const apiWrapper = (apiMethod: () => Promise<DiagnoseResponse>, statusProp: statuses) => () => {
-    setState({ isBusy: true });
+    setState({ isBusy: true, [statusProp]: 'incomplete' });
     apiMethod()
       .then((response) => {
         setState({
@@ -181,17 +181,21 @@ export const ReportHelper = ({ apiClient }: Props) => {
       title: "Whoops! Looks like something isn't working properly.",
       children: (
         <Fragment>
-          <EuiCallOut color="danger" iconType="alert">
-            <p>{help.join('\n')}</p>
-          </EuiCallOut>
-          {logs && (
+          {help.length ? (
+            <Fragment>
+              <EuiCallOut color="danger" iconType="alert">
+                <p>{help.join('\n')}</p>
+              </EuiCallOut>
+            </Fragment>
+          ) : null}
+          {logs.length ? (
             <Fragment>
               <EuiSpacer />
               <p>Here are some more details about the issue:</p>
               <EuiSpacer />
               <EuiCodeBlock>{logs}</EuiCodeBlock>
             </Fragment>
-          )}
+          ) : null}
         </Fragment>
       ),
       status: 'danger',
