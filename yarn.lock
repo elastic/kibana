@@ -1229,10 +1229,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@27.4.0":
-  version "27.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-27.4.0.tgz#4a96a6ac827f53c879451a3eeec093287fcc7255"
-  integrity sha512-wMr52SAWu5MwKUAIMb5Vfz2mw7VwKWuNxBaMlnmBKTo0WK7Trlp8cUyVTVZYy96p1MKyqDvKH6FxVDJ8JZVb6w==
+"@elastic/eui@27.4.1":
+  version "27.4.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-27.4.1.tgz#9803f6f6c6997c769720381f521e5319ef07a599"
+  integrity sha512-eGztErFlvkwI4BFxDs6tFBGFiN15NQdJdRHvSi5caOQFGabuR8XCRNUWcNFHlwKVJaDaGsJRuwbbSLh9XdWubQ==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.116"
