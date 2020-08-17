@@ -72,7 +72,6 @@ export function HomeApp({ directories, solutions }) {
     );
   };
 
-  return (
     <I18nProvider>
       <Router>
         <Switch>
