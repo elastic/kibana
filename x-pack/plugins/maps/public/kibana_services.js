@@ -33,8 +33,8 @@ export const getInspector = () => {
 
 let fileUploadPlugin;
 export const setFileUpload = (fileUpload) => (fileUploadPlugin = fileUpload);
-export const getFileUploadComponent = () => {
-  return fileUploadPlugin.JsonUploadAndParse;
+export const getFileUploadComponent = async () => {
+  return await fileUploadPlugin.getFileUploadComponent();
 };
 
 let uiSettings;
