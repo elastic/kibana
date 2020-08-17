@@ -49,7 +49,7 @@ export const fieldList = (
   specs: FieldSpec[] = [],
   shortDotsEnable = false,
   onNotification = () => {}
-) => {
+): any => {
   class FldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
