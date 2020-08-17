@@ -14,7 +14,9 @@ import {
 import { createTimeInterval } from '../../../../public/lib/time_interval';
 import { CustomInterval } from '../../../../public/components/workpad_header/view_menu/custom_interval';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type onSetAutoplayFn = (autoplay: boolean) => void;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type onSetIntervalFn = (interval: string) => void;
 
 export interface Props {

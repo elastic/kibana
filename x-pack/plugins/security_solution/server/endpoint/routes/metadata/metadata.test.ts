@@ -27,7 +27,7 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes } from './index';
+import { registerEndpointRoutes, endpointFilters } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -170,7 +170,7 @@ describe('test endpoint route', () => {
           },
         ],
 
-        filter: 'not host.ip:10.140.73.246',
+        filters: { kql: 'not host.ip:10.140.73.246' },
       },
     });
 
@@ -392,6 +392,53 @@ describe('test endpoint route', () => {
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
       expect(mockResponse.customError).toBeCalled();
     });
+  });
+});
+
+describe('Filters Schema Test', () => {
+  it('accepts a single host status', () => {
+    expect(
+      endpointFilters.validate({
+        host_status: ['error'],
+      })
+    ).toBeTruthy();
+  });
+
+  it('accepts multiple host status filters', () => {
+    expect(
+      endpointFilters.validate({
+        host_status: ['offline', 'unenrolling'],
+      })
+    ).toBeTruthy();
+  });
+
+  it('rejects invalid statuses', () => {
+    expect(() =>
+      endpointFilters.validate({
+        host_status: ['foobar'],
+      })
+    ).toThrowError();
+  });
+
+  it('accepts a KQL string', () => {
+    expect(
+      endpointFilters.validate({
+        kql: 'whatever.field',
+      })
+    ).toBeTruthy();
+  });
+
+  it('accepts KQL + status', () => {
+    expect(
+      endpointFilters.validate({
+        kql: 'thing.var',
+        host_status: ['online'],
+      })
+    ).toBeTruthy();
+  });
+
+  it('accepts no filters', () => {
+    expect(endpointFilters.validate({})).toBeTruthy();
   });
 });
 

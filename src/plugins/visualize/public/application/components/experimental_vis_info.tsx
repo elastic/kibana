@@ -26,12 +26,20 @@ export const InfoComponent = () => {
     <>
       <FormattedMessage
         id="visualize.experimentalVisInfoText"
-        defaultMessage="This visualization is marked as experimental. Have feedback? Please create an issue in"
-      />{' '}
-      <EuiLink external href="https://github.com/elastic/kibana/issues/new/choose" target="_blank">
-        GitHub
-      </EuiLink>
-      {'.'}
+        defaultMessage="This visualization is experimental and is not subject to the support SLA of official GA features.
+          For feedback, please create an issue in {githubLink}."
+        values={{
+          githubLink: (
+            <EuiLink
+              external
+              href="https://github.com/elastic/kibana/issues/new/choose"
+              target="_blank"
+            >
+              GitHub
+            </EuiLink>
+          ),
+        }}
+      />
     </>
   );
 

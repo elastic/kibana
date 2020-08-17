@@ -9,6 +9,9 @@ import axios from 'axios';
 import { createExternalService, getValueTextContent, formatUpdateRequest } from './service';
 import * as utils from '../lib/axios_utils';
 import { ExternalService } from '../case/types';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
 jest.mock('../lib/axios_utils', () => {
@@ -72,10 +75,13 @@ describe('IBM Resilient service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
-    service = createExternalService({
-      config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
-      secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
-    });
+    service = createExternalService(
+      {
+        config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
+        secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
+      },
+      logger
+    );
   });
 
   afterAll(() => {
@@ -138,37 +144,49 @@ describe('IBM Resilient service', () => {
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: null, orgId: '201' },
-          secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: null, orgId: '201' },
+            secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without orgId', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', orgId: null },
-          secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', orgId: null },
+            secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without username', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', orgId: '201' },
-          secrets: { apiKeyId: '', apiKeySecret: 'secret' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', orgId: '201' },
+            secrets: { apiKeyId: '', apiKeySecret: 'secret' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without password', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', orgId: '201' },
-          secrets: { apiKeyId: '', apiKeySecret: undefined },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', orgId: '201' },
+            secrets: { apiKeyId: '', apiKeySecret: undefined },
+          },
+          logger
+        )
       ).toThrow();
     });
   });
@@ -197,6 +215,7 @@ describe('IBM Resilient service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         params: {
           text_content_output_format: 'objects_convert',
@@ -256,6 +275,7 @@ describe('IBM Resilient service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents',
+        logger,
         method: 'post',
         data: {
           name: 'title',
@@ -311,6 +331,7 @@ describe('IBM Resilient service', () => {
       // The second call to the API is the update call.
       expect(requestMock.mock.calls[1][0]).toEqual({
         axios,
+        logger,
         method: 'patch',
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         data: {
@@ -392,7 +413,9 @@ describe('IBM Resilient service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'post',
+        proxySettings: undefined,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
         data: {
           text: {

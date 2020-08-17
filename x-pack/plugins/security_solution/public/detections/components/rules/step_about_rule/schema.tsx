@@ -96,7 +96,7 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',
       {
-        defaultMessage: 'Associate rule to Global Endpoint Exception List',
+        defaultMessage: 'Add existing Endpoint exceptions to the rule',
       }
     ),
     labelAppend: OptionalFieldLabel,

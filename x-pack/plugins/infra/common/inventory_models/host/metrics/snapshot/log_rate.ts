@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const logRate: SnapshotModel = {
+export const logRate: MetricsUIAggregation = {
   count: {
     bucket_script: {
       buckets_path: { count: '_count' },

@@ -180,7 +180,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <EuiFlexGrid>
+    <EuiFlexGrid data-test-subj="monitoringSetupModeAlertBadges">
       {badges.map((badge, index) => (
         <EuiFlexItem key={index} grow={false}>
           {badge}

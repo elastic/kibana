@@ -13,6 +13,7 @@ import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { packageConfigService, appContextService } from '../..';
+import { splitPkgKey } from '../registry';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -21,7 +22,7 @@ export async function removeInstallation(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
-  const [pkgName] = pkgkey.split('-');
+  const { pkgName } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false)
@@ -102,10 +103,12 @@ async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): P
 
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
-  installedObjects: AssetReference[]
+  installedRefs: AssetReference[]
 ) {
+  if (!installedRefs.length) return;
+
   const logger = appContextService.getLogger();
-  const deletePromises = installedObjects.map(({ id, type }) => {
+  const deletePromises = installedRefs.map(({ id, type }) => {
     const assetType = type as AssetType;
 
     if (savedObjectTypes.includes(assetType)) {

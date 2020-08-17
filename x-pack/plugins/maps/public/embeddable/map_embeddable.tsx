@@ -81,6 +81,8 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       initialInput,
       {
         editUrl: config.editUrl,
+        editApp: config.editApp,
+        editPath: config.editPath,
         indexPatterns: config.indexPatterns,
         editable: config.editable,
         defaultTitle: config.title,

@@ -91,5 +91,13 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
         5000
       );
     },
+    async waitUntilDataIsLoaded() {
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('data-missing')) {
+          await testSubjects.click('superDatePickerApplyTimeButton');
+        }
+        await testSubjects.missingOrFail('data-missing');
+      });
+    },
   };
 }

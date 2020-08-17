@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-empty-interface */
-
 import * as runtimeTypes from 'io-ts';
 
 import { stringEnum, unionWithNullType } from '../../utility_types';
@@ -257,9 +255,9 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   updatedBy: unionWithNullType(runtimeTypes.string),
 });
 
-export interface SavedTimeline extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
+export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
-export interface SavedTimelineNote extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
+export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
 /*
  *  Timeline IDs
@@ -317,8 +315,9 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
 ]);
 
-export interface TimelineSavedObject
-  extends runtimeTypes.TypeOf<typeof TimelineSavedToReturnObjectRuntimeType> {}
+export type TimelineSavedObject = runtimeTypes.TypeOf<
+  typeof TimelineSavedToReturnObjectRuntimeType
+>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -342,9 +341,8 @@ export const TimelineErrorResponseType = runtimeTypes.type({
   message: runtimeTypes.string,
 });
 
-export interface TimelineErrorResponse
-  extends runtimeTypes.TypeOf<typeof TimelineErrorResponseType> {}
-export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
+export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
+export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -355,8 +353,7 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
   data: TimelineSavedToReturnObjectRuntimeType,
 });
 
-export interface AllTimelineSavedObject
-  extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
+export type AllTimelineSavedObject = runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType>;
 
 /**
  * Import/export timelines

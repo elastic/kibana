@@ -26,12 +26,12 @@ import {
 } from '../../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
+import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -86,7 +86,9 @@ test('Is not compatible when container is in view mode', async () => {
     () => null
   );
   container.updateInput({ viewMode: ViewMode.VIEW });
-  expect(await addPanelAction.isCompatible({ embeddable: container })).toBe(false);
+  expect(
+    await addPanelAction.isCompatible({ embeddable: container, trigger: defaultTrigger })
+  ).toBe(false);
 });
 
 test('Is not compatible when embeddable is not a container', async () => {
@@ -95,7 +97,7 @@ test('Is not compatible when embeddable is not a container', async () => {
 
 test('Is compatible when embeddable is a parent and in edit mode', async () => {
   container.updateInput({ viewMode: ViewMode.EDIT });
-  expect(await action.isCompatible({ embeddable: container })).toBe(true);
+  expect(await action.isCompatible({ embeddable: container, trigger: defaultTrigger })).toBe(true);
 });
 
 test('Execute throws an error when called with an embeddable that is not a container', async () => {
@@ -109,6 +111,7 @@ test('Execute throws an error when called with an embeddable that is not a conta
         },
         {} as any
       ),
+      trigger: defaultTrigger,
     } as any);
   }
   await expect(check()).rejects.toThrow(Error);
@@ -117,6 +120,7 @@ test('Execute does not throw an error when called with a compatible container', 
   container.updateInput({ viewMode: ViewMode.EDIT });
   await action.execute({
     embeddable: container,
+    trigger: defaultTrigger,
   });
 });
 

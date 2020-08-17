@@ -42,7 +42,6 @@ const Tab = ({ title, pathname, app }: TabConfiguration) => {
       children={({ match, history }) => {
         return (
           <TabContainer className="euiTab">
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink {...linkProps} data-test-subj={`infrastructureNavLink_${pathname}`}>
               <EuiTab onClick={noop} isSelected={match !== null}>
                 {title}
