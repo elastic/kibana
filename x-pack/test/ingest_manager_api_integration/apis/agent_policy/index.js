@@ -6,6 +6,6 @@
 
 export default function loadTests({ loadTestFile }) {
   describe('Ingest Manager Endpoints', () => {
-    loadTestFile(require.resolve('./agent_config'));
+    loadTestFile(require.resolve('./agent_policy'));
   });
 }

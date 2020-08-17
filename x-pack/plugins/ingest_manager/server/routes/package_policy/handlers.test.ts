@@ -17,7 +17,7 @@ import { packagePolicyService } from '../../services';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
-jest.mock('../../services/package_config', (): {
+jest.mock('../../services/package_policy', (): {
   packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
 } => {
   return {

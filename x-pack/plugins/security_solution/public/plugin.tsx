@@ -43,7 +43,7 @@ import {
   APP_CASES_PATH,
   APP_PATH,
 } from '../common/constants';
-import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_config';
+import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
