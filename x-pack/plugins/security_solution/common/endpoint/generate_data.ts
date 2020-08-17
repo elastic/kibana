@@ -27,6 +27,7 @@ import {
   EsAssetReference,
   InstallationStatus,
   KibanaAssetReference,
+  InstallStatus,
 } from '../../../ingest_manager/common/types/models';
 
 export type Event = AlertEvent | EndpointEvent;
@@ -1158,6 +1159,9 @@ export class EndpointDocGenerator {
           version: '0.5.0',
           internal: false,
           removable: false,
+          install_version: '0.5.0',
+          install_status: InstallStatus.installed,
+          install_started_at: '2020-06-24T14:41:23.098Z',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',
