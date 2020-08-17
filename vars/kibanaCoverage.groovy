@@ -113,6 +113,7 @@ cat << EOF > src/dev/code_coverage/www/index_partial_2.html
   </footer>
 </div>
 <script src="./stat_data.js"></script>
+<script src="./index.js"></script>
 </body>
 </html>
 EOF
