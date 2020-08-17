@@ -90,7 +90,7 @@ export interface SearchSourceDependencies {
   uiSettings: CoreStart['uiSettings'];
   search: ISearchGeneric;
   legacySearch: ISearchStartLegacy;
-  injectedMetadata: CoreStart['injectedMetadata'];
+  esShardTimeout: number;
 }
 
 /** @public **/
@@ -204,10 +204,10 @@ export class SearchSource {
    * @return {Observable<SearchResponse<unknown>>}
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
-    const { search, injectedMetadata, uiSettings } = this.dependencies;
+    const { search, esShardTimeout, uiSettings } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
-      injectedMetadata,
+      esShardTimeout,
       uiSettings,
     });
 
@@ -221,8 +221,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { injectedMetadata, legacySearch, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+    const { esShardTimeout, legacySearch, uiSettings } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,

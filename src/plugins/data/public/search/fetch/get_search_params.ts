@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient, CoreStart } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { UI_SETTINGS, ISearchRequestParams } from '../../../common';
 import { SearchRequest } from './types';
 
@@ -55,12 +55,14 @@ export function getTimeout(esShardTimeout: number) {
   return esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined;
 }
 
+/** @public */
+// TODO: Could provide this on runtime contract with dependencies
+// already wired up.
 export function getSearchParamsFromRequest(
   searchRequest: SearchRequest,
-  dependencies: { injectedMetadata: CoreStart['injectedMetadata']; uiSettings: IUiSettingsClient }
+  dependencies: { esShardTimeout: number; uiSettings: IUiSettingsClient }
 ): ISearchRequestParams {
-  const { injectedMetadata, uiSettings } = dependencies;
-  const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+  const { esShardTimeout, uiSettings } = dependencies;
   const searchParams = getSearchParams(uiSettings, esShardTimeout);
 
   return {

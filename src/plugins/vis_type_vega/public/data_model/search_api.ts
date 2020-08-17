@@ -51,8 +51,10 @@ export class SearchAPI {
       searchRequests.map((request) => {
         const requestId = request.name;
         const params = getSearchParamsFromRequest(request, {
+          esShardTimeout: this.dependencies.injectedMetadata.getInjectedVar(
+            'esShardTimeout'
+          ) as number,
           uiSettings: this.dependencies.uiSettings,
-          injectedMetadata: this.dependencies.injectedMetadata,
         });
 
         if (this.inspectorAdapters) {
