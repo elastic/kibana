@@ -75,8 +75,9 @@ export const enhancedEsSearchStrategyProvider = (
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.info(`cancel ${id}`);
-    await context.core.elasticsearch.client.asCurrentUser.asyncSearch.delete({
-      id,
+    await context.core.elasticsearch.client.asCurrentUser.transport.request({
+      method: 'DELETE',
+      path: `/_async_search/${id}`,
     });
   };
 
@@ -97,6 +98,9 @@ async function asyncSearch(
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
 
+  const method = request.id ? 'GET' : 'POST';
+  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
+
   // Only report partial results every 64 shards; this should be reduced when we actually display partial results
   const batchedReduceSize = request.id ? undefined : 64;
 
@@ -105,19 +109,18 @@ async function asyncSearch(
     keepAlive: '1m', // Extend the TTL for this search request by one minute
   };
 
-  let esResponse;
-  if (request.id) {
-    esResponse = await caller.asyncSearch.get({
-      id: request.id,
-      ...asyncOptions,
-    });
-  } else {
-    esResponse = await caller.asyncSearch.submit({
-      ...asyncOptions,
-      ...(batchedReduceSize && { batchedReduceSize }),
-      ...queryParams,
-    });
-  }
+  const querystring = toSnakeCase({
+    ...asyncOptions,
+    ...(batchedReduceSize && { batchedReduceSize }),
+    ...queryParams,
+  });
+
+  const esResponse = await caller.transport.request({
+    method,
+    path,
+    body,
+    querystring,
+  });
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, response, is_partial, is_running } = esResponse.body;
