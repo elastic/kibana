@@ -6,7 +6,13 @@
 
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
-import { modelIdSchema, optionalModelIdSchema } from './schemas/inference_schema';
+import {
+  getInferenceQuerySchema,
+  modelIdSchema,
+  optionalModelIdSchema,
+} from './schemas/inference_schema';
+import { modelsProvider } from '../models/data_frame_analytics';
+import { InferenceConfigResponse } from '../../common/types/inference';
 
 export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
@@ -21,6 +27,7 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/inference/{modelId?}',
       validate: {
         params: optionalModelIdSchema,
+        query: getInferenceQuerySchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
@@ -29,11 +36,22 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await client.asInternalUser.ml.getTrainedModels({
+        const { with_pipelines: withPipelines, ...query } = request.query;
+        const { body } = await client.asInternalUser.ml.getTrainedModels<InferenceConfigResponse>({
+          ...query,
           ...(modelId ? { model_id: modelId } : {}),
         });
+        const result = body.trained_model_configs;
+        if (withPipelines) {
+          const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
+            result.map(({ model_id: id }: { model_id: string }) => id)
+          );
+          for (const model of result) {
+            model.pipelines = pipelinesResponse.get(model.model_id)!;
+          }
+        }
         return response.ok({
-          body,
+          body: result,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -93,27 +111,9 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { modelId } = request.params;
-
-        const modelIdsMap = new Map<string, Record<string, any>>(
-          modelId.split(',').map((id: string) => [id, {}])
-        );
-
-        const { body } = await client.asCurrentUser.ingest.getPipeline();
-
-        for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
-          const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
-
-          for (const processor of processors) {
-            const id = processor.inference?.model_id;
-            const obj = modelIdsMap.get(id);
-            if (obj) {
-              obj[pipelineName] = pipelineDefinition;
-            }
-          }
-        }
-
+        const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
         return response.ok({
-          body: [...modelIdsMap.entries()].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+          body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
         });
       } catch (e) {
         return response.customError(wrapError(e));

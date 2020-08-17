@@ -60,9 +60,22 @@ export interface ModelConfigResponse {
   tags: string;
   version: string;
   inference_config?: Record<string, any>;
+  pipelines?: Record<string, PipelineDefinition> | null;
+}
+
+export interface PipelineDefinition {
+  processors?: Array<Record<string, any>>;
+  description?: string;
 }
 
 export interface ModelPipelines {
   model_id: string;
-  pipelines: Record<string, { processors?: Array<Record<string, any>>; description?: string }>;
+  pipelines: Record<string, PipelineDefinition>;
+}
+
+/**
+ * Get inference response from the ES endpoint
+ */
+export interface InferenceConfigResponse {
+  trained_model_configs: ModelConfigResponse[];
 }

@@ -5,6 +5,7 @@
  */
 
 import { useMemo } from 'react';
+import { HttpFetchQuery } from 'kibana/public';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
@@ -20,15 +21,13 @@ export interface InferenceQueryParams {
   include_model_definition?: boolean;
   size?: number;
   tags?: string;
+  // Custom kibana endpoint query params
+  with_pipelines?: boolean;
 }
 
 export interface InferenceStatsQueryParams {
   from?: number;
   size?: number;
-}
-
-export interface InferenceConfigResponse {
-  trained_model_configs: ModelConfigResponse[];
 }
 
 export interface IngestStats {
@@ -64,9 +63,10 @@ export function inferenceApiProvider(httpService: HttpService) {
         model = modelId.join(',');
       }
 
-      return httpService.http<InferenceConfigResponse>({
+      return httpService.http<ModelConfigResponse[]>({
         path: `${apiBasePath}/inference${model && `/${model}`}`,
         method: 'GET',
+        ...(params ? { query: params as HttpFetchQuery } : {}),
       });
     },
 

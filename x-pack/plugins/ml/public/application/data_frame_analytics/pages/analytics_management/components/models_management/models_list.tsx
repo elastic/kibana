@@ -48,7 +48,7 @@ type Stats = Omit<TrainedModelStat, 'model_id'>;
 export type ModelItem = ModelConfigResponse & {
   type?: string;
   stats?: Stats;
-  pipelines?: ModelPipelines['pipelines'];
+  pipelines?: ModelPipelines['pipelines'] | null;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -88,9 +88,11 @@ export const ModelsList: FC = () => {
    */
   async function fetchData() {
     try {
-      const response = await inferenceApiService.getInferenceModel();
+      const response = await inferenceApiService.getInferenceModel(undefined, {
+        with_pipelines: true,
+      });
       setItems(
-        response.trained_model_configs.map((v) => ({
+        response.map((v) => ({
           ...v,
           ...(typeof v.inference_config === 'object'
             ? { type: Object.keys(v.inference_config)[0] }
@@ -119,28 +121,6 @@ export const ModelsList: FC = () => {
       },
     };
   }, [items]);
-
-  const fetchAssociatedPipelines = useCallback(
-    async (models: ModelItem[]) => {
-      try {
-        const pipelines = await inferenceApiService.getInferenceModelPipelines(
-          models.map((model) => model.model_id)
-        );
-
-        for (const { model_id: id, pipelines: modelPipelines } of pipelines) {
-          const model = models.find((m) => m.model_id === id);
-          model!.pipelines = modelPipelines;
-        }
-      } catch (error) {
-        toasts.addError(new Error(error.body.message), {
-          title: i18n.translate('xpack.ml.inference.modelsList.fetchModelPipelinesErrorMessage', {
-            defaultMessage: 'Failed to fetch associated pipelines',
-          }),
-        });
-      }
-    },
-    [items]
-  );
 
   /**
    * Fetches models stats and update the original object
@@ -276,6 +256,9 @@ export const ModelsList: FC = () => {
       onClick: async (model) => {
         await prepareModelsForDeletion([model]);
       },
+      enabled: (item) => {
+        return !item.pipelines;
+      },
     },
   ];
 
@@ -285,7 +268,6 @@ export const ModelsList: FC = () => {
       delete itemIdToExpandedRowMapValues[item.model_id];
     } else {
       await fetchModelsStats([item]);
-      await fetchAssociatedPipelines([item]);
       itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -433,6 +415,7 @@ export const ModelsList: FC = () => {
   };
 
   const selection: EuiTableSelectionType<ModelItem> = {
+    selectable: (item) => !item.pipelines,
     onSelectionChange: (selectedItems) => {
       setSelectedModels(selectedItems);
     },
