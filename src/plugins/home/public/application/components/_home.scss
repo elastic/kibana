@@ -35,7 +35,11 @@ $homePageWidth: 1200px;
 .homPageHeader {
   margin: 0 auto;
   max-width: $homePageWidth;
-  padding: $euiSizeXL $euiSize $euiSizeXXL;
+  padding: $euiSizeXL $euiSize;
+
+  .homPageHeaderContainer--hasSolutions & {
+    padding-bottom: $euiSizeXL + $euiSizeL;
+  }
 }
 
 .homPageHeader__titleWrapper {

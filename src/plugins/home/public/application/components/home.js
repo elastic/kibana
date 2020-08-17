@@ -141,7 +141,13 @@ export class Home extends Component {
         data-test-subj="homeApp"
         aria-labelledby="homPageHeader__title"
       >
-        <div className="homPageHeaderContainer">
+        <div
+          className={`homPageHeaderContainer ${
+            solutions.length
+              ? 'homPageHeaderContainer--hasSolutions'
+              : 'homPageHeaderContainer--noSolutions'
+          }`}
+        >
           <header className="homPageHeader">
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem className="homPageHeader__titleWrapper">
@@ -151,6 +157,7 @@ export class Home extends Component {
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
                   <EuiFlexItem className="homPageHeader__menuItem">
@@ -160,6 +167,7 @@ export class Home extends Component {
                       })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
+
                   {stackManagement ? (
                     <EuiFlexItem className="homPageHeader__menuItem">
                       <EuiButtonEmpty
@@ -172,6 +180,7 @@ export class Home extends Component {
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : null}
+
                   {devTools ? (
                     <EuiFlexItem className="homPageHeader__menuItem">
                       <EuiButtonEmpty
