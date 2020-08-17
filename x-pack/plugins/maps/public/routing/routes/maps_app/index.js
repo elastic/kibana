@@ -29,7 +29,6 @@ import {
   updateFlyout,
   enableFullScreen,
   openMapSettings,
-  removePreviewLayers,
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getMapsCapabilities } from '../../../kibana_services';
@@ -73,11 +72,6 @@ function mapDispatchToProps(dispatch) {
       dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(setReadOnly(!getMapsCapabilities().save));
-    },
-    closeFlyout: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(removePreviewLayers());
     },
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
