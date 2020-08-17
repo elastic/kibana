@@ -12,4 +12,6 @@ export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
   enableActionsProxy: true,
+  // use hardcoded port if getPort doesn't return a free port
+  // proxyPort: 3232,
 });

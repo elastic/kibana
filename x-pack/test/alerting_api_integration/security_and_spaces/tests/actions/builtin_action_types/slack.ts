@@ -27,7 +27,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
     // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
-      const availablePort = await getPort({ port: 9000 });
+      const availablePort = await getPort();
       slackServer.listen(availablePort);
       slackSimulatorURL = `http://localhost:${availablePort}`;
 
