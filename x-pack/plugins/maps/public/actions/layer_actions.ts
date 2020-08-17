@@ -41,6 +41,7 @@ import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/d
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { LAYER_TYPE } from '../../common/constants';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -381,12 +382,15 @@ export function clearMissingStyleProperties(layerId: string) {
     }
 
     const style = targetLayer!.getCurrentStyle();
-    if (!style) {
+    if (!style || !('getDescriptorWithMissingStylePropsRemoved' in style)) {
       return;
     }
 
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
-    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(
+    const {
+      hasChanges,
+      nextStyleDescriptor,
+    } = (style as IVectorStyle).getDescriptorWithMissingStylePropsRemoved(
       nextFields,
       getMapColors(getState())
     );

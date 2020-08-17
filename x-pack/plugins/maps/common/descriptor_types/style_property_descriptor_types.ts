@@ -12,7 +12,6 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   STYLE_TYPE,
-  LAYER_STYLE_TYPE,
 } from '../constants';
 
 // Non-static/dynamic options
@@ -194,8 +193,11 @@ export type StyleDescriptor = {
 };
 
 export type VectorStyleDescriptor = StyleDescriptor & {
-  type: LAYER_STYLE_TYPE.VECTOR;
   properties: VectorStylePropertiesDescriptor;
+};
+
+export type HeatmapStyleDescriptor = StyleDescriptor & {
+  colorRampName: string;
 };
 
 export type StylePropertyOptions =

@@ -309,7 +309,7 @@ export class VectorLayer extends AbstractLayer {
   _getSearchFilters(dataFilters, source, style) {
     const fieldNames = [
       ...source.getFieldNames(),
-      ...style.getSourceFieldNames(),
+      ...('getSourceFieldNames' in style ? style.getSourceFieldNames() : []),
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 

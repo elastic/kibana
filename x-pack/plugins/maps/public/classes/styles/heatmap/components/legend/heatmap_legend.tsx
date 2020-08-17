@@ -4,18 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ColorGradient } from './color_gradient';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import { HEATMAP_COLOR_RAMP_LABEL } from '../heatmap_constants';
+import { IField } from '../../../../fields/field';
 
-export class HeatmapLegend extends React.Component {
-  constructor() {
-    super();
-    this.state = { label: '' };
-  }
+interface Props {
+  colorRampName: string;
+  field: IField;
+}
+
+interface State {
+  label: string;
+}
+
+export class HeatmapLegend extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  state: State = { label: '' };
 
   componentDidUpdate() {
     this._loadLabel();

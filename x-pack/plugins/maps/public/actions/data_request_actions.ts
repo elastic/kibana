@@ -42,6 +42,7 @@ import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds, turfBboxToBounds } from '../elasticsearch_geo_utils';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -85,10 +86,12 @@ export function updateStyleMeta(layerId: string | null) {
     }
     const sourceDataRequest = layer.getSourceDataRequest();
     const style = layer.getCurrentStyle();
-    if (!style || !sourceDataRequest) {
+    if (!style || !sourceDataRequest || !('pluckStyleMetaFromSourceDataRequest' in style)) {
       return;
     }
-    const styleMeta = await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+    const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromSourceDataRequest(
+      sourceDataRequest
+    );
     dispatch({
       type: SET_LAYER_STYLE_META,
       layerId,

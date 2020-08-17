@@ -13,7 +13,6 @@ import {
   LINE_STYLES,
   POLYGON_STYLES,
 } from './vector_style_defaults';
-import { AbstractStyle } from '../style';
 import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,
@@ -53,7 +52,7 @@ function getNumericalMbFeatureStateValue(value) {
   return isNaN(valueAsFloat) ? null : valueAsFloat;
 }
 
-export class VectorStyle extends AbstractStyle {
+export class VectorStyle {
   static type = LAYER_STYLE_TYPE.VECTOR;
 
   static createDescriptor(properties = {}, isTimeAware = true) {
@@ -69,7 +68,6 @@ export class VectorStyle extends AbstractStyle {
   }
 
   constructor(descriptor = {}, source, layer) {
-    super();
     descriptor = descriptor === null ? {} : descriptor;
     this._source = source;
     this._layer = layer;
