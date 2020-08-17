@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -30,8 +29,13 @@ export const SplitByFilter = (props) => {
   const { onChange, uiRestrictions, indexPattern } = props;
   const defaults = { filter: { language: getDefaultQueryLanguage(), query: '' } };
   const model = { ...defaults, ...props.model };
+  const queryLanguage = model.filter.language || getDefaultQueryLanguage();
   const htmlId = htmlIdGenerator();
-  const handleSelectChange = createSelectHandler(onChange);
+  const handleSelectChange = (options) => {
+    // On changing the split mode, it also cleans the query
+    onChange({ split_mode: options[0].value, filter: { language: queryLanguage, query: '' } });
+  };
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -46,7 +50,7 @@ export const SplitByFilter = (props) => {
         >
           <GroupBySelect
             value={model.split_mode}
-            onChange={handleSelectChange('split_mode')}
+            onChange={handleSelectChange}
             uiRestrictions={uiRestrictions}
           />
         </EuiFormRow>
@@ -63,7 +67,7 @@ export const SplitByFilter = (props) => {
         >
           <QueryBarWrapper
             query={{
-              language: model.filter.language || getDefaultQueryLanguage(),
+              language: queryLanguage,
               query: model.filter.query || '',
             }}
             onChange={(filter) => onChange({ filter })}
