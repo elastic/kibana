@@ -93,20 +93,27 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { modelId } = request.params;
-        const modelsIds = modelId.split(',');
+
+        const modelIdsMap = new Map<string, Record<string, any>>(
+          modelId.split(',').map((id: string) => [id, {}])
+        );
 
         const { body } = await client.asCurrentUser.ingest.getPipeline();
 
-        const result = Object.entries(body).reduce((acc, [pipelineName, pipelineDefinition]) => {
+        for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
           const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
-          if (processors.some((processor) => modelsIds.includes(processor.inference?.model_id))) {
-            acc[pipelineName] = pipelineDefinition;
+
+          for (const processor of processors) {
+            const id = processor.inference?.model_id;
+            const obj = modelIdsMap.get(id);
+            if (obj) {
+              obj[pipelineName] = pipelineDefinition;
+            }
           }
-          return acc;
-        }, {} as Record<string, any>);
+        }
 
         return response.ok({
-          body: result,
+          body: [...modelIdsMap.entries()].map(([id, pipelines]) => ({ model_id: id, pipelines })),
         });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -61,3 +61,8 @@ export interface ModelConfigResponse {
   version: string;
   inference_config?: Record<string, any>;
 }
+
+export interface ModelPipelines {
+  model_id: string;
+  pipelines: Record<string, { processors?: Array<Record<string, any>>; description?: string }>;
+}

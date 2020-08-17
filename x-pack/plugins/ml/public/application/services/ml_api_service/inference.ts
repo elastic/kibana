@@ -8,7 +8,11 @@ import { useMemo } from 'react';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
-import { ModelConfigResponse, TrainedModelStat } from '../../../../common/types/inference';
+import {
+  ModelConfigResponse,
+  ModelPipelines,
+  TrainedModelStat,
+} from '../../../../common/types/inference';
 
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
@@ -96,7 +100,7 @@ export function inferenceApiProvider(httpService: HttpService) {
         model = modelId.join(',');
       }
 
-      return httpService.http<any>({
+      return httpService.http<ModelPipelines[]>({
         path: `${apiBasePath}/inference/${model}/pipelines`,
         method: 'GET',
       });
