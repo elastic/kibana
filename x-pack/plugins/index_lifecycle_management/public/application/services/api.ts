@@ -12,7 +12,7 @@ import {
   UIM_POLICY_ATTACH_INDEX_TEMPLATE,
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
-} from '../constants';
+} from '../constants/ui_metric';
 
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';

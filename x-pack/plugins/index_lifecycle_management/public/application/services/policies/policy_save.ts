@@ -10,7 +10,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { savePolicy as savePolicyApi } from '../api';
 import { showApiError } from '../api_errors';
 import { getUiMetricsForPhases, trackUiMetric } from '../ui_metric';
-import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
+import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants/ui_metric';
 import { toasts } from '../notification';
 import { Policy, PolicyFromES } from './types';
 import { serializePolicy } from './policy_serialization';
