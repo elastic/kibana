@@ -34,12 +34,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
 
   describe("when the second child node's first button has been clicked", () => {
     beforeEach(async () => {
-      const node = await simulator.resolveWrapper(() =>
-        simulator.processNodeElements({ entityID: entityIDs.secondChild }).find('button')
+      const button = await simulator.resolveWrapper(() =>
+        simulator.processNodePrimaryButton(entityIDs.secondChild)
       );
-      if (node) {
+      if (button) {
         // Click the first button under the second child element.
-        node.first().simulate('click');
+        button.simulate('click');
       }
     });
     const expectedSearch = urlSearch(resolverComponentInstanceID, {
@@ -68,12 +68,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       });
       describe("when the user clicks the second child node's button again", () => {
         beforeEach(async () => {
-          const node = await simulator.resolveWrapper(() =>
-            simulator.processNodeElements({ entityID: entityIDs.secondChild }).find('button')
+          const button = await simulator.resolveWrapper(() =>
+            simulator.processNodePrimaryButton(entityIDs.secondChild)
           );
-          if (node) {
+          if (button) {
             // Click the first button under the second child element.
-            node.first().simulate('click');
+            button.simulate('click');
           }
         });
         it(`should have a url search of ${urlSearch(newInstanceID, {

@@ -5,7 +5,7 @@
  */
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { AlertExecutorOptions, AlertType, State } from '../../../../alerts/server';
+import { AlertExecutorOptions, AlertType, AlertTypeState } from '../../../../alerts/server';
 import { savedObjectsAdapter } from '../saved_objects';
 import { DynamicSettings } from '../../../common/runtime_types';
 
@@ -14,7 +14,7 @@ export interface UptimeAlertType extends Omit<AlertType, 'executor' | 'producer'
     options: AlertExecutorOptions,
     callES: ILegacyScopedClusterClient['callAsCurrentUser'],
     dynamicSettings: DynamicSettings
-  ) => Promise<State | void>;
+  ) => Promise<AlertTypeState | void>;
 }
 
 export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
