@@ -29,7 +29,7 @@ export const modelsListRouteFactory = (navigateToPath: NavigateToPath): MlRoute 
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.modelsListLabel', {
-        defaultMessage: 'Models Management',
+        defaultMessage: 'Model Management',
       }),
       href: '',
     },
