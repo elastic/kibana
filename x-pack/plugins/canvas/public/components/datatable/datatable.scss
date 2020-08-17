@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  font-size: $euiFontSizeS;
+  font-size: inherit;
 
   .canvasDataTable__tableWrapper {
     @include euiScrollBar;
@@ -33,7 +33,7 @@
 
   .canvasDataTable__th,
   .canvasDataTable__td {
-    text-align: left;
+    text-align: inherit;
     padding: $euiSizeS $euiSizeXS;
     border-bottom: $euiBorderThin;
   }
