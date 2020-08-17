@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should apply correct filter', async () => {
         await PageObjects.visChart.filterOnTableCell(1, 3);
-        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingComplete();
         const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['png', '1,373'],
