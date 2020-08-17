@@ -9,6 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 
+const DEFAULT_ENABLE_EVENT_LOG = false;
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -41,6 +43,10 @@ export const configSchema = schema.object({
     defaultValue: DEFAULT_MAX_WORKERS,
     // disable the task manager rather than trying to specify it with 0 workers
     min: 1,
+  }),
+
+  event_log_enabled: schema.boolean({
+    defaultValue: DEFAULT_ENABLE_EVENT_LOG,
   }),
 });
 

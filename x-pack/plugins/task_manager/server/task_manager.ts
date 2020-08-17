@@ -59,6 +59,7 @@ import {
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { BufferedTaskStore } from './buffered_task_store';
+import { TaskLogger } from './task_log';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -69,6 +70,7 @@ export interface TaskManagerOpts {
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
   taskManagerId: string;
+  taskLogger: TaskLogger;
 }
 
 interface RunNowResult {
@@ -113,6 +115,7 @@ export class TaskManager {
     beforeRun: async (runOpts: RunContext) => runOpts,
     beforeMarkRunning: async (runOpts: RunContext) => runOpts,
   };
+  private taskLogger: TaskLogger;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -121,6 +124,7 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.logger = opts.logger;
+    this.taskLogger = opts.taskLogger;
 
     const { taskManagerId } = opts;
     if (!taskManagerId) {
@@ -132,6 +136,7 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
+    this.events$.subscribe((event) => this.taskLogger.logTaskManagerEvent(event));
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
@@ -212,6 +217,8 @@ export class TaskManager {
       this.startQueue.forEach((fn) => fn());
       this.startQueue = [];
 
+      this.taskLogger.logPluginStart();
+
       this.pollingSubscription = this.poller$.subscribe(
         mapErr((error: PollingError<string>) => {
           if (error.type === PollingErrorType.RequestCapacityReached) {
@@ -221,6 +228,7 @@ export class TaskManager {
             );
           }
           this.logger.error(error.message);
+          this.taskLogger.logPollError(error);
         })
       );
     }
@@ -302,11 +310,21 @@ export class TaskManager {
   public async runNow(taskId: string): Promise<RunNowResult> {
     await this.waitUntilStarted();
     return new Promise(async (resolve, reject) => {
-      awaitTaskRunResult(taskId, this.events$, this.store.getLifecycle.bind(this.store))
-        .then(resolve)
-        .catch(reject);
-
       this.attemptToRun(taskId);
+
+      const dateStart = new Date();
+      try {
+        const result = await awaitTaskRunResult(
+          taskId,
+          this.events$,
+          this.store.getLifecycle.bind(this.store)
+        );
+        this.taskLogger.logRunNow(taskId, dateStart);
+        return resolve(result);
+      } catch (err) {
+        this.taskLogger.logRunNow(taskId, dateStart, err);
+        return reject(err);
+      }
     });
   }
 

@@ -11,6 +11,7 @@ import { TaskManager } from './task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
 import { setupSavedObjects } from './saved_objects';
+import { TaskLogger, IEventLogService, getTaskLogger } from './task_log';
 
 export type TaskManagerSetupContract = Pick<
   TaskManager,
@@ -22,6 +23,10 @@ export type TaskManagerStartContract = Pick<
   'fetch' | 'get' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
 >;
 
+interface PluginsSetup {
+  eventLog: IEventLogService;
+}
+
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
   legacyTaskManager$: Subject<TaskManager> = new Subject<TaskManager>();
@@ -29,13 +34,15 @@ export class TaskManagerPlugin
   currentConfig: TaskManagerConfig;
   taskManagerId?: string;
   config?: TaskManagerConfig;
+  taskLogger: TaskLogger;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.currentConfig = {} as TaskManagerConfig;
+    this.taskLogger = getTaskLogger();
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
+  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<TaskManagerSetupContract> {
     this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
@@ -43,6 +50,10 @@ export class TaskManagerPlugin
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = core.uuid.getInstanceUuid();
+
+    if (this.config.event_log_enabled && plugins.eventLog) {
+      this.taskLogger = getTaskLogger(plugins.eventLog);
+    }
 
     return {
       addMiddleware: (middleware: Middleware) => {
@@ -66,6 +77,7 @@ export class TaskManagerPlugin
         serializer: savedObjects.createSerializer(),
         callAsInternalUser: elasticsearch.legacy.client.callAsInternalUser,
         logger,
+        taskLogger: this.taskLogger,
       })
     );
     this.legacyTaskManager$.complete();

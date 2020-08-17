@@ -62,4 +62,5 @@ export interface IEventLogger {
   logEvent(properties: IEvent): void;
   startTiming(event: IEvent): void;
   stopTiming(event: IEvent): void;
+  setTiming(event: IEvent, date: Date): void;
 }

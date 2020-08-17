@@ -63,7 +63,18 @@ export class EventLogger implements IEventLogger {
 
     const end = Date.now();
     event.event.end = new Date(end).toISOString();
-    event.event.duration = (end - start) * 1000 * 1000; // nanoseconds
+    event.event.duration = millisToNanos(end - start);
+  }
+
+  setTiming(event: IEvent, dateStart: Date): void {
+    if (event == null) return;
+    event.event = event.event || {};
+
+    const dateNow = new Date();
+
+    event.event.start = dateStart.toISOString();
+    event.event.end = dateNow.toISOString();
+    event.event.duration = millisToNanos(dateNow.valueOf() - dateStart.valueOf());
   }
 
   // non-blocking, but spawns an async task to do the work
@@ -196,4 +207,8 @@ async function indexLogEventDoc(esContext: EsContext, doc: unknown) {
 // TODO: write log entry to a bounded queue buffer
 function writeLogEventDocOnError(esContext: EsContext, doc: unknown) {
   esContext.logger.warn(`unable to write event doc: ${JSON.stringify(doc)}`);
+}
+
+function millisToNanos(number: number) {
+  return number * 1000 * 1000;
 }
