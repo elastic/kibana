@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
@@ -24,7 +24,7 @@ describe('TaskPoller', () => {
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         getCapacity: () => 1,
         work,
@@ -56,7 +56,7 @@ describe('TaskPoller', () => {
 
       let hasCapacity = true;
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
         getCapacity: () => (hasCapacity ? 1 : 0),
@@ -113,7 +113,7 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<void>>();
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
         getCapacity: () => 1,
@@ -157,7 +157,7 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<void>>();
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
         getCapacity: () => (hasCapacity ? 1 : 0),
@@ -200,7 +200,7 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
         getCapacity: () => 1,
@@ -235,7 +235,7 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, string[]>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work: async (...args) => {
           await worker;
@@ -281,7 +281,7 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, string[]>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work: async (...args) => {
           throw new Error('failed to work');
@@ -320,7 +320,7 @@ describe('TaskPoller', () => {
         return callCount;
       });
       createTaskPoller<string, number>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
         getCapacity: () => 5,
@@ -361,7 +361,7 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => {});
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, void>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
         getCapacity: () => 5,

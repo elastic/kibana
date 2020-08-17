@@ -5,6 +5,7 @@
  */
 
 import sinon from 'sinon';
+import { of } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 import { asOk } from './lib/result_type';
@@ -14,7 +15,7 @@ import moment from 'moment';
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
-      maxWorkers: 200,
+      maxWorkers$: of(200),
       logger: mockLogger(),
     });
 
@@ -26,7 +27,7 @@ describe('TaskPool', () => {
 
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers$: of(10),
       logger: mockLogger(),
     });
 
@@ -38,7 +39,7 @@ describe('TaskPool', () => {
 
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
-      maxWorkers: 2,
+      maxWorkers$: of(2),
       logger: mockLogger(),
     });
 
@@ -60,7 +61,7 @@ describe('TaskPool', () => {
   test('should log when marking a Task as running fails', async () => {
     const logger = mockLogger();
     const pool = new TaskPool({
-      maxWorkers: 2,
+      maxWorkers$: of(2),
       logger,
     });
 
@@ -83,7 +84,7 @@ describe('TaskPool', () => {
   test('should log when running a Task fails', async () => {
     const logger = mockLogger();
     const pool = new TaskPool({
-      maxWorkers: 3,
+      maxWorkers$: of(3),
       logger,
     });
 
@@ -106,7 +107,7 @@ describe('TaskPool', () => {
   test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
     const logger = mockLogger();
     const pool = new TaskPool({
-      maxWorkers: 3,
+      maxWorkers$: of(3),
       logger,
     });
 
@@ -130,7 +131,7 @@ describe('TaskPool', () => {
   test('Running a task which fails still takes up capacity', async () => {
     const logger = mockLogger();
     const pool = new TaskPool({
-      maxWorkers: 1,
+      maxWorkers$: of(1),
       logger,
     });
 
@@ -147,7 +148,7 @@ describe('TaskPool', () => {
 
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
-      maxWorkers: 1,
+      maxWorkers$: of(1),
       logger: mockLogger(),
     });
 
@@ -193,7 +194,7 @@ describe('TaskPool', () => {
   test('run cancels expired tasks prior to running new tasks', async () => {
     const logger = mockLogger();
     const pool = new TaskPool({
-      maxWorkers: 2,
+      maxWorkers$: of(2),
       logger,
     });
 
@@ -251,7 +252,7 @@ describe('TaskPool', () => {
     const logger = mockLogger();
     const pool = new TaskPool({
       logger,
-      maxWorkers: 20,
+      maxWorkers$: of(20),
     });
 
     const cancelled = resolvable();
