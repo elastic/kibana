@@ -5,14 +5,13 @@
  */
 
 import {
-  PHASE_INDEX_PRIORITY,
   UIM_CONFIG_COLD_PHASE,
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_FREEZE_INDEX,
-} from '../constants';
+} from '../constants/ui_metric';
 
-import { defaultColdPhase, defaultWarmPhase } from '../store/defaults';
+import { defaultNewWarmPhase, defaultNewColdPhase } from './policies/default_new_policy';
 
 import { getUiMetricsForPhases } from './ui_metric';
 jest.mock('ui/new_platform');
@@ -24,7 +23,7 @@ describe('getUiMetricsForPhases', () => {
         cold: {
           actions: {
             set_priority: {
-              priority: defaultColdPhase[PHASE_INDEX_PRIORITY],
+              priority: defaultNewColdPhase.phaseIndexPriority,
             },
           },
         },
@@ -38,7 +37,7 @@ describe('getUiMetricsForPhases', () => {
         warm: {
           actions: {
             set_priority: {
-              priority: defaultWarmPhase[PHASE_INDEX_PRIORITY],
+              priority: defaultNewWarmPhase.phaseIndexPriority,
             },
           },
         },
@@ -52,7 +51,7 @@ describe('getUiMetricsForPhases', () => {
         warm: {
           actions: {
             set_priority: {
-              priority: defaultWarmPhase[PHASE_INDEX_PRIORITY] + 1,
+              priority: defaultNewWarmPhase.phaseIndexPriority + 1,
             },
           },
         },
@@ -67,7 +66,7 @@ describe('getUiMetricsForPhases', () => {
           actions: {
             freeze: {},
             set_priority: {
-              priority: defaultColdPhase[PHASE_INDEX_PRIORITY],
+              priority: defaultNewColdPhase.phaseIndexPriority,
             },
           },
         },
