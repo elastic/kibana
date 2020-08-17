@@ -136,11 +136,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
-  if (opts.optimize) {
-    set('server.autoListen', false);
-    set('plugins.initialize', false);
-  }
-
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set(
     'plugins.paths',
