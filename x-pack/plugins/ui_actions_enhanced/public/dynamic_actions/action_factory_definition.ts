@@ -5,9 +5,11 @@
  */
 
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { SerializedAction } from './types';
+import { BaseActionFactoryContext, SerializedAction } from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
+  TriggerContextMapping,
+  TriggerId,
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
@@ -17,8 +19,11 @@ import {
  */
 export interface ActionFactoryDefinition<
   Config extends object = object,
-  FactoryContext extends object = object,
-  ActionContext extends object = object
+  SupportedTriggers extends TriggerId = TriggerId,
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 >
   extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext> {
@@ -42,4 +47,6 @@ export interface ActionFactoryDefinition<
   create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
   ): ActionDefinition<ActionContext>;
+
+  supportedTriggers(): SupportedTriggers[];
 }
