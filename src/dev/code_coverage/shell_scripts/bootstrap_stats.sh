@@ -7,7 +7,11 @@ echo ""
 STATS_PATH=$1
 touch $STATS_PATH
 
-STATS=$(gsutil ls -lr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage \
+# TODO: Pass these in from the env later
+JOB_NAME=elastic+kibana+code-coverage
+JOB_BUILD_NUMBER=1000
+
+STATS=$(gsutil ls -lr gs://kibana-ci-artifacts/jobs/$JOB_NAME/$JOB_BUILD_NUMBER/coverage \
 | grep -v "/:" | grep -v "TOTAL" | grep -v "^$")
 
 echo "### STATS:"
