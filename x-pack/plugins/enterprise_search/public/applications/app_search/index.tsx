@@ -31,6 +31,7 @@ import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
+import { Credentials } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
@@ -74,6 +75,9 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
               <Route exact path={ENGINES_PATH}>
                 <EngineOverview />
               </Route>
+              <Route exact path={CREDENTIALS_PATH}>
+                <Credentials />
+              </Route>
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
@@ -102,7 +106,7 @@ export const AppSearchNav: React.FC = () => {
           defaultMessage: 'Account Settings',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
+      <SideNavLink to={CREDENTIALS_PATH}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
           defaultMessage: 'Credentials',
         })}
