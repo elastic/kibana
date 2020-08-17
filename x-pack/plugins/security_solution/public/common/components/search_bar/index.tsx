@@ -80,14 +80,16 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       filterManager,
     } = data.query;
 
-    if (fromStr != null && toStr != null) {
-      timefilter.setTime({ from: fromStr, to: toStr });
-    } else if (start != null && end != null) {
-      timefilter.setTime({
-        from: new Date(start).toISOString(),
-        to: new Date(end).toISOString(),
-      });
-    }
+    useEffect(() => {
+      if (fromStr != null && toStr != null) {
+        timefilter.setTime({ from: fromStr, to: toStr });
+      } else if (start != null && end != null) {
+        timefilter.setTime({
+          from: new Date(start).toISOString(),
+          to: new Date(end).toISOString(),
+        });
+      }
+    }, [end, fromStr, start, timefilter, toStr]);
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -135,8 +137,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         window.setTimeout(() => updateSearch(updateSearchBar), 0);
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id, end, filterQuery, fromStr, queries, start, toStr]
+      [id, toStr, end, fromStr, start, filterManager, filterQuery, queries, updateSearch]
     );
 
     const onRefresh = useCallback(
@@ -155,16 +156,14 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id, queries, filterManager]
+      [updateSearch, id, filterManager, queries]
     );
 
     const onSaved = useCallback(
       (newSavedQuery: SavedQuery) => {
         setSavedQuery({ id, savedQuery: newSavedQuery });
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [id, setSavedQuery]
     );
 
     const onSavedQueryUpdated = useCallback(
@@ -200,8 +199,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         updateSearch(updateSearchBar);
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id, end, fromStr, start, toStr]
+      [id, toStr, end, fromStr, start, filterManager, updateSearch]
     );
 
     const onClearSavedQuery = useCallback(() => {
@@ -223,8 +221,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           filterManager,
         });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, end, filterManager, fromStr, start, toStr, savedQuery]);
+    }, [savedQuery, updateSearch, id, toStr, end, fromStr, start, filterManager]);
 
     useEffect(() => {
       let isSubscribed = true;
@@ -242,6 +239,9 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           },
         })
       );
+
+      // for the initial state
+      setSearchBarFilter({ id, filters: filterManager.getFilters() });
 
       return () => {
         isSubscribed = false;
