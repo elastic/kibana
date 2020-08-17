@@ -137,7 +137,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
   });
 
   describe('when it has loaded', () => {
-    let originBounds: ReturnType<typeof getComputedNodeBoundaries>;
+    let originBounds: AABB;
     let firstChildBounds: ReturnType<typeof getComputedNodeBoundaries>;
     let secondChildBounds: ReturnType<typeof getComputedNodeBoundaries>;
     let edgeStartingCoordinates: ReturnType<typeof getEdgeStartingCoordinates>;
