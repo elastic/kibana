@@ -18,10 +18,10 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { ModelWithStats } from './models_list';
+import { ModelItemFull } from './models_list';
 
 interface DeleteModelsModalProps {
-  models: ModelWithStats[];
+  models: ModelItemFull[];
   onClose: (deletionApproved?: boolean) => void;
 }
 

@@ -32,7 +32,11 @@ import { DeleteModelsModal } from './delete_models_modal';
 import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
 import { getResultsUrl } from '../analytics_list/common';
-import { ModelConfigResponse, TrainedModelStat } from '../../../../../../../common/types/inference';
+import {
+  ModelConfigResponse,
+  ModelPipelines,
+  TrainedModelStat,
+} from '../../../../../../../common/types/inference';
 import {
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
@@ -44,9 +48,10 @@ type Stats = Omit<TrainedModelStat, 'model_id'>;
 export type ModelItem = ModelConfigResponse & {
   type?: string;
   stats?: Stats;
+  pipelines?: ModelPipelines['pipelines'];
 };
 
-export type ModelWithStats = Omit<ModelItem, 'stats'> & { stats: Stats };
+export type ModelItemFull = Required<ModelItem>;
 
 export const ModelsList: FC = () => {
   const {
@@ -68,7 +73,7 @@ export const ModelsList: FC = () => {
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
 
-  const [modelsToDelete, setModelsToDelete] = useState<ModelWithStats[]>([]);
+  const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
 
@@ -115,6 +120,28 @@ export const ModelsList: FC = () => {
     };
   }, [items]);
 
+  const fetchAssociatedPipelines = useCallback(
+    async (models: ModelItem[]) => {
+      try {
+        const pipelines = await inferenceApiService.getInferenceModelPipelines(
+          models.map((model) => model.model_id)
+        );
+
+        for (const { model_id: id, pipelines: modelPipelines } of pipelines) {
+          const model = models.find((m) => m.model_id === id);
+          model!.pipelines = modelPipelines;
+        }
+      } catch (error) {
+        toasts.addError(new Error(error.body.message), {
+          title: i18n.translate('xpack.ml.inference.modelsList.fetchModelPipelinesErrorMessage', {
+            defaultMessage: 'Failed to fetch associated pipelines',
+          }),
+        });
+      }
+    },
+    [items]
+  );
+
   /**
    * Fetches models stats and update the original object
    */
@@ -135,7 +162,6 @@ export const ModelsList: FC = () => {
           const model = models.find((m) => m.model_id === id);
           model!.stats = stats;
         }
-        setItems([...items]);
         return true;
       } catch (error) {
         toasts.addError(new Error(error.body.message), {
@@ -168,7 +194,7 @@ export const ModelsList: FC = () => {
   async function prepareModelsForDeletion(models: ModelItem[]) {
     // Fetch model stats to check associated pipelines
     if (await fetchModelsStats(models)) {
-      setModelsToDelete(models as ModelWithStats[]);
+      setModelsToDelete(models as ModelItemFull[]);
     } else {
       toasts.addDanger(
         i18n.translate('xpack.ml.inference.modelsList.unableToDeleteModelsErrorMessage', {
@@ -254,13 +280,13 @@ export const ModelsList: FC = () => {
   ];
 
   const toggleDetails = async (item: ModelItem) => {
-    await fetchModelsStats([item]);
-
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.model_id]) {
       delete itemIdToExpandedRowMapValues[item.model_id];
     } else {
-      itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as ModelWithStats} />;
+      await fetchModelsStats([item]);
+      await fetchAssociatedPipelines([item]);
+      itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
@@ -272,7 +298,7 @@ export const ModelsList: FC = () => {
       isExpander: true,
       render: (item: ModelItem) => (
         <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
+          onClick={toggleDetails.bind(null, item)}
           aria-label={
             itemIdToExpandedRowMap[item.model_id]
               ? i18n.translate('xpack.ml.inference.modelsList.collapseRow', {
@@ -428,6 +454,7 @@ export const ModelsList: FC = () => {
           columns={columns}
           hasActions={true}
           isExpandable={true}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={items}
           itemId={ModelsTableToConfigMapping.id}
@@ -440,7 +467,6 @@ export const ModelsList: FC = () => {
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         />
       </div>
       {modelsToDelete.length > 0 && (
