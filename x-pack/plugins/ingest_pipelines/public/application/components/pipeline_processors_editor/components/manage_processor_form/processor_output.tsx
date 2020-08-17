@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiAccordion,
+  EuiCallOut,
   EuiCodeBlock,
   EuiText,
   EuiFlexGroup,
@@ -16,30 +17,95 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DocumentsDropdown } from '../test_pipeline';
+import { ProcessorResult } from '../../types';
+import { DocumentsDropdown } from '../documents_dropdown';
 
 export interface Props {
-  processorOutput: any;
+  processorOutput?: ProcessorResult;
 }
 
+const i18nTexts = {
+  noOutputCalloutTitle: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.noOutputCalloutTitle',
+    {
+      defaultMessage: 'Unable to load the processor output.',
+    }
+  ),
+  tabDescription: i18n.translate('xpack.ingestPipelines.processorOutput.descriptionText', {
+    defaultMessage:
+      'View how the processor affects the ingest document as it passes through the pipeline.',
+  }),
+  skippedCalloutTitle: i18n.translate('xpack.ingestPipelines.processorOutput.skippedCalloutTitle', {
+    defaultMessage: 'The processor was not run.',
+  }),
+  droppedCalloutTitle: i18n.translate('xpack.ingestPipelines.processorOutput.droppedCalloutTitle', {
+    defaultMessage: 'The document was dropped.',
+  }),
+  processorOutputLabel: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.processorOutputCodeBlockLabel',
+    {
+      defaultMessage: 'Processor output',
+    }
+  ),
+  processorErrorLabel: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.processorErrorCodeBlockLabel',
+    {
+      defaultMessage: 'Processor error',
+    }
+  ),
+  prevProcessorLabel: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.previousOutputCodeBlockLabel',
+    {
+      defaultMessage: 'View previous processor output',
+    }
+  ),
+  processorIgnoredErrorLabel: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.ignoredErrorCodeBlockLabel',
+    {
+      defaultMessage: 'View ignored error',
+    }
+  ),
+};
+
 export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutput }) => {
+  // A user should not reach this code,
+  // but if for some reason the output is undefined, we render a callout message
+  if (!processorOutput) {
+    return <EuiCallOut title={i18nTexts.noOutputCalloutTitle} color="danger" iconType="alert" />;
+  }
+
   const {
     prevProcessorResult,
     doc: currentResult,
     ignored_error: ignoredError,
     error,
+    status,
   } = processorOutput!;
 
   return (
     <>
       <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.ingestPipelines.processorOutput.descriptionText"
-            defaultMessage="View how the processor affects the ingest document as it passes through the pipeline."
-          />
-        </p>
+        <p>{i18nTexts.tabDescription}</p>
       </EuiText>
+
+      {status === 'skipped' && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut size="s" title={i18nTexts.skippedCalloutTitle} iconType="pin" />
+        </>
+      )}
+
+      {status === 'dropped' && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            size="s"
+            title={i18nTexts.droppedCalloutTitle}
+            iconType="pin"
+            color="warning"
+          />
+        </>
+      )}
 
       {currentResult && (
         <>
@@ -47,12 +113,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
 
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="baseline">
             <EuiFlexItem>
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.processorOutput.processorOutputCodeBlockLabel"
-                  defaultMessage="Processor output"
-                />
-              </p>
+              <p>{i18nTexts.processorOutputLabel}</p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DocumentsDropdown />
@@ -73,12 +134,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
 
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="baseline">
             <EuiFlexItem>
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.processorOutput.processorErrorCodeBlockLabel"
-                  defaultMessage="Processor output"
-                />
-              </p>
+              <p>{i18nTexts.processorErrorLabel}</p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DocumentsDropdown />
@@ -101,12 +157,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
             id="prev_accordion"
             buttonContent={
               <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.processorOutput.previousOutputCodeBlockLabel"
-                    defaultMessage="View previous processor output"
-                  />
-                </p>
+                <p>{i18nTexts.prevProcessorLabel}</p>
               </EuiText>
             }
           >
@@ -129,12 +180,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutpu
             id="ignored_error_accordion"
             buttonContent={
               <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.processorOutput.ignoredErrorCodeBlockLabel"
-                    defaultMessage="View ignored error"
-                  />
-                </p>
+                <p>{i18nTexts.processorIgnoredErrorLabel}</p>
               </EuiText>
             }
           >

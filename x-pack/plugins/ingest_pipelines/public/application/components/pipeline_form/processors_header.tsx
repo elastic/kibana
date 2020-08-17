@@ -29,7 +29,10 @@ export interface Props {
 }
 
 export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
-  const { links } = usePipelineProcessorsContext();
+  const {
+    links,
+    state: { processors },
+  } = usePipelineProcessorsContext();
   const { testPipelineData } = useTestPipelineContext();
 
   const {
@@ -113,6 +116,10 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
       {openTestPipelineFlyout && (
         <TestPipelineFlyout
           activeTab={activeFlyoutTab}
+          processors={{
+            processors: processors.state.processors,
+            onFailure: processors.state.onFailure,
+          }}
           onClose={() => setOpenTestPipelineFlyout(false)}
         />
       )}

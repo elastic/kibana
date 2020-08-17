@@ -24,10 +24,8 @@ import {
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
-import { useTestPipelineContext, usePipelineProcessorsContext } from '../../context';
+import { useTestPipelineContext } from '../../context';
 import { getProcessorDescriptor } from '../shared';
-import { serialize } from '../../serialize';
-import { deserializeVerboseTestOutput } from '../../deserialize';
 
 import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
@@ -112,54 +110,16 @@ const getFlyoutTitle = (isOnFailure: boolean, isExistingProcessor: boolean) => {
 
 export const ManageProcessorForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
-    const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+    const { testPipelineData } = useTestPipelineContext();
     const {
       testOutputByProcessor,
-      config: { documents, selectedDocumentIndex },
+      config: { selectedDocumentIndex },
     } = testPipelineData;
 
     const processorOutput =
       processor &&
       testOutputByProcessor &&
       testOutputByProcessor[selectedDocumentIndex][processor.id];
-
-    const {
-      state: { processors },
-      api,
-    } = usePipelineProcessorsContext();
-
-    const updateProcessorResults = async () => {
-      if (!documents) {
-        return;
-      }
-
-      const serializedProcessorsWithTag = serialize(processors.state, true);
-
-      const { data: verboseResults, error } = await api.simulatePipeline({
-        documents,
-        verbose: true,
-        pipeline: { ...serializedProcessorsWithTag },
-      });
-
-      if (error) {
-        setCurrentTestPipelineData({
-          type: 'updateIsExecuting',
-          payload: {
-            isExecuting: false,
-          },
-        });
-
-        return;
-      }
-
-      setCurrentTestPipelineData({
-        type: 'updateOutputByProcessor',
-        payload: {
-          testOutputByProcessor: deserializeVerboseTestOutput(verboseResults),
-          isExecuting: false,
-        },
-      });
-    };
 
     useEffect(
       () => {
@@ -172,7 +132,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
 
     let flyoutContent: React.ReactNode;
 
-    if (activeTab === 'output' && processor) {
+    if (activeTab === 'output') {
       flyoutContent = <ProcessorOutput processorOutput={processorOutput} />;
     } else {
       flyoutContent = <ProcessorSettingsFields processor={processor} />;
@@ -242,14 +202,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
                 <EuiButtonEmpty onClick={onClose}>{cancelButtonLabel}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  data-test-subj="submitButton"
-                  onClick={async () => {
-                    await form.submit();
-                    updateProcessorResults();
-                  }}
-                >
+                <EuiButton fill data-test-subj="submitButton" onClick={form.submit}>
                   {processor ? updateButtonLabel : addButtonLabel}
                 </EuiButton>
               </EuiFlexItem>

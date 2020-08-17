@@ -5,7 +5,13 @@
  */
 
 import React, { useCallback, useContext, useReducer, Reducer } from 'react';
-import { DeserializedProcessorResult } from '../deserialize';
+import { useKibana } from '../../../../shared_imports';
+import {
+  DeserializedProcessorResult,
+  deserializeVerboseTestOutput,
+  DeserializeResult,
+} from '../deserialize';
+import { serialize } from '../serialize';
 import { Document } from '../types';
 
 export interface TestPipelineData {
@@ -53,6 +59,10 @@ type Action =
 interface TestPipelineContext {
   testPipelineData: TestPipelineData;
   setCurrentTestPipelineData: (data: Action) => void;
+  updateTestOutputPerProcessor: (
+    documents: Document[] | undefined,
+    processors: DeserializeResult
+  ) => void;
 }
 
 const DEFAULT_TEST_PIPELINE_CONTEXT = {
@@ -63,6 +73,7 @@ const DEFAULT_TEST_PIPELINE_CONTEXT = {
     isExecuting: false,
   },
   setCurrentTestPipelineData: () => {},
+  updateTestOutputPerProcessor: () => {},
 };
 
 const TestPipelineContext = React.createContext<TestPipelineContext>(DEFAULT_TEST_PIPELINE_CONTEXT);
@@ -119,16 +130,64 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
 
 export const TestPipelineContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData);
+  const { services } = useKibana();
 
   const setCurrentTestPipelineData = useCallback((data: Action): void => {
     dispatch(data);
   }, []);
+
+  const updateTestOutputPerProcessor = useCallback(
+    async (documents: Document[] | undefined, processors: DeserializeResult) => {
+      if (!documents) {
+        return;
+      }
+
+      setCurrentTestPipelineData({
+        type: 'updateIsExecuting',
+        payload: {
+          isExecuting: true,
+        },
+      });
+
+      const serializedProcessorsWithTag = serialize(
+        { processors: processors.processors, onFailure: processors.onFailure },
+        true
+      );
+
+      const { data: verboseResults, error } = await services.api.simulatePipeline({
+        documents,
+        verbose: true,
+        pipeline: { ...serializedProcessorsWithTag },
+      });
+
+      if (error) {
+        setCurrentTestPipelineData({
+          type: 'updateIsExecuting',
+          payload: {
+            isExecuting: false,
+          },
+        });
+
+        return;
+      }
+
+      setCurrentTestPipelineData({
+        type: 'updateOutputByProcessor',
+        payload: {
+          testOutputByProcessor: deserializeVerboseTestOutput(verboseResults),
+          isExecuting: false,
+        },
+      });
+    },
+    [services.api, setCurrentTestPipelineData]
+  );
 
   return (
     <TestPipelineContext.Provider
       value={{
         testPipelineData: state,
         setCurrentTestPipelineData,
+        updateTestOutputPerProcessor,
       }}
     >
       {children}

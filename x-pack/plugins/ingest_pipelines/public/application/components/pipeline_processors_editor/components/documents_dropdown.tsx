@@ -7,8 +7,8 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { useTestPipelineContext } from '../../context';
-import { Document } from '../../types';
+import { useTestPipelineContext } from '../context';
+import { Document } from '../types';
 
 const i18nTexts = {
   ariaLabel: i18n.translate(

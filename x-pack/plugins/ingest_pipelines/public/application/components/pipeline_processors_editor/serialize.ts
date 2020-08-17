@@ -28,8 +28,6 @@ const convertProcessorInternalToProcessor = (
 
   if (onFailure?.length) {
     outProcessor[type].on_failure = convertProcessors(onFailure, addTag);
-  } else if (onFailure) {
-    outProcessor[type].on_failure = [];
   }
 
   // For simulation, we add the "tag" field equal to the internal processor id

@@ -23,19 +23,22 @@ import { Document } from '../../../types';
 
 import { documentsSchema } from './documents_schema';
 import { HandleExecuteArgs } from '../test_pipeline_flyout';
+import { DeserializeResult } from '../../../deserialize';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
   handleExecute: (data: HandleExecuteArgs) => void;
-  setPerProcessorOutput: (documents: Document[]) => void;
+  setPerProcessorOutput: (documents: Document[] | undefined, processors: DeserializeResult) => void;
   isExecuting: boolean;
+  processors: DeserializeResult;
 }
 
 export const DocumentsTab: React.FunctionComponent<Props> = ({
   handleExecute,
   isExecuting,
   setPerProcessorOutput,
+  processors,
 }) => {
   const { links } = usePipelineProcessorsContext();
 
@@ -57,7 +60,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
     await handleExecute({ documents: documents! });
 
     // This is necessary to update the status and output of each processor
-    setPerProcessorOutput(documents!);
+    setPerProcessorOutput(documents, processors);
   };
 
   const { form } = useForm({

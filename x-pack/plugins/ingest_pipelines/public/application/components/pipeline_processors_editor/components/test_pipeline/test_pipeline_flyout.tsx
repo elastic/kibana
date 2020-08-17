@@ -19,14 +19,15 @@ import {
 
 import { usePipelineProcessorsContext, useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
-import { deserializeVerboseTestOutput } from '../../deserialize';
 import { Document } from '../../types';
+import { DeserializeResult } from '../../deserialize';
 
 import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_flyout_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
   onClose: () => void;
+  processors: DeserializeResult;
 }
 
 export interface HandleExecuteArgs {
@@ -34,14 +35,18 @@ export interface HandleExecuteArgs {
   verbose?: boolean;
 }
 
-export const TestPipelineFlyout: React.FunctionComponent<Props> = ({ onClose, activeTab }) => {
-  const {
-    state: { processors },
-    api,
-    toasts,
-  } = usePipelineProcessorsContext();
+export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
+  onClose,
+  activeTab,
+  processors,
+}) => {
+  const { api, toasts } = usePipelineProcessorsContext();
 
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const {
+    testPipelineData,
+    setCurrentTestPipelineData,
+    updateTestOutputPerProcessor,
+  } = useTestPipelineContext();
   const { testOutput } = testPipelineData;
 
   const [selectedTab, setSelectedTab] = useState<TestPipelineFlyoutTab>(activeTab);
@@ -49,45 +54,9 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({ onClose, ac
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [executeError, setExecuteError] = useState<any>(null);
 
-  const setPerProcessorOutput = async (documents: Document[]) => {
-    const serializedProcessorsWithTag = serialize(processors.state, true);
-
-    setCurrentTestPipelineData({
-      type: 'updateIsExecuting',
-      payload: {
-        isExecuting: true,
-      },
-    });
-
-    const { data: verboseResults, error } = await api.simulatePipeline({
-      documents,
-      verbose: true,
-      pipeline: { ...serializedProcessorsWithTag },
-    });
-
-    if (error) {
-      setCurrentTestPipelineData({
-        type: 'updateIsExecuting',
-        payload: {
-          isExecuting: false,
-        },
-      });
-
-      return;
-    }
-
-    setCurrentTestPipelineData({
-      type: 'updateOutputByProcessor',
-      payload: {
-        testOutputByProcessor: deserializeVerboseTestOutput(verboseResults),
-        isExecuting: false,
-      },
-    });
-  };
-
   const handleExecute = useCallback(
     async ({ documents, verbose }: HandleExecuteArgs) => {
-      const serializedProcessors = serialize(processors.state);
+      const serializedProcessors = serialize(processors);
 
       setIsExecuting(true);
       setExecuteError(null);
@@ -127,7 +96,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({ onClose, ac
 
       setSelectedTab('output');
     },
-    [api, processors.state, setCurrentTestPipelineData, toasts]
+    [api, processors, setCurrentTestPipelineData, toasts]
   );
 
   let tabContent;
@@ -140,7 +109,8 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({ onClose, ac
       <DocumentsTab
         isExecuting={isExecuting}
         handleExecute={handleExecute}
-        setPerProcessorOutput={setPerProcessorOutput}
+        setPerProcessorOutput={updateTestOutputPerProcessor}
+        processors={processors}
       />
     );
   }
