@@ -235,10 +235,9 @@ export class ManifestManager {
    */
   public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
     // Build new exception list artifacts
-    const artifacts = await Promise.all([
-      this.buildExceptionListArtifacts(),
-      this.buildTrustedAppsArtifacts(),
-    ]).then((artifactList) => artifactList.flat());
+    const artifacts = (
+      await Promise.all([this.buildExceptionListArtifacts(), this.buildTrustedAppsArtifacts()])
+    ).flat();
 
     // Build new manifest
     const manifest = Manifest.fromArtifacts(
