@@ -44,7 +44,7 @@ export type CreateIndexPatternFieldList = (
   onNotification?: OnNotification
 ) => IIndexPatternFieldList;
 
-export const FieldList = (
+export const fieldList = (
   indexPattern: IndexPattern,
   specs: FieldSpec[] = [],
   shortDotsEnable = false,

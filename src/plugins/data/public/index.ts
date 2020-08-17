@@ -262,7 +262,7 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  FieldList,
+  fieldList,
 } from '../common';
 
 /*

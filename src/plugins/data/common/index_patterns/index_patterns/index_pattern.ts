@@ -25,7 +25,7 @@ import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/co
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
+import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -138,7 +138,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.fields = FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = fieldList(this, [], this.shortDotsEnable, this.onUnknownType);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
@@ -239,9 +239,9 @@ export class IndexPattern implements IIndexPattern {
     });
 
     // give index pattern all of the values
-    const fieldList = this.fields;
+    const fldList = this.fields;
     _.assign(this, response);
-    this.fields = fieldList;
+    this.fields = fldList;
 
     if (!this.title && this.id) {
       this.title = this.id;
