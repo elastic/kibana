@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
@@ -18,6 +18,8 @@ import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/
 import { QueryTemplateProps } from '../../../common/containers/query_template';
 
 import { overviewHostQuery } from './index.gql_query';
+import { useManageSource } from '../../../common/containers/sourcerer';
+import { SOURCERER_FEATURE_FLAG_ON } from '../../../common/containers/sourcerer/constants';
 
 export const ID = 'overviewHostQuery';
 
@@ -38,6 +40,13 @@ export interface OverviewHostProps extends QueryTemplateProps {
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+    const { activeSourceGroupId, getManageSourceGroupById } = useManageSource();
+    const { indexPatterns } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
+      getManageSourceGroupById,
+      activeSourceGroupId,
+    ]);
+    const uiDefaultIndexPatterns = useUiSetting<string[]>(DEFAULT_INDEX_KEY);
+    const defaultIndex = SOURCERER_FEATURE_FLAG_ON ? indexPatterns : uiDefaultIndexPatterns;
     return (
       <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
         query={overviewHostQuery}
@@ -50,7 +59,7 @@ const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux
             to: endDate,
           },
           filterQuery: createFilter(filterQuery),
-          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+          defaultIndex,
           inspect: isInspected,
         }}
       >

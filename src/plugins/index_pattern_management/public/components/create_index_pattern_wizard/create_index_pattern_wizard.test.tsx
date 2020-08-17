@@ -27,7 +27,6 @@ jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepInd
 jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
 jest.mock('./components/header', () => ({ Header: 'Header' }));
 jest.mock('./components/loading_state', () => ({ LoadingState: 'LoadingState' }));
-jest.mock('./components/empty_state', () => ({ EmptyState: 'EmptyState' }));
 jest.mock('./lib/get_indices', () => ({
   getIndices: () => {
     return [{ name: 'kibana' }];

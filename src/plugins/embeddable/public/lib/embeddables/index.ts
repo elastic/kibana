@@ -25,5 +25,4 @@ export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 export { withEmbeddableSubscription } from './with_subscription';
 export { EmbeddableRoot } from './embeddable_root';
 export * from './saved_object_embeddable';
-export * from './ref_or_val_embeddable';
 export { EmbeddableRenderer, EmbeddableRendererProps } from './embeddable_renderer';
