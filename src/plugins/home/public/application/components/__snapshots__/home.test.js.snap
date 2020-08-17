@@ -2,21 +2,27 @@
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -30,10 +36,11 @@ exports[`home change home route should render a link to change the default route
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -45,37 +52,32 @@ exports[`home change home route should render a link to change the default route
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -118,21 +120,27 @@ exports[`home change home route should render a link to change the default route
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -146,10 +154,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -159,7 +168,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 iconType="gear"
@@ -171,37 +180,32 @@ exports[`home directories should not render directory entry when showOnHomePage 
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -232,21 +236,27 @@ exports[`home directories should not render directory entry when showOnHomePage 
 
 exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -260,10 +270,11 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -275,49 +286,44 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={
-            Array [
-              Object {
-                "category": "admin",
-                "description": "Manage the index patterns that help retrieve your data from Elasticsearch.",
-                "icon": "indexPatternApp",
-                "id": "index_patterns",
-                "path": "index_management_landing_page",
-                "showOnHomePage": true,
-                "title": "Index Patterns",
-              },
-            ]
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={
+        Array [
+          Object {
+            "category": "admin",
+            "description": "Manage the index patterns that help retrieve your data from Elasticsearch.",
+            "icon": "indexPatternApp",
+            "id": "index_patterns",
+            "path": "index_management_landing_page",
+            "showOnHomePage": true,
+            "title": "Index Patterns",
+          },
+        ]
+      }
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -348,21 +354,27 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
 
 exports[`home directories should render DATA directory entry in "Ingest your data" panel 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -376,10 +388,11 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -391,49 +404,44 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={
-            Array [
-              Object {
-                "category": "data",
-                "description": "Display and share a collection of visualizations and saved searches.",
-                "icon": "dashboardApp",
-                "id": "dashboard",
-                "path": "dashboard_landing_page",
-                "showOnHomePage": true,
-                "title": "Dashboard",
-              },
-            ]
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={
+        Array [
+          Object {
+            "category": "data",
+            "description": "Display and share a collection of visualizations and saved searches.",
+            "icon": "dashboardApp",
+            "id": "dashboard",
+            "path": "dashboard_landing_page",
+            "showOnHomePage": true,
+            "title": "Dashboard",
+          },
+        ]
+      }
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -464,21 +472,27 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
 
 exports[`home directories should render solutions in the "solution section" 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--hasSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -492,10 +506,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -507,10 +522,10 @@ exports[`home directories should render solutions in the "solution section" 1`] 
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
     <SolutionsSection
       addBasePath={[Function]}
@@ -563,31 +578,23 @@ exports[`home directories should render solutions in the "solution section" 1`] 
         ]
       }
     />
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -618,21 +625,27 @@ exports[`home directories should render solutions in the "solution section" 1`] 
 
 exports[`home header render 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -646,10 +659,11 @@ exports[`home header render 1`] = `
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -661,37 +675,32 @@ exports[`home header render 1`] = `
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -722,21 +731,27 @@ exports[`home header render 1`] = `
 
 exports[`home header should show "Dev tools" link if console is available 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -750,10 +765,11 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -763,7 +779,7 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 iconType="wrench"
@@ -775,49 +791,44 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={
-            Array [
-              Object {
-                "category": "admin",
-                "description": "Skip cURL and use a JSON interface to work with your data in Console.",
-                "icon": "consoleApp",
-                "id": "console",
-                "path": "path-to-dev-tools",
-                "showOnHomePage": false,
-                "title": "Console",
-              },
-            ]
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={
+        Array [
+          Object {
+            "category": "admin",
+            "description": "Skip cURL and use a JSON interface to work with your data in Console.",
+            "icon": "consoleApp",
+            "id": "console",
+            "path": "path-to-dev-tools",
+            "showOnHomePage": false,
+            "title": "Console",
+          },
+        ]
+      }
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -848,21 +859,27 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
 
 exports[`home header should show "Manage" link if stack management is available 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -876,10 +893,11 @@ exports[`home header should show "Manage" link if stack management is available 
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -889,7 +907,7 @@ exports[`home header should show "Manage" link if stack management is available 
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 iconType="gear"
@@ -901,37 +919,32 @@ exports[`home header should show "Manage" link if stack management is available 
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -962,21 +975,27 @@ exports[`home header should show "Manage" link if stack management is available 
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -990,10 +1009,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1005,37 +1025,32 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -1066,21 +1081,27 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -1094,10 +1115,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1109,37 +1131,32 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -1170,21 +1187,27 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -1198,10 +1221,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1213,37 +1237,32 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -1274,21 +1293,27 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
 
 exports[`home should render home component 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -1302,10 +1327,11 @@ exports[`home should render home component 1`] = `
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1317,37 +1343,32 @@ exports[`home should render home component 1`] = `
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -1378,21 +1399,27 @@ exports[`home should render home component 1`] = `
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -1406,10 +1433,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1421,37 +1449,32 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -1482,21 +1505,27 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -1510,10 +1539,11 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1525,37 +1555,32 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -1593,21 +1618,27 @@ exports[`home welcome should show the welcome screen if enabled, and there are n
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
 <main
-  aria-labelledby="homHeader__title"
-  className="homWrapper"
+  aria-labelledby="homPageHeader__title"
+  className="homPageContainer"
   data-test-subj="homeApp"
 >
-  <header
-    className="homHeader homHeader--noSolutions"
+  <div
+    className="homPageHeaderContainer"
   >
-    <div
-      className="homHeader__inner"
+    <header
+      className="homPageHeader"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__titleWrapper"
+        >
+          <EuiTitle
+            size="m"
+          >
             <h1
-              id="homHeader__title"
+              id="homPageHeader__title"
             >
               <FormattedMessage
                 defaultMessage="Home"
@@ -1621,10 +1652,11 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           grow={false}
         >
           <EuiFlexGroup
-            className="homHeader__actions"
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
           >
             <EuiFlexItem
-              className="homHeader__actionItem"
+              className="homPageHeader__menuItem"
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
@@ -1636,37 +1668,32 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  </header>
+    </header>
+  </div>
   <div
-    className="homContent"
+    className="homPageMainContainer"
   >
-    0
-    <EuiFlexGroup
-      className="homData homData--expanded"
-    >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManageData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <SolutionsSection
+      addBasePath={[Function]}
+      solutions={Array []}
+    />
+    <AddData
+      addBasePath={[Function]}
+      features={Array []}
+    />
+    <ManageData
+      addBasePath={[Function]}
+      features={Array []}
+    />
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
+    <footer>
       <EuiFlexGroup
         alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem

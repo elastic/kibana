@@ -60,7 +60,7 @@ export const SolutionsSection: FC<Props> = ({ solutions }) => {
         </EuiScreenReaderOnly>
 
         <EuiFlexGroup className="homSolutions__content" justifyContent="spaceAround">
-          {solutions.length ? (
+          {solutions.length && (
             <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
               <EuiFlexGroup direction="column">
                 {solutions.map((solution) => (
@@ -68,8 +68,8 @@ export const SolutionsSection: FC<Props> = ({ solutions }) => {
                 ))}
               </EuiFlexGroup>
             </EuiFlexItem>
-          ) : null}
-          {kibana ? <SolutionPanel solution={kibana} /> : null}
+          )}
+          {kibana && <SolutionPanel solution={kibana} />}
         </EuiFlexGroup>
       </section>
 

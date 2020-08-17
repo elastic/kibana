@@ -21,7 +21,6 @@ import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { notificationServiceMock } from '../../../../../../core/public/mocks';

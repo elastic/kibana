@@ -145,7 +145,7 @@ export class Home extends Component {
           <div className="homHeader__inner">
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiTitle>
+                <EuiTitle size="m">
                   <h1 id="homHeader__title">
                     <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
                   </h1>
