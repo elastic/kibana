@@ -326,7 +326,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const expression = datatableVisualization.toExpression({ layers: [layer] }, frame) as Ast;
+      const expression = datatableVisualization.toExpression(
+        { layers: [layer] },
+        frame.datasourceLayers
+      ) as Ast;
       const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
 
       expect(tableArgs).toHaveLength(1);
