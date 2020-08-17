@@ -31,7 +31,7 @@ export const savePolicy = async (
     return false;
   }
 
-  const uiMetrics = getUiMetricsForPhases(policy.phases);
+  const uiMetrics = getUiMetricsForPhases(policy);
   uiMetrics.push(isNew ? UIM_POLICY_CREATE : UIM_POLICY_UPDATE);
   trackUiMetric(METRIC_TYPE.COUNT, uiMetrics);
 

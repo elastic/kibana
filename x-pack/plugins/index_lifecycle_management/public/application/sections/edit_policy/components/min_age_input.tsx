@@ -12,7 +12,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
-import { ColdPhase, DeletePhase, Phases, WarmPhase } from '../../../services/policies/types';
+import { ColdPhase, DeletePhase, Phase, Phases, WarmPhase } from '../../../services/policies/types';
 
 function getTimingLabelForPhase(phase: keyof Phases) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
@@ -63,7 +63,7 @@ function getUnitsAriaLabelForPhase(phase: keyof Phases) {
   }
 }
 
-interface Props<T> {
+interface Props<T extends Phase> {
   rolloverEnabled: boolean;
   errors?: PhaseValidationErrors<T>;
   phase: keyof Phases & string;

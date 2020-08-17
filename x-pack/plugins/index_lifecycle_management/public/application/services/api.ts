@@ -53,13 +53,6 @@ export const useLoadPoliciesList = (withIndices: boolean) => {
   });
 };
 
-export const useLoadPolicy = (policyName: string) => {
-  return useRequest({
-    path: `policies/${encodeURIComponent(policyName)}`,
-    method: 'get',
-  });
-};
-
 export async function savePolicy(policy: SerializedPolicy) {
   return await sendPost(`policies`, policy);
 }

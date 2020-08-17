@@ -103,8 +103,10 @@ export interface Policy {
   };
 }
 
-export interface HotPhase {
+export interface Phase {
   phaseEnabled: boolean;
+}
+export interface HotPhase extends Phase {
   rolloverEnabled: boolean;
   selectedMaxSizeStored: string;
   selectedMaxSizeStoredUnits: string;
@@ -114,8 +116,7 @@ export interface HotPhase {
   phaseIndexPriority: string;
 }
 
-export interface WarmPhase {
-  phaseEnabled: boolean;
+export interface WarmPhase extends Phase {
   warmPhaseOnRollover: boolean;
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
@@ -128,8 +129,7 @@ export interface WarmPhase {
   phaseIndexPriority: string;
 }
 
-export interface ColdPhase {
-  phaseEnabled: boolean;
+export interface ColdPhase extends Phase {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
   selectedNodeAttrs: string;
@@ -138,8 +138,7 @@ export interface ColdPhase {
   phaseIndexPriority: string;
 }
 
-export interface DeletePhase {
-  phaseEnabled: boolean;
+export interface DeletePhase extends Phase {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
   waitForSnapshotPolicy: string;

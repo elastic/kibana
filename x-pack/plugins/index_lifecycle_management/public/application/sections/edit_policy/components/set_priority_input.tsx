@@ -10,14 +10,14 @@ import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eu
 import { LearnMoreLink } from './';
 import { OptionalLabel } from './';
 import { ErrableFormRow } from './';
-import { ColdPhase, HotPhase, Phases, WarmPhase } from '../../../services/policies/types';
+import { ColdPhase, HotPhase, Phase, Phases, WarmPhase } from '../../../services/policies/types';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
-interface Props<Phase> {
-  errors?: PhaseValidationErrors<Phase>;
+interface Props<T extends Phase> {
+  errors?: PhaseValidationErrors<T>;
   phase: keyof Phases & string;
-  phaseData: Phase;
-  setPhaseData: (dataKey: keyof Phase & string, value: any) => void;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: any) => void;
   isShowingErrors: boolean;
 }
 export const SetPriorityInput = <T extends HotPhase | WarmPhase | ColdPhase>({

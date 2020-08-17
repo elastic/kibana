@@ -26,8 +26,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { STRUCTURE_POLICY_NAME } from '../../constants';
-
 import { toasts } from '../../services/notification';
 import { findFirstError } from '../../services/find_errors';
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
@@ -248,7 +246,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
                   fullWidth
                 >
                   <ErrableFormRow
-                    id={STRUCTURE_POLICY_NAME}
+                    id={'policyName'}
                     label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
                       defaultMessage: 'Policy name',
                     })}

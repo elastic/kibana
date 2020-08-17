@@ -6,6 +6,8 @@
 
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { EuiButton, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/target/types/react';
 import { useLoadPoliciesList } from '../../services/api';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
@@ -31,12 +33,33 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   getUrlForApp,
   history,
 }) => {
-  const { error, isLoading, data: policies } = useLoadPoliciesList(true);
+  const { error, isLoading, data: policies, sendRequest } = useLoadPoliciesList(false);
   if (isLoading) {
-    return <p>...loading</p>;
+    return <EuiLoadingSpinner size="xl" />;
   }
   if (error || !policies) {
-    return <p>error</p>;
+    const { statusCode, message } = error ? error : { statusCode: '', message: '' };
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesLoadingFailedTitle"
+            defaultMessage="Unable to load existing lifecycle policies"
+          />
+        }
+        color="danger"
+      >
+        <p>
+          {message} ({statusCode})
+        </p>
+        <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
+            defaultMessage="Try again"
+          />
+        </EuiButton>
+      </EuiCallOut>
+    );
   }
 
   return (

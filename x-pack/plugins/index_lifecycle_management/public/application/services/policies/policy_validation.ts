@@ -9,7 +9,7 @@ import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
-import { ColdPhase, DeletePhase, HotPhase, Policy, PolicyFromES, WarmPhase } from './types';
+import { ColdPhase, DeletePhase, HotPhase, Phase, Policy, PolicyFromES, WarmPhase } from './types';
 
 export const numberRequiredMessage = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.numberRequiredError',
@@ -98,8 +98,8 @@ export const policyNameAlreadyUsedErrorMessage = i18n.translate(
     defaultMessage: 'That policy name is already used.',
   }
 );
-export type PhaseValidationErrors<Phase extends HotPhase | WarmPhase | ColdPhase | DeletePhase> = {
-  [P in keyof Partial<Phase>]: string[];
+export type PhaseValidationErrors<T extends Phase> = {
+  [P in keyof Partial<T>]: string[];
 };
 
 export interface ValidationErrors {

@@ -20,7 +20,7 @@ import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { useLoadNodes } from '../../../services/api';
 import { NodeAttrsDetails } from './node_attrs_details';
-import { ColdPhase, Phases, WarmPhase } from '../../../services/policies/types';
+import { ColdPhase, Phase, Phases, WarmPhase } from '../../../services/policies/types';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 const learnMoreLink = (
@@ -38,11 +38,11 @@ const learnMoreLink = (
   </Fragment>
 );
 
-interface Props<Phase> {
+interface Props<T extends Phase> {
   phase: keyof Phases & string;
-  errors?: PhaseValidationErrors<Phase>;
-  phaseData: Phase;
-  setPhaseData: (dataKey: keyof Phase & string, value: string) => void;
+  errors?: PhaseValidationErrors<T>;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: string) => void;
   isShowingErrors: boolean;
 }
 export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
