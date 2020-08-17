@@ -22,7 +22,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ShardFailureOpenModalButton } from './shard_failure_open_modal_button';
 import { shardFailureRequest } from './__mocks__/shard_failure_request';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ShardFailureOpenModalButton', () => {

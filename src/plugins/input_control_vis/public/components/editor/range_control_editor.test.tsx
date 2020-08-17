@@ -22,7 +22,6 @@ import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert } from 'sinon';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { RangeControlEditor } from './range_control_editor';
