@@ -63,7 +63,11 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         subtitle: i18n.translate('xpack.observability.featureCatalogueSubtitle', {
           defaultMessage: 'Centralize & monitor',
         }),
-        descriptions: [
+        description: i18n.translate('xpack.observability.featureCatalogueDescription', {
+          defaultMessage:
+            'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
+        }),
+        appDescriptions: [
           i18n.translate('xpack.observability.featureCatalogueDescription1', {
             defaultMessage: 'Monitor infrastructure metrics.',
           }),
@@ -75,7 +79,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
           }),
         ],
         icon: 'logoObservability',
-        path: '/app/observability',
+        path: '/app/observability/landing',
         order: 200,
       });
     }

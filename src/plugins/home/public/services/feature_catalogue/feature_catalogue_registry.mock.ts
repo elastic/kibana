@@ -36,6 +36,7 @@ const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> =>
     start: jest.fn(),
     get: jest.fn(() => []),
     getSolutions: jest.fn(() => []),
+    removeFeature: jest.fn(),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

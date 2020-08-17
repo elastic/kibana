@@ -1,0 +1,12 @@
+.kbnOverviewFooter {
+  // Prevent children from rendering as flex items
+  .euiFlexItem {
+    display: block;
+  }
+
+  // Accounting for no `flush="both"` prop on EuiButtonEmpty
+  .euiButtonEmpty__content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

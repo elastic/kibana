@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverviewFooter render 1`] = `
+<footer
+  className="kbnOverviewFooter undefined"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        iconType="home"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Make this my landing page"
+          id="kibana-react.overviewFooter.makeDefaultRouteLink"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <mockConstructor
+        application={
+          Object {
+            "capabilities": Object {
+              "advancedSettings": Object {
+                "show": true,
+              },
+            },
+          }
+        }
+      >
+        <EuiButtonEmpty
+          data-test-subj="allPlugins"
+          href="/app/home#/feature_directory"
+          iconType="apps"
+          size="xs"
+        >
+          <FormattedMessage
+            defaultMessage="View app directory"
+            id="kibana-react.overviewFooter.appDirectoryButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </mockConstructor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</footer>
+`;

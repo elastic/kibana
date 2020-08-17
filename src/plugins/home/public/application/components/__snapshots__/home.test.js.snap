@@ -12,8 +12,8 @@ exports[`home change home route should render a link to change the default route
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -22,37 +22,18 @@ exports[`home change home route should render a link to change the default route
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -73,47 +54,9 @@ exports[`home change home route should render a link to change the default route
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            iconType="home"
-            onClick={[Function]}
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="Display a different page on log in"
-              id="home.changeHomeRouteLink"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -130,8 +73,8 @@ exports[`home directories should not render directory entry when showOnHomePage 
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -140,48 +83,18 @@ exports[`home directories should not render directory entry when showOnHomePage 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem
-              className="homHeader__actionItem"
-              data-test-subj="homManagementActionItem"
-            >
-              <EuiButtonEmpty
-                iconType="gear"
-                onClick={[Function]}
-              >
-                Manage
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -202,35 +115,9 @@ exports[`home directories should not render directory entry when showOnHomePage 
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -247,8 +134,8 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -257,37 +144,18 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -320,35 +188,9 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -365,8 +207,8 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -375,37 +217,18 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -438,35 +261,9 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -483,8 +280,8 @@ exports[`home directories should render solutions in the "solution section" 1`] 
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -493,31 +290,13 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
@@ -525,10 +304,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   >
     <SolutionsSection
       addBasePath={[Function]}
+      directories={Array []}
       solutions={
         Array [
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Analyze data in dashboards",
             ],
             "icon": "logoKibana",
@@ -539,7 +319,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "title": "Kibana",
           },
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Example use case",
             ],
             "icon": "empty",
@@ -550,7 +330,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "title": "Solution two",
           },
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Example use case",
             ],
             "icon": "empty",
@@ -561,7 +341,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "title": "Solution three",
           },
           Object {
-            "descriptions": Array [
+            "appDescriptions": Array [
               "Example use case",
             ],
             "icon": "empty",
@@ -594,35 +374,9 @@ exports[`home directories should render solutions in the "solution section" 1`] 
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -639,8 +393,8 @@ exports[`home header render 1`] = `
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -649,37 +403,18 @@ exports[`home header render 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -700,35 +435,9 @@ exports[`home header render 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -745,8 +454,8 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -755,47 +464,18 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                iconType="wrench"
-                onClick={[Function]}
-              >
-                Dev tools
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -828,35 +508,9 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -873,8 +527,8 @@ exports[`home header should show "Manage" link if stack management is available 
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -883,48 +537,18 @@ exports[`home header should show "Manage" link if stack management is available 
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem
-              className="homHeader__actionItem"
-              data-test-subj="homManagementActionItem"
-            >
-              <EuiButtonEmpty
-                iconType="gear"
-                onClick={[Function]}
-              >
-                Manage
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -945,35 +569,9 @@ exports[`home header should show "Manage" link if stack management is available 
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -990,8 +588,8 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1000,37 +598,18 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1051,35 +630,9 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -1096,8 +649,8 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1106,37 +659,18 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1157,35 +691,9 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -1202,8 +710,8 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1212,37 +720,18 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1263,35 +752,9 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -1308,8 +771,8 @@ exports[`home should render home component 1`] = `
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1318,37 +781,18 @@ exports[`home should render home component 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1369,35 +813,9 @@ exports[`home should render home component 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -1414,8 +832,8 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1424,37 +842,18 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1475,35 +874,9 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -1520,8 +893,8 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1530,37 +903,18 @@ exports[`home welcome should show the normal home page if welcome screen is disa
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1581,35 +935,9 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
@@ -1633,8 +961,8 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <div
       className="homHeader__inner"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <OverviewHeader
+        title={
           <EuiTitle
             size="m"
           >
@@ -1643,37 +971,18 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Home"
-                id="home.pageHeader.title"
+                id="home.header.title"
                 values={Object {}}
               />
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            className="homHeader__actions"
-          >
-            <EuiFlexItem
-              className="homHeader__actionItem"
-            >
-              <EuiButtonEmpty
-                href="#/tutorial_directory"
-                iconType="indexOpen"
-              >
-                Add data
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      />
     </div>
   </header>
   <div
     className="homContent"
   >
-    0
     <EuiFlexGroup
       className="homData homData--expanded"
     >
@@ -1694,35 +1003,9 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       aria-hidden="true"
       margin="xl"
     />
-    <footer
-      className="homFooter"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        />
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="allPlugins"
-            flush="right"
-            href="#/feature_directory"
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              defaultMessage="View app directory"
-              id="home.appDirectory.appDirectoryButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
+    <OverviewFooter
+      path="/app/home"
+    />
   </div>
 </main>
 `;
