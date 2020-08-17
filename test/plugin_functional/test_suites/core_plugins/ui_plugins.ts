@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('should run the new platform plugins', async () => {
         expect(
           await browser.execute(() => {
-            return window.__coreProvider.setup.plugins.core_plugin_b.sayHi();
+            return window._coreProvider.setup.plugins.core_plugin_b.sayHi();
           })
         ).to.be('Plugin A said: Hello from Plugin A!');
       });
@@ -50,7 +49,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('to start services via coreSetup.getStartServices', async () => {
         expect(
           await browser.executeAsync<boolean>(async (cb) => {
-            const [coreStart] = await window.__coreProvider.setup.core.getStartServices();
+            const [coreStart] = await window._coreProvider.setup.core.getStartServices();
             cb(Boolean(coreStart.overlays));
           })
         ).to.be(true);
@@ -77,7 +76,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('should send kbn-system-request header when asSystemRequest: true', async () => {
         expect(
           await browser.executeAsync(async (cb) => {
-            window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
+            window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? true"');
       });
@@ -85,7 +84,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('should not send kbn-system-request header when asSystemRequest: false', async () => {
         expect(
           await browser.executeAsync(async (cb) => {
-            window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
+            window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? false"');
       });

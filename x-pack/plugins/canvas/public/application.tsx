@@ -26,7 +26,6 @@ import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
-/* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';

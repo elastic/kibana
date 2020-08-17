@@ -6,6 +6,7 @@
 
 jest.mock('archiver');
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const archiver = require('archiver') as jest.Mock;
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import { httpServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';

@@ -5,12 +5,22 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { SharePluginSetup, UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+import {
+  SharePluginSetup,
+  UrlGeneratorsDefinition,
+  UrlGeneratorState,
+} from '../../../../src/plugins/share/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { JobId } from '../../reporting/common/types';
 import { ExplorerAppState } from './application/explorer/explorer_dashboard_service';
 import { MlStartDependencies } from './plugin';
+
+declare module '../../../../src/plugins/share/public' {
+  export interface UrlGeneratorStateMapping {
+    [ML_APP_URL_GENERATOR]: UrlGeneratorState<MlUrlGeneratorState>;
+  }
+}
 
 export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
 

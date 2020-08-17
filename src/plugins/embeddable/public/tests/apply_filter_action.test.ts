@@ -30,8 +30,8 @@ import {
   FilterableContainerFactory,
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
-// eslint-disable-next-line
 import { esFilters } from '../../../data/public';
+import { applyFilterTrigger } from '../../../ui_actions/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
   const { doStart, setup } = testPlugin();
@@ -86,7 +86,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
     query: { match: { extension: { query: 'foo' } } },
   };
 
-  await applyFilterAction.execute({ embeddable, filters: [filter] });
+  await applyFilterAction.execute({ embeddable, filters: [filter], trigger: applyFilterTrigger });
   expect(root.getInput().filters.length).toBe(1);
   expect(node1.getInput().filters.length).toBe(1);
   expect(embeddable.getInput().filters.length).toBe(1);

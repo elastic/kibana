@@ -113,4 +113,19 @@ describe('ES search strategy', () => {
     expect(method).toBe('POST');
     expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
   });
+
+  it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
+    mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+    const params = { index: 'foo-*', body: {} };
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+
+    expect(mockApiCaller).toBeCalled();
+    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
+    const { query } = mockApiCaller.mock.calls[0][1];
+    expect(query).toHaveProperty('wait_for_completion_timeout');
+    expect(query).toHaveProperty('keep_alive');
+  });
 });

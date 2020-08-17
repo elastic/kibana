@@ -11,7 +11,7 @@ import Printer from 'pdfmake';
 import xRegExp from 'xregexp';
 import { i18n } from '@kbn/i18n';
 
-const assetPath = path.resolve(__dirname, 'assets');
+const assetPath = path.resolve(__dirname, '..', '..', '..', 'common', 'assets');
 
 const tableBorderWidth = 1;
 

@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, FC } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath } from '../../contexts/kibana';

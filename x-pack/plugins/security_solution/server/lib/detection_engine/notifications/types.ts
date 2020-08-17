@@ -8,7 +8,7 @@ import {
   AlertsClient,
   PartialAlert,
   AlertType,
-  State,
+  AlertTypeState,
   AlertExecutorOptions,
 } from '../../../../../alerts/server';
 import { Alert } from '../../../../../alerts/common';
@@ -102,5 +102,9 @@ export const isNotificationAlertExecutor = (
 };
 
 export type NotificationAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: NotificationExecutorOptions) => Promise<State | void>;
+  executor: ({
+    services,
+    params,
+    state,
+  }: NotificationExecutorOptions) => Promise<AlertTypeState | void>;
 };

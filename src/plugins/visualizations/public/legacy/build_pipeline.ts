@@ -52,16 +52,18 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (
+type BuildVisFunction = (
   params: VisParams,
   schemas: Schemas,
   uiState: any,
   meta?: { savedObjectId?: string }
 ) => string;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
-  [key: string]: buildVisFunction;
+  [key: string]: BuildVisFunction;
 }
 
 interface BuildVisConfigFunction {
