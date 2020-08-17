@@ -10,6 +10,7 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
+import { Vector2, AABB } from '../types';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -239,32 +240,30 @@ function pxNum(px: string): number {
 /**
  * Get computed boundaries for process node elements
  */
-function getComputedNodeBoundaries(entityID: string) {
+function getComputedNodeBoundaries(entityID: string): AABB {
   const { left, top, width, height } = getComputedStyle(
     simulator.processNodeElements({ entityID }).getDOMNode()
   );
   return {
-    xMin: pxNum(left),
-    xMax: pxNum(left) + pxNum(width),
-    yMin: pxNum(top),
-    yMax: pxNum(top) + pxNum(height),
+    minimum: [pxNum(left), pxNum(top),],
+    maximum: [pxNum(left) + pxNum(width), pxNum(top) + pxNum(height),],
   };
 }
 
 /**
  * Coordinates for where the edgelines "start"
  */
-function getEdgeStartingCoordinates() {
+function getEdgeStartingCoordinates(): Vector2[] {
   return simulator.edgeLines().map((edge) => {
     const { left, top } = getComputedStyle(edge.getDOMNode());
-    return { edgeX: pxNum(left), edgeY: pxNum(top) };
+    return [pxNum(left), pxNum(top)];
   });
 }
 
 /**
  * Coordinates for where edgelines "end" (after application of transform)
  */
-function getEdgeTerminalCoordinates() {
+function getEdgeTerminalCoordinates(): Vector2[] {
   return simulator.edgeLines().map((edge) => {
     const { left, top, width, transform } = getComputedStyle(edge.getDOMNode());
     /**
@@ -276,7 +275,7 @@ function getEdgeTerminalCoordinates() {
     const edgeLineRotationInRadians = parseFloat(transform.match(/rotateZ\((-?\d+\.?\d+)/i)![1]);
     const rotateDownTo = Math.sin(edgeLineRotationInRadians) * pxNum(width);
     const rotateLeftTo = Math.cos(edgeLineRotationInRadians) * pxNum(width);
-    return { edgeX: pxNum(left) + rotateLeftTo, edgeY: pxNum(top) + rotateDownTo };
+    return [pxNum(left) + rotateLeftTo,  pxNum(top) + rotateDownTo]
   });
 }
 
@@ -287,10 +286,10 @@ function getEdgeTerminalCoordinates() {
 function coordinateBoundaryFilter(bounds: ReturnType<typeof getComputedNodeBoundaries>) {
   return (coords: ReturnType<typeof getEdgeTerminalCoordinates>[0]) => {
     return (
-      coords.edgeX >= bounds.xMin &&
-      coords.edgeX <= bounds.xMax &&
-      coords.edgeY >= bounds.yMin &&
-      coords.edgeY <= bounds.yMax
+      coords[0] >= bounds.minimum[0] &&
+      coords[0] <= bounds.maximum[0] &&
+      coords[1] >= bounds.minimum[1] &&
+      coords[1] <= bounds.maximum[1]
     );
   };
 }

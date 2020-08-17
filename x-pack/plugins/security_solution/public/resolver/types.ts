@@ -221,7 +221,7 @@ export type Vector2 = readonly [number, number];
  */
 export interface AABB {
   /**
-   * Vector who's `x` component is the _left_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
+   * Vector who's `x` component is the _left_ side of the `AABB` and who's `y` component is the _top_ side of the `AABB`.
    **/
   readonly minimum: Vector2;
   /**
