@@ -290,9 +290,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
         });
 
         test('should simulate an index action', async () => {
-          const { form, find, actions, exists } = testBed;
-
-          const INDEX = 'my_index';
+          const { form, actions, exists } = testBed;
 
           actions.clickAddActionButton();
           actions.clickActionLink('index');
