@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { EuiFlexGrid } from '@elastic/eui';
+import { isEmpty, flatten } from 'lodash';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -31,6 +32,13 @@ import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
+import { history } from '../../../utils/history';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+
+interface Sample {
+  traceId: string;
+  transactionId: string;
+}
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -62,15 +70,35 @@ export function TransactionDetails() {
     return config;
   }, [transactionName, transactionType, serviceName]);
 
-  const bucketIndex = distributionData.buckets.findIndex((bucket) =>
-    bucket.samples.some(
-      (sample) =>
-        sample.transactionId === urlParams.transactionId &&
-        sample.traceId === urlParams.traceId
-    )
+  const selectedSample = flatten(
+    distributionData.buckets.map((bucket) => bucket.samples)
+  ).find(
+    (sample) =>
+      sample.transactionId === urlParams.transactionId &&
+      sample.traceId === urlParams.traceId
   );
 
-  const traceSamples = distributionData.buckets[bucketIndex]?.samples;
+  const bucketWithSample =
+    selectedSample &&
+    distributionData.buckets.find((bucket) =>
+      bucket.samples.includes(selectedSample)
+    );
+
+  const traceSamples = bucketWithSample?.samples ?? [];
+  const bucketIndex = bucketWithSample
+    ? distributionData.buckets.indexOf(bucketWithSample)
+    : -1;
+
+  const selectSampleFromBucketClick = (sample: Sample) => {
+    history.push({
+      ...history.location,
+      search: fromQuery({
+        ...toQuery(history.location.search),
+        transactionId: sample.transactionId,
+        traceId: sample.traceId,
+      }),
+    });
+  };
 
   return (
     <div>
@@ -112,6 +140,11 @@ export function TransactionDetails() {
               isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
               bucketIndex={bucketIndex}
+              onBucketClick={(bucket) => {
+                if (!isEmpty(bucket.samples)) {
+                  selectSampleFromBucketClick(bucket.samples[0]);
+                }
+              }}
             />
           </EuiPanel>
 

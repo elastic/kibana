@@ -17,6 +17,14 @@ Array [
                 "field": "transaction.duration.us",
               },
             },
+            "transaction_type": Object {
+              "top_hits": Object {
+                "_source": Array [
+                  "transaction.type",
+                ],
+                "size": 1,
+              },
+            },
           },
           "composite": Object {
             "size": 10000,
@@ -221,6 +229,14 @@ Array [
             "count": Object {
               "value_count": Object {
                 "field": "transaction.duration.us",
+              },
+            },
+            "transaction_type": Object {
+              "top_hits": Object {
+                "_source": Array [
+                  "transaction.type",
+                ],
+                "size": 1,
               },
             },
           },

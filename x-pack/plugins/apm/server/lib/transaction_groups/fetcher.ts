@@ -66,6 +66,7 @@ function getItemsWithRelativeImpact(
     key: string | Record<'service.name' | 'transaction.name', string>;
     avg?: number | null;
     count?: number | null;
+    transactionType?: string;
     p95?: number;
   }>
 ) {
@@ -84,6 +85,7 @@ function getItemsWithRelativeImpact(
       key: item.key,
       averageResponseTime: item.avg,
       transactionsPerMinute: (item.count ?? 0) / minutes,
+      transactionType: item.transactionType || '',
       impact:
         item.sum !== null && item.sum !== undefined
           ? ((item.sum - min) / (max - min)) * 100 || 0
@@ -209,6 +211,7 @@ export interface TransactionGroup {
   key: string | Record<'service.name' | 'transaction.name', string>;
   serviceName: string;
   transactionName: string;
+  transactionType: string;
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
   p95: number | undefined;

@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { flatten, omit } from 'lodash';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import { history } from '../utils/history';
+import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
+import { maybe } from '../../common/utils/maybe';
 
 const INITIAL_DATA = {
   buckets: [] as TransactionDistributionAPIResponse['buckets'],
@@ -29,9 +33,9 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
   const uiFilters = useUiFilters(urlParams);
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    (callApmApi) => {
+    async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        return callApmApi({
+        const response = await callApmApi({
           pathname:
             '/api/apm/services/{serviceName}/transaction_groups/distribution',
           params: {
@@ -49,6 +53,39 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
             },
           },
         });
+
+        const selectedSample =
+          transactionId && traceId
+            ? flatten(response.buckets.map((bucket) => bucket.samples)).find(
+                (sample) =>
+                  sample.transactionId === transactionId &&
+                  sample.traceId === traceId
+              )
+            : undefined;
+
+        if (!selectedSample) {
+          // selected sample was not found. select a new one:
+          // sorted by total number of requests, but only pick
+          // from buckets that have samples
+          const preferredSample = maybe(
+            response.buckets
+              .filter((bucket) => bucket.samples.length > 0)
+              .sort((bucket) => bucket.count)[0]?.samples[0]
+          );
+
+          history.push({
+            ...history.location,
+            search: fromQuery({
+              ...omit(toQuery(history.location.search), [
+                'traceId',
+                'transactionId',
+              ]),
+              ...preferredSample,
+            }),
+          });
+        }
+
+        return response;
       }
     },
     // the histogram should not be refetched if the transactionId or traceId changes

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { merge } from 'lodash';
+import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
@@ -72,6 +73,12 @@ export async function getCounts({
         ),
       },
     },
+    transaction_type: {
+      top_hits: {
+        size: 1,
+        _source: [TRANSACTION_TYPE],
+      },
+    },
   });
 
   const response = await setup.apmEventClient.search(params);
@@ -79,9 +86,14 @@ export async function getCounts({
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
   ).map((bucket) => {
+    // type is Transaction | APMBaseDoc because it could be a metric document
+    const source = (bucket.transaction_type.hits.hits[0]
+      ._source as unknown) as { transaction: { type: string } };
+
     return {
       key: bucket.key as BucketKey,
       count: bucket.count.value,
+      transactionType: source.transaction.type,
     };
   });
 }

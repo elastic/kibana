@@ -16,9 +16,9 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionDetailRedirectLink } from '../../../shared/Links/apm/TransactionDetailRedirect';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
-const TransactionNameLink = styled(TransactionDetailRedirectLink)`
+const TransactionNameLink = styled(TransactionDetailLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
@@ -38,7 +38,10 @@ export function TransactionList({ items, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (_, { serviceName, transactionName }: TransactionGroup) => {
+        render: (
+          _,
+          { serviceName, transactionName, transactionType }: TransactionGroup
+        ) => {
           return (
             <EuiToolTip
               id="transaction-name-link-tooltip"
@@ -47,6 +50,7 @@ export function TransactionList({ items, isLoading }: Props) {
               <TransactionNameLink
                 serviceName={serviceName}
                 transactionName={transactionName}
+                transactionType={transactionType}
               >
                 {transactionName}
               </TransactionNameLink>

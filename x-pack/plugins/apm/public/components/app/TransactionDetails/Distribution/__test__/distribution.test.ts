@@ -34,30 +34,20 @@ describe('Distribution', () => {
       },
     ] as IBucket[];
     expect(getFormattedBuckets(buckets, 20)).toEqual([
-      { x: 20, x0: 0, y: 0, style: { cursor: 'default' }, samples: [] },
-      { x: 40, x0: 20, y: 0, style: { cursor: 'default' }, samples: [] },
-      { x: 60, x0: 40, y: 0, style: { cursor: 'default' }, samples: [] },
+      { x: 20, x0: 0, y: 0, style: { cursor: 'default' } },
+      { x: 40, x0: 20, y: 0, style: { cursor: 'default' } },
+      { x: 60, x0: 40, y: 0, style: { cursor: 'default' } },
       {
         x: 80,
         x0: 60,
         y: 5,
         style: { cursor: 'pointer' },
-        samples: [
-          {
-            transactionId: 'someTransactionId',
-          },
-        ],
       },
       {
         x: 100,
         x0: 80,
         y: 100,
         style: { cursor: 'pointer' },
-        samples: [
-          {
-            transactionId: 'anotherTransactionId',
-          },
-        ],
       },
     ]);
   });

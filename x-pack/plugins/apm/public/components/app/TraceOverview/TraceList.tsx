@@ -16,9 +16,9 @@ import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
-import { TransactionDetailRedirectLink } from '../../shared/Links/apm/TransactionDetailRedirect';
+import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
 
-const StyledTransactionLink = styled(TransactionDetailRedirectLink)`
+const StyledTransactionLink = styled(TransactionDetailLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -36,11 +36,15 @@ const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
     }),
     width: '40%',
     sortable: true,
-    render: (_: string, { serviceName, transactionName }: TransactionGroup) => (
+    render: (
+      _: string,
+      { serviceName, transactionName, transactionType }: TransactionGroup
+    ) => (
       <EuiToolTip content={transactionName}>
         <StyledTransactionLink
           serviceName={serviceName}
           transactionName={transactionName}
+          transactionType={transactionType}
         >
           {transactionName}
         </StyledTransactionLink>

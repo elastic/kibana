@@ -28,7 +28,6 @@ import {
   EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
-import { TransactionOverviewRedirectPage } from '../../TransactionOverviewRedirectPage';
 import { RumHome } from '../../RumDashboard/RumHome';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
@@ -220,13 +219,6 @@ export const routes: BreadcrumbRoute[] = [
     component: TraceLink,
     breadcrumb: null,
     name: RouteName.LINK_TO_TRACE,
-  },
-  {
-    exact: true,
-    path: '/link-to/transaction-group',
-    component: TransactionOverviewRedirectPage,
-    breadcrumb: null,
-    name: RouteName.LINK_TO_TRANSACTION_GROUP,
   },
   {
     exact: true,
