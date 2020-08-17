@@ -30,6 +30,7 @@ export interface FormHook<T extends FormData = FormData> {
   readonly isValid: boolean | undefined;
   readonly id: string;
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
+  validate: () => Promise<boolean>;
   subscribe: (handler: OnUpdateHandler<T>) => Subscription;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;

@@ -389,6 +389,7 @@ export function useForm<T extends FormData = FormData>(
       isValid,
       id,
       submit: submitForm,
+      validate: validateAllFields,
       subscribe,
       setFieldValue,
       setFieldErrors,
@@ -428,6 +429,7 @@ export function useForm<T extends FormData = FormData>(
     addField,
     removeField,
     validateFields,
+    validateAllFields,
   ]);
 
   useEffect(() => {
