@@ -26,7 +26,6 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-  Container,
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
