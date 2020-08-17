@@ -23,6 +23,7 @@ import {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
 } from 'src/plugins/telemetry_collection_manager/server';
+import { take } from 'rxjs/operators';
 import {
   CoreSetup,
   PluginInitializerContext,
@@ -42,19 +43,26 @@ import {
 import { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { handleOldSettings } from './handle_old_settings';
+import { getTelemetrySavedObject } from './telemetry_repository';
+import { getTelemetryOptIn } from '../common/telemetry_config';
 
-export interface TelemetryPluginsSetup {
+interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
 }
 
-export interface TelemetryPluginsStart {
+interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
+}
+
+export type TelemetryPluginsSetup = void;
+export interface TelemetryPluginsStart {
+  getIsOptedIn: () => Promise<boolean | null>;
 }
 
 type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
 
-export class TelemetryPlugin implements Plugin {
+export class TelemetryPlugin implements Plugin<TelemetryPluginsSetup, TelemetryPluginsStart> {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
@@ -76,8 +84,8 @@ export class TelemetryPlugin implements Plugin {
 
   public async setup(
     { elasticsearch, http, savedObjects }: CoreSetup,
-    { usageCollection, telemetryCollectionManager }: TelemetryPluginsSetup
-  ) {
+    { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
+  ): Promise<TelemetryPluginsSetup> {
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
@@ -97,7 +105,10 @@ export class TelemetryPlugin implements Plugin {
     this.registerUsageCollectors(usageCollection);
   }
 
-  public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsStart) {
+  public async start(
+    core: CoreStart,
+    { telemetryCollectionManager }: TelemetryPluginsDepsStart
+  ): Promise<TelemetryPluginsStart> {
     const { savedObjects, uiSettings } = core;
     this.savedObjectsClient = savedObjects.createInternalRepository();
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
@@ -110,6 +121,24 @@ export class TelemetryPlugin implements Plugin {
     }
 
     this.fetcherTask.start(core, { telemetryCollectionManager });
+
+    return {
+      getIsOptedIn: async () => {
+        const internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
+        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository!);
+        const config = await this.config$.pipe(take(1)).toPromise();
+        const allowChangingOptInStatus = config.allowChangingOptInStatus;
+        const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
+        const currentKibanaVersion = this.currentKibanaVersion;
+
+        return getTelemetryOptIn({
+          currentKibanaVersion,
+          telemetrySavedObject,
+          allowChangingOptInStatus,
+          configTelemetryOptIn,
+        });
+      },
+    };
   }
 
   private registerMappings(registerType: SavedObjectsRegisterType) {

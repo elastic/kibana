@@ -24,7 +24,7 @@ import { configSchema, TelemetryConfigType } from './config';
 
 export { FetcherTask } from './fetcher';
 export { handleOldSettings } from './handle_old_settings';
-export { TelemetryPluginsSetup } from './plugin';
+export { TelemetryPluginsSetup, TelemetryPluginsStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   schema: configSchema,
