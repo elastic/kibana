@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { makeChecksWithStatus } from './helper/make_checks';
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
@@ -84,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
 
     beforeEach(async () => {
+      await delay(1000);
       await es.indices.refresh();
     });
 
@@ -119,6 +122,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should receive expected results after calling overview logging', async () => {
+      // wait few seconds to make sure data is refreshed, just to avoid flakiness
+      await delay(2000);
       // call overview page
       const { body: result } = await supertest
         .post(API_URLS.LOG_PAGE_VIEW)
