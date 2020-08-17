@@ -29,7 +29,7 @@ $homePageWidth: 1200px;
 
 .homHeaderPage {
   background-color: $euiPageBackgroundColor;
-  border-bottom: 1px solid $euiColorLightShade;
+  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
 }
 
 .homHeaderPage__inner {
@@ -48,22 +48,18 @@ $homePageWidth: 1200px;
   }
 }
 
-.homHeaderPage__actions {
+.homHeaderPage__actionItem {
   @include euiBreakpoint('xs', 's') {
-    margin-top: 0;
-
-    .homHeaderPage__actionItem {
-      margin-bottom: 0 !important;
-      margin-top: 0 !important;
-    }
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
   }
 }
 
 .homContent {
-  background-color: transparent;
+  // background-color: transparent;
   margin: 0 auto;
   max-width: $homePageWidth;
-  padding: 0 $euiSize $euiSizeXL;
+  padding: $euiSizeXL $euiSize;
   width: 100%;
 }
 

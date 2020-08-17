@@ -143,7 +143,7 @@ export class Home extends Component {
           }`}
         >
           <div className="homHeaderPage__inner">
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup>
               <EuiFlexItem className="homHeaderPage__title">
                 <EuiTitle>
                   <h1>
