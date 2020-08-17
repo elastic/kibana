@@ -55,6 +55,7 @@ describe('SuggestionsComponent', () => {
         suggestions={mockSuggestions}
         loadMore={noop}
         closeList={noop}
+        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
       />
     );
 
@@ -71,6 +72,7 @@ describe('SuggestionsComponent', () => {
         suggestions={[]}
         loadMore={noop}
         closeList={noop}
+        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
       />
     );
 
@@ -87,6 +89,7 @@ describe('SuggestionsComponent', () => {
         suggestions={mockSuggestions}
         loadMore={noop}
         closeList={noop}
+        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
       />
     );
 
@@ -104,6 +107,7 @@ describe('SuggestionsComponent', () => {
         suggestions={mockSuggestions}
         loadMore={noop}
         closeList={noop}
+        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
       />
     );
 
@@ -121,6 +125,7 @@ describe('SuggestionsComponent', () => {
         suggestions={mockSuggestions}
         loadMore={noop}
         closeList={noop}
+        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
       />
     );
 
@@ -140,6 +145,7 @@ describe('SuggestionsComponent', () => {
         suggestions={mockSuggestions}
         loadMore={noop}
         closeList={noop}
+        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
       />
     );
 

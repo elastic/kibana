@@ -102,7 +102,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   private abortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
-  private queryBarDivRefInstance: RefObject<HTMLDivElement> = createRef();
+  private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -575,10 +575,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
 
     return (
-      <div
-        className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap"
-        ref={this.queryBarDivRefInstance}
-      >
+      <div className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap">
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
@@ -594,6 +591,7 @@ export class QueryStringInputUI extends Component<Props, State> {
             <div
               role="search"
               className="euiFormControlLayout__childrenWrapper kuiLocalSearchAssistedInput"
+              ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
                 placeholder={
@@ -640,22 +638,21 @@ export class QueryStringInputUI extends Component<Props, State> {
                 {this.getQueryString()}
               </EuiTextArea>
             </div>
+            <EuiPortal>
+              <SuggestionsComponent
+                show={this.state.isSuggestionsVisible}
+                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+                index={this.state.index}
+                onClick={this.onClickSuggestion}
+                onMouseEnter={this.onMouseEnterSuggestion}
+                loadMore={this.increaseLimit}
+                closeList={this.closeSuggestionsList}
+                queryBarInputDivRef={this.queryBarInputDivRefInstance}
+                dropdownHeight={this.props.dropdownHeight}
+              />
+            </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-
-        <EuiPortal>
-          <SuggestionsComponent
-            show={this.state.isSuggestionsVisible}
-            suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-            index={this.state.index}
-            onClick={this.onClickSuggestion}
-            onMouseEnter={this.onMouseEnterSuggestion}
-            loadMore={this.increaseLimit}
-            closeList={this.closeSuggestionsList}
-            queryBarRect={this.queryBarDivRefInstance.current?.getBoundingClientRect()}
-            dropdownHeight={this.props.dropdownHeight}
-          />
-        </EuiPortal>
 
         <QueryLanguageSwitcher
           language={this.props.query.language}

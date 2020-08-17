@@ -35,7 +35,7 @@ interface Props {
   suggestions: QuerySuggestion[];
   loadMore: () => void;
   closeList: () => void;
-  queryBarRect?: DOMRect;
+  queryBarInputDivRef: RefObject<HTMLDivElement>;
   dropdownHeight?: string;
 }
 
@@ -47,7 +47,7 @@ export class SuggestionsComponent extends Component<Props> {
 
   updatePosition = () => {
     const kbnTypeaheadDiv = this.kbnTypeaheadDivRefInstance.current;
-    const { queryBarRect } = this.props;
+    const queryBarRect = this.props.queryBarInputDivRef.current?.getBoundingClientRect();
 
     if (queryBarRect && kbnTypeaheadDiv) {
       const documentHeight = document.documentElement.clientHeight || window.innerHeight;
@@ -80,8 +80,10 @@ export class SuggestionsComponent extends Component<Props> {
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
+      const queryBarInputDiv = this.props.queryBarInputDivRef.current;
       const isDescriptionFittable = Boolean(
-        this.props.queryBarRect && this.props.queryBarRect.width >= suggestionsListRequiredWidth
+        queryBarInputDiv &&
+          queryBarInputDiv.getBoundingClientRect().width >= suggestionsListRequiredWidth
       );
 
       return (
