@@ -237,6 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         it('job creation loads the advanced wizard for the source data', async () => {
+          await ml.testExecution.logTestStep('job creation navigates to job management');
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
 
@@ -472,7 +473,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.jobTypeSelection.assertAdvancedJobWizardOpen();
         });
 
-        it('job cloningnavigates through the advanced wizard, checks and sets all needed fields', async () => {
+        it('job cloning navigates through the advanced wizard, checks and sets all needed fields', async () => {
           await ml.testExecution.logTestStep('job cloning displays the configure datafeed step');
           await ml.jobWizardCommon.assertConfigureDatafeedSectionExists();
 
@@ -638,7 +639,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        it('job cloningruns the clone job and displays it correctly in the job list', async () => {
+        it('job cloning runs the clone job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep('job cloning creates the job and finishes processing');
           await ml.jobWizardCommon.assertCreateJobButtonExists();
           await ml.jobWizardAdvanced.createJob();
