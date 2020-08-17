@@ -210,7 +210,11 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
-              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
+              if (
+                originatingApp === 'dashboards' &&
+                featureFlagConfig.showNewVisualizeFlow &&
+                !savedVis
+              ) {
                 return createVisReference();
               }
               return doSave(saveOptions);
