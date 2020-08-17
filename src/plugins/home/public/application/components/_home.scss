@@ -24,7 +24,7 @@ $homePageWidth: 1200px;
   background-color: $euiColorEmptyShade;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{$euiHeaderHeightCompensation});
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
 .homHeader {
