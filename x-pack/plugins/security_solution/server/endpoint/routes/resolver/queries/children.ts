@@ -6,7 +6,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder } from '../utils/pagination';
+import { ChildrenPaginationBuilder } from '../utils/children_pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
@@ -14,7 +14,7 @@ import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/com
  */
 export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
   constructor(
-    private readonly pagination: PaginationBuilder,
+    private readonly pagination: ChildrenPaginationBuilder,
     indexPattern: string | string[],
     endpointID?: string
   ) {
@@ -32,6 +32,7 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
       query: {
         bool: {
           filter: [
+            ...paginationFields.filters,
             {
               terms: { 'endgame.unique_ppid': uniquePIDs },
             },
@@ -63,7 +64,7 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
   }
 
   protected query(entityIDs: string[]): JsonObject {
-    const paginationFields = this.pagination.buildQueryFieldsAsInterface('event.id');
+    const paginationFields = this.pagination.buildQueryFields('event.id');
     return {
       /**
        * Using collapse here will only return a single event per occurrence of a process.entity_id. The events are sorted
@@ -80,12 +81,12 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
       collapse: {
         field: 'process.entity_id',
       },
-      // do not set the search_after field because collapse does not work with it
       size: paginationFields.size,
       sort: paginationFields.sort,
       query: {
         bool: {
           filter: [
+            ...paginationFields.filters,
             {
               bool: {
                 should: [

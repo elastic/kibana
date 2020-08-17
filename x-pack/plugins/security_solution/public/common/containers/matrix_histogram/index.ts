@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState, useRef } from 'react';
 
-import { deepEqual } from 'hoek';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
