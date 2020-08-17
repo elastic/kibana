@@ -69,7 +69,6 @@ export function createTaskPoller<T, H>({
       mapTo(none)
     )
   ).pipe(
-    tap(() => console.log('SCAN', new Date().toISOString())),
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)
