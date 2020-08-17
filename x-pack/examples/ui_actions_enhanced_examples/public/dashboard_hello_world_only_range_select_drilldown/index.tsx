@@ -8,39 +8,34 @@ import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
-import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
+import { RangeSelectContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps } from '../../../../../src/plugins/kibana_utils/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../src/plugins/ui_actions/public';
-
-export type ActionContext = ChartActionContext;
+import { SELECT_RANGE_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export interface Config {
   name: string;
 }
 
-const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
+const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT =
+  'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT';
 
-export class DashboardHelloWorldDrilldown
-  implements Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
-  public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN;
+export class DashboardHelloWorldOnlyRangeSelectDrilldown
+  implements Drilldown<Config, typeof SELECT_RANGE_TRIGGER> {
+  public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT;
 
-  public readonly order = 6;
+  public readonly order = 7;
 
-  public readonly getDisplayName = () => 'Say hello drilldown';
+  public readonly getDisplayName = () => 'Say hello only for range select';
 
   public readonly euiIcon = 'cheer';
 
-  supportedTriggers(): Array<typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
-    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+  supportedTriggers(): Array<typeof SELECT_RANGE_TRIGGER> {
+    return [SELECT_RANGE_TRIGGER];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps<Config>> = ({
     config,
     onConfig,
-    context,
   }) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
@@ -61,7 +56,7 @@ export class DashboardHelloWorldDrilldown
     return !!config.name;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
-    alert(`Hello, ${config.name}`);
+  public readonly execute = async (config: Config, context: RangeSelectContext) => {
+    alert(`Hello, ${config.name}, your selected range: ${JSON.stringify(context.data.range)}`);
   };
 }
