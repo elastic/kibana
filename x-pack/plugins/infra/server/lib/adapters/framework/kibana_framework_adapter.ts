@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/array-type */
-
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -43,9 +41,9 @@ export class KibanaFramework {
     this.plugins = plugins;
   }
 
-  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
-    config: InfraRouteConfig<params, query, body, method>,
-    handler: RequestHandler<params, query, body>
+  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    config: InfraRouteConfig<Params, Query, Body, Method>,
+    handler: RequestHandler<Params, Query, Body>
   ) {
     const defaultOptions = {
       tags: ['access:infra'],

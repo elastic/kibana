@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
 import { EntriesArray, entriesArray } from './entries';
+import { entriesList } from './entry_list';
 
 /**
  * Types the nonEmptyEntriesArray as:
@@ -21,6 +22,14 @@ export const nonEmptyEntriesArray = new t.Type<EntriesArray, EntriesArray, unkno
     if (Array.isArray(input) && input.length === 0) {
       return t.failure(input, context);
     } else {
+      if (
+        Array.isArray(input) &&
+        input.some((entry) => entriesList.is(entry)) &&
+        input.some((entry) => !entriesList.is(entry))
+      ) {
+        // fail when an exception item contains both a value list entry and a non-value list entry
+        return t.failure(input, context, 'Cannot have entry of type list and other');
+      }
       return entriesArray.validate(input, context);
     }
   },

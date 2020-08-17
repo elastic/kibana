@@ -45,7 +45,7 @@ import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
 import { GenericParams } from 'elasticsearch';
 import { GetParams } from 'elasticsearch';
-import { GetResponse } from 'elasticsearch';
+import { GetResponse as GetResponse_2 } from 'elasticsearch';
 import { GetScriptParams } from 'elasticsearch';
 import { GetSourceParams } from 'elasticsearch';
 import { GetTemplateParams } from 'elasticsearch';
@@ -121,7 +121,7 @@ import { ResponseToolkit } from 'hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
-import { SearchResponse } from 'elasticsearch';
+import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
 import { Server } from 'hapi';
@@ -158,7 +158,7 @@ export type AppenderConfigType = TypeOf<typeof appendersSchema>;
 // @public
 export function assertNever(x: never): never;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
     // (undocumented)
     indices: {
@@ -168,7 +168,7 @@ export interface AssistanceAPIResponse {
     };
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface AssistantAPIClientParams extends GenericParams {
     // (undocumented)
     method: 'GET';
@@ -532,6 +532,14 @@ export interface CoreStatus {
     savedObjects: ServiceStatus;
 }
 
+// @public (undocumented)
+export interface CountResponse {
+    // (undocumented)
+    count: number;
+    // (undocumented)
+    _shards: ShardsInfo;
+}
+
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
@@ -593,6 +601,28 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
 }>;
 
 // @public (undocumented)
+export interface DeleteDocumentResponse {
+    // (undocumented)
+    error?: {
+        type: string;
+    };
+    // (undocumented)
+    found: boolean;
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _index: string;
+    // (undocumented)
+    result: string;
+    // (undocumented)
+    _shards: ShardsResponse;
+    // (undocumented)
+    _type: string;
+    // (undocumented)
+    _version: number;
+}
+
+// @public @deprecated (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
     // (undocumented)
     method: 'GET';
@@ -600,7 +630,7 @@ export interface DeprecationAPIClientParams extends GenericParams {
     path: '/_migration/deprecations';
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface DeprecationAPIResponse {
     // (undocumented)
     cluster_settings: DeprecationInfo[];
@@ -612,7 +642,7 @@ export interface DeprecationAPIResponse {
     node_settings: DeprecationInfo[];
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface DeprecationInfo {
     // (undocumented)
     details?: string;
@@ -641,6 +671,21 @@ export interface DiscoveredPlugin {
     readonly requiredBundles: readonly PluginName[];
     readonly requiredPlugins: readonly PluginName[];
 }
+
+// @public
+export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
+    transport: {
+        request(params: TransportRequestParams, options?: TransportRequestOptions): TransportRequestPromise<ApiResponse>;
+    };
+};
+
+// @public
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'logQueries' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
+    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
+    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
+    ssl?: Partial<ElasticsearchConfig['ssl']>;
+    keepAlive?: boolean;
+};
 
 // @public
 export class ElasticsearchConfig {
@@ -680,6 +725,8 @@ export interface ElasticsearchServiceSetup {
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
+    readonly client: IClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
     // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
@@ -711,6 +758,16 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// @public (undocumented)
+export interface Explanation {
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    details: Explanation[];
+    // (undocumented)
+    value: number;
+}
+
 // @public
 export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
@@ -737,6 +794,28 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest)
 export function getFlattenedObject(rootValue: Record<string, any>): {
     [key: string]: any;
 };
+
+// @public (undocumented)
+export interface GetResponse<T> {
+    // (undocumented)
+    found: boolean;
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _index: string;
+    // (undocumented)
+    _primary_term: number;
+    // (undocumented)
+    _routing?: string;
+    // (undocumented)
+    _seq_no: number;
+    // (undocumented)
+    _source: T;
+    // (undocumented)
+    _type: string;
+    // (undocumented)
+    _version: number;
+}
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
@@ -829,6 +908,12 @@ export interface HttpServiceStart {
 export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
+export interface IClusterClient {
+    readonly asInternalUser: ElasticsearchClient;
+    asScoped: (request: ScopeableRequest) => IScopedClusterClient;
+}
+
+// @public
 export interface IContextContainer<THandler extends HandlerFunction<any>> {
     createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
@@ -845,6 +930,11 @@ export interface ICspConfig {
     readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
+}
+
+// @public
+export interface ICustomClusterClient extends IClusterClient {
+    close: () => Promise<void>;
 }
 
 // @public
@@ -868,13 +958,13 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
-// @public
+// @public @deprecated
 export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
-// @public
+// @public @deprecated
 export type ILegacyCustomClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
 
-// @public
+// @public @deprecated
 export type ILegacyScopedClusterClient = Pick<LegacyScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public (undocumented)
@@ -889,7 +979,7 @@ export interface ImageValidation {
 // @public
 export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
     [indexName: string]: DeprecationInfo[];
@@ -929,6 +1019,12 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 
 // @public
 export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
+
+// @public
+export interface IScopedClusterClient {
+    readonly asCurrentUser: ElasticsearchClient;
+    readonly asInternalUser: ElasticsearchClient;
+}
 
 // @public
 export function isRelativeUrl(candidatePath: string): boolean;
@@ -977,6 +1073,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
 // @public
 export interface KibanaRequestEvents {
     aborted$: Observable<void>;
+    completed$: Observable<void>;
 }
 
 // @public
@@ -1019,7 +1116,7 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['bulk']>;
@@ -1044,7 +1141,7 @@ export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'fieldStats', params: FieldStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['fieldStats']>;
     // (undocumented)
-    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse<T>>;
+    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse_2<T>>;
     // (undocumented)
     (endpoint: 'getScript', params: GetScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['getScript']>;
     // (undocumented)
@@ -1076,9 +1173,9 @@ export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
     // (undocumented)
-    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse_2<T>>;
     // (undocumented)
-    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse_2<T>>;
     // (undocumented)
     (endpoint: 'searchShards', params: SearchShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchShards']>;
     // (undocumented)
@@ -1263,15 +1360,13 @@ export interface LegacyAPICaller {
     <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<T>;
 }
 
-// @public
+// @public @deprecated
 export interface LegacyCallAPIOptions {
     signal?: AbortSignal;
     wrap401Errors?: boolean;
 }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IClusterClient"
-//
-// @public (undocumented)
+// @public @deprecated
 export class LegacyClusterClient implements ILegacyClusterClient {
     constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
@@ -1293,7 +1388,7 @@ export interface LegacyConfig {
     set(config: LegacyVars): void;
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
@@ -1301,7 +1396,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
     ssl?: Partial<ElasticsearchConfig['ssl']>;
 };
 
-// @public (undocumented)
+// @public
 export interface LegacyElasticsearchError extends Boom {
     // (undocumented)
     [code]?: string;
@@ -1334,9 +1429,7 @@ export class LegacyInternals implements ILegacyInternals {
 export interface LegacyRequest extends Request {
 }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IScopedClusterClient"
-//
-// @public (undocumented)
+// @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined, auditor?: Auditor | undefined);
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
@@ -1492,10 +1585,10 @@ export interface LogRecord {
 export interface MetricsServiceSetup {
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
 // @public
@@ -1745,6 +1838,7 @@ export interface RequestHandlerContext {
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
+            client: IScopedClusterClient;
             legacy: {
                 client: ILegacyScopedClusterClient;
             };
@@ -1792,6 +1886,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    timeout?: number;
     xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
@@ -2084,7 +2179,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-    refresh?: MutatingOperationRefreshSetting;
+    refresh?: boolean;
 }
 
 // @public (undocumented)
@@ -2398,7 +2493,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: LegacyAPICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
@@ -2414,7 +2509,7 @@ export class SavedObjectsRepository {
         attributes: any;
     }>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
-    }
+}
 
 // @public
 export interface SavedObjectsRepositoryFactory {
@@ -2554,6 +2649,39 @@ export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
+// @public (undocumented)
+export interface SearchResponse<T = unknown> {
+    // (undocumented)
+    aggregations?: any;
+    // (undocumented)
+    hits: {
+        total: number;
+        max_score: number;
+        hits: Array<{
+            _index: string;
+            _type: string;
+            _id: string;
+            _score: number;
+            _source: T;
+            _version?: number;
+            _explanation?: Explanation;
+            fields?: any;
+            highlight?: any;
+            inner_hits?: any;
+            matched_queries?: string[];
+            sort?: string[];
+        }>;
+    };
+    // (undocumented)
+    _scroll_id?: string;
+    // (undocumented)
+    _shards: ShardsResponse;
+    // (undocumented)
+    timed_out: boolean;
+    // (undocumented)
+    took: number;
+}
+
 // @public
 export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
     detail?: string;
@@ -2612,6 +2740,30 @@ export interface SessionStorageCookieOptions<T> {
 export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
+}
+
+// @public (undocumented)
+export interface ShardsInfo {
+    // (undocumented)
+    failed: number;
+    // (undocumented)
+    skipped: number;
+    // (undocumented)
+    successful: number;
+    // (undocumented)
+    total: number;
+}
+
+// @public (undocumented)
+export interface ShardsResponse {
+    // (undocumented)
+    failed: number;
+    // (undocumented)
+    skipped: number;
+    // (undocumented)
+    successful: number;
+    // (undocumented)
+    total: number;
 }
 
 // @public (undocumented)

@@ -1198,3 +1198,21 @@ export const mockCheckTimelinesStatusAfterInstallResult = {
     },
   ],
 };
+
+export const mockSavedObject = {
+  type: 'siem-ui-timeline',
+  id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  attributes: {
+    savedQueryId: null,
+
+    status: 'immutable',
+
+    excludedRowRendererIds: [],
+    ...mockGetTemplateTimelineValue,
+  },
+  references: [],
+  updated_at: '2020-07-21T12:03:08.901Z',
+  version: 'WzAsMV0=',
+  namespaces: ['default'],
+  score: 0.9444616,
+};

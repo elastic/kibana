@@ -21,7 +21,7 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
   | Set to `false` to disable the {report-features}.
 
 | `xpack.reporting.encryptionKey`
-  | Set to any text string. By default, {kib} will generate a random key when it
+  | Set to an alphanumeric, at least 32 characters long text string. By default, {kib} will generate a random key when it
   starts, which will cause pending reports to fail after restart. Configure this
   setting to preserve the same key across multiple restarts and multiple instances of {kib}.
 

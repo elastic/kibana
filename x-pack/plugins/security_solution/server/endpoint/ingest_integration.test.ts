@@ -12,7 +12,6 @@ import {
   ManifestManagerMockType,
 } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { getPackageConfigCreateCallback } from './ingest_integration';
-import { ManifestConstants } from './lib/artifacts';
 
 describe('ingest_integration tests ', () => {
   describe('ingest_integration sanity checks', () => {
@@ -30,16 +29,6 @@ describe('ingest_integration tests ', () => {
       expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual({
         artifacts: {
-          'endpoint-exceptionlist-linux-v1': {
-            compression_algorithm: 'zlib',
-            decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            decoded_size: 14,
-            encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-            encoded_size: 22,
-            encryption_algorithm: 'none',
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-          },
           'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
             decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
@@ -61,7 +50,7 @@ describe('ingest_integration tests ', () => {
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
           },
         },
-        manifest_version: 'a9b7ef358a363f327f479e31efc4f228b2277a7fb4d1914ca9b4e7ca9ffcf537',
+        manifest_version: '1.0.0',
         schema_version: 'v1',
       });
     });
@@ -70,9 +59,7 @@ describe('ingest_integration tests ', () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const manifestManager = getManifestManagerMock();
       manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error('error updating')]);
-      const lastComputed = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
+      const lastComputed = await manifestManager.getLastComputedManifest();
 
       const callback = getPackageConfigCreateCallback(logger, manifestManager);
       const policyConfig = createNewPackageConfigMock();
@@ -90,9 +77,7 @@ describe('ingest_integration tests ', () => {
       const manifestManager = getManifestManagerMock({
         mockType: ManifestManagerMockType.InitialSystemState,
       });
-      const lastComputed = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
+      const lastComputed = await manifestManager.getLastComputedManifest();
       expect(lastComputed).toEqual(null);
 
       manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error('abcd'));
@@ -107,9 +92,7 @@ describe('ingest_integration tests ', () => {
     test('subsequent policy creations succeed', async () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const manifestManager = getManifestManagerMock();
-      const lastComputed = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
+      const lastComputed = await manifestManager.getLastComputedManifest();
 
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(lastComputed); // no diffs
       const callback = getPackageConfigCreateCallback(logger, manifestManager);

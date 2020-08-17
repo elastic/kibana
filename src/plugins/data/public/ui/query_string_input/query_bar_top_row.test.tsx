@@ -51,7 +51,7 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
-    case 'timepicker:timeDefaults':
+    case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
       return {
         from: 'now-15m',
         to: 'now',

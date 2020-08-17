@@ -479,7 +479,7 @@ describe('http service', () => {
       let elasticsearch: InternalElasticsearchServiceStart;
 
       esClient.ping.mockImplementation(() =>
-        elasticsearchClientMock.createClientError(
+        elasticsearchClientMock.createErrorTransportRequestPromise(
           new ResponseError({
             statusCode: 401,
             body: {
@@ -517,7 +517,7 @@ describe('http service', () => {
       let elasticsearch: InternalElasticsearchServiceStart;
 
       esClient.ping.mockImplementation(() =>
-        elasticsearchClientMock.createClientError(
+        elasticsearchClientMock.createErrorTransportRequestPromise(
           new ResponseError({
             statusCode: 401,
             body: {

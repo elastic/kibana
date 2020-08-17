@@ -9,11 +9,6 @@ import { ParamsSchema } from './alert_type_params';
 
 describe('ActionContext', () => {
   it('generates expected properties if aggField is null', async () => {
-    const base: BaseActionContext = {
-      date: '2020-01-01T00:00:00.000Z',
-      group: '[group]',
-      value: 42,
-    };
     const params = ParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
@@ -26,6 +21,11 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
     });
+    const base: BaseActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      group: '[group]',
+      value: 42,
+    };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
       `"alert [alert-name] group [group] exceeded threshold"`
@@ -36,11 +36,6 @@ describe('ActionContext', () => {
   });
 
   it('generates expected properties if aggField is not null', async () => {
-    const base: BaseActionContext = {
-      date: '2020-01-01T00:00:00.000Z',
-      group: '[group]',
-      value: 42,
-    };
     const params = ParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
@@ -54,6 +49,11 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4.2],
     });
+    const base: BaseActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      group: '[group]',
+      value: 42,
+    };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
       `"alert [alert-name] group [group] exceeded threshold"`
@@ -64,11 +64,6 @@ describe('ActionContext', () => {
   });
 
   it('generates expected properties if comparator is between', async () => {
-    const base: BaseActionContext = {
-      date: '2020-01-01T00:00:00.000Z',
-      group: '[group]',
-      value: 4,
-    };
     const params = ParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
@@ -81,6 +76,11 @@ describe('ActionContext', () => {
       thresholdComparator: 'between',
       threshold: [4, 5],
     });
+    const base: BaseActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      group: '[group]',
+      value: 4,
+    };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
       `"alert [alert-name] group [group] exceeded threshold"`

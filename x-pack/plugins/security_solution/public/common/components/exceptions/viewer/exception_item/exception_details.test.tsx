@@ -12,7 +12,7 @@ import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {

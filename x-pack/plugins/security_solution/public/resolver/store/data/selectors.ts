@@ -28,10 +28,11 @@ import {
   ResolverTree,
   ResolverNodeStats,
   ResolverRelatedEvents,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
-import { allEventCategories } from '../../../../common/endpoint/models/event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
 
 /**
@@ -106,11 +107,32 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
 });
 
 /**
+ * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
+ */
+export const isProcessTerminated = createSelector(terminatedProcesses, function (
+  /* eslint-disable no-shadow */
+  terminatedProcesses
+  /* eslint-enable no-shadow */
+) {
+  return (entityId: string) => {
+    return terminatedProcesses.has(entityId);
+  };
+});
+
+/**
  * Process events that will be graphed.
  */
 export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
+  // Keep track of the last process event (in array order) for each entity ID
+  const events: Map<string, ResolverEvent> = new Map();
   if (tree) {
-    return resolverTreeModel.lifecycleEvents(tree).filter(isGraphableProcess);
+    for (const event of resolverTreeModel.lifecycleEvents(tree)) {
+      if (isGraphableProcess(event)) {
+        const entityID = uniquePidForProcess(event);
+        events.set(entityID, event);
+      }
+    }
+    return [...events.values()];
   } else {
     return [];
   }
@@ -124,7 +146,7 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeModel.factory(graphableProcesses);
+  return indexedProcessTreeModel.factory(graphableProcesses as SafeResolverEvent[]);
 });
 
 /**
@@ -173,7 +195,9 @@ export const relatedEventsByCategory: (
         }
         return relatedById.events.reduce(
           (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
-            if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
+            if (
+              [candidate && eventModel.allEventCategories(candidate)].flat().includes(ecsCategory)
+            ) {
               eventsByCategory.push(candidate);
             }
             return eventsByCategory;
@@ -259,7 +283,7 @@ export const relatedEventInfoByEntityId: (
           return [];
         }
         return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-          for (const category of [allEventCategories(resolverEvent)].flat()) {
+          for (const category of [eventModel.allEventCategories(resolverEvent)].flat()) {
             if (category === eventCategory) {
               return true;
             }
@@ -353,9 +377,9 @@ export const layout = createSelector(
     // find the origin node
     const originNode = indexedProcessTreeModel.processEvent(indexedProcessTree, originID);
 
-    if (!originNode) {
-      // this should only happen if the `ResolverTree` from the server has an entity ID with no matching lifecycle events.
-      throw new Error('Origin node not found in ResolverTree');
+    if (originNode === null) {
+      // If a tree is returned that has no process events for the origin, this can happen.
+      return taxiLayout;
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
@@ -383,7 +407,7 @@ export const processEventForID: (
 ) => (nodeID: string) => ResolverEvent | null = createSelector(
   tree,
   (indexedProcessTree) => (nodeID: string) =>
-    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
+    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID) as ResolverEvent
 );
 
 /**
@@ -394,7 +418,7 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
   processEventForID,
   ({ ariaLevels }, processEventGetter) => (nodeID: string) => {
     const node = processEventGetter(nodeID);
-    return node ? ariaLevels.get(node) ?? null : null;
+    return node ? ariaLevels.get(node as SafeResolverEvent) ?? null : null;
   }
 );
 
@@ -447,10 +471,10 @@ export const ariaFlowtoCandidate: (
       for (const child of children) {
         if (previousChild !== null) {
           // Set the `child` as the following sibling of `previousChild`.
-          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child));
+          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child as ResolverEvent));
         }
         // Set the child as the previous child.
-        previousChild = child;
+        previousChild = child as ResolverEvent;
       }
 
       if (previousChild) {
@@ -465,12 +489,7 @@ export const ariaFlowtoCandidate: (
 
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
-  function ({
-    /* eslint-disable no-shadow */
-    processNodePositions,
-    edgeLineSegments,
-    /* eslint-enable no-shadow */
-  }) {
+  function ({ processNodePositions, edgeLineSegments }) {
     const spatialIndex: rbush<IndexedEntity> = new rbush();
     const processesToIndex: IndexedProcessNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
@@ -537,7 +556,7 @@ export const nodesAndEdgelines: (
       maxX,
       maxY,
     });
-    const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+    const visibleProcessNodePositions = new Map<SafeResolverEvent, Vector2>(
       entities
         .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
         .map((node) => [node.entity, node.position])

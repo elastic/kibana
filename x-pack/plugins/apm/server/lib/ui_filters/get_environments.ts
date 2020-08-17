@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
@@ -18,12 +18,9 @@ export async function getEnvironments(
   setup: Setup & SetupTimeRange,
   serviceName?: string
 ) {
-  const { start, end, client, indices } = setup;
+  const { start, end, apmEventClient } = setup;
 
-  const filter: ESFilter[] = [
-    { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
-    { range: rangeFilter(start, end) },
-  ];
+  const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
 
   if (serviceName) {
     filter.push({
@@ -32,11 +29,13 @@ export async function getEnvironments(
   }
 
   const params = {
-    index: [
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      events: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.metric,
+        ProcessorEvent.error,
+      ],
+    },
     body: {
       size: 0,
       query: {
@@ -55,7 +54,7 @@ export async function getEnvironments(
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   const aggs = resp.aggregations;
   const environmentsBuckets = aggs?.environments.buckets || [];
 

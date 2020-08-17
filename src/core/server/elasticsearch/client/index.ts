@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { ElasticsearchClient } from './types';
+export * from './types';
 export { IScopedClusterClient, ScopedClusterClient } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './client_config';
 export { IClusterClient, ICustomClusterClient, ClusterClient } from './cluster_client';

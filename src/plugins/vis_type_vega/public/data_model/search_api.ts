@@ -48,25 +48,22 @@ export class SearchAPI {
     const requestResponders: any = {};
 
     return combineLatest(
-      searchRequests.map((request, index) => {
-        const requestId: number = index;
+      searchRequests.map((request) => {
+        const requestId = request.name;
         const params = getSearchParamsFromRequest(request, {
           uiSettings: this.dependencies.uiSettings,
           injectedMetadata: this.dependencies.injectedMetadata,
         });
 
         if (this.inspectorAdapters) {
-          requestResponders[requestId] = this.inspectorAdapters.requests.start(
-            `#${requestId}`,
-            request
-          );
+          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, request);
           requestResponders[requestId].json(params.body);
         }
 
         return search({ params }, { signal: this.abortSignal }).pipe(
           tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
           map((data) => ({
-            id: requestId,
+            name: requestId,
             rawResponse: data.rawResponse,
           }))
         );

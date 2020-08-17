@@ -227,7 +227,7 @@ describe('#setup', () => {
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createClientError(new Error())
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
     const setupContract = await elasticsearchService.setup(setupDeps);
@@ -243,7 +243,7 @@ describe('#setup', () => {
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createClientError(new Error())
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
     const setupContract = await elasticsearchService.setup(setupDeps);
@@ -359,7 +359,7 @@ describe('#stop', () => {
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createClientError(new Error())
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
     const setupContract = await elasticsearchService.setup(setupDeps);

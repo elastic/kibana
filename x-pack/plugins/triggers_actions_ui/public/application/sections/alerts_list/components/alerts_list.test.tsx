@@ -106,12 +106,7 @@ describe('alerts_list component empty', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
@@ -223,12 +218,7 @@ describe('alerts_list component with items', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
@@ -303,12 +293,7 @@ describe('alerts_list component empty with show only capability', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
@@ -417,12 +402,7 @@ describe('alerts_list with show only capability', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,

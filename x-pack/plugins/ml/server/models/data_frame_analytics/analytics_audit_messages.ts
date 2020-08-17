@@ -23,7 +23,7 @@ interface BoolQuery {
   bool: { [key: string]: any };
 }
 
-export function analyticsAuditMessagesProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function analyticsAuditMessagesProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
   // search for audit messages,
   // analyticsId is optional. without it, all analytics will be listed.
   async function getAnalyticsAuditMessages(analyticsId: string) {
@@ -69,7 +69,7 @@ export function analyticsAuditMessagesProvider({ callAsCurrentUser }: ILegacySco
     }
 
     try {
-      const resp = await callAsCurrentUser('search', {
+      const resp = await callAsInternalUser('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,

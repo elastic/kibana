@@ -54,20 +54,8 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.ui.get('navLinks', 'app-1'),
-        actions.ui.get('navLinks', 'app-2'),
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.ui.get('navLinks', 'app-1'),
-        actions.ui.get('navLinks', 'app-2'),
-      ],
+      all: [actions.login, actions.version],
+      read: [actions.login, actions.version],
     });
   });
 
@@ -275,7 +263,6 @@ describe('features', () => {
         actions.ui.get('catalogue', 'all-catalogue-2'),
         actions.ui.get('management', 'all-management', 'all-management-1'),
         actions.ui.get('management', 'all-management', 'all-management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
         actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
         actions.savedObject.get('all-savedObject-all-1', 'get'),
         actions.savedObject.get('all-savedObject-all-1', 'find'),
@@ -386,7 +373,6 @@ describe('features', () => {
         actions.ui.get('catalogue', 'read-catalogue-2'),
         actions.ui.get('management', 'read-management', 'read-management-1'),
         actions.ui.get('management', 'read-management', 'read-management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
         actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
         actions.savedObject.get('read-savedObject-all-1', 'get'),
         actions.savedObject.get('read-savedObject-all-1', 'find'),
@@ -644,12 +630,7 @@ describe('reserved', () => {
     const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
-    expect(actual).toHaveProperty('reserved.foo', [
-      actions.version,
-      actions.ui.get('navLinks', 'kibana:foo'),
-      actions.ui.get('navLinks', 'app-1'),
-      actions.ui.get('navLinks', 'app-2'),
-    ]);
+    expect(actual).toHaveProperty('reserved.foo', [actions.version]);
   });
 
   test(`actions only specified at the privilege are alright too`, () => {

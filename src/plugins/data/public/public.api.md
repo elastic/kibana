@@ -7,44 +7,15 @@
 import { $Values } from '@kbn/utility-types';
 import _ from 'lodash';
 import { Action } from 'history';
-import { ApplicationStart } from 'kibana/public';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import Boom from 'boom';
-import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CatAliasesParams } from 'elasticsearch';
-import { CatAllocationParams } from 'elasticsearch';
-import { CatCommonParams } from 'elasticsearch';
-import { CatFielddataParams } from 'elasticsearch';
-import { CatHealthParams } from 'elasticsearch';
-import { CatHelpParams } from 'elasticsearch';
-import { CatIndicesParams } from 'elasticsearch';
-import { CatRecoveryParams } from 'elasticsearch';
-import { CatSegmentsParams } from 'elasticsearch';
-import { CatShardsParams } from 'elasticsearch';
-import { CatSnapshotsParams } from 'elasticsearch';
-import { CatTasksParams } from 'elasticsearch';
-import { CatThreadPoolParams } from 'elasticsearch';
-import { ClearScrollParams } from 'elasticsearch';
-import { Client } from 'elasticsearch';
-import { ClusterAllocationExplainParams } from 'elasticsearch';
-import { ClusterGetSettingsParams } from 'elasticsearch';
-import { ClusterHealthParams } from 'elasticsearch';
-import { ClusterPendingTasksParams } from 'elasticsearch';
-import { ClusterPutSettingsParams } from 'elasticsearch';
-import { ClusterRerouteParams } from 'elasticsearch';
-import { ClusterStateParams } from 'elasticsearch';
-import { ClusterStatsParams } from 'elasticsearch';
 import { Component } from 'react';
 import { CoreSetup } from 'src/core/public';
+import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
-import { CountParams } from 'elasticsearch';
-import { CreateDocumentParams } from 'elasticsearch';
-import { DeleteDocumentByQueryParams } from 'elasticsearch';
-import { DeleteDocumentParams } from 'elasticsearch';
-import { DeleteScriptParams } from 'elasticsearch';
-import { DeleteTemplateParams } from 'elasticsearch';
 import { Ensure } from '@kbn/utility-types';
 import { ErrorToastOptions } from 'src/core/public/notifications';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -53,98 +24,35 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
-import { ExistsParams } from 'elasticsearch';
-import { ExplainParams } from 'elasticsearch';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldStatsParams } from 'elasticsearch';
-import { GenericParams } from 'elasticsearch';
-import { GetParams } from 'elasticsearch';
-import { GetResponse } from 'elasticsearch';
-import { GetScriptParams } from 'elasticsearch';
-import { GetSourceParams } from 'elasticsearch';
-import { GetTemplateParams } from 'elasticsearch';
+import { FetchOptions as FetchOptions_2 } from 'src/plugins/data/public';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
-import { IndexDocumentParams } from 'elasticsearch';
-import { IndicesAnalyzeParams } from 'elasticsearch';
-import { IndicesClearCacheParams } from 'elasticsearch';
-import { IndicesCloseParams } from 'elasticsearch';
-import { IndicesCreateParams } from 'elasticsearch';
-import { IndicesDeleteAliasParams } from 'elasticsearch';
-import { IndicesDeleteParams } from 'elasticsearch';
-import { IndicesDeleteTemplateParams } from 'elasticsearch';
-import { IndicesExistsAliasParams } from 'elasticsearch';
-import { IndicesExistsParams } from 'elasticsearch';
-import { IndicesExistsTemplateParams } from 'elasticsearch';
-import { IndicesExistsTypeParams } from 'elasticsearch';
-import { IndicesFlushParams } from 'elasticsearch';
-import { IndicesFlushSyncedParams } from 'elasticsearch';
-import { IndicesForcemergeParams } from 'elasticsearch';
-import { IndicesGetAliasParams } from 'elasticsearch';
-import { IndicesGetFieldMappingParams } from 'elasticsearch';
-import { IndicesGetMappingParams } from 'elasticsearch';
-import { IndicesGetParams } from 'elasticsearch';
-import { IndicesGetSettingsParams } from 'elasticsearch';
-import { IndicesGetTemplateParams } from 'elasticsearch';
-import { IndicesGetUpgradeParams } from 'elasticsearch';
-import { IndicesOpenParams } from 'elasticsearch';
-import { IndicesPutAliasParams } from 'elasticsearch';
-import { IndicesPutMappingParams } from 'elasticsearch';
-import { IndicesPutSettingsParams } from 'elasticsearch';
-import { IndicesPutTemplateParams } from 'elasticsearch';
-import { IndicesRecoveryParams } from 'elasticsearch';
-import { IndicesRefreshParams } from 'elasticsearch';
-import { IndicesRolloverParams } from 'elasticsearch';
-import { IndicesSegmentsParams } from 'elasticsearch';
-import { IndicesShardStoresParams } from 'elasticsearch';
-import { IndicesShrinkParams } from 'elasticsearch';
-import { IndicesStatsParams } from 'elasticsearch';
-import { IndicesUpdateAliasesParams } from 'elasticsearch';
-import { IndicesUpgradeParams } from 'elasticsearch';
-import { IndicesValidateQueryParams } from 'elasticsearch';
-import { InfoParams } from 'elasticsearch';
-import { IngestDeletePipelineParams } from 'elasticsearch';
-import { IngestGetPipelineParams } from 'elasticsearch';
-import { IngestPutPipelineParams } from 'elasticsearch';
-import { IngestSimulateParams } from 'elasticsearch';
 import { InjectedIntl } from '@kbn/i18n/react';
+import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/public';
+import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { MGetParams } from 'elasticsearch';
-import { MGetResponse } from 'elasticsearch';
 import { Moment } from 'moment';
 import moment from 'moment';
-import { MSearchParams } from 'elasticsearch';
-import { MSearchResponse } from 'elasticsearch';
-import { MSearchTemplateParams } from 'elasticsearch';
-import { MTermVectorsParams } from 'elasticsearch';
 import { NameList } from 'elasticsearch';
-import { NodesHotThreadsParams } from 'elasticsearch';
-import { NodesInfoParams } from 'elasticsearch';
-import { NodesStatsParams } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { Path } from 'history';
-import { PingParams } from 'elasticsearch';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import { PopoverAnchorPosition } from '@elastic/eui';
 import { PublicUiSettingsParams } from 'src/core/server/types';
-import { PutScriptParams } from 'elasticsearch';
-import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
 import * as React_2 from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { ReindexParams } from 'elasticsearch';
-import { ReindexRethrottleParams } from 'elasticsearch';
-import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Reporter } from '@kbn/analytics';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics } from 'src/plugins/inspector/common';
@@ -153,38 +61,22 @@ import * as Rx from 'rxjs';
 import { SavedObject } from 'src/core/server';
 import { SavedObject as SavedObject_3 } from 'src/core/public';
 import { SavedObjectsClientContract } from 'src/core/public';
-import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
-import { SearchShardsParams } from 'elasticsearch';
-import { SearchTemplateParams } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
-import { SnapshotCreateParams } from 'elasticsearch';
-import { SnapshotCreateRepositoryParams } from 'elasticsearch';
-import { SnapshotDeleteParams } from 'elasticsearch';
-import { SnapshotDeleteRepositoryParams } from 'elasticsearch';
-import { SnapshotGetParams } from 'elasticsearch';
-import { SnapshotGetRepositoryParams } from 'elasticsearch';
-import { SnapshotRestoreParams } from 'elasticsearch';
-import { SnapshotStatusParams } from 'elasticsearch';
-import { SnapshotVerifyRepositoryParams } from 'elasticsearch';
 import { Subscription } from 'rxjs';
-import { SuggestParams } from 'elasticsearch';
-import { TasksCancelParams } from 'elasticsearch';
-import { TasksGetParams } from 'elasticsearch';
-import { TasksListParams } from 'elasticsearch';
-import { TermvectorsParams } from 'elasticsearch';
 import { Toast } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
-import { ToastsStart } from 'kibana/public';
+import { ToastsSetup } from 'kibana/public';
+import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { TypeOf } from '@kbn/config-schema';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
-import { UpdateDocumentByQueryParams } from 'elasticsearch';
-import { UpdateDocumentParams } from 'elasticsearch';
 import { UserProvidedValues } from 'src/core/server/types';
 
 // Warning: (ae-forgotten-export) The symbol "AggConfigSerialized" needs to be exported by the entry point index.d.ts
@@ -263,12 +155,12 @@ export interface ApplyGlobalFilterActionContext {
     timeFieldName?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DateFormat" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "baseFormattersPublic" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const baseFormattersPublic: (import("../../common").FieldFormatInstanceType | typeof DateNanosFormat | typeof DateFormat)[];
+export const baseFormattersPublic: (import("../../common").FieldFormatInstanceType | typeof DateFormat | typeof DateNanosFormat)[];
 
 // Warning: (ae-missing-release-tag) "BUCKET_TYPES" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -309,10 +201,11 @@ export const castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_
 // Warning: (ae-missing-release-tag) "connectToQueryState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export const connectToQueryState: <S extends QueryState>({ timefilter: { timefilter }, filterManager, state$, }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'state$'>, stateContainer: BaseStateContainer<S>, syncConfig: {
+export const connectToQueryState: <S extends QueryState>({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>, stateContainer: BaseStateContainer<S>, syncConfig: {
     time?: boolean;
     refreshInterval?: boolean;
     filters?: FilterStateStore | boolean;
+    query?: boolean;
 }) => () => void;
 
 // Warning: (ae-missing-release-tag) "createSavedQueryService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -331,6 +224,10 @@ export type CustomFilter = Filter & {
 //
 // @public (undocumented)
 export interface DataPublicPluginSetup {
+    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
+    //
+    // @internal (undocumented)
+    __enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AutocompleteSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -499,6 +396,7 @@ export const esFilters: {
     convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
     mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
+    extractTimeRange: typeof extractTimeRange;
 };
 
 // Warning: (ae-missing-release-tag) "esKuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -684,6 +582,46 @@ export type FieldFormatsContentType = 'html' | 'text';
 // @public (undocumented)
 export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 
+// Warning: (ae-missing-release-tag) "FieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
+    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void);
+    // (undocumented)
+    readonly add: (field: FieldSpec) => void;
+    // (undocumented)
+    readonly getAll: () => IndexPatternField[];
+    // (undocumented)
+    readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
+    // (undocumented)
+    readonly getByType: (type: IndexPatternField['type']) => any[];
+    // (undocumented)
+    readonly remove: (field: IFieldType) => void;
+    // (undocumented)
+    readonly removeAll: () => void;
+    // (undocumented)
+    readonly replaceAll: (specs: FieldSpec[]) => void;
+    // (undocumented)
+    readonly toSpec: () => {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+        format: any;
+    }[];
+    // (undocumented)
+    readonly update: (field: FieldSpec) => void;
+}
+
 // @public (undocumented)
 export interface FieldMappingSpec {
     // (undocumented)
@@ -766,22 +704,10 @@ export function getDefaultQuery(language?: QueryLanguage): {
 // @public (undocumented)
 export function getEsPreference(uiSettings: IUiSettingsClient_2, sessionId?: string): any;
 
-// Warning: (ae-forgotten-export) The symbol "FieldListDependencies" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "CreateIndexPatternFieldList" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "getIndexPatternFieldListCreator" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export const getIndexPatternFieldListCreator: ({ fieldFormats, onNotification, }: FieldListDependencies) => CreateIndexPatternFieldList;
-
 // Warning: (ae-missing-release-tag) "getKbnTypeNames" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
 export const getKbnTypeNames: () => string[];
-
-// Warning: (ae-missing-release-tag) "getSearchErrorType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export function getSearchErrorType({ message }: Pick<SearchError, 'message'>): "UNSUPPORTED_QUERY" | undefined;
 
 // Warning: (ae-forgotten-export) The symbol "ISearchRequestParams" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getSearchParamsFromRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -850,6 +776,8 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 //
 // @public (undocumented)
 export interface IEsSearchResponse extends IKibanaSearchResponse {
+    isPartial?: boolean;
+    isRunning?: boolean;
     // (undocumented)
     rawResponse: SearchResponse_2<any>;
 }
@@ -916,8 +844,6 @@ export interface IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     toSpec?: () => FieldSpec;
     // (undocumented)
@@ -958,11 +884,17 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     // (undocumented)
     add(field: FieldSpec): void;
     // (undocumented)
+    getAll(): IndexPatternField[];
+    // (undocumented)
     getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
     // (undocumented)
     getByType(type: IndexPatternField['type']): IndexPatternField[];
     // (undocumented)
     remove(field: IFieldType): void;
+    // (undocumented)
+    removeAll(): void;
+    // (undocumented)
+    replaceAll(specs: FieldSpec[]): void;
     // (undocumented)
     update(field: FieldSpec): void;
 }
@@ -1037,7 +969,9 @@ export class IndexPattern implements IIndexPattern {
         }[];
     };
     // (undocumented)
-    getFieldByName(name: string): IndexPatternField | void;
+    getFieldByName(name: string): IndexPatternField | undefined;
+    // (undocumented)
+    getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat;
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     // (undocumented)
@@ -1075,7 +1009,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     refreshFields(): Promise<void | Error | never[] | undefined>;
     // (undocumented)
-    removeScriptedField(field: IFieldType): Promise<void | Error>;
+    removeScriptedField(fieldName: string): Promise<void | Error>;
     // (undocumented)
     save(saveAttempts?: number): Promise<void | Error>;
     // (undocumented)
@@ -1126,55 +1060,85 @@ export interface IndexPatternAttributes {
     typeMeta: string;
 }
 
-// Warning: (ae-missing-release-tag) "Field" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "IndexPatternField" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
+    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
+    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, onNotification: OnNotification);
     // (undocumented)
-    $$spec: FieldSpec;
-    // Warning: (ae-forgotten-export) The symbol "FieldSpecExportFmt" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IIndexPattern, spec: FieldSpecExportFmt | FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
+    get aggregatable(): boolean;
     // (undocumented)
-    aggregatable?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "FieldSpecConflictDescriptions" needs to be exported by the entry point index.d.ts
-    //
+    get conflictDescriptions(): Record<string, string[]> | undefined;
+    set conflictDescriptions(conflictDescriptions: Record<string, string[]> | undefined);
     // (undocumented)
-    conflictDescriptions?: FieldSpecConflictDescriptions;
+    get count(): number;
+    set count(count: number);
     // (undocumented)
-    count?: number;
+    readonly displayName: string;
     // (undocumented)
-    displayName?: string;
+    get esTypes(): string[] | undefined;
     // (undocumented)
-    esTypes?: string[];
+    get filterable(): boolean;
     // (undocumented)
-    filterable?: boolean;
+    get format(): FieldFormat;
     // (undocumented)
-    format: any;
+    readonly indexPattern: IndexPattern;
     // (undocumented)
-    indexPattern?: IIndexPattern;
+    get lang(): string | undefined;
+    set lang(lang: string | undefined);
     // (undocumented)
-    lang?: string;
+    get name(): string;
     // (undocumented)
-    name: string;
+    get readFromDocValues(): boolean;
     // (undocumented)
-    readFromDocValues?: boolean;
+    get script(): string | undefined;
+    set script(script: string | undefined);
     // (undocumented)
-    script?: string;
+    get scripted(): boolean;
     // (undocumented)
-    scripted?: boolean;
+    get searchable(): boolean;
     // (undocumented)
-    searchable?: boolean;
+    get sortable(): boolean;
     // (undocumented)
-    sortable?: boolean;
+    readonly spec: FieldSpec;
     // (undocumented)
-    subType?: IFieldSubType;
+    get subType(): import("../types").IFieldSubType | undefined;
     // (undocumented)
-    toSpec: () => FieldSpecExportFmt;
+    toJSON(): {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+    };
     // (undocumented)
-    type: string;
+    toSpec(): {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+        format: any;
+    };
     // (undocumented)
-    visualizable?: boolean;
+    get type(): string;
+    // (undocumented)
+    get visualizable(): boolean;
 }
 
 // Warning: (ae-missing-release-tag) "indexPatterns" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1257,11 +1221,10 @@ export type InputTimeRange = TimeRange | {
 // @public (undocumented)
 export type ISearch = (request: IKibanaSearchRequest, options?: ISearchOptions) => Observable<IKibanaSearchResponse>;
 
-// Warning: (ae-forgotten-export) The symbol "IStrategyOptions" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearchGeneric" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ISearchGeneric = (request: IEsSearchRequest, options?: IStrategyOptions) => Observable<IEsSearchResponse>;
+export type ISearchGeneric = (request: IEsSearchRequest, options?: ISearchOptions) => Observable<IEsSearchResponse>;
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1269,6 +1232,8 @@ export type ISearchGeneric = (request: IEsSearchRequest, options?: IStrategyOpti
 export interface ISearchOptions {
     // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    strategy?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "SearchSource" needs to be exported by the entry point index.d.ts
@@ -1497,6 +1462,8 @@ export interface QueryState {
     // (undocumented)
     filters?: Filter[];
     // (undocumented)
+    query?: Query;
+    // (undocumented)
     refreshInterval?: RefreshInterval;
     // (undocumented)
     time?: TimeRange;
@@ -1688,7 +1655,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;
@@ -1697,9 +1664,9 @@ export const search: {
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
         Ipv4Address: typeof Ipv4Address;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
-        isNumberType: (agg: import("./search").AggConfig) => boolean;
-        isStringType: (agg: import("./search").AggConfig) => boolean;
-        isType: (...types: string[]) => (agg: import("./search").AggConfig) => boolean;
+        isNumberType: (agg: import("../common").AggConfig) => boolean;
+        isStringType: (agg: import("../common").AggConfig) => boolean;
+        isType: (...types: string[]) => (agg: import("../common").AggConfig) => boolean;
         isValidEsInterval: typeof isValidEsInterval;
         isValidInterval: typeof isValidInterval;
         parentPipelineType: string;
@@ -1733,9 +1700,7 @@ export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 // Warning: (ae-missing-release-tag) "SearchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class SearchError extends Error {
-    // Warning: (ae-forgotten-export) The symbol "SearchErrorOptions" needs to be exported by the entry point index.d.ts
-    constructor({ status, title, message, path, type }: SearchErrorOptions);
+export interface SearchError {
     // (undocumented)
     message: string;
     // (undocumented)
@@ -1755,27 +1720,32 @@ export class SearchError extends Error {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
+    // @internal
     protected abortController: AbortController;
+    // @internal (undocumented)
+    protected application: CoreStart['application'];
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
-    getPendingCount$: () => Observable<number>;
-    // (undocumented)
+    getPendingCount$(): Observable<number>;
+    // @internal (undocumented)
     protected hideToast: () => void;
+    // @internal
     protected longRunningToast?: Toast;
+    // @internal
     protected pendingCount$: BehaviorSubject<number>;
-    protected pendingCount: number;
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
     // (undocumented)
-    protected runSearch(request: IEsSearchRequest, combinedSignal: AbortSignal): Observable<IEsSearchResponse>;
+    protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
     // (undocumented)
     protected setupTimers(options?: ISearchOptions): {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
-    // (undocumented)
+    // @internal (undocumented)
     protected showToast: () => void;
+    // @internal
     protected timeoutSubscriptions: Subscription;
 }
 
@@ -1784,13 +1754,13 @@ export class SearchInterceptor {
 // @public (undocumented)
 export interface SearchInterceptorDeps {
     // (undocumented)
-    application: ApplicationStart;
+    http: CoreSetup_2['http'];
     // (undocumented)
-    http: CoreStart['http'];
+    startServices: Promise<[CoreStart, any, unknown]>;
     // (undocumented)
-    toasts: ToastsStart;
+    toasts: ToastsSetup;
     // (undocumented)
-    uiSettings: CoreStart['uiSettings'];
+    uiSettings: CoreSetup_2['uiSettings'];
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1871,7 +1841,7 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
 // Warning: (ae-missing-release-tag) "syncQueryStateWithUrl" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export const syncQueryStateWithUrl: (query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'state$'>, kbnUrlStateStorage: IKbnUrlStateStorage) => {
+export const syncQueryStateWithUrl: (query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>, kbnUrlStateStorage: IKbnUrlStateStorage) => {
     stop: () => void;
     hasInheritedQueryFromUrl: boolean;
 };
@@ -1973,37 +1943,38 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/match_all_filter.ts:28:3 - (ae-forgotten-export) The symbol "MatchAllFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "FilterLabel" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "generateFilters" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "changeTimeFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "convertRangeFilterToTimeRangeString" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:65:23 - (ae-forgotten-export) The symbol "extractTimeFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:136:21 - (ae-forgotten-export) The symbol "buildEsQuery" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:136:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:136:21 - (ae-forgotten-export) The symbol "luceneStringToDsl" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:136:21 - (ae-forgotten-export) The symbol "decorateQuery" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "FieldFormatsRegistry" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "BoolFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "BytesFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "ColorFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "DurationFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "IpFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "NumberFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "PercentFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "RelativeDateFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "SourceFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "StaticLookupFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "UrlFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "StringFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:176:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:232:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:232:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:232:27 - (ae-forgotten-export) The symbol "validateIndexPattern" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:232:27 - (ae-forgotten-export) The symbol "getFromSavedObject" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:232:27 - (ae-forgotten-export) The symbol "flattenHitWrapper" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:232:27 - (ae-forgotten-export) The symbol "formatHitProvider" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FilterLabel" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "generateFilters" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "changeTimeFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "convertRangeFilterToTimeRangeString" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "extractTimeFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "extractTimeRange" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:138:21 - (ae-forgotten-export) The symbol "buildEsQuery" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:138:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:138:21 - (ae-forgotten-export) The symbol "luceneStringToDsl" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:138:21 - (ae-forgotten-export) The symbol "decorateQuery" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "FieldFormatsRegistry" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "BoolFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "BytesFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "ColorFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "DurationFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "IpFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "NumberFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "PercentFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "RelativeDateFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "SourceFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "StaticLookupFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "UrlFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "StringFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:178:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:234:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:234:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:234:27 - (ae-forgotten-export) The symbol "validateIndexPattern" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:234:27 - (ae-forgotten-export) The symbol "getFromSavedObject" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:234:27 - (ae-forgotten-export) The symbol "flattenHitWrapper" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:234:27 - (ae-forgotten-export) The symbol "formatHitProvider" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:369:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:369:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:369:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
@@ -2019,10 +1990,10 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:392:1 - (ae-forgotten-export) The symbol "parseInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:393:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:396:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/query/state_sync/connect_to_query_state.ts:41:60 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:54:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:55:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/query/state_sync/connect_to_query_state.ts:45:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:62:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:71:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

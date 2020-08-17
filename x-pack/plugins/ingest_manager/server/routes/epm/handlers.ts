@@ -32,6 +32,8 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
+import { IngestManagerError, getHTTPResponseCode } from '../../errors';
+import { splitPkgKey } from '../../services/epm/registry';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -130,7 +132,7 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     // TODO: change epm API to /packageName/version so we don't need to do this
-    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
@@ -145,19 +147,22 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const installPackageHandler: RequestHandler<TypeOf<
-  typeof InstallPackageRequestSchema.params
->> = async (context, request, response) => {
+export const installPackageHandler: RequestHandler<
+  TypeOf<typeof InstallPackageRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallPackageRequestSchema.body>
+> = async (context, request, response) => {
   const logger = appContextService.getLogger();
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const { pkgkey } = request.params;
-  const [pkgName, pkgVersion] = pkgkey.split('-');
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   try {
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
       callCluster,
+      force: request.body?.force,
     });
     const body: InstallPackageResponse = {
       response: res,
@@ -165,23 +170,25 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    if (e instanceof IngestManagerError) {
+      logger.error(e);
+      return response.customError({
+        statusCode: getHTTPResponseCode(e),
+        body: { message: e.message },
+      });
+    }
+
+    // if there is an unknown server error, uninstall any package assets
     try {
       const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
       const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-      // if this is a failed install, remove any assets installed
       if (!isUpdate) {
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       }
     } catch (error) {
-      logger.error(`could not remove assets from failed installation attempt for ${pkgkey}`);
+      logger.error(`could not remove failed installation ${error}`);
     }
-
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
+    logger.error(e);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

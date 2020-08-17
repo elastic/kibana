@@ -103,7 +103,6 @@ export const MarkdownEditor = React.memo<{
             end: e!.target!.selectionEnd ?? 0,
           });
         }
-        return false;
       },
       [onCursorPositionUpdate]
     );

@@ -20,6 +20,7 @@ import {
   CreateExceptionListItemOptions,
   CreateExceptionListOptions,
   DeleteEndpointListItemOptions,
+  DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
   FindEndpointListItemOptions,
@@ -40,7 +41,7 @@ import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
-import { deleteExceptionListItem } from './delete_exception_list_item';
+import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
@@ -321,6 +322,18 @@ export class ExceptionListClient {
     return deleteExceptionListItem({
       id,
       itemId,
+      namespaceType,
+      savedObjectsClient,
+    });
+  };
+
+  public deleteExceptionListItemById = async ({
+    id,
+    namespaceType,
+  }: DeleteExceptionListItemByIdOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return deleteExceptionListItemById({
+      id,
       namespaceType,
       savedObjectsClient,
     });

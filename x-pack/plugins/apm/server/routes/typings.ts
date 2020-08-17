@@ -45,7 +45,12 @@ export interface Route<
   method?: TMethod;
   params?: TParams;
   options?: {
-    tags: Array<'access:apm' | 'access:apm_write'>;
+    tags: Array<
+      | 'access:apm'
+      | 'access:apm_write'
+      | 'access:ml:canGetJobs'
+      | 'access:ml:canCreateJob'
+    >;
   };
   handler: (kibanaContext: {
     context: APMRequestHandlerContext<DecodeParams<TParams>>;

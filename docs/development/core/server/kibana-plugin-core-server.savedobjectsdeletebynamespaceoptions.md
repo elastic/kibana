@@ -15,5 +15,5 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [refresh](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+|  [refresh](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.refresh.md) | <code>boolean</code> | The Elasticsearch supports only boolean flag for this operation |
 

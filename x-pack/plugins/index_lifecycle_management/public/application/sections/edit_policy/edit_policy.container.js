@@ -15,6 +15,7 @@ import {
   isPolicyListLoaded,
   getIsNewPolicy,
   getSelectedOriginalPolicyName,
+  getPhases,
 } from '../../store/selectors';
 
 import {
@@ -23,6 +24,7 @@ import {
   setSaveAsNewPolicy,
   saveLifecyclePolicy,
   fetchPolicies,
+  setPhaseData,
 } from '../../store/actions';
 
 import { findFirstError } from '../../services/find_errors';
@@ -42,6 +44,7 @@ export const EditPolicy = connect(
       isPolicyListLoaded: isPolicyListLoaded(state),
       isNewPolicy: getIsNewPolicy(state),
       originalPolicyName: getSelectedOriginalPolicyName(state),
+      phases: getPhases(state),
     };
   },
   {
@@ -50,5 +53,6 @@ export const EditPolicy = connect(
     setSaveAsNewPolicy,
     saveLifecyclePolicy,
     fetchPolicies,
+    setPhaseData,
   }
 )(PresentationComponent);

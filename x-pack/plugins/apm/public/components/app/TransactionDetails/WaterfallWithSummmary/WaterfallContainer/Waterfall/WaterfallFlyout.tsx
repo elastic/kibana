@@ -15,12 +15,13 @@ interface Props {
   location: Location;
   toggleFlyout: ({ location }: { location: Location }) => void;
 }
-export const WaterfallFlyout: React.FC<Props> = ({
+
+export function WaterfallFlyout({
   waterfallItemId,
   waterfall,
   location,
   toggleFlyout,
-}) => {
+}: Props) {
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );
@@ -58,4 +59,4 @@ export const WaterfallFlyout: React.FC<Props> = ({
     default:
       return null;
   }
-};
+}

@@ -110,7 +110,8 @@ export class TaskRunner {
     tags: string[] | undefined,
     spaceId: string,
     apiKey: string | null,
-    actions: Alert['actions']
+    actions: Alert['actions'],
+    alertParams: RawAlert['params']
   ) {
     return createExecutionHandler({
       alertId,
@@ -124,6 +125,7 @@ export class TaskRunner {
       alertType: this.alertType,
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
+      alertParams,
     });
   }
 
@@ -261,7 +263,8 @@ export class TaskRunner {
       alert.tags,
       spaceId,
       apiKey,
-      alert.actions
+      alert.actions,
+      alert.params
     );
     return this.executeAlertInstances(services, alert, validatedParams, executionHandler, spaceId);
   }
@@ -352,41 +355,53 @@ interface GenerateNewAndResolvedInstanceEventsParams {
 }
 
 function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const { currentAlertInstanceIds, originalAlertInstanceIds } = params;
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstanceIds,
+    originalAlertInstanceIds,
+  } = params;
+
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
-
-  for (const id of newIds) {
-    const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
-  }
 
   for (const id of resolvedIds) {
     const message = `${params.alertLabel} resolved instance: '${id}'`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message);
   }
 
-  function logInstanceEvent(id: string, action: string, message: string) {
+  for (const id of newIds) {
+    const message = `${params.alertLabel} created new instance: '${id}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
+  }
+
+  for (const id of currentAlertInstanceIds) {
+    const message = `${params.alertLabel} active instance: '${id}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message);
+  }
+
+  function logInstanceEvent(instanceId: string, action: string, message: string) {
     const event: IEvent = {
       event: {
         action,
       },
       kibana: {
         alerting: {
-          instance_id: id,
+          instance_id: instanceId,
         },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
-            id: params.alertId,
-            namespace: params.namespace,
+            id: alertId,
+            namespace,
           },
         ],
       },
       message,
     };
-    params.eventLogger.logEvent(event);
+    eventLogger.logEvent(event);
   }
 }
 

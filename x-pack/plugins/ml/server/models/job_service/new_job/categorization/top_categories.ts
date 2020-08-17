@@ -9,9 +9,9 @@ import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
 
-export function topCategoriesProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
   async function getTotalCategories(jobId: string): Promise<{ total: number }> {
-    const totalResp = await callAsCurrentUser('search', {
+    const totalResp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -37,7 +37,7 @@ export function topCategoriesProvider({ callAsCurrentUser }: ILegacyScopedCluste
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const top: SearchResponse<any> = await callAsCurrentUser('search', {
+    const top: SearchResponse<any> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -99,7 +99,7 @@ export function topCategoriesProvider({ callAsCurrentUser }: ILegacyScopedCluste
             field: 'category_id',
           },
         };
-    const result: SearchResponse<any> = await callAsCurrentUser('search', {
+    const result: SearchResponse<any> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size,
       body: {

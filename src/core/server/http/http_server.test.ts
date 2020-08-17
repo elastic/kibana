@@ -992,6 +992,133 @@ describe('body options', () => {
   });
 });
 
+describe('timeout options', () => {
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a POST', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 300000 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await server.start();
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
+      timeout: 300000,
+    });
+  });
+
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a GET', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 300000 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await server.start();
+    await supertest(innerServer.listener).get('/').expect(200, {
+      timeout: 300000,
+    });
+  });
+
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a DELETE', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.delete(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 300000 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await server.start();
+    await supertest(innerServer.listener).delete('/').expect(200, {
+      timeout: 300000,
+    });
+  });
+
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a PUT', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.put(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 300000 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await server.start();
+    await supertest(innerServer.listener).put('/').expect(200, {
+      timeout: 300000,
+    });
+  });
+
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a PATCH', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.patch(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 300000 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await server.start();
+    await supertest(innerServer.listener).patch('/').expect(200, {
+      timeout: 300000,
+    });
+  });
+});
+
 test('should return a stream in the body', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 

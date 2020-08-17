@@ -7,7 +7,6 @@
 import { get, omit } from 'lodash';
 // @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
-// @ts-expect-error untyped local
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import {
@@ -215,13 +214,13 @@ export function getGlobalFilters(state: State): string[] {
   }, []);
 }
 
-type onValueFunction = (
+type OnValueFunction = (
   argValue: ExpressionAstArgument,
   argNames?: string,
   args?: ExpressionAstFunction['arguments']
 ) => ExpressionAstArgument | ExpressionAstArgument[] | undefined;
 
-function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: onValueFunction) {
+function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: OnValueFunction) {
   const argNames = Object.keys(args);
 
   return argNames.reduce<ExpressionAstArgument[]>((values, argName) => {
@@ -496,8 +495,7 @@ export function getRenderedWorkpad(state: State) {
 
   const workpad = getWorkpad(state);
 
-  // eslint-disable-next-line no-unused-vars
-  const { pages, ...rest } = workpad;
+  const { pages, variables, ...rest } = workpad;
 
   return {
     pages: renderedPages,

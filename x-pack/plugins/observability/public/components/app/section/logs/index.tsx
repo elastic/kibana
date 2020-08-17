@@ -45,7 +45,7 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   return colorsPerItem;
 }
 
-export const LogsSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
+export function LogsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
   const history = useHistory();
 
   const { start, end } = absoluteTime;
@@ -57,7 +57,7 @@ export const LogsSection = ({ absoluteTime, relativeTime, bucketSize }: Props) =
         bucketSize,
       });
     }
-  }, [start, end, bucketSize]);
+  }, [start, end, bucketSize, relativeTime]);
 
   const min = moment.utc(absoluteTime.start).valueOf();
   const max = moment.utc(absoluteTime.end).valueOf();
@@ -160,4 +160,4 @@ export const LogsSection = ({ absoluteTime, relativeTime, bucketSize }: Props) =
       </ChartContainer>
     </SectionContainer>
   );
-};
+}

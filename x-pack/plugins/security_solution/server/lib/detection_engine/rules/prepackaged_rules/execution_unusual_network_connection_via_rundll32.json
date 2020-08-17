@@ -4,7 +4,8 @@
   ],
   "description": "Identifies unusual instances of rundll32.exe making outbound network connections. This may indicate adversarial activity and may identify malicious DLLs.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

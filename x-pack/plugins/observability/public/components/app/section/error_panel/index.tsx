@@ -7,7 +7,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const ErrorPanel = () => {
+export function ErrorPanel() {
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -19,4 +19,4 @@ export const ErrorPanel = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}

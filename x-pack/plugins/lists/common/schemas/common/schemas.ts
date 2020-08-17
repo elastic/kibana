@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
 
 import { DefaultNamespace } from '../types/default_namespace';
-import { DefaultStringArray, NonEmptyString } from '../../siem_common_deps';
+import { DefaultStringArray, NonEmptyString } from '../../shared_imports';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;

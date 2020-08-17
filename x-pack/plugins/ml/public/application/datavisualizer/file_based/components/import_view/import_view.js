@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 import { importerFactory } from './importer';
 import { ResultsLinks } from '../results_links';
 import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
@@ -66,6 +67,7 @@ const DEFAULT_STATE = {
   indexPatternNameError: '',
   timeFieldName: undefined,
   isFilebeatFlyoutVisible: false,
+  checkingValidIndex: false,
 };
 
 export class ImportView extends Component {
@@ -76,14 +78,12 @@ export class ImportView extends Component {
   }
 
   componentDidMount() {
-    this.loadIndexNames();
     this.loadIndexPatternNames();
   }
 
   clickReset = () => {
     const state = getDefaultState(this.state, this.props.results);
     this.setState(state, () => {
-      this.loadIndexNames();
       this.loadIndexPatternNames();
     });
   };
@@ -326,20 +326,32 @@ export class ImportView extends Component {
   };
 
   onIndexChange = (e) => {
-    const name = e.target.value;
-    const { indexNames, indexPattern, indexPatternNames } = this.state;
-
+    const index = e.target.value;
     this.setState({
-      index: name,
-      indexNameError: isIndexNameValid(name, indexNames),
-      // if index pattern has been altered, check that it still matches the inputted index
-      ...(indexPattern === ''
-        ? {}
-        : {
-            indexPatternNameError: isIndexPatternNameValid(indexPattern, indexPatternNames, name),
-          }),
+      index,
+      checkingValidIndex: true,
     });
+    this.debounceIndexCheck(index);
   };
+
+  debounceIndexCheck = debounce(async (index) => {
+    if (index === '') {
+      this.setState({ checkingValidIndex: false });
+      return;
+    }
+
+    const { exists } = await ml.checkIndexExists({ index });
+    const indexNameError = exists ? (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+        defaultMessage="Index name already exists"
+      />
+    ) : (
+      isIndexNameValid(index)
+    );
+
+    this.setState({ checkingValidIndex: false, indexNameError });
+  }, 500);
 
   onIndexPatternChange = (e) => {
     const name = e.target.value;
@@ -396,12 +408,6 @@ export class ImportView extends Component {
     this.props.showBottomBar();
   };
 
-  async loadIndexNames() {
-    const indices = await ml.getIndices();
-    const indexNames = indices.map((i) => i.name);
-    this.setState({ indexNames });
-  }
-
   async loadIndexPatternNames() {
     await loadIndexPatterns(this.props.indexPatterns);
     const indexPatternNames = getIndexPatternNames();
@@ -437,6 +443,7 @@ export class ImportView extends Component {
       indexPatternNameError,
       timeFieldName,
       isFilebeatFlyoutVisible,
+      checkingValidIndex,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -459,7 +466,8 @@ export class ImportView extends Component {
       index === '' ||
       indexNameError !== '' ||
       (createIndexPattern === true && indexPatternNameError !== '') ||
-      initialized === true;
+      initialized === true ||
+      checkingValidIndex === true;
 
     return (
       <EuiPage data-test-subj="mlPageFileDataVisImport">
@@ -655,16 +663,7 @@ function getDefaultState(state, results) {
   };
 }
 
-function isIndexNameValid(name, indexNames) {
-  if (indexNames.find((i) => i === name)) {
-    return (
-      <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
-        defaultMessage="Index name already exists"
-      />
-    );
-  }
-
+function isIndexNameValid(name) {
   const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
   if (
     name !== name.toLowerCase() || // name should be lowercase

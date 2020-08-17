@@ -27,7 +27,10 @@
   "severity": "low",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Network",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

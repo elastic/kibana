@@ -8,14 +8,14 @@ import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   UpdateExceptionListSchemaDecoded,
   exceptionListSchema,
   updateExceptionListSchema,
 } from '../../common/schemas';
 
-import { getExceptionListClient } from './utils';
+import { getErrorMessageExceptionList, getExceptionListClient } from './utils';
 
 export const updateExceptionListRoute = (router: IRouter): void => {
   router.put(
@@ -50,7 +50,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
         const exceptionLists = getExceptionListClient(context);
         if (id == null && listId == null) {
           return siemResponse.error({
-            body: `either id or list_id need to be defined`,
+            body: 'either id or list_id need to be defined',
             statusCode: 404,
           });
         } else {
@@ -69,7 +69,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           });
           if (list == null) {
             return siemResponse.error({
-              body: `exception list id: "${id}" found found`,
+              body: getErrorMessageExceptionList({ id, listId }),
               statusCode: 404,
             });
           } else {

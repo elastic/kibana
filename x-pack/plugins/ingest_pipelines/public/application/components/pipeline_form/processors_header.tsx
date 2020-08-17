@@ -5,25 +5,23 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
 
-import { LoadFromJsonButton, OnDoneLoadJsonHandler } from '../pipeline_processors_editor';
+import {
+  LoadFromJsonButton,
+  OnDoneLoadJsonHandler,
+  TestPipelineButton,
+} from '../pipeline_processors_editor';
 
 export interface Props {
-  onTestPipelineClick: () => void;
-  isTestButtonDisabled: boolean;
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const ProcessorsHeader: FunctionComponent<Props> = ({
-  onTestPipelineClick,
-  isTestButtonDisabled,
-  onLoadJson,
-}) => {
+export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { links } = usePipelineProcessorsContext();
   return (
     <EuiFlexGroup
@@ -63,17 +61,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({
         <LoadFromJsonButton onDone={onLoadJson} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="testPipelineButton"
-          size="s"
-          onClick={onTestPipelineClick}
-          disabled={isTestButtonDisabled}
-        >
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.testPipelineButtonLabel"
-            defaultMessage="Test pipeline"
-          />
-        </EuiButton>
+        <TestPipelineButton />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

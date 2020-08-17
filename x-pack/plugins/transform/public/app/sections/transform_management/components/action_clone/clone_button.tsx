@@ -44,7 +44,7 @@ export const CloneButton: FC<CloneActionProps> = ({ itemId }) => {
       iconType="copy"
       isDisabled={buttonDisabled}
       onClick={clickHandler}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>

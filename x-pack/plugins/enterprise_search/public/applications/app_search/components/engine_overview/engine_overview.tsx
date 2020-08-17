@@ -6,8 +6,6 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentBody,
@@ -16,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
 import { KibanaContext, IKibanaContext } from '../../../index';
@@ -92,64 +90,61 @@ export const EngineOverview: React.FC = () => {
   if (!engines.length) return <EmptyState />;
 
   return (
-    <EuiPage restrictWidth className="engineOverview">
-      <SetBreadcrumbs isRoot />
+    <>
+      <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
-      <EuiPageBody>
-        <EngineOverviewHeader />
+      <EngineOverviewHeader />
+      <EuiPageContent panelPaddingSize="s" className="engineOverview">
+        <EuiPageContentHeader>
+          <EuiTitle size="s">
+            <h2>
+              <img src={EnginesIcon} alt="" className="engineIcon" />
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
+                defaultMessage="Engines"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiPageContentHeader>
+        <EuiPageContentBody data-test-subj="appSearchEngines">
+          <EngineTable
+            data={engines}
+            pagination={{
+              totalEngines: enginesTotal,
+              pageIndex: enginesPage - 1,
+              onPaginate: setEnginesPage,
+            }}
+          />
+        </EuiPageContentBody>
 
-        <EuiPageContent panelPaddingSize="s" className="engineOverview__body">
-          <EuiPageContentHeader>
-            <EuiTitle size="s">
-              <h2>
-                <img src={EnginesIcon} alt="" className="engineIcon" />
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
-                  defaultMessage="Engines"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
-          <EuiPageContentBody data-test-subj="appSearchEngines">
-            <EngineTable
-              data={engines}
-              pagination={{
-                totalEngines: enginesTotal,
-                pageIndex: enginesPage - 1,
-                onPaginate: setEnginesPage,
-              }}
-            />
-          </EuiPageContentBody>
-
-          {metaEngines.length > 0 && (
-            <>
-              <EuiSpacer size="xl" />
-              <EuiPageContentHeader>
-                <EuiTitle size="s">
-                  <h2>
-                    <img src={MetaEnginesIcon} alt="" className="engineIcon" />
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
-                      defaultMessage="Meta Engines"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiPageContentHeader>
-              <EuiPageContentBody data-test-subj="appSearchMetaEngines">
-                <EngineTable
-                  data={metaEngines}
-                  pagination={{
-                    totalEngines: metaEnginesTotal,
-                    pageIndex: metaEnginesPage - 1,
-                    onPaginate: setMetaEnginesPage,
-                  }}
-                />
-              </EuiPageContentBody>
-            </>
-          )}
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        {metaEngines.length > 0 && (
+          <>
+            <EuiSpacer size="xl" />
+            <EuiPageContentHeader>
+              <EuiTitle size="s">
+                <h2>
+                  <img src={MetaEnginesIcon} alt="" className="engineIcon" />
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
+                    defaultMessage="Meta Engines"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeader>
+            <EuiPageContentBody data-test-subj="appSearchMetaEngines">
+              <EngineTable
+                data={metaEngines}
+                pagination={{
+                  totalEngines: metaEnginesTotal,
+                  pageIndex: metaEnginesPage - 1,
+                  onPaginate: setMetaEnginesPage,
+                }}
+              />
+            </EuiPageContentBody>
+          </>
+        )}
+      </EuiPageContent>
+    </>
   );
 };

@@ -56,7 +56,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     ): Promise<string | undefined> {
       log.debug(`Searching for '${objectType}' with title '${title}'...`);
       const findResponse = await supertest
-        .get(`/api/saved_objects/_find?type=${objectType}`)
+        .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
         .set(COMMON_REQUEST_HEADERS)
         .expect(200)
         .then((res: any) => res.body);

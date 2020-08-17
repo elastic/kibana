@@ -61,7 +61,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && messageVariables?.find((variable) => variable === 'alertId')) {
+    if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
     if (!urgency) {

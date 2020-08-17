@@ -52,6 +52,14 @@ const MyActionButton = styled(EuiFlexItem)`
   align-self: flex-end;
 `;
 
+const MyNestedValueContainer = styled.div`
+  margin-left: ${({ theme }) => theme.eui.euiSizeL};
+`;
+
+const MyNestedValue = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
   disableDelete: boolean;
@@ -78,10 +86,10 @@ const ExceptionEntriesComponent = ({
         render: (value: string | null, data: FormattedEntry) => {
           if (value != null && data.isNested) {
             return (
-              <>
-                <EuiIconTip type="grabHorizontal" size="m" />
-                {value}
-              </>
+              <MyNestedValueContainer>
+                <EuiIconTip type="nested" size="s" />
+                <MyNestedValue>{value}</MyNestedValue>
+              </MyNestedValueContainer>
             );
           } else {
             return value ?? getEmptyValue();

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Readable, Transform, Writable, TransformOptions } from 'stream';
+import { Readable, Writable, Transform, TransformOptions } from 'stream';
 
 export function concatStreamProviders(
   sourceProviders: Array<() => Readable>,

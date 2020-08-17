@@ -10,7 +10,7 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../../helpers/setup_request';
-import { getServicesProjection } from '../../../../common/projections/services';
+import { getServicesProjection } from '../../../projections/services';
 import {
   getTransactionDurationAverages,
   getAgentNames,
@@ -25,7 +25,7 @@ export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems(setup: ServicesItemsSetup) {
   const params = {
-    projection: getServicesProjection({ setup, noEvents: true }),
+    projection: getServicesProjection({ setup }),
     setup,
   };
 

@@ -12,7 +12,7 @@ import {
 } from './ingest';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
 import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
-import { apiPathMockResponseProviders } from '../test_mock_utils';
+import { policyListApiPathHandlers } from '../test_mock_utils';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -61,7 +61,9 @@ describe('ingest service', () => {
 
   describe('sendGetEndpointSecurityPackage()', () => {
     it('should query EPM with category=security', async () => {
-      http.get.mockReturnValue(apiPathMockResponseProviders[INGEST_API_EPM_PACKAGES]());
+      http.get.mockReturnValue(
+        Promise.resolve(policyListApiPathHandlers()[INGEST_API_EPM_PACKAGES]())
+      );
       await sendGetEndpointSecurityPackage(http);
       expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/epm/packages', {
         query: { category: 'security' },

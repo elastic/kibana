@@ -12,10 +12,20 @@ import {
   SanitizedAlert as Alert,
   AlertAction,
   AlertTaskState,
+  AlertStatus,
+  AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
 } from '../../alerts/common';
-export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFrameworkHealth };
+export {
+  Alert,
+  AlertAction,
+  AlertTaskState,
+  AlertStatus,
+  AlertInstanceStatus,
+  RawAlertInstance,
+  AlertingFrameworkHealth,
+};
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
@@ -41,7 +51,7 @@ export interface ActionParamsProps<TParams> {
   index: number;
   editAction: (property: string, value: any, index: number) => void;
   errors: IErrorObject;
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultMessage?: string;
   docLinks: DocLinksStart;
 }
@@ -94,6 +104,7 @@ export interface ActionVariable {
 export interface ActionVariables {
   context: ActionVariable[];
   state: ActionVariable[];
+  params: ActionVariable[];
 }
 
 export interface AlertType {

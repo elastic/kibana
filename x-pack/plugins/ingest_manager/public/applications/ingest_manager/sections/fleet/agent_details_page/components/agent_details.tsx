@@ -37,7 +37,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
         },
         {
           title: i18n.translate('xpack.ingestManager.agentDetails.hostIdLabel', {
-            defaultMessage: 'Host ID',
+            defaultMessage: 'Agent ID',
           }),
           description: agent.id,
         },

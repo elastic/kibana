@@ -8,6 +8,7 @@ export * from '../../../../src/plugins/expressions/common';
 export * from './assets';
 export * from './canvas';
 export * from './elements';
+export * from './filters';
 export * from './functions';
 export * from './renderers';
 export * from './shortcuts';

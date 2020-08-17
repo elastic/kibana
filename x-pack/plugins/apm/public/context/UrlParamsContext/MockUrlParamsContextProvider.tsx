@@ -21,11 +21,11 @@ interface Props {
   refreshTimeRange?: (time: any) => void;
 }
 
-export const MockUrlParamsContextProvider = ({
+export function MockUrlParamsContextProvider({
   params,
   children,
   refreshTimeRange = () => undefined,
-}: Props) => {
+}: Props) {
   const urlParams = { ...defaultUrlParams, ...params };
   return (
     <UrlParamsContext.Provider
@@ -37,4 +37,4 @@ export const MockUrlParamsContextProvider = ({
       children={children}
     />
   );
-};
+}
