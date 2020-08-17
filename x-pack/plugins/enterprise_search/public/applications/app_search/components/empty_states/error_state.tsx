@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -16,16 +16,14 @@ import './empty_states.scss';
 
 export const ErrorState: React.FC = () => {
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome isRoot />
       <SendTelemetry action="error" metric="cannot_connect" />
 
-      <EuiPageBody>
-        <EngineOverviewHeader />
-        <EuiPageContent>
-          <ErrorStatePrompt />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+      <EngineOverviewHeader />
+      <EuiPageContent>
+        <ErrorStatePrompt />
+      </EuiPageContent>
+    </>
   );
 };

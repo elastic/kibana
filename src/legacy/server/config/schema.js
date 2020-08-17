@@ -19,9 +19,6 @@
 
 import Joi from 'joi';
 import os from 'os';
-import { join } from 'path';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
 
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
@@ -161,28 +158,6 @@ export default () =>
       maximumWaitTimeForAllCollectorsInS: Joi.number().default(60),
     }).default(),
 
-    optimize: Joi.object({
-      enabled: Joi.boolean().default(true),
-      bundleFilter: Joi.string().default('!tests'),
-      bundleDir: Joi.string().default(join(getDataPath(), 'optimize')),
-      viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-      watch: Joi.boolean().default(false),
-      watchPort: Joi.number().default(5602),
-      watchHost: Joi.string().hostname().default('localhost'),
-      watchPrebuild: Joi.boolean().default(false),
-      watchProxyTimeout: Joi.number().default(10 * 60000),
-      useBundleCache: Joi.boolean().default(!!process.env.CODE_COVERAGE ? true : Joi.ref('$prod')),
-      sourceMaps: Joi.when('$prod', {
-        is: true,
-        then: Joi.boolean().valid(false),
-        otherwise: Joi.alternatives()
-          .try(Joi.string().required(), Joi.boolean())
-          .default(!!process.env.CODE_COVERAGE ? 'true' : '#cheap-source-map'),
-      }),
-      workers: Joi.number().min(1),
-      profile: Joi.boolean().default(false),
-      validateSyntaxOfNodeModules: Joi.boolean().default(true),
-    }).default(),
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
     }).default(),
