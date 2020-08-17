@@ -167,7 +167,7 @@ preserve pagination. You can also add filters with selected influencer values
 directly on the dashboard.
 
 [role="screenshot"]
-image::images/.png[Model change annotations] !!!!!!!
+image::images/swim-lane-filter.png[Anomaly swim lane filter]
 
 [float]
 [[transform-data-frame-analytics-histogram-7-9]]
