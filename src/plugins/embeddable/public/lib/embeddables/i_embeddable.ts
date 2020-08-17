@@ -169,6 +169,11 @@ export interface IEmbeddable<
   getPlaceholderTitle?(): string | undefined;
 
   /**
+   * Sets the placeholder title of this embeddable.
+   */
+  setPlaceholderTitle?(title: string | undefined): void;
+
+  /**
    * Returns the top most parent embeddable, or itself if this embeddable
    * is not within a parent.
    */
@@ -202,4 +207,6 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): Array<keyof TriggerContextMapping>;
+
+
 }

@@ -463,6 +463,7 @@ export class DashboardAppController {
                   }
                 );
               } else if ('input' in incomingEmbeddable) {
+                debugger;
                 const input = incomingEmbeddable.input;
                 delete input.id;
                 const placeholderTitle = input.placeholderTitle;

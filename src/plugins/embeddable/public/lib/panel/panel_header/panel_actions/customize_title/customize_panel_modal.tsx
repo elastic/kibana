@@ -36,7 +36,7 @@ import { IEmbeddable } from '../../../../';
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;
-  updateTitle: (newTitle: string | undefined) => void;
+  updateTitle: (newTitle: string | undefined, hideTitle?: boolean) => void;
 }
 
 interface State {
@@ -71,7 +71,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
 
   private save = () => {
     if (this.state.hideTitle) {
-      this.props.updateTitle('');
+      this.props.updateTitle('', true);
     } else {
       const newTitle = this.state.title === '' ? undefined : this.state.title;
       this.props.updateTitle(newTitle);

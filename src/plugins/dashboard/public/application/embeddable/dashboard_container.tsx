@@ -198,6 +198,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>) {
     if (explicitInput.id && this.input.panels[explicitInput.id]) {
+      debugger;
       this.replacePanel(this.input.panels[explicitInput.id], {
         type,
         explicitInput: {

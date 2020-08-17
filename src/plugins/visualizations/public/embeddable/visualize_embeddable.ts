@@ -76,6 +76,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
+  placeholderTitle?: string | undefined;
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
@@ -97,7 +98,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
-  private readonly placeholderTitle?: string;
+  private placeholderTitle?: string;
 
   constructor(
     timefilter: TimefilterContract,
@@ -121,7 +122,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.deps = deps;
     this.timefilter = timefilter;
     this.vis = vis;
+    debugger;
     this.placeholderTitle = initialInput.placeholderTitle;
+    debugger;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
 
@@ -224,6 +227,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.updateOutput({ title: this.vis.title });
     }
 
+    // propagate the placeholder title to the output embeddable
+    // but only when the visualization is in edit/Visualize mode
+    debugger;
+    if (!this.parent && this.placeholderTitle !== this.output.placeholderTitle) {
+      this.updateOutput({ placeholderTitle: this.placeholderTitle });
+    }
+
     // Keep title depending on the output Embeddable to decouple the
     // visual appearance of the title and the actual title content (useful in Dashboard)
     if (this.output.title !== this.title) {
@@ -233,6 +243,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         this.domNode.setAttribute('data-title', this.title || '');
       }
     }
+
+   /* if (this.output.placeholderTitle !== this.placeholderTitle) {
+      this.placeholderTitle = this.output.placeholderTitle;
+
+      if (this.domNode) {
+        this.domNode.setAttribute('data-placeholder-title', this.placeholderTitle);
+      }
+    }*/
 
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
@@ -245,6 +263,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   getPlaceholderTitle = () => {
     return this.placeholderTitle;
+  };
+
+  setPlaceholderTitle = (title: string | undefined) => {
+    this.placeholderTitle = title;
   };
 
   // this is a hack to make editor still work, will be removed once we clean up editor

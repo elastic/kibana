@@ -77,6 +77,7 @@ interface State {
   notifications: Array<Action<EmbeddableContext>>;
   loading?: boolean;
   error?: EmbeddableError;
+  hidePanelTitle?: boolean;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -92,6 +93,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const viewMode = embeddable.getInput().viewMode
       ? embeddable.getInput().viewMode
       : ViewMode.EDIT;
+    debugger;
     const hidePanelTitles = embeddable.parent
       ? Boolean(embeddable.parent.getInput().hidePanelTitles)
       : false;
@@ -274,14 +276,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{ title: string | undefined }>((resolve) => {
+        return new Promise<{ title: string | undefined, hideTitle?: boolean }>((resolve) => {
           const session = overlays.openModal(
             toMountPoint(
               <CustomizePanelModal
                 embeddable={context.embeddable}
-                updateTitle={(title) => {
+                updateTitle={(title, hideTitle) => {
                   session.close();
-                  resolve({ title });
+                  resolve({ title, hideTitle });
                 }}
               />
             ),
