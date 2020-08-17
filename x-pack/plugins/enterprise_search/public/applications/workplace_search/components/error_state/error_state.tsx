@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TODO: Remove EuiPage & EuiPageBody before exposing full app
+
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
