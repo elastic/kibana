@@ -16,11 +16,11 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./epm/index'));
 
     // Package policies
-    loadTestFile(require.resolve('./package_config/create'));
-    loadTestFile(require.resolve('./package_config/update'));
-    loadTestFile(require.resolve('./package_config/get'));
+    loadTestFile(require.resolve('./package_policy/create'));
+    loadTestFile(require.resolve('./package_policy/update'));
+    loadTestFile(require.resolve('./package_policy/get'));
 
     // Agent policies
-    loadTestFile(require.resolve('./agent_config/index'));
+    loadTestFile(require.resolve('./agent_policy/index'));
   });
 }

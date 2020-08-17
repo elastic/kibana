@@ -8,7 +8,7 @@ import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPolicyPageProvider } from './policy_page';
 import { EndpointPageUtils } from './page_utils';
-import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_config_page';
+import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
