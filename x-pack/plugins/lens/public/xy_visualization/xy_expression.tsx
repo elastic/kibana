@@ -102,6 +102,30 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    tickLabelsVisibilitySettings: {
+      types: ['lens_xy_tickLabelsConfig'],
+      help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
+        defaultMessage: 'Show x and y axes tick labels',
+      }),
+    },
+    gridlinesVisibilitySettings: {
+      types: ['lens_xy_gridlinesConfig'],
+      help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {
+        defaultMessage: 'Show x and y axes gridlines',
+      }),
+    },
+    showXAxisTitle: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.showXAxisTitle.help', {
+        defaultMessage: 'Show x axis title',
+      }),
+    },
+    showYAxisTitle: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.showYAxisTitle.help', {
+        defaultMessage: 'Show y axis title',
+      }),
+    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,
@@ -199,7 +223,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -236,7 +260,10 @@ export function XYChart({
     shouldRotate
   );
 
-  const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+  const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
+  const showXAxisTitle = args.showXAxisTitle ?? true;
+  const showYAxisTitle = args.showYAxisTitle ?? true;
+  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || { x: true, y: true };
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -277,6 +304,22 @@ export function XYChart({
         minInterval: calculateMinInterval(),
       }
     : undefined;
+
+  const getYAxesTitles = (
+    axisSeries: Array<{ layer: string; accessor: string }>,
+    index: number
+  ) => {
+    if (index > 0 && args.yTitle) return;
+    return (
+      args.yTitle ||
+      axisSeries
+        .map(
+          (series) =>
+            data.tables[series.layer].columns.find((column) => column.id === series.accessor)?.name
+        )
+        .filter((name) => Boolean(name))[0]
+    );
+  };
 
   return (
     <Chart>
@@ -376,10 +419,11 @@ export function XYChart({
       <Axis
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
-        title={xTitle}
-        showGridLines={false}
-        hide={!filteredLayers[0].xAccessor || filteredLayers[0].hide}
-        tickFormat={(d) => xAxisFormatter.convert(d)}
+        title={showXAxisTitle ? xTitle : undefined}
+        showGridLines={gridlinesVisibilitySettings?.x}
+        gridLineStyle={{ strokeWidth: 2 }}
+        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor || filteredLayers[0].hide}
+        tickFormat={tickLabelsVisibilitySettings?.x ? (d) => xAxisFormatter.convert(d) : () => ''}
       />
 
       {yAxesConfiguration.map((axis, index) => (
@@ -388,18 +432,10 @@ export function XYChart({
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={
-            axis.series
-              .map(
-                (series) =>
-                  data.tables[series.layer].columns.find((column) => column.id === series.accessor)
-                    ?.name
-              )
-              .filter((name) => Boolean(name))[0] || args.yTitle
-          }
-          showGridLines={false}
+          title={showYAxisTitle ? getYAxesTitles(axis.series, index) : undefined}
+          showGridLines={gridlinesVisibilitySettings?.y}
           hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter.convert(d)}
+          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => axis.formatter.convert(d) : () => ''}
         />
       ))}
 

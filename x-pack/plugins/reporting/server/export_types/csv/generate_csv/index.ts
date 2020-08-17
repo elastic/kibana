@@ -113,6 +113,10 @@ export function createGenerateCsv(logger: LevelLogger) {
           break;
         }
 
+        if (cancellationToken.isCancelled()) {
+          break;
+        }
+
         const flattened = flattenHit(hit);
         const rows = formatCsvValues(flattened);
         const rowsHaveFormulas =

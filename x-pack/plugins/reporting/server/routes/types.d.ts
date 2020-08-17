@@ -6,12 +6,12 @@
 
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { ScheduledTaskParams } from '../types';
+import { CreateJobBaseParams, ScheduledTaskParams } from '../types';
 
 export type HandlerFunction = (
   user: AuthenticatedUser | null,
   exportType: string,
-  jobParams: object,
+  jobParams: CreateJobBaseParams,
   context: RequestHandlerContext,
   req: KibanaRequest,
   res: KibanaResponseFactory
