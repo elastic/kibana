@@ -8,14 +8,15 @@ import { i18n } from '@kbn/i18n';
 import { AdministrationSubTab } from '../types';
 import { SecurityPageName } from '../../app/types';
 import { NavTab } from '../../common/components/navigation/types';
+import { getEndpointListPath, getTrustedAppsListPath } from '../common/routing';
 
 export const managementTabs: Record<string, NavTab> = {
   [AdministrationSubTab.endpoints]: {
     name: i18n.translate('xpack.securitySolution.managementTabs.hosts', {
-      defaultMessage: 'Hosts',
+      defaultMessage: 'Endpoints',
     }),
     id: AdministrationSubTab.endpoints,
-    href: `/${AdministrationSubTab.endpoints}`,
+    href: getEndpointListPath({ name: 'endpointList' }),
     urlKey: 'administration',
     pageId: SecurityPageName.administration,
     disabled: false,
@@ -25,7 +26,7 @@ export const managementTabs: Record<string, NavTab> = {
       defaultMessage: 'Trusted Applications',
     }),
     id: AdministrationSubTab.trustedApps,
-    href: `/${AdministrationSubTab.trustedApps}`,
+    href: getTrustedAppsListPath(),
     urlKey: 'administration',
     pageId: SecurityPageName.administration,
     disabled: false,

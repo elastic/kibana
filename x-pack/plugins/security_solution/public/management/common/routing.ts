@@ -13,6 +13,7 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
@@ -35,10 +36,10 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
   Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 
-export const getEndpointListPath = (
+export function getEndpointListPath(
   props: { name: 'default' | 'endpointList' } & EndpointIndexUIQueryParams,
   search?: string
-) => {
+) {
   const { name, ...queryParams } = props;
   const urlQueryParams = querystringStringify<EndpointIndexUIQueryParams, typeof queryParams>(
     queryParams
@@ -51,13 +52,13 @@ export const getEndpointListPath = (
     })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
   }
   return `${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
-};
+}
 
-export const getEndpointDetailsPath = (
+export function getEndpointDetailsPath(
   props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointIndexUIQueryParams &
     EndpointDetailsUrlProps,
   search?: string
-) => {
+) {
   const { name, ...queryParams } = props;
   queryParams.show = (props.name === 'endpointPolicyResponse'
     ? 'policy_response'
@@ -70,15 +71,23 @@ export const getEndpointDetailsPath = (
   return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
     tabName: AdministrationSubTab.endpoints,
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
-};
+}
 
-export const getPoliciesPath = (search?: string) =>
-  `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
+export function getPoliciesPath(search?: string) {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
     tabName: AdministrationSubTab.policies,
   })}${appendSearch(search)}`;
+}
 
-export const getPolicyDetailPath = (policyId: string, search?: string) =>
-  `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+export function getPolicyDetailPath(policyId: string, search?: string) {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;
+}
+
+export function getTrustedAppsListPath(search?: string) {
+  return `${generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
+    tabName: AdministrationSubTab.trustedApps,
+  })}${appendSearch(search)}`;
+}
