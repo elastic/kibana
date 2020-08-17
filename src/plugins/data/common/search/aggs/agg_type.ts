@@ -266,7 +266,10 @@ export class AggType<
     this.getSerializedFormat =
       config.getSerializedFormat ||
       ((agg: TAggConfig) => {
-        return agg.params.field ? agg.params.field.format.toJSON() : {};
+        return agg.params.field
+          ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+          : {};
+        // return agg.params.field ? agg.params.field.format.toJSON() : {};
       });
 
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
