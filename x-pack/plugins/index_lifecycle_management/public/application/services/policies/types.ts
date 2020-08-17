@@ -6,12 +6,14 @@
 
 export interface SerializedPolicy {
   name: string;
-  phases: {
-    hot: SerializedHotPhase;
-    warm?: SerializedWarmPhase;
-    cold?: SerializedColdPhase;
-    delete?: SerializedDeletePhase;
-  };
+  phases: Phases;
+}
+
+export interface Phases {
+  hot: SerializedHotPhase;
+  warm?: SerializedWarmPhase;
+  cold?: SerializedColdPhase;
+  delete?: SerializedDeletePhase;
 }
 
 export interface PolicyFromES {

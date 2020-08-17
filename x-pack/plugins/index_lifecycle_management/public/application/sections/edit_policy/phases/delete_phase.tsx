@@ -8,7 +8,6 @@ import React, { PureComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { PHASE_DELETE, PHASE_ENABLED, PHASE_WAIT_FOR_SNAPSHOT_POLICY } from '../../../constants';
 import {
   ActiveBadge,
   LearnMoreLink,
@@ -17,13 +16,14 @@ import {
   MinAgeInput,
   SnapshotPolicies,
 } from '../components';
-import { DeletePhase as DeletePhaseInterface } from '../../../services/policies/policies';
+import { DeletePhase as DeletePhaseInterface, Phases } from '../../../services/policies/types';
+import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 interface Props {
-  setPhaseData: (key: string, value: any) => void;
+  setPhaseData: (key: keyof DeletePhaseInterface & string, value: string | boolean) => void;
   phaseData: DeletePhaseInterface;
   isShowingErrors: boolean;
-  errors: Record<string, string[]>;
+  errors?: PhaseValidationErrors<DeletePhaseInterface>;
   hotPhaseRolloverEnabled: boolean;
   getUrlForApp: (
     appId: string,
@@ -45,6 +45,9 @@ export class DeletePhase extends PureComponent<Props> {
       getUrlForApp,
     } = this.props;
 
+    const deletePhasePhaseProperty = propertyof<Phases>('delete');
+    const phaseEnabledProperty = propertyof<DeletePhaseInterface>('phaseEnabled');
+    const waitForSnapshotPolicyProperty = propertyof<DeletePhaseInterface>('waitForSnapshotPolicy');
     return (
       <div id="deletePhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
@@ -77,10 +80,10 @@ export class DeletePhase extends PureComponent<Props> {
                     defaultMessage="Activate delete phase"
                   />
                 }
-                id={`${PHASE_DELETE}-${PHASE_ENABLED}`}
+                id={`${deletePhasePhaseProperty}-${phaseEnabledProperty}`}
                 checked={phaseData.phaseEnabled}
                 onChange={(e) => {
-                  setPhaseData(PHASE_ENABLED, e.target.checked);
+                  setPhaseData(phaseEnabledProperty, e.target.checked);
                 }}
                 aria-controls="deletePhaseContent"
               />
@@ -89,10 +92,10 @@ export class DeletePhase extends PureComponent<Props> {
           fullWidth
         >
           {phaseData.phaseEnabled ? (
-            <MinAgeInput
+            <MinAgeInput<DeletePhaseInterface>
               errors={errors}
               phaseData={phaseData}
-              phase={PHASE_DELETE}
+              phase={deletePhasePhaseProperty}
               isShowingErrors={isShowingErrors}
               setPhaseData={setPhaseData}
               rolloverEnabled={hotPhaseRolloverEnabled}
@@ -137,7 +140,7 @@ export class DeletePhase extends PureComponent<Props> {
             >
               <SnapshotPolicies
                 value={phaseData.waitForSnapshotPolicy}
-                onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
+                onChange={(value) => setPhaseData(waitForSnapshotPolicyProperty, value)}
                 getUrlForApp={getUrlForApp}
               />
             </EuiFormRow>

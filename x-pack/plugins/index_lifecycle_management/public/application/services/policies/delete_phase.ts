@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DeletePhase, SerializedDeletePhase, serializedPhaseInitialization } from './policies';
+import { DeletePhase, SerializedDeletePhase, serializedPhaseInitialization } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { PHASE_ROLLOVER_MINIMUM_AGE } from '../../constants';
 import {
   numberRequiredMessage,
+  PhaseValidationErrors,
   positiveNumberRequiredMessage,
-  ValidationErrors,
 } from './policy_validation';
 
 const deletePhaseInitialization: DeletePhase = {
@@ -75,28 +74,19 @@ export const deletePhaseToES = (
   return esPhase;
 };
 
-export const validateDeletePhase = (
-  phase: DeletePhase,
-  errors: ValidationErrors
-): ValidationErrors => {
+export const validateDeletePhase = (phase: DeletePhase): PhaseValidationErrors<DeletePhase> => {
   if (!phase.phaseEnabled) {
-    return errors;
+    return {};
   }
 
-  const phaseErrors = {} as any;
+  const phaseErrors = {} as PhaseValidationErrors<DeletePhase>;
 
   // min age needs to be a positive number
   if (!isNumber(phase.selectedMinimumAge)) {
-    phaseErrors[PHASE_ROLLOVER_MINIMUM_AGE] = [numberRequiredMessage];
+    phaseErrors.selectedMinimumAge = [numberRequiredMessage];
   } else if (parseInt(phase.selectedMinimumAge, 10) < 0) {
-    phaseErrors[PHASE_ROLLOVER_MINIMUM_AGE] = [positiveNumberRequiredMessage];
+    phaseErrors.selectedMinimumAge = [positiveNumberRequiredMessage];
   }
 
-  return {
-    ...errors,
-    delete: {
-      ...errors.delete,
-      ...phaseErrors,
-    },
-  };
+  return { ...phaseErrors };
 };

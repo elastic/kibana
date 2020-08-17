@@ -4,21 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const findFirstError = (errors: any): string | undefined => {
-  let firstError;
-  const keys = Object.keys(errors);
-  for (const key of keys) {
-    const value = errors[key];
-    if (Array.isArray(value) && value.length > 0) {
-      firstError = key;
-      break;
-    } else if (value) {
-      firstError = findFirstError(value);
-      if (firstError) {
-        firstError = `${key}.${firstError}`;
-        break;
-      }
-    }
+import { propertyof, ValidationErrors } from './policies/policy_validation';
+
+export const findFirstError = (errors?: ValidationErrors): string | undefined => {
+  if (!errors) {
+    return;
   }
-  return firstError;
+
+  if (errors.policyName.length > 0) {
+    return propertyof<ValidationErrors>('policyName');
+  }
+
+  if (Object.keys(errors.hot).length > 0) {
+    return `${propertyof<ValidationErrors>('hot')}.${Object.keys(errors.hot)[0]}`;
+  }
+  if (Object.keys(errors.warm).length > 0) {
+    return `${propertyof<ValidationErrors>('warm')}.${Object.keys(errors.warm)[0]}`;
+  }
+  if (Object.keys(errors.cold).length > 0) {
+    return `${propertyof<ValidationErrors>('cold')}.${Object.keys(errors.cold)[0]}`;
+  }
+  if (Object.keys(errors.delete).length > 0) {
+    return `${propertyof<ValidationErrors>('delete')}.${Object.keys(errors.delete)[0]}`;
+  }
 };

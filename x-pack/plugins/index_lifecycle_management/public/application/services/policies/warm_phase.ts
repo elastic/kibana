@@ -10,20 +10,14 @@ import {
   WarmPhase,
   SerializedWarmPhase,
   serializedPhaseInitialization,
-} from './policies';
+} from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import {
-  PHASE_FORCE_MERGE_SEGMENTS,
-  PHASE_INDEX_PRIORITY,
-  PHASE_PRIMARY_SHARD_COUNT,
-  PHASE_REPLICA_COUNT,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-} from '../../constants';
+
 import {
   numberRequiredMessage,
+  PhaseValidationErrors,
   positiveNumberRequiredMessage,
   positiveNumbersAboveZeroErrorMessage,
-  ValidationErrors,
 } from './policy_validation';
 
 const warmPhaseInitialization: WarmPhase = {
@@ -174,63 +168,59 @@ export const warmPhaseToES = (
   return esPhase;
 };
 
-export const validateWarmPhase = (phase: WarmPhase, errors: ValidationErrors): ValidationErrors => {
+export const validateWarmPhase = (phase: WarmPhase): PhaseValidationErrors<WarmPhase> => {
   if (!phase.phaseEnabled) {
-    return errors;
+    return {};
   }
 
-  const phaseErrors = {} as any;
+  const phaseErrors = {} as PhaseValidationErrors<WarmPhase>;
 
   // index priority is optional, but if it's set, it needs to be a positive number
   if (phase.phaseIndexPriority) {
     if (!isNumber(phase.phaseIndexPriority)) {
-      phaseErrors[PHASE_INDEX_PRIORITY] = [numberRequiredMessage];
+      phaseErrors.phaseIndexPriority = [numberRequiredMessage];
     } else if (parseInt(phase.phaseIndexPriority, 10) < 0) {
-      phaseErrors[PHASE_INDEX_PRIORITY] = [positiveNumberRequiredMessage];
+      phaseErrors.phaseIndexPriority = [positiveNumberRequiredMessage];
     }
   }
 
   // if warm phase on rollover is disabled, min age needs to be a positive number
   if (!phase.warmPhaseOnRollover) {
     if (!isNumber(phase.selectedMinimumAge)) {
-      phaseErrors[PHASE_ROLLOVER_MINIMUM_AGE] = [numberRequiredMessage];
+      phaseErrors.selectedMinimumAge = [numberRequiredMessage];
     } else if (parseInt(phase.selectedMinimumAge, 10) < 0) {
-      phaseErrors[PHASE_ROLLOVER_MINIMUM_AGE] = [positiveNumberRequiredMessage];
+      phaseErrors.selectedMinimumAge = [positiveNumberRequiredMessage];
     }
   }
 
   // if forcemerge is enabled, force merge segments needs to be a number above zero
   if (phase.forceMergeEnabled) {
     if (!isNumber(phase.selectedForceMergeSegments)) {
-      phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [numberRequiredMessage];
+      phaseErrors.selectedForceMergeSegments = [numberRequiredMessage];
     } else if (parseInt(phase.selectedForceMergeSegments, 10) < 1) {
-      phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [positiveNumbersAboveZeroErrorMessage];
+      phaseErrors.selectedForceMergeSegments = [positiveNumbersAboveZeroErrorMessage];
     }
   }
 
   // if shrink is enabled, primary shard count needs to be a number above zero
   if (phase.shrinkEnabled) {
     if (!isNumber(phase.selectedPrimaryShardCount)) {
-      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [numberRequiredMessage];
+      phaseErrors.selectedPrimaryShardCount = [numberRequiredMessage];
     } else if (parseInt(phase.selectedPrimaryShardCount, 10) < 1) {
-      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [positiveNumbersAboveZeroErrorMessage];
+      phaseErrors.selectedPrimaryShardCount = [positiveNumbersAboveZeroErrorMessage];
     }
   }
 
   // replica count is optional, but if it's set, it needs to be a positive number
   if (phase.selectedReplicaCount) {
     if (!isNumber(phase.selectedReplicaCount)) {
-      phaseErrors[PHASE_REPLICA_COUNT] = [numberRequiredMessage];
+      phaseErrors.selectedReplicaCount = [numberRequiredMessage];
     } else if (parseInt(phase.selectedReplicaCount, 10) < 0) {
-      phaseErrors[PHASE_REPLICA_COUNT] = [numberRequiredMessage];
+      phaseErrors.selectedReplicaCount = [numberRequiredMessage];
     }
   }
 
   return {
-    ...errors,
-    warm: {
-      ...errors.warm,
-      ...phaseErrors,
-    },
+    ...phaseErrors,
   };
 };

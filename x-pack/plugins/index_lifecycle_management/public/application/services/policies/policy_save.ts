@@ -12,7 +12,7 @@ import { showApiError } from '../api_errors';
 import { getUiMetricsForPhases, trackUiMetric } from '../ui_metric';
 import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
 import { toasts } from '../notification';
-import { Policy, PolicyFromES } from './policies';
+import { Policy, PolicyFromES } from './types';
 import { serializePolicy } from './policy_serialization';
 
 export const savePolicy = async (

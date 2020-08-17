@@ -10,13 +10,12 @@ import {
   ColdPhase,
   SerializedColdPhase,
   serializedPhaseInitialization,
-} from './policies';
+} from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { PHASE_INDEX_PRIORITY, PHASE_ROLLOVER_MINIMUM_AGE } from '../../constants';
 import {
   numberRequiredMessage,
+  PhaseValidationErrors,
   positiveNumberRequiredMessage,
-  ValidationErrors,
 } from './policy_validation';
 
 const coldPhaseInitialization: ColdPhase = {
@@ -140,34 +139,28 @@ export const coldPhaseToES = (
   return esPhase;
 };
 
-export const validateColdPhase = (phase: ColdPhase, errors: ValidationErrors): ValidationErrors => {
+export const validateColdPhase = (phase: ColdPhase): PhaseValidationErrors<ColdPhase> => {
   if (!phase.phaseEnabled) {
-    return errors;
+    return {};
   }
 
-  const phaseErrors = {} as any;
+  const phaseErrors = {} as PhaseValidationErrors<ColdPhase>;
 
   // index priority is optional, but if it's set, it needs to be a positive number
   if (phase.phaseIndexPriority) {
     if (!isNumber(phase.phaseIndexPriority)) {
-      phaseErrors[PHASE_INDEX_PRIORITY] = [numberRequiredMessage];
+      phaseErrors.phaseIndexPriority = [numberRequiredMessage];
     } else if (parseInt(phase.phaseIndexPriority, 10) < 0) {
-      phaseErrors[PHASE_INDEX_PRIORITY] = [positiveNumberRequiredMessage];
+      phaseErrors.phaseIndexPriority = [positiveNumberRequiredMessage];
     }
   }
 
   // min age needs to be a positive number
   if (!isNumber(phase.selectedMinimumAge)) {
-    phaseErrors[PHASE_ROLLOVER_MINIMUM_AGE] = [numberRequiredMessage];
+    phaseErrors.phaseIndexPriority = [numberRequiredMessage];
   } else if (parseInt(phase.selectedMinimumAge, 10) < 0) {
-    phaseErrors[PHASE_ROLLOVER_MINIMUM_AGE] = [positiveNumberRequiredMessage];
+    phaseErrors.phaseIndexPriority = [positiveNumberRequiredMessage];
   }
 
-  return {
-    ...errors,
-    cold: {
-      ...errors.cold,
-      ...phaseErrors,
-    },
-  };
+  return { ...phaseErrors };
 };

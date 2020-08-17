@@ -33,11 +33,8 @@ import { findFirstError } from '../../services/find_errors';
 import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
 
 import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
-import { Policy, PolicyFromES } from '../../services/policies/policies';
-import {
-  validatePolicy,
-  validationErrorsInitialization,
-} from '../../services/policies/policy_validation';
+import { Policy, PolicyFromES } from '../../services/policies/types';
+import { validatePolicy, ValidationErrors } from '../../services/policies/policy_validation';
 import { savePolicy } from '../../services/policies/policy_save';
 import {
   deserializePolicy,
@@ -68,7 +65,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
   }, []);
 
   const [isShowingErrors, setIsShowingErrors] = useState(false);
-  const [errors, setErrors] = useState({ ...validationErrorsInitialization });
+  const [errors, setErrors] = useState<ValidationErrors>();
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
 
   const existingPolicy = getPolicyByName(policies, policyName);
@@ -87,17 +84,22 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
   const submit = async () => {
     setIsShowingErrors(true);
-    const validationErrors = validatePolicy(saveAsNew, policy, policies, originalPolicyName);
+    const [isValid, validationErrors] = validatePolicy(
+      saveAsNew,
+      policy,
+      policies,
+      originalPolicyName
+    );
     setErrors(validationErrors);
 
-    const firstError = findFirstError(validationErrors);
-    if (firstError) {
+    if (!isValid) {
       toasts.addDanger(
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
           defaultMessage: 'Please fix the errors on this page.',
         })
       );
-      const errorRowId = `${firstError.replace('.', '-')}-row`;
+      const firstError = findFirstError(validationErrors);
+      const errorRowId = `${firstError ? firstError.replace('.', '-') : ''}-row`;
       const element = document.getElementById(errorRowId);
       if (element) {
         element.scrollIntoView({ block: 'center', inline: 'nearest' });
@@ -250,9 +252,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
                     label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
                       defaultMessage: 'Policy name',
                     })}
-                    errorKey={STRUCTURE_POLICY_NAME}
                     isShowingErrors={isShowingErrors}
-                    errors={errors}
+                    errors={errors?.policyName}
                     helpText={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage"
@@ -275,8 +276,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <EuiSpacer />
 
             <HotPhase
-              errors={errors.hot}
-              isShowingErrors={isShowingErrors && !!findFirstError(errors.hot)}
+              errors={errors?.hot}
+              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.hot).length > 0}
               setPhaseData={(key, value) => setPhaseData('hot', key, value)}
               phaseData={policy.phases.hot}
               setWarmPhaseOnRollover={setWarmPhaseOnRollover}
@@ -285,8 +286,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <EuiHorizontalRule />
 
             <WarmPhase
-              errors={errors.warm}
-              isShowingErrors={isShowingErrors && !!findFirstError(errors.warm)}
+              errors={errors?.warm}
+              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.warm).length > 0}
               setPhaseData={(key, value) => setPhaseData('warm', key, value)}
               phaseData={policy.phases.warm}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
@@ -295,8 +296,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <EuiHorizontalRule />
 
             <ColdPhase
-              errors={errors.cold}
-              isShowingErrors={isShowingErrors && !!findFirstError(errors.cold)}
+              errors={errors?.cold}
+              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.cold).length > 0}
               setPhaseData={(key, value) => setPhaseData('cold', key, value)}
               phaseData={policy.phases.cold}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
@@ -305,8 +306,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <EuiHorizontalRule />
 
             <DeletePhase
-              errors={errors.delete}
-              isShowingErrors={isShowingErrors && !!findFirstError(errors.delete)}
+              errors={errors?.delete}
+              isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.delete).length > 0}
               getUrlForApp={getUrlForApp}
               setPhaseData={(key, value) => setPhaseData('delete', key, value)}
               phaseData={policy.phases.delete}
@@ -372,7 +373,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             {isShowingPolicyJsonFlyout ? (
               <PolicyJsonFlyout
                 policyName={policy.name || ''}
-                lifecycle={policy}
+                policy={policy}
                 close={() => setIsShowingPolicyJsonFlyout(false)}
               />
             ) : null}

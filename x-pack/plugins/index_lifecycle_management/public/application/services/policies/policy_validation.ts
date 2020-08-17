@@ -9,7 +9,7 @@ import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
-import { Policy, PolicyFromES } from './policies';
+import { ColdPhase, DeletePhase, HotPhase, Policy, PolicyFromES, WarmPhase } from './types';
 
 export const numberRequiredMessage = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.numberRequiredError',
@@ -98,107 +98,71 @@ export const policyNameAlreadyUsedErrorMessage = i18n.translate(
     defaultMessage: 'That policy name is already used.',
   }
 );
+export type PhaseValidationErrors<Phase extends HotPhase | WarmPhase | ColdPhase | DeletePhase> = {
+  [P in keyof Partial<Phase>]: string[];
+};
 
 export interface ValidationErrors {
-  hot: {
-    selectedMaxAge: string[];
-    selectedMaxAgeUnits: string[];
-    selectedMaxSizeStored: string[];
-    selectedMaxSizeStoredUnits: string[];
-    selectedMaxDocuments: string[];
-    phaseIndexPriority: string[];
-  };
-  warm: {
-    selectedMinimumAge: string[];
-    selectedMinimumAgeUnits: string[];
-    selectedNodeAttrs: string[];
-    selectedPrimaryShardCount: string[];
-    selectedReplicaCount: string[];
-    selectedForceMergeSegments: string[];
-    phaseIndexPriority: string[];
-  };
-  cold: {
-    selectedMinimumAge: string[];
-    selectedMinimumAgeUnits: string[];
-    selectedNodeAttrs: string[];
-    selectedReplicaCount: string[];
-    phaseIndexPriority: string[];
-  };
-  delete: {
-    selectedMinimumAge: string[];
-    selectedMinimumAgeUnits: string[];
-  };
+  hot: PhaseValidationErrors<HotPhase>;
+  warm: PhaseValidationErrors<WarmPhase>;
+  cold: PhaseValidationErrors<ColdPhase>;
+  delete: PhaseValidationErrors<DeletePhase>;
   policyName: string[];
 }
-
-export const validationErrorsInitialization: ValidationErrors = {
-  hot: {
-    selectedMaxAge: [],
-    selectedMaxAgeUnits: [],
-    selectedMaxSizeStored: [],
-    selectedMaxSizeStoredUnits: [],
-    selectedMaxDocuments: [],
-    phaseIndexPriority: [],
-  },
-  warm: {
-    selectedMinimumAge: [],
-    selectedMinimumAgeUnits: [],
-    selectedNodeAttrs: [],
-    selectedPrimaryShardCount: [],
-    selectedReplicaCount: [],
-    selectedForceMergeSegments: [],
-    phaseIndexPriority: [],
-  },
-  cold: {
-    selectedMinimumAge: [],
-    selectedMinimumAgeUnits: [],
-    selectedNodeAttrs: [],
-    selectedReplicaCount: [],
-    phaseIndexPriority: [],
-  },
-  delete: {
-    selectedMinimumAge: [],
-    selectedMinimumAgeUnits: [],
-  },
-  policyName: [],
-};
 
 export const validatePolicy = (
   saveAsNew: boolean,
   policy: Policy,
   policies: PolicyFromES[],
   originalPolicyName: string
-) => {
-  let errors = { ...validationErrorsInitialization };
+): [boolean, ValidationErrors] => {
+  const policyNameErrors: string[] = [];
   if (!policy.name) {
-    errors.policyName = [...errors.policyName, policyNameRequiredMessage];
+    policyNameErrors.push(policyNameRequiredMessage);
   } else {
     if (policy.name.startsWith('_')) {
-      errors.policyName = [...errors.policyName, policyNameStartsWithUnderscoreErrorMessage];
+      policyNameErrors.push(policyNameStartsWithUnderscoreErrorMessage);
     }
     if (policy.name.includes(',')) {
-      errors.policyName = [...errors.policyName, policyNameContainsCommaErrorMessage];
+      policyNameErrors.push(policyNameContainsCommaErrorMessage);
     }
     if (policy.name.includes(' ')) {
-      errors.policyName = [...errors.policyName, policyNameContainsSpaceErrorMessage];
+      policyNameErrors.push(policyNameContainsSpaceErrorMessage);
     }
     if (window.TextEncoder && new window.TextEncoder().encode(policy.name).length > 255) {
-      errors.policyName = [...errors.policyName, policyNameTooLongErrorMessage];
+      policyNameErrors.push(policyNameTooLongErrorMessage);
     }
 
     if (saveAsNew && policy.name === originalPolicyName) {
-      errors.policyName = [...errors.policyName, policyNameMustBeDifferentErrorMessage];
+      policyNameErrors.push(policyNameMustBeDifferentErrorMessage);
     } else if (policy.name !== originalPolicyName) {
       const policyNames = policies.map((existingPolicy) => existingPolicy.name);
       if (policyNames.includes(policy.name)) {
-        errors.policyName = [...errors.policyName, policyNameAlreadyUsedErrorMessage];
+        policyNameErrors.push(policyNameAlreadyUsedErrorMessage);
       }
     }
   }
 
-  errors = validateHotPhase(policy.phases.hot, errors);
-  errors = validateWarmPhase(policy.phases.warm, errors);
-  errors = validateColdPhase(policy.phases.cold, errors);
-  errors = validateDeletePhase(policy.phases.delete, errors);
-  return errors;
+  const hotPhaseErrors = validateHotPhase(policy.phases.hot);
+  const warmPhaseErrors = validateWarmPhase(policy.phases.warm);
+  const coldPhaseErrors = validateColdPhase(policy.phases.cold);
+  const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
+  const isValid =
+    policyNameErrors.length === 0 &&
+    Object.keys(hotPhaseErrors).length === 0 &&
+    Object.keys(warmPhaseErrors).length === 0 &&
+    Object.keys(coldPhaseErrors).length === 0 &&
+    Object.keys(deletePhaseErrors).length === 0;
+  return [
+    isValid,
+    {
+      policyName: [...policyNameErrors],
+      hot: hotPhaseErrors,
+      warm: warmPhaseErrors,
+      cold: coldPhaseErrors,
+      delete: deletePhaseErrors,
+    },
+  ];
 };
+
+export const propertyof = <T>(propertyName: keyof T & string) => propertyName;

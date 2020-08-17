@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './policies';
+import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './types';
 
 export const defaultNewHotPhase: HotPhase = {
   phaseEnabled: true,

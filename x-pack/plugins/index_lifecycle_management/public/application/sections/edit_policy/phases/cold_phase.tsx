@@ -19,12 +19,6 @@ import {
 } from '@elastic/eui';
 
 import {
-  PHASE_COLD,
-  PHASE_ENABLED,
-  PHASE_REPLICA_COUNT,
-  PHASE_FREEZE_ENABLED,
-} from '../../../constants';
-import {
   LearnMoreLink,
   ActiveBadge,
   PhaseErrorMessage,
@@ -34,12 +28,15 @@ import {
   NodeAllocation,
   SetPriorityInput,
 } from '../components';
-import { ColdPhase as ColdPhaseInterface } from '../../../services/policies/policies';
+
+import { ColdPhase as ColdPhaseInterface, Phases } from '../../../services/policies/types';
+
+import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 interface Props {
-  setPhaseData: (key: string, value: any) => void;
+  setPhaseData: (key: keyof ColdPhaseInterface & string, value: string | boolean) => void;
   phaseData: ColdPhaseInterface;
   isShowingErrors: boolean;
-  errors: Record<string, string[]>;
+  errors?: PhaseValidationErrors<ColdPhaseInterface>;
   hotPhaseRolloverEnabled: boolean;
 }
 export class ColdPhase extends PureComponent<Props> {
@@ -56,6 +53,10 @@ export class ColdPhase extends PureComponent<Props> {
       defaultMessage: 'Freeze index',
     });
 
+    const coldPhaseProperty = propertyof<Phases>('cold');
+    const phaseEnabledProperty = propertyof<ColdPhaseInterface>('phaseEnabled');
+    const selectedReplicaCountProperty = propertyof<ColdPhaseInterface>('selectedReplicaCount');
+    const freezeEnabledProperty = propertyof<ColdPhaseInterface>('freezeEnabled');
     return (
       <div id="coldPhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
@@ -90,10 +91,10 @@ export class ColdPhase extends PureComponent<Props> {
                     defaultMessage="Activate cold phase"
                   />
                 }
-                id={`${PHASE_COLD}-${PHASE_ENABLED}`}
+                id={`${coldPhaseProperty}-${phaseEnabledProperty}`}
                 checked={phaseData.phaseEnabled}
                 onChange={(e) => {
-                  setPhaseData(PHASE_ENABLED, e.target.checked);
+                  setPhaseData(phaseEnabledProperty, e.target.checked);
                 }}
                 aria-controls="coldPhaseContent"
               />
@@ -104,18 +105,18 @@ export class ColdPhase extends PureComponent<Props> {
           <Fragment>
             {phaseData.phaseEnabled ? (
               <Fragment>
-                <MinAgeInput
+                <MinAgeInput<ColdPhaseInterface>
                   errors={errors}
                   phaseData={phaseData}
-                  phase={PHASE_COLD}
+                  phase={coldPhaseProperty}
                   isShowingErrors={isShowingErrors}
                   setPhaseData={setPhaseData}
                   rolloverEnabled={hotPhaseRolloverEnabled}
                 />
                 <EuiSpacer />
 
-                <NodeAllocation
-                  phase={PHASE_COLD}
+                <NodeAllocation<ColdPhaseInterface>
+                  phase={coldPhaseProperty}
                   setPhaseData={setPhaseData}
                   errors={errors}
                   phaseData={phaseData}
@@ -125,7 +126,7 @@ export class ColdPhase extends PureComponent<Props> {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                     <ErrableFormRow
-                      id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
+                      id={`${coldPhaseProperty}-${freezeEnabledProperty}`}
                       label={
                         <Fragment>
                           <FormattedMessage
@@ -135,9 +136,8 @@ export class ColdPhase extends PureComponent<Props> {
                           <OptionalLabel />
                         </Fragment>
                       }
-                      errorKey={PHASE_REPLICA_COUNT}
                       isShowingErrors={isShowingErrors}
-                      errors={errors}
+                      errors={errors?.freezeEnabled}
                       helpText={i18n.translate(
                         'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
                         {
@@ -146,10 +146,10 @@ export class ColdPhase extends PureComponent<Props> {
                       )}
                     >
                       <EuiFieldNumber
-                        id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
+                        id={`${coldPhaseProperty}-${selectedReplicaCountProperty}`}
                         value={phaseData.selectedReplicaCount}
                         onChange={(e) => {
-                          setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                          setPhaseData(selectedReplicaCountProperty, e.target.value);
                         }}
                         min={0}
                       />
@@ -190,16 +190,16 @@ export class ColdPhase extends PureComponent<Props> {
                 data-test-subj="freezeSwitch"
                 checked={phaseData.freezeEnabled}
                 onChange={(e) => {
-                  setPhaseData(PHASE_FREEZE_ENABLED, e.target.checked);
+                  setPhaseData(freezeEnabledProperty, e.target.checked);
                 }}
                 label={freezeLabel}
                 aria-label={freezeLabel}
               />
             </EuiDescribedFormGroup>
-            <SetPriorityInput
+            <SetPriorityInput<ColdPhaseInterface>
               errors={errors}
               phaseData={phaseData}
-              phase={PHASE_COLD}
+              phase={coldPhaseProperty}
               isShowingErrors={isShowingErrors}
               setPhaseData={setPhaseData}
             />

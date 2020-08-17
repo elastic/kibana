@@ -16,7 +16,7 @@ import {
 
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
-import { PolicyFromES, SerializedPolicy } from './policies/policies';
+import { PolicyFromES, SerializedPolicy } from './policies/types';
 
 interface GenericObject {
   [key: string]: any;

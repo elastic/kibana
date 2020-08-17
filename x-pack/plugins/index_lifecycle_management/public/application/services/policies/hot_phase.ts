@@ -5,22 +5,16 @@
  */
 
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { HotPhase, SerializedHotPhase } from './policies';
+import { HotPhase, SerializedHotPhase } from './types';
 import {
   maximumAgeRequiredMessage,
   maximumDocumentsRequiredMessage,
   maximumSizeRequiredMessage,
   numberRequiredMessage,
+  PhaseValidationErrors,
   positiveNumberRequiredMessage,
   positiveNumbersAboveZeroErrorMessage,
-  ValidationErrors,
 } from './policy_validation';
-import {
-  PHASE_INDEX_PRIORITY,
-  PHASE_ROLLOVER_MAX_AGE,
-  PHASE_ROLLOVER_MAX_DOCUMENTS,
-  PHASE_ROLLOVER_MAX_SIZE_STORED,
-} from '../../constants';
 
 const hotPhaseInitialization: HotPhase = {
   phaseEnabled: false,
@@ -112,19 +106,19 @@ export const hotPhaseToES = (
   return esPhase;
 };
 
-export const validateHotPhase = (phase: HotPhase, errors: ValidationErrors): ValidationErrors => {
+export const validateHotPhase = (phase: HotPhase): PhaseValidationErrors<HotPhase> => {
   if (!phase.phaseEnabled) {
-    return errors;
+    return {};
   }
 
-  const phaseErrors = {} as any;
+  const phaseErrors = {} as PhaseValidationErrors<HotPhase>;
 
   // index priority is optional, but if it's set, it needs to be a positive number
   if (phase.phaseIndexPriority) {
     if (!isNumber(phase.phaseIndexPriority)) {
-      phaseErrors[PHASE_INDEX_PRIORITY] = [numberRequiredMessage];
+      phaseErrors.phaseIndexPriority = [numberRequiredMessage];
     } else if (parseInt(phase.phaseIndexPriority, 10) < 0) {
-      phaseErrors[PHASE_INDEX_PRIORITY] = [positiveNumberRequiredMessage];
+      phaseErrors.phaseIndexPriority = [positiveNumberRequiredMessage];
     }
   }
 
@@ -136,28 +130,24 @@ export const validateHotPhase = (phase: HotPhase, errors: ValidationErrors): Val
       !isNumber(phase.selectedMaxSizeStored) &&
       !isNumber(phase.selectedMaxDocuments)
     ) {
-      phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [maximumAgeRequiredMessage];
-      phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [maximumSizeRequiredMessage];
-      phaseErrors[PHASE_ROLLOVER_MAX_DOCUMENTS] = [maximumDocumentsRequiredMessage];
+      phaseErrors.selectedMaxAge = [maximumAgeRequiredMessage];
+      phaseErrors.selectedMaxSizeStored = [maximumSizeRequiredMessage];
+      phaseErrors.selectedMaxDocuments = [maximumDocumentsRequiredMessage];
     }
 
     // max age, max size and max docs need to be above zero if set
     if (isNumber(phase.selectedMaxAge) && parseInt(phase.selectedMaxAge, 10) < 1) {
-      phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [positiveNumbersAboveZeroErrorMessage];
+      phaseErrors.selectedMaxAge = [positiveNumbersAboveZeroErrorMessage];
     }
     if (isNumber(phase.selectedMaxSizeStored) && parseInt(phase.selectedMaxSizeStored, 10) < 1) {
-      phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [positiveNumbersAboveZeroErrorMessage];
+      phaseErrors.selectedMaxSizeStored = [positiveNumbersAboveZeroErrorMessage];
     }
     if (isNumber(phase.selectedMaxDocuments) && parseInt(phase.selectedMaxDocuments, 10) < 1) {
-      phaseErrors[PHASE_ROLLOVER_MAX_DOCUMENTS] = [positiveNumbersAboveZeroErrorMessage];
+      phaseErrors.selectedMaxDocuments = [positiveNumbersAboveZeroErrorMessage];
     }
   }
 
   return {
-    ...errors,
-    hot: {
-      ...errors.hot,
-      ...phaseErrors,
-    },
+    ...phaseErrors,
   };
 };
