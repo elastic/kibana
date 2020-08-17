@@ -90,6 +90,7 @@ export const ModelsList: FC = () => {
     try {
       const response = await inferenceApiService.getInferenceModel(undefined, {
         with_pipelines: true,
+        size: 1000,
       });
       setItems(
         response.map((v) => ({

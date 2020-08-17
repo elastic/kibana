@@ -38,6 +38,7 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
         const { body } = await client.asInternalUser.ml.getTrainedModels<InferenceConfigResponse>({
+          size: 1000,
           ...query,
           ...(modelId ? { model_id: modelId } : {}),
         });
