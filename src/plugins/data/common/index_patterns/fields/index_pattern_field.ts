@@ -18,13 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  IFieldType,
-  KbnFieldType,
-  getKbnFieldType,
-  KBN_FIELD_TYPES,
-  FieldFormat,
-} from '../../../common';
+import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../../field_formats';
+import { IFieldType } from './types';
 import { OnNotification, FieldSpec } from '../types';
 
 import { IndexPattern } from '../index_patterns';
@@ -62,7 +59,7 @@ export class IndexPatternField implements IFieldType {
 
   // writable attrs
   public get count() {
-    return this.spec.count;
+    return this.spec.count || 0;
   }
 
   public set count(count) {
@@ -107,7 +104,7 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get scripted() {
-    return this.spec.scripted;
+    return !!this.spec.scripted;
   }
 
   public get searchable() {

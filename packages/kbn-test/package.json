@@ -21,7 +21,7 @@
     "diff": "^4.0.1"
   },
   "dependencies": {
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.0",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
     "exit-hook": "^2.2.0",

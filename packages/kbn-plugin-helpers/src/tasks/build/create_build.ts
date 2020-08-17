@@ -22,7 +22,6 @@ import path from 'path';
 
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'fs';
 import execa from 'execa';
-import sass from 'node-sass';
 import del from 'del';
 import File from 'vinyl';
 import vfs from 'vinyl-fs';
@@ -133,22 +132,6 @@ export async function createBuild(
     execa.sync(winCmd('yarn'), ['install', '--production', '--pure-lockfile'], {
       cwd: buildRoot,
     });
-  }
-
-  // compile stylesheet
-  if (typeof plugin.styleSheetToCompile === 'string') {
-    const file = path.resolve(plugin.root, plugin.styleSheetToCompile);
-    if (!existsSync(file)) {
-      throw new Error(`Path provided for styleSheetToCompile does not exist: ${file}`);
-    }
-
-    const outputFileName = path.basename(file, path.extname(file)) + '.css';
-    const output = path.join(buildRoot, path.dirname(plugin.styleSheetToCompile), outputFileName);
-
-    const rendered = sass.renderSync({ file, output });
-    writeFileSync(output, rendered.css);
-
-    del.sync([path.join(buildRoot, '**', '*.s{a,c}ss')]);
   }
 
   // transform typescript to js and clean out typescript

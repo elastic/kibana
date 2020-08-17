@@ -5,3 +5,5 @@
  */
 
 export { StopButton } from './stop_button';
+export { StopButtonModal } from './stop_button_modal';
+export { useForceStopAction } from './use_force_stop_action';
