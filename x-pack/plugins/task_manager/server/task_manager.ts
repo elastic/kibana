@@ -144,6 +144,9 @@ export class TaskManager {
     // pipe store events into the TaskManager's event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
+    const maxWorkers$ = new Subject<number>();
+    const pollInterval$ = new Subject<number>();
+
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
       logger: this.logger,
@@ -151,10 +154,9 @@ export class TaskManager {
 
     this.pool = new TaskPool({
       logger: this.logger,
-      maxWorkers: opts.config.max_workers,
+      maxWorkers$: maxWorkers$.pipe(startWith(opts.config.max_workers)),
     });
 
-    const pollInterval$ = new Subject<number>();
     this.poller$ = createTaskPoller<string, FillPoolResult>({
       pollInterval$: pollInterval$.pipe(startWith(opts.config.poll_interval)),
       bufferCapacity: opts.config.request_capacity,
