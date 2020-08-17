@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackagePolicy, PackagePolicyPackage } from './package_config';
+import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
 
 export enum AgentPolicyStatus {

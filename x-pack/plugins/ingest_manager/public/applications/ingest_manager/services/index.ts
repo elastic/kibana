@@ -21,7 +21,7 @@ export {
   appRoutesService,
   packageToPackagePolicyInputs,
   storedPackagePoliciesToAgentInputs,
-  policyToYaml,
+  fullAgentPolicyToYaml,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
 } from '../../../../common';

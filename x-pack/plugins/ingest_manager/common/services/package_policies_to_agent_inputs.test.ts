@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PackagePolicy, PackagePolicyInput } from '../types';
-import { storedPackagePoliciesToAgentInputs } from './package_configs_to_agent_inputs';
+import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
 
 describe('Ingest Manager - storedPackagePoliciesToAgentInputs', () => {
   const mockPackagePolicy: PackagePolicy = {

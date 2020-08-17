@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NewPackagePolicy, PackagePolicy } from './types/models/package_config';
+import { NewPackagePolicy, PackagePolicy } from './types';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {

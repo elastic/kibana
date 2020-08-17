@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
-import { policyToYaml, agentPolicyRouteService } from '../../../services';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -40,7 +40,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         <Loading />
       ) : (
         <EuiCodeBlock language="yaml" isCopyable fontSize="m">
-          {policyToYaml(yamlData!.item)}
+          {fullAgentPolicyToYaml(yamlData!.item)}
         </EuiCodeBlock>
       );
 

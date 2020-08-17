@@ -21,7 +21,7 @@ const POLICY_KEYS_ORDER = [
   'input',
 ];
 
-export const policyToYaml = (policy: FullAgentPolicy): string => {
+export const fullAgentPolicyToYaml = (policy: FullAgentPolicy): string => {
   return safeDump(policy, {
     skipInvalid: true,
     sortKeys: (keyA: string, keyB: string) => {

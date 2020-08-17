@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../types';
 import { useCore, sendGetOneAgentPolicyFull } from '../../../../hooks';
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
-import { policyToYaml, agentPolicyRouteService } from '../../../../services';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -68,7 +68,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
     fetchFullPolicy();
   }, [selectedPolicyId, notifications.toasts]);
 
-  const yaml = useMemo(() => policyToYaml(fullAgentPolicy), [fullAgentPolicy]);
+  const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy), [fullAgentPolicy]);
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
     AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId }),
