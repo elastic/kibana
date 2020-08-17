@@ -1,6 +1,6 @@
 [role="xpack"]
 [[siem-ui]]
-== Using Elastic Security UI
+== Using Elastic Security
 
 Elastic Security is a highly interactive workspace designed for security
 analysts. It provides a clear overview of events and alerts from your
@@ -12,7 +12,7 @@ interest.
 === Hosts
 
 The Hosts page provides key metrics regarding host-related security events, and
-data tables and widgets that let you interact with the Timeline Event Viewer.
+data tables and histograms that let you interact with the Timeline Event Viewer.
 You can drill down for deeper insights, and drag and drop items of interest from
 the Hosts page to Timeline for further investigation.
 
@@ -41,7 +41,7 @@ search for suspicious activity on your network and hosts. Additionally, you can
 create your own rules.
 
 See {security-guide}/detection-engine-overview.html[Detections] for information
-on managing detection rules and alerts via the UI or the Detections API.
+on managing detection rules and alerts.
 
 [role="screenshot"]
 image::siem/images/detections-ui.png[]
@@ -86,9 +86,9 @@ For detailed information about Timeline, see
 === Sample workflow
 
 An analyst notices a suspicious user ID that warrants further investigation, and
-clicks a url that links to Elastic Security. 
+clicks a URL that links to Elastic Security. 
 
-The analyst uses the tables, widgets, and filtering and search capabilities in
+The analyst uses the tables, histograms, and filtering and search capabilities in
 Elastic Security to get to the bottom of the alert. The analyst can drag items of
 interest to Timeline for further analysis.
 

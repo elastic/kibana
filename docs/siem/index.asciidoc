@@ -35,9 +35,7 @@ https://www.elastic.co/products/beats/packetbeat[{packetbeat}]
 send security events and other data to Elasticsearch.
 
 The default index patterns for Elastic Security events are `auditbeat-*`, `winlogbeat-*`,
-`filebeat-*`, `packetbeat-*`, `endgame-*`, `logs-*`, and `apm-*-transaction*`. You can 
-change the default index patterns in
-*Kibana > Stack Management > Advanced Settings > securitySolution:defaultIndex*.
+`filebeat-*`, `packetbeat-*`, `endgame-*`, `logs-*`, and `apm-*-transaction*`. To change the default pattern patterns, go to *Stack Management > Advanced Settings > securitySolution:defaultIndex*.
 
 [float]
 === Elastic Security endpoint agent
