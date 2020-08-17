@@ -13,7 +13,11 @@ import {
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  TriggerId,
+  UiActionsSetup,
+  UiActionsStart,
+} from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -116,6 +120,7 @@ export class AdvancedUiActionsPublicPlugin
       ...this.enhancements,
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
         actionFactories: this.enhancements.getActionFactories(),
+        getTrigger: (triggerId: TriggerId) => uiActions.getTrigger(triggerId),
         storage: new Storage(window?.localStorage),
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,

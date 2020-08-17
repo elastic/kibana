@@ -281,11 +281,10 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorBold"
                     size="m"
                   />
@@ -315,11 +314,10 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorItalic"
                     size="m"
                   />
@@ -349,11 +347,10 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorUnderline"
                     size="m"
                   />
@@ -395,11 +392,10 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignLeft"
                     size="m"
                   />
@@ -429,11 +425,10 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignCenter"
                     size="m"
                   />
@@ -463,11 +458,10 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignRight"
                     size="m"
                   />
@@ -768,11 +762,10 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorBold"
                     size="m"
                   />
@@ -802,11 +795,10 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorItalic"
                     size="m"
                   />
@@ -836,11 +828,10 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorUnderline"
                     size="m"
                   />
@@ -882,11 +873,10 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignLeft"
                     size="m"
                   />
@@ -916,11 +906,10 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignCenter"
                     size="m"
                   />
@@ -950,11 +939,10 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
                 type="button"
               >
                 <span
-                  className="euiButton__content"
+                  className="euiButtonContent euiButton__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButton__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="editorAlignRight"
                     size="m"
                   />

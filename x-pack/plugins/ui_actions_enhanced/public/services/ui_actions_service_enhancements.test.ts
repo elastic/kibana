@@ -18,6 +18,9 @@ describe('UiActionsService', () => {
       createConfig: () => ({}),
       isConfigValid: () => true,
       create: () => ({} as any),
+      supportedTriggers() {
+        return ['VALUE_CLICK_TRIGGER'];
+      },
     };
     const factoryDefinition2: ActionFactoryDefinition = {
       id: 'test-factory-2',
@@ -25,6 +28,9 @@ describe('UiActionsService', () => {
       createConfig: () => ({}),
       isConfigValid: () => true,
       create: () => ({} as any),
+      supportedTriggers() {
+        return ['VALUE_CLICK_TRIGGER'];
+      },
     };
 
     test('.getActionFactories() returns empty array if no action factories registered', () => {
