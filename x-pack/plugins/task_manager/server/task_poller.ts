@@ -58,17 +58,16 @@ export function createTaskPoller<T, H>({
 }: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
 
-  const interval$ = pollInterval$.pipe(
-    switchMap((period) => interval(period)),
-    mapTo(none)
-  );
   const errors$ = new Subject<Err<PollingError<T>>>();
 
   const requestWorkProcessing$ = merge(
     // emit a polling event on demand
     pollRequests$,
     // emit a polling event on a fixed interval
-    interval$
+    pollInterval$.pipe(
+      switchMap((period) => interval(period)),
+      mapTo(none)
+    )
   ).pipe(
     tap(() => console.log('SCAN', new Date().toISOString())),
     // buffer all requests in a single set (to remove duplicates) as we don't want
