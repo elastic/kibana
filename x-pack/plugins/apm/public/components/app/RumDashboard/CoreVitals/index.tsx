@@ -4,20 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import styled from 'styled-components';
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { CoreVitalItem } from './ColorPaletteFlexItem';
-
-const ClFlexGroup = styled(EuiFlexGroup)`
-  flex-direction: row;
-  @media only screen and (max-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-`;
 
 export function CoreVitals() {
   const { urlParams, uiFilters } = useUrlParams();

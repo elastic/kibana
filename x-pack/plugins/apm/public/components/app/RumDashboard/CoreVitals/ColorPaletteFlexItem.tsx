@@ -23,7 +23,7 @@ const ColoredSpan = styled.div`
   cursor: pointer;
 `;
 
-export const ColorPaletteFlexItem = ({
+export function ColorPaletteFlexItem({
   hexCode,
   className,
   first,
@@ -34,7 +34,8 @@ export const ColorPaletteFlexItem = ({
   className: string;
   first: boolean;
   last: boolean;
-}) => {
+  inFocus: boolean;
+}) {
   return (
     <EuiFlexItem
       key={hexCode}
@@ -50,13 +51,13 @@ export const ColorPaletteFlexItem = ({
             borderBottomLeftRadius: first ? 4 : 0,
             borderTopRightRadius: last ? 4 : 0,
             borderBottomRightRadius: last ? 4 : 0,
-            opacity: !inFocus ? 1 : 0.4,
+            opacity: !inFocus ? 1 : 0.3,
           }}
         />
       </EuiToolTip>
     </EuiFlexItem>
   );
-};
+}
 
 interface Props {
   title: string;
@@ -64,7 +65,7 @@ interface Props {
   ranks: number[];
 }
 
-export const CoreVitalItem = ({ title, value, ranks }: Props) => {
+export function CoreVitalItem({ title, value, ranks }: Props) {
   const palette = euiPaletteForStatus(3);
 
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
@@ -105,4 +106,4 @@ export const CoreVitalItem = ({ title, value, ranks }: Props) => {
       <EuiSpacer size="xl" />
     </Fragment>
   );
-};
+}
