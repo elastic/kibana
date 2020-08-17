@@ -62,7 +62,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...config.xpack.api.get('kbnTestServer'),
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
-          '--optimize.enabled=false',
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',

@@ -38,11 +38,6 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         />
          Yellow
         <p />
-        <p
-          class="euiScreenReaderOnly"
-        >
-          Status [object Object]
-        </p>
       </div>
     </div>
     <div
@@ -217,11 +212,6 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         />
          Green
         <p />
-        <p
-          class="euiScreenReaderOnly"
-        >
-          Status [object Object]
-        </p>
       </div>
     </div>
     <div
