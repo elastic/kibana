@@ -158,7 +158,6 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
-    '**/target/public/.kbn-optimizer-cache',
     'target/kibana-*',
     'target/test-metrics/*',
     'target/kibana-security-solution/**/*.png',
@@ -204,7 +203,7 @@ def publishJunit() {
   }
 }
 
-def sendMail() {
+def sendMail(Map params = [:]) {
   // If the build doesn't have a result set by this point, there haven't been any errors and it can be marked as a success
   // The e-mail plugin for the infra e-mail depends upon this being set
   currentBuild.result = currentBuild.result ?: 'SUCCESS'
@@ -213,7 +212,7 @@ def sendMail() {
   if (buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
     node('flyweight') {
       sendInfraMail()
-      sendKibanaMail()
+      sendKibanaMail(params)
     }
   }
 }
@@ -229,12 +228,14 @@ def sendInfraMail() {
   }
 }
 
-def sendKibanaMail() {
+def sendKibanaMail(Map params = [:]) {
+  def config = [to: 'build-kibana@elastic.co'] + params
+
   catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
-        to: 'build-kibana@elastic.co',
+        config.to,
         subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',

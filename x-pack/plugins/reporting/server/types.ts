@@ -19,24 +19,12 @@ import { LevelLogger } from './lib';
 import { LayoutInstance } from './lib/layouts';
 
 /*
- * Routing / API types
+ * Routing types
  */
-
-interface ListQuery {
-  page: string;
-  size: string;
-  ids?: string; // optional field forbids us from extending RequestQuery
-}
-
-interface GenerateQuery {
-  jobParams: string;
-}
-
-export type ReportingRequestQuery = ListQuery | GenerateQuery;
 
 export interface ReportingRequestPre {
   management: {
-    jobTypes: any;
+    jobTypes: string[];
   };
   user: string;
 }
@@ -54,12 +42,14 @@ export interface TimeRangeParams {
   max?: Date | string | number | null;
 }
 
+// the "raw" data coming from the client, unencrypted
 export interface JobParamPostPayload {
   timerange?: TimeRangeParams;
 }
 
+// the pre-processed, encrypted data ready for storage
 export interface ScheduledTaskParams<JobParamsType> {
-  headers?: string; // serialized encrypted headers
+  headers: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
   type: string;
@@ -77,10 +67,10 @@ export interface JobSource<JobParamsType> {
 }
 
 export interface TaskRunResult {
-  content_type: string;
+  content_type: string | null;
   content: string | null;
-  size: number;
   csv_contains_formulas?: boolean;
+  size: number;
   max_size_reached?: boolean;
   warnings?: string[];
 }
@@ -177,17 +167,31 @@ export type ReportingSetup = object;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type ESQueueCreateJobFn<JobParamsType> = (
+export interface CreateJobBaseParams {
+  browserTimezone: string;
+  layout?: LayoutInstance; // for screenshot type reports
+  objectType: string;
+  savedObjectId?: string; // legacy (7.x) only
+  queryString?: string; // legacy (7.x) only
+}
+
+export interface CreateJobBaseParamsEncryptedFields extends CreateJobBaseParams {
+  basePath?: string; // for screenshot type reports
+  headers: string; // encrypted headers
+}
+
+export type CreateJobFn<JobParamsType extends CreateJobBaseParams> = (
   jobParams: JobParamsType,
   context: RequestHandlerContext,
   request: KibanaRequest
-) => Promise<JobParamsType>;
+) => Promise<JobParamsType & CreateJobBaseParamsEncryptedFields>;
 
-export type ESQueueWorkerExecuteFn<ScheduledTaskParamsType> = (
+// rename me
+export type WorkerExecuteFn<ScheduledTaskParamsType> = (
   jobId: string,
   job: ScheduledTaskParamsType,
   cancellationToken: CancellationToken
-) => Promise<any>;
+) => Promise<TaskRunResult>;
 
 export type ScheduleTaskFnFactory<ScheduleTaskFnType> = (
   reporting: ReportingCore,

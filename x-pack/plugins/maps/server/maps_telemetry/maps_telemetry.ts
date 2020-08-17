@@ -23,7 +23,6 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
-  SourceDescriptor,
 } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
@@ -154,7 +153,7 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
     return false;
   }
 
-  const sourceDescriptor: SourceDescriptor = layer.sourceDescriptor;
+  const sourceDescriptor = layer.sourceDescriptor;
   if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
     return isFieldGeoShape(
       indexPatterns,

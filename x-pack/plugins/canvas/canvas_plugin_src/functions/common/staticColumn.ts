@@ -48,7 +48,7 @@ export function staticColumn(): ExpressionFunctionDefinition<
       const type = getType(args.value) as DatatableColumnType;
       const columns = [...input.columns];
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
-      const newColumn = { name: args.name, type };
+      const newColumn = { id: args.name, name: args.name, meta: { type } };
 
       if (existingColumnIndex > -1) {
         columns[existingColumnIndex] = newColumn;
