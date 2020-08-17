@@ -11,7 +11,7 @@ exports[`ManageData render 1`] = `
   />
   <section
     aria-labelledby="home.manageData.sectionTitle"
-    className="homManageData"
+    className="homDataManage"
   >
     <EuiTitle
       size="s"
@@ -26,7 +26,7 @@ exports[`ManageData render 1`] = `
     </EuiTitle>
     <EuiSpacer />
     <EuiFlexGroup
-      className="homManageData__container"
+      className="homDataManage__content"
       justifyContent="spaceAround"
       wrap={true}
     >

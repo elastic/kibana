@@ -27,28 +27,28 @@ $homePageWidth: 1200px;
   height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.homHeaderPage {
+.homHeader {
   background-color: $euiPageBackgroundColor;
   border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
 }
 
-.homHeaderPage__inner {
+.homHeader__inner {
   margin: 0 auto;
   max-width: $homePageWidth;
   padding: $euiSizeXL $euiSize;
 
-  .homHeaderPage--hasSolutions & {
+  .homHeader--hasSolutions & {
     padding-bottom: $euiSizeXL + $euiSizeL;
   }
 }
 
-.homHeaderPage__title {
+#homHeader__title {
   @include euiBreakpoint('xs', 's') {
     text-align: center;
   }
 }
 
-.homHeaderPage__actionItem {
+.homHeader__actionItem {
   @include euiBreakpoint('xs', 's') {
     margin-bottom: 0 !important;
     margin-top: 0 !important;
@@ -63,21 +63,12 @@ $homePageWidth: 1200px;
   width: 100%;
 }
 
-// .homHome__synopsisItem {
-//   max-width: 50%;
-//   // min-width: $euiSizeL * 9;
-
-//   @include euiBreakpoint('xs', 's') {
-//     max-width: 100%;
-//   }
-// }
-
 .homData--expanded {
   flex-direction: column;
-}
 
-// .homPageFooter__mainAction {
-//   @include euiBreakpoint('xs', 's') {
-//     flex-direction: column;
-//   }
-// }
+  &,
+  & > * {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+}

@@ -2,8 +2,8 @@
 
 exports[`AddData render 1`] = `
 <section
-  aria-labelledby="homAddData__title"
-  className="homAddData"
+  aria-labelledby="homDataAdd__title"
+  className="homDataAdd"
 >
   <EuiFlexGroup
     alignItems="baseline"
@@ -17,7 +17,7 @@ exports[`AddData render 1`] = `
         size="s"
       >
         <h2
-          id="homAddData__title"
+          id="homDataAdd__title"
         >
           <FormattedMessage
             defaultMessage="Ingest your data"

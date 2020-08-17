@@ -136,25 +136,25 @@ export class Home extends Component {
     }
 
     return (
-      <main className="homWrapper" data-test-subj="homeApp">
+      <main aria-labelledby="homHeader__title" className="homWrapper" data-test-subj="homeApp">
         <header
-          className={`homHeaderPage ${
-            solutions.length ? 'homHeaderPage--hasSolutions' : 'homHeaderPage--noSolutions'
+          className={`homHeader ${
+            solutions.length ? 'homHeader--hasSolutions' : 'homHeader--noSolutions'
           }`}
         >
-          <div className="homHeaderPage__inner">
+          <div className="homHeader__inner">
             <EuiFlexGroup>
-              <EuiFlexItem className="homHeaderPage__title">
+              <EuiFlexItem>
                 <EuiTitle>
-                  <h1>
+                  <h1 id="homHeader__title">
                     <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homHeaderPage__actions">
-                  <EuiFlexItem className="homHeaderPage__actionItem">
+                <EuiFlexGroup className="homHeader__actions">
+                  <EuiFlexItem className="homHeader__actionItem">
                     <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
@@ -163,7 +163,7 @@ export class Home extends Component {
                   </EuiFlexItem>
 
                   {stackManagement ? (
-                    <EuiFlexItem className="homHeaderPage__actionItem">
+                    <EuiFlexItem className="homHeader__actionItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(stackManagement.path)}
                         iconType="gear"
@@ -176,7 +176,7 @@ export class Home extends Component {
                   ) : null}
 
                   {devTools ? (
-                    <EuiFlexItem className="homHeaderPage__actionItem">
+                    <EuiFlexItem className="homHeader__actionItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(devTools.path)}
                         iconType="wrench"
@@ -214,15 +214,10 @@ export class Home extends Component {
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <footer>
-            <EuiFlexGroup
-              className="homPageFooter"
-              alignItems="center"
-              gutterSize="s"
-              justifyContent="spaceBetween"
-            >
+          <footer className="homFooter">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                {advancedSettings ? (
+                {advancedSettings && (
                   <EuiButtonEmpty
                     iconType="home"
                     onClick={createAppNavigationHandler(
@@ -235,8 +230,9 @@ export class Home extends Component {
                       defaultMessage="Display a different page on log in"
                     />
                   </EuiButtonEmpty>
-                ) : null}
+                )}
               </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="allPlugins"

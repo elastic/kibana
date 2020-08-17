@@ -47,10 +47,10 @@ export const SolutionsSection: FC<Props> = ({ solutions }) => {
 
   return (
     <>
-      <section className="homSolutions">
+      <section aria-labelledby="homSolutions__title" className="homSolutions">
         <EuiScreenReaderOnly>
           <EuiTitle size="s">
-            <h2>
+            <h2 id="homSolutions__title">
               <FormattedMessage
                 id="home.solutionsSection.sectionTitle"
                 defaultMessage="Pick your solution"
