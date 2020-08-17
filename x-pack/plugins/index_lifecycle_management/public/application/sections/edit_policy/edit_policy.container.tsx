@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useLoadPoliciesList } from '../../services/api';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
@@ -35,7 +35,17 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
 }) => {
   const { error, isLoading, data: policies, sendRequest } = useLoadPoliciesList(false);
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return (
+      <EuiEmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.policiesLoading"
+            defaultMessage="Loading policies..."
+          />
+        }
+      />
+    );
   }
   if (error || !policies) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
