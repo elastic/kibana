@@ -6,17 +6,16 @@ exports[`ManageData render 1`] = `
     aria-hidden="true"
     margin="xl"
   />
-  <EuiSpacer
-    size="s"
-  />
   <section
-    aria-labelledby="home.manageData.sectionTitle"
+    aria-labelledby="homDataManage__title"
     className="homDataManage"
   >
     <EuiTitle
       size="s"
     >
-      <h2>
+      <h2
+        id="homDataManage__title"
+      >
         <FormattedMessage
           defaultMessage="Manage your data"
           id="home.manageData.sectionTitle"
@@ -24,14 +23,13 @@ exports[`ManageData render 1`] = `
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer />
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup
       className="homDataManage__content"
-      justifyContent="spaceAround"
-      wrap={true}
     >
       <EuiFlexItem
-        className="homHome__synopsisItem"
         key="security"
       >
         <Synopsis
@@ -46,7 +44,6 @@ exports[`ManageData render 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        className="homHome__synopsisItem"
         key="monitoring"
       >
         <Synopsis
@@ -61,7 +58,6 @@ exports[`ManageData render 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        className="homHome__synopsisItem"
         key="snapshot_restore"
       >
         <Synopsis
@@ -76,7 +72,6 @@ exports[`ManageData render 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        className="homHome__synopsisItem"
         key="index_lifecycle_management"
       >
         <Synopsis
