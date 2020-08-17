@@ -20,26 +20,16 @@
 import { i18n } from '@kbn/i18n';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../../field_formats';
 import { IFieldType } from './types';
 import { OnNotification, FieldSpec } from '../types';
-
-import { IndexPattern } from '../index_patterns';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
-  readonly indexPattern: IndexPattern;
   readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(
-    indexPattern: IndexPattern,
-    spec: FieldSpec,
-    displayName: string,
-    onNotification: OnNotification
-  ) {
-    this.indexPattern = indexPattern;
+  constructor(spec: FieldSpec, displayName: string, onNotification: OnNotification) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
     this.displayName = displayName;
 
@@ -50,7 +40,8 @@ export class IndexPatternField implements IFieldType {
         defaultMessage: 'Unknown field type {type}',
       });
       const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
-        values: { name: spec.name, title: indexPattern.title },
+        // values: { name: spec.name, title: indexPattern.title },
+        values: { name: spec.name },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
       onNotification({ title, text, color: 'danger', iconType: 'alert' });
@@ -143,10 +134,6 @@ export class IndexPatternField implements IFieldType {
     return this.aggregatable;
   }
 
-  public get format(): FieldFormat {
-    return this.indexPattern.getFormatterForField(this);
-  }
-
   public toJSON() {
     return {
       count: this.count,
@@ -179,7 +166,6 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
-      format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || undefined,
     };
   }
 }

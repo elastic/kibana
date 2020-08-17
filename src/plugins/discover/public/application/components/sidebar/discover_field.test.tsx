@@ -62,7 +62,6 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
   );
 
   const field = new IndexPatternField(
-    indexPattern,
     {
       name: 'bytes',
       type: 'number',

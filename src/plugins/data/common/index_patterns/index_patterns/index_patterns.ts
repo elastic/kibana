@@ -92,7 +92,7 @@ export class IndexPatternsService {
     displayName: string,
     onNotification: OnNotification
   ) {
-    return new IndexPatternField(indexPattern, spec, displayName, onNotification);
+    return new IndexPatternField(spec, displayName, onNotification);
   }
 
   private async refreshSavedObjectsCache() {

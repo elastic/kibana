@@ -45,7 +45,6 @@ export type CreateIndexPatternFieldList = (
 ) => IIndexPatternFieldList;
 
 export const fieldList = (
-  indexPattern: IndexPattern,
   specs: FieldSpec[] = [],
   shortDotsEnable = false,
   onNotification = () => {}
@@ -75,7 +74,6 @@ export const fieldList = (
     ];
     public readonly add = (field: FieldSpec) => {
       const newField = new IndexPatternField(
-        indexPattern,
         field,
         this.calcDisplayName(field.name),
         onNotification
@@ -95,7 +93,6 @@ export const fieldList = (
 
     public readonly update = (field: FieldSpec) => {
       const newField = new IndexPatternField(
-        indexPattern,
         field,
         this.calcDisplayName(field.name),
         onNotification

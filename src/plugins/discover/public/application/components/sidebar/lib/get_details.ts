@@ -45,7 +45,7 @@ export function getDetails(
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {
-      bucket.display = field.format.convert(bucket.value);
+      bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
     }
   }
   return details;
