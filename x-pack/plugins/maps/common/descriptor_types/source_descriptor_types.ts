@@ -15,8 +15,6 @@ import {
   SCALING_TYPES,
   MVT_FIELD_TYPE,
 } from '../constants';
-import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
-import { DataRequestDescriptor } from './data_request_descriptor_types';
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -135,84 +133,4 @@ export type GeojsonFileSourceDescriptor = {
   __featureCollection: FeatureCollection;
   name: string;
   type: string;
-};
-
-export type JoinDescriptor = {
-  leftField?: string;
-  right: ESTermSourceDescriptor;
-};
-
-// todo : this union type is incompatible with dynamic extensibility of sources.
-// Reconsider using SourceDescriptor in type signatures for top-level classes
-export type SourceDescriptor =
-  | AbstractSourceDescriptor
-  | XYZTMSSourceDescriptor
-  | WMSSourceDescriptor
-  | KibanaTilemapSourceDescriptor
-  | KibanaRegionmapSourceDescriptor
-  | ESTermSourceDescriptor
-  | ESSearchSourceDescriptor
-  | ESGeoGridSourceDescriptor
-  | EMSFileSourceDescriptor
-  | ESPewPewSourceDescriptor
-  | TiledSingleLayerVectorSourceDescriptor
-  | EMSTMSSourceDescriptor
-  | EMSFileSourceDescriptor
-  | GeojsonFileSourceDescriptor;
-
-export type LayerDescriptor = {
-  __dataRequests?: DataRequestDescriptor[];
-  __isInErrorState?: boolean;
-  __isPreviewLayer?: boolean;
-  __errorMessage?: string;
-  __trackedLayerDescriptor?: LayerDescriptor;
-  alpha?: number;
-  id: string;
-  joins?: JoinDescriptor[];
-  label?: string | null;
-  areLabelsOnTop?: boolean;
-  minZoom?: number;
-  maxZoom?: number;
-  sourceDescriptor: SourceDescriptor | null;
-  type?: string;
-  visible?: boolean;
-  style?: StyleDescriptor | null;
-  query?: Query;
-};
-
-export type VectorLayerDescriptor = LayerDescriptor & {
-  style?: VectorStyleDescriptor;
-};
-
-export type RangeFieldMeta = {
-  min: number;
-  max: number;
-  delta: number;
-  isMinOutsideStdRange?: boolean;
-  isMaxOutsideStdRange?: boolean;
-};
-
-export type Category = {
-  key: string;
-  count: number;
-};
-
-export type CategoryFieldMeta = {
-  categories: Category[];
-};
-
-export type GeometryTypes = {
-  isPointsOnly: boolean;
-  isLinesOnly: boolean;
-  isPolygonsOnly: boolean;
-};
-
-export type StyleMetaDescriptor = {
-  geometryTypes?: GeometryTypes;
-  fieldMeta: {
-    [key: string]: {
-      range: RangeFieldMeta;
-      categories: CategoryFieldMeta;
-    };
-  };
 };

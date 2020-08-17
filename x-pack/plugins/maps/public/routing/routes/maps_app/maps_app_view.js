@@ -142,7 +142,7 @@ export class MapsAppView extends React.Component {
       return;
     }
 
-    this._onQueryChange({ time: globalState.time, refresh: true });
+    this._onQueryChange({ time: globalState.time });
   };
 
   async _updateIndexPatterns() {
@@ -160,7 +160,7 @@ export class MapsAppView extends React.Component {
     }
   }
 
-  _onQueryChange = ({ filters, query, time, refresh = false }) => {
+  _onQueryChange = ({ filters, query, time, forceRefresh = false }) => {
     const { filterManager } = getData().query;
 
     if (filters) {
@@ -168,7 +168,7 @@ export class MapsAppView extends React.Component {
     }
 
     this.props.dispatchSetQuery({
-      refresh,
+      forceRefresh,
       filters: filterManager.getFilters(),
       query,
       timeFilters: time,
@@ -336,7 +336,7 @@ export class MapsAppView extends React.Component {
           this._onQueryChange({
             query,
             time: dateRange,
-            refresh: true,
+            forceRefresh: true,
           });
         }}
         onFiltersUpdated={this._onFiltersChange}

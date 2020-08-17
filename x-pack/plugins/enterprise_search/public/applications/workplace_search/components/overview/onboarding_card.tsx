@@ -17,7 +17,6 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import { useRoutes } from '../shared/use_routes';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
@@ -40,8 +39,10 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   actionPath,
   complete,
 }) => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { getWSRoute } = useRoutes();
+  const {
+    http,
+    externalUrl: { getWorkplaceSearchUrl },
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({
@@ -53,7 +54,7 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   const buttonActionProps = actionPath
     ? {
         onClick,
-        href: getWSRoute(actionPath),
+        href: getWorkplaceSearchUrl(actionPath),
         target: '_blank',
         'data-test-subj': testSubj,
       }
