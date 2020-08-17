@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { ReactWrapper } from 'enzyme';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
