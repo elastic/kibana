@@ -16,6 +16,6 @@ kibanaPipeline(timeoutMinutes: 180) {
   }
 
   if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail(to: 'gloria.delatorre@elastic.co')
+    kibanaPipeline.sendMail(to: 'siem_dev_team@elastic.co')
   }
 }
