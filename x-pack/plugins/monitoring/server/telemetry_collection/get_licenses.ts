@@ -45,7 +45,11 @@ export function fetchLicenses(
     index: `${INDEX_PATTERN_ELASTICSEARCH},${metricbeatIndex}`,
     size: maxBucketSize,
     ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
+    filterPath: [
+      'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
+      'hits.hits._source.license',
+    ],
     body: {
       query: {
         bool: {
@@ -79,11 +83,11 @@ export interface ESClusterStatsWithLicense {
 export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.reduce(
-    (acc, { _source }) => ({
+  return clusters.reduce((acc, { _source }) => {
+    const clusterUuid = get(_source, 'elasticsearch.cluster.id', get(_source, 'cluster_uuid'));
+    return {
       ...acc,
-      [_source.cluster_uuid]: _source.license,
-    }),
-    {}
-  );
+      [clusterUuid]: _source.license,
+    };
+  }, {});
 }

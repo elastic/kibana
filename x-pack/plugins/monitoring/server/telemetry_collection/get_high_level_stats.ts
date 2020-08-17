@@ -154,13 +154,23 @@ function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
 
   // hits are sorted arbitrarily by product UUID
   instances.map((instance) => {
-    const clusterUuid = instance._source.cluster_uuid;
+    const clusterUuid =
+      instance._source.cluster_uuid || get(instance, '_source.elasticsearch.cluster.id');
     const version: string | undefined = get(
       instance,
-      `_source.${product}_stats.${product}.version`
+      `_source.${product}.stats.${product}.version`,
+      get(instance, `_source.${product}_stats.${product}.version`)
     );
-    const cloud: CloudEntry | undefined = get(instance, `_source.${product}_stats.cloud`);
-    const os: OSData | undefined = get(instance, `_source.${product}_stats.os`);
+    const cloud: CloudEntry | undefined = get(
+      instance,
+      `_source.${product}.stats.cloud`,
+      get(instance, `_source.${product}_stats.cloud`)
+    );
+    const os: OSData | undefined = get(
+      instance,
+      `_source.${product}.stats.os`,
+      get(instance, `_source.${product}_stats.os`)
+    );
 
     if (clusterUuid) {
       let cluster = clusterMap.get(clusterUuid);

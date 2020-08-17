@@ -32,9 +32,13 @@ async function getCcrStat(req, esIndexPattern, filters) {
     size: 1,
     filterPath: [
       'hits.hits._source.ccr_stats',
+      'hits.hits._source.elasticsearch.ccr.stats',
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.operations_written',
+      'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.stats.operations_written',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
+      'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.stats.failed_read_requests',
     ],
     body: {
       sort: [{ timestamp: { order: 'desc' } }],
@@ -97,10 +101,23 @@ export function ccrShardRoute(server) {
 
       const filters = [
         {
-          term: {
-            type: {
-              value: 'ccr_stats',
-            },
+          bool: {
+            should: [
+              {
+                term: {
+                  type: {
+                    value: 'ccr_stats',
+                  },
+                },
+              },
+              {
+                term: {
+                  'metricset.name': {
+                    value: 'ccr_stats',
+                  },
+                },
+              },
+            ],
           },
         },
         {
@@ -133,18 +150,26 @@ export function ccrShardRoute(server) {
           getCcrStat(req, esIndexPattern, filters),
         ]);
 
-        const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats', {});
+        const stat = get(
+          ccrResponse,
+          'hits.hits[0]._source.elasticsearch.ccr.stats',
+          get(ccrResponse, 'hits.hits[0]._source.ccr_stats', {})
+        );
         const oldestStat = get(
           ccrResponse,
-          'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats',
-          {}
+          'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.elasticsearch.ccr.stats',
+          get(ccrResponse, 'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats', {})
         );
 
         return {
           metrics,
           stat,
           formattedLeader: getFormattedLeaderIndex(stat.leader_index),
-          timestamp: get(ccrResponse, 'hits.hits[0]._source.timestamp'),
+          timestamp: get(
+            ccrResponse,
+            'hits.hits[0]._source.@timestamp',
+            get(ccrResponse, 'hits.hits[0]._source.timestamp')
+          ),
           oldestStat,
         };
       } catch (err) {

@@ -47,17 +47,29 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
       sort: [{ timestamp: { order: 'desc' } }],
       _source: [
         'timestamp',
+        '@timestamp',
         'kibana_stats.process.memory.resident_set_size_in_bytes',
+        'kibana.stats.process.memory.resident_set_size_in_bytes',
         'kibana_stats.os.load.1m',
+        'kibana.stats.os.load.1m',
         'kibana_stats.response_times.average',
+        'kibana.stats.response_times.average',
         'kibana_stats.response_times.max',
+        'kibana.stats.response_times.max',
         'kibana_stats.requests.total',
+        'kibana.stats.requests.total',
         'kibana_stats.kibana.transport_address',
+        'kibana.stats.kibana.transport_address',
         'kibana_stats.kibana.name',
+        'kibana.stats.kibana.name',
         'kibana_stats.kibana.host',
+        'kibana.stats.kibana.host',
         'kibana_stats.kibana.uuid',
+        'kibana.stats.kibana.uuid',
         'kibana_stats.kibana.status',
+        'kibana.stats.kibana.status',
         'kibana_stats.concurrent_connections',
+        'kibana.stats.concurrent_connections',
       ],
     },
   };
@@ -68,8 +80,10 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
 
     return instances.map((hit) => {
       return {
-        ...get(hit, '_source.kibana_stats'),
-        availability: calculateAvailability(get(hit, '_source.timestamp')),
+        ...get(hit, '_source.kibana.stats', get(hit, '_source.kibana_stats')),
+        availability: calculateAvailability(
+          get(hit, '_source.@timestamp', get(hit, '_source.timestamp'))
+        ),
       };
     });
   });

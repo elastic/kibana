@@ -75,8 +75,16 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
 
   // get usage stats per cluster / .kibana index
   return rawStatsHits.reduce((accum, currInstance) => {
-    const clusterUuid = currInstance._source.cluster_uuid;
-    const currUsage = currInstance._source.kibana_stats?.usage || {};
+    const clusterUuid = get(
+      currInstance,
+      '_source.elasticsearch.cluster.id',
+      get(currInstance, '_source.cluster_uuid')
+    );
+    const currUsage = get(
+      currInstance,
+      '_source.kibana.stats.usage',
+      get(currInstance, '_source.kibana_stats.usage', {})
+    );
     const clusterIndexCombination = clusterUuid + currUsage.index;
 
     // return early if usage data is empty or if this cluster/index has already been processed

@@ -86,9 +86,13 @@ function buildRequest(req, config, esIndexPattern) {
     size: maxBucketSize,
     filterPath: [
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.read_exceptions',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.stats.read_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.stats.follower_index',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.shard_id',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.stats.shard_id',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.time_since_last_read_millis',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.elasticsearch.ccr.stats.time_since_last_read_millis',
       'aggregations.by_follower_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.remote_cluster.buckets.key',
@@ -104,10 +108,23 @@ function buildRequest(req, config, esIndexPattern) {
         bool: {
           must: [
             {
-              term: {
-                type: {
-                  value: 'ccr_stats',
-                },
+              bool: {
+                should: [
+                  {
+                    term: {
+                      type: {
+                        value: 'ccr_stats',
+                      },
+                    },
+                  },
+                  {
+                    term: {
+                      'metricset.name': {
+                        value: 'ccr_stats',
+                      },
+                    },
+                  },
+                ],
               },
             },
             {
@@ -205,7 +222,9 @@ export function ccrRoute(server) {
 
         const fullStats = get(response, 'hits.hits').reduce((accum, hit) => {
           const innerHits = get(hit, 'inner_hits.by_shard.hits.hits');
-          const innerHitsSource = innerHits.map((innerHit) => get(innerHit, '_source.ccr_stats'));
+          const innerHitsSource = innerHits.map((innerHit) =>
+            get(innerHit, '_source.elasticsearch.ccr.stats', get(innerHit, '_source.ccr_stats'))
+          );
           const grouped = groupBy(
             innerHitsSource,
             (stat) => `${stat.follower_index}:${stat.shard_id}`

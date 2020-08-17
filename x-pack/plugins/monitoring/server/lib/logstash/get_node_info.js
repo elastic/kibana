@@ -9,7 +9,11 @@ import { checkParam } from '../error_missing_required';
 import { calculateAvailability } from './../calculate_availability';
 
 export function handleResponse(resp) {
-  const source = get(resp, 'hits.hits[0]._source.logstash_stats');
+  const source = get(
+    resp,
+    'hits.hits[0]._source.logstash.stats',
+    get(resp, 'hits.hits[0]._source.logstash_stats')
+  );
   const logstash = get(source, 'logstash');
   const info = merge(logstash, {
     availability: calculateAvailability(get(source, 'timestamp')),
@@ -30,11 +34,17 @@ export function getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }) 
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.logstash_stats.events',
+      'hits.hits._source.logstash.stats.events',
       'hits.hits._source.logstash_stats.jvm.uptime_in_millis',
+      'hits.hits._source.logstash.stats.jvm.uptime_in_millis',
       'hits.hits._source.logstash_stats.logstash',
+      'hits.hits._source.logstash.stats.logstash',
       'hits.hits._source.logstash_stats.queue.type',
+      'hits.hits._source.logstash.stats.queue.type',
       'hits.hits._source.logstash_stats.reloads',
+      'hits.hits._source.logstash.stats.reloads',
       'hits.hits._source.logstash_stats.timestamp',
+      'hits.hits._source.logstash.stats.timestamp',
     ],
     body: {
       query: {

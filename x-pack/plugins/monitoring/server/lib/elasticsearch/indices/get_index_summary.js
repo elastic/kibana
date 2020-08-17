@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 export function handleResponse(shardStats, indexUuid) {
   return (response) => {
-    const indexStats = get(response, 'hits.hits[0]._source.index_stats');
+    const indexStats = get(
+      response,
+      'hits.hits[0]._source.elasticsearch.index',
+      get(response, 'hits.hits[0]._source.index_stats')
+    );
     const primaries = get(indexStats, 'primaries');
     const total = get(indexStats, 'total');
 

@@ -20,7 +20,7 @@ export function handleResponse(response) {
 
   // map into object with shard and source properties
   return hits.reduce((shards, hit) => {
-    const shard = hit._source.shard;
+    const shard = get(hit, '_source.elasticsearch.shard', get(hit, '_source.shard'));
 
     if (shard) {
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both

@@ -51,10 +51,14 @@ export function fetchElasticsearchStats(
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.cluster_name',
       'hits.hits._source.version',
+      'hits.hits._source.version',
       'hits.hits._source.cluster_stats',
+      'hits.hits._source.elasticsearch.cluster',
       'hits.hits._source.stack_stats',
     ],
     body: {

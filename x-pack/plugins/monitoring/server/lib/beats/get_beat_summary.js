@@ -12,9 +12,14 @@ import { getDiffCalculation } from './_beats_stats';
 export function handleResponse(response, beatUuid) {
   const firstStats = get(
     response,
-    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats'
+    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats.stats',
+    get(response, 'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats')
   );
-  const stats = get(response, 'hits.hits[0]._source.beats_stats');
+  const stats = get(
+    response,
+    'hits.hits[0]._source.beats.stats',
+    get(response, 'hits.hits[0]._source.beats_stats')
+  );
 
   const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
   const eventsEmittedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.published', null);
@@ -60,22 +65,39 @@ export async function getBeatSummary(
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.beats_stats.beat.host',
+      'hits.hits._source.beats.stats.beat.host',
       'hits.hits._source.beats_stats.beat.version',
+      'hits.hits._source.beats.stats.beat.version',
       'hits.hits._source.beats_stats.beat.name',
+      'hits.hits._source.beats.stats.beat.name',
       'hits.hits._source.beats_stats.beat.type',
+      'hits.hits._source.beats.stats.beat.type',
       'hits.hits._source.beats_stats.metrics.libbeat.output.type',
+      'hits.hits._source.beats.stats.metrics.libbeat.output.type',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
+      'hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.published',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.total',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.dropped',
+      'hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.dropped',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
+      'hits.hits._source.beats.stats.metrics.libbeat.output.write.bytes',
       'hits.hits._source.beats_stats.metrics.libbeat.config.reloads',
+      'hits.hits._source.beats.stats.metrics.libbeat.config.reloads',
       'hits.hits._source.beats_stats.metrics.beat.info.uptime.ms',
+      'hits.hits._source.beats.stats.metrics.beat.info.uptime.ms',
       'hits.hits._source.beats_stats.metrics.beat.handles.limit.hard',
+      'hits.hits._source.beats.stats.metrics.beat.handles.limit.hard',
       'hits.hits._source.beats_stats.metrics.beat.handles.limit.soft',
+      'hits.hits._source.beats.stats.metrics.beat.handles.limit.soft',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.published',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.total',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.dropped',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.dropped',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
+      'hits.hits.inner_hits.first_hit.hits.hits._source.beats.stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
       sort: { timestamp: { order: 'desc' } },

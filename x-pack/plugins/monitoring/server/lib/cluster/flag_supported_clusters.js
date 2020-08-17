@@ -29,7 +29,7 @@ async function findSupportedBasicLicenseCluster(
     index: kbnIndexPattern,
     size: 1,
     ignoreUnavailable: true,
-    filterPath: 'hits.hits._source.cluster_uuid',
+    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.elasticsearch.cluster.id'],
     body: {
       sort: { timestamp: { order: 'desc' } },
       query: {
@@ -43,7 +43,11 @@ async function findSupportedBasicLicenseCluster(
       },
     },
   });
-  const supportedClusterUuid = get(kibanaDataResult, 'hits.hits[0]._source.cluster_uuid');
+  const supportedClusterUuid = get(
+    kibanaDataResult,
+    'hits.hits[0]._source.elasticsearch.cluster.id',
+    get(kibanaDataResult, 'hits.hits[0]._source.cluster_uuid')
+  );
   const supportedCluster = find(clusters, { cluster_uuid: supportedClusterUuid });
   // only this basic cluster is supported
   set(supportedCluster, 'isSupported', true);

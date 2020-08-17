@@ -47,18 +47,31 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
       sort: [{ timestamp: { order: 'desc' } }],
       _source: [
         'timestamp',
+        '@timestamp',
         'logstash_stats.process.cpu.percent',
+        'logstash.stats.process.cpu.percent',
         'logstash_stats.jvm.mem.heap_used_percent',
+        'logstash.stats.jvm.mem.heap_used_percent',
         'logstash_stats.os.cpu.load_average.1m',
+        'logstash.stats.os.cpu.load_average.1m',
         'logstash_stats.events.out',
+        'logstash.stats.events.out',
         'logstash_stats.logstash.http_address',
+        'logstash.stats.logstash.http_address',
         'logstash_stats.logstash.name',
+        'logstash.stats.logstash.name',
         'logstash_stats.logstash.host',
+        'logstash.stats.logstash.host',
         'logstash_stats.logstash.uuid',
+        'logstash.stats.logstash.uuid',
         'logstash_stats.logstash.status',
+        'logstash.stats.logstash.status',
         'logstash_stats.logstash.pipeline',
+        'logstash.stats.logstash.pipeline',
         'logstash_stats.reloads',
+        'logstash.stats.reloads',
         'logstash_stats.logstash.version',
+        'logstash.stats.logstash.version',
       ],
     },
   };
@@ -69,8 +82,10 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
 
     return instances.map((hit) => {
       return {
-        ...get(hit, '_source.logstash_stats'),
-        availability: calculateAvailability(get(hit, '_source.timestamp')),
+        ...get(hit, '_source.logstash.stats', get(hit, '_source.logstash_stats')),
+        availability: calculateAvailability(
+          get(hit, '_source.@timestamp', get(hit, '_source.timestamp'))
+        ),
       };
     });
   });

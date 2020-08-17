@@ -12,6 +12,7 @@ export async function fetchClusters(callCluster: any, index: string): Promise<Al
     filterPath: [
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_name',
     ],
     body: {
@@ -45,9 +46,10 @@ export async function fetchClusters(callCluster: any, index: string): Promise<Al
     const clusterName: string =
       get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
       get(hit, '_source.cluster_name') ||
+      get(hit, '_source.elasticsearch.cluster.id') ||
       get(hit, '_source.cluster_uuid');
     return {
-      clusterUuid: get(hit, '_source.cluster_uuid'),
+      clusterUuid: get(hit, '_source.elasticsearch.cluster.id', get(hit, '_source.cluster_uuid')),
       clusterName,
     };
   });

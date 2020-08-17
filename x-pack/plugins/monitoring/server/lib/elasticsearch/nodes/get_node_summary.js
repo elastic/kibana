@@ -17,13 +17,11 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
   return (response) => {
     let nodeSummary = {};
     const nodeStatsHits = get(response, 'hits.hits', []);
-    const nodes = nodeStatsHits.map(
-      (hit) => hit._source.source_node || hit._source.elasticsearch.node
-    ); // using [0] value because query results are sorted desc per timestamp
+    const nodes = nodeStatsHits.map((hit) => hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats =
       get(response, 'hits.hits[0]._source.node_stats') ||
-      get(response, 'hits.hits[0]._source.elasticsearch.node.stats');
+      get(response, 'hits.hits[0]._source.elasticsearch.node');
     const clusterNode = get(clusterState, ['nodes', nodeUuid]);
     const stats = {
       resolver: nodeUuid,

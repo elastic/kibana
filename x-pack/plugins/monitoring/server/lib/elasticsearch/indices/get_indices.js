@@ -165,8 +165,6 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     size: config.get('monitoring.ui.max_bucket_size'),
   });
 
-  console.log(JSON.stringify(params, null, 2));
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) =>
     handleResponse(resp, start, end, shardStats)
