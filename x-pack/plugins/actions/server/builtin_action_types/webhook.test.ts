@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('axios', () => ({
-  request: jest.fn(),
-}));
-
 import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -24,7 +20,22 @@ import {
   WebhookMethods,
 } from './webhook';
 
-const axiosRequestMock = axios.request as jest.Mock;
+import * as utils from './lib/axios_utils';
+
+jest.mock('axios');
+jest.mock('./lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('./lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+    patch: jest.fn(),
+  };
+});
+
+axios.create = jest.fn(() => axios);
+const requestMock = utils.request as jest.Mock;
+
+axios.create = jest.fn(() => axios);
 
 const ACTION_TYPE_ID = '.webhook';
 
@@ -227,7 +238,7 @@ describe('params validation', () => {
 
 describe('execute()', () => {
   beforeAll(() => {
-    axiosRequestMock.mockReset();
+    requestMock.mockReset();
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
@@ -235,8 +246,8 @@ describe('execute()', () => {
   });
 
   beforeEach(() => {
-    axiosRequestMock.mockReset();
-    axiosRequestMock.mockResolvedValue({
+    requestMock.mockReset();
+    requestMock.mockResolvedValue({
       status: 200,
       statusText: '',
       data: '',
@@ -261,17 +272,42 @@ describe('execute()', () => {
       params: { body: 'some data' },
     });
 
-    expect(axiosRequestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
           Object {
             "auth": Object {
               "password": "123",
               "username": "abc",
             },
+            "axios": undefined,
             "data": "some data",
             "headers": Object {
               "aheader": "a value",
             },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "method": "post",
+            "proxySettings": undefined,
             "url": "https://abc.def/my-webhook",
           }
     `);
@@ -294,13 +330,38 @@ describe('execute()', () => {
       params: { body: 'some data' },
     });
 
-    expect(axiosRequestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
           Object {
+            "axios": undefined,
             "data": "some data",
             "headers": Object {
               "aheader": "a value",
             },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "method": "post",
+            "proxySettings": undefined,
             "url": "https://abc.def/my-webhook",
           }
     `);

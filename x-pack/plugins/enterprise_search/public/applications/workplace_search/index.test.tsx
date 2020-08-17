@@ -15,7 +15,7 @@ import { Overview } from './components/overview';
 
 import { WorkplaceSearch } from './';
 
-describe('Workplace Search Routes', () => {
+describe('Workplace Search', () => {
   describe('/', () => {
     it('redirects to Setup Guide when enterpriseSearchUrl is not set', () => {
       (useContext as jest.Mock).mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
