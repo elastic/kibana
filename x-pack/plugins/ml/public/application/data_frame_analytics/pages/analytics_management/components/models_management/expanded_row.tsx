@@ -177,7 +177,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <h5>
                     <FormattedMessage
                       id="xpack.ml.inference.modelsList.expandedRow.inferenceStatsTitle"
-                      defaultMessage="Inference Stats"
+                      defaultMessage="Inference stats"
                     />
                   </h5>
                 </EuiTitle>
@@ -199,7 +199,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 <h5>
                   <FormattedMessage
                     id="xpack.ml.inference.modelsList.expandedRow.ingestStatsTitle"
-                    defaultMessage="Ingest Stats"
+                    defaultMessage="Ingest stats"
                   />
                 </h5>
               </EuiTitle>
