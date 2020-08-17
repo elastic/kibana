@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { sendGetEnrollmentAPIKeys, useCore } from '../../../../hooks';
-import { AgentPolicyPackageBadges } from '../agent_config_package_badges';
+import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 type Props = {
   agentPolicies?: AgentPolicy[];

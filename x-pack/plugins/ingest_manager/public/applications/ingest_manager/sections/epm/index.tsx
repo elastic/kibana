@@ -8,7 +8,7 @@ import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
-import { CreatePackagePolicyPage } from '../agent_config/create_package_config_page';
+import { CreatePackagePolicyPage } from '../agent_policy/create_package_policy_page';
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 

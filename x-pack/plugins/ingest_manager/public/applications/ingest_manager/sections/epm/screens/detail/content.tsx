@@ -13,7 +13,7 @@ import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
-import { PackagePoliciesPanel } from './package_configs_panel';
+import { PackagePoliciesPanel } from './package_policies_panel';
 import { SettingsPanel } from './settings_panel';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'>;

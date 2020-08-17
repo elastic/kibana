@@ -42,9 +42,9 @@ import {
   validationHasErrors,
 } from './services';
 import { StepSelectPackage } from './step_select_package';
-import { StepSelectAgentPolicy } from './step_select_config';
+import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
-import { StepDefinePackagePolicy } from './step_define_package_config';
+import { StepDefinePackagePolicy } from './step_define_package_policy';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 const StepsWithLessPadding = styled(EuiSteps)`

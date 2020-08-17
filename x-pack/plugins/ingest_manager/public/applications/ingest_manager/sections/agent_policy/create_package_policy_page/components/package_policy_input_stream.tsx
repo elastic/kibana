@@ -22,7 +22,7 @@ import {
   PackagePolicyConfigValidationResults,
   validationHasErrors,
 } from '../services';
-import { PackagePolicyInputVarField } from './package_config_input_var_field';
+import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});

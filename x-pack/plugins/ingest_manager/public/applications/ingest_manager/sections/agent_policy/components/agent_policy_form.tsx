@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { NewAgentPolicy, AgentPolicy } from '../../../types';
-import { AgentPolicyDeleteProvider } from './config_delete_provider';
+import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
 interface ValidationResults {
   [key: string]: JSX.Element[];

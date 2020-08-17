@@ -16,7 +16,7 @@ export {
   CustomConfigurePackagePolicyContent,
   CustomConfigurePackagePolicyProps,
   registerPackagePolicyComponent,
-} from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
+} from './applications/ingest_manager/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
 
 export { NewPackagePolicy } from './applications/ingest_manager/types';
 export * from './applications/ingest_manager/types/intra_app_route_state';

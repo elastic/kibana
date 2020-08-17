@@ -22,7 +22,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';
-import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
+import { useGetAgentStatus } from '../../agent_policy/details_page/hooks';
 import { AgentEnrollmentFlyout } from '../components';
 import { DonutChart } from './donut_chart';
 

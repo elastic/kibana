@@ -9,7 +9,7 @@ import {
   NewPackagePolicy,
   RegistryConfigTemplate,
 } from '../../../../types';
-import { validatePackagePolicy, validationHasErrors } from './validate_package_config';
+import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
 
 describe('Ingest Manager - validatePackagePolicy()', () => {
   const mockPackage = ({

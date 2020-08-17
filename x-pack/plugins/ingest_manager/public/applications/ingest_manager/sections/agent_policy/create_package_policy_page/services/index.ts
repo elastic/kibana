@@ -13,4 +13,4 @@ export {
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
-} from './validate_package_config';
+} from './validate_package_policy';

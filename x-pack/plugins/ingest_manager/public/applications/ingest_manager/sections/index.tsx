@@ -5,7 +5,7 @@
  */
 export { IngestManagerOverview } from './overview';
 export { EPMApp } from './epm';
-export { AgentPolicyApp } from './agent_config';
+export { AgentPolicyApp } from './agent_policy';
 export { DataStreamApp } from './data_stream';
 export { FleetApp } from './fleet';
 

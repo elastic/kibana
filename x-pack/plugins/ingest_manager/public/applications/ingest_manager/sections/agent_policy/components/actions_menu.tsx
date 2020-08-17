@@ -10,8 +10,8 @@ import { AgentPolicy } from '../../../types';
 import { useCapabilities } from '../../../hooks';
 import { ContextMenuActions } from '../../../components';
 import { AgentEnrollmentFlyout } from '../../fleet/components';
-import { AgentPolicyYamlFlyout } from './config_yaml_flyout';
-import { AgentPolicyCopyProvider } from './config_copy_provider';
+import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
+import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;

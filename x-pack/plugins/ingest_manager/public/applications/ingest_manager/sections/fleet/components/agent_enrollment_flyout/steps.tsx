@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EnrollmentStepAgentPolicy } from './config_selection';
+import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AgentPolicy } from '../../../../types';
 
 export const DownloadStep = () => {

@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
 import { sendPutAgentReassign, useCore, useGetAgentPolicies } from '../../../../hooks';
-import { AgentPolicyPackageBadges } from '../agent_config_package_badges';
+import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 interface Props {
   onClose: () => void;

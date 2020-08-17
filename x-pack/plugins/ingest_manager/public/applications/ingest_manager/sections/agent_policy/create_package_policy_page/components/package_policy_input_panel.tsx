@@ -27,8 +27,8 @@ import {
   hasInvalidButRequiredVar,
   countValidationErrors,
 } from '../services';
-import { PackagePolicyInputConfig } from './package_config_input_config';
-import { PackagePolicyInputStreamConfig } from './package_config_input_stream';
+import { PackagePolicyInputConfig } from './package_policy_input_config';
+import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
 const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
   &&& {

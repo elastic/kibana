@@ -29,18 +29,18 @@ import {
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout } from '../create_package_config_page/components';
+import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import {
   PackagePolicyValidationResults,
   validatePackagePolicy,
   validationHasErrors,
-} from '../create_package_config_page/services';
+} from '../create_package_policy_page/services';
 import {
   PackagePolicyFormState,
   CreatePackagePolicyFrom,
-} from '../create_package_config_page/types';
-import { StepConfigurePackagePolicy } from '../create_package_config_page/step_configure_package';
-import { StepDefinePackagePolicy } from '../create_package_config_page/step_define_package_config';
+} from '../create_package_policy_page/types';
+import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
+import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const {

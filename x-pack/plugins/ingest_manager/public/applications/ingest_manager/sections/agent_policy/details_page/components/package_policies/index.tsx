@@ -6,8 +6,8 @@
 
 import React, { memo } from 'react';
 import { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { NoPackagePolicies } from './no_package_configs';
-import { PackagePoliciesTable } from './package_configs_table';
+import { NoPackagePolicies } from './no_package_policies';
+import { PackagePoliciesTable } from './package_policies_table';
 
 export const PackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
   if (agentPolicy.package_policies.length === 0) {

@@ -19,7 +19,7 @@ import { WithHeaderLayout } from '../../layouts';
 import { useGetAgentPolicies, useBreadcrumbs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../fleet/components';
 import { OverviewAgentSection } from './components/agent_section';
-import { OverviewPolicySection } from './components/configuration_section';
+import { OverviewPolicySection } from './components/agent_policy_section';
 import { OverviewIntegrationSection } from './components/integration_section';
 import { OverviewDatastreamSection } from './components/datastream_section';
 

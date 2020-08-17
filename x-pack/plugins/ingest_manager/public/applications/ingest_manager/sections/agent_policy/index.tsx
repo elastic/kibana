@@ -9,8 +9,8 @@ import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
 import { AgentPolicyListPage } from './list_page';
 import { AgentPolicyDetailsPage } from './details_page';
-import { CreatePackagePolicyPage } from './create_package_config_page';
-import { EditPackagePolicyPage } from './edit_package_config_page';
+import { CreatePackagePolicyPage } from './create_package_policy_page';
+import { EditPackagePolicyPage } from './edit_package_policy_page';
 
 export const AgentPolicyApp: React.FunctionComponent = () => {
   useBreadcrumbs('policies');

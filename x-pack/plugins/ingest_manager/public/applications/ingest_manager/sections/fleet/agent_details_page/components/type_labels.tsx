@@ -67,7 +67,7 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
     <EuiBadge color="hollow">
       <FormattedMessage
         id="xpack.ingestManager.agentEventSubtype.policyLabel"
-        defaultMessage="Config"
+        defaultMessage="Policy"
       />
     </EuiBadge>
   ),
