@@ -5,11 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 
 function isValidUrl(url: string) {
@@ -28,11 +32,13 @@ export interface Config {
   openInNewTab: boolean;
 }
 
-export type CollectConfigProps = CollectConfigPropsBase<Config>;
+type UrlTrigger = typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER;
+
+export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: UrlTrigger[] }>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 
-export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext> {
+export class DashboardToUrlDrilldown implements Drilldown<Config, UrlTrigger> {
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
   public readonly order = 8;
@@ -43,7 +49,15 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
 
   public readonly euiIcon = 'link';
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
+  supportedTriggers(): UrlTrigger[] {
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+  }
+
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
+    config,
+    onConfig,
+    context,
+  }) => (
     <>
       <EuiCallOut title="Example warning!" color="warning" iconType="help">
         <p>
@@ -79,6 +93,11 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
           onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
         />
       </EuiFormRow>
+      <EuiSpacer size="xl" />
+      <EuiCallOut>
+        {/* just demo how can access selected triggers*/}
+        <p>Will be attached to triggers: {JSON.stringify(context.triggers)}</p>
+      </EuiCallOut>
     </>
   );
 
