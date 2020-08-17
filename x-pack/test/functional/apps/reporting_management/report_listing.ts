@@ -26,10 +26,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   const testSubjects = getService('testSubjects');
-  const findInstance = getService('find');
   const esArchiver = getService('esArchiver');
 
-  describe('Listing of Reports', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/75044
+  describe.skip('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
       await esArchiver.load('empty_kibana');
@@ -68,7 +68,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('Paginates content', async () => {
+    it('Paginates historical reports', async () => {
+      // wait for first row of page 1
+      await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
+
       const previousButton = await testSubjects.find('pagination-button-previous');
 
       // previous CAN NOT be clicked
@@ -90,7 +93,9 @@ pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:0
 
       // click page 2
       await testSubjects.click('pagination-button-1');
-      await findInstance.byCssSelector('[data-test-page="1"]');
+
+      // wait for first row of page 2
+      await testSubjects.find('checkboxSelectRow-k9a9uc4x0gpe1457b16wthc8');
 
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
@@ -110,7 +115,9 @@ test_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached\nreport2csv\n20
 
       // click page 3
       await testSubjects.click('pagination-button-2');
-      await findInstance.byCssSelector('[data-test-page="2"]');
+
+      // wait for first row of page 3
+      await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5');
 
       // scan page 3
       tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));

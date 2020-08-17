@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -70,8 +71,31 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vegalite`,
     check({}, true, {
       config: {
+        axis: {
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: '#54B399' },
+        style: {
+          'group-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'guide-label': {
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'guide-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+        },
+        title: {
+          color: euiThemeVars.euiColorDarkestShade,
+        },
       },
     })
   );
@@ -80,6 +104,12 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vega`,
     check({}, false, {
       config: {
+        axis: {
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: '#54B399' },
         area: { fill: '#54B399' },
@@ -90,6 +120,23 @@ describe(`VegaParser._setDefaultColors`, () => {
         shape: { stroke: '#54B399' },
         symbol: { fill: '#54B399' },
         trail: { fill: '#54B399' },
+        style: {
+          'group-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'guide-label': {
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'guide-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+        },
+        title: {
+          color: euiThemeVars.euiColorDarkestShade,
+        },
       },
     })
   );

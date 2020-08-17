@@ -30,7 +30,7 @@ import React from 'react';
 import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
-import { EmbeddableContext } from '../../triggers';
+import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -49,11 +49,11 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
-      iconType={badge.getIconType({ embeddable })}
-      onClick={() => badge.execute({ embeddable })}
-      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+      iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
+      onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     >
-      {badge.getDisplayName({ embeddable })}
+      {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
   ));
 }
@@ -70,14 +70,17 @@ function renderNotifications(
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
         key={notification.id}
         style={{ marginTop: '4px', marginRight: '4px' }}
-        onClick={() => notification.execute(context)}
+        onClick={() => notification.execute({ ...context, trigger: panelNotificationTrigger })}
       >
-        {notification.getDisplayName(context)}
+        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
       </EuiNotificationBadge>
     );
 
     if (notification.getDisplayNameTooltip) {
-      const tooltip = notification.getDisplayNameTooltip(context);
+      const tooltip = notification.getDisplayNameTooltip({
+        ...context,
+        trigger: panelNotificationTrigger,
+      });
 
       if (tooltip) {
         badge = (
