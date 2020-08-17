@@ -9,13 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
-import { ForceStopAction } from './use_force_stop_action';
+import { StopAction } from './use_stop_action';
 
-export const StopButtonModal: FC<ForceStopAction> = ({
-  closeModal,
-  item,
-  forceStopAndCloseModal,
-}) => {
+export const StopButtonModal: FC<StopAction> = ({ closeModal, item, forceStopAndCloseModal }) => {
   return (
     <>
       {item !== undefined && (

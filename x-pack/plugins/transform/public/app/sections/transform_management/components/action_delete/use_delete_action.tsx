@@ -73,8 +73,8 @@ export const useDeleteAction = (forceDisable: boolean) => {
         <DeleteActionName
           {...{
             canDeleteTransform,
-            isBulkAction: false,
             disabled: isDeleteActionDisabled([item], forceDisable),
+            isBulkAction: false,
           }}
         />
       ),
