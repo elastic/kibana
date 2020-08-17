@@ -8,7 +8,7 @@ import url from 'url';
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
-import { agentPolicyService } from './agent_config';
+import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
@@ -22,7 +22,7 @@ import {
   decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
-import { packagePolicyService } from './package_config';
+import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';

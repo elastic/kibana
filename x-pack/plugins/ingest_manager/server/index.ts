@@ -43,7 +43,7 @@ export const config = {
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 
-export { PackagePolicyServiceInterface } from './services/package_config';
+export { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

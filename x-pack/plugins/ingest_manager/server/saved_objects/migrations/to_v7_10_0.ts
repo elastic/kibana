@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { cloneDeep } from 'lodash';
 import { Agent, AgentEvent, AgentPolicy, PackagePolicy, EnrollmentAPIKey } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<

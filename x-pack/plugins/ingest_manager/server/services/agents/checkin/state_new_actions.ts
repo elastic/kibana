@@ -23,7 +23,7 @@ import {
   AgentPolicy,
   FullAgentPolicy,
 } from '../../../types';
-import { agentPolicyService } from '../../agent_config';
+import { agentPolicyService } from '../../agent_policy';
 import * as APIKeysService from '../../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_UPDATE_ACTIONS_INTERVAL_MS } from '../../../constants';
 import { createAgentAction, getNewActionsSince } from '../actions';

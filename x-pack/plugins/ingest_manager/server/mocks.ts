@@ -8,7 +8,7 @@ import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mock
 import { IngestManagerAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
-import { PackagePolicyServiceInterface } from './services/package_config';
+import { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const createAppContextStartContractMock = (): IngestManagerAppContext => {
   return {

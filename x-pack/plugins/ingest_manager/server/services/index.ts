@@ -61,8 +61,8 @@ export interface AgentService {
 }
 
 // Saved object services
-export { agentPolicyService } from './agent_config';
-export { packagePolicyService } from './package_config';
+export { agentPolicyService } from './agent_policy';
+export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
 export { settingsService };
 

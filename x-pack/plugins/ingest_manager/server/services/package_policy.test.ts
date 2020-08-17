@@ -6,7 +6,7 @@
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackagePolicyMock } from '../../common/mocks';
-import { packagePolicyService } from './package_config';
+import { packagePolicyService } from './package_policy';
 import { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { SavedObjectsUpdateResponse } from 'src/core/server';
 

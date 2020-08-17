@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { PackagePolicySchema } from './package_config';
+import { PackagePolicySchema } from './package_policy';
 import { AgentPolicyStatus } from '../../../common';
 
 const AgentPolicyBaseSchema = {

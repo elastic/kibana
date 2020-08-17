@@ -22,9 +22,9 @@ import {
 } from '../types';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
 import { listAgents } from './agents';
-import { packagePolicyService } from './package_config';
+import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
-import { agentPolicyUpdateEventHandler } from './agent_config_update';
+import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 

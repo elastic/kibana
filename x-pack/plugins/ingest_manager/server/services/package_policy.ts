@@ -24,7 +24,7 @@ import {
   RegistryPackage,
   CallESAsCurrentUser,
 } from '../types';
-import { agentPolicyService } from './agent_config';
+import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';

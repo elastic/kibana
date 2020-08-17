@@ -10,7 +10,7 @@ import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
-import { agentPolicyService } from '../agent_config';
+import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 
 export async function listEnrollmentApiKeys(

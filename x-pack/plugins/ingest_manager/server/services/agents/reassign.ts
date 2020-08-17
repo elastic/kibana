@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import Boom from 'boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
-import { agentPolicyService } from '../agent_config';
+import { agentPolicyService } from '../agent_policy';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,

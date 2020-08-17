@@ -5,7 +5,7 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { agentPolicyService } from './agent_config';
+import { agentPolicyService } from './agent_policy';
 import { Output } from '../types';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
