@@ -262,7 +262,9 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxElement element that wraps up EuiComboBox
      */
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
-      const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
+      const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList', {
+        timeout: 5000,
+      });
       if (!isOptionsListOpen) {
         const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
         await toggleBtn.click();
