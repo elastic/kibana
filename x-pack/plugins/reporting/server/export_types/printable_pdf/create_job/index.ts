@@ -6,13 +6,13 @@
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { cryptoFactory } from '../../../lib';
-import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, ScheduleTaskFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF } from '../types';
 // @ts-ignore no module def (deprecated module)
 import { compatibilityShimFactory } from './compatibility_shim';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
+export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
