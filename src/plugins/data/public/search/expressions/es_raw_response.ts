@@ -58,7 +58,7 @@ function flatten(obj: any, keyPrefix = '') {
 }
 
 const parseRawDocs = (hits: SearchResponse<unknown>['hits']) => {
-  return hits.hits.map((hit) => hit._source).filter((hit) => hit);
+  return hits.hits.map((hit) => hit.fields || hit._source).filter((hit) => hit);
 };
 
 const convertResult = (body: SearchResponse<unknown>) => {
