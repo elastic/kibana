@@ -138,10 +138,10 @@ describe('Resolver, when analyzing a tree that has two related events for the or
 
   describe('when it has loaded', () => {
     let originBounds: AABB;
-    let firstChildBounds: ReturnType<typeof getComputedNodeBoundaries>;
-    let secondChildBounds: ReturnType<typeof getComputedNodeBoundaries>;
-    let edgeStartingCoordinates: ReturnType<typeof getEdgeStartingCoordinates>;
-    let edgeTerminalCoordinates: ReturnType<typeof getEdgeTerminalCoordinates>;
+    let firstChildBounds: AABB;
+    let secondChildBounds: AABB;
+    let edgeStartingCoordinates: Vector2[];
+    let edgeTerminalCoordinates: Vector2[];
     beforeEach(async () => {
       await expect(
         simulator.map(() => ({
@@ -157,11 +157,11 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         originNodeButton: 1,
       });
 
-      originBounds = getComputedNodeBoundaries(entityIDs.origin);
-      firstChildBounds = getComputedNodeBoundaries(entityIDs.firstChild);
-      secondChildBounds = getComputedNodeBoundaries(entityIDs.secondChild);
-      edgeStartingCoordinates = getEdgeStartingCoordinates();
-      edgeTerminalCoordinates = getEdgeTerminalCoordinates();
+      originBounds = computedNodeBoundaries(entityIDs.origin);
+      firstChildBounds = computedNodeBoundaries(entityIDs.firstChild);
+      secondChildBounds = computedNodeBoundaries(entityIDs.secondChild);
+      edgeStartingCoordinates = computedEdgeStartingCoordinates();
+      edgeTerminalCoordinates = computedEdgeTerminalCoordinates();
     });
 
     it('should have one and only one outgoing edge from the origin node', () => {
@@ -251,7 +251,7 @@ function computedNodeBoundaries(entityID: string): AABB {
 /**
  * Coordinates for where the edgelines "start"
  */
-function getEdgeStartingCoordinates(): Vector2[] {
+function computedEdgeStartingCoordinates(): Vector2[] {
   return simulator.edgeLines().map((edge) => {
     const { left, top } = getComputedStyle(edge.getDOMNode());
     return [pxNum(left), pxNum(top)];
@@ -261,7 +261,7 @@ function getEdgeStartingCoordinates(): Vector2[] {
 /**
  * Coordinates for where edgelines "end" (after application of transform)
  */
-function getEdgeTerminalCoordinates(): Vector2[] {
+function computedEdgeTerminalCoordinates(): Vector2[] {
   return simulator.edgeLines().map((edge) => {
     const { left, top, width, transform } = getComputedStyle(edge.getDOMNode());
     /**
@@ -281,8 +281,8 @@ function getEdgeTerminalCoordinates(): Vector2[] {
  *
  * @param bounds Get a function that filters x/y of edges to those contained in a certain bounding box
  */
-function coordinateBoundaryFilter(bounds: ReturnType<typeof getComputedNodeBoundaries>) {
-  return (coords: ReturnType<typeof getEdgeTerminalCoordinates>[0]) => {
+function coordinateBoundaryFilter(bounds: AABB) {
+  return (coords: Vector2) => {
     return (
       coords[0] >= bounds.minimum[0] &&
       coords[0] <= bounds.maximum[0] &&
