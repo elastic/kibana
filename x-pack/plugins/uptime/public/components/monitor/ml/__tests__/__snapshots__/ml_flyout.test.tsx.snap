@@ -84,15 +84,15 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
   <div
     data-focus-guard="true"
     style="width:1px;height:0px;padding:0;overflow:hidden;position:fixed;top:1px;left:1px"
-    tabindex="0"
+    tabindex="-1"
   />
   <div
     data-focus-guard="true"
     style="width:1px;height:0px;padding:0;overflow:hidden;position:fixed;top:1px;left:1px"
-    tabindex="1"
+    tabindex="-1"
   />
   <div
-    data-focus-lock-disabled="false"
+    data-focus-lock-disabled="disabled"
   >
     <div
       class="euiFlyout euiFlyout--small"
@@ -165,7 +165,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                     target="_blank"
                   >
                     <span
-                      class="euiButton__content"
+                      class="euiButtonContent euiButton__content"
                     >
                       <span
                         class="euiButton__text"
@@ -226,7 +226,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
               type="button"
             >
               <span
-                class="euiButtonEmpty__content"
+                class="euiButtonContent euiButtonEmpty__content"
               >
                 <span
                   class="euiButtonEmpty__text"
@@ -240,13 +240,13 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <button
-              class="euiButton euiButton--primary euiButton--fill"
+              class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
               data-test-subj="uptimeMLCreateJobBtn"
               disabled=""
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
                 <span
                   class="euiButton__text"
@@ -263,7 +263,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
   <div
     data-focus-guard="true"
     style="width:1px;height:0px;padding:0;overflow:hidden;position:fixed;top:1px;left:1px"
-    tabindex="0"
+    tabindex="-1"
   />
 </div>
 `;
