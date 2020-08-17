@@ -48,18 +48,18 @@ $homePageWidth: 1200px;
   }
 }
 
-.homHeaderPage__menu {
+.homHeaderPage__actions {
   @include euiBreakpoint('xs', 's') {
     margin-top: 0;
 
-    .homHeaderPage__menuItem {
+    .homHeaderPage__actionItem {
       margin-bottom: 0 !important;
       margin-top: 0 !important;
     }
   }
 }
 
-.homPageMainContainer {
+.homContent {
   background-color: transparent;
   margin: 0 auto;
   max-width: $homePageWidth;
@@ -76,7 +76,7 @@ $homePageWidth: 1200px;
 //   }
 // }
 
-.homDataTools--expanded {
+.homData--expanded {
   flex-direction: column;
 }
 

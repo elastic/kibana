@@ -153,8 +153,8 @@ export class Home extends Component {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homHeaderPage__menu" alignItems="flexEnd">
-                  <EuiFlexItem className="homHeaderPage__menuItem">
+                <EuiFlexGroup className="homHeaderPage__actions">
+                  <EuiFlexItem className="homHeaderPage__actionItem">
                     <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
@@ -163,7 +163,7 @@ export class Home extends Component {
                   </EuiFlexItem>
 
                   {stackManagement ? (
-                    <EuiFlexItem className="homHeaderPage__menuItem">
+                    <EuiFlexItem className="homHeaderPage__actionItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(stackManagement.path)}
                         iconType="gear"
@@ -176,7 +176,7 @@ export class Home extends Component {
                   ) : null}
 
                   {devTools ? (
-                    <EuiFlexItem className="homHeaderPage__menuItem">
+                    <EuiFlexItem className="homHeaderPage__actionItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(devTools.path)}
                         iconType="wrench"
@@ -193,14 +193,14 @@ export class Home extends Component {
           </div>
         </header>
 
-        <div className="homPageMainContainer">
+        <div className="homContent">
           <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
           <EuiFlexGroup
-            className={`homDataTools ${
-              addDataFeatures.length === 1 && manageDataFeatures.length
-                ? 'homDataTools--compressed'
-                : 'homDataTools--expanded'
+            className={`homData ${
+              addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                ? 'homData--compressed'
+                : 'homData--expanded'
             }`}
           >
             <EuiFlexItem>
