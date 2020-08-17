@@ -20,7 +20,8 @@ The `start` function exposes the following interface:
 
 - `async getIsOptedIn(): Promise<boolean>`:
   An async function that resolves into `true` if the user has opted into send Elastic usage data.
-  Resolves to `false` if the user explicitly opted out of sending usage datato Elastic or did not choose to opt-in or out yet after an minor or major upgrade.
+  Resolves to `false` if the user explicitly opted out of sending usage data to Elastic or did not choose
+  to opt-in or out yet after an minor or major upgrade.
 
 
 ### Usage
