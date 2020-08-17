@@ -346,16 +346,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
           )}
           {configurePackage}
           <EuiSpacer size="l" />
-          {/* TODO #64541 - Remove classes */}
-          <EuiBottomBar
-            className={
-              uiSettings.get('pageNavigation') === 'legacy'
-                ? isNavDrawerLocked
-                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
-                  : 'ingestManager__bottomBar'
-                : undefined
-            }
-          >
+          <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 {agentConfig && packageInfo && formState === 'INVALID' ? (

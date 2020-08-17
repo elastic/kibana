@@ -1,14 +1,5 @@
 @include euiHeaderAffordForFixed;
 
-// TODO #64541
-// Delete this block
-.chrHeaderWrapper:not(.headerWrapper) {
-  width: 100%;
-  position: fixed;
-  top: 0;
-  z-index: 10;
-}
-
 .chrHeaderHelpMenu__version {
   text-transform: none;
 }

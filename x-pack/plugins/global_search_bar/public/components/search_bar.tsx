@@ -19,7 +19,7 @@ import {
 import { ApplicationStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { SearchServiceStart, GlobalSearchResult } from '../../../global_search/public';
+import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
 
 const useIfMounted = () => {
   const isMounted = useRef(true);
@@ -40,7 +40,7 @@ const useIfMounted = () => {
 };
 
 interface Props {
-  globalSearch: SearchServiceStart['find'];
+  globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
@@ -181,6 +181,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         const { url } = selected.find(({ checked }) => checked === 'on')!;
 
         if (url.startsWith('https://')) window.location.assign(url);
+        // TODO should we be worried about http://?
         else {
           navigateToUrl(url);
           (document.activeElement as HTMLElement).blur();

@@ -152,17 +152,9 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
             history.push(getPath('configurations_list'));
           }}
         />
-        {/* TODO #64541 - Remove classes */}
+
         {hasChanges ? (
-          <EuiBottomBar
-            className={
-              uiSettings.get('pageNavigation') === 'legacy'
-                ? isNavDrawerLocked
-                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
-                  : 'ingestManager__bottomBar'
-                : undefined
-            }
-          >
+          <EuiBottomBar>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <FormattedMessage

@@ -43,7 +43,7 @@ import {
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { NavType, OnIsLockedUpdate } from './';
+import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -73,7 +73,6 @@ export interface HeaderProps {
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
-  navType$: Observable<NavType>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
 }
@@ -102,7 +101,6 @@ export function Header({
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, true);
-  const navType = useObservable(observables.navType$, 'modern');
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
 
@@ -113,14 +111,7 @@ export function Header({
   const navDrawerRef = createRef<EuiNavDrawer>();
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
   const navId = htmlIdGenerator()();
-  const className = classnames(
-    'chrHeaderWrapper', // TODO #64541 - delete this
-    'hide-for-sharing',
-    {
-      'chrHeaderWrapper--navIsLocked': isLocked,
-      headerWrapper: navType === 'modern',
-    }
-  );
+  const className = classnames('hide-for-sharing');
 
   return (
     <>
@@ -164,31 +155,21 @@ export function Header({
 
         <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
-            {navType === 'modern' ? (
-              <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                <EuiHeaderSectionItemButton
-                  data-test-subj="toggleNavButton"
-                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                    defaultMessage: 'Toggle primary navigation',
-                  })}
-                  onClick={() => setIsNavOpen(!isNavOpen)}
-                  aria-expanded={isNavOpen}
-                  aria-pressed={isNavOpen}
-                  aria-controls={navId}
-                  ref={toggleCollapsibleNavRef}
-                >
-                  <EuiIcon type="menu" size="m" />
-                </EuiHeaderSectionItemButton>
-              </EuiHeaderSectionItem>
-            ) : (
-              // TODO #64541
-              // Delete this block
-              <EuiShowFor sizes={['xs', 's']}>
-                <EuiHeaderSectionItem border="right">
-                  {renderMenuTrigger(() => navDrawerRef.current?.toggleOpen())}
-                </EuiHeaderSectionItem>
-              </EuiShowFor>
-            )}
+            <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+              <EuiHeaderSectionItemButton
+                data-test-subj="toggleNavButton"
+                aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                  defaultMessage: 'Toggle primary navigation',
+                })}
+                onClick={() => setIsNavOpen(!isNavOpen)}
+                aria-expanded={isNavOpen}
+                aria-pressed={isNavOpen}
+                aria-controls={navId}
+                ref={toggleCollapsibleNavRef}
+              >
+                <EuiIcon type="menu" size="m" />
+              </EuiHeaderSectionItemButton>
+            </EuiHeaderSectionItem>
 
             <EuiHeaderSectionItem border="right" />
 
@@ -201,43 +182,34 @@ export function Header({
           />
 
           <HeaderBadge badge$={observables.badge$} />
+
+          <EuiHeaderSection side="right">
+            <EuiHeaderSectionItem border="none">
+              {/* TODO  app content goes here */}
+            </EuiHeaderSectionItem>
+          </EuiHeaderSection>
         </EuiHeader>
-        {navType === 'modern' ? (
-          <CollapsibleNav
-            appId$={application.currentAppId$}
-            id={navId}
-            isLocked={isLocked}
-            navLinks$={observables.navLinks$}
-            recentlyAccessed$={observables.recentlyAccessed$}
-            isNavOpen={isNavOpen}
-            homeHref={homeHref}
-            basePath={basePath}
-            legacyMode={legacyMode}
-            navigateToApp={application.navigateToApp}
-            onIsLockedUpdate={onIsLockedUpdate}
-            closeNav={() => {
-              setIsNavOpen(false);
-              if (toggleCollapsibleNavRef.current) {
-                toggleCollapsibleNavRef.current.focus();
-              }
-            }}
-            customNavLink$={observables.customNavLink$}
-          />
-        ) : (
-          // TODO #64541
-          // Delete this block
-          <NavDrawer
-            isLocked={isLocked}
-            onIsLockedUpdate={onIsLockedUpdate}
-            navLinks$={observables.navLinks$}
-            recentlyAccessed$={observables.recentlyAccessed$}
-            basePath={basePath}
-            appId$={application.currentAppId$}
-            navigateToApp={application.navigateToApp}
-            ref={navDrawerRef}
-            legacyMode={legacyMode}
-          />
-        )}
+
+        <CollapsibleNav
+          appId$={application.currentAppId$}
+          id={navId}
+          isLocked={isLocked}
+          navLinks$={observables.navLinks$}
+          recentlyAccessed$={observables.recentlyAccessed$}
+          isNavOpen={isNavOpen}
+          homeHref={homeHref}
+          basePath={basePath}
+          legacyMode={legacyMode}
+          navigateToApp={application.navigateToApp}
+          onIsLockedUpdate={onIsLockedUpdate}
+          closeNav={() => {
+            setIsNavOpen(false);
+            if (toggleCollapsibleNavRef.current) {
+              toggleCollapsibleNavRef.current.focus();
+            }
+          }}
+          customNavLink$={observables.customNavLink$}
+        />
       </header>
     </>
   );

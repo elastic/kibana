@@ -164,10 +164,6 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    // TODO #64541
-    // Can delete
-    const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
-
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -238,7 +234,6 @@ export class ChromeService {
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
-          navType$={getNavType$}
         />
       ),
 
@@ -298,8 +293,6 @@ export class ChromeService {
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
-
-      getNavType$: () => getNavType$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
@@ -462,13 +455,6 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
-   * Get the navigation type
-   * TODO #64541
-   * Can delete
-   */
-  getNavType$(): Observable<NavType>;
 }
 
 /** @internal */

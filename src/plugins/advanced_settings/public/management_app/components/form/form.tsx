@@ -326,23 +326,8 @@ export class Form extends PureComponent<FormProps> {
 
   renderBottomBar = () => {
     const areChangesInvalid = this.areChangesInvalid();
-
-    // TODO #64541
-    // Delete these classes
-    let bottomBarClasses = '';
-    const pageNav = this.props.settings.general.find(
-      (setting) => setting.name === 'pageNavigation'
-    );
-
-    if (pageNav?.value === 'legacy') {
-      bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'mgtAdvancedSettingsForm__bottomBar--pushForNav':
-          localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
-      });
-    }
     return (
-      <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
+      <EuiBottomBar data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"

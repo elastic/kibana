@@ -88,18 +88,8 @@ export function MainControls({
     </EuiContextMenuItem>,
   ];
 
-  // TODO #64541
-  // Can delete all this class stuff
-  let classes = '';
-  if (isNavLegacy) {
-    classes = classNames('painlessLab__bottomBar', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
-    });
-  }
-
   return (
-    <EuiBottomBar paddingSize="s" className={classes}>
+    <EuiBottomBar paddingSize="s">
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
