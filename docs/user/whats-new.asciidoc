@@ -22,7 +22,7 @@ coming[7.9.0]
 
 [float]
 [[new-platform-7-9]]
-=== A new, grown-up Kibana platform
+=== An improved {kib} platform
 
 As of 7.9,
 the new development platform
@@ -127,15 +127,15 @@ image::images/alert-flyout-action-type-selection.png[UI for selecting an action 
 
 [float]
 [[model-snapshots-7-9]]
-=== Manage your model snapshots within {kib}
+=== Management of your model snapshots
 
-In 7.9, you can now see the list of 
-{ml-docs}/ml-model-snapshots.html[model snapshots] for each job in **Machine 
-Learning > Anomaly Detection > Job Management**. It is now easier than ever to 
-edit, delete, or revert to a specific snapshot. If there are periods of unusual 
-activity that you want to ignore, you can also create 
-{ml-docs}/ml-calendars.html[scheduled events] before you revert and replay the 
-analysis. 
+See the list of
+{ml-docs}/ml-model-snapshots.html[model snapshots] for each job in **Machine
+Learning > Anomaly Detection > Job Management**. This makes it easier to
+edit, delete, or revert to a specific snapshot. If there are periods of unusual
+activity that you want to ignore, you can also create
+{ml-docs}/ml-calendars.html[scheduled events] before you revert and replay the
+analysis.
 
 [role="screenshot"]
 image::images/revert-model-snapshot.png[UI for reverting model snapshot]
@@ -143,14 +143,14 @@ image::images/revert-model-snapshot.png[UI for reverting model snapshot]
 
 [float]
 [[model-change-annotations-7-9]]
-=== {anomaly-detect-cap} model change annotations
+=== {anomaly-detect-cap} annotations generated automatically
 
-You have been able to add annotations to your anomaly detection job results for 
-a long time. But form 7.9, anomaly detection job annotations will be 
-automatically generated every time when the model calculation significantly 
-changes. For example, when the job detects periodicity, a trend, or a 
-step-change. The table of annotations in the **Anomaly Explorer** and **Single 
-Metric Viewer** is enhanced to support the new functionality, to allow you to 
+You have been able to add annotations to your anomaly detection job results for
+a long time. Starting in 7.9, anomaly detection job annotations are
+automatically generated every time the model calculation significantly
+changes, for example, when the job detects periodicity, a trend, or a
+step-change. The table of annotations in the **Anomaly Explorer** and **Single
+Metric Viewer** is enhanced to support the new functionality, so you can
 filter and search the list of annotations for the various types of events.
 
 [role="screenshot"]
@@ -158,12 +158,12 @@ image::images/model_change_annotations.png[Model change annotations]
 
 [float]
 [[swim-lane-embeddable-actions-filters-7-9]]
-=== New anomaly swim lane embeddable actions and filters
+=== Anomaly swim lane embeddable actions and filters
 
-In 7.8, swim lanes became the first {ml} visual that is embeddable to 
-dashboards. From 7.9, embeddable anomaly swim lanes are more powerful: when you 
-navigate to the **Anomaly Explorer** page from the dashboard, swim lanes 
-preserve pagination. You can also add filters with selected influencer values 
+In 7.8, swim lanes became the first {ml} visual that you can embed in
+dashboards. As of 7.9, embeddable anomaly swim lanes are more powerful: when you
+navigate to the **Anomaly Explorer** page from the dashboard, swim lanes
+preserve pagination. You can also add filters with selected influencer values
 directly on the dashboard.
 
 [role="screenshot"]
@@ -171,16 +171,16 @@ image::images/swim-lane-filter.png[Anomaly swim lane filter]
 
 [float]
 [[transform-data-frame-analytics-histogram-7-9]]
-=== See the distribution of your data in transform and data frame analytics wizards and results
+=== See the distribution of your data in transform and data frame analytics wizards
 
-Whether you're transforming your data to get it ready for analysis or evaluating 
-your data after running it through a data frame analytics job, understanding the 
-distribution and range of your fields is important. In 7.9, you can enable 
-histogram charts in the transform and data frame analytics wizards so that you 
-can quickly understand the shape of your data columns. This same functionality 
-is also available in the data frame analytics results grid. All of this is 
-designed to give you richer visibility into your data so you can spot outliers 
-faster as well as more easily compare prediction results vs. actual values.
+Whether you're transforming your data to get it ready for analysis or evaluating
+your data after running it through a data frame analytics job, understanding the
+distribution and range of your fields is important. In 7.9, you can enable
+histogram charts in the transform and data frame analytics wizards, so that you
+can quickly understand the shape of your data columns. This same functionality
+is also available in the data frame analytics results grid. All of this is
+designed to give you richer visibility into your data so you can spot outliers
+faster and easily compare prediction results vs. actual values.
 
 [role="screenshot"]
 image::images/histogram-transforms.png[Histogram charts in transforms]
@@ -190,10 +190,10 @@ image::images/histogram-transforms.png[Histogram charts in transforms]
 [[ml-access-kibana-spaces]]
 === Control access to {ml} features in your {kib} spaces
 
-In 7.9, you can now grant {kibana-ref}/kibana-privileges.html[{kib} privileges] 
-for {ml} features in {kib}. If {ml} features are enabled in your space, you can 
-grant read-write, read-only, or no access to all the machine learning objects in 
-that space. For details, see 
+You can now grant {kibana-ref}/kibana-privileges.html[{kib} privileges]
+for {ml} features in {kib}. If {ml} features are enabled in your space, you can
+grant read-write, read-only, or no access to all the machine learning objects in
+that space. For details, see
 {ml-docs}/setup.html[Set up machine learning features].
 
 [role="screenshot"]
