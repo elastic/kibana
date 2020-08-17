@@ -652,36 +652,6 @@ export class JobCreator {
     this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }
 
-  public get categorizationPerPartitionField(): string | null {
-    // looping through to find current partition_field name to prevent stale/syncing issue
-    // possible because partition_field_name has to have same value in every detector that uses the keyword mlcategory
-    const firstCategorizationDetector = this._detectors.find(
-      (d) => d.by_field_name === 'mlcategory'
-    );
-    if (
-      firstCategorizationDetector &&
-      'partition_field_name' in firstCategorizationDetector &&
-      firstCategorizationDetector.partition_field_name !== undefined
-    ) {
-      return firstCategorizationDetector.partition_field_name;
-    }
-    return null;
-  }
-
-  public set categorizationPerPartitionField(fieldName: string | null) {
-    if (fieldName === null) {
-      this._detectors.forEach((detector) => {
-        delete detector.partition_field_name;
-      });
-    } else {
-      if (this.categorizationPerPartitionField !== fieldName) {
-        this._detectors.forEach((detector) => {
-          detector.partition_field_name = fieldName;
-        });
-      }
-    }
-  }
-
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {
     this._job_config = job;
     this._datafeed_config = datafeed;
