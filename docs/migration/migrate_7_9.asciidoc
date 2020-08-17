@@ -13,14 +13,14 @@ your application to Kibana 7.9.
 * <<general-plugin-API-changes-79, Breaking changes for plugin developers>>
 
 
-// The following section is re-used in the Installation and Upgrade Guide
-
-
-// tag::notable-breaking-changes[]
 
 [float]
 [[user-facing-changes-79]]
 === Breaking changes for users
+
+// The following section is re-used in the Installation and Upgrade Guide
+
+// tag::notable-breaking-changes[]
 
 [float]
 [[breaking_kibana_keystore]]
