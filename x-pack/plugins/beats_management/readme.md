@@ -1,7 +1,7 @@
 # Beats CM
 
 Notes:
-Falure to have auth enabled in Kibana will make for a broken UI. UI based errors not yet in place
+Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
 
 ## Testing
 
