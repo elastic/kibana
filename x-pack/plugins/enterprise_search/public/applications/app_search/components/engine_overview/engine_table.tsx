@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
+import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 
@@ -39,9 +40,13 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
-  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
+  const {
+    externalUrl: { getAppSearchUrl },
+    http,
+  } = useContext(KibanaContext) as IKibanaContext;
+
   const engineLinkProps = (name: string) => ({
-    href: `${enterpriseSearchUrl}/as/engines/${name}`,
+    href: getAppSearchUrl(getEngineRoute(name)),
     target: '_blank',
     onClick: () =>
       sendTelemetry({
