@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
 import chartTableSVG from '../assets/chart_datatable.svg';
@@ -180,10 +181,13 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  toExpression(state, datasourceLayers) {
+  toExpression(state, datasourceLayers): Ast {
     const layer = state.layers[0];
     const datasource = datasourceLayers[layer.layerId];
-    const operations = layer.columns
+    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    // When we add a column it could be empty, and therefore have no order
+    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
+    const operations = sortedColumns
       .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
       .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
