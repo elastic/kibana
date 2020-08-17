@@ -72,33 +72,33 @@ project {
       id("Default_Functional")
       name = "Functional"
 
-      // val ciGroups = (1..12).map { DefaultCiGroup(it, DefaultBuild) }
+       val ciGroups = (1..10).map { DefaultCiGroup(it, DefaultBuild) }
 
-      // buildType {
-      //   id("CIGroups_Composite")
-      //   name = "CI Groups"
-      //   type = BuildTypeSettings.Type.COMPOSITE
+       buildType {
+         id("CIGroups_Composite")
+         name = "CI Groups"
+         type = BuildTypeSettings.Type.COMPOSITE
 
-      //   dependencies {
-      //     for (ciGroup in ciGroups) {
-      //       snapshot(ciGroup) {
-      //         reuseBuilds = ReuseBuilds.SUCCESSFUL
-      //         onDependencyCancel = FailureAction.CANCEL
-      //         onDependencyFailure = FailureAction.CANCEL
-      //         synchronizeRevisions = true
-      //       }
-      //     }
-      //   }
-      // }
+         dependencies {
+           for (ciGroup in ciGroups) {
+             snapshot(ciGroup) {
+               reuseBuilds = ReuseBuilds.SUCCESSFUL
+               onDependencyCancel = FailureAction.CANCEL
+               onDependencyFailure = FailureAction.CANCEL
+               synchronizeRevisions = true
+             }
+           }
+         }
+       }
 
       buildType(DefaultVisualRegression(DefaultBuild))
 
-      // subProject {
-      //   id("CIGroups")
-      //   name = "CI Groups"
+       subProject {
+         id("CIGroups")
+         name = "CI Groups"
 
-      //   for (ciGroup in ciGroups) buildType(ciGroup)
-      // }
+         for (ciGroup in ciGroups) buildType(ciGroup)
+       }
     }
   }
 }
