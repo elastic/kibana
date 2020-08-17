@@ -86,9 +86,9 @@ Contains the Discover application and the saved search embeddable.
 Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable containers.
 
 
-- {kib-repo}blob/{branch}/src/plugins/es_ui_shared[esUiShared]
+- {kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
 
-WARNING: Missing README.
+This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
 - {kib-repo}blob/{branch}/src/plugins/expressions/README.md[expressions]

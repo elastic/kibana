@@ -20,6 +20,6 @@
 import fs from 'fs';
 import path from 'path';
 
-export function isOSS() {
+export function isOss() {
   return !fs.existsSync(path.resolve(__dirname, '../../../x-pack'));
 }
