@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { isEmpty } from 'lodash';
+import { isEmpty, get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';

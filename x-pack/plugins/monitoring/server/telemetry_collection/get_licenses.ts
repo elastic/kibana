@@ -5,6 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { get } from 'lodash';
 import {
   ESLicense,
   LicenseGetter,
