@@ -238,7 +238,7 @@ function pxNum(px: string): number {
 /**
  * Get computed boundaries for process node elements
  */
-function getComputedNodeBoundaries(entityID: string): AABB {
+function computedNodeBoundaries(entityID: string): AABB {
   const { left, top, width, height } = getComputedStyle(
     simulator.processNodeElements({ entityID }).getDOMNode()
   );
