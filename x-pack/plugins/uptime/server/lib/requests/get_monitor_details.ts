@@ -34,7 +34,7 @@ const getMonitorAlerts = async (
   for (let i = 0; i < data.length; i++) {
     const currAlert = data[i];
 
-    if (currAlert.params.search.includes(monitorId)) {
+    if (currAlert.params.search?.includes(monitorId)) {
       monitorAlerts.push(currAlert);
       continue;
     }

@@ -11,9 +11,9 @@ import {
   mountWithRouterRedux,
   renderWithRouterRedux,
   shallowWithRouterRedux,
-} from '../../../../lib';
+} from '../../../../../lib';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 
 describe('EnableAlertComponent', () => {
   let defaultConnectors: string[] = [];

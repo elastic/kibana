@@ -1265,7 +1265,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         aria-label="Enable down alert"
                         class="euiButtonIcon euiButtonIcon--primary"
                         data-test-subj="uptimeDisplayDefineConnector"
-                        style="margin-right:15px"
+                        style="margin-right:10px"
                         type="button"
                       >
                         <div
@@ -1475,7 +1475,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         aria-label="Enable down alert"
                         class="euiButtonIcon euiButtonIcon--primary"
                         data-test-subj="uptimeDisplayDefineConnector"
-                        style="margin-right:15px"
+                        style="margin-right:10px"
                         type="button"
                       >
                         <div

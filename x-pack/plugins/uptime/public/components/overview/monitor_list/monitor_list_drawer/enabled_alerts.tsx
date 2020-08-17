@@ -38,7 +38,9 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
         onClick: () => deleteAlert(alert.id),
         iconType: 'trash',
         iconSize: 's',
-        'aria-label': 'Delete the alert',
+        'aria-label': i18n.translate('xpack.uptime.monitorList.enabledAlerts.deleteAlert', {
+          defaultMessage: 'Delete the alert',
+        }),
         alwaysShow: true,
       },
       'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,
@@ -57,7 +59,12 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
         </h3>
       </EuiText>
       {listItems.length === 0 && !loading && (
-        <EuiCallOut size="s" title="No alert is enabled for this monitor." />
+        <EuiCallOut
+          size="s"
+          title={i18n.translate('xpack.uptime.monitorList.enabledAlerts.noAlert', {
+            defaultMessage: 'No alert is enabled for this monitor.',
+          })}
+        />
       )}
       <EuiListGroup listItems={listItems} />
     </>
