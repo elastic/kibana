@@ -118,6 +118,7 @@ storiesOf('Components|ExceptionItem', module)
     );
   })
   .add('with loadingItemIds', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { id, namespace_type, ...rest } = getExceptionListItemSchemaMock();
 
     return (

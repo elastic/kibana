@@ -1,1 +1,1 @@
-# X-Pack part of Dashboard app
+Contains the enhancements to the OSS dashboard app.

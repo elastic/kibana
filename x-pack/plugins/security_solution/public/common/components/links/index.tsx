@@ -311,9 +311,11 @@ const ReputationLinkComponent: React.FC<{
       ipReputationLinksSetting
         ?.slice(0, allItemsLimit)
         .filter(
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           ({ url_template, name }) =>
             !isNil(url_template) && !isNil(name) && !isUrlInvalid(url_template)
         )
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         .map(({ name, url_template }: { name: string; url_template: string }) => ({
           name: isDefaultReputationLink(name) ? defaultNameMapping[name] : name,
           url_template: url_template.replace(`{{ip}}`, encodeURIComponent(domain)),

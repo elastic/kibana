@@ -22,7 +22,7 @@ import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
-import { replaceUrlHashQuery } from './format';
+import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 import { url as urlUtils } from '../../../common';
 
 /**
@@ -84,10 +84,14 @@ export function getStateFromKbnUrl<State>(
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  { useHash = false }: { useHash: boolean } = { useHash: false },
+  { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
+    useHash: false,
+    storeInHashQuery: true,
+  },
   rawUrl = window.location.href
 ): string {
-  return replaceUrlHashQuery(rawUrl, (query) => {
+  const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
+  return replacer(rawUrl, (query) => {
     const encoded = encodeState(state, useHash);
     return {
       ...query,
@@ -103,7 +107,7 @@ export function setStateToKbnUrl<State>(
 export interface IKbnUrlControls {
   /**
    * Listen for url changes
-   * @param cb - get's called when url has been changed
+   * @param cb - called when url has been changed
    */
   listen: (cb: () => void) => () => void;
 
@@ -142,12 +146,12 @@ export interface IKbnUrlControls {
    */
   cancel: () => void;
 }
-export type UrlUpdaterFnType = (currentUrl: string) => string;
+export type UrlUpdaterFnType = (currentUrl: string) => string | undefined;
 
 export const createKbnUrlControls = (
   history: History = createBrowserHistory()
 ): IKbnUrlControls => {
-  const updateQueue: Array<(currentUrl: string) => string> = [];
+  const updateQueue: UrlUpdaterFnType[] = [];
 
   // if we should replace or push with next async update,
   // if any call in a queue asked to push, then we should push
@@ -188,7 +192,7 @@ export const createKbnUrlControls = (
   function getPendingUrl() {
     if (updateQueue.length === 0) return undefined;
     const resultUrl = updateQueue.reduce(
-      (url, nextUpdate) => nextUpdate(url),
+      (url, nextUpdate) => nextUpdate(url) ?? url,
       getCurrentUrl(history)
     );
 
@@ -201,7 +205,7 @@ export const createKbnUrlControls = (
         cb();
       }),
     update: (newUrl: string, replace = false) => updateUrl(newUrl, replace),
-    updateAsync: (updater: (currentUrl: string) => string, replace = false) => {
+    updateAsync: (updater: UrlUpdaterFnType, replace = false) => {
       updateQueue.push(updater);
       if (shouldReplace) {
         shouldReplace = replace;

@@ -4,7 +4,8 @@
   ],
   "description": "Identifies the SYSTEM account using the Net utility. The Net utility is a component of the Windows operating system. It is used in command line operations for control of users, groups, services, and network connections.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

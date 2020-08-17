@@ -188,6 +188,7 @@ export function ChartSwitch(props: Props) {
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
       props.visualizationMap,

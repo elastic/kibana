@@ -31,7 +31,7 @@ import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { ExceptionBuilder } from '../builder';
+import { ExceptionBuilderComponent } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -317,7 +317,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <ModalBodySection className="builder-section">
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
-                <ExceptionBuilder
+                <ExceptionBuilderComponent
                   exceptionListItems={initialExceptionItems}
                   listType={exceptionListType}
                   listId={ruleExceptionList.list_id}

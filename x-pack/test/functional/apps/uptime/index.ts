@@ -56,6 +56,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./certificates'));
     });
 
+    describe('with generated data but no data reset', () => {
+      loadTestFile(require.resolve('./ping_redirects'));
+    });
+
     describe('with real-world data', () => {
       before(async () => {
         await esArchiver.unload(ARCHIVE);

@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../storage/hashed_item_store/mock';
+import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { ScopedHistory } from '../../../../../core/public';
+import { withNotifyOnErrors } from '../../state_management/url';
+import { coreMock } from '../../../../../core/public/mocks';
 
 describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {
@@ -93,6 +95,37 @@ describe('KbnUrlStateStorage', () => {
 
       expect(await result).toEqual([{ test: 'test', ok: 1 }, { test: 'test', ok: 2 }, null]);
     });
+
+    it("shouldn't throw in case of parsing error", async () => {
+      const key = '_s';
+      history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
+      expect(() => urlStateStorage.get(key)).not.toThrow();
+      expect(urlStateStorage.get(key)).toBeNull();
+    });
+
+    it('should notify about errors', () => {
+      const cb = jest.fn();
+      urlStateStorage = createKbnUrlStateStorage({ useHash: false, history, onGetError: cb });
+      const key = '_s';
+      history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
+      expect(() => urlStateStorage.get(key)).not.toThrow();
+      expect(cb).toBeCalledWith(expect.any(Error));
+    });
+
+    describe('withNotifyOnErrors integration', () => {
+      test('toast is shown', () => {
+        const toasts = coreMock.createStart().notifications.toasts;
+        urlStateStorage = createKbnUrlStateStorage({
+          useHash: true,
+          history,
+          ...withNotifyOnErrors(toasts),
+        });
+        const key = '_s';
+        history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
+        expect(() => urlStateStorage.get(key)).not.toThrow();
+        expect(toasts.addError).toBeCalled();
+      });
+    });
   });
 
   describe('useHash: true', () => {
@@ -127,6 +160,44 @@ describe('KbnUrlStateStorage', () => {
       destroy$.complete();
 
       expect(await result).toEqual([{ test: 'test', ok: 1 }, { test: 'test', ok: 2 }, null]);
+    });
+
+    describe('hashStorage overflow exception', () => {
+      let oldLimit: number;
+      beforeAll(() => {
+        oldLimit = mockStorage.getStubbedSizeLimit();
+        mockStorage.clear();
+        mockStorage.setStubbedSizeLimit(0);
+      });
+      afterAll(() => {
+        mockStorage.setStubbedSizeLimit(oldLimit);
+      });
+
+      it("shouldn't throw in case of error", async () => {
+        expect(() => urlStateStorage.set('_s', { test: 'test' })).not.toThrow();
+        await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
+        expect(getCurrentUrl()).toBe('/'); // url wasn't updated with hash
+      });
+
+      it('should notify about errors', async () => {
+        const cb = jest.fn();
+        urlStateStorage = createKbnUrlStateStorage({ useHash: true, history, onSetError: cb });
+        await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
+        expect(cb).toBeCalledWith(expect.any(Error));
+      });
+
+      describe('withNotifyOnErrors integration', () => {
+        test('toast is shown', async () => {
+          const toasts = coreMock.createStart().notifications.toasts;
+          urlStateStorage = createKbnUrlStateStorage({
+            useHash: true,
+            history,
+            ...withNotifyOnErrors(toasts),
+          });
+          await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
+          expect(toasts.addError).toBeCalled();
+        });
+      });
     });
   });
 

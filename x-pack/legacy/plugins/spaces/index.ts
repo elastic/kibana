@@ -25,10 +25,6 @@ export const spaces = (kibana: Record<string, any>) =>
         .default();
     },
     uiExports: {
-      managementSections: [],
-      apps: [],
-      hacks: ['plugins/spaces/legacy'],
-      home: [],
       injectDefaultVars(server: Server) {
         return {
           serverBasePath: server.config().get('server.basePath'),
