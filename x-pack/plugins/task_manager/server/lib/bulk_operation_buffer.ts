@@ -100,7 +100,7 @@ export function createBuffer<Input extends Entity, ErrorOutput, Output extends E
           );
 
           // if any `bufferedEntities` remain in the array then there was no result we could map to them in the bulkOperation
-          // call their failur ehandler to avoid hanging the promise returned to the call site
+          // call their failure handler to avoid hanging the promise returned to the call site
           bufferedEntities.forEach((unhandledBufferedEntity) => {
             unhandledBufferedEntity.onFailure(
               asErr(
