@@ -31,5 +31,5 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId 
     );
   }
 
-  return <>legendRows</>;
+  return <>{legendRows}</>;
 }
