@@ -17,7 +17,7 @@ describe('Transform: Transform List Actions', () => {
     const actions = result.current.actions;
 
     // Using `any` for the callback. Somehow the EUI types don't pass
-    // on the `data-test-subj` attribute correctly. We're interesting
+    // on the `data-test-subj` attribute correctly. We're interested
     // in the runtime result here anyway.
     expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
       'transformActionStart',
