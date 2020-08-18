@@ -39,7 +39,7 @@ import {
 } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart, SharePluginSetup, UrlGeneratorState } from '../../share/public';
+import { SharePluginStart, SharePluginSetup } from '../../share/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
@@ -57,11 +57,7 @@ import {
   setShareService,
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
-import {
-  VisualizeUrlGeneratorState,
-  VISUALIZE_APP_URL_GENERATOR,
-  createVisualizeUrlGenerator,
-} from './url_generator';
+import { createVisualizeUrlGenerator } from './url_generator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -79,12 +75,6 @@ export interface VisualizePluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
-}
-
-declare module '../../share/public' {
-  export interface UrlGeneratorStateMapping {
-    [VISUALIZE_APP_URL_GENERATOR]: UrlGeneratorState<VisualizeUrlGeneratorState>;
-  }
 }
 
 export interface FeatureFlagConfig {

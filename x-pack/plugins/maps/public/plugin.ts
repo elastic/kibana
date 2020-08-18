@@ -34,11 +34,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import {
-  MapsUrlGeneratorState,
-  MAPS_APP_URL_GENERATOR,
-  createMapsUrlGenerator,
-} from './url_generator';
+import { createMapsUrlGenerator } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
@@ -48,11 +44,7 @@ import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
-import {
-  SharePluginSetup,
-  UrlGeneratorState,
-  SharePluginStart,
-} from '../../../../src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -77,12 +69,6 @@ export interface MapsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
-}
-
-declare module '../../../../src/plugins/share/public' {
-  export interface UrlGeneratorStateMapping {
-    [MAPS_APP_URL_GENERATOR]: UrlGeneratorState<MapsUrlGeneratorState>;
-  }
 }
 
 /**
