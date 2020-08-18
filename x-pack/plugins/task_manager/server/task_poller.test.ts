@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { sleep, resolvable } from './test_utils';
+import { sleep, resolvable, Resolvable } from './test_utils';
 import { asOk, asErr } from './lib/result_type';
 
 describe('TaskPoller', () => {
@@ -243,6 +243,7 @@ describe('TaskPoller', () => {
         },
         getCapacity: () => 5,
         pollRequests$,
+        workTimeout: pollInterval * 5,
       }).subscribe(handler);
 
       pollRequests$.next(some('one'));
@@ -267,6 +268,68 @@ describe('TaskPoller', () => {
       expect(handler).toHaveBeenCalledWith(asOk(['one']));
 
       advance(pollInterval);
+
+      expect(handler).toHaveBeenCalledWith(asOk(['two', 'three']));
+    })
+  );
+
+  test(
+    'work times out whe nit exceeds a predefined amount of time',
+    fakeSchedulers(async (advance) => {
+      const pollInterval = 100;
+      const workTimeout = pollInterval * 2;
+      const bufferCapacity = 2;
+
+      const handler = jest.fn();
+
+      type ResolvableTupple = [string, PromiseLike<void> & Resolvable];
+      const pollRequests$ = new Subject<Option<ResolvableTupple>>();
+      createTaskPoller<[string, Resolvable], string[]>({
+        pollInterval,
+        bufferCapacity,
+        work: async (...resolvables) => {
+          await Promise.all(resolvables.map(([, future]) => future));
+          return resolvables.map(([name]) => name);
+        },
+        getCapacity: () => 5,
+        pollRequests$,
+        workTimeout,
+      }).subscribe(handler);
+
+      const one: ResolvableTupple = ['one', resolvable()];
+      pollRequests$.next(some(one));
+
+      // split these into two payloads
+      advance(pollInterval);
+
+      const two: ResolvableTupple = ['two', resolvable()];
+      const three: ResolvableTupple = ['three', resolvable()];
+      pollRequests$.next(some(two));
+      pollRequests$.next(some(three));
+
+      advance(workTimeout);
+      await sleep(workTimeout);
+
+      // one resolves too late!
+      one[1].resolve();
+
+      expect(handler).toHaveBeenCalledWith(
+        asErr(
+          new PollingError<string>(
+            'Failed to poll for work: Error: work has timed out',
+            PollingErrorType.WorkError,
+            none
+          )
+        )
+      );
+      expect(handler.mock.calls[0][0].error.type).toEqual(PollingErrorType.WorkError);
+
+      // two and three in time
+      two[1].resolve();
+      three[1].resolve();
+
+      advance(pollInterval);
+      await sleep(pollInterval);
 
       expect(handler).toHaveBeenCalledWith(asOk(['two', 'three']));
     })

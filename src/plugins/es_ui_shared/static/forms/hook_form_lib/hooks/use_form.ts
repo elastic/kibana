@@ -140,7 +140,7 @@ export function useForm<T extends FormData = FormData>(
       return Object.entries(fieldsRefs.current).reduce(
         (acc, [key, field]) => ({
           ...acc,
-          [key]: field.__serializeOutput(),
+          [key]: field.value,
         }),
         {} as T
       );
@@ -233,8 +233,7 @@ export function useForm<T extends FormData = FormData>(
       fieldsRefs.current[field.path] = field;
 
       if (!{}.hasOwnProperty.call(getFormData$().value, field.path)) {
-        const fieldValue = field.__serializeOutput();
-        updateFormDataAt(field.path, fieldValue);
+        updateFormDataAt(field.path, field.value);
       }
     },
     [getFormData$, updateFormDataAt]
@@ -301,7 +300,7 @@ export function useForm<T extends FormData = FormData>(
       setSubmitting(true);
 
       const isFormValid = await validateAllFields();
-      const formData = getFormData();
+      const formData = isFormValid ? getFormData() : ({} as T);
 
       if (onSubmit) {
         await onSubmit(formData, isFormValid!);
