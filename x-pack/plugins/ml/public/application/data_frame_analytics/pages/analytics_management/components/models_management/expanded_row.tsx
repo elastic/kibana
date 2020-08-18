@@ -341,6 +341,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
   return (
     <EuiTabbedContent
+      size="s"
       style={{ width: '100%' }}
       tabs={tabs}
       initialSelectedTab={tabs[0]}
