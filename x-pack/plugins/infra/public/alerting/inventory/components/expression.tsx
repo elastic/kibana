@@ -71,7 +71,7 @@ import { validateMetricThreshold } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-interface AlertContextMeta {
+export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
