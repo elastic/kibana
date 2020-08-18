@@ -59,7 +59,12 @@ export const getCategorizerStatsSchema = schema.nullable(
   })
 );
 
-export const getStoppedPartitionsSchema = schema.object({
+export const getCategorizerStoppedPartitionsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
+  /**
+   * Field to aggregate results by: 'job_id' or 'partition_field_value'
+   * If by job_id, will return list of jobIds with at least one partition that have stopped
+   * If by partition_field_value, it will return a list of categorizer stopped partitions for each job_id
+   */
   fieldToBucket: schema.maybe(schema.string()),
 });

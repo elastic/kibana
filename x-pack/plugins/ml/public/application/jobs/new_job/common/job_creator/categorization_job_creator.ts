@@ -189,9 +189,14 @@ export class CategorizationJobCreator extends JobCreator {
       this._detectors.forEach((detector) => {
         delete detector.partition_field_name;
       });
+      this.removeInfluencer(this._partitionFieldName);
       this._partitionFieldName = null;
     } else {
       if (this._partitionFieldName !== fieldName) {
+        // remove the previous field from list of influencers
+        // and add the new one
+        this.removeInfluencer(this._partitionFieldName);
+        this.addInfluencer(fieldName);
         this._partitionFieldName = fieldName;
         this._detectors.forEach((detector) => {
           detector.partition_field_name = fieldName;

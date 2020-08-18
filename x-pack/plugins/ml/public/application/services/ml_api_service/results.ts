@@ -124,7 +124,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       fieldToBucket,
     });
     return httpService.http<GetStoppedPartitionResult>({
-      path: `${basePath()}/results/stopped_partitions`,
+      path: `${basePath()}/results/category_stopped_partitions`,
       method: 'POST',
       body,
     });

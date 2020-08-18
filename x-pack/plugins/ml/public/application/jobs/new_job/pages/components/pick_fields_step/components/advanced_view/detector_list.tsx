@@ -129,7 +129,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-      <DuplicateDetectorsWarning validation={validation} />
+      <DetectorsValidationWarning validation={validation} />
     </Fragment>
   );
 };
@@ -159,7 +159,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
   );
 };
 
-const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation }) => {
+const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation }) => {
   if (validation.valid === true) {
     return null;
   }

@@ -20,7 +20,7 @@ import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns'
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
   getCategorizerStatsSchema,
-  getStoppedPartitionsSchema,
+  getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
 
 function getAnomaliesTableData(legacyClient: ILegacyScopedClusterClient, payload: any) {
@@ -319,16 +319,16 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
   /**
    * @apiGroup ResultsService
    *
-   * @api {get} /api/ml/results/stopped_partitions
+   * @api {get} /api/ml/results/category_stopped_partitions
    * @apiName GetStoppedPartitions
    * @apiDescription Returns list of partitions we stopped categorizing whens status changed to warn
-   * @apiSchema (body) getStoppedPartitionsSchema
+   * @apiSchema (body) getCategorizerStoppedPartitionsSchema
    */
   router.post(
     {
-      path: '/api/ml/results/stopped_partitions',
+      path: '/api/ml/results/category_stopped_partitions',
       validate: {
-        body: getStoppedPartitionsSchema,
+        body: getCategorizerStoppedPartitionsSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
