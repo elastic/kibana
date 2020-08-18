@@ -21,7 +21,8 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
@@ -47,7 +48,7 @@ import {
 } from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor: string = VISUALIZATION_COLORS[0];
+const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -659,6 +660,35 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
+
+    // provide right colors for light and dark themes
+    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'guide-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-subtitle',
+      'fill'
+    );
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
+    this._setDefaultValue('transparent', 'config', 'background');
   }
 
   /**

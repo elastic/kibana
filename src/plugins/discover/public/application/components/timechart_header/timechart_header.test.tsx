@@ -21,7 +21,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('timechart header', function () {
