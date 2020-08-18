@@ -34,25 +34,20 @@ interface Props {
 
 export const ManageData: FC<Props> = ({ addBasePath, features }) => (
   <>
-    {features.length > 1 ? (
-      <>
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
-        <EuiSpacer size="s" />
-      </>
-    ) : null}
+    {features.length > 1 && <EuiHorizontalRule margin="xl" aria-hidden="true" />}
 
-    <section className="homManageData" aria-labelledby="homManageData__title">
+    <section className="homDataManage" aria-labelledby="homDataManage__title">
       <EuiTitle size="s">
-        <h2 id="homManageData__title">
+        <h2 id="homDataManage__title">
           <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Manage your data" />
         </h2>
       </EuiTitle>
 
-      <EuiSpacer />
+      <EuiSpacer size="m" />
 
-      <EuiFlexGroup className="homManageData__container" justifyContent="spaceAround" wrap>
+      <EuiFlexGroup className="homDataManage__content">
         {features.map((feature) => (
-          <EuiFlexItem className="homHome__synopsisItem" key={feature.id}>
+          <EuiFlexItem key={feature.id}>
             <Synopsis
               id={feature.id}
               onClick={createAppNavigationHandler(feature.path)}

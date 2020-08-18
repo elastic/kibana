@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
   EuiTitle,
@@ -45,37 +44,36 @@ export const SolutionsSection: FC<Props> = ({ solutions }) => {
   const kibana = solutions.find(({ id }) => id === 'kibana');
   solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
 
-  return solutions.length || kibana ? (
-    <section aria-labelledby="homSolutions__title">
-      <EuiScreenReaderOnly>
-        <EuiTitle size="s">
-          <h2 id="homSolutions__title">
-            <FormattedMessage
-              id="home.solutionsSection.sectionTitle"
-              defaultMessage="Pick your solution"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiScreenReaderOnly>
-      <EuiFlexGroup className="homSolutions" justifyContent="spaceAround">
-        {solutions.length ? (
-          <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
-            <EuiFlexGroup direction="column">
-              {solutions.map((solution) => (
-                <SolutionPanel key={solution.id} solution={solution} />
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-        {kibana ? <SolutionPanel solution={kibana} /> : null}
-      </EuiFlexGroup>
+  return (
+    <>
+      <section aria-labelledby="homSolutions__title" className="homSolutions">
+        <EuiScreenReaderOnly>
+          <EuiTitle size="s">
+            <h2 id="homSolutions__title">
+              <FormattedMessage
+                id="home.solutionsSection.sectionTitle"
+                defaultMessage="Pick your solution"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiScreenReaderOnly>
+
+        <EuiFlexGroup className="homSolutions__content" justifyContent="spaceAround">
+          {solutions.length && (
+            <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
+              <EuiFlexGroup direction="column">
+                {solutions.map((solution) => (
+                  <SolutionPanel key={solution.id} solution={solution} />
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {kibana && <SolutionPanel solution={kibana} />}
+        </EuiFlexGroup>
+      </section>
 
       <EuiHorizontalRule margin="xl" aria-hidden="true" />
-
-      <EuiSpacer size="s" />
-    </section>
-  ) : (
-    <EuiSpacer size="xl" />
+    </>
   );
 };
 

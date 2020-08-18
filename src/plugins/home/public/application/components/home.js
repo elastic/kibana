@@ -136,32 +136,34 @@ export class Home extends Component {
     }
 
     return (
-      <main
-        className="homPageContainer"
-        data-test-subj="homeApp"
-        aria-labelledby="homPageHeader__title"
-      >
-        <div className="homPageHeaderContainer">
-          <header className="homPageHeader">
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem className="homPageHeader__titleWrapper">
+      <main aria-labelledby="homHeader__title" className="homWrapper" data-test-subj="homeApp">
+        <header
+          className={`homHeader ${
+            solutions.length ? 'homHeader--hasSolutions' : 'homHeader--noSolutions'
+          }`}
+        >
+          <div className="homHeader__inner">
+            <EuiFlexGroup>
+              <EuiFlexItem>
                 <EuiTitle size="m">
-                  <h1 id="homPageHeader__title">
+                  <h1 id="homHeader__title">
                     <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
-                  <EuiFlexItem className="homPageHeader__menuItem">
+                <EuiFlexGroup className="homHeader__actions">
+                  <EuiFlexItem className="homHeader__actionItem">
                     <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
                       })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
+
                   {stackManagement ? (
-                    <EuiFlexItem className="homPageHeader__menuItem">
+                    <EuiFlexItem className="homHeader__actionItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(stackManagement.path)}
                         iconType="gear"
@@ -172,8 +174,9 @@ export class Home extends Component {
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : null}
+
                   {devTools ? (
-                    <EuiFlexItem className="homPageHeader__menuItem">
+                    <EuiFlexItem className="homHeader__actionItem">
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(devTools.path)}
                         iconType="wrench"
@@ -187,39 +190,34 @@ export class Home extends Component {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </header>
-        </div>
-        <div className="homPageMainContainer">
-          <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
+          </div>
+        </header>
 
-          {/* If there is only one card in each add and manage data section, this displays the two sections side by side */}
-          {addDataFeatures.length === 1 && manageDataFeatures.length === 1 ? (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <AddData addBasePath={addBasePath} features={addDataFeatures} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <>
+        <div className="homContent">
+          {solutions.length && <SolutionsSection addBasePath={addBasePath} solutions={solutions} />}
+
+          <EuiFlexGroup
+            className={`homData ${
+              addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                ? 'homData--compressed'
+                : 'homData--expanded'
+            }`}
+          >
+            <EuiFlexItem>
               <AddData addBasePath={addBasePath} features={addDataFeatures} />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
               <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-            </>
-          )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <footer>
-            <EuiFlexGroup
-              className="homPageFooter"
-              alignItems="center"
-              gutterSize="s"
-              justifyContent="spaceBetween"
-            >
+          <footer className="homFooter">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                {advancedSettings ? (
+                {advancedSettings && (
                   <EuiButtonEmpty
                     iconType="home"
                     onClick={createAppNavigationHandler(
@@ -232,8 +230,9 @@ export class Home extends Component {
                       defaultMessage="Display a different page on log in"
                     />
                   </EuiButtonEmpty>
-                ) : null}
+                )}
               </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="allPlugins"

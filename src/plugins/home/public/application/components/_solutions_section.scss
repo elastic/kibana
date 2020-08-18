@@ -18,7 +18,10 @@
  */
 
 .homSolutions {
-  margin-top: -$euiSizeXL;
+  margin-top: -($euiSizeXL + $euiSizeL + $euiSizeM);
+}
+
+.homSolutions__content {
   min-height: $euiSize * 16;
 
   @include euiBreakpoint('xs', 's') {
@@ -48,8 +51,8 @@
   }
 
   &:focus {
-    @include euiSlightShadowHover;
     @include euiFocusRing('large');
+    @include euiSlightShadowHover;
   }
 }
 

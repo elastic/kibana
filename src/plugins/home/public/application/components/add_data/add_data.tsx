@@ -33,18 +33,19 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, features }) => (
-  <section className="homAddData" aria-labelledby="homAddData__title">
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
+  <section className="homDataAdd" aria-labelledby="homDataAdd__title">
+    <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={1}>
         <EuiTitle size="s">
-          <h2 id="homAddData__title">
+          <h2 id="homDataAdd__title">
             <FormattedMessage id="home.addData.sectionTitle" defaultMessage="Ingest your data" />
           </h2>
         </EuiTitle>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          iconType="tableDensityExpanded"
+          iconType="visTable"
           href="#/tutorial_directory/sampleData"
           size="xs"
           flush="right"
@@ -57,11 +58,11 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => (
       </EuiFlexItem>
     </EuiFlexGroup>
 
-    <EuiSpacer />
+    <EuiSpacer size="m" />
 
-    <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexGroup className="homDataAdd__content">
       {features.map((feature) => (
-        <EuiFlexItem className="homHome__synopsisItem" key={feature.id}>
+        <EuiFlexItem key={feature.id}>
           <Synopsis
             id={feature.id}
             onClick={createAppNavigationHandler(feature.path)}

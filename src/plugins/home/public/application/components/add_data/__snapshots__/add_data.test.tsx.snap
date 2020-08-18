@@ -2,12 +2,11 @@
 
 exports[`AddData render 1`] = `
 <section
-  aria-labelledby="homAddData__title"
-  className="homAddData"
+  aria-labelledby="homDataAdd__title"
+  className="homDataAdd"
 >
   <EuiFlexGroup
-    alignItems="baseline"
-    justifyContent="spaceBetween"
+    alignItems="center"
     responsive={false}
   >
     <EuiFlexItem
@@ -17,7 +16,7 @@ exports[`AddData render 1`] = `
         size="s"
       >
         <h2
-          id="homAddData__title"
+          id="homDataAdd__title"
         >
           <FormattedMessage
             defaultMessage="Ingest your data"
@@ -33,7 +32,7 @@ exports[`AddData render 1`] = `
       <EuiButtonEmpty
         flush="right"
         href="#/tutorial_directory/sampleData"
-        iconType="tableDensityExpanded"
+        iconType="visTable"
         size="xs"
       >
         <FormattedMessage
@@ -44,12 +43,13 @@ exports[`AddData render 1`] = `
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer />
+  <EuiSpacer
+    size="m"
+  />
   <EuiFlexGroup
-    justifyContent="spaceAround"
+    className="homDataAdd__content"
   >
     <EuiFlexItem
-      className="homHome__synopsisItem"
       key="home_tutorial_directory"
     >
       <Synopsis
@@ -64,7 +64,6 @@ exports[`AddData render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      className="homHome__synopsisItem"
       key="ingestManager"
     >
       <Synopsis
@@ -79,7 +78,6 @@ exports[`AddData render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      className="homHome__synopsisItem"
       key="ml_file_data_visualizer"
     >
       <Synopsis

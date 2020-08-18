@@ -1,60 +1,73 @@
-// Local page vars
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+// Local page variables
 $homePageWidth: 1200px;
 
-.homPageContainer {
-  display: flex;
-  height: calc(100vh - #{$euiHeaderHeightCompensation});
-  flex-direction: column;
+.homWrapper {
   background-color: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 }
 
-.homPageHeaderContainer {
+.homHeader {
   background-color: $euiPageBackgroundColor;
-  border-bottom: 1px solid $euiColorLightShade;
+  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
 }
 
-.homPageHeader {
+.homHeader__inner {
   margin: 0 auto;
   max-width: $homePageWidth;
-  padding: $euiSizeXL $euiSize $euiSizeXXL;
+  padding: $euiSizeXL $euiSize;
+
+  .homHeader--hasSolutions & {
+    padding-bottom: $euiSizeXL + $euiSizeL;
+  }
 }
 
-.homPageHeader__titleWrapper {
+#homHeader__title {
   @include euiBreakpoint('xs', 's') {
     text-align: center;
-  }  
-}
-
-.homPageHeader__menu {
-
-  @include euiBreakpoint('xs', 's') {
-    margin-top: 0;
-    
-    .homPageHeader__menuItem {
-      margin-bottom: 0 !important;
-      margin-top: 0 !important;
-    }  
   }
 }
 
-.homPageMainContainer {
-  max-width: $homePageWidth;
+.homHeader__actionItem {
+  @include euiBreakpoint('xs', 's') {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+
+.homContent {
   margin: 0 auto;
-  padding: 0 $euiSize $euiSizeXL;
-  background-color: transparent;
+  max-width: $homePageWidth;
+  padding: $euiSizeXL $euiSize;
+  width: 100%;
 }
 
-.homHome__synopsisItem {
-  max-width: 50%;
-  min-width: $euiSizeL * 9;
+.homData--expanded {
+  flex-direction: column;
 
-  @include euiBreakpoint('xs', 's') {
-    max-width: 100%;
-  }
-}
-
-.homPageFooter__mainAction {
-  @include euiBreakpoint('xs', 's') {
-    flex-direction: column;
+  &,
+  & > * {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
   }
 }
