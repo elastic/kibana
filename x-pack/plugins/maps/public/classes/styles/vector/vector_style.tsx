@@ -322,7 +322,12 @@ export class VectorStyle implements IVectorStyle {
         return;
       }
 
-      updatedProperties[key] = { ...dynamicProperty } as any;
+      updatedProperties[key] = {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...originalProperties[key]!.options,
+        },
+      } as any;
       // @ts-expect-error
       delete updatedProperties[key].options.field;
     });
