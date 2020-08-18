@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         _id: 'zeek-sensor-san-francisco',
         endpoint: null,
         agent: {
-          id: [AGENT_ID],
+          id: AGENT_ID,
           __typename: 'AgentFields',
         },
         host: {
