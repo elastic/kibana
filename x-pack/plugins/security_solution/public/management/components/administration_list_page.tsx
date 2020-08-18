@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FC } from 'react';
+import React, { FC, memo } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { WrapperPage } from '../../common/components/wrapper_page';
@@ -21,50 +21,45 @@ interface AdministrationListPageProps {
   actions?: React.ReactNode;
 }
 
-export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = ({
-  beta,
-  title,
-  subtitle,
-  actions,
-  children,
-  ...otherProps
-}) => {
-  const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
+export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
+  ({ beta, title, subtitle, actions, children, ...otherProps }) => {
+    const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
-  return (
-    <WrapperPage noTimeline {...otherProps}>
-      <HeaderPage title={title} subtitle={subtitle} badgeOptions={badgeOptions}>
-        {actions}
-      </HeaderPage>
+    return (
+      <WrapperPage noTimeline {...otherProps}>
+        <HeaderPage title={title} subtitle={subtitle} badgeOptions={badgeOptions}>
+          {actions}
+        </HeaderPage>
 
-      <SiemNavigation
-        navTabs={{
-          [AdministrationSubTab.endpoints]: {
-            name: ENDPOINTS_TAB,
-            id: AdministrationSubTab.endpoints,
-            href: getEndpointListPath({ name: 'endpointList' }),
-            urlKey: 'administration',
-            pageId: SecurityPageName.administration,
-            disabled: false,
-          },
-          [AdministrationSubTab.trustedApps]: {
-            name: TRUSTED_APPS_TAB,
-            id: AdministrationSubTab.trustedApps,
-            href: getTrustedAppsListPath(),
-            urlKey: 'administration',
-            pageId: SecurityPageName.administration,
-            disabled: false,
-          },
-        }}
-      />
+        <SiemNavigation
+          navTabs={{
+            [AdministrationSubTab.endpoints]: {
+              name: ENDPOINTS_TAB,
+              id: AdministrationSubTab.endpoints,
+              href: getEndpointListPath({ name: 'endpointList' }),
+              urlKey: 'administration',
+              pageId: SecurityPageName.administration,
+              disabled: false,
+            },
+            [AdministrationSubTab.trustedApps]: {
+              name: TRUSTED_APPS_TAB,
+              id: AdministrationSubTab.trustedApps,
+              href: getTrustedAppsListPath(),
+              urlKey: 'administration',
+              pageId: SecurityPageName.administration,
+              disabled: false,
+            },
+          }}
+        />
 
-      <EuiSpacer />
+        <EuiSpacer />
 
-      <EuiPanel>{children}</EuiPanel>
+        <EuiPanel>{children}</EuiPanel>
 
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </WrapperPage>
-  );
-};
+        <SpyRoute pageName={SecurityPageName.administration} />
+      </WrapperPage>
+    );
+  }
+);
 
 AdministrationListPage.displayName = 'AdministrationListPage';
