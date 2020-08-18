@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useActions, useValues } from 'kea';
+
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -19,13 +21,38 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { CredentialsList } from './credentials_list';
+import { CredentialsFlyout } from './credentials_flyout';
+import {
+  CredentialsLogic,
+  ICredentialsLogicActions,
+  ICredentialsLogicValues,
+} from './credentials_logic';
 
 export const Credentials: React.FC = () => {
+  const { initializeCredentialsData, resetCredentials, toggleCredentialsForm } = useActions(
+    CredentialsLogic
+  ) as ICredentialsLogicActions;
+
+  const { meta, apiUrl, dataLoading, showCredentialsForm } = useValues(
+    CredentialsLogic
+  ) as ICredentialsLogicValues;
+
+  useEffect(() => {
+    initializeCredentialsData();
+    return resetCredentials;
+  }, []);
+
+  // TODO
+  // if (dataLoading) { return <Loading /> }
+  if (dataLoading) {
+    return null;
+  }
   return (
     <>
-      {/* TODO <SetPageChrome isRoot /> */}
-      {/* <SendTelemetry action="viewed" metric="engines_overview" /> */}
+      <SetPageChrome isRoot />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
@@ -39,6 +66,7 @@ export const Credentials: React.FC = () => {
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContentBody>
+        {showCredentialsForm && <CredentialsFlyout />}
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiPanel style={{ textAlign: 'center' }}>
@@ -50,11 +78,28 @@ export const Credentials: React.FC = () => {
                   />
                 </h2>
               </EuiTitle>
-              <EuiCopy textToCopy="http://www.example.com" afterMessage="Copied">
+              <EuiCopy
+                textToCopy={apiUrl}
+                afterMessage={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.credentials.copied',
+                  {
+                    defaultMessage: 'Copied',
+                  }
+                )}
+              >
                 {(copy) => (
                   <div>
-                    <EuiButtonIcon onClick={copy} iconType="copyClipboard" />
-                    <span>http://www.example.com</span>
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.appSearch.credentials.copyApiEndpoint',
+                        {
+                          defaultMessage: 'Copy API Endpoint to clipboard',
+                        }
+                      )}
+                    />
+                    <span>{apiUrl}</span>
                   </div>
                 )}
               </EuiCopy>
@@ -78,9 +123,12 @@ export const Credentials: React.FC = () => {
               color="primary"
               data-test-subj="CreateAPIKeyButton"
               fill={true}
-              onClick={() => window.alert(`create a new key`)}
+              onClick={() => toggleCredentialsForm()}
             >
-              Create a Key
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.credentials.createKey"
+                defaultMessage="Create a Key"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

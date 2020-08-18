@@ -30,3 +30,42 @@ export interface IConfiguredLimits {
     maxEnginesPerMetaEngine: number;
   };
 }
+
+export interface IApiToken {
+  access_all_engines?: boolean;
+  key?: string;
+  engines?: string[];
+  id?: number;
+  name: string;
+  read?: boolean;
+  type: string;
+  write?: boolean;
+}
+
+export interface IMetaPage {
+  current: number;
+  size: number;
+  total_pages: number;
+  total_results: number;
+}
+
+export interface IMeta {
+  page: IMetaPage;
+}
+
+export interface IEngine {
+  name: string;
+  type: string;
+  language: string;
+  result_fields: object[];
+}
+
+export interface ICredentialsDetails {
+  lmAccount: {
+    id: string;
+    key: string;
+  };
+  apiUrl: string;
+  apiTokens: IApiToken[];
+  engines: IEngine[];
+}

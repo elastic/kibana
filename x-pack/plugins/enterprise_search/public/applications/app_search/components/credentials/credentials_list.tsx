@@ -6,9 +6,81 @@
 
 import React from 'react';
 import { EuiBasicTable, EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+
+import { i18n } from '@kbn/i18n';
 import { HiddenText } from '../../../shared/hidden_text';
 
-export const CredentialsList: React.FC<{}> = () => {
+import {
+  CredentialsLogic,
+  ICredentialsLogicActions,
+  ICredentialsLogicValues,
+  apiTokenSort,
+} from './credentials_logic';
+import { TOKEN_TYPE_DISPLAY_NAMES, ADMIN, SEARCH } from '../../constants/credentials';
+import { IApiToken } from '../../../../../common/types/app_search';
+
+const ALL = 'all';
+const READ_WRITE = 'read/write';
+const READ_ONLY = 'read-only';
+const WRITE_ONLY = 'write-only';
+
+const getModeDisplayText = (apiToken) => {
+  const { read = false, write = false, type } = apiToken;
+
+  switch (type) {
+    case ADMIN:
+      return '--';
+    case SEARCH:
+      return 'search';
+    default:
+      if (read && write) {
+        return READ_WRITE;
+      }
+      return write ? WRITE_ONLY : READ_ONLY;
+  }
+};
+
+const getEnginesDisplayText = (apiToken) => {
+  const { type, access_all_engines: accessAll, engines = [] } = apiToken;
+  const engineList = () => (
+    <ul className="credentials-engine-list">
+      {engines.map((engine) => (
+        <li key={engine} className="credentials-engine-list__engine">
+          {engine}
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (type === ADMIN) {
+    return '--';
+  }
+  return accessAll ? ALL : engineList();
+};
+
+export const CredentialsList: React.FC = () => {
+  const { deleteApiKey, fetchCredentials, toggleCredentialsForm } = useActions(
+    CredentialsLogic
+  ) as ICredentialsLogicActions;
+
+  const { apiTokens, meta } = useValues(CredentialsLogic) as ICredentialsLogicValues;
+
+  const items = apiTokens.slice().sort(apiTokenSort);
+  const pagination = {
+    pageIndex: meta.page.current - 1,
+    pageSize: meta.page.size,
+    totalItemCount: meta.page.total_results,
+    hidePerPageOptions: true,
+  };
+
+  const onTableChange = ({ page }: CriteriaWithPagination<IApiToken>) => {
+    const { index: current } = page;
+    fetchCredentials(current + 1);
+  };
+
+  // TODO StuiEmptyState from ent-search
   return (
     <EuiBasicTable
       columns={[
@@ -23,7 +95,7 @@ export const CredentialsList: React.FC<{}> = () => {
           name: 'Type',
           width: '18%',
           render: (item) => {
-            return <div>{item.type}</div>;
+            return <div>{TOKEN_TYPE_DISPLAY_NAMES[item.type]}</div>;
           },
         },
         {
@@ -31,15 +103,41 @@ export const CredentialsList: React.FC<{}> = () => {
           width: '43%',
           render: (item) => {
             return (
-              <EuiCopy textToCopy={item.key} afterMessage="Copied">
+              <EuiCopy
+                textToCopy={item.key}
+                afterMessage={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.credentials.copied',
+                  {
+                    defaultMessage: 'Copied',
+                  }
+                )}
+              >
                 {(copy) => (
                   <HiddenText text={item.key}>
                     {({ hiddenText, isHidden, toggle }) => {
                       const icon = isHidden ? 'eye' : 'eyeClosed';
                       return (
                         <div>
-                          <EuiButtonIcon onClick={() => copy()} iconType="copyClipboard" />
-                          <EuiButtonIcon onClick={toggle} iconType={icon} />
+                          <EuiButtonIcon
+                            onClick={() => copy()}
+                            iconType="copyClipboard"
+                            aria-label={i18n.translate(
+                              'xpack.enterpriseSearch.appSearch.credentials.copyApiKey',
+                              {
+                                defaultMessage: 'Copy API Key to clipboard',
+                              }
+                            )}
+                          />
+                          <EuiButtonIcon
+                            onClick={toggle}
+                            iconType={icon}
+                            aria-label={i18n.translate(
+                              'xpack.enterpriseSearch.appSearch.credentials.toggleApiEndpoint',
+                              {
+                                defaultMessage: 'Toggle API key visibility',
+                              }
+                            )}
+                          />
                           {hiddenText}
                         </div>
                       );
@@ -54,21 +152,27 @@ export const CredentialsList: React.FC<{}> = () => {
           name: 'Modes',
           width: '10%',
           render: (item) => {
-            return <div>{item.modes}</div>;
+            return <div>{getModeDisplayText(item)}</div>;
           },
         },
         {
           name: 'Engines',
           width: '10%',
           render: (item) => {
-            return <div>{item.engines}</div>;
+            return <div>{getEnginesDisplayText(item)}</div>;
           },
         },
         {
           width: '4%',
           render: (item) => {
             return (
-              <EuiButtonIcon onClick={() => window.alert(`edit ${item.id}`)} iconType="pencil" />
+              <EuiButtonIcon
+                onClick={() => toggleCredentialsForm(item)}
+                iconType="pencil"
+                aria-label={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.editKey', {
+                  defaultMessage: 'Edit API Key',
+                })}
+              />
             );
           },
         },
@@ -76,21 +180,23 @@ export const CredentialsList: React.FC<{}> = () => {
           width: '4%',
           render: (item) => {
             return (
-              <EuiButtonIcon onClick={() => window.alert(`delete ${item.id}`)} iconType="trash" />
+              <EuiButtonIcon
+                onClick={() => item.name && deleteApiKey(item.name)}
+                iconType="trash"
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.credentials.deleteKey',
+                  {
+                    defaultMessage: 'Delete API Key',
+                  }
+                )}
+              />
             );
           },
         },
       ]}
-      items={[
-        {
-          id: 'id',
-          name: 'private-key',
-          type: 'Private API Key',
-          key: 'private-hdh25f2eozpsfttm47hjrch9',
-          modes: 'read/write',
-          engines: 'all',
-        },
-      ]}
+      items={items}
+      pagination={pagination}
+      onChange={onTableChange}
     />
   );
 };
