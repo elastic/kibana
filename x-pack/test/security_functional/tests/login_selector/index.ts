@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security app - trial license', function () {
+  describe('security app - login selector', function () {
     this.tags('ciGroup4');
 
-    loadTestFile(require.resolve('./login_selector'));
+    loadTestFile(require.resolve('./basic_functionality'));
   });
 }

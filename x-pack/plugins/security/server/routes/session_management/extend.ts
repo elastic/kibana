@@ -7,26 +7,9 @@
 import { RouteDefinitionParams } from '..';
 
 /**
- * Defines routes required for all authentication realms.
+ * Defines routes required for the session extension.
  */
-export function defineSessionRoutes({ router, logger, authc, basePath }: RouteDefinitionParams) {
-  router.get(
-    {
-      path: '/internal/security/session',
-      validate: false,
-    },
-    async (_context, request, response) => {
-      try {
-        const sessionInfo = await authc.getSessionInfo(request);
-        // This is an authenticated request, so sessionInfo will always be non-null.
-        return response.ok({ body: sessionInfo! });
-      } catch (err) {
-        logger.error(`Error retrieving user session: ${err.message}`);
-        return response.internalError();
-      }
-    }
-  );
-
+export function defineSessionExtendRoutes({ router, basePath }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/session',
