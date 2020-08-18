@@ -20,6 +20,7 @@ const VECTOR_SOURCE_ID = 'n1t6f';
 const CIRCLE_STYLE_LAYER_INDEX = 0;
 const FILL_STYLE_LAYER_INDEX = 2;
 const LINE_STYLE_LAYER_INDEX = 3;
+const TOO_MANY_FEATURES_LAYER_INDEX = 4;
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
@@ -86,7 +87,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    it('should style fills, points and lines independently', async () => {
+    it('should style fills, points, lines, and bounding-boxes independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       const layersForVectorSource = mapboxStyle.layers.filter((mbLayer) => {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
@@ -100,6 +101,18 @@ export default function ({ getPageObjects, getService }) {
 
       //line layer for borders
       expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.LINE_LAYER);
+
+      //Too many features layer (this is a static style config)
+      expect(layersForVectorSource[TOO_MANY_FEATURES_LAYER_INDEX]).to.eql({
+        id: 'n1t6f_toomanyfeatures',
+        type: 'fill',
+        source: 'n1t6f',
+        minzoom: 0,
+        maxzoom: 24,
+        filter: ['==', ['get', '__kbn_too_many_features__'], true],
+        layout: { visibility: 'visible' },
+        paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
+      });
     });
 
     it('should flag only the joined features as visible', async () => {
