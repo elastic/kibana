@@ -15,8 +15,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const retry = getService('retry');
-
   describe('telemetry collectors', () => {
     before('generating data', async () => {
       await getService('esArchiver').load('uptime/blank');
