@@ -27,57 +27,39 @@ project {
     name = "OSS Distro"
 
     buildType(OssBuild)
-    buildType(OssVisualRegression)
-    val ciGroups = (1..12).map { OssCiGroup(it) }
-    ciGroups.forEach { buildType(it) }
 
-    sequential {
-      buildType(OssBuild)
-      parallel (options = {
-        onDependencyFailure = FailureAction.CANCEL
-        onDependencyCancel = FailureAction.CANCEL
-        synchronizeRevisions = true
-        reuseBuilds = ReuseBuilds.SUCCESSFUL
-      }) {
+    subProject {
+      id("OSS_Functional")
+      name = "Functional"
 
-        buildType(OssVisualRegression)
+      val ciGroups = (1..12).map { OssCiGroup(it) }
+
+      buildType {
+        id("CIGroups_Composite")
+        name = "CI Groups"
+        type = BuildTypeSettings.Type.COMPOSITE
+
+        dependencies {
+          for (ciGroup in ciGroups) {
+            snapshot(ciGroup) {
+              reuseBuilds = ReuseBuilds.SUCCESSFUL
+              onDependencyCancel = FailureAction.CANCEL
+              onDependencyFailure = FailureAction.CANCEL
+              synchronizeRevisions = true
+            }
+          }
+        }
+      }
+
+      buildType(OssVisualRegression)
+
+      subProject {
+        id("CIGroups")
+        name = "CI Groups"
+
+        for (ciGroup in ciGroups) buildType(ciGroup)
       }
     }
-
-//    buildType(OssBuild)
-//
-//    subProject {
-//      id("OSS_Functional")
-//      name = "Functional"
-//
-//      val ciGroups = (1..12).map { OssCiGroup(it) }
-//
-//      buildType {
-//        id("CIGroups_Composite")
-//        name = "CI Groups"
-//        type = BuildTypeSettings.Type.COMPOSITE
-//
-//        dependencies {
-//          for (ciGroup in ciGroups) {
-//            snapshot(ciGroup) {
-//              reuseBuilds = ReuseBuilds.SUCCESSFUL
-//              onDependencyCancel = FailureAction.CANCEL
-//              onDependencyFailure = FailureAction.CANCEL
-//              synchronizeRevisions = true
-//            }
-//          }
-//        }
-//      }
-//
-//      buildType(OssVisualRegression)
-//
-//      subProject {
-//        id("CIGroups")
-//        name = "CI Groups"
-//
-//        for (ciGroup in ciGroups) buildType(ciGroup)
-//      }
-//    }
   }
 
   subProject {
