@@ -39,7 +39,6 @@ module.exports = {
     '@kbn/ui-framework/dist/kui_light.css',
     '@storybook/addon-info',
     '@storybook/addon-knobs',
-    '@storybook/addon-knobs/react',
     '@storybook/addon-knobs/register',
     '@storybook/addon-options',
     '@storybook/addon-options/register',
