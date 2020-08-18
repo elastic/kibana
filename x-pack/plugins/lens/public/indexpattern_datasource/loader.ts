@@ -46,10 +46,9 @@ export async function loadIndexPatterns({
   }
 
   const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
-
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
-      const newFields = indexPattern.fields
+      const newFields = (indexPattern.fields as IndexPatternField[])
         .filter(
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
@@ -68,7 +67,7 @@ export async function loadIndexPatterns({
         )
         .concat(documentField);
 
-      const { typeMeta } = indexPattern;
+      const { typeMeta, title, timeFieldName, fieldFormatMap } = indexPattern;
       if (typeMeta?.aggs) {
         const aggs = Object.keys(typeMeta.aggs);
         newFields.forEach((field, index) => {
@@ -86,10 +85,13 @@ export async function loadIndexPatterns({
         });
       }
 
-      const currentIndexPattern = {
-        ...indexPattern,
+      const currentIndexPattern: IndexPattern = {
+        id: indexPattern.id!, // id exists for sure because we got index patterns by id
+        title,
+        timeFieldName,
+        fieldFormatMap,
         fields: newFields,
-      } as IndexPattern;
+      };
 
       return {
         [currentIndexPattern.id]: currentIndexPattern,
