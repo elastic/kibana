@@ -15,12 +15,6 @@ describe('Enterprise Search URL helper', () => {
     expect(await getPublicUrl(httpMock)).toEqual('http://some.vanity.url');
   });
 
-  it('strips trailing slashes', async () => {
-    httpMock.get.mockImplementationOnce(() => ({ publicUrl: 'http://trailing.slash/' }));
-
-    expect(await getPublicUrl(httpMock)).toEqual('http://trailing.slash');
-  });
-
   // For the most part, error logging/handling is done on the server side.
   // On the front-end, we should simply gracefully fall back to config.host
   // if we can't fetch a public URL

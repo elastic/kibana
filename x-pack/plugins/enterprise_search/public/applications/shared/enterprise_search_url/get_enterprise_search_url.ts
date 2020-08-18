@@ -6,6 +6,8 @@
 
 import { HttpSetup } from 'src/core/public';
 
+import { stripTrailingSlash } from '../../../../common/strip_trailing_slash';
+
 /**
  * On Elastic Cloud, the host URL set in kibana.yml is not necessarily the same
  * URL we want to send users to in the front-end (e.g. if a vanity URL is set).
@@ -20,8 +22,4 @@ export const getPublicUrl = async (http: HttpSetup): Promise<string> => {
   } catch {
     return '';
   }
-};
-
-const stripTrailingSlash = (url: string): string => {
-  return url.endsWith('/') ? url.slice(0, -1) : url;
 };
