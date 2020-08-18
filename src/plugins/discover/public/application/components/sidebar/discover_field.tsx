@@ -167,44 +167,42 @@ export function DiscoverField({
   }
 
   return (
-    <>
-      <EuiPopover
-        ownFocus
-        display="block"
-        button={
-          <FieldButton
-            size="s"
-            className="dscSidebarItem"
-            isActive={infoIsOpen}
-            onClick={() => {
-              togglePopover();
-            }}
-            buttonProps={{ 'data-test-subj': `field-${field.name}-showDetails` }}
-            fieldIcon={dscFieldIcon}
-            fieldAction={actionButton}
-            fieldName={fieldName}
-          />
-        }
-        isOpen={infoIsOpen}
-        closePopover={() => setOpen(false)}
-        anchorPosition="rightUp"
-        panelClassName="dscSidebarItem__fieldPopoverPanel"
-      >
-        <EuiPopoverTitle>
-          {' '}
-          {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-            defaultMessage: 'Top 5 values',
-          })}
-        </EuiPopoverTitle>
-        {infoIsOpen && (
-          <DiscoverFieldDetails
-            indexPattern={indexPattern}
-            field={field}
-            details={getDetails(field)}
-            onAddFilter={onAddFilter}
-          />
-        )}
-      </EuiPopover>
-    </>
+    <EuiPopover
+      ownFocus
+      display="block"
+      button={
+        <FieldButton
+          size="s"
+          className="dscSidebarItem"
+          isActive={infoIsOpen}
+          onClick={() => {
+            togglePopover();
+          }}
+          buttonProps={{ 'data-test-subj': `field-${field.name}-showDetails` }}
+          fieldIcon={dscFieldIcon}
+          fieldAction={actionButton}
+          fieldName={fieldName}
+        />
+      }
+      isOpen={infoIsOpen}
+      closePopover={() => setOpen(false)}
+      anchorPosition="rightUp"
+      panelClassName="dscSidebarItem__fieldPopoverPanel"
+    >
+      <EuiPopoverTitle>
+        {' '}
+        {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+          defaultMessage: 'Top 5 values',
+        })}
+      </EuiPopoverTitle>
+      {infoIsOpen && (
+        <DiscoverFieldDetails
+          indexPattern={indexPattern}
+          field={field}
+          details={getDetails(field)}
+          onAddFilter={onAddFilter}
+        />
+      )}
+    </EuiPopover>
   );
 }
