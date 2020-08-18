@@ -283,6 +283,16 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       script="doc.test.value"
     />
     <eui-form-row
+      label="Display Name"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldDisplayName"
+        onChange={[Function]}
+        placeholder="test"
+        value=""
+      />
+    </eui-form-row>
+    <eui-form-row
       helpText={null}
       label="Language"
     >
@@ -381,7 +391,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -504,8 +514,10 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       indexPattern={
         Object {
           "fields": Object {
+            "add": [MockFunction],
             "getAll": [Function],
             "getByName": [Function],
+            "update": [MockFunction],
           },
           "getFormatterForField": [Function],
         }
@@ -777,8 +789,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       indexPattern={
         Object {
           "fields": Object {
+            "add": [MockFunction],
             "getAll": [Function],
             "getByName": [Function],
+            "update": [MockFunction],
           },
           "getFormatterForField": [Function],
         }
@@ -1102,8 +1116,10 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       indexPattern={
         Object {
           "fields": Object {
+            "add": [MockFunction],
             "getAll": [Function],
             "getByName": [Function],
+            "update": [MockFunction],
           },
           "getFormatterForField": [Function],
         }
