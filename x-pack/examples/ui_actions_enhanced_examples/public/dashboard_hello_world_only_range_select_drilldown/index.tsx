@@ -56,6 +56,11 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
     return !!config.name;
   };
 
+  isCompatible(config: Config, context: RangeSelectContext): Promise<boolean> {
+    if (context.data.range.length === 0) return Promise.resolve(false);
+    return Promise.resolve(true);
+  }
+
   public readonly execute = async (config: Config, context: RangeSelectContext) => {
     alert(`Hello, ${config.name}, your selected range: ${JSON.stringify(context.data.range)}`);
   };

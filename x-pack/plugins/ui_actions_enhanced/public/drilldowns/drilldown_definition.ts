@@ -8,6 +8,7 @@ import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_ac
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { ActionDefinition } from '../../../../../src/plugins/ui_actions/public/actions';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -105,6 +106,15 @@ export interface DrilldownDefinition<
    * displayed to the user.
    */
   getDisplayName: () => string;
+
+  /**
+   * isCompatible during execution
+   * Could be used to prevent drilldown from execution
+   */
+  isCompatible?(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): Promise<boolean>;
 
   /**
    * Implements the "navigation" action of the drilldown. This happens when
