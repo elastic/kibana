@@ -102,6 +102,7 @@ export class ESSearchSource extends AbstractESSource {
     return new ESDocField({
       fieldName,
       source: this,
+      canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
   }
 
