@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce, compact, isEqual } from 'lodash';
+import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
@@ -459,6 +459,9 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.handleBlurHeight();
     if (this.props.onChangeQueryInputFocus) {
       this.props.onChangeQueryInputFocus(false);
+    }
+    if (isFunction(this.props.onBlur)) {
+      this.props.onBlur();
     }
   };
 

@@ -51,6 +51,8 @@ export class MapsAppView extends React.Component {
       initialized: false,
       savedQuery: '',
       initialLayerListConfig: null,
+      // tracking originatingApp in state so the connection can be broken by users
+      originatingApp: props.originatingApp,
     };
   }
 
@@ -103,7 +105,15 @@ export class MapsAppView extends React.Component {
   }
 
   _hasUnsavedChanges() {
-    return this.props.hasUnsavedChanges(this.props.savedMap, this.state.initialLayerListConfig);
+    const savedLayerList = this.props.savedMap.getLayerList();
+    return !savedLayerList
+      ? !_.isEqual(this.props.layerListConfigOnly, this.state.initialLayerListConfig)
+      : // savedMap stores layerList as a JSON string using JSON.stringify.
+        // JSON.stringify removes undefined properties from objects.
+        // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+        // Need to perform the same process for layerListConfigOnly to compare apples to apples
+        // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+        !_.isEqual(JSON.parse(JSON.stringify(this.props.layerListConfigOnly)), savedLayerList);
   }
 
   _setBreadcrumbs = () => {
@@ -132,7 +142,7 @@ export class MapsAppView extends React.Component {
       return;
     }
 
-    this._onQueryChange({ time: globalState.time, refresh: true });
+    this._onQueryChange({ time: globalState.time });
   };
 
   async _updateIndexPatterns() {
@@ -150,7 +160,7 @@ export class MapsAppView extends React.Component {
     }
   }
 
-  _onQueryChange = ({ filters, query, time, refresh = false }) => {
+  _onQueryChange = ({ filters, query, time, forceRefresh = false }) => {
     const { filterManager } = getData().query;
 
     if (filters) {
@@ -158,7 +168,7 @@ export class MapsAppView extends React.Component {
     }
 
     this.props.dispatchSetQuery({
-      refresh,
+      forceRefresh,
       filters: filterManager.getFilters(),
       query,
       timeFilters: time,
@@ -303,11 +313,15 @@ export class MapsAppView extends React.Component {
       savedMap: this.props.savedMap,
       isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
       isSaveDisabled: this.props.isSaveDisabled,
-      closeFlyout: this.props.closeFlyout,
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
       setBreadcrumbs: this._setBreadcrumbs,
+      stateTransfer: this.props.stateTransfer,
+      originatingApp: this.state.originatingApp,
+      cutOriginatingAppConnection: () => {
+        this.setState({ originatingApp: undefined });
+      },
     });
 
     const { TopNavMenu } = getNavigation().ui;
@@ -322,7 +336,7 @@ export class MapsAppView extends React.Component {
           this._onQueryChange({
             query,
             time: dateRange,
-            refresh: true,
+            forceRefresh: true,
           });
         }}
         onFiltersUpdated={this._onFiltersChange}
@@ -356,22 +370,20 @@ export class MapsAppView extends React.Component {
     );
   }
 
-  render() {
-    const { filters, isFullScreen } = this.props;
+  _addFilter = (newFilters) => {
+    newFilters.forEach((filter) => {
+      filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+    });
+    this._onFiltersChange([...this.props.filters, ...newFilters]);
+  };
 
+  render() {
     return this.state.initialized ? (
-      <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
+      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
-          <MapContainer
-            addFilters={(newFilters) => {
-              newFilters.forEach((filter) => {
-                filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
-              });
-              this._onFiltersChange([...filters, ...newFilters]);
-            }}
-          />
+          <MapContainer addFilters={this._addFilter} />
         </div>
       </div>
     ) : null;
