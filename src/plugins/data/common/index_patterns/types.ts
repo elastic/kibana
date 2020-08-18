@@ -54,6 +54,7 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
+  attributes?: { [key: string]: unknown };
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;

@@ -18,6 +18,7 @@
  */
 
 import { IndexPattern, IndexPatternField, FieldFormatInstanceType } from 'src/plugins/data/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -55,11 +56,6 @@ jest.mock('../../scripting_languages', () => ({
   getEnabledScriptingLanguages: () => ['painless', 'testlang'],
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
-}));
-
-jest.mock('./lib', () => ({
-  isScriptValid: () => Promise.resolve(true),
-  executeScript: () => Promise.resolve({}),
 }));
 
 jest.mock('./components/scripting_call_outs', () => ({
@@ -128,6 +124,35 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (field as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
+    );
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render edit scripted field correctly', async () => {
+    const testField = {
+      ...field,
+      name: 'test',
+      script: 'doc.test.value',
+    };
+    fieldList.push(testField as IndexPatternField);
+    indexPattern.fields.getByName = (name) => {
+      const flds = {
+        [testField.name]: testField,
+      };
+      return flds[name] as IndexPatternField;
+    };
+
+    const component = createComponentWithContext<FieldEdiorProps>(
+      FieldEditor,
+      {
+        indexPattern,
+        spec: (testField as unknown) as IndexPatternField,
         services: { redirectAway: () => {} },
       },
       mockContext
