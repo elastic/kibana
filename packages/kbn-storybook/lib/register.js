@@ -17,7 +17,17 @@
  * under the License.
  */
 
-import '@storybook/addon-options/register';
-import '@storybook/addon-actions/register';
-import '@storybook/addon-knobs/register';
-import '@storybook/addon-console';
+const { addons } = require('@storybook/addons');
+const { create } = require('@storybook/theming');
+
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Kibana Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/kbn-storybook',
+  }),
+  showPanel: false,
+  isFullscreen: false,
+  panelPosition: 'bottom',
+  isToolshown: true,
+});

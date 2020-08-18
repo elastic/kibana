@@ -20,6 +20,7 @@
 import { join } from 'path';
 import { run, createFlagError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/dev-utils';
+import { runStorybookCli } from '@kbn/storybook';
 import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';
 
@@ -48,12 +49,11 @@ run(
     }
 
     const relative = (storybookAliases as any)[alias];
-    const absolute = join(REPO_ROOT, relative);
+    const configDir = join(REPO_ROOT, relative);
 
-    log.verbose('Loading Storybook:', absolute);
-    process.chdir(join(absolute, '..', '..'));
+    log.verbose('Loading Storybook:', configDir);
 
-    require(absolute);
+    runStorybookCli({ configDir, name: alias });
   },
   {
     usage: `node scripts/storybook <alias>`,

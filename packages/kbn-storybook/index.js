@@ -17,27 +17,29 @@
  * under the License.
  */
 
-const fs = require('fs');
+//const fs = require('fs');
 const { join } = require('path');
-const Rx = require('rxjs');
-const { first } = require('rxjs/operators');
+//const Rx = require('rxjs');
+//const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
 const { run } = require('@kbn/dev-utils');
-const { generateStorybookEntry } = require('./lib/storybook_entry');
-const { ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
+//const { generateStorybookEntry } = require('./lib/storybook_entry');
+//const { ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
+const { ASSET_DIR } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
-exports.runStorybookCli = (config) => {
-  const { name, storyGlobs } = config;
+exports.defaultConfig = require('./storybook_config/main');
+
+exports.runStorybookCli = ({ configDir, name }) => {
   run(
     async ({ flags, log, procRunner }) => {
       log.debug('Global config:\n', require('./lib/constants'));
 
-      const currentConfig = JSON.stringify(config, null, 2);
-      const currentConfigDir = join(CURRENT_CONFIG, '..');
-      await fs.promises.mkdir(currentConfigDir, { recursive: true });
-      log.debug('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
-      await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
+      // const currentConfig = JSON.stringify(config, null, 2);
+      //const currentConfigDir = join(CURRENT_CONFIG, '..');
+      // await fs.promises.mkdir(currentConfigDir, { recursive: true });
+      // log.debug('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
+      //  await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
 
       await buildDll({
         rebuildDll: flags.rebuildDll,
@@ -45,35 +47,35 @@ exports.runStorybookCli = (config) => {
         procRunner,
       });
 
-      const subj = new Rx.ReplaySubject(1);
-      generateStorybookEntry({ log, storyGlobs }).subscribe(subj);
+      // const subj = new Rx.ReplaySubject(1);
+      // generateStorybookEntry({ log, storyGlobs }).subscribe(subj);
 
-      await subj.pipe(first()).toPromise();
+      // await subj.pipe(first()).toPromise();
 
-      await Promise.all([
-        // route errors
-        subj.toPromise(),
+      // await Promise.all([
+      //   // route errors
+      //   subj.toPromise(),
 
-        new Promise(async () => {
-          // storybook never completes, so neither will this promise
-          const configDir = join(__dirname, 'storybook_config');
-          log.debug('Config dir:', configDir);
+      //   new Promise(async () => {
+      //     // storybook never completes, so neither will this promise
+      //     const configDir = join(__dirname, 'storybook_config');
+      //     log.debug('Config dir:', configDir);
 
-          const config = {
-            mode: flags.site ? 'static' : 'dev',
-            port: 9001,
-            configDir,
-          };
-          if (flags.site) {
-            config.outputDir = join(ASSET_DIR, name);
-          }
+      const config = {
+        mode: flags.site ? 'static' : 'dev',
+        port: 9001,
+        configDir,
+      };
+      if (flags.site) {
+        config.outputDir = join(ASSET_DIR, name);
+      }
 
-          await storybook(config);
+      await storybook(config);
 
-          // Line is only reached when building the static version
-          if (flags.site) process.exit();
-        }),
-      ]);
+      // Line is only reached when building the static version
+      if (flags.site) process.exit();
+      // }),
+      // ]);
     },
     {
       flags: {

@@ -124,7 +124,9 @@ module.exports = async ({ config: storybookConfig }) => {
 
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
-  const cssRule = storybookConfig.module.rules.find((rule) => rule.test.source.includes('.css$'));
+  const cssRule = storybookConfig.module.rules.find((rule) =>
+    rule.test.source.includes('.css$')
+  ) || { use: [] };
   cssRule.use.push({
     loader: 'string-replace-loader',
     options: {
