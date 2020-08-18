@@ -7,7 +7,6 @@
 import { EuiAccordionProps, EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { groupBy } from 'lodash';
 import React, { useState } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
@@ -60,6 +59,7 @@ const WaterfallItemsContainer = styled.div<{
   paddingTop: number;
 }>`
   padding-top: ${(props) => px(props.paddingTop)};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
 interface Props {

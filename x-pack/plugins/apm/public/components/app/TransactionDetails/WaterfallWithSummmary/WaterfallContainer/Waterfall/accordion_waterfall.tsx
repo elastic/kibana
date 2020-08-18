@@ -63,6 +63,8 @@ const StyledAccordion = styled(EuiAccordion)<
       position: absolute;
       left: 20px;
       top: -3px;
+      z-index: 1;
+      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
     }
   }
 
