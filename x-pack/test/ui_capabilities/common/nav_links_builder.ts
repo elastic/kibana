@@ -5,7 +5,7 @@
  */
 import { Features } from './features';
 
-type buildCallback = (featureId: string) => boolean;
+type BuildCallback = (featureId: string) => boolean;
 export class NavLinksBuilder {
   private readonly features: Features;
   constructor(features: Features) {
@@ -38,7 +38,7 @@ export class NavLinksBuilder {
     return this.build((featureId) => feature.includes(featureId));
   }
 
-  private build(callback: buildCallback): Record<string, boolean> {
+  private build(callback: BuildCallback): Record<string, boolean> {
     const navLinks = {} as Record<string, boolean>;
     for (const [featureId, feature] of Object.entries(this.features)) {
       feature.app.forEach((app) => {

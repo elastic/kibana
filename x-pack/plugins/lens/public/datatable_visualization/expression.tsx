@@ -160,6 +160,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
+  const { onClickValue } = props;
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
@@ -180,9 +181,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
         ],
         timeFieldName,
       };
-      props.onClickValue(desanitizeFilterContext(data));
+      onClickValue(desanitizeFilterContext(data));
     },
-    [firstTable]
+    [firstTable, onClickValue]
   );
 
   const bucketColumns = firstTable.columns

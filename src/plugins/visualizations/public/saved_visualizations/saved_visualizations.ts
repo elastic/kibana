@@ -43,7 +43,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
           typeName = JSON.parse(String(source.visState)).type;
         } catch (e) {
           /* missing typename handled below */
-        } // eslint-disable-line no-empty
+        }
       }
 
       if (!typeName || !visTypes.get(typeName)) {

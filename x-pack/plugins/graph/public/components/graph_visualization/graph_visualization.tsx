@@ -122,6 +122,7 @@ export function GraphVisualization({
                   cy={node.ky}
                   r={node.scaledSize}
                   className={classNames('gphNode__circle', {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     'gphNode__circle--selected': node.isSelected,
                   })}
                   style={{ fill: node.color }}
@@ -129,6 +130,7 @@ export function GraphVisualization({
                 {node.icon && (
                   <text
                     className={classNames('fa gphNode__text', {
+                      // eslint-disable-next-line @typescript-eslint/naming-convention
                       'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
                     })}
                     transform="translate(0,5)"

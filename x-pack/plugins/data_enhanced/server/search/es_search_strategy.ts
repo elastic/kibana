@@ -119,6 +119,7 @@ async function asyncSearch(
     ...queryParams,
   });
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
     { method, path, body, query },
@@ -127,8 +128,8 @@ async function asyncSearch(
 
   return {
     id,
-    is_partial,
-    is_running,
+    isPartial: is_partial,
+    isRunning: is_running,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
   };

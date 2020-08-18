@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { TypeOf } from '@kbn/config-schema';
 import {
   ExecutorSubActionGetIncidentParamsSchema,
