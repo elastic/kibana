@@ -17,8 +17,6 @@ releases, refer to:
 For the full list of changes in {minor-version}, see <<release-notes>> and
 <<breaking-changes>>. 
 
-coming[7.9.0]
-
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
