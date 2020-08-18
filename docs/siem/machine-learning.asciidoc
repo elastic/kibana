@@ -3,14 +3,12 @@
 == Anomaly Detection with Machine Learning
 
 For *{ess-trial}[Free Trial]*
-and *https://www.elastic.co/subscriptions[Platinum License]* deployments,
-Machine Learning functionality is available throughout the SIEM app. You can
-view the details of detected anomalies within the `Anomalies` table widget
-shown on the Hosts, Network and associated Details pages, or even narrow to
-the specific daterange of an anomaly from the `Max Anomaly Score` details in
-the overview of the Host and IP Details pages. Each of these interfaces also
-offer the ability to drag and drop details of the anomaly to Timeline, such
-as the `Entity` itself, or any of the associated `Influencers`.
+and *https://www.elastic.co/subscriptions[Platinum subscription]* deployments,
+Machine Learning functionality is available throughout Elastic Security. You can
+view the details of detected anomalies in the `Anomalies` table
+shown on the Hosts, Network and associated details pages. You can drag and drop
+anomaly details to Timeline, such as the `Entity` itself, or any of the
+associated `Influencers`.
 
 [role="screenshot"]
 image::siem/images/ml-ui.png[Machine Learning - Max Anomaly Score]
