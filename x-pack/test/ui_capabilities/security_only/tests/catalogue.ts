@@ -55,6 +55,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'ml',
               'ml_file_data_visualizer',
               'monitoring',
+              'enterpriseSearch',
               'appSearch',
               'workplaceSearch',
             ];
