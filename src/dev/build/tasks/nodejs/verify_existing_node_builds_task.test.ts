@@ -87,7 +87,7 @@ it('checks shasums for each downloaded node build', async () => {
     [MockFunction] {
       "calls": Array [
         Array [
-          "10.21.0",
+          "10.22.0",
         ],
       ],
       "results": Array [
