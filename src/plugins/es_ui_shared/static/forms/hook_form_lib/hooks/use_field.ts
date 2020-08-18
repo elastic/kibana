@@ -44,14 +44,22 @@ export const useField = <T>(
 
   const { getFormData, __removeField, __updateFormDataAt, __validateFields } = form;
 
-  const initialValue = useMemo(() => {
-    if (typeof defaultValue === 'function') {
-      return deserializer ? deserializer(defaultValue()) : defaultValue();
-    }
-    return deserializer ? deserializer(defaultValue) : defaultValue;
-  }, [defaultValue, deserializer]) as T;
+  /**
+   * This callback is both used as the initial "value" state getter, **and** for when we reset the form
+   * (and thus reset the field value). When we reset the form, we can provide a new default value (which will be
+   * passed through this "initialValueGetter" handler).
+   */
+  const initialValueGetter = useCallback(
+    (updatedDefaultValue = defaultValue) => {
+      if (typeof updatedDefaultValue === 'function') {
+        return deserializer ? deserializer(updatedDefaultValue()) : updatedDefaultValue();
+      }
+      return deserializer ? deserializer(updatedDefaultValue) : updatedDefaultValue;
+    },
+    [defaultValue, deserializer]
+  );
 
-  const [value, setStateValue] = useState<T>(initialValue);
+  const [value, setStateValue] = useState<T>(initialValueGetter);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
@@ -429,7 +437,7 @@ export const useField = <T>(
 
   const reset: FieldHook<T>['reset'] = useCallback(
     (resetOptions = { resetValue: true }) => {
-      const { resetValue = true } = resetOptions;
+      const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
       setPristine(true);
       setValidating(false);
@@ -438,11 +446,12 @@ export const useField = <T>(
       setErrors([]);
 
       if (resetValue) {
-        setValue(initialValue);
-        return initialValue;
+        const newValue = initialValueGetter(updatedDefaultValue);
+        setValue(newValue);
+        return newValue;
       }
     },
-    [setValue, serializeOutput, initialValue]
+    [setValue, initialValueGetter]
   );
 
   // -- EFFECTS
