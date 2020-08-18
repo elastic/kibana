@@ -104,10 +104,11 @@ NodeList [
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButton__content"
+                  class="euiButton__content"
                 >
                   <div
-                    class="euiButtonContent__icon"
+                    aria-hidden="true"
+                    class="euiButton__icon"
                     data-euiicon-type="help"
                   />
                   <span
