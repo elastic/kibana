@@ -252,7 +252,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                               <EuiTitle size={'xxs'}>
                                 <h6>
                                   <FormattedMessage
-                                    id="xpack.ml.inference.modelsList.expandedRow.processorsTitle"
+                                    id="xpack.ml.inference.modelsList.expandedRow.byProcessorTitle"
                                     defaultMessage="By processor"
                                   />
                                 </h6>
