@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rules_updated).to.eql(0);
       });
 
-      it('should create the prepackaged timelines and the rules_updated is of size zero', async () => {
+      it('should create the prepackaged timelines and the timelines_updated is of size zero', async () => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)
           .set('kbn-xsrf', 'true')

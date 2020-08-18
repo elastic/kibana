@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.timelines_installed).to.be.greaterThan(0);
       });
 
-      it('should create the prepackaged timelines and the rules_updated is of size zero', async () => {
+      it('should create the prepackaged timelines and the timelines_updated is of size zero', async () => {
         const { body } = await supertest
           .put(TIMELINE_PREPACKAGED_URL)
           .set('kbn-xsrf', 'true')
