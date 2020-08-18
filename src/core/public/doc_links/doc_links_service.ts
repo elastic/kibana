@@ -127,6 +127,10 @@ export class DocLinksService {
           kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
           dashboardSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-dashboard-settings`,
         },
+        visualize: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/timelion.html#timelion-deprecation`,
+        },
       },
     });
   }
@@ -225,5 +229,6 @@ export interface DocLinksStart {
       readonly dateMath: string;
     };
     readonly management: Record<string, string>;
+    readonly visualize: Record<string, string>;
   };
 }

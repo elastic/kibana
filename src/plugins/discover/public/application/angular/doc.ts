@@ -36,7 +36,6 @@ app.directive('discoverDoc', function (reactDirective: any) {
       ['index', { watchDepth: 'value' }],
       ['indexPatternId', { watchDepth: 'reference' }],
       ['indexPatternService', { watchDepth: 'reference' }],
-      ['esClient', { watchDepth: 'reference' }],
     ],
     { restrict: 'E' }
   );
@@ -51,10 +50,9 @@ app.config(($routeProvider: any) => {
     .when('/doc/:indexPattern/:index', {
       // have to be written as function expression, because it's not compiled in dev mode
       // eslint-disable-next-line object-shorthand
-      controller: function ($scope: LazyScope, $route: any, es: any) {
+      controller: function ($scope: LazyScope, $route: any) {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
-        $scope.esClient = es;
         $scope.id = $route.current.params.id;
         $scope.index = $route.current.params.index;
         $scope.indexPatternId = $route.current.params.indexPattern;
