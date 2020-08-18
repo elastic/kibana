@@ -247,8 +247,8 @@ describe('when on the list page', () => {
   });
 
   describe('when polling on Endpoint List', () => {
-    beforeEach(() => {
-      reactTestingLibrary.act(() => {
+    beforeEach(async () => {
+      await reactTestingLibrary.act(() => {
         const hostListData = mockEndpointResultList({ total: 4 }).hosts;
 
         setEndpointListApiMockImplementation(coreStart.http, {
