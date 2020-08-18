@@ -82,7 +82,6 @@ export const serializePolicy = (
 ): SerializedPolicy => {
   const serializedPolicy = {
     name: policy.name,
-    // Hot phase is ALWAYS enabled
     phases: { hot: hotPhaseToES(policy.phases.hot, originalEsPolicy.phases.hot) },
   } as SerializedPolicy;
   if (policy.phases.warm.phaseEnabled) {

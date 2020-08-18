@@ -15,7 +15,7 @@ import {
   UIM_CONFIG_WARM_PHASE,
 } from '../constants/ui_metric';
 
-import { Policy } from './policies/types';
+import { Phases } from './policies/types';
 import {
   defaultNewColdPhase,
   defaultNewHotPhase,
@@ -30,32 +30,47 @@ export function init(usageCollection?: UsageCollectionSetup): void {
   }
 }
 
-export function getUiMetricsForPhases(policy: Policy): any {
+export function getUiMetricsForPhases(phases: Phases): any {
   const phaseUiMetrics = [
     {
       metric: UIM_CONFIG_COLD_PHASE,
-      isTracked: () => Boolean(policy.phases.cold),
+      isTracked: () => Boolean(phases.cold),
     },
     {
       metric: UIM_CONFIG_WARM_PHASE,
-      isTracked: () => Boolean(policy.phases.warm),
+      isTracked: () => Boolean(phases.warm),
     },
     {
       metric: UIM_CONFIG_SET_PRIORITY,
       isTracked: () => {
         // We only care about whether the user has interacted with the priority of *any* phase at all.
+        const isHotPhasePriorityChanged =
+          phases.hot &&
+          phases.hot.actions.set_priority &&
+          phases.hot.actions.set_priority.priority !==
+            parseInt(defaultNewHotPhase.phaseIndexPriority, 10);
+
+        const isWarmPhasePriorityChanged =
+          phases.warm &&
+          phases.warm.actions.set_priority &&
+          phases.warm.actions.set_priority.priority !==
+            parseInt(defaultNewWarmPhase.phaseIndexPriority, 10);
+
+        const isColdPhasePriorityChanged =
+          phases.cold &&
+          phases.cold.actions.set_priority &&
+          phases.cold.actions.set_priority.priority !==
+            parseInt(defaultNewColdPhase.phaseIndexPriority, 10);
         // If the priority is different than the default, we'll consider it a user interaction,
         // even if the user has set it to undefined.
         return (
-          policy.phases.hot.phaseIndexPriority !== defaultNewHotPhase.phaseIndexPriority ||
-          policy.phases.warm.phaseIndexPriority !== defaultNewWarmPhase.phaseIndexPriority ||
-          policy.phases.cold.phaseIndexPriority !== defaultNewColdPhase.phaseIndexPriority
+          isHotPhasePriorityChanged || isWarmPhasePriorityChanged || isColdPhasePriorityChanged
         );
       },
     },
     {
       metric: UIM_CONFIG_FREEZE_INDEX,
-      isTracked: () => policy.phases.cold && policy.phases.cold.freezeEnabled,
+      isTracked: () => phases.cold && phases.cold.actions.freeze,
     },
   ];
 

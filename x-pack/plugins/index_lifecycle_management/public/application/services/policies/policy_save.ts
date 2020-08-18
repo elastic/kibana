@@ -20,8 +20,9 @@ export const savePolicy = async (
   isNew: boolean,
   originalEsPolicy?: PolicyFromES
 ): Promise<boolean> => {
+  const serializedPolicy = serializePolicy(policy, originalEsPolicy?.policy);
   try {
-    await savePolicyApi(serializePolicy(policy, originalEsPolicy?.policy));
+    await savePolicyApi(serializedPolicy);
   } catch (err) {
     const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage', {
       defaultMessage: 'Error saving lifecycle policy {lifecycleName}',
@@ -31,7 +32,7 @@ export const savePolicy = async (
     return false;
   }
 
-  const uiMetrics = getUiMetricsForPhases(policy);
+  const uiMetrics = getUiMetricsForPhases(serializedPolicy.phases);
   uiMetrics.push(isNew ? UIM_POLICY_CREATE : UIM_POLICY_UPDATE);
   trackUiMetric(METRIC_TYPE.COUNT, uiMetrics);
 

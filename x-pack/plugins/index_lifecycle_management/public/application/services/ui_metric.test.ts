@@ -21,9 +21,10 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         cold: {
+          min_age: '0ms',
           actions: {
             set_priority: {
-              priority: defaultNewColdPhase.phaseIndexPriority,
+              priority: parseInt(defaultNewColdPhase.phaseIndexPriority, 10),
             },
           },
         },
@@ -35,9 +36,10 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         warm: {
+          min_age: '0ms',
           actions: {
             set_priority: {
-              priority: defaultNewWarmPhase.phaseIndexPriority,
+              priority: parseInt(defaultNewWarmPhase.phaseIndexPriority, 10),
             },
           },
         },
@@ -49,9 +51,10 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         warm: {
+          min_age: '0ms',
           actions: {
             set_priority: {
-              priority: defaultNewWarmPhase.phaseIndexPriority + 1,
+              priority: parseInt(defaultNewWarmPhase.phaseIndexPriority, 10) + 1,
             },
           },
         },
@@ -63,10 +66,11 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         cold: {
+          min_age: '0ms',
           actions: {
             freeze: {},
             set_priority: {
-              priority: defaultNewColdPhase.phaseIndexPriority,
+              priority: parseInt(defaultNewColdPhase.phaseIndexPriority, 10),
             },
           },
         },

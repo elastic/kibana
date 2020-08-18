@@ -10,7 +10,7 @@ export interface SerializedPolicy {
 }
 
 export interface Phases {
-  hot: SerializedHotPhase;
+  hot?: SerializedHotPhase;
   warm?: SerializedWarmPhase;
   cold?: SerializedColdPhase;
   delete?: SerializedDeletePhase;

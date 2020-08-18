@@ -5,7 +5,7 @@
  */
 
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { HotPhase, SerializedHotPhase } from './types';
+import { HotPhase, SerializedHotPhase, serializedPhaseInitialization } from './types';
 import {
   maximumAgeRequiredMessage,
   maximumDocumentsRequiredMessage,
@@ -27,7 +27,7 @@ const hotPhaseInitialization: HotPhase = {
   selectedMaxDocuments: '',
 };
 
-export const hotPhaseFromES = (phaseSerializedOrUndefined: SerializedHotPhase): HotPhase => {
+export const hotPhaseFromES = (phaseSerializedOrUndefined?: SerializedHotPhase): HotPhase => {
   const phase: HotPhase = { ...hotPhaseInitialization };
 
   if (!phaseSerializedOrUndefined) {
@@ -72,8 +72,12 @@ export const hotPhaseFromES = (phaseSerializedOrUndefined: SerializedHotPhase): 
 
 export const hotPhaseToES = (
   phase: HotPhase,
-  originalPhase: SerializedHotPhase
+  originalPhase?: SerializedHotPhase
 ): SerializedHotPhase => {
+  if (!originalPhase) {
+    originalPhase = { ...serializedPhaseInitialization };
+  }
+
   const esPhase = { ...originalPhase };
 
   esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
