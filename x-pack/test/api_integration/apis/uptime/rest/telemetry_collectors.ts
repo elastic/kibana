@@ -15,6 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
+  const retry = getService('retry');
+
   describe('telemetry collectors', () => {
     before('generating data', async () => {
       await getService('esArchiver').load('uptime/blank');
@@ -125,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
       // wait few seconds to make sure data is refreshed, just to avoid flakiness
       await delay(2000);
       // call overview page
-      const { body: result } = await supertest
+      const { body } = await supertest
         .post(API_URLS.LOG_PAGE_VIEW)
         .set('kbn-xsrf', 'true')
         .send({
@@ -136,21 +138,6 @@ export default function ({ getService }: FtrProviderContext) {
           autoRefreshEnabled: true,
         })
         .expect(200);
-
-      expect(result).to.eql({
-        overview_page: 1,
-        monitor_page: 1,
-        no_of_unique_monitors: 4,
-        settings_page: 0,
-        monitor_frequency: [120, 0.001, 60, 60],
-        monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
-        no_of_unique_observer_locations: 3,
-        observer_location_name_stats: { min_length: 2, max_length: 7, avg_length: 4.8 },
-        dateRangeStart: ['now/d', 'now/d'],
-        dateRangeEnd: ['now/d', 'now-30'],
-        autoRefreshEnabled: true,
-        autorefreshInterval: [100, 60],
-      });
     });
   });
 }
