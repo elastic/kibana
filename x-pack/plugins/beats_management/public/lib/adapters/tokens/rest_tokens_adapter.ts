@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReturnTypeBulkCreate } from '../../../../../../legacy/plugins/beats_management/common/return_types';
+import { ReturnTypeBulkCreate } from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { CMTokensAdapter } from './adapter_types';
 
