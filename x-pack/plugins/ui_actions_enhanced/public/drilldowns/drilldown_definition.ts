@@ -8,7 +8,6 @@ import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_ac
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import { ActionDefinition } from '../../../../../src/plugins/ui_actions/public/actions';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
