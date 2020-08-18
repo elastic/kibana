@@ -71,7 +71,7 @@ export class Plugin {
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader = {} as IBulkUploader;
+  private bulkUploader;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -277,7 +277,7 @@ export class Plugin {
   }
 
   async setupLegacy(legacyAPI: LegacyAPI) {
-    // Set the stats gette
+    // Set the stats getter
     if (this.bulkUploader) {
       this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
     }
