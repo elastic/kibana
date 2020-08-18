@@ -62,7 +62,7 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
   maxDomain = maxDomain + buffer;
   minDomain = minDomain - buffer;
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = decisionPlotData.length > 3 ? 35 : 75;
+  const heightMultiplier = decisionPlotData.length > 3 ? 25 : 75;
   return (
     <>
       <Chart className="story-chart" size={{ height: decisionPlotData.length * heightMultiplier }}>

@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, FC } from 'react';
+import React, { memo, useEffect, FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -90,6 +90,16 @@ export const DataGrid: FC<Props> = memo(
     //     onMouseLeave: () => hoveredRow$.next(null),
     //   };
     // };
+
+    const popOverContent = useMemo(() => {
+      return {
+        featureImportance: ({ cellContentsElement }) => {
+          const stringContents = cellContentsElement.textContent;
+          const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
+          return <DecisionPathPopover baseline={baseline} featureImportance={parsedFIArray} />;
+        },
+      };
+    }, [baseline]);
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
@@ -226,15 +236,7 @@ export const DataGrid: FC<Props> = memo(
                   }
                 : {}),
             }}
-            popoverContents={{
-              featureImportance: ({ cellContentsElement }) => {
-                const stringContents = cellContentsElement.textContent;
-                const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
-                return (
-                  <DecisionPathPopover baseline={baseline} featureImportance={parsedFIArray} />
-                );
-              },
-            }}
+            popoverContents={popOverContent}
             pagination={{
               ...pagination,
               pageSizeOptions: [5, 10, 25],
