@@ -41,14 +41,14 @@ export const inputsSelector = () => createSelector(selectInputs, (inputs) => inp
 
 export const timelineTimeRangeSelector = createSelector(
   selectTimeline,
-  (timeline) => timeline.timerange ?? false
+  (timeline) => timeline.timerange
 );
 
 export const globalFullScreenSelector = createSelector(selectGlobal, (global) => global.fullScreen);
 
 export const timelineFullScreenSelector = createSelector(
   selectTimeline,
-  (timeline) => timeline.fullScreen ?? false
+  (timeline) => timeline.fullScreen
 );
 
 export const globalTimeRangeSelector = createSelector(selectGlobal, (global) => global.timerange);

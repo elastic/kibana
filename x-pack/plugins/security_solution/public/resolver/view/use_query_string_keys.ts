@@ -10,7 +10,7 @@ import * as selectors from '../store/selectors';
 /**
  * Get the query string keys used by this Resolver instance.
  */
-export function useQueryStringKeys(): { idKey: string; eventKey: string } {
+export const useQueryStringKeys = (): { idKey: string; eventKey: string } => {
   const resolverComponentInstanceID = useShallowEqualSelector(
     selectors.resolverComponentInstanceID
   );
@@ -20,4 +20,4 @@ export function useQueryStringKeys(): { idKey: string; eventKey: string } {
     idKey,
     eventKey,
   };
-}
+};

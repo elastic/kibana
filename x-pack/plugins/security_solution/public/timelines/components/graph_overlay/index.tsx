@@ -108,7 +108,7 @@ const GraphOverlayComponent = ({
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
   }, [dispatch, timelineId]);
 
-  const currentTimeline = useShallowEqualSelector((state: State) =>
+  const currentTimeline = useShallowEqualSelector((state) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
 

@@ -5,7 +5,6 @@
  */
 
 import { PolicyListState, PolicyDetailsState } from '../types';
-import { State } from '../../../../common/store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
@@ -18,7 +17,7 @@ import {
  * @param selector
  */
 export const usePolicyListSelector = <TSelected>(selector: (state: PolicyListState) => TSelected) =>
-  useShallowEqualSelector((state: State) =>
+  useShallowEqualSelector((state) =>
     selector(
       state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
         MANAGEMENT_STORE_POLICY_LIST_NAMESPACE
@@ -33,7 +32,7 @@ export const usePolicyListSelector = <TSelected>(selector: (state: PolicyListSta
 export const usePolicyDetailsSelector = <TSelected>(
   selector: (state: PolicyDetailsState) => TSelected
 ) =>
-  useShallowEqualSelector((state: State) =>
+  useShallowEqualSelector((state) =>
     selector(
       state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
         MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE

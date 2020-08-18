@@ -30,8 +30,10 @@ export const resetScroll = () => {
 
 export const useFullScreen = () => {
   const dispatch = useDispatch();
-  const globalFullScreen = useShallowEqualSelector(inputsSelectors.globalFullScreenSelector);
-  const timelineFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector);
+  const globalFullScreen =
+    useShallowEqualSelector(inputsSelectors.globalFullScreenSelector) ?? false;
+  const timelineFullScreen =
+    useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {

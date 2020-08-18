@@ -6,5 +6,12 @@
 
 // eslint-disable-next-line no-restricted-imports
 import { shallowEqual, useSelector } from 'react-redux';
+import { State } from '../store';
 
-export const useShallowEqualSelector = (selector) => useSelector(selector, shallowEqual);
+export type TypedUseSelectorHook = <TSelected, TState = State>(
+  selector: (state: TState) => TSelected,
+  equalityFn?: (left: TSelected, right: TSelected) => boolean
+) => TSelected;
+
+export const useShallowEqualSelector: TypedUseSelectorHook = (selector) =>
+  useSelector(selector, shallowEqual);

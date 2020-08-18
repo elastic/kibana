@@ -33,7 +33,6 @@ import { getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
-import { StoreState } from '../../../../../common/store';
 
 interface Props {
   actionsColumnWidth: number;
@@ -130,7 +129,7 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const timeline = useShallowEqualSelector<StoreState, TimelineModel>(
+  const timeline = useShallowEqualSelector<TimelineModel>(
     (state) => state.timeline.timelineById['timeline-1']
   );
   const divElement = useRef<HTMLDivElement | null>(null);

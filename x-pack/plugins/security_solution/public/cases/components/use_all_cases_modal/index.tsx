@@ -12,7 +12,6 @@ import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../common/components/link_to';
-import { State } from '../../../common/store';
 import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 
@@ -35,7 +34,7 @@ export const useAllCasesModal = ({
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
-  const timeline = useShallowEqualSelector((state: State) =>
+  const timeline = useShallowEqualSelector((state) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
 

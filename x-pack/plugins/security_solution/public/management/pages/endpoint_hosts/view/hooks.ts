@@ -13,10 +13,9 @@ import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
-import { State } from '../../../../common/store';
 
 export const useEndpointSelector = <TSelected>(selector: (state: EndpointState) => TSelected) =>
-  useShallowEqualSelector((state: State) =>
+  useShallowEqualSelector((state) =>
     selector(
       state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
         MANAGEMENT_STORE_ENDPOINTS_NAMESPACE

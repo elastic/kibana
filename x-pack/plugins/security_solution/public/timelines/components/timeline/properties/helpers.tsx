@@ -33,7 +33,6 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
@@ -160,7 +159,7 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
-    const { savedObjectId } = useShallowEqualSelector((state: State) =>
+    const { savedObjectId } = useShallowEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
     const { navigateToApp } = useKibana().services.application;

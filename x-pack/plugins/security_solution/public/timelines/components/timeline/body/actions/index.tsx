@@ -7,7 +7,6 @@ import React from 'react';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import { Note } from '../../../../../common/lib/note';
-import { StoreState } from '../../../../../common/store/types';
 import { TimelineType } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
 
@@ -87,7 +86,7 @@ export const Actions = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const timeline = useShallowEqualSelector<StoreState, TimelineModel>(
+    const timeline = useShallowEqualSelector<TimelineModel>(
       (state) => state.timeline.timelineById['timeline-1']
     );
 
