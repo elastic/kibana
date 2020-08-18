@@ -54,7 +54,7 @@ const OWNER = 'XJSON_GRAMMAR_CHECKER';
 export const registerGrammarChecker = () => {
   const allDisposables: monaco.IDisposable[] = [];
 
-  const updateAnnos = async (model: monaco.editor.IModel): Promise<void> => {
+  const updateAnnotations = async (model: monaco.editor.IModel): Promise<void> => {
     if (model.isDisposed()) {
       return;
     }
@@ -84,11 +84,11 @@ export const registerGrammarChecker = () => {
     if (model.getModeId() === ID) {
       allDisposables.push(
         model.onDidChangeContent(async () => {
-          updateAnnos(model);
+          updateAnnotations(model);
         })
       );
 
-      updateAnnos(model);
+      updateAnnotations(model);
     }
   };
   allDisposables.push(monaco.editor.onDidCreateModel(onModelAdd));
