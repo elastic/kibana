@@ -117,7 +117,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app1',
           legacy: false,
-          navLinkStatus: AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
         })
       );
@@ -125,7 +125,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app2',
           legacy: false,
-          navLinkStatus: AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
         })
       );
@@ -142,7 +142,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app1',
           legacy: false,
-          navLinkStatus: AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.hidden,
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
@@ -152,7 +152,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app2',
           legacy: false,
-          navLinkStatus: AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
         })
       );
@@ -268,7 +268,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app2',
           legacy: false,
-          navLinkStatus: AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
           tooltip: 'App accessible',
         })
@@ -523,7 +523,7 @@ describe('#start()', () => {
         appRoute: '/app/app1',
         id: 'app1',
         legacy: false,
-        navLinkStatus: AppNavLinkStatus.default,
+        navLinkStatus: AppNavLinkStatus.visible,
         status: AppStatus.accessible,
       })
     );
@@ -532,7 +532,7 @@ describe('#start()', () => {
         appUrl: '/my-url',
         id: 'app2',
         legacy: true,
-        navLinkStatus: AppNavLinkStatus.default,
+        navLinkStatus: AppNavLinkStatus.visible,
         status: AppStatus.accessible,
       })
     );
