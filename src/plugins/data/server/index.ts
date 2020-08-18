@@ -150,6 +150,16 @@ export {
  */
 
 import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
@@ -159,13 +169,41 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from '../common';
 
 export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
   EsaggsExpressionFunctionDefinition,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
   ParsedInterval,
+  // search
   IEsSearchRequest,
   IEsSearchResponse,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
 } from '../common';
 
 export {
@@ -182,16 +220,29 @@ export {
 // Search namespace
 export const search = {
   aggs: {
+    CidrMask,
     dateHistogramInterval,
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
     Ipv4Address,
+    isNumberType,
+    isStringType,
+    isType,
     isValidEsInterval,
     isValidInterval,
+    parentPipelineType,
     parseEsInterval,
     parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
     toAbsoluteDates,
   },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 };
 
 /**
