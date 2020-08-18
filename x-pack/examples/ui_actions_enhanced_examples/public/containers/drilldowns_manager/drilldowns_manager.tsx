@@ -15,6 +15,7 @@ import {
 
 export const DrilldownsManager: React.FC = () => {
   const { plugins } = useUiActions();
+  const [showManager, setShowManager] = React.useState(false);
 
   const manager = React.useMemo(() => {
     const storage = new UiActionsEnhancedMemoryActionStorage();
@@ -26,7 +27,7 @@ export const DrilldownsManager: React.FC = () => {
   }, [plugins]);
 
   return (
-    <>
+    <div>
       <Section title={'Drilldowns Manager'}>
         <EuiText>
           <p>
@@ -37,21 +38,23 @@ export const DrilldownsManager: React.FC = () => {
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={() => window.alert('Button clicked')}>
-              Open Drilldown Manager
+            <EuiButton fill={!showManager} onClick={() => setShowManager((x) => !x)}>
+              {showManager ? 'Close' : 'Open Drilldown Manager'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </Section>
 
-      <EuiFlyout ownFocus onClose={() => {}} aria-labelledby="Drilldown Manager">
-        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-          onClose={() => {}}
-          viewMode={'create'}
-          dynamicActionManager={manager}
-          triggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER']}
-        />
-      </EuiFlyout>
-    </>
+      {showManager && (
+        <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
+          <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
+            onClose={() => setShowManager(false)}
+            viewMode={'create'}
+            dynamicActionManager={manager}
+            triggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER']}
+          />
+        </EuiFlyout>
+      )}
+    </div>
   );
 };
