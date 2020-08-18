@@ -21,7 +21,7 @@ import { mockLicenseContext } from './license_context.mock';
  *
  * Example usage:
  *
- * const wrapper = mountWithContext(<Component />, { enterpriseSearchUrl: 'someOverride', license: {} });
+ * const wrapper = mountWithContext(<Component />, { config: { host: 'someOverride' } });
  */
 export const mountWithContext = (children: React.ReactNode, context?: object) => {
   return mount(

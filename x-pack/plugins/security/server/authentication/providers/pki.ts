@@ -107,16 +107,20 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
-    if (!state) {
+    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // session isn't defined then provider is just being probed whether or not it can perform logout.
+    if (state === undefined) {
       this.logger.debug('There is no access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    try {
-      await this.options.tokens.invalidate({ accessToken: state.accessToken });
-    } catch (err) {
-      this.logger.debug(`Failed invalidating access token: ${err.message}`);
-      return DeauthenticationResult.failed(err);
+    if (state) {
+      try {
+        await this.options.tokens.invalidate({ accessToken: state.accessToken });
+      } catch (err) {
+        this.logger.debug(`Failed invalidating access token: ${err.message}`);
+        return DeauthenticationResult.failed(err);
+      }
     }
 
     return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);

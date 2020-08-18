@@ -84,7 +84,17 @@ export class DynamicActionManager {
         return actionDefinition.isCompatible(context);
       },
     });
-    for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);
+
+    const supportedTriggers = factory.supportedTriggers();
+    for (const trigger of triggers) {
+      if (!supportedTriggers.includes(trigger as any))
+        throw new Error(
+          `Can't attach [action=${actionId}] to [trigger=${trigger}]. Supported triggers for this action: ${supportedTriggers.join(
+            ','
+          )}`
+        );
+      uiActions.attachAction(trigger as any, actionId);
+    }
   }
 
   protected killAction({ eventId, triggers }: SerializedEvent) {
