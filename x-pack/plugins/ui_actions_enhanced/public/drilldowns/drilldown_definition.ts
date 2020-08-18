@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition } from '../dynamic_actions';
+import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
+import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 
 /**
@@ -21,9 +22,14 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
  * and provided to the `execute` function of the drilldown. This object contains
  * information about the action user performed.
  */
+
 export interface DrilldownDefinition<
   Config extends object = object,
-  ExecutionContext extends object = object
+  SupportedTriggers extends TriggerId = TriggerId,
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 > {
   /**
    * Globally unique identifier for this drilldown.
@@ -45,7 +51,12 @@ export interface DrilldownDefinition<
   /**
    * Function that returns default config for this drilldown.
    */
-  createConfig: ActionFactoryDefinition<Config, object, ExecutionContext>['createConfig'];
+  createConfig: ActionFactoryDefinition<
+    Config,
+    SupportedTriggers,
+    FactoryContext,
+    ExecutionContext
+  >['createConfig'];
 
   /**
    * `UiComponent` that collections config for this drilldown. You can create
@@ -66,13 +77,23 @@ export interface DrilldownDefinition<
    * export const CollectConfig = uiToReactComponent(ReactCollectConfig);
    * ```
    */
-  CollectConfig: ActionFactoryDefinition<Config, object, ExecutionContext>['CollectConfig'];
+  CollectConfig: ActionFactoryDefinition<
+    Config,
+    SupportedTriggers,
+    FactoryContext,
+    ExecutionContext
+  >['CollectConfig'];
 
   /**
    * A validator function for the config object. Should always return a boolean
    * given any input.
    */
-  isConfigValid: ActionFactoryDefinition<Config, object, ExecutionContext>['isConfigValid'];
+  isConfigValid: ActionFactoryDefinition<
+    Config,
+    SupportedTriggers,
+    FactoryContext,
+    ExecutionContext
+  >['isConfigValid'];
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.
@@ -106,4 +127,10 @@ export interface DrilldownDefinition<
     config: Config,
     context: ExecutionContext | ActionExecutionContext<ExecutionContext>
   ): Promise<string | undefined>;
+
+  /**
+   * List of triggers supported by this drilldown type
+   * This is used in trigger picker when configuring drilldown
+   */
+  supportedTriggers(): SupportedTriggers[];
 }

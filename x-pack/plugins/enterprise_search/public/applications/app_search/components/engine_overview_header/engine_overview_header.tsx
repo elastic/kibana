@@ -19,13 +19,16 @@ import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 export const EngineOverviewHeader: React.FC = () => {
-  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
+  const {
+    externalUrl: { getAppSearchUrl },
+    http,
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {
     fill: true,
     iconType: 'popout',
     'data-test-subj': 'launchButton',
-    href: `${enterpriseSearchUrl}/as`,
+    href: getAppSearchUrl(),
     target: '_blank',
     onClick: () =>
       sendTelemetry({
