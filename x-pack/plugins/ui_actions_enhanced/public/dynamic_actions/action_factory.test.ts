@@ -37,6 +37,14 @@ describe('License & ActionFactory', () => {
     expect(factory.isCompatibleLicence()).toBe(false);
   });
 
+  test('licence has expired', async () => {
+    const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
+      licensingMock.createLicense({ license: { type: 'gold', status: 'expired' } })
+    );
+    expect(await factory.isCompatible({ triggers: [] })).toBe(true);
+    expect(factory.isCompatibleLicence()).toBe(false);
+  });
+
   test('enough license level', async () => {
     const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
       licensingMock.createLicense({ license: { type: 'gold' } })
