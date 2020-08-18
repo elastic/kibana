@@ -120,10 +120,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   }, [selectedIdFromUrlInitialized, analytics]);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: () => getAnalytics(true),
-  });
+  useRefreshAnalyticsList(
+    {
+      isLoading: setIsLoading,
+      onRefresh: () => getAnalytics(true),
+    },
+    isManagementTable
+  );
 
   const { columns, modals } = useColumns(
     expandedRowItemIds,

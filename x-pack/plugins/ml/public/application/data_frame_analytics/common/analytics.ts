@@ -321,7 +321,8 @@ export const useRefreshAnalyticsList = (
   callback: {
     isLoading?(d: boolean): void;
     onRefresh?(): void;
-  } = {}
+  } = {},
+  isManagementTable = false
 ) => {
   useEffect(() => {
     const distinct$ = refreshAnalyticsList$.pipe(distinctUntilChanged());
@@ -329,6 +330,9 @@ export const useRefreshAnalyticsList = (
     const subscriptions: Subscription[] = [];
 
     if (typeof callback.onRefresh === 'function') {
+      // required in order to fetch the DFA jobs on the management page
+      if (isManagementTable) callback.onRefresh();
+
       subscriptions.push(
         distinct$
           .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
