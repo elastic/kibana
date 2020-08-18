@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -20,8 +20,8 @@ import {
 import { useKibana } from '../../../../../shared_imports';
 import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
-import { Document } from '../../types';
 import { DeserializeResult } from '../../deserialize';
+import { Document } from '../../types';
 
 import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_flyout_tabs';
 
@@ -31,7 +31,7 @@ export interface Props {
   processors: DeserializeResult;
 }
 
-export interface HandleExecuteArgs {
+export interface HandleTestPipelineArgs {
   documents: Document[];
   verbose?: boolean;
 }
@@ -48,19 +48,24 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     setCurrentTestPipelineData,
     updateTestOutputPerProcessor,
   } = useTestPipelineContext();
-  const { testOutput } = testPipelineData;
+
+  const {
+    config: { documents: cachedDocuments, verbose: cachedVerbose },
+  } = testPipelineData;
 
   const [selectedTab, setSelectedTab] = useState<TestPipelineFlyoutTab>(activeTab);
 
-  const [isExecuting, setIsExecuting] = useState<boolean>(false);
-  const [executeError, setExecuteError] = useState<any>(null);
+  const [shouldTestImmediately, setShouldTestImmediately] = useState<boolean>(false);
+  const [isRunningTest, setIsRunningTest] = useState<boolean>(false);
+  const [testingError, setTestingError] = useState<any>(null);
+  const [testOutput, setTestOutput] = useState<any>(undefined);
 
-  const handleExecute = useCallback(
-    async ({ documents, verbose }: HandleExecuteArgs) => {
+  const handleTestPipeline = useCallback(
+    async ({ documents, verbose }: HandleTestPipelineArgs) => {
       const serializedProcessors = serialize(processors);
 
-      setIsExecuting(true);
-      setExecuteError(null);
+      setIsRunningTest(true);
+      setTestingError(null);
 
       const { error, data: currentTestOutput } = await services.api.simulatePipeline({
         documents,
@@ -68,23 +73,24 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         pipeline: { ...serializedProcessors },
       });
 
-      setIsExecuting(false);
+      setIsRunningTest(false);
 
       if (error) {
-        setExecuteError(error);
+        setTestingError(error);
         return;
       }
 
       setCurrentTestPipelineData({
-        type: 'updateOutput',
+        type: 'updateConfig',
         payload: {
           config: {
             documents,
             verbose,
           },
-          testOutput: currentTestOutput,
         },
       });
+
+      setTestOutput(currentTestOutput);
 
       services.notifications.toasts.addSuccess(
         i18n.translate('xpack.ingestPipelines.testPipelineFlyout.successNotificationText', {
@@ -100,22 +106,41 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     [services.api, processors, setCurrentTestPipelineData, services.notifications.toasts]
   );
 
+  useEffect(() => {
+    if (cachedDocuments) {
+      setShouldTestImmediately(true);
+    }
+    // We only want to know on initial mount if there are cached documents
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // If the user has already tested the pipeline once,
+    // use the cached test config and automatically execute the pipeline
+    if (shouldTestImmediately) {
+      setShouldTestImmediately(false);
+      handleTestPipeline({ documents: cachedDocuments!, verbose: cachedVerbose });
+    }
+  }, [handleTestPipeline, cachedDocuments, cachedVerbose, shouldTestImmediately]);
+
   let tabContent;
 
   if (selectedTab === 'output') {
     tabContent = (
       <OutputTab
-        handleExecute={handleExecute}
-        isExecuting={isExecuting}
-        testPipelineData={testPipelineData}
+        handleTestPipeline={handleTestPipeline}
+        isRunningTest={isRunningTest}
+        cachedVerbose={cachedVerbose}
+        cachedDocuments={cachedDocuments!}
+        testOutput={testOutput}
       />
     );
   } else {
     // default to "Documents" tab
     tabContent = (
       <DocumentsTab
-        isExecuting={isExecuting}
-        handleExecute={handleExecute}
+        isRunningTest={isRunningTest}
+        handleTestPipeline={handleTestPipeline}
         setPerProcessorOutput={updateTestOutputPerProcessor}
         processors={processors}
         testPipelineData={testPipelineData}
@@ -145,8 +170,8 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
         <EuiSpacer />
 
-        {/* Execute error callout */}
-        {executeError ? (
+        {/* Testing error callout */}
+        {testingError ? (
           <>
             <EuiCallOut
               title={
@@ -158,7 +183,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
               color="danger"
               iconType="alert"
             >
-              <p>{executeError.message}</p>
+              <p>{testingError.message}</p>
             </EuiCallOut>
             <EuiSpacer size="m" />
           </>

@@ -20,32 +20,24 @@ export interface TestPipelineData {
     verbose?: boolean;
     selectedDocumentIndex: number;
   };
-  // This represents the complete output from the simulate API
-  // It may be the verbose output if the user has enabled the "Verbose" flag
-  testOutput?: {
-    [key: string]: any;
-  };
-  testOutputByProcessor?: DeserializedProcessorResult[];
-  isExecuting?: boolean;
+  testOutputPerProcessor?: DeserializedProcessorResult[];
+  isExecutingPipeline?: boolean;
 }
 
 type Action =
   | {
-      type: 'updateOutputByProcessor';
+      type: 'updateOutputPerProcessor';
       payload: {
-        testOutputByProcessor?: DeserializedProcessorResult[];
-        isExecuting: boolean;
+        testOutputPerProcessor?: DeserializedProcessorResult[];
+        isExecutingPipeline: boolean;
       };
     }
   | {
-      type: 'updateOutput';
+      type: 'updateConfig';
       payload: {
         config: {
           documents: Document[];
           verbose?: boolean;
-        };
-        testOutput: {
-          [key: string]: any;
         };
       };
     }
@@ -54,8 +46,8 @@ type Action =
       payload: Pick<TestPipelineData, 'config'>;
     }
   | {
-      type: 'updateIsExecuting';
-      payload: Pick<TestPipelineData, 'isExecuting'>;
+      type: 'updateIsExecutingPipeline';
+      payload: Pick<TestPipelineData, 'isExecutingPipeline'>;
     };
 
 export interface TestPipelineContext {
@@ -72,7 +64,7 @@ const DEFAULT_TEST_PIPELINE_CONTEXT = {
     config: {
       selectedDocumentIndex: 0,
     },
-    isExecuting: false,
+    isExecutingPipeline: false,
   },
   setCurrentTestPipelineData: () => {},
   updateTestOutputPerProcessor: () => {},
@@ -91,22 +83,22 @@ export const useTestPipelineContext = () => {
 };
 
 export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
-  if (action.type === 'updateOutputByProcessor') {
+  if (action.type === 'updateOutputPerProcessor') {
     return {
       ...state,
-      testOutputByProcessor: action.payload.testOutputByProcessor,
-      isExecuting: false,
+      testOutputPerProcessor: action.payload.testOutputPerProcessor,
+      isExecutingPipeline: false,
     };
   }
 
-  if (action.type === 'updateOutput') {
+  if (action.type === 'updateConfig') {
     return {
       ...action.payload,
       config: {
         ...action.payload.config,
         selectedDocumentIndex: state.config.selectedDocumentIndex,
       },
-      testOutputByProcessor: state.testOutputByProcessor,
+      testOutputPerProcessor: state.testOutputPerProcessor,
     };
   }
 
@@ -120,10 +112,10 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
     };
   }
 
-  if (action.type === 'updateIsExecuting') {
+  if (action.type === 'updateIsExecutingPipeline') {
     return {
       ...state,
-      isExecuting: action.payload.isExecuting,
+      isExecutingPipeline: action.payload.isExecutingPipeline,
     };
   }
 
@@ -145,9 +137,9 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
       }
 
       setCurrentTestPipelineData({
-        type: 'updateIsExecuting',
+        type: 'updateIsExecutingPipeline',
         payload: {
-          isExecuting: true,
+          isExecutingPipeline: true,
         },
       });
 
@@ -164,9 +156,9 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
 
       if (error) {
         setCurrentTestPipelineData({
-          type: 'updateIsExecuting',
+          type: 'updateIsExecutingPipeline',
           payload: {
-            isExecuting: false,
+            isExecutingPipeline: false,
           },
         });
 
@@ -174,10 +166,10 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
       }
 
       setCurrentTestPipelineData({
-        type: 'updateOutputByProcessor',
+        type: 'updateOutputPerProcessor',
         payload: {
-          testOutputByProcessor: deserializeVerboseTestOutput(verboseResults),
-          isExecuting: false,
+          testOutputPerProcessor: deserializeVerboseTestOutput(verboseResults),
+          isExecutingPipeline: false,
         },
       });
     },

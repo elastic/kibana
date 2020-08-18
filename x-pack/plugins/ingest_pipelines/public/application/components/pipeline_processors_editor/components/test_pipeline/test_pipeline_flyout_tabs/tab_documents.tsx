@@ -21,24 +21,23 @@ import {
 
 import { TestPipelineContext } from '../../../context';
 import { Document } from '../../../types';
-
-import { documentsSchema } from './documents_schema';
-import { HandleExecuteArgs } from '../test_pipeline_flyout';
 import { DeserializeResult } from '../../../deserialize';
+import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
+import { documentsSchema } from './documents_schema';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
-  handleExecute: (data: HandleExecuteArgs) => void;
+  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
   setPerProcessorOutput: (documents: Document[] | undefined, processors: DeserializeResult) => void;
-  isExecuting: boolean;
+  isRunningTest: boolean;
   processors: DeserializeResult;
   testPipelineData: TestPipelineContext['testPipelineData'];
 }
 
 export const DocumentsTab: React.FunctionComponent<Props> = ({
-  handleExecute,
-  isExecuting,
+  handleTestPipeline,
+  isRunningTest,
   setPerProcessorOutput,
   processors,
   testPipelineData,
@@ -46,7 +45,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   const { services } = useKibana();
 
   const {
-    config: { documents: cachedDocuments },
+    config: { documents: cachedDocuments, verbose: cachedVerbose },
   } = testPipelineData;
 
   const executePipeline = async () => {
@@ -58,10 +57,10 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
 
     const { documents } = data as { documents: Document[] };
 
-    await handleExecute({ documents: documents! });
+    await handleTestPipeline({ documents: documents!, verbose: cachedVerbose });
 
     // This is necessary to update the status and output of each processor
-    // as verbose is not enabled on initial execution
+    // as verbose may not be enabled
     setPerProcessorOutput(documents, processors);
   };
 
@@ -131,10 +130,10 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <EuiButton
           onClick={executePipeline}
           size="s"
-          isLoading={isExecuting}
+          isLoading={isRunningTest}
           disabled={form.isSubmitted && !form.isValid}
         >
-          {isExecuting ? (
+          {isRunningTest ? (
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.runningButtonLabel"
               defaultMessage="Running"

@@ -112,14 +112,14 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
     const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
     const {
-      testOutputByProcessor,
+      testOutputPerProcessor,
       config: { selectedDocumentIndex, documents },
     } = testPipelineData;
 
     const processorOutput =
       processor &&
-      testOutputByProcessor &&
-      testOutputByProcessor[selectedDocumentIndex][processor.id];
+      testOutputPerProcessor &&
+      testOutputPerProcessor[selectedDocumentIndex][processor.id];
 
     const updateSelectedDocument = (index: number) => {
       setCurrentTestPipelineData({
@@ -200,7 +200,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
                       key={tab.id}
                       data-test-subj={`${tab.id}Tab`}
                       disabled={
-                        (tab.id === 'output' && Boolean(testOutputByProcessor) === false) ||
+                        (tab.id === 'output' && Boolean(testOutputPerProcessor) === false) ||
                         Boolean(processorOutput) === false
                       }
                     >

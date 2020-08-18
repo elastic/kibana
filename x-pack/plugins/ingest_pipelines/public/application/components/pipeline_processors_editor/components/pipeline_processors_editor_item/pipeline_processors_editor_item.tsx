@@ -69,12 +69,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const { testPipelineData } = useTestPipelineContext();
     const {
       config: { selectedDocumentIndex },
-      testOutputByProcessor,
-      isExecuting,
+      testOutputPerProcessor,
+      isExecutingPipeline,
     } = testPipelineData;
 
     const processorOutput =
-      testOutputByProcessor && testOutputByProcessor[selectedDocumentIndex][processor.id];
+      testOutputPerProcessor && testOutputPerProcessor[selectedDocumentIndex][processor.id];
     const processorStatus = processorOutput?.status ?? 'inactive';
 
     const panelClasses = classNames('pipelineProcessorsEditor__item', {
@@ -146,7 +146,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
               <EuiFlexItem grow={false} className="pipelineProcessorsEditor__item__statusContainer">
-                {isExecuting ? (
+                {isExecutingPipeline ? (
                   <EuiLoadingSpinner size="s" />
                 ) : (
                   <PipelineProcessorsItemStatus processorStatus={processorStatus} />

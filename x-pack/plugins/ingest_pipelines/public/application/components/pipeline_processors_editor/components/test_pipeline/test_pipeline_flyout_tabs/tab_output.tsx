@@ -17,36 +17,35 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { TestPipelineContext } from '../../../context';
-import { HandleExecuteArgs } from '../test_pipeline_flyout';
+import { Document } from '../../../types';
+import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
 
 interface Props {
-  handleExecute: (data: HandleExecuteArgs) => void;
-  isExecuting: boolean;
-  testPipelineData: TestPipelineContext['testPipelineData'];
+  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
+  isRunningTest: boolean;
+  cachedVerbose?: boolean;
+  cachedDocuments: Document[];
+  testOutput?: any;
 }
 
 export const OutputTab: React.FunctionComponent<Props> = ({
-  handleExecute,
-  isExecuting,
-  testPipelineData,
+  handleTestPipeline,
+  isRunningTest,
+  cachedVerbose,
+  cachedDocuments,
+  testOutput,
 }) => {
-  const {
-    testOutput,
-    config: { verbose: cachedVerbose, documents: cachedDocuments },
-  } = testPipelineData;
-
   const [isVerboseEnabled, setIsVerboseEnabled] = useState(Boolean(cachedVerbose));
 
   const onEnableVerbose = (isVerbose: boolean) => {
     setIsVerboseEnabled(isVerbose);
 
-    handleExecute({ documents: cachedDocuments!, verbose: isVerbose });
+    handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
   };
 
   let content: React.ReactNode | undefined;
 
-  if (isExecuting) {
+  if (isRunningTest) {
     content = <EuiLoadingSpinner size="m" />;
   } else if (testOutput) {
     content = (
@@ -86,7 +85,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
           <EuiButton
             size="s"
             onClick={() =>
-              handleExecute({ documents: cachedDocuments!, verbose: isVerboseEnabled })
+              handleTestPipeline({ documents: cachedDocuments!, verbose: isVerboseEnabled })
             }
             iconType="refresh"
           >

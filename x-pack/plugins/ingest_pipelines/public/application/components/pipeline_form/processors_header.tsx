@@ -38,7 +38,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { services } = useKibana();
 
   const {
-    testOutput,
+    testOutputPerProcessor,
     config: { documents, selectedDocumentIndex },
   } = testPipelineData;
 
@@ -123,7 +123,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TestOutputButton
-                isDisabled={Boolean(testOutput) === false}
+                isDisabled={Boolean(testOutputPerProcessor) === false}
                 openTestPipelineFlyout={() => {
                   setOpenTestPipelineFlyout(true);
                   setActiveFlyoutTab('output');
