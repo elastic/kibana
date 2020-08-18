@@ -58,8 +58,6 @@ import { getAppTitle } from '../common/i18n_getters';
 import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { getAlertMenuAction } from './components/alerts/alerts_top_nav_handling';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 
@@ -69,7 +67,6 @@ export interface MapsPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: unknown };
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -80,7 +77,7 @@ export const bindSetupCoreAndPlugins = (
   config: MapsConfigType,
   kibanaVersion: string
 ) => {
-  const { licensing, mapsLegacy, navigation, triggers_actions_ui } = plugins;
+  const { licensing, mapsLegacy, navigation } = plugins;
   const { uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
@@ -104,7 +101,6 @@ export const bindSetupCoreAndPlugins = (
   setKibanaCommonConfig(mapsLegacy.config);
   setMapAppConfig(config);
   setKibanaVersion(kibanaVersion);
-  setTriggersActionsUi(triggers_actions_ui);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -163,10 +159,8 @@ export class MapsPlugin
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
     const config = this._initializerContext.config.get<MapsConfigType>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
-    const { inspector, home, visualizations, embeddable, triggers_actions_ui } = plugins;
+    const { inspector, home, visualizations, embeddable } = plugins;
     bindSetupCoreAndPlugins(core, plugins, config, kibanaVersion);
-
-    triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
 
     inspector.registerView(MapView);
     home.featureCatalogue.register(featureCatalogueEntry);

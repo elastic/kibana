@@ -13,7 +13,7 @@ import {
   ApplicationStart,
 } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
+import {DataPublicPluginSetup, DataPublicPluginStart} from 'src/plugins/data/public';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
@@ -32,6 +32,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   capabilities: ApplicationStart['capabilities'];
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
   metadata?: MetaData;
+  data: DataPublicPluginStart;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

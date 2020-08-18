@@ -71,6 +71,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
   IndexThresholdAlertParams,
   AlertsContextValue
 >> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
+  console.log(alertParams);
   const {
     index,
     timeField,
