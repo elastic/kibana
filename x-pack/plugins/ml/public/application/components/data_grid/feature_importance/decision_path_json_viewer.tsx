@@ -12,5 +12,5 @@ interface DecisionPathJSONViewerProps {
   featureImportance: FeatureImportance[];
 }
 export const DecisionPathJSONViewer: FC<DecisionPathJSONViewerProps> = ({ featureImportance }) => {
-  return <EuiCodeBlock>{JSON.stringify(featureImportance)}</EuiCodeBlock>;
+  return <EuiCodeBlock isCopyable={true}>{JSON.stringify(featureImportance)}</EuiCodeBlock>;
 };

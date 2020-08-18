@@ -560,7 +560,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { destinationIndex, predictionField } = request.body;
         const params = {
@@ -588,7 +588,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           },
         };
         let baseline;
-        const aggregationResult = await context.ml!.mlClient.callAsCurrentUser('search', params);
+        const aggregationResult = await legacyClient.callAsCurrentUser('search', params);
         if (aggregationResult) {
           baseline = aggregationResult.aggregations.featureImportanceBaseline.value;
         }

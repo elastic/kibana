@@ -24,42 +24,44 @@ enum DECISION_PATH_TABS {
 const FEATURE_NAME = 'feature_name';
 const FEATURE_IMPORTANCE = 'importance';
 
+export interface ExtendedFeatureImportance extends FeatureImportance {
+  absImportance?: number;
+}
 export const useDecisionPathData = ({ baseline, featureImportance }: DecisionPathPopoverProps) => {
   const [decisionPlotData, setDecisionPlotData] = useState();
 
   useEffect(() => {
-    let mappedFeatureImportance: FeatureImportance[] = featureImportance;
+    let mappedFeatureImportance: ExtendedFeatureImportance[] = featureImportance;
+    mappedFeatureImportance = mappedFeatureImportance.map((d) => ({
+      ...d,
+      absImportance: Math.abs(d[FEATURE_IMPORTANCE]),
+    }));
 
     if (baseline) {
-      // get the absolute difference of the importance value to the baseline for sorting
-
-      mappedFeatureImportance = mappedFeatureImportance.map((d) => ({
-        ...d,
-        difference: Math.abs(d[FEATURE_IMPORTANCE]),
-      }));
+      // get the absolute absImportance of the importance value to the baseline for sorting
       mappedFeatureImportance.push({
         [FEATURE_NAME]: 'baseline',
         [FEATURE_IMPORTANCE]: baseline,
-        difference: 0,
+        absImportance: 0,
       });
-
-      // sort so importance so it goes from bottom (baseline) to top
-      mappedFeatureImportance = mappedFeatureImportance
-        .sort((a, b) => b.difference - a.difference)
-        .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
-
-      // start at the baseline and end at predicted value
-      let cumulativeSum = 0;
-      for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
-        cumulativeSum += mappedFeatureImportance[i][1];
-        mappedFeatureImportance[i][2] = cumulativeSum;
-      }
-    } else {
-      // sort so most positive importance on top -> most negative importance at bottom
-      mappedFeatureImportance = featureImportance
-        // .sort((a, b) => b[FEATURE_IMPORTANCE] - a[FEATURE_IMPORTANCE])
-        .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
     }
+
+    mappedFeatureImportance = mappedFeatureImportance
+      // sort so absolute importance so it goes from bottom (baseline) to top
+      .sort((a, b) => b.absImportance - a.absImportance)
+      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
+
+    // start at the baseline and end at predicted value
+    // for regression, cumulativeSum should add up to baseline
+    let cumulativeSum = 0;
+    for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
+      cumulativeSum += mappedFeatureImportance[i][1];
+      mappedFeatureImportance[i][2] = cumulativeSum;
+    }
+
+    // go back and readjust the starting point to m.{}_prediction - cumulativeSum
+    // to account for when there are more or less features included in the analysis than the max set
+
     setDecisionPlotData(mappedFeatureImportance);
   }, [baseline, featureImportance]);
 

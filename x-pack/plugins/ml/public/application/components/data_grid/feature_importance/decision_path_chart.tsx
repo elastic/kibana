@@ -56,11 +56,13 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
     return null;
   }
   const baselineData: LineAnnotationDatum[] = [{ dataValue: baseline, details: 'baseline' }];
-  const maxDomain = _.maxBy(decisionPlotData, (d) => d[2])[2];
-  const minDomain = _.minBy(decisionPlotData, (d) => d[2])[2];
-
+  let maxDomain = _.maxBy(decisionPlotData, (d) => d[2])[2];
+  let minDomain = _.minBy(decisionPlotData, (d) => d[2])[2];
+  const buffer = Math.abs(maxDomain - minDomain) * 0.1;
+  maxDomain = maxDomain + buffer;
+  minDomain = minDomain - buffer;
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = decisionPlotData.length > 3 ? 20 : 75;
+  const heightMultiplier = decisionPlotData.length > 3 ? 35 : 75;
   return (
     <>
       <Chart className="story-chart" size={{ height: decisionPlotData.length * heightMultiplier }}>
@@ -97,7 +99,7 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
           xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
-          yAccessors={baseline ? [2] : [1]} // if baseline exist then shows the decision path else show in order of descending importance
+          yAccessors={[2]} // if baseline exist then shows the decision path else show in order of descending importance
           data={decisionPlotData}
         />
       </Chart>
