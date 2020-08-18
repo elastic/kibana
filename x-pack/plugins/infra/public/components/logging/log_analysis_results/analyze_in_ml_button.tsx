@@ -11,12 +11,10 @@ import { encode } from 'rison-node';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
 
-type DatemathRange = TimeRange | { startTime: string; endTime: string };
-
 export const AnalyzeInMlButton: React.FunctionComponent<{
   jobId: string;
   partition?: string;
-  timeRange: DatemathRange;
+  timeRange: TimeRange;
 }> = ({ jobId, partition, timeRange }) => {
   const linkProps = useLinkProps(
     typeof partition === 'string'
@@ -44,7 +42,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
 
 export const getOverallAnomalyExplorerLinkDescriptor = (
   jobId: string,
-  timeRange: DatemathRange
+  timeRange: TimeRange
 ): LinkDescriptor => {
   const { from, to } = convertTimeRangeToParams(timeRange);
 
@@ -67,7 +65,7 @@ export const getOverallAnomalyExplorerLinkDescriptor = (
 
 export const getEntitySpecificSingleMetricViewerLink = (
   jobId: string,
-  timeRange: DatemathRange,
+  timeRange: TimeRange,
   entities: Record<string, string>
 ): LinkDescriptor => {
   const { from, to } = convertTimeRangeToParams(timeRange);
@@ -96,15 +94,9 @@ export const getEntitySpecificSingleMetricViewerLink = (
   };
 };
 
-const convertTimeRangeToParams = (timeRange: DatemathRange): { from: string; to: string } => {
+const convertTimeRangeToParams = (timeRange: TimeRange): { from: string; to: string } => {
   return {
-    from:
-      typeof timeRange.startTime === 'number'
-        ? new Date(timeRange.startTime).toISOString()
-        : timeRange.startTime,
-    to:
-      typeof timeRange.endTime === 'number'
-        ? new Date(timeRange.endTime).toISOString()
-        : timeRange.endTime,
+    from: new Date(timeRange.startTime).toISOString(),
+    to: new Date(timeRange.endTime).toISOString(),
   };
 };

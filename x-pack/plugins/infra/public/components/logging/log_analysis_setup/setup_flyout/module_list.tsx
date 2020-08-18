@@ -17,7 +17,6 @@ import {
 } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogAnalysisModuleListCard } from './module_list_card';
 import type { ModuleId } from './setup_flyout_state';
-import { useLogAnalysisResultsUrlState } from '../../../../pages/logs/log_entry_rate/use_log_entry_rate_results_url_state';
 
 export const LogAnalysisModuleList: React.FC<{
   onViewModuleSetup: (module: ModuleId) => void;
@@ -32,8 +31,6 @@ export const LogAnalysisModuleList: React.FC<{
     jobIds: logEntryCategoriesJobIds,
   } = useLogEntryCategoriesModuleContext();
 
-  const { timeRange } = useLogAnalysisResultsUrlState();
-
   const viewLogEntryRateSetupFlyout = useCallback(() => {
     onViewModuleSetup('logs_ui_analysis');
   }, [onViewModuleSetup]);
@@ -47,7 +44,6 @@ export const LogAnalysisModuleList: React.FC<{
         <EuiFlexItem>
           <LogAnalysisModuleListCard
             jobId={logEntryRateJobIds['log-entry-rate']}
-            timeRange={timeRange}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryRateModule.moduleDescription}
             moduleName={logEntryRateModule.moduleName}
@@ -58,7 +54,6 @@ export const LogAnalysisModuleList: React.FC<{
         <EuiFlexItem>
           <LogAnalysisModuleListCard
             jobId={logEntryCategoriesJobIds['log-entry-categories-count']}
-            timeRange={timeRange}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryCategoriesModule.moduleDescription}
             moduleName={logEntryCategoriesModule.moduleName}
