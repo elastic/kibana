@@ -91,6 +91,25 @@ function getSuggestionForColumns(
   }
 }
 
+function flipSeriesType(seriesType: SeriesType) {
+  switch (seriesType) {
+    case 'bar_horizontal':
+      return 'bar';
+    case 'bar_horizontal_stacked':
+      return 'bar_stacked';
+    case 'bar':
+      return 'bar_horizontal';
+    case 'bar_horizontal_stacked':
+      return 'bar_stacked';
+    case 'bar_horizontal_percentage_stacked':
+      return 'bar_percentage_stacked';
+    case 'bar_percentage_stacked':
+      return 'bar_horizontal_percentage_stacked';
+    default:
+      return 'bar_horizontal';
+  }
+}
+
 function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
     currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
@@ -183,18 +202,8 @@ function getSuggestionsForLayer({
     // Chart switcher needs to include every chart type
     return visualizationTypes
       .map((visType) => {
-        const localOptions = { ...options };
-        if (
-          visType.id.includes('percentage') &&
-          localOptions.xValue &&
-          localOptions.xValue.operation.scale === 'ordinal' &&
-          !localOptions.splitBy
-        ) {
-          localOptions.splitBy = localOptions.xValue;
-          delete localOptions.xValue;
-        }
         return {
-          ...buildSuggestion({ ...localOptions, seriesType: visType.id as SeriesType }),
+          ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
           title: visType.label,
           hide: visType.id !== 'bar_stacked',
         };
@@ -211,19 +220,13 @@ function getSuggestionsForLayer({
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
-  if (seriesType !== 'line' && (!xValue || xValue.operation.scale === 'ordinal')) {
+  if (seriesType.includes('bar') && (!xValue || xValue.operation.scale === 'ordinal')) {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
-        seriesType:
-          // TODO add percentage variants in here
-          seriesType === 'bar_horizontal'
-            ? 'bar'
-            : seriesType === 'bar_horizontal_stacked'
-            ? 'bar_stacked'
-            : 'bar_horizontal',
+        seriesType: flipSeriesType(seriesType),
       })
     );
   } else {
@@ -430,6 +433,15 @@ function buildSuggestion({
   keptLayerIds: string[];
   hide?: boolean;
 }) {
+  if (
+    seriesType.includes('percentage') &&
+    xValue &&
+    xValue.operation.scale === 'ordinal' &&
+    !splitBy
+  ) {
+    splitBy = xValue;
+    xValue = undefined;
+  }
   const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
   const accessors = yValues.map((col) => col.columnId);
   const newLayer = {

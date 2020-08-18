@@ -492,6 +492,18 @@ export function XYChart({
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             stackAsPercentage: seriesType.includes('percentage'),
             timeZone,
+            areaSeriesStyle: {
+              point: {
+                visible: !xAccessor,
+                radius: 5,
+              },
+            },
+            lineSeriesStyle: {
+              point: {
+                visible: !xAccessor,
+                radius: 5,
+              },
+            },
             name(d) {
               const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
