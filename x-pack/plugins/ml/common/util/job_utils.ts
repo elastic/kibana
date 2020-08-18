@@ -388,9 +388,19 @@ export function basicJobValidation(
       valid = false;
     } else {
       let v = true;
+      let categorizerDetectorMissingPartitionField = false;
+
       each(job.analysis_config.detectors, (d) => {
         if (isEmpty(d.function)) {
           v = false;
+        }
+        // if detector has an ml category, check if the partition_field is missing
+        const needToHavePartitionFieldName =
+          job.analysis_config.per_partition_categorization?.enabled === true &&
+          (d.by_field_name === MLCATEGORY || d.over_field_name === MLCATEGORY);
+
+        if (needToHavePartitionFieldName && d.partition_field_name === undefined) {
+          categorizerDetectorMissingPartitionField = true;
         }
       });
       if (v) {
@@ -398,6 +408,9 @@ export function basicJobValidation(
       } else {
         messages.push({ id: 'detectors_function_empty' });
         valid = false;
+      }
+      if (categorizerDetectorMissingPartitionField) {
+        messages.push({ id: 'categorizer_detector_missing_per_partition_field' });
       }
     }
 
@@ -421,7 +434,7 @@ export function basicJobValidation(
           if (uniqPartitions.length > 1) {
             valid = false;
             messages.push({
-              id: 'varying_per_partition_fields',
+              id: 'categorizer_varying_per_partition_fields',
               fields: uniqPartitions.join(', '),
             });
           }

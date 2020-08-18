@@ -43,10 +43,26 @@ export const getMessages = once(() => {
   const createJobsDocsUrl = `https://www.elastic.co/guide/en/machine-learning/{{version}}/create-jobs.html`;
 
   return {
-    varying_per_partition_fields: {
+    categorizer_detector_missing_per_partition_field: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate(
-        'xpack.ml.models.jobValidation.messages.varyingPerPartitionFieldNamesMessage',
+        'xpack.ml.models.jobValidation.messages.categorizerMissingPerPartitionFieldMessage',
+        {
+          defaultMessage:
+            'Partition field name must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
+
+          values: {
+            fields: '"{{fields}}"',
+          },
+        }
+      ),
+      url:
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
+    },
+    categorizer_varying_per_partition_fields: {
+      status: VALIDATION_STATUS.ERROR,
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.categorizerVaryingPerPartitionFieldNamesMessage',
         {
           defaultMessage:
             'Detectors with keyword "mlcategory" cannot have different partition_field_name when per-partition categorization is enabled. Found [{fields}].',
