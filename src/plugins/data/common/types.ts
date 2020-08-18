@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { FieldFormatsGetConfigFn } from './field_formats/types';
-
 export * from './query/types';
 export * from './kbn_field_types/types';
 export * from './index_patterns/types';
-export { TextContextTypeConvert, IFieldFormatMetaParams } from './field_formats/types';
 
 /**
  * If a service is being shared on both the client and the server, and
@@ -34,4 +31,4 @@ export { TextContextTypeConvert, IFieldFormatMetaParams } from './field_formats/
  * should only be used in scenarios where async access to uiSettings is
  * not possible.
  */
-export type GetConfigFn = FieldFormatsGetConfigFn;
+export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
