@@ -30,7 +30,7 @@ describe('awaitIfPending', () => {
     expect(fnD).toHaveBeenCalledTimes(0);
   });
 
-  describe('first promise created, not necessarily first fufilled, sets value for all in queue', () => {
+  describe('first promise created, not necessarily first fulfilled, sets value for all in queue', () => {
     it('succeeds', async () => {
       const fnA = jest.fn().mockImplementation(async () => {
         await sleep(1000);
@@ -89,7 +89,7 @@ describe('awaitIfPending', () => {
     });
   });
 
-  it('does not block other calls after batch is fufilled. can call again for a new result', async () => {
+  it('does not block other calls after batch is fulfilled. can call again for a new result', async () => {
     const fnA = jest
       .fn()
       .mockImplementationOnce(() => 'fnA first')
