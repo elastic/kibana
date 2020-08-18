@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react';
 
 import {
   isCompletedAnalyticsJob,
+  isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
@@ -57,8 +58,7 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
         />
       ),
       available: (i: DataFrameAnalyticsListRow) =>
-        !isDataFrameAnalyticsRunning(item.stats.state) &&
-        !isDataFrameAnalyticsFailed(item.stats.state),
+        !isDataFrameAnalyticsRunning(i.stats.state) && !isDataFrameAnalyticsFailed(i.stats.state),
       enabled: startButtonEnabled,
       description: startActionNameText,
       icon: 'play',
