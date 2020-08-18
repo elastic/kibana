@@ -90,9 +90,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
      */
-    async configureDimension(opts: { dimension: string; operation: string; field: string }) {
+    async configureDimension(
+      opts: { dimension: string; operation: string; field: string },
+      layerIndex = 0
+    ) {
       await retry.try(async () => {
-        await testSubjects.click(opts.dimension);
+        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
         await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
       });
 
