@@ -17,14 +17,7 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import {
-  ChromeBadge,
-  ChromeBrand,
-  ChromeBreadcrumb,
-  ChromeService,
-  InternalChromeStart,
-  NavType,
-} from './';
+import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {

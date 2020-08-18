@@ -43,11 +43,7 @@ import { StepConfigurePackage } from '../create_package_config_page/step_configu
 import { StepDefinePackageConfig } from '../create_package_config_page/step_define_package_config';
 
 export const EditPackageConfigPage: React.FunctionComponent = () => {
-  const {
-    notifications,
-    chrome: { getIsNavDrawerLocked$ },
-    uiSettings,
-  } = useCore();
+  const { notifications } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -56,15 +52,6 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   } = useRouteMatch();
   const history = useHistory();
   const { getHref, getPath } = useLink();
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   // Agent config, package info, and package config states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);

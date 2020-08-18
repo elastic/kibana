@@ -56,8 +56,6 @@ const StepsWithLessPadding = styled(EuiSteps)`
 export const CreatePackageConfigPage: React.FunctionComponent = () => {
   const {
     notifications,
-    chrome: { getIsNavDrawerLocked$ },
-    uiSettings,
     application: { navigateToApp },
   } = useCore();
   const {
@@ -70,15 +68,6 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
   const history = useHistory();
   const routeState = useIntraAppState<CreatePackageConfigRouteState>();
   const from: CreatePackageConfigFrom = configId ? 'config' : 'package';
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();

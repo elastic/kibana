@@ -10,13 +10,17 @@ import { globalSearchPluginMock } from '../../../global_search/public/mocks';
 import { GlobalSearchPluginStart } from '../../../global_search/public';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => 'mockId',
+}));
+
 describe('SearchBar', () => {
   let searchService: GlobalSearchPluginStart;
-  let findSpy: jest.SpyInstance;
+  // let findSpy: jest.SpyInstance;
 
   beforeEach(() => {
     searchService = globalSearchPluginMock.createStartContract();
-    findSpy = jest.spyOn(globalSearchPluginMock, 'createStartContract');
+    // findSpy = jest.spyOn(globalSearchPluginMock, 'createStartContract');
   });
 
   it('basically works', async () => {

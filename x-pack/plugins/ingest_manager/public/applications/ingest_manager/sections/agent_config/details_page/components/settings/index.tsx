@@ -33,11 +33,7 @@ const FormWrapper = styled.div`
 
 export const ConfigSettingsView = memo<{ config: AgentConfig }>(
   ({ config: originalAgentConfig }) => {
-    const {
-      notifications,
-      chrome: { getIsNavDrawerLocked$ },
-      uiSettings,
-    } = useCore();
+    const { notifications } = useCore();
     const {
       fleet: { enabled: isFleetEnabled },
     } = useConfig();
@@ -45,7 +41,6 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     const { getPath } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
     const refreshConfig = useConfigRefresh();
-    const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
     const [agentConfig, setAgentConfig] = useState<AgentConfig>({
       ...originalAgentConfig,
     });
@@ -54,14 +49,6 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
     const validation = agentConfigFormValidation(agentConfig);
-
-    useEffect(() => {
-      const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-        setIsNavDrawerLocked(newIsNavDrawerLocked);
-      });
-
-      return () => subscription.unsubscribe();
-    });
 
     const updateAgentConfig = (updatedFields: Partial<AgentConfig>) => {
       setAgentConfig({
