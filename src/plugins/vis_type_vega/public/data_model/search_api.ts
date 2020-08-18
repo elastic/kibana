@@ -54,7 +54,7 @@ export class SearchAPI {
           esShardTimeout: this.dependencies.injectedMetadata.getInjectedVar(
             'esShardTimeout'
           ) as number,
-          uiSettings: this.dependencies.uiSettings,
+          getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 
         if (this.inspectorAdapters) {

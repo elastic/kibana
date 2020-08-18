@@ -112,7 +112,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
-      uiSettings,
+      getConfig: uiSettings.get.bind(uiSettings),
       esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
       legacySearch,

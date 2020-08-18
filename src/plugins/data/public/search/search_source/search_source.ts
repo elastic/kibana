@@ -72,7 +72,6 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -82,12 +81,29 @@ import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromReques
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
 import { ISearchStartLegacy } from '../types';
 
+/** @internal */
+export const searchSourceRequiredUiSettings = [
+  'dateFormat:tz',
+  UI_SETTINGS.COURIER_BATCH_SEARCHES,
+  UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
+  UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
+  UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS,
+  UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE,
+  UI_SETTINGS.DOC_HIGHLIGHT,
+  UI_SETTINGS.META_FIELDS,
+  UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS,
+  UI_SETTINGS.QUERY_STRING_OPTIONS,
+  UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
+  UI_SETTINGS.SORT_OPTIONS,
+];
+
 export interface SearchSourceDependencies {
-  uiSettings: CoreStart['uiSettings'];
+  getConfig: GetConfigFn;
   search: ISearchGeneric;
   legacySearch: ISearchStartLegacy;
   esShardTimeout: number;
@@ -204,11 +220,11 @@ export class SearchSource {
    * @return {Observable<SearchResponse<unknown>>}
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
-    const { search, esShardTimeout, uiSettings } = this.dependencies;
+    const { search, esShardTimeout, getConfig } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       esShardTimeout,
-      uiSettings,
+      getConfig,
     });
 
     return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
@@ -221,7 +237,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { esShardTimeout, legacySearch, uiSettings } = this.dependencies;
+    const { esShardTimeout, legacySearch, getConfig } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -231,7 +247,7 @@ export class SearchSource {
       },
       {
         legacySearchService: legacySearch,
-        config: uiSettings,
+        config: { get: getConfig },
         esShardTimeout,
       }
     );
@@ -242,14 +258,14 @@ export class SearchSource {
    * @async
    */
   async fetch(options: FetchOptions = {}) {
-    const { uiSettings } = this.dependencies;
+    const { getConfig } = this.dependencies;
     await this.requestIsStarting(options);
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
 
     let response;
-    if (uiSettings.get(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
       response = this.fetch$(searchRequest, options.abortSignal).toPromise();
@@ -341,7 +357,7 @@ export class SearchSource {
       }
     };
 
-    const { uiSettings } = this.dependencies;
+    const { getConfig } = this.dependencies;
 
     switch (key) {
       case 'filter':
@@ -363,7 +379,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          uiSettings.get(UI_SETTINGS.SORT_OPTIONS)
+          getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
       default:
@@ -417,14 +433,11 @@ export class SearchSource {
       body._source = index.getSourceFiltering();
     }
 
-    const { uiSettings } = this.dependencies;
+    const { getConfig } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(
-        body._source.excludes,
-        uiSettings.get(UI_SETTINGS.META_FIELDS)
-      );
+      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -444,11 +457,11 @@ export class SearchSource {
       );
     }
 
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, uiSettings.get(UI_SETTINGS.DOC_HIGHLIGHT));
+      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 
