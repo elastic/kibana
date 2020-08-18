@@ -40,7 +40,9 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   },
 ];
 
-export const createResultTypeFilters = (resultTypes: Array<'model_plot' | 'record'>) => [
+export const createResultTypeFilters = (
+  resultTypes: Array<'categorizer_stats' | 'model_plot' | 'record'>
+) => [
   {
     terms: {
       result_type: resultTypes,
