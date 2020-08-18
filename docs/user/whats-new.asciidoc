@@ -170,7 +170,7 @@ image::images/swim-lane-filter.png[Anomaly swim lane filter]
 
 [float]
 [[transform-data-frame-analytics-histogram-7-9]]
-=== Histogram charts in {transform} and {df-analytics} wizards
+=== Histogram charts in {transform} and {dfanalytics} wizards
 
 Whether you're transforming your data to get it ready for analysis or evaluating
 your data after running it through a {dfanalytics-job}, understanding the
