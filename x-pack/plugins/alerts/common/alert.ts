@@ -6,6 +6,11 @@
 
 import { SavedObjectAttributes } from 'kibana/server';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AlertTypeState = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AlertTypeParams = Record<string, any>;
+
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
 }
@@ -28,9 +33,7 @@ export interface Alert {
   consumer: string;
   schedule: IntervalSchedule;
   actions: AlertAction[];
-  // This will have to remain `any` until we can extend Alert Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: Record<string, any>;
+  params: AlertTypeParams;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;

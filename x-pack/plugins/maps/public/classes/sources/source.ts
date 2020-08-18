@@ -11,9 +11,9 @@ import { ReactElement } from 'react';
 import { Adapters } from 'src/plugins/inspector/public';
 import { copyPersistentState } from '../../reducers/util';
 
-import { SourceDescriptor } from '../../../common/descriptor_types';
 import { IField } from '../fields/field';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 
 export type SourceEditorArgs = {
@@ -56,7 +56,7 @@ export interface ISource {
   supportsFitToBounds(): Promise<boolean>;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
-  cloneDescriptor(): SourceDescriptor;
+  cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getIndexPatternIds(): string[];
@@ -70,17 +70,17 @@ export interface ISource {
 }
 
 export class AbstractSource implements ISource {
-  readonly _descriptor: SourceDescriptor;
+  readonly _descriptor: AbstractSourceDescriptor;
   readonly _inspectorAdapters?: Adapters | undefined;
 
-  constructor(descriptor: SourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
     this._inspectorAdapters = inspectorAdapters;
   }
 
   destroy(): void {}
 
-  cloneDescriptor(): SourceDescriptor {
+  cloneDescriptor(): AbstractSourceDescriptor {
     return copyPersistentState(this._descriptor);
   }
 
@@ -133,7 +133,7 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalQuery(): boolean {
-    return 'applyGlobalQuery' in this._descriptor ? !!this._descriptor.applyGlobalQuery : false;
+    return !!this._descriptor.applyGlobalQuery;
   }
 
   getIndexPatternIds(): string[] {

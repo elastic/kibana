@@ -6,19 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MonitorStatusTranslations = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage: '{contextMessage}\nLast triggered at: {lastTriggered}\n',
-    values: {
-      contextMessage: '{{context.message}}',
-      lastTriggered: '{{state.lastTriggeredAt}}',
-    },
-  }),
-  name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
-    defaultMessage: 'Uptime monitor status',
-  }),
-};
-
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
     defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
