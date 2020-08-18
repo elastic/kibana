@@ -25,10 +25,25 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
       alert(JSON.stringify(args));
     },
   } as any,
+  getTrigger: (triggerId) => ({
+    id: triggerId,
+  }),
 });
 
-storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
-  <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />
-  </EuiFlyout>
-));
+storiesOf('components/FlyoutManageDrilldowns', module)
+  .add('default (3 triggers)', () => (
+    <EuiFlyout onClose={() => {}}>
+      <FlyoutManageDrilldowns
+        dynamicActionManager={mockDynamicActionManager}
+        supportedTriggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER']}
+      />
+    </EuiFlyout>
+  ))
+  .add('Only filter is supported', () => (
+    <EuiFlyout onClose={() => {}}>
+      <FlyoutManageDrilldowns
+        dynamicActionManager={mockDynamicActionManager}
+        supportedTriggers={['FILTER_TRIGGER']}
+      />
+    </EuiFlyout>
+  ));
