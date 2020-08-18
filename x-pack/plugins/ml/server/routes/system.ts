@@ -187,10 +187,10 @@ export function systemRoutes(
     },
     mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const info = await client.asInternalUser.ml.info();
+        const { body } = await client.asInternalUser.ml.info();
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
-          body: { ...info, cloudId },
+          body: { ...body, cloudId },
         });
       } catch (error) {
         return response.customError(wrapError(error));
@@ -218,8 +218,9 @@ export function systemRoutes(
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
+        const { body } = await client.asCurrentUser.search(request.body);
         return response.ok({
-          body: await client.asCurrentUser.search(request.body),
+          body,
         });
       } catch (error) {
         return response.customError(wrapError(error));

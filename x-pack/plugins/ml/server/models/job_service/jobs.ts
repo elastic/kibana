@@ -22,7 +22,7 @@ import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
-import { CalendarManager, Calendar } from '../calendar';
+import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getEarliestDatafeedStartTime,
@@ -257,41 +257,25 @@ export function jobsProvider(client: IScopedClusterClient) {
     const globalCalendars: string[] = [];
 
     const jobIdsString = jobIds.join();
-    const requests: [
-      Promise<MlJobsResponse>,
-      Promise<MlJobsStatsResponse>,
-      Promise<MlDatafeedsResponse>,
-      Promise<MlDatafeedsStatsResponse>,
-      Promise<Calendar[]>,
-      Promise<{ [id: string]: number | undefined }>
-    ] = [
-      (asInternalUser.ml.getJobs(
-        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
-      ) as unknown) as Promise<MlJobsResponse>,
-      (asInternalUser.ml.getJobStats(
-        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
-      ) as unknown) as Promise<MlJobsStatsResponse>,
-      (asInternalUser.ml.getDatafeeds() as unknown) as Promise<MlDatafeedsResponse>,
-      (asInternalUser.ml.getDatafeedStats() as unknown) as Promise<MlDatafeedsStatsResponse>,
-      calMngr.getAllCalendars(),
-      getLatestBucketTimestampByJob(),
-    ];
-
     const [
-      jobResults,
-      jobStatsResults,
-      datafeedResults,
-      datafeedStatsResults,
+      { body: jobResults },
+      { body: jobStatsResults },
+      { body: datafeedResults },
+      { body: datafeedStatsResults },
       calendarResults,
       latestBucketTimestampByJob,
-    ] = await Promise.all<
-      MlJobsResponse,
-      MlJobsStatsResponse,
-      MlDatafeedsResponse,
-      MlDatafeedsStatsResponse,
-      Calendar[],
-      { [id: string]: number | undefined }
-    >(requests);
+    ] = await Promise.all([
+      asInternalUser.ml.getJobs<MlJobsResponse>(
+        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
+      ),
+      asInternalUser.ml.getJobStats<MlJobsStatsResponse>(
+        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
+      ),
+      asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>(),
+      asInternalUser.ml.getDatafeedStats<MlDatafeedsStatsResponse>(),
+      calMngr.getAllCalendars(),
+      getLatestBucketTimestampByJob(),
+    ]);
 
     if (datafeedResults && datafeedResults.datafeeds) {
       datafeedResults.datafeeds.forEach((datafeed) => {

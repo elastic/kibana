@@ -100,7 +100,7 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
     }
 
     try {
-      const resp = await asInternalUser.search({
+      const { body } = await asInternalUser.search({
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
@@ -112,8 +112,8 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
       });
 
       let messages = [];
-      if (resp.hits.total !== 0) {
-        messages = resp.hits.hits.map((hit) => hit._source);
+      if (body.hits.total !== 0) {
+        messages = body.hits.hits.map((hit) => hit._source);
       }
       return messages;
     } catch (e) {
@@ -155,7 +155,7 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
         levelsPerJobAggSize = jobIds.length;
       }
 
-      const resp = await asInternalUser.search({
+      const { body } = await asInternalUser.search({
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
@@ -201,13 +201,13 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
       let messagesPerJob = [];
       const jobMessages = [];
       if (
-        resp.hits.total !== 0 &&
-        resp.aggregations &&
-        resp.aggregations.levelsPerJob &&
-        resp.aggregations.levelsPerJob.buckets &&
-        resp.aggregations.levelsPerJob.buckets.length
+        body.hits.total !== 0 &&
+        body.aggregations &&
+        body.aggregations.levelsPerJob &&
+        body.aggregations.levelsPerJob.buckets &&
+        body.aggregations.levelsPerJob.buckets.length
       ) {
-        messagesPerJob = resp.aggregations.levelsPerJob.buckets;
+        messagesPerJob = body.aggregations.levelsPerJob.buckets;
       }
 
       messagesPerJob.forEach((job) => {

@@ -65,10 +65,11 @@ class FieldsService {
   }
 
   private async loadFieldCaps(): Promise<any> {
-    return this._mlClusterClient.asCurrentUser.fieldCaps({
+    const { body } = await this._mlClusterClient.asCurrentUser.fieldCaps({
       index: this._indexPattern,
       fields: '*',
     });
+    return body;
   }
 
   // create field object from the results from _field_caps
