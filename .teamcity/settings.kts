@@ -26,6 +26,11 @@ project {
     id("OSS")
     name = "OSS Distro"
 
+    buildType(OssBuild)
+    buildType(OssVisualRegression)
+    val ciGroups = (1..12).map { OssCiGroup(it) }
+    ciGroups.forEach { buildType(it) }
+
     sequential {
       buildType(OssBuild)
       parallel (options = {
@@ -34,7 +39,7 @@ project {
         synchronizeRevisions = true
         reuseBuilds = ReuseBuilds.SUCCESSFUL
       }) {
-        (1..12).forEach { buildType(OssCiGroup(it)) }
+
         buildType(OssVisualRegression)
       }
     }
