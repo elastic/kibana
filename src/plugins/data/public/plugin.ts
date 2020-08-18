@@ -148,7 +148,7 @@ export class DataPublicPlugin
     const searchService = this.searchService.setup(core, {
       usageCollection,
       packageInfo: this.packageInfo,
-      registerFunction: expressions.registerFunction,
+      expressions,
     });
 
     return {
