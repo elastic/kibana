@@ -313,6 +313,7 @@ describe('use_form() hook', () => {
     const TestComp = ({ onForm }: { onForm: (form: FormHook<any>) => void }) => {
       const { form } = useForm<RestFormTest>({
         defaultValue,
+        options: { stripEmptyFields: false },
       });
 
       useEffect(() => {
@@ -321,8 +322,17 @@ describe('use_form() hook', () => {
 
       return (
         <Form form={form}>
-          <UseField path="username" data-test-subj="userNameField" />
-          <UseField path="city" defaultValue="Paris" data-test-subj="cityField" />
+          <UseField
+            path="username"
+            config={{ defaultValue: 'configDefaultValue' }}
+            data-test-subj="userNameField"
+          />
+          <UseField
+            path="city"
+            config={{ defaultValue: 'configDefaultValue' }}
+            defaultValue="inlineDefaultValue"
+            data-test-subj="cityField"
+          />
           <UseField path="deeply.nested.value" data-test-subj="deeplyNestedField" />
         </Form>
       );
@@ -351,7 +361,7 @@ describe('use_form() hook', () => {
       });
       expect(formData).toEqual({
         username: 'defaultValue',
-        city: 'Paris',
+        city: 'inlineDefaultValue',
         deeply: { nested: { value: 'defaultValue' } },
       });
 
@@ -377,7 +387,7 @@ describe('use_form() hook', () => {
       });
       expect(formData).toEqual({
         username: 'defaultValue',
-        city: 'Paris',
+        city: 'inlineDefaultValue', // Inline default value is correctly kept after resetting
         deeply: { nested: { value: 'defaultValue' } },
       });
     });
@@ -411,9 +421,24 @@ describe('use_form() hook', () => {
         formData = formHook!.getFormData();
       });
       expect(formData).toEqual({
-        username: 'defaultValue', // Back to the initial defaultValue as no value was provided when resetting
+        username: 'configDefaultValue', // Back to the config defaultValue as no value was provided when resetting
         city: 'newDefaultValue',
         deeply: { nested: { value: 'newDefaultValue' } },
+      });
+
+      // Make sure all field are back to the config defautlValue, even when we have a UseField with inline prop "defaultValue"
+      await act(async () => {
+        formHook!.reset({
+          defaultValue: {},
+        });
+      });
+      await act(async () => {
+        formData = formHook!.getFormData();
+      });
+      expect(formData).toEqual({
+        username: 'configDefaultValue',
+        city: 'configDefaultValue', // Inline default value **is not** kept after resetting with undefined "city" value
+        deeply: { nested: { value: '' } }, // Fallback to empty string as no config was provided
       });
     });
   });

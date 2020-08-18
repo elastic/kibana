@@ -19,6 +19,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
@@ -39,7 +40,7 @@ export function useForm<T extends FormData = FormData>(
   const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
     formConfig ?? {};
 
-  const formDefaultValue = useMemo(() => {
+  const formDefaultValue = useMemo<{ [key: string]: any }>(() => {
     if (defaultValue === undefined || Object.keys(defaultValue).length === 0) {
       return {};
     }
@@ -48,7 +49,7 @@ export function useForm<T extends FormData = FormData>(
       .filter(({ 1: value }) => value !== undefined)
       .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
-    return deserializer ? deserializer(defaultValueFiltered) : defaultValueFiltered;
+    return deserializer ? (deserializer(defaultValueFiltered) as any) : defaultValueFiltered;
   }, [defaultValue, deserializer]);
 
   const defaultValueDeserialized = useRef(formDefaultValue);
@@ -123,6 +124,10 @@ export function useForm<T extends FormData = FormData>(
     },
     [getFormData$]
   );
+
+  const updateDefaultValueAt: FormHook<T>['__updateDefaultValueAt'] = useCallback((path, value) => {
+    set(defaultValueDeserialized.current, path, value);
+  }, []);
 
   // -- API
   // ----------------------------------
@@ -347,7 +352,7 @@ export function useForm<T extends FormData = FormData>(
 
       if (updatedDefaultValue) {
         defaultValueDeserialized.current = deserializer
-          ? deserializer(updatedDefaultValue)
+          ? (deserializer(updatedDefaultValue) as any)
           : updatedDefaultValue;
       }
 
@@ -390,6 +395,7 @@ export function useForm<T extends FormData = FormData>(
       __options: formOptions,
       __getFormData$: getFormData$,
       __updateFormDataAt: updateFormDataAt,
+      __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
       __addField: addField,
       __removeField: removeField,
@@ -412,6 +418,7 @@ export function useForm<T extends FormData = FormData>(
     formOptions,
     getFormData$,
     updateFormDataAt,
+    updateDefaultValueAt,
     readFieldConfigFromSchema,
     addField,
     removeField,

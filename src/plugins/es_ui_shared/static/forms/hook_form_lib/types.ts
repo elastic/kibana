@@ -47,6 +47,7 @@ export interface FormHook<T extends FormData = FormData> {
     fieldNames: string[]
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => T;
+  __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
 

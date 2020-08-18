@@ -25,12 +25,13 @@ import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 export const useField = <T>(
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> = {},
+  config: FieldConfig<any, T> & { initialValue?: T } = {},
   valueChangeListener?: (value: T) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
-    defaultValue = '',
+    defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
+    initialValue = config.defaultValue ?? '', // The value explicitly passed
     label = '',
     labelAppend = '',
     helpText = '',
@@ -50,13 +51,13 @@ export const useField = <T>(
    * passed through this "initialValueGetter" handler).
    */
   const initialValueGetter = useCallback(
-    (updatedDefaultValue = defaultValue) => {
+    (updatedDefaultValue = initialValue) => {
       if (typeof updatedDefaultValue === 'function') {
         return deserializer ? deserializer(updatedDefaultValue()) : updatedDefaultValue();
       }
       return deserializer ? deserializer(updatedDefaultValue) : updatedDefaultValue;
     },
-    [defaultValue, deserializer]
+    [initialValue, deserializer]
   );
 
   const [value, setStateValue] = useState<T>(initialValueGetter);
@@ -446,12 +447,12 @@ export const useField = <T>(
       setErrors([]);
 
       if (resetValue) {
-        const newValue = initialValueGetter(updatedDefaultValue);
+        const newValue = initialValueGetter(updatedDefaultValue ?? defaultValue);
         setValue(newValue);
         return newValue;
       }
     },
-    [setValue, initialValueGetter]
+    [setValue, initialValueGetter, defaultValue]
   );
 
   // -- EFFECTS
