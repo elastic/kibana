@@ -634,8 +634,6 @@ export interface IndexPatternFieldDescriptor {
     // (undocumented)
     aggregatable: boolean;
     // (undocumented)
-    displayName?: string;
-    // (undocumented)
     esTypes: string[];
     // (undocumented)
     name: string;
