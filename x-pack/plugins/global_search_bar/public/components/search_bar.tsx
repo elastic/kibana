@@ -109,7 +109,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   useEffect(() => {
     const openSearch = (event: KeyboardEvent) => {
-      if (event.key === 's' && (isWindows ? event.ctrlKey : event.metaKey)) {
+      if (event.key === '/' && (isWindows ? event.ctrlKey : event.metaKey)) {
         if (searchRef) {
           event.preventDefault();
           searchRef.focus();
@@ -215,7 +215,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                       id="xpack.globalSearchBar.searchBar.shortcut"
                       defaultMessage="Quickly search using {shortcut}"
                       values={{
-                        shortcut: <EuiBadge>{isWindows ? 'Ctrl + S' : 'Command + S'}</EuiBadge>,
+                        shortcut: <EuiBadge>{isWindows ? 'Ctrl + /' : 'Command + /'}</EuiBadge>,
                       }}
                     />
                   </EuiFlexItem>
