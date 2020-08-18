@@ -36,6 +36,11 @@ Array [
     data-focus-lock-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
+    onScrollCapture={[Function]}
+    onTouchMoveCapture={[Function]}
+    onTouchStart={[Function]}
+    onWheelCapture={[Function]}
   >
     <div
       className="euiModal canvasAssetManager canvasModal--fixedSize"
@@ -175,6 +180,7 @@ Array [
               className="euiFlexItem"
             >
               <progress
+                aria-hidden={false}
                 aria-labelledby="CanvasAssetManagerLabel"
                 className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
                 max={25000}
@@ -198,7 +204,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <span
                 className="euiButton__text"
@@ -265,6 +271,11 @@ Array [
     data-focus-lock-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
+    onScrollCapture={[Function]}
+    onTouchMoveCapture={[Function]}
+    onTouchStart={[Function]}
+    onWheelCapture={[Function]}
   >
     <div
       className="euiModal canvasAssetManager canvasModal--fixedSize"
@@ -714,6 +725,7 @@ Array [
               className="euiFlexItem"
             >
               <progress
+                aria-hidden={false}
                 aria-labelledby="CanvasAssetManagerLabel"
                 className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
                 max={25000}
@@ -737,7 +749,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <span
                 className="euiButton__text"

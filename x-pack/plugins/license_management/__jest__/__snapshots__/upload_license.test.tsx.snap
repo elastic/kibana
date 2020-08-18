@@ -297,11 +297,15 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           class="euiOverlayMask euiOverlayMask--aboveHeader"
                         >
                           <div
+                            aria-hidden="true"
+                            data-aria-hidden="true"
                             data-focus-guard="true"
                             style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
                             tabindex="0"
                           />
                           <div
+                            aria-hidden="true"
+                            data-aria-hidden="true"
                             data-focus-guard="true"
                             style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
                             tabindex="1"
@@ -375,7 +379,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     type="button"
                                   >
                                     <span
-                                      class="euiButtonEmpty__content"
+                                      class="euiButtonContent euiButtonEmpty__content"
                                     >
                                       <span
                                         class="euiButtonEmpty__text"
@@ -390,7 +394,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     type="button"
                                   >
                                     <span
-                                      class="euiButton__content"
+                                      class="euiButtonContent euiButton__content"
                                     >
                                       <span
                                         class="euiButton__text"
@@ -404,6 +408,8 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             </div>
                           </div>
                           <div
+                            aria-hidden="true"
+                            data-aria-hidden="true"
                             data-focus-guard="true"
                             style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
                             tabindex="0"
@@ -441,165 +447,93 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           onClose={[Function]}
                         >
                           <EuiFocusTrap>
-                            <FocusLock
-                              as="div"
-                              autoFocus={true}
-                              disabled={false}
-                              lockProps={
-                                Object {
-                                  "style": undefined,
-                                }
-                              }
-                              noFocusGuards={false}
-                              persistentFocus={false}
+                            <ForwardRef
+                              enabled={true}
+                              noIsolation={true}
                               returnFocus={true}
+                              scrollLock={false}
                             >
-                              <div
-                                data-focus-guard={true}
-                                key="guard-first"
-                                style={
-                                  Object {
-                                    "height": "0px",
-                                    "left": "1px",
-                                    "overflow": "hidden",
-                                    "padding": 0,
-                                    "position": "fixed",
-                                    "top": "1px",
-                                    "width": "1px",
-                                  }
-                                }
-                                tabIndex={0}
-                              />
-                              <div
-                                data-focus-guard={true}
-                                key="guard-nearest"
-                                style={
-                                  Object {
-                                    "height": "0px",
-                                    "left": "1px",
-                                    "overflow": "hidden",
-                                    "padding": 0,
-                                    "position": "fixed",
-                                    "top": "1px",
-                                    "width": "1px",
-                                  }
-                                }
-                                tabIndex={1}
-                              />
-                              <div
-                                data-focus-lock-disabled={false}
-                                onBlur={[Function]}
-                                onFocus={[Function]}
+                              <ForwardRef
+                                enabled={true}
+                                noIsolation={true}
+                                returnFocus={true}
+                                scrollLock={false}
+                                sideCar={[Function]}
                               >
-                                <SideEffect(FocusWatcher)
-                                  autoFocus={true}
-                                  disabled={false}
-                                  observed={
-                                    <div
-                                      data-focus-lock-disabled="false"
-                                    >
-                                      <div
-                                        class="euiModal euiModal--maxWidth-default euiModal--confirmation"
-                                        tabindex="0"
-                                      >
-                                        <button
-                                          aria-label="Closes this modal window"
-                                          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
-                                          type="button"
-                                        >
-                                          <div
-                                            aria-hidden="true"
-                                            class="euiButtonIcon__icon"
-                                            data-euiicon-type="cross"
-                                          />
-                                        </button>
-                                        <div
-                                          class="euiModal__flex"
-                                        >
-                                          <div
-                                            class="euiModalHeader"
-                                          >
-                                            <div
-                                              class="euiModalHeader__title"
-                                              data-test-subj="confirmModalTitleText"
-                                            >
-                                              Confirm License Upload
-                                            </div>
-                                          </div>
-                                          <div
-                                            class="euiModalBody"
-                                          >
-                                            <div
-                                              class="euiModalBody__overflow"
-                                            >
-                                              <div
-                                                class="euiText euiText--medium"
-                                                data-test-subj="confirmModalBodyText"
-                                              >
-                                                <div>
-                                                  <div
-                                                    class="euiText euiText--medium"
-                                                  >
-                                                    Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                                  </div>
-                                                  <div
-                                                    class="euiText euiText--medium"
-                                                  >
-                                                    <ul>
-                                                      <li>
-                                                        Watcher will be disabled
-                                                      </li>
-                                                    </ul>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div
-                                            class="euiModalFooter"
-                                          >
-                                            <button
-                                              class="euiButtonEmpty euiButtonEmpty--primary"
-                                              data-test-subj="confirmModalCancelButton"
-                                              type="button"
-                                            >
-                                              <span
-                                                class="euiButtonEmpty__content"
-                                              >
-                                                <span
-                                                  class="euiButtonEmpty__text"
-                                                >
-                                                  Cancel
-                                                </span>
-                                              </span>
-                                            </button>
-                                            <button
-                                              class="euiButton euiButton--primary euiButton--fill"
-                                              data-test-subj="confirmModalConfirmButton"
-                                              type="button"
-                                            >
-                                              <span
-                                                class="euiButton__content"
-                                              >
-                                                <span
-                                                  class="euiButton__text"
-                                                >
-                                                  Confirm
-                                                </span>
-                                              </span>
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
+                                <ForwardRef
+                                  as={
+                                    Object {
+                                      "$$typeof": Symbol(react.forward_ref),
+                                      "classNames": Object {
+                                        "fullWidth": "width-before-scroll-bar",
+                                        "zeroRight": "right-scroll-bar-position",
+                                      },
+                                      "defaultProps": Object {
+                                        "enabled": true,
+                                        "inert": false,
+                                        "removeScrollBar": true,
+                                      },
+                                      "render": [Function],
+                                    }
                                   }
+                                  autoFocus={true}
+                                  crossFrame={true}
+                                  disabled={false}
+                                  lockProps={
+                                    Object {
+                                      "allowPinchZoom": undefined,
+                                      "enabled": false,
+                                      "inert": undefined,
+                                      "onMouseDown": [Function],
+                                      "onTouchStart": [Function],
+                                      "shards": undefined,
+                                      "sideCar": [Function],
+                                    }
+                                  }
+                                  noFocusGuards={false}
                                   onActivation={[Function]}
                                   onDeactivation={[Function]}
                                   persistentFocus={false}
+                                  returnFocus={true}
+                                  sideCar={[Function]}
                                 >
-                                  <FocusWatcher
+                                  <div
+                                    data-focus-guard={true}
+                                    key="guard-first"
+                                    style={
+                                      Object {
+                                        "height": "0px",
+                                        "left": "1px",
+                                        "overflow": "hidden",
+                                        "padding": 0,
+                                        "position": "fixed",
+                                        "top": "1px",
+                                        "width": "1px",
+                                      }
+                                    }
+                                    tabIndex={0}
+                                  />
+                                  <div
+                                    data-focus-guard={true}
+                                    key="guard-nearest"
+                                    style={
+                                      Object {
+                                        "height": "0px",
+                                        "left": "1px",
+                                        "overflow": "hidden",
+                                        "padding": 0,
+                                        "position": "fixed",
+                                        "top": "1px",
+                                        "width": "1px",
+                                      }
+                                    }
+                                    tabIndex={1}
+                                  />
+                                  <RequireSideCar
                                     autoFocus={true}
+                                    crossFrame={true}
                                     disabled={false}
+                                    id={Object {}}
                                     observed={
                                       <div
                                         data-focus-lock-disabled="false"
@@ -670,7 +604,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                                 type="button"
                                               >
                                                 <span
-                                                  class="euiButtonEmpty__content"
+                                                  class="euiButtonContent euiButtonEmpty__content"
                                                 >
                                                   <span
                                                     class="euiButtonEmpty__text"
@@ -685,7 +619,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                                 type="button"
                                               >
                                                 <span
-                                                  class="euiButton__content"
+                                                  class="euiButtonContent euiButton__content"
                                                 >
                                                   <span
                                                     class="euiButton__text"
@@ -702,195 +636,654 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     onActivation={[Function]}
                                     onDeactivation={[Function]}
                                     persistentFocus={false}
-                                  />
-                                </SideEffect(FocusWatcher)>
-                                <div
-                                  className="euiModal euiModal--maxWidth-default euiModal--confirmation"
-                                  onKeyDown={[Function]}
-                                  tabIndex={0}
-                                >
-                                  <EuiI18n
-                                    default="Closes this modal window"
-                                    token="euiModal.closeModal"
+                                    returnFocus={[Function]}
+                                    shards={Array []}
+                                    sideCar={
+                                      Object {
+                                        "assignMedium": [Function],
+                                        "assignSyncMedium": [Function],
+                                        "options": Object {
+                                          "async": true,
+                                          "ssr": false,
+                                        },
+                                        "read": [Function],
+                                        "useMedium": [Function],
+                                      }
+                                    }
                                   >
-                                    <EuiButtonIcon
-                                      aria-label="Closes this modal window"
-                                      className="euiModal__closeIcon"
-                                      color="text"
-                                      iconType="cross"
-                                      onClick={[Function]}
-                                    >
-                                      <button
-                                        aria-label="Closes this modal window"
-                                        className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
-                                        onClick={[Function]}
-                                        type="button"
-                                      >
-                                        <EuiIcon
-                                          aria-hidden="true"
-                                          className="euiButtonIcon__icon"
-                                          size="m"
-                                          type="cross"
-                                        >
-                                          <div
-                                            aria-hidden="true"
-                                            className="euiButtonIcon__icon"
-                                            data-euiicon-type="cross"
-                                            size="m"
-                                          />
-                                        </EuiIcon>
-                                      </button>
-                                    </EuiButtonIcon>
-                                  </EuiI18n>
-                                  <div
-                                    className="euiModal__flex"
-                                  >
-                                    <EuiModalHeader>
-                                      <div
-                                        className="euiModalHeader"
-                                      >
-                                        <EuiModalHeaderTitle
-                                          data-test-subj="confirmModalTitleText"
-                                        >
-                                          <div
-                                            className="euiModalHeader__title"
-                                            data-test-subj="confirmModalTitleText"
-                                          >
-                                            <FormattedMessage
-                                              defaultMessage="Confirm License Upload"
-                                              id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-                                              values={Object {}}
-                                            >
-                                              Confirm License Upload
-                                            </FormattedMessage>
-                                          </div>
-                                        </EuiModalHeaderTitle>
-                                      </div>
-                                    </EuiModalHeader>
-                                    <EuiModalBody>
-                                      <div
-                                        className="euiModalBody"
-                                      >
+                                    <SideCar
+                                      autoFocus={true}
+                                      crossFrame={true}
+                                      disabled={false}
+                                      id={Object {}}
+                                      observed={
                                         <div
-                                          className="euiModalBody__overflow"
+                                          data-focus-lock-disabled="false"
                                         >
-                                          <EuiText
-                                            data-test-subj="confirmModalBodyText"
+                                          <div
+                                            class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                            tabindex="0"
+                                          >
+                                            <button
+                                              aria-label="Closes this modal window"
+                                              class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                              type="button"
+                                            >
+                                              <div
+                                                aria-hidden="true"
+                                                class="euiButtonIcon__icon"
+                                                data-euiicon-type="cross"
+                                              />
+                                            </button>
+                                            <div
+                                              class="euiModal__flex"
+                                            >
+                                              <div
+                                                class="euiModalHeader"
+                                              >
+                                                <div
+                                                  class="euiModalHeader__title"
+                                                  data-test-subj="confirmModalTitleText"
+                                                >
+                                                  Confirm License Upload
+                                                </div>
+                                              </div>
+                                              <div
+                                                class="euiModalBody"
+                                              >
+                                                <div
+                                                  class="euiModalBody__overflow"
+                                                >
+                                                  <div
+                                                    class="euiText euiText--medium"
+                                                    data-test-subj="confirmModalBodyText"
+                                                  >
+                                                    <div>
+                                                      <div
+                                                        class="euiText euiText--medium"
+                                                      >
+                                                        Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                      </div>
+                                                      <div
+                                                        class="euiText euiText--medium"
+                                                      >
+                                                        <ul>
+                                                          <li>
+                                                            Watcher will be disabled
+                                                          </li>
+                                                        </ul>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div
+                                                class="euiModalFooter"
+                                              >
+                                                <button
+                                                  class="euiButtonEmpty euiButtonEmpty--primary"
+                                                  data-test-subj="confirmModalCancelButton"
+                                                  type="button"
+                                                >
+                                                  <span
+                                                    class="euiButtonContent euiButtonEmpty__content"
+                                                  >
+                                                    <span
+                                                      class="euiButtonEmpty__text"
+                                                    >
+                                                      Cancel
+                                                    </span>
+                                                  </span>
+                                                </button>
+                                                <button
+                                                  class="euiButton euiButton--primary euiButton--fill"
+                                                  data-test-subj="confirmModalConfirmButton"
+                                                  type="button"
+                                                >
+                                                  <span
+                                                    class="euiButtonContent euiButton__content"
+                                                  >
+                                                    <span
+                                                      class="euiButton__text"
+                                                    >
+                                                      Confirm
+                                                    </span>
+                                                  </span>
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      }
+                                      onActivation={[Function]}
+                                      onDeactivation={[Function]}
+                                      persistentFocus={false}
+                                      returnFocus={[Function]}
+                                      shards={Array []}
+                                      sideCar={
+                                        Object {
+                                          "assignMedium": [Function],
+                                          "assignSyncMedium": [Function],
+                                          "options": Object {
+                                            "async": true,
+                                            "ssr": false,
+                                          },
+                                          "read": [Function],
+                                          "useMedium": [Function],
+                                        }
+                                      }
+                                    >
+                                      <SideEffect(FocusWatcher)
+                                        autoFocus={true}
+                                        crossFrame={true}
+                                        disabled={false}
+                                        id={Object {}}
+                                        observed={
+                                          <div
+                                            data-focus-lock-disabled="false"
                                           >
                                             <div
-                                              className="euiText euiText--medium"
-                                              data-test-subj="confirmModalBodyText"
+                                              class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                              tabindex="0"
                                             >
-                                              <div>
-                                                <EuiText>
+                                              <button
+                                                aria-label="Closes this modal window"
+                                                class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                                type="button"
+                                              >
+                                                <div
+                                                  aria-hidden="true"
+                                                  class="euiButtonIcon__icon"
+                                                  data-euiicon-type="cross"
+                                                />
+                                              </button>
+                                              <div
+                                                class="euiModal__flex"
+                                              >
+                                                <div
+                                                  class="euiModalHeader"
+                                                >
                                                   <div
-                                                    className="euiText euiText--medium"
+                                                    class="euiModalHeader__title"
+                                                    data-test-subj="confirmModalTitleText"
                                                   >
-                                                    Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                    Confirm License Upload
                                                   </div>
-                                                </EuiText>
-                                                <EuiText>
+                                                </div>
+                                                <div
+                                                  class="euiModalBody"
+                                                >
+                                                  <div
+                                                    class="euiModalBody__overflow"
+                                                  >
+                                                    <div
+                                                      class="euiText euiText--medium"
+                                                      data-test-subj="confirmModalBodyText"
+                                                    >
+                                                      <div>
+                                                        <div
+                                                          class="euiText euiText--medium"
+                                                        >
+                                                          Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                        </div>
+                                                        <div
+                                                          class="euiText euiText--medium"
+                                                        >
+                                                          <ul>
+                                                            <li>
+                                                              Watcher will be disabled
+                                                            </li>
+                                                          </ul>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div
+                                                  class="euiModalFooter"
+                                                >
+                                                  <button
+                                                    class="euiButtonEmpty euiButtonEmpty--primary"
+                                                    data-test-subj="confirmModalCancelButton"
+                                                    type="button"
+                                                  >
+                                                    <span
+                                                      class="euiButtonContent euiButtonEmpty__content"
+                                                    >
+                                                      <span
+                                                        class="euiButtonEmpty__text"
+                                                      >
+                                                        Cancel
+                                                      </span>
+                                                    </span>
+                                                  </button>
+                                                  <button
+                                                    class="euiButton euiButton--primary euiButton--fill"
+                                                    data-test-subj="confirmModalConfirmButton"
+                                                    type="button"
+                                                  >
+                                                    <span
+                                                      class="euiButtonContent euiButton__content"
+                                                    >
+                                                      <span
+                                                        class="euiButton__text"
+                                                      >
+                                                        Confirm
+                                                      </span>
+                                                    </span>
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        }
+                                        onActivation={[Function]}
+                                        onDeactivation={[Function]}
+                                        persistentFocus={false}
+                                        returnFocus={[Function]}
+                                        shards={Array []}
+                                      >
+                                        <FocusWatcher
+                                          autoFocus={true}
+                                          crossFrame={true}
+                                          disabled={false}
+                                          id={Object {}}
+                                          observed={
+                                            <div
+                                              data-focus-lock-disabled="false"
+                                            >
+                                              <div
+                                                class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                                tabindex="0"
+                                              >
+                                                <button
+                                                  aria-label="Closes this modal window"
+                                                  class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                                  type="button"
+                                                >
+                                                  <div
+                                                    aria-hidden="true"
+                                                    class="euiButtonIcon__icon"
+                                                    data-euiicon-type="cross"
+                                                  />
+                                                </button>
+                                                <div
+                                                  class="euiModal__flex"
+                                                >
+                                                  <div
+                                                    class="euiModalHeader"
+                                                  >
+                                                    <div
+                                                      class="euiModalHeader__title"
+                                                      data-test-subj="confirmModalTitleText"
+                                                    >
+                                                      Confirm License Upload
+                                                    </div>
+                                                  </div>
+                                                  <div
+                                                    class="euiModalBody"
+                                                  >
+                                                    <div
+                                                      class="euiModalBody__overflow"
+                                                    >
+                                                      <div
+                                                        class="euiText euiText--medium"
+                                                        data-test-subj="confirmModalBodyText"
+                                                      >
+                                                        <div>
+                                                          <div
+                                                            class="euiText euiText--medium"
+                                                          >
+                                                            Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                          </div>
+                                                          <div
+                                                            class="euiText euiText--medium"
+                                                          >
+                                                            <ul>
+                                                              <li>
+                                                                Watcher will be disabled
+                                                              </li>
+                                                            </ul>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                  <div
+                                                    class="euiModalFooter"
+                                                  >
+                                                    <button
+                                                      class="euiButtonEmpty euiButtonEmpty--primary"
+                                                      data-test-subj="confirmModalCancelButton"
+                                                      type="button"
+                                                    >
+                                                      <span
+                                                        class="euiButtonContent euiButtonEmpty__content"
+                                                      >
+                                                        <span
+                                                          class="euiButtonEmpty__text"
+                                                        >
+                                                          Cancel
+                                                        </span>
+                                                      </span>
+                                                    </button>
+                                                    <button
+                                                      class="euiButton euiButton--primary euiButton--fill"
+                                                      data-test-subj="confirmModalConfirmButton"
+                                                      type="button"
+                                                    >
+                                                      <span
+                                                        class="euiButtonContent euiButton__content"
+                                                      >
+                                                        <span
+                                                          class="euiButton__text"
+                                                        >
+                                                          Confirm
+                                                        </span>
+                                                      </span>
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          }
+                                          onActivation={[Function]}
+                                          onDeactivation={[Function]}
+                                          persistentFocus={false}
+                                          returnFocus={[Function]}
+                                          shards={Array []}
+                                        />
+                                      </SideEffect(FocusWatcher)>
+                                    </SideCar>
+                                  </RequireSideCar>
+                                  <ForwardRef
+                                    data-focus-lock-disabled={false}
+                                    enabled={false}
+                                    inert={false}
+                                    onBlur={[Function]}
+                                    onFocus={[Function]}
+                                    onMouseDown={[Function]}
+                                    onTouchStart={[Function]}
+                                    removeScrollBar={true}
+                                    sideCar={[Function]}
+                                  >
+                                    <div
+                                      data-focus-lock-disabled={false}
+                                      onBlur={[Function]}
+                                      onFocus={[Function]}
+                                      onMouseDown={[Function]}
+                                      onScrollCapture={[Function]}
+                                      onTouchMoveCapture={[Function]}
+                                      onTouchStart={[Function]}
+                                      onWheelCapture={[Function]}
+                                    >
+                                      <div
+                                        className="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                                        onKeyDown={[Function]}
+                                        tabIndex={0}
+                                      >
+                                        <EuiI18n
+                                          default="Closes this modal window"
+                                          token="euiModal.closeModal"
+                                        >
+                                          <EuiButtonIcon
+                                            aria-label="Closes this modal window"
+                                            className="euiModal__closeIcon"
+                                            color="text"
+                                            iconType="cross"
+                                            onClick={[Function]}
+                                          >
+                                            <button
+                                              aria-label="Closes this modal window"
+                                              className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                              onClick={[Function]}
+                                              type="button"
+                                            >
+                                              <EuiIcon
+                                                aria-hidden="true"
+                                                className="euiButtonIcon__icon"
+                                                size="m"
+                                                type="cross"
+                                              >
+                                                <div
+                                                  aria-hidden="true"
+                                                  className="euiButtonIcon__icon"
+                                                  data-euiicon-type="cross"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </button>
+                                          </EuiButtonIcon>
+                                        </EuiI18n>
+                                        <div
+                                          className="euiModal__flex"
+                                        >
+                                          <EuiModalHeader>
+                                            <div
+                                              className="euiModalHeader"
+                                            >
+                                              <EuiModalHeaderTitle
+                                                data-test-subj="confirmModalTitleText"
+                                              >
+                                                <div
+                                                  className="euiModalHeader__title"
+                                                  data-test-subj="confirmModalTitleText"
+                                                >
+                                                  <FormattedMessage
+                                                    defaultMessage="Confirm License Upload"
+                                                    id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+                                                    values={Object {}}
+                                                  >
+                                                    Confirm License Upload
+                                                  </FormattedMessage>
+                                                </div>
+                                              </EuiModalHeaderTitle>
+                                            </div>
+                                          </EuiModalHeader>
+                                          <EuiModalBody>
+                                            <div
+                                              className="euiModalBody"
+                                            >
+                                              <div
+                                                className="euiModalBody__overflow"
+                                              >
+                                                <EuiText
+                                                  data-test-subj="confirmModalBodyText"
+                                                >
                                                   <div
                                                     className="euiText euiText--medium"
+                                                    data-test-subj="confirmModalBodyText"
                                                   >
-                                                    <ul>
-                                                      <li
-                                                        key="Watcher will be disabled"
-                                                      >
-                                                        Watcher will be disabled
-                                                      </li>
-                                                    </ul>
+                                                    <div>
+                                                      <EuiText>
+                                                        <div
+                                                          className="euiText euiText--medium"
+                                                        >
+                                                          Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                        </div>
+                                                      </EuiText>
+                                                      <EuiText>
+                                                        <div
+                                                          className="euiText euiText--medium"
+                                                        >
+                                                          <ul>
+                                                            <li
+                                                              key="Watcher will be disabled"
+                                                            >
+                                                              Watcher will be disabled
+                                                            </li>
+                                                          </ul>
+                                                        </div>
+                                                      </EuiText>
+                                                    </div>
                                                   </div>
                                                 </EuiText>
                                               </div>
                                             </div>
-                                          </EuiText>
+                                          </EuiModalBody>
+                                          <EuiModalFooter>
+                                            <div
+                                              className="euiModalFooter"
+                                            >
+                                              <EuiButtonEmpty
+                                                buttonRef={[Function]}
+                                                data-test-subj="confirmModalCancelButton"
+                                                onClick={[Function]}
+                                              >
+                                                <button
+                                                  className="euiButtonEmpty euiButtonEmpty--primary"
+                                                  data-test-subj="confirmModalCancelButton"
+                                                  onClick={[Function]}
+                                                  type="button"
+                                                >
+                                                  <EuiButtonContent
+                                                    className="euiButtonEmpty__content"
+                                                    iconSide="left"
+                                                    textProps={
+                                                      Object {
+                                                        "className": "euiButtonEmpty__text",
+                                                      }
+                                                    }
+                                                  >
+                                                    <span
+                                                      className="euiButtonContent euiButtonEmpty__content"
+                                                    >
+                                                      <span
+                                                        className="euiButtonEmpty__text"
+                                                      >
+                                                        <FormattedMessage
+                                                          defaultMessage="Cancel"
+                                                          id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+                                                          values={Object {}}
+                                                        >
+                                                          Cancel
+                                                        </FormattedMessage>
+                                                      </span>
+                                                    </span>
+                                                  </EuiButtonContent>
+                                                </button>
+                                              </EuiButtonEmpty>
+                                              <EuiButton
+                                                buttonRef={[Function]}
+                                                color="primary"
+                                                data-test-subj="confirmModalConfirmButton"
+                                                fill={true}
+                                                onClick={[Function]}
+                                              >
+                                                <EuiButtonDisplay
+                                                  color="primary"
+                                                  data-test-subj="confirmModalConfirmButton"
+                                                  element="button"
+                                                  fill={true}
+                                                  onClick={[Function]}
+                                                  type="button"
+                                                >
+                                                  <button
+                                                    className="euiButton euiButton--primary euiButton--fill"
+                                                    data-test-subj="confirmModalConfirmButton"
+                                                    onClick={[Function]}
+                                                    type="button"
+                                                  >
+                                                    <EuiButtonContent
+                                                      className="euiButton__content"
+                                                      iconSide="left"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButton__text",
+                                                        }
+                                                      }
+                                                    >
+                                                      <span
+                                                        className="euiButtonContent euiButton__content"
+                                                      >
+                                                        <span
+                                                          className="euiButton__text"
+                                                        >
+                                                          <FormattedMessage
+                                                            defaultMessage="Confirm"
+                                                            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+                                                            values={Object {}}
+                                                          >
+                                                            Confirm
+                                                          </FormattedMessage>
+                                                        </span>
+                                                      </span>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonDisplay>
+                                              </EuiButton>
+                                            </div>
+                                          </EuiModalFooter>
                                         </div>
                                       </div>
-                                    </EuiModalBody>
-                                    <EuiModalFooter>
-                                      <div
-                                        className="euiModalFooter"
-                                      >
-                                        <EuiButtonEmpty
-                                          buttonRef={[Function]}
-                                          data-test-subj="confirmModalCancelButton"
-                                          onClick={[Function]}
-                                        >
-                                          <button
-                                            className="euiButtonEmpty euiButtonEmpty--primary"
-                                            data-test-subj="confirmModalCancelButton"
-                                            onClick={[Function]}
-                                            type="button"
-                                          >
-                                            <span
-                                              className="euiButtonEmpty__content"
-                                            >
-                                              <span
-                                                className="euiButtonEmpty__text"
-                                              >
-                                                <FormattedMessage
-                                                  defaultMessage="Cancel"
-                                                  id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-                                                  values={Object {}}
-                                                >
-                                                  Cancel
-                                                </FormattedMessage>
-                                              </span>
-                                            </span>
-                                          </button>
-                                        </EuiButtonEmpty>
-                                        <EuiButton
-                                          buttonRef={[Function]}
-                                          color="primary"
-                                          data-test-subj="confirmModalConfirmButton"
-                                          fill={true}
-                                          onClick={[Function]}
-                                        >
-                                          <button
-                                            className="euiButton euiButton--primary euiButton--fill"
-                                            data-test-subj="confirmModalConfirmButton"
-                                            onClick={[Function]}
-                                            type="button"
-                                          >
-                                            <span
-                                              className="euiButton__content"
-                                            >
-                                              <span
-                                                className="euiButton__text"
-                                              >
-                                                <FormattedMessage
-                                                  defaultMessage="Confirm"
-                                                  id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-                                                  values={Object {}}
-                                                >
-                                                  Confirm
-                                                </FormattedMessage>
-                                              </span>
-                                            </span>
-                                          </button>
-                                        </EuiButton>
-                                      </div>
-                                    </EuiModalFooter>
-                                  </div>
-                                </div>
-                              </div>
-                              <div
-                                data-focus-guard={true}
-                                style={
-                                  Object {
-                                    "height": "0px",
-                                    "left": "1px",
-                                    "overflow": "hidden",
-                                    "padding": 0,
-                                    "position": "fixed",
-                                    "top": "1px",
-                                    "width": "1px",
+                                    </div>
+                                  </ForwardRef>
+                                  <div
+                                    data-focus-guard={true}
+                                    style={
+                                      Object {
+                                        "height": "0px",
+                                        "left": "1px",
+                                        "overflow": "hidden",
+                                        "padding": 0,
+                                        "position": "fixed",
+                                        "top": "1px",
+                                        "width": "1px",
+                                      }
+                                    }
+                                    tabIndex={0}
+                                  />
+                                </ForwardRef>
+                                <RequireSideCar
+                                  noIsolation={true}
+                                  setLockProps={[Function]}
+                                  sideCar={
+                                    Object {
+                                      "assignMedium": [Function],
+                                      "assignSyncMedium": [Function],
+                                      "options": Object {
+                                        "async": true,
+                                        "ssr": false,
+                                      },
+                                      "read": [Function],
+                                      "useMedium": [Function],
+                                    }
                                   }
-                                }
-                                tabIndex={0}
-                              />
-                            </FocusLock>
+                                >
+                                  <SideCar
+                                    noIsolation={true}
+                                    setLockProps={[Function]}
+                                    sideCar={
+                                      Object {
+                                        "assignMedium": [Function],
+                                        "assignSyncMedium": [Function],
+                                        "options": Object {
+                                          "async": true,
+                                          "ssr": false,
+                                        },
+                                        "read": [Function],
+                                        "useMedium": [Function],
+                                      }
+                                    }
+                                  >
+                                    <Effect
+                                      noIsolation={true}
+                                      setLockProps={[Function]}
+                                    >
+                                      <Component>
+                                        <Sheet
+                                          styles="
+ [data-focus-on-hidden] {
+   pointer-events: none !important;
+ }
+"
+                                        />
+                                      </Component>
+                                    </Effect>
+                                  </SideCar>
+                                </RequireSideCar>
+                              </ForwardRef>
+                            </ForwardRef>
                           </EuiFocusTrap>
                         </EuiModal>
                       </EuiConfirmModal>
@@ -1076,21 +1469,31 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   onClick={[Function]}
                                   rel="noreferrer"
                                 >
-                                  <span
+                                  <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
                                   >
                                     <span
-                                      className="euiButtonEmpty__text"
+                                      className="euiButtonContent euiButtonEmpty__content"
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Cancel"
-                                        id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonEmpty__text"
                                       >
-                                        Cancel
-                                      </FormattedMessage>
+                                        <FormattedMessage
+                                          defaultMessage="Cancel"
+                                          id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                          values={Object {}}
+                                        >
+                                          Cancel
+                                        </FormattedMessage>
+                                      </span>
                                     </span>
-                                  </span>
+                                  </EuiButtonContent>
                                 </a>
                               </EuiButtonEmpty>
                             </div>
@@ -1107,28 +1510,48 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 isLoading={false}
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
                                   data-test-subj="uploadLicenseButton"
+                                  element="button"
+                                  fill={true}
+                                  isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <button
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="uploadLicenseButton"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      isLoading={false}
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Upload"
-                                        id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Upload
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </button>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Upload"
+                                            id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Upload
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -1734,21 +2157,31 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                   onClick={[Function]}
                                   rel="noreferrer"
                                 >
-                                  <span
+                                  <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
                                   >
                                     <span
-                                      className="euiButtonEmpty__text"
+                                      className="euiButtonContent euiButtonEmpty__content"
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Cancel"
-                                        id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonEmpty__text"
                                       >
-                                        Cancel
-                                      </FormattedMessage>
+                                        <FormattedMessage
+                                          defaultMessage="Cancel"
+                                          id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                          values={Object {}}
+                                        >
+                                          Cancel
+                                        </FormattedMessage>
+                                      </span>
                                     </span>
-                                  </span>
+                                  </EuiButtonContent>
                                 </a>
                               </EuiButtonEmpty>
                             </div>
@@ -1765,28 +2198,48 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                 isLoading={false}
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
                                   data-test-subj="uploadLicenseButton"
+                                  element="button"
+                                  fill={true}
+                                  isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <button
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="uploadLicenseButton"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      isLoading={false}
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Upload"
-                                        id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Upload
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </button>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Upload"
+                                            id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Upload
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -2392,21 +2845,31 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                   onClick={[Function]}
                                   rel="noreferrer"
                                 >
-                                  <span
+                                  <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
                                   >
                                     <span
-                                      className="euiButtonEmpty__text"
+                                      className="euiButtonContent euiButtonEmpty__content"
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Cancel"
-                                        id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonEmpty__text"
                                       >
-                                        Cancel
-                                      </FormattedMessage>
+                                        <FormattedMessage
+                                          defaultMessage="Cancel"
+                                          id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                          values={Object {}}
+                                        >
+                                          Cancel
+                                        </FormattedMessage>
+                                      </span>
                                     </span>
-                                  </span>
+                                  </EuiButtonContent>
                                 </a>
                               </EuiButtonEmpty>
                             </div>
@@ -2423,28 +2886,48 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                 isLoading={false}
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
                                   data-test-subj="uploadLicenseButton"
+                                  element="button"
+                                  fill={true}
+                                  isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <button
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="uploadLicenseButton"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      isLoading={false}
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Upload"
-                                        id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Upload
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </button>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Upload"
+                                            id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Upload
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -3050,21 +3533,31 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                   onClick={[Function]}
                                   rel="noreferrer"
                                 >
-                                  <span
+                                  <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
                                   >
                                     <span
-                                      className="euiButtonEmpty__text"
+                                      className="euiButtonContent euiButtonEmpty__content"
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Cancel"
-                                        id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonEmpty__text"
                                       >
-                                        Cancel
-                                      </FormattedMessage>
+                                        <FormattedMessage
+                                          defaultMessage="Cancel"
+                                          id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                          values={Object {}}
+                                        >
+                                          Cancel
+                                        </FormattedMessage>
+                                      </span>
                                     </span>
-                                  </span>
+                                  </EuiButtonContent>
                                 </a>
                               </EuiButtonEmpty>
                             </div>
@@ -3081,28 +3574,48 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                 isLoading={false}
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
                                   data-test-subj="uploadLicenseButton"
+                                  element="button"
+                                  fill={true}
+                                  isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <button
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="uploadLicenseButton"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      isLoading={false}
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Upload"
-                                        id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Upload
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </button>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Upload"
+                                            id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Upload
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>
@@ -3708,21 +4221,31 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                   onClick={[Function]}
                                   rel="noreferrer"
                                 >
-                                  <span
+                                  <EuiButtonContent
                                     className="euiButtonEmpty__content"
+                                    iconSide="left"
+                                    textProps={
+                                      Object {
+                                        "className": "euiButtonEmpty__text",
+                                      }
+                                    }
                                   >
                                     <span
-                                      className="euiButtonEmpty__text"
+                                      className="euiButtonContent euiButtonEmpty__content"
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Cancel"
-                                        id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonEmpty__text"
                                       >
-                                        Cancel
-                                      </FormattedMessage>
+                                        <FormattedMessage
+                                          defaultMessage="Cancel"
+                                          id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                          values={Object {}}
+                                        >
+                                          Cancel
+                                        </FormattedMessage>
+                                      </span>
                                     </span>
-                                  </span>
+                                  </EuiButtonContent>
                                 </a>
                               </EuiButtonEmpty>
                             </div>
@@ -3739,28 +4262,48 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                 isLoading={false}
                                 onClick={[Function]}
                               >
-                                <button
-                                  className="euiButton euiButton--primary euiButton--fill"
+                                <EuiButtonDisplay
                                   data-test-subj="uploadLicenseButton"
+                                  element="button"
+                                  fill={true}
+                                  isLoading={false}
                                   onClick={[Function]}
                                   type="button"
                                 >
-                                  <span
-                                    className="euiButton__content"
+                                  <button
+                                    className="euiButton euiButton--primary euiButton--fill"
+                                    data-test-subj="uploadLicenseButton"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <EuiButtonContent
+                                      className="euiButton__content"
+                                      iconSide="left"
+                                      isLoading={false}
+                                      textProps={
+                                        Object {
+                                          "className": "euiButton__text",
+                                        }
+                                      }
                                     >
-                                      <FormattedMessage
-                                        defaultMessage="Upload"
-                                        id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
-                                        values={Object {}}
+                                      <span
+                                        className="euiButtonContent euiButton__content"
                                       >
-                                        Upload
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </button>
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          <FormattedMessage
+                                            defaultMessage="Upload"
+                                            id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Upload
+                                          </FormattedMessage>
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonDisplay>
                               </EuiButton>
                             </div>
                           </EuiFlexItem>

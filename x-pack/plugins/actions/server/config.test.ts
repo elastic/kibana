@@ -15,6 +15,7 @@ describe('config validation', () => {
           "*",
         ],
         "preconfigured": Object {},
+        "rejectUnauthorizedCertificates": true,
         "whitelistedHosts": Array [
           "*",
         ],
@@ -33,6 +34,7 @@ describe('config validation', () => {
           },
         },
       },
+      rejectUnauthorizedCertificates: false,
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
@@ -50,6 +52,7 @@ describe('config validation', () => {
             "secrets": Object {},
           },
         },
+        "rejectUnauthorizedCertificates": false,
         "whitelistedHosts": Array [
           "*",
         ],
