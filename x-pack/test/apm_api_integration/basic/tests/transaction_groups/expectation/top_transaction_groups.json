@@ -7,6 +7,7 @@
       "impact": 100,
       "p95": 259040,
       "transactionName": "GET /api",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -16,6 +17,7 @@
       "impact": 12.686265169840583,
       "p95": 270336,
       "transactionName": "POST /api/orders",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -25,6 +27,7 @@
       "impact": 3.790160870423129,
       "p95": 26432,
       "transactionName": "GET /api/customers",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -34,6 +37,7 @@
       "impact": 2.875276331059301,
       "p95": 38528,
       "transactionName": "GET /log-message",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -43,6 +47,7 @@
       "impact": 2.8716452680799467,
       "p95": 4472,
       "transactionName": "GET /*",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -52,6 +57,7 @@
       "impact": 2.6645791239678345,
       "p95": 11616,
       "transactionName": "GET /api/orders",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -61,6 +67,7 @@
       "impact": 2.624924094061731,
       "p95": 22112,
       "transactionName": "GET /api/products",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -70,6 +77,7 @@
       "impact": 2.3368756900811305,
       "p95": 37856,
       "transactionName": "GET /api/products/:id",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -79,6 +87,7 @@
       "impact": 2.3330057413794503,
       "p95": 45248,
       "transactionName": "GET /api/types",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -88,6 +97,7 @@
       "impact": 2.0901067389184496,
       "p95": 11900,
       "transactionName": "GET static file",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -97,6 +107,7 @@
       "impact": 1.9475397398343375,
       "p95": 33216,
       "transactionName": "GET /api/products/top",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -106,6 +117,7 @@
       "impact": 1.7905918202662048,
       "p95": 15136,
       "transactionName": "GET /api/stats",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -115,6 +127,7 @@
       "impact": 1.466376117925459,
       "p95": 35840,
       "transactionName": "GET /log-error",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -124,6 +137,7 @@
       "impact": 0.7098250353192541,
       "p95": 19968,
       "transactionName": "POST /api",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -133,6 +147,7 @@
       "impact": 0.5354862351657939,
       "p95": 10080,
       "transactionName": "GET /api/types/:id",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -142,6 +157,7 @@
       "impact": 0.43453312891085794,
       "p95": 7184,
       "transactionName": "GET /api/orders/:id",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -151,6 +167,7 @@
       "impact": 0.20830834986820673,
       "p95": 5616,
       "transactionName": "GET /api/products/:id/customers",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     },
     {
@@ -160,6 +177,7 @@
       "impact": 0,
       "p95": 3224,
       "transactionName": "GET /throw-error",
+      "transactionType": "request",
       "serviceName": "opbeans-node"
     }
   ],

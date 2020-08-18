@@ -8,6 +8,7 @@
     "transactionsPerMinute": 0.25,
     "impact": 100,
     "transactionName": "Process payment",
+    "transactionType": "Worker",
     "serviceName": "opbeans-node"
   },
   {
@@ -19,6 +20,7 @@
     "transactionsPerMinute": 8,
     "impact": 91.32732325394932,
     "transactionName": "GET /api",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -30,6 +32,7 @@
     "transactionsPerMinute": 0.75,
     "impact": 35.56882613781033,
     "transactionName": "/dashboard",
+    "transactionType": "page-load",
     "serviceName": "client"
   },
   {
@@ -41,6 +44,7 @@
     "transactionsPerMinute": 3.25,
     "impact": 26.61043592713186,
     "transactionName": "DispatcherServlet#doGet",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -52,6 +56,7 @@
     "transactionsPerMinute": 0.25,
     "impact": 15.261616628971955,
     "transactionName": "POST /api/orders",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -63,6 +68,7 @@
     "transactionsPerMinute": 3.5,
     "impact": 11.30657439844125,
     "transactionName": "ResourceHttpRequestHandler",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -74,6 +80,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 9.072365225837785,
     "transactionName": "/orders",
+    "transactionType": "route-change",
     "serviceName": "client"
   },
   {
@@ -85,6 +92,7 @@
     "transactionsPerMinute": 1.25,
     "impact": 5.270496679320978,
     "transactionName": "APIRestController#customer",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -96,6 +104,7 @@
     "transactionsPerMinute": 0.25,
     "impact": 4.129424578484989,
     "transactionName": "/products",
+    "transactionType": "page-load",
     "serviceName": "client"
   },
   {
@@ -107,6 +116,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 3.5546640380951287,
     "transactionName": "/customers",
+    "transactionType": "route-change",
     "serviceName": "client"
   },
   {
@@ -118,6 +128,7 @@
     "transactionsPerMinute": 1,
     "impact": 3.541042213287889,
     "transactionName": "APIRestController#customers",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -129,6 +140,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 3.458966408120217,
     "transactionName": "GET /log-message",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -140,6 +152,7 @@
     "transactionsPerMinute": 1,
     "impact": 3.275330415465657,
     "transactionName": "APIRestController#stats",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -151,6 +164,7 @@
     "transactionsPerMinute": 0.75,
     "impact": 3.168195050736987,
     "transactionName": "GET /api/customers",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -162,6 +176,7 @@
     "transactionsPerMinute": 1,
     "impact": 2.8112687551548836,
     "transactionName": "GET /api/products/:id",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -173,6 +188,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 2.8066131947777255,
     "transactionName": "GET /api/types",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -184,6 +200,7 @@
     "transactionsPerMinute": 3.5,
     "impact": 2.5144049360435208,
     "transactionName": "GET static file",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -195,6 +212,7 @@
     "transactionsPerMinute": 3.25,
     "impact": 2.4998634943716573,
     "transactionName": "APIRestController#customerWhoBought",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -206,6 +224,7 @@
     "transactionsPerMinute": 0.25,
     "impact": 1.7640550505645587,
     "transactionName": "GET /log-error",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -217,6 +236,7 @@
     "transactionsPerMinute": 1.75,
     "impact": 1.6450221426498186,
     "transactionName": "APIRestController#topProducts",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -228,6 +248,7 @@
     "transactionsPerMinute": 0.25,
     "impact": 1.6060533780113861,
     "transactionName": "GET /api/products/top",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -239,6 +260,7 @@
     "transactionsPerMinute": 1,
     "impact": 1.2172278724376455,
     "transactionName": "GET /api/products",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -250,6 +272,7 @@
     "transactionsPerMinute": 0.25,
     "impact": 0.853921734857215,
     "transactionName": "POST /api",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -261,6 +284,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.6441916136689552,
     "transactionName": "GET /api/types/:id",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -272,6 +296,7 @@
     "transactionsPerMinute": 0.75,
     "impact": 0.582807187955318,
     "transactionName": "GET /api/stats",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -283,6 +308,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.5802207655235637,
     "transactionName": "GET /api/orders",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -294,6 +320,7 @@
     "transactionsPerMinute": 0.75,
     "impact": 0.5227447114845778,
     "transactionName": "GET /api/orders/:id",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -305,6 +332,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.4839483750082622,
     "transactionName": "APIRestController#products",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -316,6 +344,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.25059559560997896,
     "transactionName": "GET /api/products/:id/customers",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   },
   {
@@ -327,6 +356,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.24559517890858723,
     "transactionName": "APIRestController#product",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -338,6 +368,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.09374344413758617,
     "transactionName": "APIRestController#order",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -349,6 +380,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0.06552270160444405,
     "transactionName": "APIRestController#orders",
+    "transactionType": "request",
     "serviceName": "opbeans-java"
   },
   {
@@ -360,6 +392,7 @@
     "transactionsPerMinute": 0.5,
     "impact": 0,
     "transactionName": "GET /throw-error",
+    "transactionType": "request",
     "serviceName": "opbeans-node"
   }
 ]
