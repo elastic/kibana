@@ -31,12 +31,13 @@ import {
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
-  VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
+  VisualizationDimensionEditorProps,
 } from '../types';
 import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { PalettePicker } from '../editor_frame_service/palettes/palette_picker';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarButton } from '../toolbar_button';
 
@@ -256,6 +257,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           }}
           anchorPosition="downRight"
         >
+          <PalettePicker frame={props.frame} />
           <EuiToolTip
             anchorClassName="eui-displayBlock"
             content={
@@ -490,7 +492,15 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
 
   return (
     <EuiForm>
-      <ColorPicker {...props} />
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.palette.label', {
+          defaultMessage: 'Palette',
+        })}
+      >
+        <ColorPicker {...props} />
+      </EuiFormRow>
 
       <EuiFormRow
         display="columnCompressed"

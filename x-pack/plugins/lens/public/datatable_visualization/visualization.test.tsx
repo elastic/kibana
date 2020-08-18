@@ -6,12 +6,13 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
-import { createMockDatasource } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
 
 function mockFrame(): FramePublicAPI {
   return {
+    ...createMockFramePublicAPI(),
     addNewLayer: () => 'aaa',
     removeLayers: () => {},
     datasourceLayers: {},

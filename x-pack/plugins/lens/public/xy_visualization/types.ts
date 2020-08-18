@@ -16,6 +16,7 @@ import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked
 import chartLineSVG from '../assets/chart_line.svg';
 
 import { VisualizationType } from '../index';
+import { LensPalette } from '../editor_frame_service/palettes/palettes';
 import { FittingFunction } from './fitting_functions';
 
 export interface LegendConfig {
@@ -317,6 +318,7 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
+  palette: LensPalette & { type: 'lens_palette' };
   fittingFunction?: FittingFunction;
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;

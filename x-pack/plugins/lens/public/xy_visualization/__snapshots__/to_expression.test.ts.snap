@@ -117,6 +117,18 @@ Object {
             "type": "expression",
           },
         ],
+        "palette": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {},
+                "function": "mock_palette",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "xTitle": Array [
           "",
         ],

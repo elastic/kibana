@@ -44,6 +44,7 @@ function expressionHelper(
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
+          palette: [frame.globalPalette.activePalette.toExpression(frame.globalPalette.state)],
         },
       },
     ],

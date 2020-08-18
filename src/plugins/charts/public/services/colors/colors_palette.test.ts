@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { seedColors } from './seed_colors';
-import { createColorPalette } from './color_palette';
+import { seedColors } from '../../static/colors';
+import { createColorPalette } from '../../static/colors';
 
 describe('Color Palette', () => {
   const num1 = 45;

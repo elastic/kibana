@@ -15,6 +15,7 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   SeriesNameFn,
+  SeriesColorAccessorFn,
   Fit,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
@@ -34,6 +35,7 @@ import {
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const onClickValue = jest.fn();
@@ -232,6 +234,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     x: true,
     y: false,
   },
+  palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
   layers,
 });
 
@@ -1082,11 +1085,26 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
-        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
-        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
+        expect(
+          (component.find(LineSeries).at(0).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['Bar'],
+          })
+        ).toEqual('#550000');
+        expect(
+          (component.find(LineSeries).at(1).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['Bar'],
+          })
+        ).toEqual('#FFFF00');
+        expect(
+          (component.find(LineSeries).at(2).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['Bar'],
+          })
+        ).toEqual('#FEECDF');
       });
-      test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
+      test('color overwrite is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
         const args = createArgsWithLayers();
         const newArgs = {
           ...args,
@@ -1110,8 +1128,18 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
-        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
+        expect(
+          (component.find(LineSeries).at(0).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['Bar'],
+          })
+        ).toEqual('#ff0000');
+        expect(
+          (component.find(LineSeries).at(1).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['Bar'],
+          })
+        ).toEqual('#ff0000');
       });
     });
 
@@ -1443,6 +1471,40 @@ describe('xy_expression', () => {
       expect(convertSpy).toHaveBeenCalledTimes(0);
     });
 
+    it('calls the color function with the right series layers', () => {
+      const { data, args } = sampleArgs();
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      (instance.find(LineSeries).at(0).prop('color') as SeriesColorAccessorFn)({
+        yAccessor: 'b',
+        seriesKeys: ['Bar'],
+        splitAccessors: new Map<string, string>(),
+        key: 'abc',
+        specId: 'abc',
+      });
+      expect(args.palette.getColor).toHaveBeenCalledWith([
+        {
+          name: 'Bar',
+          rankAtDepth: 3,
+          totalSeries: 4,
+          totalSeriesAtDepth: 4,
+          maxDepth: 1,
+        },
+      ]);
+    });
+
     test('it should remove invalid rows', () => {
       const data: LensMultiTable = {
         type: 'lens_multitable',
@@ -1488,6 +1550,7 @@ describe('xy_expression', () => {
           x: true,
           y: false,
         },
+        palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
@@ -1567,6 +1630,7 @@ describe('xy_expression', () => {
           x: true,
           y: false,
         },
+        palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
@@ -1633,6 +1697,7 @@ describe('xy_expression', () => {
           x: true,
           y: false,
         },
+        palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',

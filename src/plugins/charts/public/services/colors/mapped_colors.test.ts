@@ -22,7 +22,7 @@ import d3 from 'd3';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from './seed_colors';
+import { seedColors } from '../../static/colors';
 import { MappedColors } from './mapped_colors';
 
 // Local state for config

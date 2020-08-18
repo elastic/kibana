@@ -95,6 +95,21 @@ export const buildExpression = (
         arguments: {
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
+          palette: [
+            frame
+              ? frame.globalPalette.activePalette.toExpression(frame.globalPalette.state)
+              : {
+                  /** TODO add in default theme here */
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'palette',
+                      arguments: {},
+                    },
+                  ],
+                },
+          ],
           legend: [
             {
               type: 'expression',

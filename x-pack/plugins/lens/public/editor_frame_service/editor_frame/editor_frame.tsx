@@ -13,6 +13,7 @@ import {
   FramePublicAPI,
   Visualization,
   DatasourceMetaData,
+  PaletteDefinition,
 } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -34,6 +35,7 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
+  palettes: Record<string, PaletteDefinition>;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -117,6 +119,24 @@ export function EditorFrame(props: EditorFrameProps) {
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
+
+    globalPalette: {
+      state: state.globalPalette.state,
+      setState: (updater) => {
+        dispatch({
+          type: 'UPDATE_PALETTE_STATE',
+          updater,
+        });
+      },
+      availablePalettes: props.palettes,
+      activePalette: props.palettes[state.globalPalette.activePaletteId],
+      setActivePalette: (id) => {
+        dispatch({
+          type: 'UPDATE_PALETTE',
+          id,
+        });
+      },
+    },
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -242,6 +262,8 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
+      state.globalPalette.activePaletteId,
+      state.globalPalette.state,
       props.query,
       props.dateRange,
       props.filters,

@@ -22,6 +22,10 @@ export interface Document {
     visualization: unknown;
     query: Query;
     filters: Filter[];
+    globalPalette?: {
+      activePaletteId: string;
+      state?: unknown;
+    };
   };
 }
 

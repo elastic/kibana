@@ -19,7 +19,7 @@
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from './seed_colors';
+import { seedColors } from '../../static/colors';
 import { ColorsService } from './colors';
 
 // Local state for config

@@ -11,7 +11,6 @@ import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/publ
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -26,6 +25,7 @@ import {
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
@@ -84,6 +84,7 @@ export class LensPlugin {
       data,
       embeddable,
       expressions,
+      charts,
     });
     const dependencies: IndexPatternDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &

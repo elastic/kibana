@@ -5,7 +5,7 @@
  */
 
 import { getSavedObjectFormat, Props } from './save';
-import { createMockDatasource, createMockVisualization } from '../mocks';
+import { createMockDatasource, createMockFramePublicAPI, createMockVisualization } from '../mocks';
 import { esFilters, IIndexPattern, IFieldType } from '../../../../../../src/plugins/data/public';
 
 describe('save editor frame state', () => {
@@ -31,8 +31,13 @@ describe('save editor frame state', () => {
       },
       activeDatasourceId: 'indexpattern',
       visualization: { activeId: '2', state: {} },
+      globalPalette: {
+        activePaletteId: 'default',
+        state: undefined,
+      },
     },
     framePublicAPI: {
+      ...createMockFramePublicAPI(),
       addNewLayer: jest.fn(),
       removeLayers: jest.fn(),
       datasourceLayers: {
@@ -70,6 +75,10 @@ describe('save editor frame state', () => {
         },
         activeDatasourceId: 'indexpattern',
         visualization: { activeId: '3', state: '4' },
+        globalPalette: {
+          activePaletteId: 'default',
+          state: undefined,
+        },
       },
       visualization,
     });
@@ -94,6 +103,10 @@ describe('save editor frame state', () => {
             exists: { field: '@timestamp' },
           },
         ],
+        globalPalette: {
+          activePaletteId: 'default',
+          state: undefined,
+        },
       },
       title: 'bbb',
       type: 'lens',
