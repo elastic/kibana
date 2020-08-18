@@ -6,23 +6,22 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart, AppMountParameters } from 'kibana/public';
+import { CoreSetup, AppMountParameters } from 'kibana/public';
 import { StartDependencies } from './plugin';
-
-export interface BfetchDeps {
-  appBasePath: string;
-  core: CoreStart;
-  plugins: StartDependencies;
-}
+import { UiActionsExampleAppContextValue, context } from './context';
 
 export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
   appBasePath,
   element,
 }: AppMountParameters) => {
   const [core, plugins] = await coreSetup.getStartServices();
-  const deps: BfetchDeps = { appBasePath, core, plugins };
   const { App } = await import('./containers/app');
-  const reactElement = <App />;
+  const deps: UiActionsExampleAppContextValue = { appBasePath, core, plugins };
+  const reactElement = (
+    <context.Provider value={deps}>
+      <App />
+    </context.Provider>
+  );
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
 };
