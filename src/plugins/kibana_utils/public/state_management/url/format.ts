@@ -22,6 +22,23 @@ import { stringify, ParsedQuery } from 'query-string';
 import { parseUrl, parseUrlHash } from './parse';
 import { url as urlUtils } from '../../../common';
 
+export function replaceUrlQuery(
+  rawUrl: string,
+  queryReplacer: (query: ParsedQuery) => ParsedQuery
+) {
+  const url = parseUrl(rawUrl);
+  const newQuery = queryReplacer(url.query || {});
+  const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
+    sort: false,
+    encode: false,
+  });
+  if (!url.search && !searchQueryString) return rawUrl; // nothing to change. return original url
+  return formatUrl({
+    ...url,
+    search: searchQueryString,
+  });
+}
+
 export function replaceUrlHashQuery(
   rawUrl: string,
   queryReplacer: (query: ParsedQuery) => ParsedQuery

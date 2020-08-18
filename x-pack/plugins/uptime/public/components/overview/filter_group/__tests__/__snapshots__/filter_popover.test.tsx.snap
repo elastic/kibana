@@ -94,15 +94,14 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
       class="euiPopover__anchor"
     >
       <button
-        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-hasNotification euiFilterButton--hasIcon"
+        class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-hasNotification euiFilterButton--hasIcon"
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
         >
           <div
-            aria-hidden="true"
-            class="euiButtonEmpty__icon"
+            class="euiButtonContent__icon"
             data-euiicon-type="arrowDown"
           />
           <span

@@ -177,6 +177,8 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.license_management.enabled
+    xpack.maps.enabled
+    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
@@ -235,6 +237,7 @@ kibana_vars=(
     xpack.security.sessionTimeout
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
+    xpack.security.session.cleanupInterval
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.spaces.enabled
