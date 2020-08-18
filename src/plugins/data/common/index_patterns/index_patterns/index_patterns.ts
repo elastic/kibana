@@ -86,13 +86,8 @@ export class IndexPatternsService {
     );
   }
 
-  public createField(
-    indexPattern: IndexPattern,
-    spec: IndexPatternField['spec'],
-    displayName: string,
-    onNotification: OnNotification
-  ) {
-    return new IndexPatternField(spec, displayName, onNotification);
+  public createField(spec: IndexPatternField['spec'], displayName: string) {
+    return new IndexPatternField(spec, displayName);
   }
 
   private async refreshSavedObjectsCache() {

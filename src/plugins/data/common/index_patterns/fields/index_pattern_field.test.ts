@@ -28,16 +28,16 @@ describe('Field', function () {
   }
 
   function getField(values = {}) {
-    return new IndexPatternField({ ...fieldValues, ...values }, 'displayName', () => {});
+    return new IndexPatternField({ ...fieldValues, ...values }, 'displayName');
   }
 
   const fieldValues = {
     name: 'name',
-    type: 'type',
+    type: 'string',
     script: 'script',
     lang: 'lang',
     count: 1,
-    esTypes: ['type'],
+    esTypes: ['text'],
     aggregatable: true,
     filterable: true,
     searchable: true,
@@ -120,7 +120,7 @@ describe('Field', function () {
     const fieldB = getField({ indexed: true, type: KBN_FIELD_TYPES.STRING });
     expect(fieldB.sortable).toEqual(true);
 
-    const fieldC = getField({ indexed: false });
+    const fieldC = getField({ indexed: false, aggregatable: false, scripted: false });
     expect(fieldC.sortable).toEqual(false);
   });
 
@@ -134,17 +134,17 @@ describe('Field', function () {
     const fieldC = getField({ indexed: true, type: KBN_FIELD_TYPES.STRING });
     expect(fieldC.filterable).toEqual(true);
 
-    const fieldD = getField({ scripted: false, indexed: false });
+    const fieldD = getField({ scripted: false, indexed: false, searchable: false });
     expect(fieldD.filterable).toEqual(false);
   });
 
   it('exports the property to JSON', () => {
-    const field = new IndexPatternField(fieldValues, 'displayName', () => {});
+    const field = new IndexPatternField(fieldValues, 'displayName');
     expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
-    const field = new IndexPatternField(fieldValues, 'displayName', () => {});
+    const field = new IndexPatternField(fieldValues, 'displayName');
     expect(field.toSpec()).toMatchSnapshot();
   });
 });

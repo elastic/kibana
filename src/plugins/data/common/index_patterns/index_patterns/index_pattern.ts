@@ -138,7 +138,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.fields = fieldList([], this.shortDotsEnable, this.onUnknownType);
+    this.fields = fieldList([], this.shortDotsEnable);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
@@ -331,7 +331,7 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec(),
+      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
     };
   }

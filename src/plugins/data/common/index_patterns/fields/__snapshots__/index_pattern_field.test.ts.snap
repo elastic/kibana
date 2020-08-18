@@ -14,7 +14,7 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "type",
+    "text",
   ],
   "lang": "lang",
   "name": "name",
@@ -30,7 +30,7 @@ Object {
       "path": "path",
     },
   },
-  "type": "type",
+  "type": "string",
 }
 `;
 
@@ -48,8 +48,9 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "type",
+    "text",
   ],
+  "format": undefined,
   "lang": "lang",
   "name": "name",
   "readFromDocValues": false,
@@ -64,6 +65,6 @@ Object {
       "path": "path",
     },
   },
-  "type": "type",
+  "type": "string",
 }
 `;

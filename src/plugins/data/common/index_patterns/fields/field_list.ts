@@ -35,7 +35,7 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
-  toSpec(): FieldSpec[];
+  toSpec(options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }): FieldSpec[];
 }
 
 export type CreateIndexPatternFieldList = (
@@ -47,8 +47,7 @@ export type CreateIndexPatternFieldList = (
 
 export const fieldList = (
   specs: FieldSpec[] = [],
-  shortDotsEnable = false,
-  onNotification = () => {}
+  shortDotsEnable = false
 ): IIndexPatternFieldList => {
   class FldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
@@ -74,11 +73,7 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec) => {
-      const newField = new IndexPatternField(
-        field,
-        this.calcDisplayName(field.name),
-        onNotification
-      );
+      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
@@ -93,11 +88,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new IndexPatternField(
-        field,
-        this.calcDisplayName(field.name),
-        onNotification
-      );
+      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);
@@ -116,9 +107,13 @@ export const fieldList = (
       spcs.forEach(this.add);
     };
 
-    public readonly toSpec = () => {
-      return [...this.map((field) => field.toSpec())];
-    };
+    public toSpec({
+      getFormatterForField,
+    }: {
+      getFormatterForField?: IndexPattern['getFormatterForField'];
+    } = {}) {
+      return [...this.map((field) => field.toSpec({ getFormatterForField }))];
+    }
   }
 
   return new FldList();

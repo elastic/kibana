@@ -326,6 +326,7 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+      // debugger;
       expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
     });
   });

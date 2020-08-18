@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { IFieldType } from './types';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec, IndexPattern } from '../..';
+import { FieldTypeUnknownError } from '../errors';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
@@ -29,23 +30,17 @@ export class IndexPatternField implements IFieldType {
   readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(spec: FieldSpec, displayName: string, onNotification: OnNotification) {
+  constructor(spec: FieldSpec, displayName: string) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
     this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
     if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
-      const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
-        values: { type: spec.type },
-        defaultMessage: 'Unknown field type {type}',
+      const msg = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+        values: { type: spec.type, name: spec.name },
+        defaultMessage: `Field '{name}': Unknown field type '{type}'`,
       });
-      const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
-        // values: { name: spec.name, title: indexPattern.title },
-        values: { name: spec.name },
-        // defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
-        defaultMessage: 'Field {name} in indexPattern is using an unknown field type.',
-      });
-      onNotification({ title, text, color: 'danger', iconType: 'alert' });
+      throw new FieldTypeUnknownError(msg, spec);
     }
   }
 
@@ -153,7 +148,11 @@ export class IndexPatternField implements IFieldType {
     };
   }
 
-  public toSpec() {
+  public toSpec({
+    getFormatterForField,
+  }: {
+    getFormatterForField?: IndexPattern['getFormatterForField'];
+  } = {}) {
     return {
       count: this.count,
       script: this.script,
@@ -167,6 +166,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
+      format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
     };
   }
 }
