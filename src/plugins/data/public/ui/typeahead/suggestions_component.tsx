@@ -34,7 +34,6 @@ interface Props {
   show: boolean;
   suggestions: QuerySuggestion[];
   loadMore: () => void;
-  closeList: () => void;
   queryBarInputDivRef: RefObject<HTMLDivElement>;
   dropdownHeight?: string;
 }
@@ -172,7 +171,7 @@ export class SuggestionsComponent extends Component<Props> {
       event.target &&
       this.kbnTypeaheadDivRefInstance.current.contains(event.target as Node) === false
     ) {
-      this.props.closeList();
+      this.updatePosition();
     }
   };
 
