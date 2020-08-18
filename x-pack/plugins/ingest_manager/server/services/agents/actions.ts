@@ -31,21 +31,27 @@ export async function getAgentActionsForCheckin(
 ): Promise<AgentAction[]> {
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * and ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id:${agentId}`,
+    search: agentId,
+    searchFields: ['agent_id'],
+    sortField: 'created_at',
+    sortOrder: 'DESC',
+    perPage: 2,
   });
 
   return Promise.all(
-    res.saved_objects.map(async (so) => {
-      // Get decrypted actions
-      return savedObjectToAgentAction(
-        await appContextService
-          .getEncryptedSavedObjects()
-          .getDecryptedAsInternalUser<AgentActionSOAttributes>(
-            AGENT_ACTION_SAVED_OBJECT_TYPE,
-            so.id
-          )
-      );
-    })
+    res.saved_objects
+      .filter((r) => !r.attributes.sent_at)
+      .map(async (so) => {
+        // Get decrypted actions
+        return savedObjectToAgentAction(
+          await appContextService
+            .getEncryptedSavedObjects()
+            .getDecryptedAsInternalUser<AgentActionSOAttributes>(
+              AGENT_ACTION_SAVED_OBJECT_TYPE,
+              so.id
+            )
+        );
+      })
   );
 }
 
