@@ -114,6 +114,7 @@ export const useExplorationResults = (
     jobConfig?.dest.index,
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
+  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
 
   const getAnalyticsBaseline = useCallback(async () => {
     try {
@@ -121,7 +122,7 @@ export const useExplorationResults = (
         const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(
           jobConfig.id,
           jobConfig.dest.index,
-          getPredictionFieldName(jobConfig.analysis)
+          predictionFieldName
         );
         if (result?.baseline) {
           setBaseLine(result.baseline);
@@ -148,5 +149,6 @@ export const useExplorationResults = (
     ...dataGrid,
     renderCellValue,
     baseline,
+    predictionFieldName,
   };
 };

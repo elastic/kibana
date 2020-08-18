@@ -46,23 +46,27 @@ const theme: PartialTheme = {
 interface FeatureImportanceDecisionPathProps {
   baseline?: number;
   decisionPlotData: LineAnnotationDatum[];
+  predictedValue?: number | undefined;
 }
 
 export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProps> = ({
   baseline,
   decisionPlotData,
 }) => {
-  if (!decisionPlotData) {
-    return null;
-  }
+  if (!decisionPlotData) return <div />;
+
   const baselineData: LineAnnotationDatum[] = [{ dataValue: baseline, details: 'baseline' }];
   let maxDomain = _.maxBy(decisionPlotData, (d) => d[2])[2];
   let minDomain = _.minBy(decisionPlotData, (d) => d[2])[2];
+  // adjust domain so plot have some space on both sides
+  // and to account for baseline out of range
   const buffer = Math.abs(maxDomain - minDomain) * 0.1;
-  maxDomain = maxDomain + buffer;
-  minDomain = minDomain - buffer;
+  maxDomain = Math.max(maxDomain, baseline) + buffer;
+  minDomain = Math.min(minDomain, baseline) - buffer;
+
   // adjust the height so it's compact for items with more features
   const heightMultiplier = decisionPlotData.length > 3 ? 25 : 75;
+
   return (
     <>
       <Chart className="story-chart" size={{ height: decisionPlotData.length * heightMultiplier }}>

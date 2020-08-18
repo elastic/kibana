@@ -75,6 +75,7 @@ export interface UseIndexDataReturnType
     | 'toggleChartVisibility'
     | 'visibleColumns'
     | 'baseline'
+    | 'predictionFieldName'
   > {
   renderCellValue: RenderCellValue;
 }
@@ -107,4 +108,5 @@ export interface UseDataGridReturnType {
   toggleChartVisibility: () => void;
   visibleColumns: ColumnId[];
   baseline?: number;
+  predictionFieldName?: string;
 }

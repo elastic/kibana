@@ -82,6 +82,7 @@ export const DataGrid: FC<Props> = memo(
       toastNotifications,
       toggleChartVisibility,
       visibleColumns,
+      predictionFieldName,
     } = props;
     // TODO Fix row hovering + bar highlighting
     // const getRowProps = (item: any) => {
@@ -93,13 +94,25 @@ export const DataGrid: FC<Props> = memo(
 
     const popOverContent = useMemo(() => {
       return {
-        featureImportance: ({ cellContentsElement }) => {
+        featureImportance: ({ cellContentsElement, children }) => {
           const stringContents = cellContentsElement.textContent;
           const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
-          return <DecisionPathPopover baseline={baseline} featureImportance={parsedFIArray} />;
+          const rowIndex = children?.props?.rowIndex;
+          const row = data[rowIndex];
+          let predictedValue;
+          if (row && predictionFieldName && row.ml[predictionFieldName] !== undefined) {
+            predictedValue = row.ml[predictionFieldName];
+          }
+          return (
+            <DecisionPathPopover
+              predictedValue={predictedValue}
+              baseline={baseline}
+              featureImportance={parsedFIArray}
+            />
+          );
         },
       };
-    }, [baseline]);
+    }, [baseline, data]);
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {

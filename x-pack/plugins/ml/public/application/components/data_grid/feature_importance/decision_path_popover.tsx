@@ -14,6 +14,7 @@ import { FeatureImportance } from '../../../../../common/types/feature_importanc
 interface DecisionPathPopoverProps {
   baseline?: number;
   featureImportance: FeatureImportance[];
+  predictedValue?: number | undefined;
 }
 
 enum DECISION_PATH_TABS {
@@ -27,7 +28,11 @@ const FEATURE_IMPORTANCE = 'importance';
 export interface ExtendedFeatureImportance extends FeatureImportance {
   absImportance?: number;
 }
-export const useDecisionPathData = ({ baseline, featureImportance }: DecisionPathPopoverProps) => {
+export const useDecisionPathData = ({
+  baseline,
+  featureImportance,
+  predictedValue,
+}: DecisionPathPopoverProps) => {
   const [decisionPlotData, setDecisionPlotData] = useState();
 
   useEffect(() => {
@@ -37,11 +42,21 @@ export const useDecisionPathData = ({ baseline, featureImportance }: DecisionPat
       absImportance: Math.abs(d[FEATURE_IMPORTANCE]),
     }));
 
-    if (baseline) {
+    if (baseline && Number.isFinite(predictedValue)) {
+      // get the adjusted importance needed for when # of fields included in c++ analysis != max allowed
+      // if num fields included = num features allowed exactly, adjustedImportance should be 0
+      const adjustedImportance =
+        predictedValue -
+        mappedFeatureImportance.reduce(
+          (accumulator, currentValue) => accumulator + currentValue.importance,
+          0
+        ) -
+        baseline;
+
       // get the absolute absImportance of the importance value to the baseline for sorting
       mappedFeatureImportance.push({
-        [FEATURE_NAME]: 'baseline',
-        [FEATURE_IMPORTANCE]: baseline,
+        [FEATURE_NAME]: 'other',
+        [FEATURE_IMPORTANCE]: baseline + adjustedImportance,
         absImportance: 0,
       });
     }
@@ -58,10 +73,6 @@ export const useDecisionPathData = ({ baseline, featureImportance }: DecisionPat
       cumulativeSum += mappedFeatureImportance[i][1];
       mappedFeatureImportance[i][2] = cumulativeSum;
     }
-
-    // go back and readjust the starting point to m.{}_prediction - cumulativeSum
-    // to account for when there are more or less features included in the analysis than the max set
-
     setDecisionPlotData(mappedFeatureImportance);
   }, [baseline, featureImportance]);
 
@@ -70,9 +81,10 @@ export const useDecisionPathData = ({ baseline, featureImportance }: DecisionPat
 export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   baseline,
   featureImportance,
+  predictedValue,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
-  const { decisionPlotData } = useDecisionPathData({ baseline, featureImportance });
+  const { decisionPlotData } = useDecisionPathData({ baseline, featureImportance, predictedValue });
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -140,6 +152,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
             baseline={baseline}
             featureImportance={featureImportance}
             decisionPlotData={decisionPlotData}
+            predictedValue={predictedValue}
           />
         </>
       )}
