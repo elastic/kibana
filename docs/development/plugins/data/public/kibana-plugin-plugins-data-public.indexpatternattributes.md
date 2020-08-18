@@ -20,6 +20,7 @@ export interface IndexPatternAttributes
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [attributes](./kibana-plugin-plugins-data-public.indexpatternattributes.attributes.md) | <code>{</code><br/><code>        [key: string]: unknown;</code><br/><code>    }</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternattributes.fields.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternattributes.intervalname.md) | <code>string</code> |  |

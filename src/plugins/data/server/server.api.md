@@ -606,6 +606,10 @@ export type IMetricAggType = MetricAggType;
 // @public @deprecated
 export interface IndexPatternAttributes {
     // (undocumented)
+    attributes?: {
+        [key: string]: unknown;
+    };
+    // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)
     fields: string;
@@ -629,6 +633,8 @@ export interface IndexPatternAttributes {
 export interface IndexPatternFieldDescriptor {
     // (undocumented)
     aggregatable: boolean;
+    // (undocumented)
+    displayName?: string;
     // (undocumented)
     esTypes: string[];
     // (undocumented)
