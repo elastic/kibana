@@ -6,9 +6,7 @@
 
 import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '@elastic/elasticsearch';
 import {
   SharedGlobalConfig,
   RequestHandlerContext,
@@ -26,15 +24,8 @@ import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
 
-interface EnhancedEsSearchResponse extends IEsSearchResponse {
-  is_partial: boolean;
-  is_running: boolean;
-}
-
-function isEnhancedEsSearchResponse(
-  response: IEsSearchResponse
-): response is EnhancedEsSearchResponse {
-  return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
+function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
+  return response.hasOwnProperty('isPartial') && response.hasOwnProperty('isRunning');
 }
 
 export const enhancedEsSearchStrategyProvider = (
@@ -49,19 +40,23 @@ export const enhancedEsSearchStrategyProvider = (
   ) => {
     logger.info(`search ${JSON.stringify(request.params) || request.id}`);
     const config = await config$.pipe(first()).toPromise();
-    const caller = context.core.elasticsearch.client.asCurrentUser;
+    const client = context.core.elasticsearch.client.asCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
+    const isAsync = request.indexType !== 'rollup';
+
     try {
-      const response =
-        request.indexType === 'rollup'
-          ? await rollupSearch(caller, { ...request, params }, options)
-          : await asyncSearch(caller, { ...request, params }, options);
+      const response = isAsync
+        ? await asyncSearch(client, { ...request, params }, options)
+        : await rollupSearch(client, { ...request, params }, options);
 
       if (
         usage &&
-        (!isEnhancedEsSearchResponse(response) || (!response.is_partial && !response.is_running))
+        isAsync &&
+        isEnhancedEsSearchResponse(response) &&
+        !response.isRunning &&
+        !response.isPartial
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }
@@ -85,10 +80,10 @@ export const enhancedEsSearchStrategyProvider = (
 };
 
 async function asyncSearch(
-  caller: ElasticsearchClient,
+  client: ElasticsearchClient,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
-) {
+): Promise<IEsSearchResponse> {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     ...request.params,
   };
@@ -115,7 +110,8 @@ async function asyncSearch(
     ...queryParams,
   });
 
-  const esResponse = await caller.transport.request({
+  // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
+  const esResponse = await client.transport.request({
     method,
     path,
     body,
@@ -134,23 +130,27 @@ async function asyncSearch(
 }
 
 async function rollupSearch(
-  caller: ElasticsearchClient,
+  client: ElasticsearchClient,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
-) {
+): Promise<IEsSearchResponse> {
   const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
   const querystring = toSnakeCase(params);
 
-  const esResponse = (await caller.transport.request({
+  const esResponse = await client.transport.request({
     method,
     path,
     body,
     querystring,
-  })) as ApiResponse<SearchResponse<any>>;
+  });
 
-  return { rawResponse: esResponse.body, ...getTotalLoaded(esResponse.body._shards) };
+  const { response } = esResponse.body;
+  return {
+    rawResponse: shimHitsTotal(response),
+    ...getTotalLoaded(esResponse.body._shards),
+  };
 }
 
 function toSnakeCase(obj: Record<string, any>) {
