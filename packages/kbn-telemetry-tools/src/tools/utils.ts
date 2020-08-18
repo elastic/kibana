@@ -98,6 +98,14 @@ export function getVariableValue(node: ts.Node): string | Record<string, any> {
     return serializeObject(node);
   }
 
+  if (ts.isIdentifier(node)) {
+    const declaration = getIdentifierDeclaration(node);
+    if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+      return getVariableValue(declaration.initializer);
+    }
+    // TODO: If this is another imported value from another file, we'll need to go fetch it like in getPropertyValue
+  }
+
   throw Error(`Unsuppored Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`);
 }
 
@@ -224,7 +232,22 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
 export function difference(actual: any, expected: any) {
   function changes(obj: any, base: any) {
     return transform(obj, function (result, value, key) {
-      if (key && !isEqual(value, base[key])) {
+      if (key && /@@INDEX@@/.test(`${key}`)) {
+        // The type definition is an Index Signature, fuzzy searching for similar keys
+        const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.*)?'));
+        const keysInBase = Object.keys(base)
+          .map((k) => {
+            const match = k.match(regexp);
+            return match && match[0];
+          })
+          .filter((s): s is string => !!s);
+        keysInBase.forEach((k) => {
+          if (!isEqual(value, base[k])) {
+            result[k as any] =
+              isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+          }
+        });
+      } else if (key && !isEqual(value, base[key])) {
         result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
       }
     });
