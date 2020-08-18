@@ -468,9 +468,14 @@ export class DashboardAppController {
                 const explicitInput = {
                   savedVis: input,
                 };
+                const embeddableId =
+                  'embeddableId' in incomingEmbeddable
+                    ? incomingEmbeddable.embeddableId
+                    : undefined;
                 container.addOrUpdateEmbeddable<EmbeddableInput>(
                   incomingEmbeddable.type,
-                  explicitInput
+                  explicitInput,
+                  embeddableId
                 );
               }
             }

@@ -47,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
     });
 
-    describe('metric', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/75127
+    describe.skip('metric', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
