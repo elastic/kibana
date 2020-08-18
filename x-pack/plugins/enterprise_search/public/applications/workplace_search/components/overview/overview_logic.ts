@@ -9,7 +9,7 @@ import { HttpSetup } from 'src/core/public';
 import { kea, MakeLogicType } from 'kea';
 
 import { IAccount, IOrganization, IUser } from '../../types';
-import { IFlashMessagesProps, TKeaReducers } from '../../../shared/types';
+import { IFlashMessagesProps } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -31,10 +31,10 @@ export interface IOverviewServerData {
 }
 
 export interface IOverviewActions {
-  setServerData(serverData: IOverviewServerData): void;
-  setFlashMessages(flashMessages: IFlashMessagesProps): void;
-  setHasErrorConnecting(hasErrorConnecting: boolean): void;
-  initializeOverview({ http }: { http: HttpSetup }): void;
+  setServerData(serverData: IOverviewServerData): IOverviewServerData;
+  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
+  setHasErrorConnecting(hasErrorConnecting: boolean): { hasErrorConnecting: boolean };
+  initializeOverview({ http }: { http: HttpSetup }): { http: HttpSetup };
 }
 
 export interface IOverviewValues extends IOverviewServerData {
@@ -156,7 +156,7 @@ export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions
     ],
   },
   listeners: ({ actions }) => ({
-    initializeOverview: async ({ http }: { http: HttpSetup }) => {
+    initializeOverview: async ({ http }) => {
       try {
         const response = await http.get('/api/workplace_search/overview');
         actions.setServerData(response);
