@@ -277,8 +277,8 @@ export function App({
       data.indexPatterns,
       data.query.filterManager,
       savedObjectId,
-      state.byValueMode,
       // TODO: These dependencies are changing too often
+      // state.byValueMode,
       // docStorage,
       // redirectTo,
       // state.persistedDoc,

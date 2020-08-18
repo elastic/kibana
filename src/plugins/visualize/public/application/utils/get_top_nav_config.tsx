@@ -21,7 +21,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import uuid from 'uuid';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -165,15 +164,11 @@ export const getTopNavConfig = (
     }
     const state = {
       input: {
-        ...vis.serialize(),
-        id: embeddableId ? embeddableId : uuid.v4(),
+        savedVis: vis.serialize(),
       },
+      embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
-      embeddableId: '',
     };
-    if (embeddableId) {
-      state.embeddableId = embeddableId;
-    }
     embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
