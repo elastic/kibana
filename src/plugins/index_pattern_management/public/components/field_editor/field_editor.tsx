@@ -851,6 +851,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       attrFields && attrFields[field.name] ? attrFields[field.name].displayName : '';
     if (prevDisplayName !== displayName) {
       set(indexPattern, ['attributes', 'fields', field.name, 'displayName'], displayName);
+      indexPattern.fields.update(field);
     }
 
     return indexPattern

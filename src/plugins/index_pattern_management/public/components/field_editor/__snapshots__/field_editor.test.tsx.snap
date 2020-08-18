@@ -517,7 +517,24 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             "add": [MockFunction],
             "getAll": [Function],
             "getByName": [Function],
-            "update": [MockFunction],
+            "update": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "format": Format {},
+                    "lang": undefined,
+                    "name": "test",
+                    "type": "string",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
           },
           "getFormatterForField": [Function],
         }
@@ -792,7 +809,24 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             "add": [MockFunction],
             "getAll": [Function],
             "getByName": [Function],
-            "update": [MockFunction],
+            "update": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "format": Format {},
+                    "lang": undefined,
+                    "name": "test",
+                    "type": "string",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
           },
           "getFormatterForField": [Function],
         }
@@ -1119,7 +1153,24 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             "add": [MockFunction],
             "getAll": [Function],
             "getByName": [Function],
-            "update": [MockFunction],
+            "update": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "format": Format {},
+                    "lang": undefined,
+                    "name": "test",
+                    "type": "string",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
           },
           "getFormatterForField": [Function],
         }

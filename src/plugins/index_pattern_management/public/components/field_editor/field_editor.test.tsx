@@ -166,7 +166,6 @@ describe('FieldEditor', () => {
   it('should display and update a displayName correctly', async () => {
     const testField = {
       name: 'test',
-      displayName: 'Test',
       format: new Format(),
       lang: undefined,
       type: 'string',
@@ -181,6 +180,7 @@ describe('FieldEditor', () => {
     indexPattern.fields.add = jest.fn();
     indexPattern.fields.update = jest.fn();
     indexPattern.fieldFormatMap = { test: field };
+    indexPattern.attributes = { fields: { test: { displayName: 'Test' } } };
 
     indexPattern.save = jest.fn(() => Promise.resolve());
 
@@ -203,10 +203,15 @@ describe('FieldEditor', () => {
 
     await saveBtn.simulate('click');
     await new Promise((resolve) => process.nextTick(resolve));
-    expect(indexPattern.fields.update).toHaveBeenCalledWith({
-      ...testField,
-      displayName: 'new Test',
-    });
+    expect(indexPattern.attributes).toMatchInlineSnapshot(`
+      Object {
+        "fields": Object {
+          "test": Object {
+            "displayName": "new Test",
+          },
+        },
+      }
+    `);
   });
 
   it('should show deprecated lang warning', async () => {
