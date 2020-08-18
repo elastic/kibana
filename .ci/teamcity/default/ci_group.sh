@@ -10,6 +10,8 @@ export KIBANA_INSTALL_DIR="$WORKSPACE/kibana-build-default"
 
 # mv /home/agent/work/kibana-build-oss/kibana-8.0.0-SNAPSHOT-linux-x86_64/* "$KIBANA_INSTALL_DIR/"
 
+cd "$XPACK_DIR"
+
 checks-reporter-with-killswitch "Default Distro Chrome Functional tests / Group ${CI_GROUP}" \
   node scripts/functional_tests \
     --debug --bail \
