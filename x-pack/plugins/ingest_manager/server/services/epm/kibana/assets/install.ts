@@ -46,7 +46,6 @@ export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   kibanaAssets: ArchiveAsset[];
-  isUpdate: boolean;
 }): Promise<SavedObject[]> {
   const { savedObjectsClient, kibanaAssets } = options;
 

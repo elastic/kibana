@@ -111,12 +111,11 @@ export async function installPackage({
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
   // get the currently installed package
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-  // reinstall is either trying to install the same package or trying to install a package that didn't finish updating
-  const reinstall =
-    pkgVersion === installedPkg?.attributes.version ||
-    pkgVersion === installedPkg?.attributes.install_version;
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !reinstall) {
+  const reinstall = pkgVersion === installedPkg?.attributes.version;
+  const reupdate = pkgVersion === installedPkg?.attributes.install_version;
+
+  // let the user install if using the force flag or this is a reinstall or reupdate due to intallation interruption
+  if (semver.lt(pkgVersion, latestPackage.version) && !force && !reinstall && !reupdate) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
@@ -163,7 +162,6 @@ export async function installPackage({
     savedObjectsClient,
     pkgName,
     kibanaAssets,
-    isUpdate,
   });
 
   // the rest of the installation must happen in sequential order
@@ -183,7 +181,6 @@ export async function installPackage({
   // install or update the templates referencing the newly installed pipelines
   const installedTemplates = await installTemplates(
     registryPackageInfo,
-    isUpdate,
     callCluster,
     paths,
     savedObjectsClient
