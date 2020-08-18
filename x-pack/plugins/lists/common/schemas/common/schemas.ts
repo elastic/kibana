@@ -274,6 +274,7 @@ export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
 
+export const operatorIncluded = t.keyof({ included: null });
 export const operator = t.keyof({ excluded: null, included: null });
 export type Operator = t.TypeOf<typeof operator>;
 export enum OperatorEnum {
