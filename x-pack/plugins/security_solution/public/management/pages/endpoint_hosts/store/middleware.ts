@@ -43,6 +43,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             payload: packageInfo,
           });
         } catch (error) {
+          // Ignore Errors, since this should not hinder the user's ability to use the UI
           // eslint-disable-next-line no-console
           console.error(error);
         }
@@ -173,6 +174,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
               });
             }
           } catch (error) {
+            // Ignore Errors, since this should not hinder the user's ability to use the UI
             // eslint-disable-next-line no-console
             console.error(error);
           }
@@ -212,6 +214,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             });
           }
         } catch (error) {
+          // Ignore Errors, since this should not hinder the user's ability to use the UI
           // eslint-disable-next-line no-console
           console.error(error);
         }

@@ -145,6 +145,27 @@ export const EndpointList = () => {
     }
   );
 
+  const onRefresh = useCallback(() => {
+    dispatch({
+      type: 'appRequestedEndpointList',
+    });
+  }, [dispatch]);
+
+  const onRefreshChange = useCallback(
+    (evt) => {
+      dispatch({
+        type: 'userUpdatedEndpointListRefreshOptions',
+        payload: {
+          isAutoRefreshEnabled: !evt.isPaused,
+          autoRefreshInterval: evt.refreshInterval,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const NOOP = useCallback(() => {}, []);
+
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<
     AgentConfigDetailsDeployAgentAction
   >('ingestManager', {
@@ -379,6 +400,34 @@ export const EndpointList = () => {
   ]);
 
   const hasListData = listData && listData.length > 0;
+
+  const autoRefresh = useMemo(() => {
+    return (
+      <>
+        <div style={{ display: hasListData ? 'flex' : 'none', maxWidth: 200 }}>
+          <EuiSuperDatePicker
+            onTimeChange={NOOP}
+            isDisabled={hasSelectedEndpoint}
+            onRefresh={onRefresh}
+            isPaused={!hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled}
+            refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
+            onRefreshChange={onRefreshChange}
+            isAutoRefreshOnly={true}
+          />
+        </div>
+        <EuiSpacer size="m" />
+      </>
+    );
+  }, [
+    hasListData,
+    hasSelectedEndpoint,
+    onRefresh,
+    isAutoRefreshEnabled,
+    autoRefreshInterval,
+    onRefreshChange,
+    NOOP,
+  ]);
+
   return (
     <ManagementPageView
       viewType="list"
@@ -417,34 +466,7 @@ export const EndpointList = () => {
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {
-        <>
-          <div style={{ display: hasListData ? 'flex' : 'none', maxWidth: 200 }}>
-            <EuiSuperDatePicker
-              onTimeChange={() => {}}
-              isDisabled={hasSelectedEndpoint}
-              onRefresh={() => {
-                dispatch({
-                  type: 'appRequestedEndpointList',
-                });
-              }}
-              isPaused={!hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled}
-              refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
-              onRefreshChange={(evt) => {
-                dispatch({
-                  type: 'userUpdatedEndpointListRefreshOptions',
-                  payload: {
-                    isAutoRefreshEnabled: !evt.isPaused,
-                    autoRefreshInterval: evt.refreshInterval,
-                  },
-                });
-              }}
-              isAutoRefreshOnly={true}
-            />
-          </div>
-          <EuiSpacer size="m" />
-        </>
-      }
+      {autoRefresh}
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
