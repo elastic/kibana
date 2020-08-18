@@ -16,8 +16,18 @@ storiesOf('renderers/table', module).add('default', () => {
     datatable: {
       type: 'datatable' as 'datatable',
       columns: [
-        { name: 'Foo', type: 'string' as 'string' },
-        { name: 'Bar', type: 'number' as 'number' },
+        {
+          name: 'Foo',
+          type: 'string' as 'string',
+          id: 'id-foo',
+          meta: { type: 'string' as 'string' },
+        },
+        {
+          name: 'Bar',
+          type: 'number' as 'number',
+          id: 'id-bar',
+          meta: { type: 'string' as 'string' },
+        },
       ],
       rows: [
         { Foo: 'a', Bar: 700 },
