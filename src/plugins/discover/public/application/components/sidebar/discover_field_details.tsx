@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiLink, EuiIconTip, EuiText, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -44,7 +44,7 @@ export function DiscoverFieldDetails({
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean>(false);
-  const [visualizeLink, setVisualizeLink] = useState<string | undefined>('');
+  const [visualizeLink, setVisualizeLink] = useState<string>('');
 
   useEffect(() => {
     isFieldVisualizable(field, indexPattern.id, details.columns).then(
@@ -53,7 +53,7 @@ export function DiscoverFieldDetails({
         // get href only if Visualize button is enabled
         getVisualizeHref(field, indexPattern.id, details.columns).then(
           (uri) => {
-            setVisualizeLink(uri);
+            if (uri) setVisualizeLink(uri);
           },
           () => {
             setVisualizeLink('');
@@ -67,12 +67,7 @@ export function DiscoverFieldDetails({
   }, [field, indexPattern.id, details.columns]);
 
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (
-      !event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore everything but left clicks
-      (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
-      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
-    ) {
+    if (!event.defaultPrevented) {
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
       triggerVisualizeActions(field, indexPattern.id, details.columns);
@@ -117,7 +112,7 @@ export function DiscoverFieldDetails({
 
       {showVisualizeLink && (
         // eslint-disable-next-line @elastic/eui/href-or-on-click
-        <EuiLink
+        <EuiButton
           onClick={(e) => handleVisualizeLinkClick(e)}
           href={visualizeLink}
           className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
@@ -130,7 +125,7 @@ export function DiscoverFieldDetails({
           {warnings.length > 0 && (
             <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
           )}
-        </EuiLink>
+        </EuiButton>
       )}
     </div>
   );

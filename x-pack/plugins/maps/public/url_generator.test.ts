@@ -63,7 +63,6 @@ describe('visualize url generator', () => {
         },
       },
     ];
-    // @ts-ignore
     const encodedLayers = rison.encode_array(initialLayers);
     const url = await generator.createUrl!({
       initialLayers,

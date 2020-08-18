@@ -56,7 +56,7 @@ export async function getVisualizeHref(
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
-  if (!indexPatternId) return '';
+  if (!indexPatternId) return undefined;
   const triggerOptions = {
     indexPatternId,
     fieldName: field.name,
@@ -70,7 +70,9 @@ export async function getVisualizeHref(
     getTriggerConstant(field.type)
   );
   // enable the link only if only one action is registered
-  return compatibleActions.length === 1 ? compatibleActions[0].getHref?.(triggerOptions) : '';
+  return compatibleActions.length === 1
+    ? compatibleActions[0].getHref?.(triggerOptions)
+    : undefined;
 }
 
 export function triggerVisualizeActions(

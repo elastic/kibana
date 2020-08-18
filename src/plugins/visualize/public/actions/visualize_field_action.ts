@@ -36,7 +36,7 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
   type: ACTION_VISUALIZE_FIELD,
   getDisplayName: () =>
     i18n.translate('visualize.discover.visualizeFieldLabel', {
-      defaultMessage: 'Visualize on Vis Editor',
+      defaultMessage: 'Visualize field',
     }),
   isCompatible: async () => !!getApplication().capabilities.visualize.show,
   getHref: async (context) => {
