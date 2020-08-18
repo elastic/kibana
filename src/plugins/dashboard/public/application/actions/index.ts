@@ -37,3 +37,8 @@ export {
   AddToLibraryActionContext,
   ACTION_ADD_TO_LIBRARY,
 } from './add_to_library_action';
+export {
+  UnlinkFromLibraryAction,
+  UnlinkFromLibraryActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+} from './unlink_from_library_action';

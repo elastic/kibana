@@ -80,6 +80,9 @@ import {
   RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+  UnlinkFromLibraryActionContext,
+  UnlinkFromLibraryAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -158,6 +161,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
+    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
   }
 }
 
@@ -430,6 +434,9 @@ export class DashboardPlugin
       const addToLibraryAction = new AddToLibraryAction();
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+      uiActions.registerAction(unlinkFromLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({

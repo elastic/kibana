@@ -25,4 +25,5 @@ export const VisualizeConstants = {
   WIZARD_STEP_2_PAGE_PATH: '/new/configure',
   CREATE_PATH: '/create',
   EDIT_PATH: '/edit',
+  EDIT_BY_VALUE_PATH: '/edit_by_value',
 };
