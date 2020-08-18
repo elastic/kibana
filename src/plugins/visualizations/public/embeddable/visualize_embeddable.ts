@@ -47,6 +47,7 @@ import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { TriggerId } from '../../../ui_actions/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -310,12 +311,21 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId =
-            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
-          const context = {
-            embeddable: this,
-            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-          };
+          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+          let context;
+
+          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+            context = {
+              embeddable: this,
+              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+              ...event.data,
+            };
+          } else {
+            context = {
+              embeddable: this,
+              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
+            };
+          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
@@ -393,7 +403,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     });
   };
 
-  public supportedTriggers() {
+  public supportedTriggers(): TriggerId[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 }
