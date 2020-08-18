@@ -121,7 +121,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(
+      core.application.navigateToApp,
+      core.application.applications$
+    );
     this.isRegistryReady = true;
 
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
@@ -151,7 +154,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEmbeddableFactories: this.getEmbeddableFactories,
       getStateTransfer: (history?: ScopedHistory) => {
         return history
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
+          ? new EmbeddableStateTransfer(
+              core.application.navigateToApp,
+              core.application.applications$,
+              history
+            )
           : this.outgoingOnlyStateTransfer;
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),

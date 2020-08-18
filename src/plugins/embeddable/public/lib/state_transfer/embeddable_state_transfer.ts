@@ -18,7 +18,13 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { ScopedHistory, ApplicationStart } from '../../../../../core/public';
+import { Observable } from 'rxjs';
+import {
+  ScopedHistory,
+  ApplicationStart,
+  PublicLegacyAppInfo,
+  PublicAppInfo,
+} from '../../../../../core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,
@@ -33,10 +39,22 @@ import {
  * @public
  */
 export class EmbeddableStateTransfer {
+  private appList?: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>;
+
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
+    applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>,
     private scopedHistory?: ScopedHistory
-  ) {}
+  ) {
+    applications$.subscribe(
+      (appList: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>) =>
+        (this.appList = appList)
+    );
+  }
+
+  public fetchI18nAppNameFromId(appId: string): string | undefined {
+    return this.appList?.get(appId)?.title;
+  }
 
   /**
    * Fetches an {@link EmbeddableEditorState | originating app} argument from the scoped
