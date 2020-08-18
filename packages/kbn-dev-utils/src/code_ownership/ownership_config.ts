@@ -471,6 +471,13 @@ export const rules: OwnershipRule[] = [
   },
   {
     files: [
+      '/src/legacy/core_plugins/ui_metric/',
+      '/src/plugins/kibana_usage_collection/',
+      '/src/plugins/telemetry',
+      '/src/plugins/usage_collection/',
+      '/x-pack/plugins/oss_telemetry/',
+      '/x-pack/plugins/telemetry_collection_xpack/',
+      '/packages/kbn-analytics/',
       '/x-pack/plugins/alerts/',
       '/x-pack/plugins/actions/',
       '/x-pack/plugins/event_log/',
@@ -525,20 +532,6 @@ export const rules: OwnershipRule[] = [
     excludeFiles: [],
     codeOwner: '@elastic/logstash',
     coverageOwner: 'logstash',
-  },
-  {
-    files: [
-      '/src/legacy/core_plugins/ui_metric/',
-      '/src/plugins/kibana_usage_collection/',
-      '/src/plugins/telemetry',
-      '/src/plugins/usage_collection/',
-      '/x-pack/plugins/oss_telemetry/',
-      '/x-pack/plugins/telemetry_collection_xpack/',
-      '/packages/kbn-analytics/',
-    ],
-    excludeFiles: [],
-    codeOwner: '@elastic/pulse',
-    coverageOwner: 'pulse',
   },
   {
     files: ['/x-pack/plugins/enterprise_search/', '/x-pack/test/functional_enterprise_search/'],

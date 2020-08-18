@@ -207,6 +207,13 @@
 /x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kibana-telemetry
 
 # @elastic/kibana-alerting-services
+/src/legacy/core_plugins/ui_metric/ @elastic/kibana-alerting-services
+/src/plugins/kibana_usage_collection/ @elastic/kibana-alerting-services
+/src/plugins/telemetry @elastic/kibana-alerting-services
+/src/plugins/usage_collection/ @elastic/kibana-alerting-services
+/x-pack/plugins/oss_telemetry/ @elastic/kibana-alerting-services
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-alerting-services
+/packages/kbn-analytics/ @elastic/kibana-alerting-services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
@@ -230,15 +237,6 @@
 
 # @elastic/logstash
 /x-pack/plugins/logstash @elastic/logstash
-
-# @elastic/pulse
-/src/legacy/core_plugins/ui_metric/ @elastic/pulse
-/src/plugins/kibana_usage_collection/ @elastic/pulse
-/src/plugins/telemetry @elastic/pulse
-/src/plugins/usage_collection/ @elastic/pulse
-/x-pack/plugins/oss_telemetry/ @elastic/pulse
-/x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
-/packages/kbn-analytics/ @elastic/pulse
 
 # @elastic/app-search-frontend
 /x-pack/plugins/enterprise_search/ @elastic/app-search-frontend
