@@ -127,7 +127,7 @@ describe('<UseField />', () => {
       expect(serializer).not.toBeCalled();
       expect(formatter).not.toBeCalled();
 
-      let formData = formHook.getFormData({ unflatten: false }) ?? ({} as MyForm);
+      let formData = formHook.getFormData({ unflatten: false });
       expect(formData.name).toEqual('John-deserialized');
 
       await act(async () => {
@@ -137,7 +137,7 @@ describe('<UseField />', () => {
       expect(formatter).toBeCalled(); // Formatters are executed on each value change
       expect(serializer).not.toBeCalled(); // Serializer are executed *only** when outputting the form data
 
-      formData = formHook.getFormData() ?? ({} as MyForm);
+      formData = formHook.getFormData();
       expect(serializer).toBeCalled();
       expect(formData.name).toEqual('MIKE-serialized');
 
