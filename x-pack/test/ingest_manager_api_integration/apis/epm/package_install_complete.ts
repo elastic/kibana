@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
-  InstallStatus,
+  EpmPackageInstallStatus,
 } from '../../../../plugins/ingest_manager/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
           type: PACKAGES_SAVED_OBJECT_TYPE,
           attributes: {
-            install_status: InstallStatus.installing,
+            install_status: EpmPackageInstallStatus.installing,
             install_started_at: previousInstallDate,
           },
         });
@@ -59,7 +59,9 @@ export default function (providerContext: FtrProviderContext) {
         });
         const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
         expect(Date.parse(installStartedAfterSetup)).greaterThan(Date.parse(previousInstallDate));
-        expect(packageAfterSetup.attributes.install_status).equal(InstallStatus.installed);
+        expect(packageAfterSetup.attributes.install_status).equal(
+          EpmPackageInstallStatus.installed
+        );
       });
       it('should have not reinstalled if package installing did not surpass elapsed time', async function () {
         // change the saved object to installing to mock package still installing, but a time less than the max time allowable
@@ -68,7 +70,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
           type: PACKAGES_SAVED_OBJECT_TYPE,
           attributes: {
-            install_status: InstallStatus.installing,
+            install_status: EpmPackageInstallStatus.installing,
             install_started_at: previousInstallDate,
           },
         });
@@ -79,7 +81,9 @@ export default function (providerContext: FtrProviderContext) {
         });
         const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
         expect(Date.parse(installStartedAfterSetup)).equal(Date.parse(previousInstallDate));
-        expect(packageAfterSetup.attributes.install_status).equal(InstallStatus.installing);
+        expect(packageAfterSetup.attributes.install_status).equal(
+          EpmPackageInstallStatus.installing
+        );
       });
       after(async () => {
         await supertest
@@ -120,7 +124,7 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGES_SAVED_OBJECT_TYPE,
           attributes: {
             version: pkgVersion,
-            install_status: InstallStatus.installing,
+            install_status: EpmPackageInstallStatus.installing,
             install_started_at: previousInstallDate,
             install_version: pkgUpdateVersion, // set version back
           },
@@ -132,7 +136,9 @@ export default function (providerContext: FtrProviderContext) {
         });
         const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
         expect(Date.parse(installStartedAfterSetup)).greaterThan(Date.parse(previousInstallDate));
-        expect(packageAfterSetup.attributes.install_status).equal(InstallStatus.installed);
+        expect(packageAfterSetup.attributes.install_status).equal(
+          EpmPackageInstallStatus.installed
+        );
         expect(packageAfterSetup.attributes.version).equal(pkgUpdateVersion);
         expect(packageAfterSetup.attributes.install_version).equal(pkgUpdateVersion);
       });
@@ -143,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
           id: pkgName,
           type: PACKAGES_SAVED_OBJECT_TYPE,
           attributes: {
-            install_status: InstallStatus.installing,
+            install_status: EpmPackageInstallStatus.installing,
             install_started_at: previousInstallDate,
             version: pkgVersion, // set version back
           },
@@ -155,7 +161,9 @@ export default function (providerContext: FtrProviderContext) {
         });
         const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
         expect(Date.parse(installStartedAfterSetup)).equal(Date.parse(previousInstallDate));
-        expect(packageAfterSetup.attributes.install_status).equal(InstallStatus.installing);
+        expect(packageAfterSetup.attributes.install_status).equal(
+          EpmPackageInstallStatus.installing
+        );
         expect(packageAfterSetup.attributes.version).equal(pkgVersion);
       });
       after(async () => {

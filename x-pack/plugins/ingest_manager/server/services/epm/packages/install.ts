@@ -16,7 +16,7 @@ import {
   KibanaAssetReference,
   EsAssetReference,
   ElasticsearchAssetType,
-  InstallStatus,
+  EpmPackageInstallStatus,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -141,7 +141,7 @@ export async function installPackage({
   } else {
     await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       install_version: pkgVersion,
-      install_status: InstallStatus.installing,
+      install_status: EpmPackageInstallStatus.installing,
       install_started_at: new Date().toISOString(),
     });
   }
@@ -208,7 +208,7 @@ export async function installPackage({
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_version: pkgVersion,
-    install_status: InstallStatus.installed,
+    install_status: EpmPackageInstallStatus.installed,
   });
   return [...installedKibanaAssetsRefs, ...installedPipelines, ...installedTemplateRefs];
 }
@@ -253,7 +253,7 @@ export async function createInstallation(options: {
       internal,
       removable,
       install_version: pkgVersion,
-      install_status: InstallStatus.installing,
+      install_status: EpmPackageInstallStatus.installing,
       install_started_at: new Date().toISOString(),
     },
     { id: pkgName, overwrite: true }
@@ -309,7 +309,7 @@ export async function ensurePackagesCompletedInstall(
 ) {
   const installedSavedObjects = await getPackageSavedObjects(savedObjectsClient);
   const installingPackages = installedSavedObjects.saved_objects.filter(
-    (pkg) => pkg.attributes.install_status === InstallStatus.installing
+    (pkg) => pkg.attributes.install_status === EpmPackageInstallStatus.installing
   );
   const installingPromises = installingPackages.reduce<Array<Promise<AssetReference[]>>>(
     (acc, pkg) => {
