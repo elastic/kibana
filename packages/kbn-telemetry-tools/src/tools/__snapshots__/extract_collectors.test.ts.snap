@@ -132,6 +132,14 @@ Array [
               "type": "BooleanKeyword",
             },
           },
+          "my_index_signature_prop": Object {
+            "": Object {
+              "@@INDEX@@": Object {
+                "kind": 140,
+                "type": "NumberKeyword",
+              },
+            },
+          },
           "my_objects": Object {
             "total": Object {
               "kind": 140,
@@ -164,6 +172,20 @@ Array [
             },
             "type": Object {
               "type": "boolean",
+            },
+          },
+          "my_index_signature_prop": Object {
+            "avg": Object {
+              "type": "number",
+            },
+            "count": Object {
+              "type": "number",
+            },
+            "max": Object {
+              "type": "number",
+            },
+            "min": Object {
+              "type": "number",
             },
           },
           "my_objects": Object {
