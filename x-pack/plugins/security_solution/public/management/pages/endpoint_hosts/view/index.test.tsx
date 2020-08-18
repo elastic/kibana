@@ -8,6 +8,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
 import { EndpointList } from './index';
+import '../../../../common/mock/match_media.ts';
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,

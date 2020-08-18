@@ -10,15 +10,10 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
-  EuiTitle,
-  EuiSpacer,
   EuiLink,
   EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -36,8 +31,6 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -50,6 +43,7 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { AdministrationListPage } from '../../../components/administration_list_page';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -375,40 +369,20 @@ export const EndpointList = () => {
   ]);
 
   return (
-    <ManagementPageView
-      viewType="list"
+    <AdministrationListPage
       data-test-subj="endpointPage"
-      headerLeft={
-        <>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1 data-test-subj="pageViewHeaderLeftTitle">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.list.pageTitle"
-                    defaultMessage="Endpoints"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpoint.list.beta', {
-                  defaultMessage: 'Beta',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.pageSubTitle"
-                defaultMessage="Hosts running Elastic Endpoint Security"
-              />
-            </p>
-          </EuiText>
-        </>
+      beta={true}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.pageTitle"
+          defaultMessage="Endpoints"
+        />
+      }
+      subtitle={
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.list.pageSubTitle"
+          defaultMessage="Hosts running Elastic Endpoint Security"
+        />
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
@@ -425,7 +399,6 @@ export const EndpointList = () => {
         </>
       )}
       {renderTableOrEmptyState}
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </ManagementPageView>
+    </AdministrationListPage>
   );
 };
