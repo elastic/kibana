@@ -63,13 +63,15 @@ export class TiledVectorLayer extends VectorLayer {
     );
     const prevDataRequest = this.getSourceDataRequest();
 
+    const templateWithMeta = await this._source.getUrlTemplateWithMeta(dataFilters);
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
       if (data) {
         const canSkipBecauseNoChanges =
           data.layerName === this._source.getLayerName() &&
           data.minSourceZoom === this._source.getMinZoom() &&
-          data.maxSourceZoom === this._source.getMaxZoom();
+          data.maxSourceZoom === this._source.getMaxZoom() &&
+          data.urlTemplate === templateWithMeta.urlTemplate;
 
         if (canSkipBecauseNoChanges) {
           return null;
@@ -79,7 +81,6 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
-      const templateWithMeta = await this._source.getUrlTemplateWithMeta(dataFilters);
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
