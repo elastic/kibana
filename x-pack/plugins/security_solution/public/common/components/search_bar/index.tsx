@@ -33,7 +33,6 @@ import {
   filterQuerySelector,
   fromStrSelector,
   isLoadingSelector,
-  kindSelector,
   queriesSelector,
   savedQuerySelector,
   startSelector,
@@ -57,7 +56,7 @@ const SearchBarContainer = styled.div`
   }
 `;
 
-const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
+export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     end,
     filterQuery,
@@ -74,11 +73,15 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     updateSearch,
     dataTestSubj,
   }) => {
-    const { data } = useKibana().services;
     const {
-      timefilter: { timefilter },
-      filterManager,
-    } = data.query;
+      data: {
+        query: {
+          timefilter: { timefilter },
+          filterManager,
+        },
+        ui: { SearchBar },
+      },
+    } = useKibana().services;
 
     useEffect(() => {
       if (fromStr != null && toStr != null) {
@@ -249,10 +252,12 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
-        <data.ui.SearchBar
+        <SearchBar
           appName="siem"
           isLoading={isLoading}
           indexPatterns={indexPatterns}
@@ -279,7 +284,6 @@ const makeMapStateToProps = () => {
   const getEndSelector = endSelector();
   const getFromStrSelector = fromStrSelector();
   const getIsLoadingSelector = isLoadingSelector();
-  const getKindSelector = kindSelector();
   const getQueriesSelector = queriesSelector();
   const getStartSelector = startSelector();
   const getToStrSelector = toStrSelector();
@@ -292,7 +296,6 @@ const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      kind: getKindSelector(inputsRange),
       queries: getQueriesSelector(inputsRange),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
