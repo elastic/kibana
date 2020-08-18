@@ -63,7 +63,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           onClose={() => handle.close()}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          triggers={ensureNestedTriggers(embeddable.supportedTriggers())}
         />
       ),
       {

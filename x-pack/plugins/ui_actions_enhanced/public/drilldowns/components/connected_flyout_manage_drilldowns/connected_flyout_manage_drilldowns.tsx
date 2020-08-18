@@ -42,7 +42,7 @@ interface ConnectedFlyoutManageDrilldownsProps<
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  triggers: TriggerId[];
 
   /**
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
@@ -81,8 +81,8 @@ export function createFlyoutManageDrilldowns({
     const isCreateOnly = props.viewMode === 'create';
 
     const factoryContext: BaseActionFactoryContext = useMemo(
-      () => ({ ...props.extraContext, triggers: props.supportedTriggers }),
-      [props.extraContext, props.supportedTriggers]
+      () => ({ ...props.extraContext, triggers: props.triggers }),
+      [props.extraContext, props.triggers]
     );
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -206,7 +206,7 @@ export function createFlyoutManageDrilldowns({
             }}
             extraActionFactoryContext={props.extraContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
-            supportedTriggers={props.supportedTriggers}
+            supportedTriggers={props.triggers}
             getTrigger={getTrigger}
           />
         );
@@ -216,7 +216,7 @@ export function createFlyoutManageDrilldowns({
         // show trigger column in case if there is more then 1 possible trigger in current context
         const showTriggerColumn =
           intersection(
-            props.supportedTriggers,
+            props.triggers,
             actionFactories
               .map((factory) => factory.supportedTriggers())
               .reduce((res, next) => res.concat(next), [])

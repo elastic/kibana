@@ -49,7 +49,7 @@ export const DrilldownsManager: React.FC = () => {
           onClose={() => {}}
           viewMode={'create'}
           dynamicActionManager={manager}
-          supportedTriggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER']}
+          triggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER']}
         />
       </EuiFlyout>
     </>
