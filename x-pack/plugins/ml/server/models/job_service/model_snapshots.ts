@@ -6,10 +6,9 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
-import { datafeedsProvider, MlDatafeedsResponse } from './datafeeds';
-import { MlJobsResponse } from './jobs';
+import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
 
 export interface ModelSnapshotsResponse {
@@ -20,8 +19,9 @@ export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
 
-export function modelSnapshotProvider(callAsCurrentUser: LegacyAPICaller) {
-  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
+export function modelSnapshotProvider(mlClusterClient: ILegacyScopedClusterClient) {
+  const { callAsInternalUser } = mlClusterClient;
+  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(mlClusterClient);
 
   async function revertModelSnapshot(
     jobId: string,
@@ -33,12 +33,12 @@ export function modelSnapshotProvider(callAsCurrentUser: LegacyAPICaller) {
   ) {
     let datafeedId = `datafeed-${jobId}`;
     // ensure job exists
-    await callAsCurrentUser<MlJobsResponse>('ml.jobs', { jobId: [jobId] });
+    await callAsInternalUser('ml.jobs', { jobId: [jobId] });
 
     try {
       // ensure the datafeed exists
       // the datafeed is probably called datafeed-<jobId>
-      await callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds', {
+      await callAsInternalUser('ml.datafeeds', {
         datafeedId: [datafeedId],
       });
     } catch (e) {
@@ -52,22 +52,19 @@ export function modelSnapshotProvider(callAsCurrentUser: LegacyAPICaller) {
     }
 
     // ensure the snapshot exists
-    const snapshot = await callAsCurrentUser<ModelSnapshotsResponse>('ml.modelSnapshots', {
+    const snapshot = (await callAsInternalUser('ml.modelSnapshots', {
       jobId,
       snapshotId,
-    });
+    })) as ModelSnapshotsResponse;
 
     // apply the snapshot revert
-    const { model } = await callAsCurrentUser<RevertModelSnapshotResponse>(
-      'ml.revertModelSnapshot',
-      {
-        jobId,
-        snapshotId,
-        body: {
-          delete_intervening_results: deleteInterveningResults,
-        },
-      }
-    );
+    const { model } = (await callAsInternalUser('ml.revertModelSnapshot', {
+      jobId,
+      snapshotId,
+      body: {
+        delete_intervening_results: deleteInterveningResults,
+      },
+    })) as RevertModelSnapshotResponse;
 
     // create calendar (if specified) and replay datafeed
     if (replay && model.snapshot_id === snapshotId && snapshot.model_snapshots.length) {
@@ -88,7 +85,7 @@ export function modelSnapshotProvider(callAsCurrentUser: LegacyAPICaller) {
             end_time: s.end,
           })),
         };
-        const cm = new CalendarManager(callAsCurrentUser);
+        const cm = new CalendarManager(mlClusterClient);
         await cm.newCalendar(calendar);
       }
 

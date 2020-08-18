@@ -16,6 +16,7 @@ import { ClientMetrics } from './ClientMetrics';
 import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
+import { VisitorBreakdown } from './VisitorBreakdown';
 
 export function RumDashboard() {
   return (
@@ -39,6 +40,14 @@ export function RumDashboard() {
             <EuiFlexItem grow={3}>
               <PageLoadDistribution />
               <PageViewsTrend />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+        <EuiPanel>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={3}>
+              <VisitorBreakdown />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

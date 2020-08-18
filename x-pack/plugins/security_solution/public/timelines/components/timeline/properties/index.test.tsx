@@ -16,6 +16,7 @@ import {
   TestProviders,
   kibanaObservable,
 } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';

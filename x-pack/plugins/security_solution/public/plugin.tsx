@@ -281,7 +281,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.management}`,
+      id: `${APP_ID}:${SecurityPageName.administration}`,
       title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,

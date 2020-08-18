@@ -9,10 +9,8 @@
   "ui": true,
   "requiredBundles": [
     "home",
-    "management",
     "kibanaReact",
     "spaces",
-    "esUiShared",
-    "management"
+    "esUiShared"
   ]
 }

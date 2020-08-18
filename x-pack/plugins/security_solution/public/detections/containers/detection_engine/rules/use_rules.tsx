@@ -67,7 +67,7 @@ export const useRules = ({
         }
       } catch (error) {
         if (isSubscribed) {
-          errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
+          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
           if (dispatchRulesInReducer != null) {
             dispatchRulesInReducer([], {});
           }

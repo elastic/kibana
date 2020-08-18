@@ -1,13 +1,13 @@
 [[development-plugin-feature-registration]]
-==== Plugin feature registration
+== Plugin feature registration
 
 If your plugin will be used with {kib}'s default distribution, then you have the ability to register the features that your plugin provides. Features are typically apps in {kib}; once registered, you can toggle them via Spaces, and secure them via Roles when security is enabled.
 
-===== UI Capabilities
+=== UI Capabilities
 
 Registering features also gives your plugin access to “UI Capabilities”. These capabilities are boolean flags that you can use to conditionally render your interface, based on the current user's permissions. For example, you can  hide or disable a Save button if the current user is not authorized.
 
-===== Registering a feature
+=== Registering a feature
 
 Feature registration is controlled via the built-in `xpack_main` plugin. To register a feature, call `xpack_main`'s `registerFeature` function from your plugin's `init` function, and provide the appropriate details:
 
@@ -21,7 +21,7 @@ init(server) {
 }
 -----------
 
-===== Feature details
+=== Feature details
 Registering a feature consists of the following fields. For more information, consult the {kib-repo}blob/{branch}/x-pack/plugins/features/server/feature_registry.ts[feature registry interface].
 
 
@@ -65,12 +65,12 @@ Registering a feature consists of the following fields. For more information, co
 |The ID of the navigation link associated with your feature.
 |===
 
-====== Privilege definition
+==== Privilege definition
 The `privileges` section of feature registration allows plugins to implement read/write and read-only modes for their applications.
 
 For a full explanation of fields and options, consult the {kib-repo}blob/{branch}/x-pack/plugins/features/server/feature_registry.ts[feature registry interface].
 
-===== Using UI Capabilities
+=== Using UI Capabilities
 
 UI Capabilities are available to your public (client) plugin code. These capabilities are read-only, and are used to inform the UI. This object is namespaced by feature id. For example, if your feature id is “foo”, then your UI Capabilities are stored at `uiCapabilities.foo`.
 To access capabilities, import them from `ui/capabilities`:
@@ -86,7 +86,7 @@ if (canUserSave) {
 -----------
 
 [[example-1-canvas]]
-===== Example 1: Canvas Application
+=== Example 1: Canvas Application
 ["source","javascript"]
 -----------
 init(server) {
@@ -141,7 +141,7 @@ if (canUserSave) {
 Because the `read` privilege does not define the `save` capability, users with read-only access will have their `uiCapabilities.canvas.save` flag set to `false`.
 
 [[example-2-dev-tools]]
-===== Example 2: Dev Tools
+=== Example 2: Dev Tools
 
 ["source","javascript"]
 -----------
@@ -176,7 +176,7 @@ init(server) {
     },
     privilegesTooltip: i18n.translate('xpack.features.devToolsPrivilegesTooltip', {
      defaultMessage:
-       'User should also be granted the appropriate Elasticsearch cluster and index privileges',
+       'User should also be granted the appropriate {es} cluster and index privileges',
    }),
   });
 }
@@ -199,7 +199,7 @@ server.route({
 -----------
 
 [[example-3-discover]]
-===== Example 3: Discover
+=== Example 3: Discover
 
 Discover takes advantage of subfeature privileges to allow fine-grained access control. In this example,
 a single "Create Short URLs" subfeature privilege is defined, which allows users to grant access to this feature without having to grant the `all` privilege to Discover. In other words, you can grant `read` access to Discover, and also grant the ability to create short URLs.

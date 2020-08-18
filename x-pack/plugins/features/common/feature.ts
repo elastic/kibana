@@ -95,6 +95,13 @@ export interface FeatureConfig {
   catalogue?: readonly string[];
 
   /**
+   * If your feature grants access to specific Alert Types, you can specify them here to control visibility based on the current space.
+   * Include both Alert Types registered by the feature and external Alert Types such as built-in
+   * Alert Types and Alert Types provided by other features to which you wish to grant access.
+   */
+  alerting?: readonly string[];
+
+  /**
    * Feature privilege definition.
    *
    * @example
@@ -177,6 +184,10 @@ export class Feature {
 
   public get privileges() {
     return this.config.privileges;
+  }
+
+  public get alerting() {
+    return this.config.alerting;
   }
 
   public get excludeFromBasePrivileges() {

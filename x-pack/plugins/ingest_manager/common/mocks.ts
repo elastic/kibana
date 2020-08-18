@@ -6,7 +6,7 @@
 
 import { NewPackageConfig, PackageConfig } from './types/models/package_config';
 
-export const createNewPackageConfigMock = () => {
+export const createNewPackageConfigMock = (): NewPackageConfig => {
   return {
     name: 'endpoint-1',
     description: '',
@@ -20,10 +20,10 @@ export const createNewPackageConfigMock = () => {
       version: '0.9.0',
     },
     inputs: [],
-  } as NewPackageConfig;
+  };
 };
 
-export const createPackageConfigMock = () => {
+export const createPackageConfigMock = (): PackageConfig => {
   const newPackageConfig = createNewPackageConfigMock();
   return {
     ...newPackageConfig,
@@ -37,7 +37,10 @@ export const createPackageConfigMock = () => {
     inputs: [
       {
         config: {},
+        enabled: true,
+        type: 'endpoint',
+        streams: [],
       },
     ],
-  } as PackageConfig;
+  };
 };

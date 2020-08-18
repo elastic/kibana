@@ -20,11 +20,12 @@ import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
 import { InfraSourceConfiguration } from '../../sources';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
 type ConditionResult = InventoryMetricConditions & {
-  shouldFire: boolean | boolean[];
+  shouldFire: boolean[];
   currentValue: number;
-  isNoData: boolean;
+  isNoData: boolean[];
   isError: boolean;
 };
 
@@ -70,8 +71,8 @@ export const evaluateCondition = async (
         value !== null &&
         (Array.isArray(value)
           ? value.map((v) => comparisonFunction(Number(v), threshold))
-          : comparisonFunction(value as number, threshold)),
-      isNoData: value === null,
+          : [comparisonFunction(value as number, threshold)]),
+      isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
       isError: value === undefined,
       currentValue: getCurrentValue(value),
     };
@@ -111,6 +112,8 @@ const getData = async (
   try {
     const { nodes } = await snapshot.getNodes(esClient, options);
 
+    if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
+
     return nodes.reduce((acc, n) => {
       const nodePathItem = last(n.path) as any;
       const m = first(n.metrics);
@@ -129,14 +132,14 @@ const getData = async (
       const causedByType = e.body?.error?.caused_by?.type;
       if (causedByType === 'too_many_buckets_exception') {
         return {
-          '*': {
+          [UNGROUPED_FACTORY_KEY]: {
             [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
             maxBuckets: e.body.error.caused_by.max_buckets,
           },
         };
       }
     }
-    return { '*': undefined };
+    return { [UNGROUPED_FACTORY_KEY]: undefined };
   }
 };
 

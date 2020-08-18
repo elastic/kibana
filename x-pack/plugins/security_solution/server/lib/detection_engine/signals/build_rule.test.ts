@@ -5,7 +5,7 @@
  */
 
 import { buildRule } from './build_rule';
-import { sampleRuleAlertParams, sampleRuleGuid } from './__mocks__/es_results';
+import { sampleDocNoSortId, sampleRuleAlertParams, sampleRuleGuid } from './__mocks__/es_results';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
@@ -29,6 +29,7 @@ describe('buildRule', () => {
     ];
     const rule = buildRule({
       actions: [],
+      doc: sampleDocNoSortId(),
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -97,6 +98,7 @@ describe('buildRule', () => {
     ruleParams.filters = undefined;
     const rule = buildRule({
       actions: [],
+      doc: sampleDocNoSortId(),
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -154,6 +156,7 @@ describe('buildRule', () => {
     ruleParams.filters = undefined;
     const rule = buildRule({
       actions: [],
+      doc: sampleDocNoSortId(),
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,

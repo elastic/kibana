@@ -256,43 +256,52 @@ exports[`InspectorPanel should render as expected 1`] = `
                           size="s"
                         >
                           <button
-                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--iconRight"
+                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                             data-test-subj="inspectorViewChooser"
                             onClick={[Function]}
                             type="button"
                           >
-                            <span
+                            <EuiButtonContent
                               className="euiButtonEmpty__content"
+                              iconSide="right"
+                              iconType="arrowDown"
+                              textProps={
+                                Object {
+                                  "className": "euiButtonEmpty__text",
+                                }
+                              }
                             >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonEmpty__icon"
-                                size="m"
-                                type="arrowDown"
-                              >
-                                <div
-                                  aria-hidden="true"
-                                  className="euiButtonEmpty__icon"
-                                  data-euiicon-type="arrowDown"
-                                  size="m"
-                                />
-                              </EuiIcon>
                               <span
-                                className="euiButtonEmpty__text"
+                                className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                               >
-                                <FormattedMessage
-                                  defaultMessage="View: {viewName}"
-                                  id="inspector.view"
-                                  values={
-                                    Object {
-                                      "viewName": "View 1",
-                                    }
-                                  }
+                                <EuiIcon
+                                  className="euiButtonContent__icon"
+                                  size="m"
+                                  type="arrowDown"
                                 >
-                                  View: View 1
-                                </FormattedMessage>
+                                  <div
+                                    className="euiButtonContent__icon"
+                                    data-euiicon-type="arrowDown"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="View: {viewName}"
+                                    id="inspector.view"
+                                    values={
+                                      Object {
+                                        "viewName": "View 1",
+                                      }
+                                    }
+                                  >
+                                    View: View 1
+                                  </FormattedMessage>
+                                </span>
                               </span>
-                            </span>
+                            </EuiButtonContent>
                           </button>
                         </EuiButtonEmpty>
                       </div>
@@ -306,9 +315,11 @@ exports[`InspectorPanel should render as expected 1`] = `
       </EuiFlexGroup>
     </div>
   </EuiFlyoutHeader>
-  <EuiFlyoutBody>
+  <EuiFlyoutBody
+    className="insInspectorPanel__flyoutBody"
+  >
     <div
-      className="euiFlyoutBody"
+      className="euiFlyoutBody insInspectorPanel__flyoutBody"
     >
       <div
         className="euiFlyoutBody__overflow"

@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const editedDescription = 'Edited description';
 
   describe('outlier detection creation', function () {
     before(async () => {
@@ -37,6 +38,18 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
+          histogramCharts: [
+            { chartAvailable: true, id: '1stFlrSF', legend: '334 - 4692' },
+            { chartAvailable: true, id: 'BsmtFinSF1', legend: '0 - 5644' },
+            { chartAvailable: true, id: 'BsmtQual', legend: '0 - 5' },
+            { chartAvailable: true, id: 'CentralAir', legend: '2 categories' },
+            { chartAvailable: true, id: 'Condition2', legend: '2 categories' },
+            { chartAvailable: true, id: 'Electrical', legend: '2 categories' },
+            { chartAvailable: true, id: 'ExterQual', legend: '1 - 4' },
+            { chartAvailable: true, id: 'Exterior1st', legend: '2 categories' },
+            { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
+            { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
+          ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
@@ -84,6 +97,16 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
         });
 
+        it('enables the source data preview histogram charts', async () => {
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+        });
+
+        it('displays the source data preview histogram charts', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+        });
+
         it('displays the include fields selection', async () => {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
         });
@@ -111,7 +134,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
         });
 
-        it('inputs the destination index', async () => {
+        it('should default the set destination index to job id switch to true', async () => {
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdCheckState(true);
+        });
+
+        it('should input the destination index', async () => {
+          await ml.dataFrameAnalyticsCreation.setDestIndexSameAsIdCheckState(false);
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
         });
@@ -161,6 +190,36 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
+            sourceIndex: testData.source,
+            destinationIndex: testData.destinationIndex,
+            type: testData.expected.row.type,
+            status: testData.expected.row.status,
+            progress: testData.expected.row.progress,
+          });
+        });
+
+        it('should open the edit form for the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+        });
+
+        it('should input the description in the edit form', async () => {
+          await ml.dataFrameAnalyticsEdit.assertJobDescriptionEditInputExists();
+          await ml.dataFrameAnalyticsEdit.setJobDescriptionEdit(editedDescription);
+        });
+
+        it('should input the model memory limit in the edit form', async () => {
+          await ml.dataFrameAnalyticsEdit.assertJobMmlEditInputExists();
+          await ml.dataFrameAnalyticsEdit.setJobMmlEdit('21mb');
+        });
+
+        it('should submit the edit job form', async () => {
+          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
+        });
+
+        it('displays details for the edited job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
+            id: testData.jobId,
+            description: editedDescription,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,

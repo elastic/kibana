@@ -41,6 +41,13 @@ export const QUERY_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.thresholdRuleTypeDescription',
+  {
+    defaultMessage: 'Threshold',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
@@ -52,5 +59,19 @@ export const ML_JOB_STOPPED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription',
   {
     defaultMessage: 'Stopped',
+  }
+);
+
+export const THRESHOLD_RESULTS_ALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
+  {
+    defaultMessage: 'All results',
+  }
+);
+
+export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription',
+  {
+    defaultMessage: 'Results aggregated by',
   }
 );

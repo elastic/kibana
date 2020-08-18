@@ -183,9 +183,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('disabling a filter unfilters the data on', function () {
-      // Flaky test
-      // https://github.com/elastic/kibana/issues/41087
-      this.tags('skipFirefox');
       before(async () => {
         await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();

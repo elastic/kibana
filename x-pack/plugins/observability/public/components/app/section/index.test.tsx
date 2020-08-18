@@ -20,13 +20,13 @@ describe('SectionContainer', () => {
   });
   it('renders section with app link', () => {
     const component = render(
-      <SectionContainer title="Foo" appLink="/foo/bar" hasError={false}>
+      <SectionContainer title="Foo" appLink={{ label: 'foo', href: '/foo/bar' }} hasError={false}>
         <div>I am a very nice component</div>
       </SectionContainer>
     );
     expect(component.getByText('I am a very nice component')).toBeInTheDocument();
     expect(component.getByText('Foo')).toBeInTheDocument();
-    expect(component.getByText('View in app')).toBeInTheDocument();
+    expect(component.getByText('foo')).toBeInTheDocument();
   });
   it('renders section with error', () => {
     const component = render(

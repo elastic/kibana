@@ -144,6 +144,12 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Additional body options {@link RouteConfigOptionsBody}.
    */
   body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
+
+  /**
+   * Timeouts for processing durations. Response timeout is in milliseconds.
+   * Default value: 2 minutes
+   */
+  timeout?: number;
 }
 
 /**

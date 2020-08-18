@@ -14,8 +14,8 @@ import {
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+const FROM = '2000-01-01T00:00:00.000Z';
+const TO = '3000-01-01T00:00:00.000Z';
 const IP = '0.0.0.0';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               ip: IP,
               flowTarget: FlowTarget.destination,
               sort: { field: UsersFields.name, direction: Direction.asc },

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
@@ -69,12 +69,9 @@ interface AppDetectedMissingEventData {
  */
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
-  readonly payload: {
-    /**
-     * Used to identify the process node that the user focused on (in the DOM)
-     */
-    readonly nodeId: string;
-  };
+
+  /** focused nodeID */
+  readonly payload: string;
 }
 
 /**
@@ -85,16 +82,10 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  readonly payload: {
-    /**
-     * The HTML ID used to identify the process node's element that the user selected
-     */
-    readonly nodeId: string;
-    /**
-     * The process entity_id for the process the node represents
-     */
-    readonly selectedProcessId: string;
-  };
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
 }
 
 /**
@@ -105,7 +96,7 @@ interface UserSelectedResolverNode {
 interface UserSelectedRelatedEventCategory {
   readonly type: 'userSelectedRelatedEventCategory';
   readonly payload: {
-    subject: ResolverEvent;
+    subject: SafeResolverEvent;
     category?: string;
   };
 }

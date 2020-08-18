@@ -30,8 +30,6 @@ import {
   getKibanaVersion,
 } from './kibana_services';
 
-const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
-
 export function getKibanaRegionList(): unknown[] {
   return getRegionmapLayers();
 }
@@ -69,10 +67,14 @@ export function getEMSClient(): EMSClient {
     const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
     const proxyPath = '';
     const tileApiUrl = proxyElasticMapsServiceInMaps
-      ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_TILES_CATALOGUE_PATH}`)
+      ? relativeToAbsolute(
+          getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`)
+        )
       : getEmsTileApiUrl();
     const fileApiUrl = proxyElasticMapsServiceInMaps
-      ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_FILES_CATALOGUE_PATH}`)
+      ? relativeToAbsolute(
+          getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`)
+        )
       : getEmsFileApiUrl();
 
     emsClient = new EMSClient({
@@ -101,8 +103,11 @@ export function getGlyphUrl(): string {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
   return getProxyElasticMapsServiceInMaps()
-    ? relativeToAbsolute(`../${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`) +
-        `/{fontstack}/{range}`
+    ? relativeToAbsolute(
+        getHttp().basePath.prepend(
+          `/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`
+        )
+      ) + `/{fontstack}/{range}`
     : getEmsFontLibraryUrl();
 }
 

@@ -18,6 +18,8 @@ export const MITRE_BTN = '[data-test-subj="addMitre"]';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
+export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
+
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
@@ -26,6 +28,8 @@ export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
+
+export const INPUT = '[data-test-subj="input"]';
 
 export const INVESTIGATION_NOTES_TEXTAREA =
   '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
@@ -51,16 +55,36 @@ export const REFERENCE_URLS_INPUT =
 
 export const RISK_INPUT = '.euiRangeInput';
 
+export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
+
+export const RISK_OVERRIDE =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-riskOverride"]';
+
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';
 
 export const RULE_NAME_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleName"] [data-test-subj="input"]';
 
+export const RULE_NAME_OVERRIDE = '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]';
+
+export const RULE_TIMESTAMP_OVERRIDE =
+  '[data-test-subj="detectionEngineStepAboutRuleTimestampOverride"]';
+
 export const SCHEDULE_CONTINUE_BUTTON = '[data-test-subj="schedule-continue"]';
 
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';
 
+export const SEVERITY_MAPPING_OVERRIDE_OPTION = '#severity-mapping-override';
+
+export const SEVERITY_OVERRIDE_ROW = '[data-test-subj="severityOverrideRow"]';
+
 export const TAGS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxSearchInput"]';
+
+export const THRESHOLD_FIELD_SELECTION = '.euiFilterSelectItem';
+
+export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
+
+export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';

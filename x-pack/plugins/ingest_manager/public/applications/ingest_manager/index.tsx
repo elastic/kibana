@@ -59,7 +59,7 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
-    const { epm, fleet } = useConfig();
+    const { fleet } = useConfig();
     const { notifications } = useCore();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
@@ -94,7 +94,6 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
           setPermissionsError('REQUEST_ERROR');
         }
       })();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (isPermissionsLoading || permissionsError) {
@@ -186,11 +185,11 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
             <Router {...rest}>
               <PackageInstallProvider notifications={notifications}>
                 <Switch>
-                  <ProtectedRoute path={PAGE_ROUTING_PATHS.integrations} isAllowed={epm.enabled}>
+                  <Route path={PAGE_ROUTING_PATHS.integrations}>
                     <DefaultLayout section="epm">
                       <EPMApp />
                     </DefaultLayout>
-                  </ProtectedRoute>
+                  </Route>
                   <Route path={PAGE_ROUTING_PATHS.configurations}>
                     <DefaultLayout section="agent_config">
                       <AgentConfigApp />

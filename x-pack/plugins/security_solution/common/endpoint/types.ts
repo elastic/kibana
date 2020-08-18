@@ -104,6 +104,8 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
    *
    * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
    * using this node's entity_id
+   *
+   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
    */
   nextChild?: string | null;
 }
@@ -177,6 +179,15 @@ export interface ResolverAncestry {
 export interface ResolverRelatedEvents {
   entityID: string;
   events: ResolverEvent[];
+  nextEvent: string | null;
+}
+
+/**
+ * Safe version of `ResolverRelatedEvents`
+ */
+export interface SafeResolverRelatedEvents {
+  entityID: string;
+  events: SafeResolverEvent[];
   nextEvent: string | null;
 }
 
@@ -309,6 +320,7 @@ export interface AlertEvent {
     dataset: string;
     module: string;
     type: string;
+    sequence: number;
   };
   Endpoint: {
     policy: {
@@ -334,13 +346,13 @@ export interface AlertEvent {
     start: number;
     thread?: ThreadFields[];
     uptime: number;
-    Ext: {
+    Ext?: {
       /*
        * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
        * values towards the end of the array are more distant ancestors (grandparents). Therefore
        * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
        */
-      ancestry: string[];
+      ancestry?: string[];
       code_signature: Array<{
         subject_name: string;
         trusted: boolean;
@@ -419,6 +431,11 @@ export enum HostStatus {
    * Host is offline as indicated by its checkin status during the last checkin window
    */
   OFFLINE = 'offline',
+
+  /**
+   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   */
+  UNENROLLING = 'unenrolling',
 }
 
 export type HostInfo = Immutable<{
@@ -482,7 +499,6 @@ export interface LegacyEndpointEvent {
     type: string;
     version: string;
   };
-  process?: object;
   rule?: object;
   user?: object;
   event?: {
@@ -502,11 +518,14 @@ export interface EndpointEvent {
   ecs: {
     version: string;
   };
+  // A legacy has `endgame` and an `EndpointEvent` (AKA ECS event) will never have it. This helps TS narrow `SafeResolverEvent`.
+  endgame?: never;
   event: {
     category: string | string[];
     type: string | string[];
     id: string;
     kind: string;
+    sequence: number;
   };
   host: Host;
   network?: {
@@ -539,8 +558,8 @@ export interface EndpointEvent {
      * values towards the end of the array are more distant ancestors (grandparents). Therefore
      * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
      */
-    Ext: {
-      ancestry: string[];
+    Ext?: {
+      ancestry?: string[];
     };
   };
   user?: {
@@ -552,6 +571,131 @@ export interface EndpointEvent {
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+/**
+ * All mappings in Elasticsearch support arrays. They can also return null values or be missing. For example, a `keyword` mapping could return `null` or `[null]` or `[]` or `'hi'`, or `['hi', 'there']`. We need to handle these cases in order to avoid throwing an error.
+ * When dealing with an value that comes from ES, wrap the underlying type in `ECSField`. For example, if you have a `keyword` or `text` value coming from ES, cast it to `ECSField<string>`.
+ */
+export type ECSField<T> = T | null | Array<T | null>;
+
+/**
+ * A more conservative version of `ResolverEvent` that treats fields as optional and use `ECSField` to type all ECS fields.
+ * Prefer this over `ResolverEvent`.
+ */
+export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent;
+
+/**
+ * Safer version of ResolverEvent. Please use this going forward.
+ */
+export type SafeEndpointEvent = Partial<{
+  '@timestamp': ECSField<number>;
+  agent: Partial<{
+    id: ECSField<string>;
+    version: ECSField<string>;
+    type: ECSField<string>;
+  }>;
+  ecs: Partial<{
+    version: ECSField<string>;
+  }>;
+  event: Partial<{
+    category: ECSField<string>;
+    type: ECSField<string>;
+    id: ECSField<string>;
+    kind: ECSField<string>;
+    sequence: ECSField<number>;
+  }>;
+  host: Partial<{
+    id: ECSField<string>;
+    hostname: ECSField<string>;
+    name: ECSField<string>;
+    ip: ECSField<string>;
+    mac: ECSField<string>;
+    architecture: ECSField<string>;
+    os: Partial<{
+      full: ECSField<string>;
+      name: ECSField<string>;
+      version: ECSField<string>;
+      platform: ECSField<string>;
+      family: ECSField<string>;
+      Ext: Partial<{
+        variant: ECSField<string>;
+      }>;
+    }>;
+  }>;
+  network: Partial<{
+    direction: ECSField<string>;
+    forwarded_ip: ECSField<string>;
+  }>;
+  dns: Partial<{
+    question: Partial<{ name: ECSField<string> }>;
+  }>;
+  process: Partial<{
+    entity_id: ECSField<string>;
+    name: ECSField<string>;
+    executable: ECSField<string>;
+    args: ECSField<string>;
+    code_signature: Partial<{
+      status: ECSField<string>;
+      subject_name: ECSField<string>;
+    }>;
+    pid: ECSField<number>;
+    hash: Partial<{
+      md5: ECSField<string>;
+    }>;
+    parent: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    /*
+     * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+     * values towards the end of the array are more distant ancestors (grandparents). Therefore
+     * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+     */
+    Ext: Partial<{
+      ancestry: ECSField<string>;
+    }>;
+  }>;
+  user: Partial<{
+    domain: ECSField<string>;
+    name: ECSField<string>;
+  }>;
+  file: Partial<{ path: ECSField<string> }>;
+  registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+}>;
+
+export interface SafeLegacyEndpointEvent {
+  '@timestamp'?: ECSField<number>;
+  /**
+   * 'legacy' events must have an `endgame` key.
+   */
+  endgame: Partial<{
+    pid: ECSField<number>;
+    ppid: ECSField<number>;
+    event_type_full: ECSField<string>;
+    event_subtype_full: ECSField<string>;
+    event_timestamp: ECSField<number>;
+    event_type: ECSField<number>;
+    unique_pid: ECSField<number>;
+    unique_ppid: ECSField<number>;
+    machine_id: ECSField<string>;
+    process_name: ECSField<string>;
+    process_path: ECSField<string>;
+    timestamp_utc: ECSField<string>;
+    serial_event_id: ECSField<number>;
+  }>;
+  agent: Partial<{
+    id: ECSField<string>;
+    type: ECSField<string>;
+    version: ECSField<string>;
+  }>;
+  event: Partial<{
+    action: ECSField<string>;
+    type: ECSField<string>;
+    category: ECSField<string>;
+    id: ECSField<string>;
+  }>;
+}
 
 /**
  * The response body for the resolver '/entity' index API

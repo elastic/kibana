@@ -12,7 +12,10 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
+import { List } from '../../../../../../common/detection_engine/schemas/types';
+import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
+import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
@@ -51,19 +54,29 @@ export interface RuleFields {
   queryBar: unknown;
   index: unknown;
   ruleType: unknown;
+  threshold?: unknown;
 }
-type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
-type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
+type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
+type ThresholdRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
+type MlRuleFields<T> = Omit<T, 'queryBar' | 'index' | 'threshold'>;
 
-const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is MlRuleFields<T> =>
-  has('anomalyThreshold', fields);
+const isMlFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
+
+const isThresholdFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
   if (isMlRule(type)) {
-    const { index, queryBar, ...mlRuleFields } = fields;
+    const { index, queryBar, threshold, ...mlRuleFields } = fields;
     return mlRuleFields;
+  } else if (isThresholdRule(type)) {
+    const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
+    return thresholdRuleFields;
   } else {
-    const { anomalyThreshold, machineLearningJobId, ...queryRuleFields } = fields;
+    const { anomalyThreshold, machineLearningJobId, threshold, ...queryRuleFields } = fields;
     return queryRuleFields;
   }
 };
@@ -84,6 +97,20 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
         machine_learning_job_id: ruleFields.machineLearningJobId,
+      }
+    : isThresholdFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        ...(ruleType === 'threshold' && {
+          threshold: {
+            field: ruleFields.threshold?.field[0] ?? '',
+            value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
+          },
+        }),
       }
     : {
         index: ruleFields.index,
@@ -121,7 +148,10 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
   };
 };
 
-export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
+export const formatAboutStepData = (
+  aboutStepData: AboutStepRule,
+  exceptionsList?: List[]
+): AboutStepRuleJson => {
   const {
     author,
     falsePositives,
@@ -129,6 +159,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     riskScore,
     severity,
     threat,
+    isAssociatedToEndpointList,
     isBuildingBlock,
     isNew,
     note,
@@ -136,16 +167,41 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     timestampOverride,
     ...rest
   } = aboutStepData;
+
+  const detectionExceptionLists =
+    exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
+
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
     ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
+    ...(isAssociatedToEndpointList
+      ? {
+          exceptions_list: [
+            {
+              id: ENDPOINT_LIST_ID,
+              list_id: ENDPOINT_LIST_ID,
+              namespace_type: 'agnostic',
+              type: 'endpoint',
+            },
+            ...detectionExceptionLists,
+          ] as AboutStepRuleJson['exceptions_list'],
+        }
+      : exceptionsList != null
+      ? {
+          exceptions_list: [...detectionExceptionLists],
+        }
+      : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
-    risk_score_mapping: riskScore.mapping,
-    rule_name_override: ruleNameOverride,
+    risk_score_mapping: riskScore.isMappingChecked
+      ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
+      : [],
+    rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
-    severity_mapping: severity.mapping,
+    severity_mapping: severity.isMappingChecked
+      ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
+      : [],
     threat: threat
       .filter((singleThreat) => singleThreat.tactic.name !== 'none')
       .map((singleThreat) => ({
@@ -156,7 +212,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
           return { id, name, reference };
         }),
       })),
-    timestamp_override: timestampOverride,
+    timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };
@@ -185,11 +241,12 @@ export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
-  actionsData: ActionsStepRule
+  actionsData: ActionsStepRule,
+  rule?: Rule | null
 ): NewRule =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
-    formatAboutStepData(aboutStepData),
+    formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]) as NewRule;

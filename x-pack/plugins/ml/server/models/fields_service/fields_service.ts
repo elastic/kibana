@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
@@ -14,7 +14,7 @@ import { initCardinalityFieldsCache } from './fields_aggs_cache';
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
  */
-export function fieldsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
+export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   const fieldsAggsCache = initCardinalityFieldsCache();
 
   /**

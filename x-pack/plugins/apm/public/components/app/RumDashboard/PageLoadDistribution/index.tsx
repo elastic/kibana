@@ -24,7 +24,7 @@ export interface PercentileRange {
   max?: number | null;
 }
 
-export const PageLoadDistribution = () => {
+export function PageLoadDistribution() {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end, serviceName } = urlParams;
@@ -56,6 +56,7 @@ export const PageLoadDistribution = () => {
           },
         });
       }
+      return Promise.resolve(null);
     },
     [
       end,
@@ -114,4 +115,4 @@ export const PageLoadDistribution = () => {
       />
     </div>
   );
-};
+}

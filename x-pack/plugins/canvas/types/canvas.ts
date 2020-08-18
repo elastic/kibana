@@ -37,12 +37,19 @@ export interface CanvasPage {
   groups: CanvasGroup[];
 }
 
+export interface CanvasVariable {
+  name: string;
+  value: boolean | number | string;
+  type: 'boolean' | 'number' | 'string';
+}
+
 export interface CanvasWorkpad {
   '@created': string;
   '@timestamp': string;
   assets: { [id: string]: CanvasAsset };
   colors: string[];
   css: string;
+  variables: CanvasVariable[];
   height: number;
   id: string;
   isWriteable: boolean;
@@ -69,3 +76,7 @@ export interface CanvasWorkpadBoundingBox {
   top: number;
   bottom: number;
 }
+
+export type LayoutState = any;
+
+export type CommitFn = (type: string, payload: any) => LayoutState;

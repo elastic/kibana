@@ -137,7 +137,8 @@ const reducerManageTimeline = (
   }
 };
 
-interface UseTimelineManager {
+export interface UseTimelineManager {
+  getIndexToAddById: (id: string) => string[] | null;
   getManageTimelineById: (id: string) => ManageTimeline;
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
   initializeTimeline: (newTimeline: ManageTimelineInit) => void;
@@ -151,7 +152,9 @@ interface UseTimelineManager {
   }) => void;
 }
 
-const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseTimelineManager => {
+export const useTimelineManager = (
+  manageTimelineForTesting?: ManageTimelineById
+): UseTimelineManager => {
   const [state, dispatch] = useReducer<
     (state: ManageTimelineById, action: ActionManageTimeline) => ManageTimelineById
   >(reducerManageTimeline, manageTimelineForTesting ?? initManageTimeline);
@@ -216,9 +219,19 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     },
     [initializeTimeline, state]
   );
+  const getIndexToAddById = useCallback(
+    (id: string): string[] | null => {
+      if (state[id] != null) {
+        return state[id].indexToAdd;
+      }
+      return getTimelineDefaults(id).indexToAdd;
+    },
+    [state]
+  );
   const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);
 
   return {
+    getIndexToAddById,
     getManageTimelineById,
     getTimelineFilterManager,
     initializeTimeline,
@@ -230,11 +243,12 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
 };
 
 const init = {
+  getIndexToAddById: (id: string) => null,
   getManageTimelineById: (id: string) => getTimelineDefaults(id),
   getTimelineFilterManager: () => undefined,
-  setIndexToAdd: () => undefined,
-  isManagedTimeline: () => false,
   initializeTimeline: () => noop,
+  isManagedTimeline: () => false,
+  setIndexToAdd: () => undefined,
   setIsTimelineLoading: () => noop,
   setTimelineRowActions: () => noop,
 };

@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { arrayUnionToCallable } from '../../../../common/utils/array_union_to_callable';
 import {
-  PROCESSOR_EVENT,
   TRANSACTION_DURATION,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/elasticsearch_fieldnames';
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
+import { mergeProjection } from '../../../projections/util/merge_projection';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ServicesItemsSetup,
@@ -32,22 +30,15 @@ export const getTransactionDurationAverages = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
-      size: 0,
-      index: indices['apm_oss.transactionIndices'],
+      apm: {
+        events: [ProcessorEvent.transaction],
+      },
       body: {
-        query: {
-          bool: {
-            filter: projection.body.query.bool.filter.concat({
-              term: {
-                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-              },
-            }),
-          },
-        },
+        size: 0,
         aggs: {
           services: {
             terms: {
@@ -83,32 +74,18 @@ export const getAgentNames = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
-      index: [
-        indices['apm_oss.metricsIndices'],
-        indices['apm_oss.errorIndices'],
-        indices['apm_oss.transactionIndices'],
-      ],
+      apm: {
+        events: [
+          ProcessorEvent.metric,
+          ProcessorEvent.error,
+          ProcessorEvent.transaction,
+        ],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                terms: {
-                  [PROCESSOR_EVENT]: [
-                    ProcessorEvent.metric,
-                    ProcessorEvent.error,
-                    ProcessorEvent.transaction,
-                  ],
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -137,11 +114,7 @@ export const getAgentNames = async ({
 
   return aggregations.services.buckets.map((bucket) => ({
     serviceName: bucket.key as string,
-    agentName: (bucket.agent_name.hits.hits[0]?._source as {
-      agent: {
-        name: string;
-      };
-    }).agent.name,
+    agentName: bucket.agent_name.hits.hits[0]?._source.agent.name,
   }));
 };
 
@@ -149,24 +122,14 @@ export const getTransactionRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
-      index: indices['apm_oss.transactionIndices'],
+      apm: {
+        events: [ProcessorEvent.transaction],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                term: {
-                  [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -187,7 +150,7 @@ export const getTransactionRates = async ({
 
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
-  return arrayUnionToCallable(aggregations.services.buckets).map((bucket) => {
+  return aggregations.services.buckets.map((bucket) => {
     const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
       serviceName: bucket.key as string,
@@ -200,24 +163,14 @@ export const getErrorRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
-      index: indices['apm_oss.errorIndices'],
+      apm: {
+        events: [ProcessorEvent.error],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                term: {
-                  [PROCESSOR_EVENT]: ProcessorEvent.error,
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -251,32 +204,18 @@ export const getEnvironments = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
-      index: [
-        indices['apm_oss.metricsIndices'],
-        indices['apm_oss.errorIndices'],
-        indices['apm_oss.transactionIndices'],
-      ],
+      apm: {
+        events: [
+          ProcessorEvent.metric,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+        ],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                terms: {
-                  [PROCESSOR_EVENT]: [
-                    ProcessorEvent.transaction,
-                    ProcessorEvent.error,
-                    ProcessorEvent.metric,
-                  ],
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {

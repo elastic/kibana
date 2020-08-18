@@ -27,7 +27,8 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
           label: state.indexPatterns[layer.indexPatternId].title,
           title: state.indexPatterns[layer.indexPatternId].title,
           'data-test-subj': 'lns_layerIndexPatternLabel',
-          size: 'xs',
+          size: 's',
+          fontWeight: 'normal',
         }}
         indexPatternId={layer.indexPatternId}
         indexPatternRefs={state.indexPatternRefs}

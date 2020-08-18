@@ -88,6 +88,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        height={180}
         noHits={distribution.noHits}
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
@@ -106,7 +107,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-            defaultMessage: '{occCount} occurrences',
+            defaultMessage:
+              '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
             values: { occCount: value },
           })
         }

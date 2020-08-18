@@ -36,6 +36,11 @@ describe('getGlyphUrl', () => {
     beforeAll(() => {
       require('./kibana_services').getIsEmsEnabled = () => true;
       require('./kibana_services').getEmsFontLibraryUrl = () => EMS_FONTS_URL_MOCK;
+      require('./kibana_services').getHttp = () => ({
+        basePath: {
+          prepend: (url) => url, // No need to actually prepend a dev basepath for test
+        },
+      });
     });
 
     describe('EMS proxy enabled', () => {

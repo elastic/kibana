@@ -17,6 +17,7 @@ import {
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
 } from '../types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -66,7 +67,7 @@ export class TaskRunnerFactory {
         const {
           attributes: { actionId, params, apiKey },
         } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-          'action_task_params',
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           actionTaskParamsId,
           { namespace }
         );
@@ -93,7 +94,7 @@ export class TaskRunnerFactory {
           },
         } as unknown) as KibanaRequest;
 
-        let executorResult: ActionTypeExecutorResult;
+        let executorResult: ActionTypeExecutorResult<unknown>;
         try {
           executorResult = await actionExecutor.execute({
             params,
@@ -121,11 +122,11 @@ export class TaskRunnerFactory {
         // Cleanup action_task_params object now that we're done with it
         try {
           const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+          await savedObjectsClient.delete(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, actionTaskParamsId);
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
-            `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskParamsId}"]: ${e.message}`
           );
         }
       },

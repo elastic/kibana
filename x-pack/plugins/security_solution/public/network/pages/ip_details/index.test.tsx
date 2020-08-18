@@ -34,9 +34,12 @@ type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/source');
 jest.mock('../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest
-    .fn()
-    .mockReturnValue({ from: 0, isInitializing: false, to: 0, setQuery: jest.fn() }),
+  useGlobalTime: jest.fn().mockReturnValue({
+    from: '2020-07-07T08:20:18.966Z',
+    isInitializing: false,
+    to: '2020-07-08T08:20:18.966Z',
+    setQuery: jest.fn(),
+  }),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -67,8 +70,8 @@ const getMockHistory = (ip: string) => ({
   listen: jest.fn(),
 });
 
-const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
-const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+const to = '2018-03-23T18:49:23.132Z';
+const from = '2018-03-24T03:33:52.253Z';
 const getMockProps = (ip: string) => ({
   to,
   from,
@@ -88,8 +91,8 @@ const getMockProps = (ip: string) => ({
   match: { params: { detailName: ip, search: '' }, isExact: true, path: '', url: '' },
   setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>,
   setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<void>,
 });

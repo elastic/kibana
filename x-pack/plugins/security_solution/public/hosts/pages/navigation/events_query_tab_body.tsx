@@ -6,6 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
@@ -16,6 +17,7 @@ import {
   MatrixHisrogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
@@ -60,7 +62,7 @@ export const EventsQueryTabBody = ({
 }: HostsComponentsQueryProps) => {
   const { initializeTimeline } = useManageTimeline();
   const dispatch = useDispatch();
-
+  const { globalFullScreen } = useFullScreen();
   useEffect(() => {
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
@@ -81,16 +83,18 @@ export const EventsQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
-        endDate={endDate}
-        filterQuery={filterQuery}
-        setQuery={setQuery}
-        sourceId="default"
-        startDate={startDate}
-        type={hostsModel.HostsType.page}
-        id={EVENTS_HISTOGRAM_ID}
-        {...histogramConfigs}
-      />
+      {!globalFullScreen && (
+        <MatrixHistogramContainer
+          endDate={endDate}
+          filterQuery={filterQuery}
+          setQuery={setQuery}
+          sourceId="default"
+          startDate={startDate}
+          type={hostsModel.HostsType.page}
+          id={EVENTS_HISTOGRAM_ID}
+          {...histogramConfigs}
+        />
+      )}
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}

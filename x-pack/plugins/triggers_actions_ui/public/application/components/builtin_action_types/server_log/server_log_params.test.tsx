@@ -7,6 +7,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ServerLogLevelOptions } from '.././types';
 import ServerLogParamsFields from './server_log_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('ServerLogParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -21,6 +22,7 @@ describe('ServerLogParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         defaultMessage={'test default message'}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
@@ -41,6 +43,7 @@ describe('ServerLogParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();

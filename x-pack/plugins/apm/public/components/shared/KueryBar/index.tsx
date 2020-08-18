@@ -9,7 +9,7 @@ import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-// @ts-ignore
+// @ts-expect-error
 import { Typeahead } from './Typeahead';
 import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
@@ -76,7 +76,7 @@ export function KueryBar() {
   });
 
   // The bar should be disabled when viewing the service map
-  const disabled = /\/(service-map|rum-overview)$/.test(location.pathname);
+  const disabled = /\/(service-map)$/.test(location.pathname);
   const disabledPlaceholder = i18n.translate(
     'xpack.apm.kueryBar.disabledPlaceholder',
     { defaultMessage: 'Search is not available here' }
@@ -112,7 +112,6 @@ export function KueryBar() {
 
       setState({ ...state, suggestions, isLoadingSuggestions: false });
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Error while fetching suggestions', e);
     }
   }

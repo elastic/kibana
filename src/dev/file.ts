@@ -55,7 +55,9 @@ export class File {
   }
 
   public isFixture() {
-    return this.relativePath.split(sep).includes('__fixtures__');
+    return (
+      this.relativePath.split(sep).includes('__fixtures__') || this.path.endsWith('.test-d.ts')
+    );
   }
 
   public getRelativeParentDirs() {

@@ -20,8 +20,8 @@ export interface IPDetailsComponentProps {
 
 export interface OwnProps {
   type: NetworkType;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   filterQuery: string | ESTermQuery;
   ip: string;
   skip: boolean;

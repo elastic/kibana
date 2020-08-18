@@ -45,6 +45,20 @@ export const PINNED_WITH_NOTES = i18n.translate(
   }
 );
 
+export const SORTED_ASCENDING = i18n.translate(
+  'xpack.securitySolution.timeline.body.sort.sortedAscendingTooltip',
+  {
+    defaultMessage: 'Sorted ascending',
+  }
+);
+
+export const SORTED_DESCENDING = i18n.translate(
+  'xpack.securitySolution.timeline.body.sort.sortedDescendingTooltip',
+  {
+    defaultMessage: 'Sorted descending',
+  }
+);
+
 export const DISABLE_PIN = i18n.translate(
   'xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip',
   {
@@ -63,6 +77,13 @@ export const COLLAPSE = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
   {
     defaultMessage: 'Collapse',
+  }
+);
+
+export const COLLAPSE_EVENT = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.collapseEventTooltip',
+  {
+    defaultMessage: 'Collapse event',
   }
 );
 

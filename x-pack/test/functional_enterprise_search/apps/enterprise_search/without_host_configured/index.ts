@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup10');
 
     loadTestFile(require.resolve('./app_search/setup_guide'));
+    loadTestFile(require.resolve('./workplace_search/setup_guide'));
   });
 }

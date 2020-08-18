@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
@@ -44,6 +43,7 @@ import {
   timeline_title,
   type,
   threat,
+  threshold,
   throttle,
   job_status,
   status_date,
@@ -123,6 +123,9 @@ export const dependentRulesSchema = t.partial({
   // ML fields
   anomaly_threshold,
   machine_learning_job_id,
+
+  // Threshold fields
+  threshold,
 });
 
 /**
@@ -202,7 +205,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'query' || typeAndTimelineOnly.type === 'saved_query') {
+  if (['query', 'saved_query', 'threshold'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -225,6 +228,17 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
   }
 };
 
+export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'threshold') {
+    return [
+      t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
@@ -233,6 +247,7 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addTimelineTitle(typeAndTimelineOnly),
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
+    ...addThresholdFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

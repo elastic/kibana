@@ -15,10 +15,12 @@ export {
   AlertType,
   AlertExecutorOptions,
 } from '../../alerts/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 // this plugin's dependendencies
 export interface AlertingBuiltinsDeps {
   alerts: AlertingSetup;
+  features: FeaturesPluginSetup;
 }
 
 // external service exposed through plugin setup/start

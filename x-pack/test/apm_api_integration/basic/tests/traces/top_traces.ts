@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { sortBy, omit } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectTopTraces from './top_traces.expectation.json';
+import expectTopTraces from './expectation/top_traces.expectation.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 100 });
+        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 1000 });
       });
     });
 
@@ -46,8 +47,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.items.length).to.be(33);
       });
 
-      it('returns the correct buckets and samples', async () => {
-        expect(response.body.items).to.eql(expectTopTraces);
+      it('returns the correct buckets', async () => {
+        const responseWithoutSamples = sortBy(
+          response.body.items.map((item: any) => omit(item, 'sample')),
+          'impact'
+        );
+
+        const expectedTracesWithoutSamples = sortBy(
+          expectTopTraces.map((item: any) => omit(item, 'sample')),
+          'impact'
+        );
+
+        expect(responseWithoutSamples).to.eql(expectedTracesWithoutSamples);
+      });
+
+      it('returns a sample', async () => {
+        // sample should provide enough information to deeplink to a transaction detail page
+        response.body.items.forEach((item: any) => {
+          expect(item.sample.trace.id).to.be.an('string');
+          expect(item.sample.transaction.id).to.be.an('string');
+          expect(item.sample.service.name).to.be(item.key['service.name']);
+          expect(item.sample.transaction.name).to.be(item.key['transaction.name']);
+        });
       });
     });
   });

@@ -61,7 +61,7 @@ describe('agent config', () => {
         },
         inputs: [],
         revision: 1,
-        settings: {
+        agent: {
           monitoring: {
             enabled: false,
             logs: false,
@@ -90,7 +90,7 @@ describe('agent config', () => {
         },
         inputs: [],
         revision: 1,
-        settings: {
+        agent: {
           monitoring: {
             use_output: 'default',
             enabled: true,
@@ -120,7 +120,7 @@ describe('agent config', () => {
         },
         inputs: [],
         revision: 1,
-        settings: {
+        agent: {
           monitoring: {
             use_output: 'default',
             enabled: true,

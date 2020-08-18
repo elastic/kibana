@@ -53,7 +53,7 @@ const pushToServiceHandler = async ({
 
   let incident = {};
   // TODO: should be removed later but currently keep it for the Case implementation support
-  if (mapping) {
+  if (mapping && Array.isArray(params.comments)) {
     const fields = prepareFieldsForTransformation({
       externalCase: params.externalObject,
       mapping,

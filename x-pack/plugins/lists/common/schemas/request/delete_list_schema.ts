@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import { id } from '../common/schemas';
+import { RequiredKeepUndefined } from '../../types';
 
 export const deleteListSchema = t.exact(
   t.type({
@@ -16,5 +15,5 @@ export const deleteListSchema = t.exact(
   })
 );
 
-export type DeleteListSchema = t.TypeOf<typeof deleteListSchema>;
+export type DeleteListSchema = RequiredKeepUndefined<t.TypeOf<typeof deleteListSchema>>;
 export type DeleteListSchemaEncoded = t.OutputOf<typeof deleteListSchema>;

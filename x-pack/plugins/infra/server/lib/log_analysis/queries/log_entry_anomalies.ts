@@ -11,8 +11,13 @@ import {
   createTimeRangeFilters,
   createResultTypeFilters,
   defaultRequestParameters,
+  createDatasetsFilters,
 } from './common';
-import { Sort, Pagination } from '../../../../common/http_api/log_analysis';
+import {
+  Sort,
+  Pagination,
+  GetLogEntryAnomaliesRequestPayload,
+} from '../../../../common/http_api/log_analysis';
 
 // TODO: Reassess validity of this against ML docs
 const TIEBREAKER_FIELD = '_doc';
@@ -28,7 +33,8 @@ export const createLogEntryAnomaliesQuery = (
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
 ) => {
   const { field } = sort;
   const { pageSize } = pagination;
@@ -37,6 +43,7 @@ export const createLogEntryAnomaliesQuery = (
     ...createJobIdsFilters(jobIds),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
+    ...createDatasetsFilters(datasets),
   ];
 
   const sourceFields = [

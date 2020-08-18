@@ -1,6 +1,7 @@
 {
   "id": "securitySolution",
   "version": "8.0.0",
+  "extraPublicDirs": ["common"],
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "securitySolution"],
   "requiredPlugins": [
@@ -30,10 +31,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "kibanaUtils",
-    "esUiShared",
-    "kibanaReact",
-    "ingestManager"
-  ]
+  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists"]
 }

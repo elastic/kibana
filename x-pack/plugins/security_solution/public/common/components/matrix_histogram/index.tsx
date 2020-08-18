@@ -64,7 +64,6 @@ const HeaderChildrenFlexItem = styled(EuiFlexItem)`
   margin-left: 24px;
 `;
 
-// @ts-ignore - the EUI type definitions for Panel do no play nice with styled-components
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
@@ -115,8 +114,8 @@ export const MatrixHistogramComponent: React.FC<
           const [min, max] = x;
           dispatchSetAbsoluteRangeDatePicker({
             id: setAbsoluteRangeDatePickerTarget,
-            from: min,
-            to: max,
+            from: new Date(min).toISOString(),
+            to: new Date(max).toISOString(),
           });
         },
         yTickFormatter,

@@ -73,7 +73,7 @@ export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
 export const ALL_EVENT = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.eventTypeAllEvent',
   {
-    defaultMessage: 'All events',
+    defaultMessage: 'All',
   }
 );
 

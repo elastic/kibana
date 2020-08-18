@@ -41,7 +41,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { getHref } = useLink();
-  const { epm, fleet } = useConfig();
+  const { fleet } = useConfig();
   const { uiSettings } = useCore();
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
@@ -71,11 +71,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       defaultMessage="Overview"
                     />
                   </EuiTab>
-                  <EuiTab
-                    isSelected={section === 'epm'}
-                    href={getHref('integrations_all')}
-                    disabled={!epm?.enabled}
-                  >
+                  <EuiTab isSelected={section === 'epm'} href={getHref('integrations_all')}>
                     <FormattedMessage
                       id="xpack.ingestManager.appNavigation.epmLinkText"
                       defaultMessage="Integrations"

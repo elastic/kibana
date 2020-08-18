@@ -35,6 +35,7 @@ export const mockFirstLastSeenHostQuery: MockedProvidedQuery[] = [
         sourceId: 'default',
         hostName: 'kibana-siem',
         defaultIndex: DEFAULT_INDEX_PATTERN,
+        docValueFields: [],
       },
     },
     result: {

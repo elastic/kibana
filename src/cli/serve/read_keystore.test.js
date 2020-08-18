@@ -40,11 +40,17 @@ describe('cli/serve/read_keystore', () => {
     });
   });
 
-  it('uses data path provided', () => {
-    const keystoreDir = '/foo/';
-    const keystorePath = path.join(keystoreDir, 'kibana.keystore');
+  it('uses data path if provided', () => {
+    const keystorePath = path.join('/foo/', 'kibana.keystore');
 
-    readKeystore(keystoreDir);
-    expect(Keystore.mock.calls[0][0]).toEqual(keystorePath);
+    readKeystore(keystorePath);
+    expect(Keystore.mock.calls[0][0]).toContain(keystorePath);
+  });
+
+  it('uses the getKeystore path if not', () => {
+    readKeystore();
+    // we test exact path scenarios in get_keystore.test.js - we use both
+    // deprecated and new to cover any older local environments
+    expect(Keystore.mock.calls[0][0]).toMatch(/data|config/);
   });
 });

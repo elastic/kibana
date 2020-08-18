@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import _ from 'lodash';
 import {
   EndpointDocGenerator,
   Event,
@@ -23,6 +24,13 @@ describe('data generator', () => {
   let generator: EndpointDocGenerator;
   beforeEach(() => {
     generator = new EndpointDocGenerator('seed');
+  });
+
+  it('creates events with a numerically increasing sequence value', () => {
+    const event1 = generator.generateEvent();
+    const event2 = generator.generateEvent();
+
+    expect(event2.event.sequence).toBe(event1.event.sequence + 1);
   });
 
   it('creates the same documents with same random seed', () => {
@@ -79,9 +87,9 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp });
     expect(processEvent['@timestamp']).toEqual(timestamp);
-    expect(processEvent.event.category).toEqual('process');
+    expect(processEvent.event.category).toEqual(['process']);
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('start');
+    expect(processEvent.event.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
@@ -94,7 +102,7 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('start');
+    expect(processEvent.event.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
@@ -120,7 +128,7 @@ describe('data generator', () => {
 
     it('creates all events with an empty ancestry array', () => {
       for (const event of tree.allEvents) {
-        expect(event.process.Ext.ancestry.length).toEqual(0);
+        expect(event.process.Ext!.ancestry!.length).toEqual(0);
       }
     });
   });
@@ -188,24 +196,24 @@ describe('data generator', () => {
     };
 
     const verifyAncestry = (event: Event, genTree: Tree) => {
-      if (event.process.Ext.ancestry!.length > 0) {
-        expect(event.process.parent?.entity_id).toBe(event.process.Ext.ancestry![0]);
+      if (event.process.Ext!.ancestry!.length > 0) {
+        expect(event.process.parent?.entity_id).toBe(event.process.Ext!.ancestry![0]);
       }
-      for (let i = 0; i < event.process.Ext.ancestry!.length; i++) {
-        const ancestor = event.process.Ext.ancestry![i];
+      for (let i = 0; i < event.process.Ext!.ancestry!.length; i++) {
+        const ancestor = event.process.Ext!.ancestry![i];
         const parent = genTree.children.get(ancestor) || genTree.ancestry.get(ancestor);
         expect(ancestor).toBe(parent?.lifecycle[0].process.entity_id);
 
         // the next ancestor should be the grandparent
-        if (i + 1 < event.process.Ext.ancestry!.length) {
-          const grandparent = event.process.Ext.ancestry![i + 1];
+        if (i + 1 < event.process.Ext!.ancestry!.length) {
+          const grandparent = event.process.Ext!.ancestry![i + 1];
           expect(grandparent).toBe(parent?.lifecycle[0].process.parent?.entity_id);
         }
       }
     };
 
     it('has ancestry array defined', () => {
-      expect(tree.origin.lifecycle[0].process.Ext.ancestry!.length).toBe(ANCESTRY_LIMIT);
+      expect(tree.origin.lifecycle[0].process.Ext!.ancestry!.length).toBe(ANCESTRY_LIMIT);
       for (const event of tree.allEvents) {
         verifyAncestry(event, tree);
       }
@@ -332,6 +340,12 @@ describe('data generator', () => {
   describe('creates alert ancestor tree', () => {
     let events: Event[];
 
+    const isCategoryProcess = (event: Event) => {
+      return (
+        _.isEqual(event.event.category, ['process']) || _.isEqual(event.event.category, 'process')
+      );
+    };
+
     beforeEach(() => {
       events = generator.createAlertEventAncestry({
         ancestors: 3,
@@ -343,11 +357,7 @@ describe('data generator', () => {
     it('with n-1 process events', () => {
       for (let i = events.length - 2; i > 0; ) {
         const parentEntityIdOfChild = events[i].process.parent?.entity_id;
-        for (
-          ;
-          --i >= -1 && (events[i].event.kind !== 'event' || events[i].event.category !== 'process');
-
-        ) {
+        for (; --i >= -1 && (events[i].event.kind !== 'event' || !isCategoryProcess(events[i])); ) {
           // related event - skip it
         }
         expect(i).toBeGreaterThanOrEqual(0);
@@ -361,7 +371,7 @@ describe('data generator', () => {
         ;
         previousProcessEventIndex >= -1 &&
         (events[previousProcessEventIndex].event.kind !== 'event' ||
-          events[previousProcessEventIndex].event.category !== 'process');
+          !isCategoryProcess(events[previousProcessEventIndex]));
         previousProcessEventIndex--
       ) {
         // related event - skip it

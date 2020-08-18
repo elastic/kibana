@@ -30,7 +30,7 @@ const validateConnector = (action: ResilientActionConnector): ValidationResult =
   };
 
   if (!action.config.orgId) {
-    errors.orgId = [...errors.orgId, i18n.RESILIENT_PROJECT_KEY_LABEL];
+    errors.orgId = [...errors.orgId, i18n.RESILIENT_PROJECT_KEY_REQUIRED];
   }
 
   if (!action.secrets.apiKeyId) {

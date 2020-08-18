@@ -14,7 +14,7 @@ import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
-import { ServiceMetricFetcher } from './ServiceMetricFetcher';
+import { ServiceStatsFetcher } from './ServiceStatsFetcher';
 import { popoverWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
@@ -34,20 +34,21 @@ interface ContentsProps {
 // @ts-ignore `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-const FlexColumnGroup = (props: {
+function FlexColumnGroup(props: {
   children: React.ReactNode;
   style: React.CSSProperties;
   direction: 'column';
   gutterSize: 's';
-}) => {
+}) {
   if (isIE11) {
     const { direction, gutterSize, ...rest } = props;
     return <div {...rest} />;
   }
   return <EuiFlexGroup {...props} />;
-};
-const FlexColumnItem = (props: { children: React.ReactNode }) =>
-  isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+}
+function FlexColumnItem(props: { children: React.ReactNode }) {
+  return isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+}
 
 export function Contents({
   selectedNodeData,
@@ -70,7 +71,7 @@ export function Contents({
       </FlexColumnItem>
       <FlexColumnItem>
         {isService ? (
-          <ServiceMetricFetcher
+          <ServiceStatsFetcher
             serviceName={selectedNodeServiceName}
             serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
           />

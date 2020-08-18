@@ -68,7 +68,7 @@
                 "type": "keyword"
               },
               "risk_score": {
-                "type": "keyword"
+                "type": "float"
               },
               "risk_score_mapping": {
                 "properties": {
@@ -171,6 +171,16 @@
                         "type": "keyword"
                       }
                     }
+                  }
+                }
+              },
+              "threshold": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "float"
                   }
                 }
               },
@@ -286,6 +296,9 @@
           },
           "status": {
             "type": "keyword"
+          },
+          "threshold_count": {
+            "type": "float"
           }
         }
       }

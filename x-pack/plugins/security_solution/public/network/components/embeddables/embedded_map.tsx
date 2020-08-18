@@ -71,8 +71,8 @@ EmbeddableMap.displayName = 'EmbeddableMap';
 export interface EmbeddedMapProps {
   query: Query;
   filters: Filter[];
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   setQuery: GlobalTimeArgs['setQuery'];
 }
 
@@ -185,7 +185,7 @@ export const EmbeddedMapComponent = ({
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
         <EuiText size="xs">
           <EuiLink
-            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
+            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
             target="_blank"
           >
             {i18n.EMBEDDABLE_HEADER_HELP}

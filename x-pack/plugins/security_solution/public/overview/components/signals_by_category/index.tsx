@@ -17,7 +17,6 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const DEFAULT_STACK_BY = 'signal.rule.threat.tactic.name';
 const NO_FILTERS: Filter[] = [];
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
@@ -52,19 +51,19 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
+      setAbsoluteRangeDatePicker({
+        id: setAbsoluteRangeDatePickerTarget,
+        from: new Date(min).toISOString(),
+        to: new Date(max).toISOString(),
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [setAbsoluteRangeDatePicker]
   );
 
-  const defaultStackByOption =
-    alertsHistogramOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? alertsHistogramOptions[0];
-
   return (
     <AlertsHistogramPanel
       deleteQuery={deleteQuery}
-      defaultStackByOption={defaultStackByOption}
       filters={filters}
       from={from}
       headerChildren={headerChildren}

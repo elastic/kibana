@@ -50,3 +50,10 @@ export const I18LABELS = {
     defaultMessage: 'seconds',
   }),
 };
+
+export const VisitorBreakdownLabel = i18n.translate(
+  'xpack.apm.rum.visitorBreakdown',
+  {
+    defaultMessage: 'Visitor breakdown',
+  }
+);

@@ -2,7 +2,10 @@
 
 ## Overview
 
-This plugin's goal is to provide a Kibana user interface to the Enterprise Search solution's products (App Search and Workplace Search). In its current MVP state, the plugin provides a basic engines overview from App Search with the goal of gathering user feedback and raising product awareness.
+This plugin's goal is to provide a Kibana user interface to the Enterprise Search solution's products (App Search and Workplace Search). In it's current MVP state, the plugin provides the following with the goal of gathering user feedback and raising product awareness:
+
+- **App Search:** A basic engines overview with links into the product.
+- **Workplace Search:** A simple app overview with basic statistics, links to the sources, users (if standard auth), and product settings.
 
 ## Development
 

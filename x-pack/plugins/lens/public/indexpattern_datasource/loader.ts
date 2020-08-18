@@ -246,7 +246,12 @@ export async function syncExistingFields({
   showNoDataPopover,
 }: {
   dateRange: DateRange;
-  indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
+  indexPatterns: Array<{
+    id: string;
+    title: string;
+    fields: IndexPatternField[];
+    timeFieldName?: string | null;
+  }>;
   fetchJson: HttpSetup['post'];
   setState: SetState;
   isFirstExistenceFetch: boolean;
@@ -254,41 +259,53 @@ export async function syncExistingFields({
   dslQuery: object;
   showNoDataPopover: () => void;
 }) {
-  const emptinessInfo = await Promise.all(
-    indexPatterns.map((pattern) => {
-      const body: Record<string, string | object> = {
-        dslQuery,
-        fromDate: dateRange.fromDate,
-        toDate: dateRange.toDate,
-      };
+  const existenceRequests = indexPatterns.map((pattern) => {
+    const body: Record<string, string | object> = {
+      dslQuery,
+      fromDate: dateRange.fromDate,
+      toDate: dateRange.toDate,
+    };
 
-      if (pattern.timeFieldName) {
-        body.timeFieldName = pattern.timeFieldName;
-      }
-
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
-        body: JSON.stringify(body),
-      }) as Promise<ExistingFields>;
-    })
-  );
-
-  if (isFirstExistenceFetch) {
-    const fieldsCurrentIndexPattern = emptinessInfo.find(
-      (info) => info.indexPatternTitle === currentIndexPatternTitle
-    );
-    if (fieldsCurrentIndexPattern && fieldsCurrentIndexPattern.existingFieldNames.length === 0) {
-      showNoDataPopover();
+    if (pattern.timeFieldName) {
+      body.timeFieldName = pattern.timeFieldName;
     }
-  }
 
-  setState((state) => ({
-    ...state,
-    isFirstExistenceFetch: false,
-    existingFields: emptinessInfo.reduce((acc, info) => {
-      acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-      return acc;
-    }, state.existingFields),
-  }));
+    return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+      body: JSON.stringify(body),
+    }) as Promise<ExistingFields>;
+  });
+
+  try {
+    const emptinessInfo = await Promise.all(existenceRequests);
+    if (isFirstExistenceFetch) {
+      const fieldsCurrentIndexPattern = emptinessInfo.find(
+        (info) => info.indexPatternTitle === currentIndexPatternTitle
+      );
+      if (fieldsCurrentIndexPattern && fieldsCurrentIndexPattern.existingFieldNames.length === 0) {
+        showNoDataPopover();
+      }
+    }
+
+    setState((state) => ({
+      ...state,
+      isFirstExistenceFetch: false,
+      existenceFetchFailed: false,
+      existingFields: emptinessInfo.reduce((acc, info) => {
+        acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+        return acc;
+      }, state.existingFields),
+    }));
+  } catch (e) {
+    // show all fields as available if fetch failed
+    setState((state) => ({
+      ...state,
+      existenceFetchFailed: true,
+      existingFields: indexPatterns.reduce((acc, pattern) => {
+        acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+        return acc;
+      }, state.existingFields),
+    }));
+  }
 }
 
 function booleanMap(keys: string[]) {

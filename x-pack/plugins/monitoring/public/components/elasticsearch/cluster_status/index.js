@@ -10,7 +10,7 @@ import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-export function ClusterStatus({ stats }) {
+export function ClusterStatus({ stats, alerts }) {
   const {
     dataSize,
     nodesCount,
@@ -81,6 +81,7 @@ export function ClusterStatus({ stats }) {
     <SummaryStatus
       metrics={metrics}
       status={status}
+      alerts={alerts}
       IconComponent={IconComponent}
       data-test-subj="elasticsearchClusterStatus"
     />

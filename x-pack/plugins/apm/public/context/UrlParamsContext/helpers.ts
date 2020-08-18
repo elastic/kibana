@@ -7,10 +7,13 @@
 import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  ProcessorEvent,
+  UIProcessorEvent,
+} from '../../../common/processor_event';
 
 interface PathParams {
-  processorEvent?: ProcessorEvent;
+  processorEvent?: UIProcessorEvent;
   serviceName?: string;
   errorGroupId?: string;
   serviceNodeName?: string;
@@ -104,7 +107,6 @@ export function getPathParams(pathname: string = ''): PathParams {
             serviceName,
           };
         case 'service-map':
-        case 'rum-overview':
           return {
             serviceName,
           };

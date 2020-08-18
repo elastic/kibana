@@ -26,8 +26,8 @@ import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FlowTarget } from '../../../../graphql/types';
 
 export const getAnomaliesNetworkTableColumns = (
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   flowTarget?: FlowTarget
 ): [
   Columns<AnomaliesByNetwork['ip'], AnomaliesByNetwork>,
@@ -127,8 +127,8 @@ export const getAnomaliesNetworkTableColumns = (
 
 export const getAnomaliesNetworkTableColumnsCurated = (
   pageType: NetworkType,
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   flowTarget?: FlowTarget
 ) => {
   const columns = getAnomaliesNetworkTableColumns(startDate, endDate, flowTarget);

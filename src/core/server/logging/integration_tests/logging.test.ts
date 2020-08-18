@@ -198,13 +198,17 @@ describe('logging service', () => {
         JSON.parse(jsonString)
       );
       expect(firstCall).toMatchObject({
-        level: 'DEBUG',
-        context: 'plugins.myplugin.debug_json',
+        log: {
+          level: 'DEBUG',
+          logger: 'plugins.myplugin.debug_json',
+        },
         message: 'log1',
       });
       expect(secondCall).toMatchObject({
-        level: 'INFO',
-        context: 'plugins.myplugin.debug_json',
+        log: {
+          level: 'INFO',
+          logger: 'plugins.myplugin.debug_json',
+        },
         message: 'log2',
       });
     });
@@ -217,8 +221,10 @@ describe('logging service', () => {
 
       expect(mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
-        level: 'INFO',
-        context: 'plugins.myplugin.info_json',
+        log: {
+          level: 'INFO',
+          logger: 'plugins.myplugin.info_json',
+        },
         message: 'log2',
       });
     });
@@ -259,14 +265,18 @@ describe('logging service', () => {
       const logs = mockConsoleLog.mock.calls.map(([jsonString]) => jsonString);
 
       expect(JSON.parse(logs[0])).toMatchObject({
-        level: 'DEBUG',
-        context: 'plugins.myplugin.all',
+        log: {
+          level: 'DEBUG',
+          logger: 'plugins.myplugin.all',
+        },
         message: 'log1',
       });
       expect(logs[1]).toEqual('CUSTOM - PATTERN [plugins.myplugin.all][DEBUG] log1');
       expect(JSON.parse(logs[2])).toMatchObject({
-        level: 'INFO',
-        context: 'plugins.myplugin.all',
+        log: {
+          level: 'INFO',
+          logger: 'plugins.myplugin.all',
+        },
         message: 'log2',
       });
       expect(logs[3]).toEqual('CUSTOM - PATTERN [plugins.myplugin.all][INFO ] log2');

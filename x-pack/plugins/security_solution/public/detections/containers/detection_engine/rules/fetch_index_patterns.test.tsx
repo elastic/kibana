@@ -374,6 +374,16 @@ describe('useFetchIndexPatterns', () => {
             'winlogbeat-*',
           ],
           indicesExists: true,
+          docValueFields: [
+            {
+              field: '@timestamp',
+              format: 'date_time',
+            },
+            {
+              field: 'event.end',
+              format: 'date_time',
+            },
+          ],
           indexPatterns: {
             fields: [
               { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
@@ -441,6 +451,7 @@ describe('useFetchIndexPatterns', () => {
       expect(result.current).toEqual([
         {
           browserFields: {},
+          docValueFields: [],
           indexPatterns: {
             fields: [],
             title: '',

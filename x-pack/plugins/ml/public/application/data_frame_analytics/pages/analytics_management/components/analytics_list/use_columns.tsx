@@ -19,10 +19,9 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getJobIdUrl } from '../../../../../util/get_job_id_url';
+import { getJobIdUrl, TAB_IDS } from '../../../../../util/get_selected_ids_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
@@ -138,17 +137,16 @@ export const progressColumn = {
 };
 
 export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
-  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
+  <EuiLink href={getJobIdUrl(TAB_IDS.DATA_FRAME_ANALYTICS, item.id)}>{item.id}</EuiLink>
 );
 
 export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
-  isMlEnabledInSpace: boolean = true,
-  createAnalyticsForm?: CreateAnalyticsFormProps
+  isMlEnabledInSpace: boolean = true
 ) => {
-  const { actions, modals } = useActions(createAnalyticsForm!, isManagementTable);
+  const { actions, modals } = useActions(isManagementTable);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -216,6 +214,14 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
     },
     {
+      field: DataFrameAnalyticsListColumn.memoryStatus,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.memoryStatus', {
+        defaultMessage: 'Memory status',
+      }),
+      truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnJobMemoryStatus',
+    },
+    {
       field: DataFrameAnalyticsListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.analyticsList.sourceIndex', {
         defaultMessage: 'Source index',
@@ -260,6 +266,7 @@ export const useColumns = (
       }),
       actions,
       width: isManagementTable === true ? '100px' : '150px',
+      'data-test-subj': 'mlAnalyticsTableColumnActions',
     },
   ];
 

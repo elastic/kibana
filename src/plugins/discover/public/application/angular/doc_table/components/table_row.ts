@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { find, template } from 'lodash';
 import $ from 'jquery';
-// @ts-ignore
 import rison from 'rison-node';
 import '../../doc_viewer';
-// @ts-ignore
-import { noWhiteSpace } from '../../../../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
 
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
@@ -35,6 +32,16 @@ import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_he
 import { esFilters } from '../../../../../../data/public';
 import { getServices } from '../../../../kibana_services';
 
+const TAGS_WITH_WS = />\s+</g;
+
+/**
+ * Remove all of the whitespace between html tags
+ * so that inline elements don't have extra spaces.
+ */
+export function noWhiteSpace(html: string): string {
+  return html.replace(TAGS_WITH_WS, '><');
+}
+
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
 
@@ -43,8 +50,8 @@ interface LazyScope extends ng.IScope {
 }
 
 export function createTableRowDirective($compile: ng.ICompileService, $httpParamSerializer: any) {
-  const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
-  const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
+  const cellTemplate = template(noWhiteSpace(cellTemplateHtml));
+  const truncateByHeightTemplate = template(noWhiteSpace(truncateByHeightTemplateHtml));
 
   return {
     restrict: 'A',
@@ -169,7 +176,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = _.find($cells.slice(i + 1), function (cell: any) {
+          const reuse = find($cells.slice(i + 1), function (cell: any) {
             return $.data(cell, 'discover:html') === html;
           });
 

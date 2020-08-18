@@ -9,15 +9,17 @@ import './add_message_variables.scss';
 import { useXJsonMode } from '../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
 import { AddMessageVariables } from './add_message_variables';
+import { ActionVariable } from '../../types';
 
 interface Props {
-  messageVariables: string[] | undefined;
+  messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue: string;
   label: string;
   errors?: string[];
   areaLabel?: string;
   onDocumentsChange: (data: string) => void;
+  helpText?: JSX.Element;
 }
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -28,6 +30,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   errors,
   areaLabel,
   onDocumentsChange,
+  helpText,
 }) => {
   const [cursorPosition, setCursorPosition] = useState<any>(null);
 
@@ -65,6 +68,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           paramsProperty={paramsProperty}
         />
       }
+      helpText={helpText}
     >
       <EuiCodeEditor
         mode={xJsonMode}

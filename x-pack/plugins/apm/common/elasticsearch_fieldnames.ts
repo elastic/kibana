@@ -24,12 +24,14 @@ export const AGENT_VERSION = 'agent.version';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
+export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
+export const OBSERVER_NAME = 'observer.name';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';

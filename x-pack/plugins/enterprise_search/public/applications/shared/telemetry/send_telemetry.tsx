@@ -7,6 +7,7 @@
 import React, { useContext, useEffect } from 'react';
 
 import { HttpSetup } from 'src/core/public';
+import { JSON_HEADER as headers } from '../../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../../index';
 
 interface ISendTelemetryProps {
@@ -25,10 +26,8 @@ interface ISendTelemetry extends ISendTelemetryProps {
 
 export const sendTelemetry = async ({ http, product, action, metric }: ISendTelemetry) => {
   try {
-    await http.put(`/api/${product}/telemetry`, {
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, metric }),
-    });
+    const body = JSON.stringify({ product, action, metric });
+    await http.put('/api/enterprise_search/telemetry', { headers, body });
   } catch (error) {
     throw new Error('Unable to send telemetry');
   }
@@ -36,7 +35,7 @@ export const sendTelemetry = async ({ http, product, action, metric }: ISendTele
 
 /**
  * React component helpers - useful for on-page-load/views
- * TODO: SendWorkplaceSearchTelemetry and SendEnterpriseSearchTelemetry
+ * TODO: SendEnterpriseSearchTelemetry
  */
 
 export const SendAppSearchTelemetry: React.FC<ISendTelemetryProps> = ({ action, metric }) => {
@@ -44,6 +43,16 @@ export const SendAppSearchTelemetry: React.FC<ISendTelemetryProps> = ({ action, 
 
   useEffect(() => {
     sendTelemetry({ http, action, metric, product: 'app_search' });
+  }, [action, metric, http]);
+
+  return null;
+};
+
+export const SendWorkplaceSearchTelemetry: React.FC<ISendTelemetryProps> = ({ action, metric }) => {
+  const { http } = useContext(KibanaContext) as IKibanaContext;
+
+  useEffect(() => {
+    sendTelemetry({ http, action, metric, product: 'workplace_search' });
   }, [action, metric, http]);
 
   return null;

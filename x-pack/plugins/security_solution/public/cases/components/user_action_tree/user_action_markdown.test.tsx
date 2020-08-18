@@ -44,6 +44,7 @@ describe('UserActionMarkdown ', () => {
 
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
+      graphEventId: '',
       timelineId,
       updateIsLoading: expect.any(Function),
       updateTimeline: expect.any(Function),
@@ -62,6 +63,7 @@ describe('UserActionMarkdown ', () => {
     wrapper.find(`[data-test-subj="markdown-timeline-link"]`).first().simulate('click');
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
+      graphEventId: '',
       timelineId,
       updateIsLoading: expect.any(Function),
       updateTimeline: expect.any(Function),

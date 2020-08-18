@@ -32,7 +32,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
   {
-    defaultMessage: '.pbf vector tiles',
+    defaultMessage: 'Vector tiles',
   }
 );
 
@@ -127,11 +127,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     });
   }
 
-  getGeoJsonWithMeta(
-    layerName: 'string',
-    searchFilters: unknown[],
-    registerCancelCallback: (callback: () => void) => void
-  ): Promise<GeoJsonWithMeta> {
+  getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     // Having this method here is a consequence of ITiledSingleLayerVectorSource extending IVectorSource.
     throw new Error('Does not implement getGeoJsonWithMeta');
   }

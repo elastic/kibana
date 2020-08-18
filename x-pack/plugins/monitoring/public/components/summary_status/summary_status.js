@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
+import { AlertsStatus } from '../../alerts/status';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './summary_status.scss';
@@ -86,6 +87,7 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
 export function SummaryStatus({
   metrics,
   status,
+  alerts,
   isOnline,
   IconComponent = DefaultIconComponent,
   ...props
@@ -94,6 +96,19 @@ export function SummaryStatus({
     <div {...props} className="monSummaryStatusNoWrap">
       <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
         <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
+        {alerts ? (
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              title={<AlertsStatus showOnlyCount={true} alerts={alerts} />}
+              titleSize="xxxs"
+              textAlign="left"
+              className="monSummaryStatusNoWrap__stat"
+              description={i18n.translate('xpack.monitoring.summaryStatus.alertsDescription', {
+                defaultMessage: 'Alerts',
+              })}
+            />
+          </EuiFlexItem>
+        ) : null}
         {metrics.map(wrapChild)}
       </EuiFlexGroup>
     </div>

@@ -7,6 +7,7 @@
 import React, { useRef } from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../../common/mock/match_media';
 import { AllRulesTables } from './index';
 import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 

@@ -1,8 +1,8 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Winlogbeat: Unusual user context switches can be due to privilege escalation (beta)",
+  "description": "Security: Winlogbeat - Unusual user context switches can be due to privilege escalation.",
   "groups": [
-    "siem",
+    "security",
     "winlogbeat",
     "authentication"
   ],
@@ -33,19 +33,19 @@
     "custom_urls": [
       {
         "url_name": "Host Details by process name",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Host Details by user name",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Hosts Overview by process name",
-        "url_value": "siem#/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Hosts Overview by user name",
-        "url_value": "siem#/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

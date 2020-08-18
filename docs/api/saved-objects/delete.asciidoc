@@ -39,6 +39,6 @@ Delete an index pattern object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE "localhost:5601/api/saved_objects/index-pattern/my-pattern"
+$ curl -X DELETE api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA

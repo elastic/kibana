@@ -5,11 +5,7 @@
  */
 
 import { StartServicesAccessor } from 'src/core/public';
-import {
-  ManagementSetup,
-  ManagementApp,
-  ManagementSectionId,
-} from '../../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementApp } from '../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
@@ -26,11 +22,9 @@ export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
   public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
-    this.registeredSpacesManagementApp = management.sections
-      .getSection(ManagementSectionId.Kibana)
-      .registerApp(
-        spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
-      );
+    this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
+      spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
+    );
   }
 
   public stop() {

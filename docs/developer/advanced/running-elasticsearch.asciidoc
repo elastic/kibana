@@ -1,18 +1,22 @@
 [[running-elasticsearch]]
-=== Running elasticsearch during development
+== Running {es} during development
 
-There are many ways to run Elasticsearch while you are developing.
+There are many ways to run {es} while you are developing.
 
-[float]
+[discrete]
 
-==== By snapshot
+=== By snapshot
 
-This will run a snapshot of elasticsearch that is usually built nightly. Read more about <<development-es-snapshots>>.
+This will run a snapshot of {es} that is usually built nightly. Read more about <<development-es-snapshots>>.
 
 [source,bash]
 ----
 yarn es snapshot
 ----
+By default, two users are added to Elasticsearch:
+
+  - A superuser with username: `elastic` and password: `changeme`, which can be used to log into Kibana with.
+  - A user with username: `kibana_system` and password `changeme`. This account is used by the Kibana server to authenticate itself to Elasticsearch, and to perform certain actions on behalf of the end user. These credentials should be specified in your kibana.yml as described in <<using-kibana-with-security>>
 
 See all available options, like how to specify a specific license, with the `--help` flag.
 
@@ -25,36 +29,36 @@ yarn es snapshot --help
 
 **Keeping data between snapshots**
 
-If you want to keep the data inside your Elasticsearch between usages of this command, you should use the following command, to keep your data folder outside the downloaded snapshot folder:
+If you want to keep the data inside your {es} between usages of this command, you should use the following command, to keep your data folder outside the downloaded snapshot folder:
 
 [source,bash]
 ----
 yarn es snapshot -E path.data=../data
 ----
 
-==== By source
+=== By source
 
-If you have the Elasticsearch repo checked out locally and wish to run against that, use `source`. By default, it will reference an elasticsearch checkout which is a sibling to the {kib} directory named elasticsearch. If you wish to use a checkout in another location you can provide that by supplying --source-path 
+If you have the {es} repo checked out locally and wish to run against that, use `source`. By default, it will reference an {es} checkout which is a sibling to the {kib} directory named elasticsearch. If you wish to use a checkout in another location you can provide that by supplying --source-path 
 
 [source,bash]
 ----
 yarn es source
 ----
 
-==== From an archive
+=== From an archive
 
-Use this if you already have a distributable. For released versions, one can be obtained on the Elasticsearch downloads page.
+Use this if you already have a distributable. For released versions, one can be obtained on the {es} downloads page.
 
 [source,bash]
 ----
 yarn es archive <full_path_to_archive>
 ----
 
-Each of these will run Elasticsearch with a basic license. Additional options are available, pass --help for more information.
+Each of these will run {es} with a basic license. Additional options are available, pass --help for more information.
 
-==== From a remote host
+=== From a remote host
 
-You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
+You can save some system resources, and the effort of generating sample data, if you have a remote {es} cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
 
 You'll need to create a kibana.dev.yml (<<customize-kibana-yml>>) and add the following to it:
 
@@ -75,7 +79,7 @@ kibana.index: '.{YourGitHubHandle}-kibana'
 xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
 ----
 
-===== Running remote clusters
+==== Running remote clusters
 
 Setup remote clusters for cross cluster search (CCS) and cross cluster replication (CCR).
 
@@ -95,7 +99,7 @@ yarn es snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_p
 
 Once both clusters are running, start {kib}. {kib} will connect to the primary cluster.
 
-Setup the remote cluster in {kib} from either Management -> Elasticsearch -> Remote Clusters UI or by running the following script in Console.
+Setup the remote cluster in {kib} from either Management -> {es} -> Remote Clusters UI or by running the following script in Console.
 
 [source,bash]
 ----

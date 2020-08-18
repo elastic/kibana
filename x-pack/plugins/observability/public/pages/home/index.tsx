@@ -8,7 +8,7 @@ import { useHistory } from 'react-router-dom';
 import { fetchHasData } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
 
-export const HomePage = () => {
+export function HomePage() {
   const history = useHistory();
   const { data = {} } = useFetcher(() => fetchHasData(), []);
 
@@ -23,4 +23,4 @@ export const HomePage = () => {
   }
 
   return <></>;
-};
+}

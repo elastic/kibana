@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { merge } from 'rxjs';
-import { map, skip } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { useMemo } from 'react';
 import { annotationsRefresh$ } from '../services/annotations_service';
@@ -29,9 +29,7 @@ export const useRefresh = () => {
     return merge(
       mlTimefilterRefresh$,
       timefilter.getTimeUpdate$().pipe(
-        // skip initially emitted value
-        skip(1),
-        map((_) => {
+        map(() => {
           const { from, to } = timefilter.getTime();
           return { lastRefresh: Date.now(), timeRange: { start: from, end: to } };
         })

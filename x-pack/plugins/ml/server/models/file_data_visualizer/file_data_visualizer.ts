@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   AnalysisResult,
   FormattedOverrides,
@@ -13,9 +13,9 @@ import {
 
 export type InputData = any[];
 
-export function fileDataVisualizerProvider(callAsCurrentUser: LegacyAPICaller) {
+export function fileDataVisualizerProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
   async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
-    const results = await callAsCurrentUser('ml.fileStructure', {
+    const results = await callAsInternalUser('ml.fileStructure', {
       body: data,
       ...overrides,
     });

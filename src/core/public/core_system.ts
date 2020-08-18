@@ -42,8 +42,8 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { CoreApp } from './core_app';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -180,7 +180,7 @@ export class CoreSystem {
         ]),
       });
       const application = this.application.setup({ context, http, injectedMetadata });
-      this.coreApp.setup({ application, http });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,

@@ -4,7 +4,7 @@
 Consider these best practices, whether developing code directly to the {kib} repo or building your own plugins.
 They are intended to support our https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md[{kib} development principals].
 
-[float]
+[discrete]
 === Performance
 
 Are you planning with scalability in mind?
@@ -15,7 +15,7 @@ Are you planning with scalability in mind?
 * Do you make lots of requests to the server?
 ** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
 
-[float]
+[discrete]
 === Accessibility
 
 Did you know {kib} makes a public statement about our commitment to
@@ -28,7 +28,7 @@ tackles accessibility]
 * If you don’t use EUI, follow the same EUI accessibility standards
 
 [[kibana-localization-best-practices]]
-[float]
+[discrete]
 === Localization
 
 {kib} is translated into other languages. Use our i18n utilities to
@@ -39,7 +39,7 @@ ensure your public facing strings will be translated to ensure all
 {kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n
 guidelines]
 
-[float]
+[discrete]
 === Conventions
 
 * Become familiar with our
@@ -58,7 +58,7 @@ them.
 * Use https://elastic.github.io/eui[EUI] for all your basic UI
 components to create a consistent UI experience.
 
-[float]
+[discrete]
 === Re-inventing the wheel
 
 Over-refactoring can be a problem in it’s own right, but it’s still
@@ -96,7 +96,7 @@ for react specific helpers
 Re-using these services will help create a consistent experience across
 {kib} from every solution.
 
-[float]
+[discrete]
 === Backward compatibility
 
 Eventually we want to garauntee to our plugin developers that their plugins will not break from minor to minor.
@@ -122,7 +122,7 @@ In addition, if users are relying on state stored in your app’s URL as
 part of your public contract, keep in mind that you may also need to
 provide backwards compatibility for bookmarked URLs.
 
-[float]
+[discrete]
 === Testing & stability
 
 Review:
@@ -131,6 +131,6 @@ Review:
 * <<stability>>
 * <<security-best-practices>>
 
-include::stability.asciidoc[]
+include::stability.asciidoc[leveloffset=+1]
 
-include::security.asciidoc[]
+include::security.asciidoc[leveloffset=+1]

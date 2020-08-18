@@ -53,6 +53,7 @@ export interface NewAgentEvent {
     | 'FAILED'
     | 'STOPPING'
     | 'STOPPED'
+    | 'DEGRADED'
     // Action results
     | 'DATA_DUMP'
     // Actions

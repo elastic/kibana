@@ -120,6 +120,11 @@ module.exports = function ({ name, targetPath }) {
           return !customPath;
         },
       },
+      generateTsconfig: {
+        type: 'confirm',
+        message: 'Would you like to use a custom tsconfig file?',
+        default: true,
+      },
     },
     filters: {
       'public/**/index.scss': 'generateScss',
@@ -128,6 +133,7 @@ module.exports = function ({ name, targetPath }) {
       'translations/**/*': 'generateTranslations',
       'i18nrc.json': 'generateTranslations',
       'eslintrc.js': 'generateEslint',
+      'tsconfig.json': 'generateTsconfig',
     },
     move: {
       'eslintrc.js': '.eslintrc.js',

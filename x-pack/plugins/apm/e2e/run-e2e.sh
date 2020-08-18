@@ -18,8 +18,8 @@ normal=$(tput sgr0)
 
 # paths
 E2E_DIR="${0%/*}"
-TMP_DIR="./tmp"
-APM_IT_DIR="./tmp/apm-integration-testing"
+TMP_DIR="tmp"
+APM_IT_DIR="tmp/apm-integration-testing"
 
 cd ${E2E_DIR}
 

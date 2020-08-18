@@ -13,7 +13,8 @@
 // Returned response contains a results property containing the requested aggregation.
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import _ from 'lodash';
+import each from 'lodash/each';
+import get from 'lodash/get';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -237,7 +238,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       ];
 
       // Add in term queries for each of the specified criteria.
-      _.each(criteriaFields, (criteria) => {
+      each(criteriaFields, (criteria) => {
         mustCriteria.push({
           term: {
             [criteria.fieldName]: criteria.fieldValue,
@@ -262,8 +263,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         },
       ];
 
-      return mlApiServices
-        .esSearch$({
+      return mlApiServices.results
+        .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
           size: 0,
           body: {
@@ -316,12 +317,12 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         })
         .pipe(
           map((resp) => {
-            const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-            _.each(aggregationsByTime, (dataForTime: any) => {
+            const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
+            each(aggregationsByTime, (dataForTime: any) => {
               const time = dataForTime.key;
-              const modelUpper: number | undefined = _.get(dataForTime, ['modelUpper', 'value']);
-              const modelLower: number | undefined = _.get(dataForTime, ['modelLower', 'value']);
-              const actual = _.get(dataForTime, ['actual', 'value']);
+              const modelUpper: number | undefined = get(dataForTime, ['modelUpper', 'value']);
+              const modelLower: number | undefined = get(dataForTime, ['modelLower', 'value']);
+              const actual = get(dataForTime, ['actual', 'value']);
 
               obj.results[time] = {
                 actual,
@@ -375,7 +376,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
 
       if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
         let jobIdFilterStr = '';
-        _.each(jobIds, (jobId, i) => {
+        each(jobIds, (jobId, i) => {
           if (i > 0) {
             jobIdFilterStr += ' OR ';
           }
@@ -391,7 +392,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       }
 
       // Add in term queries for each of the specified criteria.
-      _.each(criteriaFields, (criteria) => {
+      each(criteriaFields, (criteria) => {
         boolCriteria.push({
           term: {
             [criteria.fieldName]: criteria.fieldValue,
@@ -399,8 +400,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       });
 
-      return mlApiServices
-        .esSearch$({
+      return mlApiServices.results
+        .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
           rest_total_hits_as_int: true,
           size: maxResults !== undefined ? maxResults : 100,
@@ -428,7 +429,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         .pipe(
           map((resp) => {
             if (resp.hits.total !== 0) {
-              _.each(resp.hits.hits, (hit: any) => {
+              each(resp.hits.hits, (hit: any) => {
                 obj.records.push(hit._source);
               });
             }
@@ -473,7 +474,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
 
       if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
         let jobIdFilterStr = '';
-        _.each(jobIds, (jobId, i) => {
+        each(jobIds, (jobId, i) => {
           jobIdFilterStr += `${i > 0 ? ' OR ' : ''}job_id:${jobId}`;
         });
         boolCriteria.push({
@@ -484,8 +485,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       }
 
-      return mlApiServices
-        .esSearch$({
+      return mlApiServices.results
+        .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
           size: 0,
           body: {
@@ -536,15 +537,15 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         })
         .pipe(
           map((resp) => {
-            const dataByJobId = _.get(resp, ['aggregations', 'jobs', 'buckets'], []);
-            _.each(dataByJobId, (dataForJob: any) => {
+            const dataByJobId = get(resp, ['aggregations', 'jobs', 'buckets'], []);
+            each(dataByJobId, (dataForJob: any) => {
               const jobId: string = dataForJob.key;
               const resultsForTime: Record<string, any> = {};
-              const dataByTime = _.get(dataForJob, ['times', 'buckets'], []);
-              _.each(dataByTime, (dataForTime: any) => {
+              const dataByTime = get(dataForJob, ['times', 'buckets'], []);
+              each(dataByTime, (dataForTime: any) => {
                 const time: string = dataForTime.key;
-                const events: object[] = _.get(dataForTime, ['events', 'buckets']);
-                resultsForTime[time] = _.map(events, 'key');
+                const events: any[] = get(dataForTime, ['events', 'buckets']);
+                resultsForTime[time] = events.map((e) => e.key);
               });
               obj.events[jobId] = resultsForTime;
             });

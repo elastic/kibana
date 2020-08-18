@@ -8,6 +8,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import '../../mock/match_media';
 import { TestProviders } from '../../mock';
 import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';

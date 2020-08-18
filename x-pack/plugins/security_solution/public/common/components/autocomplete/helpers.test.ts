@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+import '../../../common/mock/match_media';
+import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
 import {
   EXCEPTION_OPERATORS,
@@ -13,7 +14,7 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from './operators';
-import { getOperators, validateParams, getGenericComboBoxProps } from './helpers';
+import { getOperators, paramIsValid, getGenericComboBoxProps } from './helpers';
 
 describe('helpers', () => {
   describe('#getOperators', () => {
@@ -52,51 +53,67 @@ describe('helpers', () => {
     });
   });
 
-  describe('#validateParams', () => {
-    test('returns true if value is undefined', () => {
-      const isValid = validateParams(undefined, 'date');
-
-      expect(isValid).toBeTruthy();
-    });
-
-    test('returns true if value is empty string', () => {
-      const isValid = validateParams('', 'date');
-
-      expect(isValid).toBeTruthy();
-    });
-
-    test('returns true if type is "date" and value is valid', () => {
-      const isValid = validateParams('1994-11-05T08:15:30-05:00', 'date');
-
-      expect(isValid).toBeTruthy();
-    });
-
-    test('returns false if type is "date" and value is not valid', () => {
-      const isValid = validateParams('1593478826', 'date');
+  describe('#paramIsValid', () => {
+    test('returns false if value is undefined and "isRequired" nad "touched" are true', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), true, true);
 
       expect(isValid).toBeFalsy();
     });
 
-    test('returns true if type is "ip" and value is valid', () => {
-      const isValid = validateParams('126.45.211.34', 'ip');
+    test('returns true if value is undefined and "isRequired" is true but "touched" is false', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), true, false);
 
       expect(isValid).toBeTruthy();
     });
 
-    test('returns false if type is "ip" and value is not valid', () => {
-      const isValid = validateParams('hellooo', 'ip');
+    test('returns true if value is undefined and "isRequired" is false', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), false, false);
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns false if value is empty string when "isRequired" is true and "touched" is false', () => {
+      const isValid = paramIsValid('', getField('@timestamp'), true, false);
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if value is empty string and "isRequired" is false', () => {
+      const isValid = paramIsValid('', getField('@timestamp'), false, false);
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if type is "date" and value is valid and "isRequired" is false', () => {
+      const isValid = paramIsValid(
+        '1994-11-05T08:15:30-05:00',
+        getField('@timestamp'),
+        false,
+        false
+      );
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if type is "date" and value is valid and "isRequired" is true', () => {
+      const isValid = paramIsValid(
+        '1994-11-05T08:15:30-05:00',
+        getField('@timestamp'),
+        true,
+        false
+      );
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns false if type is "date" and value is not valid and "isRequired" is false', () => {
+      const isValid = paramIsValid('1593478826', getField('@timestamp'), false, false);
 
       expect(isValid).toBeFalsy();
     });
 
-    test('returns true if type is "number" and value is valid', () => {
-      const isValid = validateParams('123', 'number');
-
-      expect(isValid).toBeTruthy();
-    });
-
-    test('returns false if type is "number" and value is not valid', () => {
-      const isValid = validateParams('not a number', 'number');
+    test('returns false if type is "date" and value is not valid and "isRequired" is true', () => {
+      const isValid = paramIsValid('1593478826', getField('@timestamp'), true, true);
 
       expect(isValid).toBeFalsy();
     });

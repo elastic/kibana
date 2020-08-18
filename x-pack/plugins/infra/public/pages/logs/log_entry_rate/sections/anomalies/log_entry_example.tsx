@@ -80,12 +80,8 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   const setItemIsHovered = useCallback(() => setIsHovered(true), []);
   const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
 
-  // the dataset must be encoded for the field column and the empty value must
-  // be turned into a user-friendly value
-  const encodedDatasetFieldValue = useMemo(
-    () => JSON.stringify(getFriendlyNameForPartitionId(dataset)),
-    [dataset]
-  );
+  // handle special cases for the dataset value
+  const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
 
   const viewInStreamLinkProps = useLinkProps({
     app: 'logs',
@@ -158,7 +154,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: encodedDatasetFieldValue,
+            value: humanFriendlyDataset,
             highlights: [],
           }}
           highlights={noHighlights}

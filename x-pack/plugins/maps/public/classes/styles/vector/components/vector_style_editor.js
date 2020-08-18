@@ -15,7 +15,7 @@ import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
-import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
+import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';

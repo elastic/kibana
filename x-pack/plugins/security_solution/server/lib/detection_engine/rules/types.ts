@@ -59,6 +59,7 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
   PerPageOrUndefined,
@@ -204,6 +205,7 @@ export interface CreateRulesOptions {
   severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  threshold: ThresholdOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -247,6 +249,7 @@ export interface UpdateRulesOptions {
   severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  threshold: ThresholdOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -288,6 +291,7 @@ export interface PatchRulesOptions {
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

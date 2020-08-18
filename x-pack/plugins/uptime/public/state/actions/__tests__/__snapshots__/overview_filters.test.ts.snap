@@ -2,6 +2,7 @@
 
 exports[`overview filters action creators creates a fail action 1`] = `
 Object {
+  "error": true,
   "payload": [Error: There was an error retrieving the overview filters],
   "type": "FETCH_OVERVIEW_FILTERS_FAIL",
 }

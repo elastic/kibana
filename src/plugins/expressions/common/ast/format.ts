@@ -22,13 +22,9 @@ import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { toExpression } = require('@kbn/interpreter/common');
 
-export function format(
-  ast: ExpressionAstExpression | ExpressionAstArgument,
-  type: 'expression' | 'argument'
+export function format<T extends ExpressionAstExpression | ExpressionAstArgument>(
+  ast: T,
+  type: T extends ExpressionAstExpression ? 'expression' : 'argument'
 ): string {
   return toExpression(ast, type);
-}
-
-export function formatExpression(ast: ExpressionAstExpression): string {
-  return format(ast, 'expression');
 }

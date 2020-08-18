@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiI18nNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
-  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiI18nNumber,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -30,23 +30,18 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
 
   return (
     <EuiFlexItem component="section">
-      <OverviewPanel>
-        <header>
-          <EuiTitle size="xs">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestManager.overviewPageConfigurationsPanelTitle"
-                defaultMessage="Agent configurations"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={getHref('configurations_list')}>
-            <FormattedMessage
-              id="xpack.ingestManager.overviewPageConfigurationsPanelAction"
-              defaultMessage="View configs"
-            />
-          </EuiButtonEmpty>
-        </header>
+      <OverviewPanel
+        title={i18n.translate('xpack.ingestManager.overviewPageConfigurationsPanelTitle', {
+          defaultMessage: 'Agent configurations',
+        })}
+        tooltip={i18n.translate('xpack.ingestManager.overviewPageConfigurationsPanelTooltip', {
+          defaultMessage: 'Use agent configurations to control the data that your agents collect.',
+        })}
+        linkTo={getHref('configurations_list')}
+        linkToText={i18n.translate('xpack.ingestManager.overviewPageConfigurationsPanelAction', {
+          defaultMessage: 'View configurations',
+        })}
+      >
         <OverviewStats>
           {packageConfigsRequest.isLoading ? (
             <Loading />

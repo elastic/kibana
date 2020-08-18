@@ -228,7 +228,7 @@ might increase the search time. This setting is off by default. Users must opt-i
 `siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
 `siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
 `siem:ipReputationLinks`:: A JSON array containing links for verifying the reputation of an IP address. The links are displayed on
-{siem-guide}/siem-ui-overview.html#network-ui[IP detail] pages.
+{security-guide}/siem-ui-overview.html#network-ui[IP detail] pages.
 `siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
 page.
 `siem:newsFeedUrl`:: The URL from which the security news feed content is
@@ -247,7 +247,7 @@ retrieved.
 `timelion:es.timefield`:: The default field containing a timestamp when using the `.es()` query.
 `timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host
 in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can be
-selected from a whitelist configured in the `kibana.yml` under `timelion.graphiteUrls`.
+selected from an allow-list configured in the `kibana.yml` under `timelion.graphiteUrls`.
 `timelion:max_buckets`:: The maximum number of buckets a single data source can return.
 This value is used for calculating automatic intervals in visualizations.
 `timelion:min_interval`:: The smallest interval to calculate when using "auto".

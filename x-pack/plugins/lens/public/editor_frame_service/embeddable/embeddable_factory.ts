@@ -102,7 +102,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         savedVis,
         editPath: getEditPath(savedObjectId),
-        editUrl: coreHttp.basePath.prepend(`app/lens${getEditPath(savedObjectId)}`),
+        editUrl: coreHttp.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
         editable: await this.isEditable(),
         indexPatterns,
       },

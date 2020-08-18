@@ -10,10 +10,10 @@ import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
-  maxLat: number;
-  maxLon: number;
-  minLat: number;
   minLon: number;
+  minLat: number;
+  maxLon: number;
+  maxLat: number;
 };
 
 export type MapQuery = Query & {

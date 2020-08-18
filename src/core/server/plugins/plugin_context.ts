@@ -157,6 +157,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       ),
       createRouter: () => router,
       resources: deps.httpResources.createRegistrar(router),
+      registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
@@ -211,6 +212,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
     elasticsearch: {
+      client: deps.elasticsearch.client,
+      createClient: deps.elasticsearch.createClient,
       legacy: deps.elasticsearch.legacy,
     },
     http: {

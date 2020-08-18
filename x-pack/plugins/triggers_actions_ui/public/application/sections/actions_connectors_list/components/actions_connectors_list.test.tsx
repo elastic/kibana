@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { ScopedHistory } from 'kibana/public';
 
 import { ActionsConnectorsList } from './actions_connectors_list';
 import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
@@ -62,13 +61,13 @@ describe('actions_connectors_list component empty', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
@@ -169,13 +168,13 @@ describe('actions_connectors_list component with items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -257,13 +256,13 @@ describe('actions_connectors_list component empty with show only capability', ()
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': false,
-          'actions:delete': false,
+        actions: {
+          show: true,
+          save: false,
+          delete: false,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -288,7 +287,7 @@ describe('actions_connectors_list component empty with show only capability', ()
 
   it('renders no permissions to create connector', async () => {
     await setup();
-    expect(wrapper.find('[defaultMessage="No permissions to create connector"]')).toHaveLength(1);
+    expect(wrapper.find('[defaultMessage="No permissions to create connectors"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="createActionButton"]')).toHaveLength(0);
   });
 });
@@ -346,13 +345,13 @@ describe('actions_connectors_list with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': false,
-          'actions:delete': false,
+        actions: {
+          show: true,
+          save: false,
+          delete: false,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -447,13 +446,13 @@ describe('actions_connectors_list component with disabled items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {

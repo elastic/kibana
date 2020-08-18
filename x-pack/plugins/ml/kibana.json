@@ -16,7 +16,8 @@
     "share",
     "embeddable",
     "uiActions",
-    "kibanaLegacy"
+    "kibanaLegacy",
+    "indexPatternManagement"
   ],
   "optionalPlugins": [
     "security",
@@ -30,7 +31,6 @@
     "esUiShared",
     "kibanaUtils",
     "kibanaReact",
-    "management",
     "dashboard",
     "savedObjects"
   ]

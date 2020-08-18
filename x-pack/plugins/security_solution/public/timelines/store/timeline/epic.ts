@@ -6,6 +6,7 @@
 
 import {
   get,
+  getOr,
   has,
   merge as mergeObject,
   set,
@@ -68,6 +69,7 @@ import {
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
+  setExcludedRowRendererIds,
   setFilters,
   setSavedQueryId,
   startTimelineSaving,
@@ -88,9 +90,11 @@ import { ActionTimeline, TimelineEpicDependencies } from './types';
 const timelineActionsType = [
   applyKqlFilterQuery.type,
   addProvider.type,
+  addTimeline.type,
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  setExcludedRowRendererIds.type,
   setFilters.type,
   setSavedQueryId.type,
   updateColumns.type,
@@ -169,7 +173,7 @@ export const createTimelineEpic = <State>(): Epic<
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
           myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
           myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
-          return true;
+          return getOr(false, 'payload.savedTimeline', action);
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import moment from 'moment';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { EmptySection } from '../../components/app/empty_section';
@@ -23,7 +22,7 @@ import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_sett
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { getObservabilityAlerts } from '../../services/get_observability_alerts';
-import { getParsedDate } from '../../utils/date';
+import { getAbsoluteTime } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
@@ -33,24 +32,20 @@ interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
-function calculatetBucketSize({ startTime, endTime }: { startTime?: string; endTime?: string }) {
-  if (startTime && endTime) {
-    return getBucketSize({
-      start: moment.utc(startTime).valueOf(),
-      end: moment.utc(endTime).valueOf(),
-      minInterval: '60s',
-    });
+function calculatetBucketSize({ start, end }: { start?: number; end?: number }) {
+  if (start && end) {
+    return getBucketSize({ start, end, minInterval: '60s' });
   }
 }
 
-export const OverviewPage = ({ routeParams }: Props) => {
+export function OverviewPage({ routeParams }: Props) {
   const { core } = usePluginContext();
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });
-  }, []);
+  }, [core]);
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), []);
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
@@ -62,16 +57,22 @@ export const OverviewPage = ({ routeParams }: Props) => {
     return <LoadingObservability />;
   }
 
-  const {
-    rangeFrom = timePickerTime.from,
-    rangeTo = timePickerTime.to,
-    refreshInterval = 10000,
-    refreshPaused = true,
-  } = routeParams.query;
+  const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
-  const startTime = getParsedDate(rangeFrom);
-  const endTime = getParsedDate(rangeTo, { roundUp: true });
-  const bucketSize = calculatetBucketSize({ startTime, endTime });
+  const relativeTime = {
+    start: routeParams.query.rangeFrom ?? timePickerTime.from,
+    end: routeParams.query.rangeTo ?? timePickerTime.to,
+  };
+
+  const absoluteTime = {
+    start: getAbsoluteTime(relativeTime.start),
+    end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
+  };
+
+  const bucketSize = calculatetBucketSize({
+    start: absoluteTime.start,
+    end: absoluteTime.end,
+  });
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
@@ -93,8 +94,8 @@ export const OverviewPage = ({ routeParams }: Props) => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <DatePicker
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
+            rangeFrom={relativeTime.start}
+            rangeTo={relativeTime.end}
             refreshInterval={refreshInterval}
             refreshPaused={refreshPaused}
           />
@@ -112,44 +113,46 @@ export const OverviewPage = ({ routeParams }: Props) => {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {showDataSections && (
-            <EuiFlexGroup direction="column">
-              {hasData.infra_logs && (
-                <EuiFlexItem grow={false}>
-                  <LogsSection
-                    startTime={startTime}
-                    endTime={endTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasData.infra_metrics && (
-                <EuiFlexItem grow={false}>
-                  <MetricsSection
-                    startTime={startTime}
-                    endTime={endTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasData.apm && (
-                <EuiFlexItem grow={false}>
-                  <APMSection
-                    startTime={startTime}
-                    endTime={endTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasData.uptime && (
-                <EuiFlexItem grow={false}>
-                  <UptimeSection
-                    startTime={startTime}
-                    endTime={endTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column">
+                {hasData.infra_logs && (
+                  <EuiFlexItem grow={false}>
+                    <LogsSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+                {hasData.infra_metrics && (
+                  <EuiFlexItem grow={false}>
+                    <MetricsSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+                {hasData.apm && (
+                  <EuiFlexItem grow={false}>
+                    <APMSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+                {hasData.uptime && (
+                  <EuiFlexItem grow={false}>
+                    <UptimeSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           )}
 
           {/* Empty sections */}
@@ -205,4 +208,4 @@ export const OverviewPage = ({ routeParams }: Props) => {
       </EuiFlexGroup>
     </WithHeaderLayout>
   );
-};
+}

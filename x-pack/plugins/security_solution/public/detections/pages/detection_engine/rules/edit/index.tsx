@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import {
   EuiButton,
   EuiCallOut,
@@ -20,6 +18,7 @@ import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } fr
 import { useParams, useHistory } from 'react-router-dom';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import {
   getRuleDetailsUrl,
@@ -74,12 +73,17 @@ const EditRulePageComponent: FC = () => {
   const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
   const {
-    loading: initLoading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const initLoading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
 
@@ -154,12 +158,13 @@ const EditRulePageComponent: FC = () => {
           <>
             <EuiSpacer />
             <StepPanel loading={loading || initLoading} title={ruleI18n.ABOUT}>
-              {myAboutRuleForm.data != null && (
+              {myAboutRuleForm.data != null && myDefineRuleForm.data != null && (
                 <StepAboutRule
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={myAboutRuleForm.data}
+                  defineRuleData={myDefineRuleForm.data}
                   setForm={setStepsForm}
                 />
               )}
@@ -266,7 +271,8 @@ const EditRulePageComponent: FC = () => {
             : myScheduleRuleForm.data) as ScheduleStepRule,
           (activeFormId === RuleStep.ruleActions
             ? activeForm.data
-            : myActionsRuleForm.data) as ActionsStepRule
+            : myActionsRuleForm.data) as ActionsStepRule,
+          rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
       });
@@ -365,7 +371,14 @@ const EditRulePageComponent: FC = () => {
     return null;
   }
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   } else if (userHasNoPermissions(canUserCRUD)) {

@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMount } from 'react-use';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { LogEntryAnomaly } from '../../../../../../common/http_api';
-import { useLogEntryExamples } from '../../use_log_entry_examples';
-import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 import { euiStyled } from '../../../../../../../observability/public';
+import { LogEntryAnomaly } from '../../../../../../common/http_api';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogSourceContext } from '../../../../../containers/logs/log_source';
+import { useLogEntryExamples } from '../../use_log_entry_examples';
+import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 
 const EXAMPLE_COUNT = 5;
 

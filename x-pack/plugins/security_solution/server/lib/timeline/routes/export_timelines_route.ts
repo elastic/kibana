@@ -15,8 +15,14 @@ import {
   exportTimelinesRequestBodySchema,
 } from './schemas/export_timelines_schema';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildFrameworkRequest } from './utils/common';
+import { SetupPlugins } from '../../../plugin';
 
-export const exportTimelinesRoute = (router: IRouter, config: ConfigType) => {
+export const exportTimelinesRoute = (
+  router: IRouter,
+  config: ConfigType,
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
       path: TIMELINE_EXPORT_URL,
@@ -31,7 +37,8 @@ export const exportTimelinesRoute = (router: IRouter, config: ConfigType) => {
     async (context, request, response) => {
       try {
         const siemResponse = buildSiemResponse(response);
-        const savedObjectsClient = context.core.savedObjects.client;
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+
         const exportSizeLimit = config.maxTimelineImportExportSize;
 
         if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
@@ -42,8 +49,8 @@ export const exportTimelinesRoute = (router: IRouter, config: ConfigType) => {
         }
 
         const responseBody = await getExportTimelineByObjectIds({
-          client: savedObjectsClient,
-          ids: request.body.ids,
+          frameworkRequest,
+          ids: request.body?.ids,
         });
 
         return response.ok({

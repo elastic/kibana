@@ -203,6 +203,7 @@ export function renderApp(
   });
 
   return () => {
+    chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
     unlisten();
   };

@@ -31,7 +31,6 @@ import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
-import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
@@ -157,7 +156,7 @@ function createCoreStartMock() {
 }
 
 function createInternalCoreSetupMock() {
-  const setupDeps: InternalCoreSetup = {
+  const setupDeps = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
@@ -175,7 +174,7 @@ function createInternalCoreSetupMock() {
 }
 
 function createInternalCoreStartMock() {
-  const startDeps: InternalCoreStart = {
+  const startDeps = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
     http: httpServiceMock.createInternalStartContract(),
@@ -194,6 +193,7 @@ function createCoreRequestHandlerContextMock() {
       typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
       legacy: {
         client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
       },

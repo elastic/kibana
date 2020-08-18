@@ -171,13 +171,17 @@ const StatefulTimelineComponent = React.memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const { indexPattern, browserFields } = useWithSource('default', indexToAdd);
+    const { docValueFields, indexPattern, browserFields, loading: isLoadingSource } = useWithSource(
+      'default',
+      indexToAdd
+    );
 
     return (
       <Timeline
         browserFields={browserFields}
         columns={columns}
         dataProviders={dataProviders!}
+        docValueFields={docValueFields}
         end={end}
         eventType={eventType}
         filters={filters}
@@ -186,6 +190,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         indexPattern={indexPattern}
         indexToAdd={indexToAdd}
         isLive={isLive}
+        isLoadingSource={isLoadingSource}
         isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
@@ -210,6 +215,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       />
     );
   },
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) => {
     return (
       prevProps.eventType === nextProps.eventType &&
@@ -218,6 +224,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.isSaving === nextProps.isSaving &&
+      prevProps.isTimelineExists === nextProps.isTimelineExists &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
@@ -266,7 +273,9 @@ const makeMapStateToProps = () => {
 
     // return events on empty search
     const kqlQueryExpression =
-      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
+      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
+        ? ' '
+        : kqlQueryTimeline;
     return {
       columns,
       dataProviders,

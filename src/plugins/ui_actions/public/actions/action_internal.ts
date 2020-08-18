@@ -65,4 +65,9 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     if (!this.definition.getHref) return undefined;
     return await this.definition.getHref(context);
   }
+
+  public async shouldAutoExecute(context: Context<A>): Promise<boolean> {
+    if (!this.definition.shouldAutoExecute) return false;
+    return this.definition.shouldAutoExecute(context);
+  }
 }

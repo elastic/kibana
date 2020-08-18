@@ -138,10 +138,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     setShow(false);
   }, []);
   // only merge in the default category if the field browser is visible
-  const browserFieldsWithDefaultCategory = useMemo(
-    () => (show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {}),
-    [show, browserFields]
-  );
+  const browserFieldsWithDefaultCategory = useMemo(() => {
+    return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
+  }, [show, browserFields]);
 
   return (
     <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">

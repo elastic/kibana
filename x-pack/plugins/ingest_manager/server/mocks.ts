@@ -18,6 +18,7 @@ export const createAppContextStartContractMock = (): IngestManagerAppContext => 
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     kibanaVersion: '8.0.0',
+    kibanaBranch: 'master',
   };
 };
 

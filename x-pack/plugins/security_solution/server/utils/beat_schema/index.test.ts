@@ -401,8 +401,15 @@ describe('Schema Beat', () => {
       const result = getIndexAlias([leadingWildcardIndex], leadingWildcardIndex);
       expect(result).toBe(leadingWildcardIndex);
     });
+
     test('getIndexAlias no match returns "unknown" string', () => {
       const index = 'auditbeat-*';
+      const result = getIndexAlias([index], 'hello');
+      expect(result).toBe('unknown');
+    });
+
+    test('empty index should not cause an error to return although it will cause an invalid regular expression to occur', () => {
+      const index = '';
       const result = getIndexAlias([index], 'hello');
       expect(result).toBe('unknown');
     });

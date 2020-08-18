@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
-import DragSelect from 'dragselect';
 import {
   EuiPanel,
   EuiPopover,
@@ -22,21 +21,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DRAG_SELECT_ACTION, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddToDashboardControl } from './add_to_dashboard_control';
 import { useMlKibana } from '../contexts/kibana';
 import { TimeBuckets } from '../util/time_buckets';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import {
-  ALLOW_CELL_RANGE_SELECTION,
-  dragSelect$,
-  explorerService,
-} from './explorer_dashboard_service';
+import { explorerService } from './explorer_dashboard_service';
 import { ExplorerState } from './reducers/explorer_reducer';
 import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
-import { OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
@@ -63,10 +58,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
-    const isSwimlaneSelectActive = useRef(false);
-    // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
-    const disableDragSelectOnMouseLeave = useRef(true);
-
     const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
     const timeBuckets = useMemo(() => {
@@ -77,48 +68,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
       });
     }, [uiSettings]);
-
-    const dragSelect = useMemo(
-      () =>
-        new DragSelect({
-          selectorClass: 'ml-swimlane-selector',
-          selectables: document.querySelectorAll('.sl-cell'),
-          callback(elements) {
-            if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
-              elements = [elements[0]];
-            }
-
-            if (elements.length > 0) {
-              dragSelect$.next({
-                action: DRAG_SELECT_ACTION.NEW_SELECTION,
-                elements,
-              });
-            }
-
-            disableDragSelectOnMouseLeave.current = true;
-          },
-          onDragStart(e) {
-            let target = e.target as HTMLElement;
-            while (target && target !== document.body && !target.classList.contains('sl-cell')) {
-              target = target.parentNode as HTMLElement;
-            }
-            if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
-              dragSelect$.next({
-                action: DRAG_SELECT_ACTION.DRAG_START,
-              });
-              disableDragSelectOnMouseLeave.current = false;
-            }
-          },
-          onElementSelect() {
-            if (ALLOW_CELL_RANGE_SELECTION) {
-              dragSelect$.next({
-                action: DRAG_SELECT_ACTION.ELEMENT_SELECT,
-              });
-            }
-          },
-        }),
-      []
-    );
 
     const {
       filterActive,
@@ -138,42 +87,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       loading,
     } = explorerState;
 
-    const setSwimlaneSelectActive = useCallback((active: boolean) => {
-      if (isSwimlaneSelectActive.current && !active && disableDragSelectOnMouseLeave.current) {
-        dragSelect.stop();
-        isSwimlaneSelectActive.current = active;
-        return;
-      }
-      if (!isSwimlaneSelectActive.current && active) {
-        dragSelect.start();
-        dragSelect.clearSelection();
-        dragSelect.setSelectables(document.querySelectorAll('.sl-cell'));
-        isSwimlaneSelectActive.current = active;
-      }
-    }, []);
-    const onSwimlaneEnterHandler = () => setSwimlaneSelectActive(true);
-    const onSwimlaneLeaveHandler = () => setSwimlaneSelectActive(false);
-
-    // Listens to render updates of the swimlanes to update dragSelect
-    const swimlaneRenderDoneListener = useCallback(() => {
-      dragSelect.clearSelection();
-      dragSelect.setSelectables(document.querySelectorAll('.sl-cell'));
-    }, []);
-
-    // Listener for click events in the swimlane to load corresponding anomaly data.
-    const swimlaneCellClick = useCallback(
-      (selectedCellsUpdate: any) => {
-        // If selectedCells is an empty object we clear any existing selection,
-        // otherwise we save the new selection in AppState and update the Explorer.
-        if (Object.keys(selectedCellsUpdate).length === 0) {
-          setSelectedCells();
-        } else {
-          setSelectedCells(selectedCellsUpdate);
-        }
-      },
-      [setSelectedCells]
-    );
-
     const menuItems = useMemo(() => {
       const items = [];
       if (canEditDashboards) {
@@ -192,6 +105,19 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
       return items;
     }, [canEditDashboards]);
+
+    // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
+    const overallCellSelection: AppStateSelectedCells | undefined = useMemo(() => {
+      if (!selectedCells) return;
+
+      if (selectedCells.type === SWIMLANE_TYPE.OVERALL) return selectedCells;
+
+      return {
+        type: SWIMLANE_TYPE.OVERALL,
+        lanes: [OVERALL_LABEL],
+        times: selectedCells.times,
+      };
+    }, [selectedCells]);
 
     return (
       <>
@@ -284,86 +210,68 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           <EuiSpacer size="m" />
 
-          <div
-            className="mlExplorerSwimlane euiText"
-            onMouseEnter={onSwimlaneEnterHandler}
-            onMouseLeave={onSwimlaneLeaveHandler}
+          <SwimlaneContainer
             data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-          >
-            <SwimlaneContainer
-              filterActive={filterActive}
-              maskAll={maskAll}
-              timeBuckets={timeBuckets}
-              swimlaneCellClick={swimlaneCellClick}
-              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-              swimlaneType={'overall'}
-              selection={selectedCells}
-              swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-              onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-              isLoading={loading}
-              noDataWarning={<NoOverallData />}
-            />
-          </div>
+            filterActive={filterActive}
+            maskAll={maskAll}
+            timeBuckets={timeBuckets}
+            swimlaneData={overallSwimlaneData as OverallSwimlaneData}
+            swimlaneType={SWIMLANE_TYPE.OVERALL}
+            selection={overallCellSelection}
+            onCellsSelection={setSelectedCells}
+            onResize={explorerService.setSwimlaneContainerWidth}
+            isLoading={loading}
+            noDataWarning={<NoOverallData />}
+          />
 
           <EuiSpacer size="m" />
 
           {viewBySwimlaneOptions.length > 0 && (
-            <>
-              <>
-                <div
-                  className="mlExplorerSwimlane euiText"
-                  onMouseEnter={onSwimlaneEnterHandler}
-                  onMouseLeave={onSwimlaneLeaveHandler}
-                  data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                >
-                  <SwimlaneContainer
-                    filterActive={filterActive}
-                    maskAll={
-                      maskAll &&
-                      !hasMatchingPoints({
-                        filteredFields,
-                        swimlaneData: viewBySwimlaneData,
-                      })
-                    }
-                    timeBuckets={timeBuckets}
-                    swimlaneCellClick={swimlaneCellClick}
-                    swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
-                    swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                    selection={selectedCells}
-                    swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-                    onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-                    fromPage={viewByFromPage}
-                    perPage={viewByPerPage}
-                    swimlaneLimit={swimlaneLimit}
-                    onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
-                      if (perPageUpdate) {
-                        explorerService.setViewByPerPage(perPageUpdate);
-                      }
-                      if (fromPageUpdate) {
-                        explorerService.setViewByFromPage(fromPageUpdate);
-                      }
-                    }}
-                    isLoading={loading || viewBySwimlaneDataLoading}
-                    noDataWarning={
-                      typeof viewBySwimlaneFieldName === 'string' ? (
-                        viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.noResultForSelectedJobsMessage"
-                            defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
-                            values={{ jobsCount: selectedJobs?.length ?? 1 }}
-                          />
-                        ) : (
-                          <ExplorerNoInfluencersFound
-                            viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                            showFilterMessage={filterActive === true}
-                          />
-                        )
-                      ) : null
-                    }
-                  />
-                </div>
-              </>
-            </>
+            <SwimlaneContainer
+              data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+              filterActive={filterActive}
+              maskAll={
+                maskAll &&
+                !hasMatchingPoints({
+                  filteredFields,
+                  swimlaneData: viewBySwimlaneData,
+                })
+              }
+              timeBuckets={timeBuckets}
+              swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
+              swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+              selection={selectedCells}
+              onCellsSelection={setSelectedCells}
+              onResize={explorerService.setSwimlaneContainerWidth}
+              fromPage={viewByFromPage}
+              perPage={viewByPerPage}
+              swimlaneLimit={swimlaneLimit}
+              onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
+                if (perPageUpdate) {
+                  explorerService.setViewByPerPage(perPageUpdate);
+                }
+                if (fromPageUpdate) {
+                  explorerService.setViewByFromPage(fromPageUpdate);
+                }
+              }}
+              isLoading={loading || viewBySwimlaneDataLoading}
+              noDataWarning={
+                typeof viewBySwimlaneFieldName === 'string' ? (
+                  viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
+                    <FormattedMessage
+                      id="xpack.ml.explorer.noResultForSelectedJobsMessage"
+                      defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
+                      values={{ jobsCount: selectedJobs?.length ?? 1 }}
+                    />
+                  ) : (
+                    <ExplorerNoInfluencersFound
+                      viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                      showFilterMessage={filterActive === true}
+                    />
+                  )
+                ) : null
+              }
+            />
           )}
         </EuiPanel>
         {isAddDashboardsActive && selectedJobs && (

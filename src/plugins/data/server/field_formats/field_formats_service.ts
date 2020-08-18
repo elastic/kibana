@@ -23,10 +23,14 @@ import {
   baseFormatters,
 } from '../../common/field_formats';
 import { IUiSettingsClient } from '../../../../core/server';
-import { DateFormat } from './converters';
+import { DateFormat, DateNanosFormat } from './converters';
 
 export class FieldFormatsService {
-  private readonly fieldFormatClasses: FieldFormatInstanceType[] = [DateFormat, ...baseFormatters];
+  private readonly fieldFormatClasses: FieldFormatInstanceType[] = [
+    DateFormat,
+    DateNanosFormat,
+    ...baseFormatters,
+  ];
 
   public setup() {
     return {

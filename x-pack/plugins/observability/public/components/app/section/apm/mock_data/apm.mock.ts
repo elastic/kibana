@@ -7,8 +7,6 @@
 import { ApmFetchDataResponse } from '../../../../../typings';
 
 export const response: ApmFetchDataResponse = {
-  title: 'APM',
-
   appLink: '/app/apm',
   stats: {
     services: { value: 11, type: 'number' },

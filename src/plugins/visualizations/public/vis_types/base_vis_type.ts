@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
+import { Adapters } from '../../../inspector/public';
 
 export interface BaseVisTypeOptions {
   name: string;
@@ -40,6 +41,7 @@ export interface BaseVisTypeOptions {
   hierarchicalData?: boolean | unknown;
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
+  inspectorAdapters?: Adapters | (() => Adapters);
 }
 
 export class BaseVisType {
@@ -63,6 +65,7 @@ export class BaseVisType {
   hierarchicalData: boolean | unknown;
   setup?: unknown;
   useCustomNoDataScreen: boolean;
+  inspectorAdapters?: Adapters | (() => Adapters);
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -98,6 +101,7 @@ export class BaseVisType {
     this.requiresSearch = this.requestHandler !== 'none';
     this.hierarchicalData = opts.hierarchicalData || false;
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
+    this.inspectorAdapters = opts.inspectorAdapters;
   }
 
   public get schemas() {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
 import { mlLog } from '../../client/log';
 import {
   MlCapabilities,
@@ -22,12 +22,12 @@ import {
 } from './errors';
 
 export function capabilitiesProvider(
-  callAsCurrentUser: LegacyAPICaller,
+  mlClusterClient: ILegacyScopedClusterClient,
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
 ) {
-  const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
+  const { isUpgradeInProgress } = upgradeCheckProvider(mlClusterClient);
   async function getCapabilities(): Promise<MlCapabilitiesResponse> {
     const upgradeInProgress = await isUpgradeInProgress();
     const isPlatinumOrTrialLicense = mlLicense.isFullLicense();

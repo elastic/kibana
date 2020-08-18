@@ -24,11 +24,14 @@ export default function enterpriseSearchSetupGuideTests({
     });
 
     describe('when no enterpriseSearch.host is configured', () => {
-      it('navigating to the enterprise_search plugin will redirect a user to the setup guide', async () => {
+      it('navigating to the plugin will redirect a user to the setup guide', async () => {
         await PageObjects.appSearch.navigateToPage();
         await retry.try(async function () {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain('/app_search/setup_guide');
+
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('Setup Guide - App Search - Elastic');
         });
       });
     });

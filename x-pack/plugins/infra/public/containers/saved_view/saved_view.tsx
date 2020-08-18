@@ -50,7 +50,7 @@ export const useSavedView = (props: Props) => {
   const { data, loading, find, error: errorOnFind, hasView } = useFindSavedObject<
     SavedViewSavedObject<ViewState>
   >(viewType);
-
+  const [shouldLoadDefault] = useState(props.shouldLoadDefault);
   const [currentView, setCurrentView] = useState<SavedView<any> | null>(null);
   const [loadingDefaultView, setLoadingDefaultView] = useState<boolean | null>(null);
   const { create, error: errorOnCreate, data: createdViewData, createdId } = useCreateSavedObject(
@@ -211,8 +211,6 @@ export const useSavedView = (props: Props) => {
   }, [setCurrentView, defaultViewId, defaultViewState]);
 
   useEffect(() => {
-    const shouldLoadDefault = props.shouldLoadDefault;
-
     if (loadingDefaultView || currentView || !shouldLoadDefault) {
       return;
     }
@@ -225,7 +223,7 @@ export const useSavedView = (props: Props) => {
     }
   }, [
     loadDefaultView,
-    props.shouldLoadDefault,
+    shouldLoadDefault,
     setDefault,
     loadingDefaultView,
     currentView,
@@ -246,7 +244,7 @@ export const useSavedView = (props: Props) => {
     errorOnUpdate,
     errorOnFind,
     errorOnCreate: createError,
-    shouldLoadDefault: props.shouldLoadDefault,
+    shouldLoadDefault,
     makeDefault,
     sourceIsLoading,
     deleteView,

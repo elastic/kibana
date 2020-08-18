@@ -12,17 +12,18 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
+  defaultSearchQuery,
 } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
-  // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
   classification = '100mb',
 }
 
 export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 0;
+export const DEFAULT_MAX_NUM_THREADS = 1;
 export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
@@ -43,6 +44,7 @@ export interface FormMessage {
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
+  disableSwitchToForm: boolean;
   form: {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
@@ -68,6 +70,7 @@ export interface State {
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
     loadingFieldOptions: boolean;
+    maxNumThreads: undefined | number;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -92,10 +95,10 @@ export interface State {
     trainingPercent: number;
   };
   disabled: boolean;
-  indexNames: EsIndexName[];
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
+  hasSwitchedToEditor: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
   isValid: boolean;
@@ -109,6 +112,7 @@ export interface State {
 export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
+  disableSwitchToForm: false,
   form: {
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
@@ -130,10 +134,11 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    jobConfigQuery: { match_all: {} },
+    jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingFieldOptions: false,
+    maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -162,10 +167,10 @@ export const getInitialState = (): State => ({
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
-  indexNames: [],
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
+  hasSwitchedToEditor: false,
   isJobCreated: false,
   isJobStarted: false,
   isValid: false,
@@ -199,6 +204,10 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
+
+  if (formState.maxNumThreads !== undefined) {
+    jobConfig.max_num_threads = formState.maxNumThreads;
+  }
 
   const resultsFieldEmpty =
     typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
@@ -278,8 +287,9 @@ function toCamelCase(property: string): string {
  * Extracts form state for a job clone from the analytics job configuration.
  * For cloning we keep job id and destination index empty.
  */
-export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
+export function getFormStateFromJobConfig(
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
+  isClone: boolean = true
 ): Partial<State['form']> {
   const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
 
@@ -291,8 +301,13 @@ export function getCloneFormStateFromJobConfig(
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
+    maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
+
+  if (isClone === false) {
+    resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
+  }
 
   const analysisConfig = analyticsJobConfig.analysis[jobType];
 

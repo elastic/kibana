@@ -6,10 +6,19 @@
 
 import { HttpFetchOptions } from '../../../../../src/core/public';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { getAcknowledgeSchemaResponseMock } from '../../common/schemas/response/acknowledge_schema.mock';
 import { getListResponseMock } from '../../common/schemas/response/list_schema.mock';
+import { getListItemIndexExistSchemaResponseMock } from '../../common/schemas/response/list_item_index_exist_schema.mock';
 import { getFoundListSchemaMock } from '../../common/schemas/response/found_list_schema.mock';
 
-import { deleteList, exportList, findLists, importList } from './api';
+import {
+  createListIndex,
+  deleteList,
+  exportList,
+  findLists,
+  importList,
+  readListIndex,
+} from './api';
 import {
   ApiPayload,
   DeleteListParams,
@@ -60,7 +69,7 @@ describe('Value Lists API', () => {
           ...((payload as unknown) as ApiPayload<DeleteListParams>),
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "23" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "23" supplied to "id"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -76,7 +85,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -105,6 +114,7 @@ describe('Value Lists API', () => {
     it('sends pagination as query parameters', async () => {
       const abortCtrl = new AbortController();
       await findLists({
+        cursor: 'cursor',
         http: httpMock,
         pageIndex: 1,
         pageSize: 10,
@@ -114,14 +124,21 @@ describe('Value Lists API', () => {
       expect(httpMock.fetch).toHaveBeenCalledWith(
         '/api/lists/_find',
         expect.objectContaining({
-          query: { page: 1, per_page: 10 },
+          query: {
+            cursor: 'cursor',
+            page: 1,
+            per_page: 10,
+          },
         })
       );
     });
 
     it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<FindListsParams> = { pageIndex: 10, pageSize: 0 };
+      const payload: ApiPayload<FindListsParams> = {
+        pageIndex: 10,
+        pageSize: 0,
+      };
 
       await expect(
         findLists({
@@ -129,13 +146,16 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "0" supplied to "per_page"');
+      ).rejects.toEqual(new Error('Invalid value "0" supplied to "per_page"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<FindListsParams> = { pageIndex: 1, pageSize: 10 };
+      const payload: ApiPayload<FindListsParams> = {
+        pageIndex: 1,
+        pageSize: 10,
+      };
       const badResponse = { ...getFoundListSchemaMock(), cursor: undefined };
       httpMock.fetch.mockResolvedValue(badResponse);
 
@@ -145,7 +165,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "cursor"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "cursor"'));
     });
   });
 
@@ -214,7 +234,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "file"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "file"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -233,7 +253,7 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "other" supplied to "type"');
+      ).rejects.toEqual(new Error('Invalid value "other" supplied to "type"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
     });
 
@@ -254,13 +274,13 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
   describe('exportList', () => {
     beforeEach(() => {
-      httpMock.fetch.mockResolvedValue(getListResponseMock());
+      httpMock.fetch.mockResolvedValue({});
     });
 
     it('POSTs to the export endpoint', async () => {
@@ -307,25 +327,96 @@ describe('Value Lists API', () => {
           ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "23" supplied to "list_id"');
+      ).rejects.toEqual(new Error('Invalid value "23" supplied to "list_id"'));
       expect(httpMock.fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('readListIndex', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getListItemIndexExistSchemaResponseMock());
+    });
+
+    it('GETs the list index', async () => {
+      const abortCtrl = new AbortController();
+      await readListIndex({
+        http: httpMock,
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith(
+        '/api/lists/index',
+        expect.objectContaining({
+          method: 'GET',
+        })
+      );
+    });
+
+    it('returns the response when valid', async () => {
+      const abortCtrl = new AbortController();
+      const result = await readListIndex({
+        http: httpMock,
+        signal: abortCtrl.signal,
+      });
+
+      expect(result).toEqual(getListItemIndexExistSchemaResponseMock());
     });
 
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<ExportListParams> = {
-        listId: 'list-id',
-      };
-      const badResponse = { ...getListResponseMock(), id: undefined };
+      const badResponse = { ...getListItemIndexExistSchemaResponseMock(), list_index: undefined };
       httpMock.fetch.mockResolvedValue(badResponse);
 
       await expect(
-        exportList({
+        readListIndex({
           http: httpMock,
-          ...payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "list_index"'));
+    });
+  });
+
+  describe('createListIndex', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getAcknowledgeSchemaResponseMock());
+    });
+
+    it('GETs the list index', async () => {
+      const abortCtrl = new AbortController();
+      await createListIndex({
+        http: httpMock,
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith(
+        '/api/lists/index',
+        expect.objectContaining({
+          method: 'POST',
+        })
+      );
+    });
+
+    it('returns the response when valid', async () => {
+      const abortCtrl = new AbortController();
+      const result = await createListIndex({
+        http: httpMock,
+        signal: abortCtrl.signal,
+      });
+
+      expect(result).toEqual(getAcknowledgeSchemaResponseMock());
+    });
+
+    it('rejects with an error if response payload is invalid', async () => {
+      const abortCtrl = new AbortController();
+      const badResponse = { acknowledged: undefined };
+      httpMock.fetch.mockResolvedValue(badResponse);
+
+      await expect(
+        createListIndex({
+          http: httpMock,
+          signal: abortCtrl.signal,
+        })
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "acknowledged"'));
     });
   });
 });

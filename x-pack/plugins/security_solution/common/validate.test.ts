@@ -43,6 +43,6 @@ describe('validateEither', () => {
     const payload = { a: 'some other value' };
     const result = validateEither(schema, payload);
 
-    expect(result).toEqual(left('Invalid value "some other value" supplied to "a"'));
+    expect(result).toEqual(left(new Error('Invalid value "some other value" supplied to "a"')));
   });
 });

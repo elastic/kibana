@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -15,6 +16,7 @@ interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  enableActionsProxy: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -33,9 +35,9 @@ const enabledActionTypes = [
   'test.index-record',
   'test.noop',
   'test.rate-limit',
+  'test.throw',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
 
@@ -55,6 +57,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const plugins = allFiles.filter((file) =>
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
+
+    const actionsProxyUrl = options.enableActionsProxy
+      ? [`--xpack.actions.proxyUrl=http://localhost:${await getPort()}`]
+      : [];
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -85,6 +91,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          ...actionsProxyUrl,
+          '--xpack.actions.rejectUnauthorizedCertificates=false',
+
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {

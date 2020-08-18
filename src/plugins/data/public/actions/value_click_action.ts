@@ -17,98 +17,41 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../plugins/kibana_react/public';
 import {
   ActionByType,
+  APPLY_FILTER_TRIGGER,
   createAction,
-  IncompatibleActionError,
+  UiActionsStart,
 } from '../../../../plugins/ui_actions/public';
-import { getOverlays, getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../ui/apply_filters';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
-import { ValueClickContext } from '../../../embeddable/public';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
-
-export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
+import type { Filter } from '../../common/es_query/filters';
+import type { ValueClickContext } from '../../../embeddable/public';
 
 export type ValueClickActionContext = ValueClickContext;
+export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
-async function isCompatible(context: ValueClickActionContext) {
-  try {
-    const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
-    return filters.length > 0;
-  } catch {
-    return false;
-  }
-}
-
-export function valueClickAction(
-  filterManager: FilterManager,
-  timeFilter: TimefilterContract
+export function createValueClickAction(
+  getStartServices: () => { uiActions: UiActionsStart }
 ): ActionByType<typeof ACTION_VALUE_CLICK> {
   return createAction<typeof ACTION_VALUE_CLICK>({
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
-    getIconType: () => 'filter',
-    getDisplayName: () => {
-      return i18n.translate('data.filter.applyFilterActionTitle', {
-        defaultMessage: 'Apply filter to current view',
-      });
-    },
-    isCompatible,
-    execute: async ({ data }: ValueClickActionContext) => {
-      if (!(await isCompatible({ data }))) {
-        throw new IncompatibleActionError();
-      }
-
-      const filters: Filter[] = await createFiltersFromValueClickAction(data);
-
-      let selectedFilters = filters;
-
-      if (filters.length > 1) {
-        const indexPatterns = await Promise.all(
-          filters.map((filter) => {
-            return getIndexPatterns().get(filter.meta.index!);
-          })
-        );
-
-        const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
-          const overlay = getOverlays().openModal(
-            toMountPoint(
-              applyFiltersPopover(
-                filters,
-                indexPatterns,
-                () => {
-                  overlay.close();
-                  resolve([]);
-                },
-                (filterSelection: Filter[]) => {
-                  overlay.close();
-                  resolve(filterSelection);
-                }
-              )
-            ),
-            {
-              'data-test-subj': 'selectFilterOverlay',
-            }
-          );
-        });
-
-        selectedFilters = await filterSelectionPromise;
-      }
-
-      if (data.timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          data.timeFieldName,
-          selectedFilters
-        );
-        filterManager.addFilters(restOfFilters);
-        if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+    shouldAutoExecute: async () => true,
+    execute: async (context: ValueClickActionContext) => {
+      try {
+        const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
+        if (filters.length > 0) {
+          await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+            filters,
+            embeddable: context.embeddable,
+            timeFieldName: context.data.timeFieldName,
+          });
         }
-      } else {
-        filterManager.addFilters(selectedFilters);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Error [ACTION_EMIT_APPLY_FILTER_TRIGGER]: can\'t extract filters from action context`
+        );
       }
     },
   });

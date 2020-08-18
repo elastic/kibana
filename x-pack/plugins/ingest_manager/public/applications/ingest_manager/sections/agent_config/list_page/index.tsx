@@ -158,10 +158,9 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Description',
         }),
         width: '35%',
-        truncateText: true,
-        render: (description: AgentConfig['description']) => (
-          <EuiTextColor color="subdued" className="eui-textTruncate">
-            {description}
+        render: (value: string) => (
+          <EuiTextColor color="subdued" className="eui-textTruncate" title={value}>
+            {value}
           </EuiTextColor>
         ),
       },

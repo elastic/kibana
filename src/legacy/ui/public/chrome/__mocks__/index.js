@@ -60,12 +60,6 @@ const internals = _.defaults(_.cloneDeep(metadata), {
 
 const waitForBootstrap = new Promise((resolve) => {
   chrome.bootstrap = function (targetDomElement) {
-    // import chrome nav controls and hacks now so that they are executed after
-    // everything else, can safely import the chrome, and interact with services
-    // and such setup by all other modules
-    require('uiExports/chromeNavControls');
-    require('uiExports/hacks');
-
     // sets attribute on body for stylesheet sandboxing
     document.body.setAttribute('id', `${internals.app.id}-app`);
 

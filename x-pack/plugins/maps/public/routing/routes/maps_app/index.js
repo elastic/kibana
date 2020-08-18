@@ -9,8 +9,12 @@ import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {
   getFilters,
+  getQuery,
   getQueryableUniqueIndexPatternIds,
   getRefreshConfig,
+  getTimeFilters,
+  hasDirtyState,
+  getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
 import {
   replaceLayerList,
@@ -23,28 +27,37 @@ import {
   setRefreshConfig,
   setSelectedLayer,
   updateFlyout,
+  enableFullScreen,
+  openMapSettings,
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getMapsCapabilities } from '../../../kibana_services';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
     isFullScreen: getIsFullScreen(state),
+    isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
+    isSaveDisabled: hasDirtyState(state),
+    inspectorAdapters: getInspectorAdapters(state),
     nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
     filters: getFilters(state),
+    layerListConfigOnly: getLayerListConfigOnly(state),
+    query: getQuery(state),
+    timeFilters: getTimeFilters(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    dispatchSetQuery: (refresh, filters, query, time) => {
+    dispatchSetQuery: ({ refresh, filters, query, timeFilters }) => {
       dispatch(
         setQuery({
           filters,
           query,
-          timeFilters: time,
+          timeFilters,
           refresh,
         })
       );
@@ -60,6 +73,8 @@ function mapDispatchToProps(dispatch) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(setReadOnly(!getMapsCapabilities().save));
     },
+    enableFullScreen: () => dispatch(enableFullScreen()),
+    openMapSettings: () => dispatch(openMapSettings()),
   };
 }
 

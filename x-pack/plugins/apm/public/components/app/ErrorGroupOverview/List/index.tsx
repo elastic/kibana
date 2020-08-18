@@ -53,7 +53,7 @@ interface Props {
   items: ErrorGroupListAPIResponse;
 }
 
-const ErrorGroupList: React.FC<Props> = (props) => {
+function ErrorGroupList(props: Props) {
   const { items } = props;
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
@@ -213,6 +213,6 @@ const ErrorGroupList: React.FC<Props> = (props) => {
       sortItems={false}
     />
   );
-};
+}
 
 export { ErrorGroupList };

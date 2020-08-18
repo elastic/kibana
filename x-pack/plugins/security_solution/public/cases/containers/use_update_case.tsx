@@ -5,6 +5,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
+
 import {
   displaySuccessToast,
   errorToToaster,
@@ -33,6 +34,8 @@ export interface UpdateByKey {
   fetchCaseUserActions?: (caseId: string) => void;
   updateCase?: (newCase: Case) => void;
   version: string;
+  onSuccess?: () => void;
+  onError?: () => void;
 }
 
 type Action =
@@ -81,7 +84,15 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateCaseProperty = useCallback(
-    async ({ fetchCaseUserActions, updateKey, updateValue, updateCase, version }: UpdateByKey) => {
+    async ({
+      fetchCaseUserActions,
+      updateKey,
+      updateValue,
+      updateCase,
+      version,
+      onSuccess,
+      onError,
+    }: UpdateByKey) => {
       let cancel = false;
       const abortCtrl = new AbortController();
 
@@ -102,6 +113,9 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
           }
           dispatch({ type: 'FETCH_SUCCESS' });
           displaySuccessToast(i18n.UPDATED_CASE(response[0].title), dispatchToaster);
+          if (onSuccess) {
+            onSuccess();
+          }
         }
       } catch (error) {
         if (!cancel) {
@@ -111,6 +125,9 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
             dispatchToaster,
           });
           dispatch({ type: 'FETCH_FAILURE' });
+          if (onError) {
+            onError();
+          }
         }
       }
       return () => {

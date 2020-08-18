@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { getColorRampCenterColor, getColorPalette } from '../../../color_utils';
+import { getColorRampCenterColor, getColorPalette } from '../../../color_palettes';
 import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
 import {
   ColorDynamicOptions,

@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-
 import { Dispatch } from 'redux';
-// @ts-ignore
-import turf from 'turf';
+import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
+
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
+  getFilters,
+  getMapSettings,
   getWaitingForMapReadyLayerListRaw,
   getQuery,
+  getTimeFilters,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -42,8 +43,8 @@ import {
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import { syncDataForAllLayers } from './data_request_actions';
-import { addLayer } from './layer_actions';
+import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
+import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
@@ -51,6 +52,8 @@ import {
   MapExtent,
   MapRefreshConfig,
 } from '../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../common/constants';
+import { scaleBounds } from '../elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -91,13 +94,21 @@ export function mapReady() {
       type: MAP_READY,
     });
 
-    getWaitingForMapReadyLayerListRaw(getState()).forEach((layerDescriptor) => {
-      dispatch<any>(addLayer(layerDescriptor));
-    });
-
+    const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
     dispatch({
       type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
     });
+
+    if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        dispatch<any>(addLayerWithoutDataSync(layerDescriptor));
+      });
+      dispatch<any>(autoFitToBounds());
+    } else {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        dispatch<any>(addLayer(layerDescriptor));
+      });
+    }
   };
 }
 
@@ -117,13 +128,13 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
     if (extent) {
       let doesBufferContainExtent = false;
       if (buffer) {
-        const bufferGeometry = turf.bboxPolygon([
+        const bufferGeometry = turfBboxPolygon([
           buffer.minLon,
           buffer.minLat,
           buffer.maxLon,
           buffer.maxLat,
         ]);
-        const extentGeometry = turf.bboxPolygon([
+        const extentGeometry = turfBboxPolygon([
           extent.minLon,
           extent.minLat,
           extent.maxLon,
@@ -134,15 +145,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
       }
 
       if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        const scaleFactor = 0.5; // TODO put scale factor in store and fetch with selector
-        const width = extent.maxLon - extent.minLon;
-        const height = extent.maxLat - extent.minLat;
-        dataFilters.buffer = {
-          minLon: extent.minLon - width * scaleFactor,
-          minLat: extent.minLat - height * scaleFactor,
-          maxLon: extent.maxLon + width * scaleFactor,
-          maxLat: extent.maxLat + height * scaleFactor,
-        };
+        dataFilters.buffer = scaleBounds(extent, 0.5);
       }
     }
 
@@ -217,16 +220,20 @@ export function setQuery({
 
     dispatch({
       type: SET_QUERY,
-      timeFilters,
+      timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
       query: {
-        ...query,
+        ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
         queryLastTriggeredAt: refresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
-      filters,
+      filters: filters ? filters : getFilters(getState()),
     });
 
-    await dispatch<any>(syncDataForAllLayers());
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch<any>(autoFitToBounds());
+    } else {
+      await dispatch<any>(syncDataForAllLayers());
+    }
   };
 }
 

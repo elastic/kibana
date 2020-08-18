@@ -26,9 +26,7 @@ export function UpdateSourceEditor({ onChange, config }) {
             />
           </h5>
         </EuiTitle>
-
         <EuiSpacer size="m" />
-
         <TileServiceSelect onTileSelect={_onTileSelect} config={config} />
       </EuiPanel>
 

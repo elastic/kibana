@@ -6,7 +6,6 @@
 
 import { getOr, omit } from 'lodash/fp';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
@@ -15,12 +14,14 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
+import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/pages';
 import { SecurityPageName } from '../../../../app/types';
 import {
   RouteSpyState,
   HostRouteSpyState,
   NetworkRouteSpyState,
   TimelineRouteSpyState,
+  AdministrationRouteSpyState,
 } from '../../../utils/route/types';
 import { getAppOverviewUrl } from '../../link_to';
 
@@ -61,6 +62,10 @@ const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
 const isAlertsRoutes = (spyState: RouteSpyState) =>
   spyState != null && spyState.pageName === SecurityPageName.detections;
 
+const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.administration;
+
+// eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps,
   getUrlForApp: GetUrlForApp
@@ -159,6 +164,27 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
+
+  if (isAdminRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'administration', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+
+    return [
+      ...siemRootBreadcrumb,
+      ...getAdminBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        ),
+        getUrlForApp
+      ),
+    ];
+  }
+
   if (
     spyState != null &&
     object.navTabs &&

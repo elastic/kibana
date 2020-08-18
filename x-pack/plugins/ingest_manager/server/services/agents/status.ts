@@ -25,9 +25,10 @@ export async function getAgentStatusForConfig(
   soClient: SavedObjectsClientContract,
   configId?: string
 ) {
-  const [all, error, offline] = await Promise.all(
+  const [all, online, error, offline] = await Promise.all(
     [
       undefined,
+      AgentStatusKueryHelper.buildKueryForOnlineAgents(),
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
     ].map((kuery) =>
@@ -47,9 +48,10 @@ export async function getAgentStatusForConfig(
   return {
     events: await getEventsCount(soClient, configId),
     total: all.total,
-    online: all.total - error.total - offline.total,
+    online: online.total,
     error: error.total,
     offline: offline.total,
+    other: all.total - online.total - error.total - offline.total,
   };
 }
 

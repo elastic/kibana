@@ -48,7 +48,7 @@ export type SiemNavTabKey =
   | SecurityPageName.detections
   | SecurityPageName.timelines
   | SecurityPageName.case
-  | SecurityPageName.management;
+  | SecurityPageName.administration;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 

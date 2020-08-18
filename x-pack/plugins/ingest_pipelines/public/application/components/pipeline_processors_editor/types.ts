@@ -5,9 +5,11 @@
  */
 
 import { Dispatch } from 'react';
+import { NotificationsSetup } from 'src/core/public';
 import { OnFormUpdateArg } from '../../../shared_imports';
+import { ApiService } from '../../services';
 import { SerializeResult } from './serialize';
-import { OnActionHandler, ProcessorInfo } from './components/processors_tree';
+import { OnActionHandler, ProcessorInfo } from './components';
 import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
 
 export interface Links {
@@ -54,7 +56,7 @@ export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
 export type EditorMode =
   | { id: 'creatingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'movingProcessor'; arg: ProcessorInfo }
-  | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
+  | { id: 'managingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'idle' };
 
@@ -75,6 +77,8 @@ export interface ContextValueState {
 
 export interface ContextValue {
   links: Links;
+  toasts: NotificationsSetup['toasts'];
+  api: ApiService;
   onTreeAction: OnActionHandler;
   state: ContextValueState;
 }

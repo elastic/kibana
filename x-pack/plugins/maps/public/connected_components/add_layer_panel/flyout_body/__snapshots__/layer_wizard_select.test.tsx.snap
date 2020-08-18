@@ -3,6 +3,7 @@
 exports[`LayerWizardSelect Should render layer select after layer wizards are loaded 1`] = `
 <Fragment>
   <EuiFacetGroup
+    gutterSize="s"
     layout="horizontal"
   >
     <EuiFacetButton
@@ -46,6 +47,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
         description="mock wizard without icon"
         onClick={[Function]}
         title="wizard 1"
+        titleSize="xs"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -62,6 +64,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
         }
         onClick={[Function]}
         title="wizard 2"
+        titleSize="xs"
       />
     </EuiFlexItem>
   </EuiFlexGrid>

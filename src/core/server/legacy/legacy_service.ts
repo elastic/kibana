@@ -301,6 +301,7 @@ export class LegacyService implements CoreService {
         ),
         createRouter: () => router,
         resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -374,6 +375,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../cli/repl').startRepl(kbnServer);
     }
 

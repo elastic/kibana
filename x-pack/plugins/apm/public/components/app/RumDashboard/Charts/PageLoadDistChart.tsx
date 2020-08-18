@@ -70,6 +70,7 @@ export function PageLoadDistChart({
     onPercentileChange(minX, maxX);
   };
 
+  // eslint-disable-next-line react/function-component-definition
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     return (
       <div>

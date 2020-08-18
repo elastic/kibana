@@ -24,6 +24,7 @@ import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 
 import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
+import { migrateLegacyQuery } from '../../../../../kibana_legacy/public';
 import { esFilters, connectToQueryState } from '../../../../../data/public';
 import { VisualizeServices, VisualizeAppStateContainer, SavedVisInstance } from '../../types';
 import { visStateToEditorState } from '../utils';
@@ -61,19 +62,35 @@ export const useVisualizeAppState = (
 
       eventEmitter.on('dirtyStateChange', onDirtyStateChange);
 
-      const { filterManager } = services.data.query;
-      // sync initial app filters from state to filterManager
+      const { filterManager, queryString } = services.data.query;
+      // sync initial app state from state to managers
       filterManager.setAppFilters(cloneDeep(stateContainer.getState().filters));
-      // setup syncing of app filters between appState and filterManager
+      queryString.setQuery(migrateLegacyQuery(stateContainer.getState().query));
+
+      // setup syncing of app filters between appState and query services
       const stopSyncingAppFilters = connectToQueryState(
         services.data.query,
         {
-          set: ({ filters }) => stateContainer.transitions.set('filters', filters),
-          get: () => ({ filters: stateContainer.getState().filters }),
-          state$: stateContainer.state$.pipe(map((state) => ({ filters: state.filters }))),
+          set: ({ filters, query }) => {
+            stateContainer.transitions.set('filters', filters);
+            stateContainer.transitions.set('query', query);
+          },
+          get: () => {
+            return {
+              filters: stateContainer.getState().filters,
+              query: stateContainer.getState().query,
+            };
+          },
+          state$: stateContainer.state$.pipe(
+            map((state) => ({
+              filters: state.filters,
+              query: state.query,
+            }))
+          ),
         },
         {
           filters: esFilters.FilterStateStore.APP_STATE,
+          query: true,
         }
       );
 

@@ -7,7 +7,6 @@
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -77,7 +76,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     setIpDetailsTablesActivePageToZero();
   }, [detailName, setIpDetailsTablesActivePageToZero]);
 
-  const { indicesExist, indexPattern } = useWithSource();
+  const { docValueFields, indicesExist, indexPattern } = useWithSource();
   const ip = decodeIpv6(detailName);
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -89,7 +88,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
   return (
     <div data-test-subj="ip-details-page">
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <FiltersGlobal>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
@@ -106,6 +105,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
             </HeaderPage>
 
             <IpOverviewQuery
+              docValueFields={docValueFields}
               skip={isInitializing}
               sourceId="default"
               filterQuery={filterQuery}
@@ -259,7 +259,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
               AnomaliesTableComponent={AnomaliesNetworkTable}
             />
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <HeaderPage border title={ip} />

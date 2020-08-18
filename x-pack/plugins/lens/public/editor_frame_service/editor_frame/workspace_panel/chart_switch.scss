@@ -5,15 +5,9 @@
   }
 }
 
-.lnsChartSwitch__triggerButton {
-  @include euiTitle('xs');
-  background-color: $euiColorEmptyShade;
-  border-color: $euiColorLightShade;
-}
-
 .lnsChartSwitch__summaryIcon {
   margin-right: $euiSizeS;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 // Targeting img as this won't target normal EuiIcon's only the custom svgs's

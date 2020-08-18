@@ -7,8 +7,8 @@
 import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-
 import Boom from 'boom';
+
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
@@ -21,6 +21,7 @@ import { EndpointAppContext } from '../../types';
 import { AgentService } from '../../../../../ingest_manager/server';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
+import { findAgentIDsByStatus } from './support/agent_status';
 
 interface HitSource {
   _source: HostMetadata;
@@ -35,11 +36,37 @@ interface MetadataRequestContext {
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
+  ['unenrolling', HostStatus.UNENROLLING],
 ]);
+
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
 
 const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
+
+/* Filters that can be applied to the endpoint fetch route */
+export const endpointFilters = schema.object({
+  kql: schema.nullable(schema.string()),
+  host_status: schema.nullable(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.OFFLINE.toString()),
+        schema.literal(HostStatus.UNENROLLING.toString()),
+        schema.literal(HostStatus.ERROR.toString()),
+      ])
+    )
+  ),
+});
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const logger = getLogger(endpointAppContext);
@@ -65,10 +92,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
                 ])
               )
             ),
-            /**
-             * filter to be applied, it could be a kql expression or discrete filter to be implemented
-             */
-            filter: schema.nullable(schema.oneOf([schema.string()])),
+            filters: endpointFilters,
           })
         ),
       },
@@ -92,12 +116,21 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           context.core.savedObjects.client
         );
 
+        const statusIDs = req.body?.filters?.host_status?.length
+          ? await findAgentIDsByStatus(
+              agentService,
+              context.core.savedObjects.client,
+              req.body?.filters?.host_status
+            )
+          : undefined;
+
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
           metadataIndexPattern,
           {
-            unenrolledAgentIds,
+            unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+            statusAgentIDs: statusIDs,
           }
         );
 
@@ -190,7 +223,11 @@ async function findAgent(
       hostMetadata.elastic.agent.id
     );
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
       );
@@ -253,7 +290,11 @@ async function enrichHostMetadata(
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
       log.error(e);

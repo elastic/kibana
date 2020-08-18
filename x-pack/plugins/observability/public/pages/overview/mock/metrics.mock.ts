@@ -11,7 +11,6 @@ export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
 };
 
 const response: MetricsFetchDataResponse = {
-  title: 'Metrics',
   appLink: '/app/apm',
   stats: {
     hosts: { value: 11, type: 'number' },
@@ -113,7 +112,6 @@ const response: MetricsFetchDataResponse = {
 };
 
 export const emptyResponse: MetricsFetchDataResponse = {
-  title: 'Metrics',
   appLink: '/app/apm',
   stats: {
     hosts: { value: 0, type: 'number' },

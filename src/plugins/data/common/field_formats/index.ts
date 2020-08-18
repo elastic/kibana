@@ -27,7 +27,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,

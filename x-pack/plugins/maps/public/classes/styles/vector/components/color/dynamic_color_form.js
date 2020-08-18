@@ -10,8 +10,6 @@ import { FieldSelect } from '../field_select';
 import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
-import { COLOR_GRADIENTS, COLOR_PALETTES } from '../../../color_utils';
-import { i18n } from '@kbn/i18n';
 
 export function DynamicColorForm({
   fields,
@@ -91,14 +89,10 @@ export function DynamicColorForm({
       return (
         <ColorMapSelect
           isCustomOnly={!field.supportsAutoDomain}
-          colorMapOptions={COLOR_GRADIENTS}
-          customOptionLabel={i18n.translate('xpack.maps.style.customColorRampLabel', {
-            defaultMessage: 'Custom color ramp',
-          })}
           onChange={onColorMapSelect}
           onColorMapTypeChange={onColorMapTypeChange}
           colorMapType={COLOR_MAP_TYPE.ORDINAL}
-          color={styleOptions.color}
+          colorPaletteId={styleOptions.color}
           customColorMap={styleOptions.customColorRamp}
           useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
           styleProperty={styleProperty}
@@ -110,14 +104,10 @@ export function DynamicColorForm({
       return (
         <ColorMapSelect
           isCustomOnly={!field.supportsAutoDomain}
-          colorMapOptions={COLOR_PALETTES}
-          customOptionLabel={i18n.translate('xpack.maps.style.customColorPaletteLabel', {
-            defaultMessage: 'Custom color palette',
-          })}
           onColorMapTypeChange={onColorMapTypeChange}
           onChange={onColorMapSelect}
           colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
-          color={styleOptions.colorCategory}
+          colorPaletteId={styleOptions.colorCategory}
           customColorMap={styleOptions.customColorPalette}
           useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
           styleProperty={styleProperty}

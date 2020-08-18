@@ -27,9 +27,6 @@ export const deleteAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:alerting-all'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

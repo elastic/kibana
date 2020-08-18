@@ -5,8 +5,8 @@
 * <<development-es-snapshots>>
 * <<development-basepath>>
 
-include::development-es-snapshots.asciidoc[]
+include::development-es-snapshots.asciidoc[leveloffset=+1]
 
-include::running-elasticsearch.asciidoc[]
+include::running-elasticsearch.asciidoc[leveloffset=+1]
 
-include::development-basepath.asciidoc[]
+include::development-basepath.asciidoc[leveloffset=+1]

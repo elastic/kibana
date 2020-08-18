@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import {
@@ -16,18 +16,23 @@ import {
 } from '../../../lists_plugin_deps';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
-import { formatExceptionItemForUpdate } from './helpers';
+import { buildAlertStatusFilter } from '../../../detections/components/alerts_table/default_config';
+import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
+import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
  *
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
+ * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  alertIdToClose?: string
+  alertIdToClose?: string,
+  bulkCloseIndex?: Index
 ) => Promise<void>;
 
 export type ReturnUseAddOrUpdateException = [
@@ -55,7 +60,19 @@ export const useAddOrUpdateException = ({
   onSuccess,
 }: UseAddOrUpdateExceptionProps): ReturnUseAddOrUpdateException => {
   const [isLoading, setIsLoading] = useState(false);
-  const addOrUpdateException = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
+    async (exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+      if (addOrUpdateExceptionRef.current !== null) {
+        addOrUpdateExceptionRef.current(
+          exceptionItemsToAddOrUpdate,
+          alertIdToClose,
+          bulkCloseIndex
+        );
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -100,7 +117,8 @@ export const useAddOrUpdateException = ({
 
     const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
       exceptionItemsToAddOrUpdate,
-      alertIdToClose
+      alertIdToClose,
+      bulkCloseIndex
     ) => {
       try {
         setIsLoading(true);
@@ -108,6 +126,25 @@ export const useAddOrUpdateException = ({
           await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
             status: 'closed',
+            signal: abortCtrl.signal,
+          });
+        }
+
+        if (bulkCloseIndex != null) {
+          const filter = getQueryFilter(
+            '',
+            'kuery',
+            buildAlertStatusFilter('open'),
+            bulkCloseIndex,
+            prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
+            false
+          );
+          await updateAlertStatus({
+            query: {
+              query: filter,
+            },
+            status: 'closed',
+            signal: abortCtrl.signal,
           });
         }
 
@@ -125,12 +162,12 @@ export const useAddOrUpdateException = ({
       }
     };
 
-    addOrUpdateException.current = addOrUpdateExceptionItems;
+    addOrUpdateExceptionRef.current = addOrUpdateExceptionItems;
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();
     };
   }, [http, onSuccess, onError]);
 
-  return [{ isLoading }, addOrUpdateException.current];
+  return [{ isLoading }, addOrUpdateException];
 };

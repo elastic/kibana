@@ -220,11 +220,11 @@ export const mockEnableChartsData = {
       icon: 'visMapCoordinate',
     },
   ],
-  from: 1560578400000,
+  from: '2019-06-15T06:00:00.000Z',
   grow: 2,
   id: 'statItem',
   index: 2,
   statKey: 'UniqueIps',
-  to: 1560837600000,
+  to: '2019-06-18T06:00:00.000Z',
   narrowDateRange: mockNarrowDateRange,
 };

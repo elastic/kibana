@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-empty-interface */
-
 import * as runtimeTypes from 'io-ts';
-import { SavedObjectsClient } from 'kibana/server';
 
 import { stringEnum, unionWithNullType } from '../../utility_types';
 import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
 import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
+import {
+  success,
+  success_count as successCount,
+} from '../../detection_engine/schemas/common/schemas';
+import { PositiveInteger } from '../../detection_engine/schemas/types';
+import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 
 /*
  *  ColumnHeader Types
@@ -119,8 +122,12 @@ const SavedFilterQueryQueryRuntimeType = runtimeTypes.partial({
  *  DatePicker Range Types
  */
 const SavedDateRangePickerRuntimeType = runtimeTypes.partial({
-  start: unionWithNullType(runtimeTypes.number),
-  end: unionWithNullType(runtimeTypes.number),
+  /* Before the change of all timestamp to ISO string the values of start and from
+   * attributes where a number. Specifically UNIX timestamps.
+   * To support old timeline's saved object we need to add the number io-ts type
+   */
+  start: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
+  end: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
 });
 
 /*
@@ -248,9 +255,9 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   updatedBy: unionWithNullType(runtimeTypes.string),
 });
 
-export interface SavedTimeline extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
+export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
-export interface SavedTimelineNote extends runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType> {}
+export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
 /*
  *  Timeline IDs
@@ -308,8 +315,9 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
 ]);
 
-export interface TimelineSavedObject
-  extends runtimeTypes.TypeOf<typeof TimelineSavedToReturnObjectRuntimeType> {}
+export type TimelineSavedObject = runtimeTypes.TypeOf<
+  typeof TimelineSavedToReturnObjectRuntimeType
+>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -333,9 +341,8 @@ export const TimelineErrorResponseType = runtimeTypes.type({
   message: runtimeTypes.string,
 });
 
-export interface TimelineErrorResponse
-  extends runtimeTypes.TypeOf<typeof TimelineErrorResponseType> {}
-export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
+export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
+export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -346,25 +353,11 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
   data: TimelineSavedToReturnObjectRuntimeType,
 });
 
-export interface AllTimelineSavedObject
-  extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
+export type AllTimelineSavedObject = runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType>;
 
 /**
  * Import/export timelines
  */
-
-export type ExportTimelineSavedObjectsClient = Pick<
-  SavedObjectsClient,
-  | 'get'
-  | 'errors'
-  | 'create'
-  | 'bulkCreate'
-  | 'delete'
-  | 'find'
-  | 'bulkGet'
-  | 'update'
-  | 'bulkUpdate'
->;
 
 export type ExportedGlobalNotes = Array<Exclude<NoteSavedObject, 'eventId'>>;
 export type ExportedEventNotes = NoteSavedObject[];
@@ -393,3 +386,15 @@ export type NotesAndPinnedEventsByTimelineId = Record<
   string,
   { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
 >;
+
+export const importTimelineResultSchema = runtimeTypes.exact(
+  runtimeTypes.type({
+    success,
+    success_count: successCount,
+    timelines_installed: PositiveInteger,
+    timelines_updated: PositiveInteger,
+    errors: runtimeTypes.array(errorSchema),
+  })
+);
+
+export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;

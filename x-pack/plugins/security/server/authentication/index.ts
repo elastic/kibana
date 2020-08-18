@@ -187,7 +187,8 @@ export async function setupAuthentication({
     areAPIKeysEnabled: () => apiKeys.areAPIKeysEnabled(),
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
-    grantAPIKeyAsInternalUser: (request: KibanaRequest) => apiKeys.grantAsInternalUser(request),
+    grantAPIKeyAsInternalUser: (request: KibanaRequest, params: CreateAPIKeyParams) =>
+      apiKeys.grantAsInternalUser(request, params),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
     invalidateAPIKeyAsInternalUser: (params: InvalidateAPIKeyParams) =>

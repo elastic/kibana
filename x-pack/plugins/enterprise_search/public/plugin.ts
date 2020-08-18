@@ -20,8 +20,10 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
+import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../common/constants';
 import { getPublicUrl } from './applications/shared/enterprise_search_url';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
+import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
@@ -43,12 +45,14 @@ export class EnterpriseSearchPlugin implements Plugin {
     const config = { host: this.config.host };
 
     core.application.register({
-      id: 'appSearch',
-      title: 'App Search',
-      appRoute: '/app/enterprise_search/app_search',
+      id: APP_SEARCH_PLUGIN.ID,
+      title: APP_SEARCH_PLUGIN.NAME,
+      appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
 
         await this.setPublicUrl(config, coreStart.http);
 
@@ -58,19 +62,45 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(AppSearch, coreStart, params, config, plugins);
       },
     });
-    // TODO: Workplace Search will need to register its own plugin.
+
+    core.application.register({
+      id: WORKPLACE_SEARCH_PLUGIN.ID,
+      title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
+
+        await this.setPublicUrl(config, coreStart.http);
+
+        const { renderApp } = await import('./applications');
+        const { WorkplaceSearch } = await import('./applications/workplace_search');
+
+        return renderApp(WorkplaceSearch, coreStart, params, config, plugins);
+      },
+    });
 
     plugins.home.featureCatalogue.register({
-      id: 'appSearch',
-      title: 'App Search',
+      id: APP_SEARCH_PLUGIN.ID,
+      title: APP_SEARCH_PLUGIN.NAME,
       icon: AppSearchLogo,
-      description:
-        'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-      path: '/app/enterprise_search/app_search',
+      description: APP_SEARCH_PLUGIN.DESCRIPTION,
+      path: APP_SEARCH_PLUGIN.URL,
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
-    // TODO: Workplace Search will need to register its own feature catalogue section/card.
+
+    plugins.home.featureCatalogue.register({
+      id: WORKPLACE_SEARCH_PLUGIN.ID,
+      title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      icon: WorkplaceSearchLogo,
+      description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
+      path: WORKPLACE_SEARCH_PLUGIN.URL,
+      category: FeatureCatalogueCategory.DATA,
+      showOnHomePage: true,
+    });
   }
 
   public start(core: CoreStart) {}

@@ -27,13 +27,13 @@ interface EditorExampleProps {
 
 const exampleText = `
 # index a doc
-PUT index/1
+PUT index/_doc/1
 {
   "body": "here"
 }
 
 # and get it ...
-GET index/1
+GET index/_doc/1
 `;
 
 export function EditorExample(props: EditorExampleProps) {

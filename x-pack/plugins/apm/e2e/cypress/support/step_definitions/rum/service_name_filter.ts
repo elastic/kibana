@@ -22,9 +22,9 @@ Then(`it displays relevant client metrics`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
-  cy.get(clientMetrics).eq(2).invoke('text').snapshot();
+  cy.get(clientMetrics).eq(2).should('have.text', '7 ');
 
-  cy.get(clientMetrics).eq(1).invoke('text').snapshot();
+  cy.get(clientMetrics).eq(1).should('have.text', '0.07 sec');
 
-  cy.get(clientMetrics).eq(0).invoke('text').snapshot();
+  cy.get(clientMetrics).eq(0).should('have.text', '0.01 sec');
 });

@@ -400,8 +400,9 @@ export function getBoundingBoxGeometry(geometry) {
 export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
-  const left = minLon;
-  const right = maxLon;
+  const lonDelta = maxLon - minLon;
+  const left = lonDelta > 360 ? -180 : minLon;
+  const right = lonDelta > 360 ? 180 : maxLon;
   const top = clampToLatBounds(maxLat);
   const bottom = clampToLatBounds(minLat);
   const topLeft = [left, top];
@@ -467,4 +468,24 @@ export function extractFeaturesFromFilters(filters) {
     });
 
   return features;
+}
+
+export function scaleBounds(bounds, scaleFactor) {
+  const width = bounds.maxLon - bounds.minLon;
+  const height = bounds.maxLat - bounds.minLat;
+  return {
+    minLon: bounds.minLon - width * scaleFactor,
+    minLat: bounds.minLat - height * scaleFactor,
+    maxLon: bounds.maxLon + width * scaleFactor,
+    maxLat: bounds.maxLat + height * scaleFactor,
+  };
+}
+
+export function turfBboxToBounds(turfBbox) {
+  return {
+    minLon: turfBbox[0],
+    minLat: turfBbox[1],
+    maxLon: turfBbox[2],
+    maxLat: turfBbox[3],
+  };
 }

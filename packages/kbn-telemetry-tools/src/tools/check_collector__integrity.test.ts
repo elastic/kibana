@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import * as ts from 'typescript';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
@@ -42,7 +42,7 @@ describe('checkMatchingMapping', () => {
   describe('Collector change', () => {
     it('returns diff on mismatching parsedCollections and stored mapping', async () => {
       const mockSchema = await parseJsonFile('mock_schema.json');
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       const fieldMapping = { type: 'number' };
       malformedParsedCollector[1].schema.value.flat = fieldMapping;
 
@@ -58,7 +58,7 @@ describe('checkMatchingMapping', () => {
 
     it('returns diff on unknown parsedCollections', async () => {
       const mockSchema = await parseJsonFile('mock_schema.json');
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       const collectorName = 'New Collector in town!';
       const collectorMapping = { some_usage: { type: 'number' } };
       malformedParsedCollector[1].collectorName = collectorName;
@@ -84,7 +84,7 @@ describe('checkCompatibleTypeDescriptor', () => {
 
   describe('Interface Change', () => {
     it('returns diff on incompatible type descriptor with mapping', () => {
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].fetch.typeDescriptor.flat.kind = ts.SyntaxKind.BooleanKeyword;
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(1);
@@ -101,14 +101,14 @@ describe('checkCompatibleTypeDescriptor', () => {
 
   describe('Mapping change', () => {
     it('returns no diff when mapping change between text and keyword', () => {
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].schema.value.flat.type = 'text';
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(0);
     });
 
     it('returns diff on incompatible type descriptor with mapping', () => {
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].schema.value.flat.type = 'boolean';
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(1);

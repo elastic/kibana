@@ -49,7 +49,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
       } catch (error) {
         if (isSubscribed) {
           setRuleStatus(null);
-          errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
+          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {
@@ -106,7 +106,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
       } catch (error) {
         if (isSubscribed) {
           setRuleStatuses([]);
-          errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
+          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
       if (isSubscribed) {

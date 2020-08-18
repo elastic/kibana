@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock';
 import { PreferenceFormattedBytes } from '../../../../../../common/components/formatted_bytes';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';

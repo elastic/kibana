@@ -8,12 +8,8 @@ import sinon from 'sinon';
 
 jest.mock('../../../kibana_services', () => {
   return {
-    getUiSettings() {
-      return {
-        get() {
-          return false;
-        },
-      };
+    getIsDarkMode() {
+      return false;
     },
   };
 });

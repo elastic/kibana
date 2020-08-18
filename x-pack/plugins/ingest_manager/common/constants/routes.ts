@@ -11,6 +11,8 @@ export const PACKAGE_CONFIG_API_ROOT = `${API_ROOT}/package_configs`;
 export const AGENT_CONFIG_API_ROOT = `${API_ROOT}/agent_configs`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
+export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
+
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;

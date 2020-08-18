@@ -38,12 +38,12 @@ interface Props {
   showGiveFeedback?: boolean;
 }
 
-export const Header = ({
+export function Header({
   color,
   restrictWidth,
   showAddData = false,
   showGiveFeedback = false,
-}: Props) => {
+}: Props) {
   const { core } = usePluginContext();
   return (
     <Container color={color}>
@@ -69,10 +69,7 @@ export const Header = ({
           </EuiFlexItem>
           {showGiveFeedback && (
             <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-              <EuiButtonEmpty
-                href={'https://discuss.elastic.co/c/observability/'}
-                iconType="popout"
-              >
+              <EuiButtonEmpty href={'https://ela.st/observability-discuss'} iconType="popout">
                 {i18n.translate('xpack.observability.home.feedback', {
                   defaultMessage: 'Give us feedback',
                 })}
@@ -94,4 +91,4 @@ export const Header = ({
       </Wrapper>
     </Container>
   );
-};
+}

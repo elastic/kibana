@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -26,6 +27,9 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiLoadingContent,
+  EuiPanel,
+  EuiAccordion,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -138,6 +142,7 @@ export class Explorer extends React.Component {
   };
 
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
+  htmlIdGen = htmlIdGenerator();
 
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
@@ -202,7 +207,7 @@ export class Explorer extends React.Component {
     const { showCharts, severity } = this.props;
 
     const {
-      annotationsData,
+      annotations,
       chartsData,
       filterActive,
       filterPlaceHolder,
@@ -216,6 +221,7 @@ export class Explorer extends React.Component {
       selectedJobs,
       tableData,
     } = this.props.explorerState;
+    const { annotationsData, aggregations } = annotations;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -239,13 +245,12 @@ export class Explorer extends React.Component {
         </ExplorerPage>
       );
     }
-
     const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
     const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
-
+    const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
     return (
       <ExplorerPage
         jobSelectorProps={jobSelectorProps}
@@ -297,29 +302,50 @@ export class Explorer extends React.Component {
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
-
             {annotationsData.length > 0 && (
               <>
-                <EuiTitle className="panel-title">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.explorer.annotationsTitle"
-                      defaultMessage="Annotations"
-                    />
-                  </h2>
-                </EuiTitle>
-                <AnnotationsTable
-                  annotations={annotationsData}
-                  drillDown={true}
-                  numberBadge={false}
-                />
+                <EuiPanel>
+                  <EuiAccordion
+                    id={this.htmlIdGen()}
+                    buttonContent={
+                      <EuiTitle className="panel-title">
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.ml.explorer.annotationsTitle"
+                            defaultMessage="Annotations {badge}"
+                            values={{
+                              badge: (
+                                <EuiBadge color={'hollow'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                    defaultMessage="Total: {count}"
+                                    values={{ count: annotationsData.length }}
+                                  />
+                                </EuiBadge>
+                              ),
+                            }}
+                          />
+                        </h2>
+                      </EuiTitle>
+                    }
+                  >
+                    <>
+                      <AnnotationsTable
+                        jobIds={selectedJobIds}
+                        annotations={annotationsData}
+                        aggregations={aggregations}
+                        drillDown={true}
+                        numberBadge={false}
+                      />
+                    </>
+                  </EuiAccordion>
+                </EuiPanel>
                 <AnnotationFlyout />
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
               </>
             )}
-
             {loading === false && (
-              <>
+              <EuiPanel>
                 <EuiTitle className="panel-title">
                   <h2>
                     <FormattedMessage
@@ -328,6 +354,7 @@ export class Explorer extends React.Component {
                     />
                   </h2>
                 </EuiTitle>
+
                 <EuiFlexGroup
                   direction="row"
                   gutterSize="l"
@@ -360,16 +387,19 @@ export class Explorer extends React.Component {
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
+
                 <EuiSpacer size="m" />
+
                 <div className="euiText explorer-charts">
                   {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
                 </div>
+
                 <AnomaliesTable
                   bounds={bounds}
                   tableData={tableData}
                   influencerFilter={this.applyFilter}
                 />
-              </>
+              </EuiPanel>
             )}
           </div>
         </div>

@@ -82,10 +82,10 @@ const Parens = styled.span`
   `}
 `;
 
-const AndOrBadgeContainer = styled.div`
-  width: 121px;
-  display: flex;
-  justify-content: flex-end;
+const AndOrBadgeContainer = styled.div<{ hideBadge: boolean }>`
+  span {
+    visibility: ${({ hideBadge }) => (hideBadge ? 'hidden' : 'inherit')};
+  }
 `;
 
 const LastAndOrBadgeInGroup = styled.div`
@@ -111,10 +111,6 @@ TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 
 const ParensContainer = styled(EuiFlexItem)`
   align-self: center;
-`;
-
-const AddDataProviderContainer = styled.div`
-  padding-right: 9px;
 `;
 
 const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
@@ -152,15 +148,9 @@ export const Providers = React.memo<Props>(
 
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <OrFlexItem grow={false}>
-                {groupIndex === 0 ? (
-                  <AddDataProviderContainer>
-                    <AddDataProviderPopover browserFields={browserFields} timelineId={timelineId} />
-                  </AddDataProviderContainer>
-                ) : (
-                  <AndOrBadgeContainer>
-                    <AndOrBadge type="or" />
-                  </AndOrBadgeContainer>
-                )}
+                <AndOrBadgeContainer hideBadge={groupIndex === 0}>
+                  <AndOrBadge type="or" />
+                </AndOrBadgeContainer>
               </OrFlexItem>
               <ParensContainer grow={false}>
                 <Parens>{'('}</Parens>
@@ -300,6 +290,9 @@ export const Providers = React.memo<Props>(
               <ParensContainer grow={false}>
                 <Parens>{')'}</Parens>
               </ParensContainer>
+              {groupIndex === dataProviderGroups.length - 1 && (
+                <AddDataProviderPopover browserFields={browserFields} timelineId={timelineId} />
+              )}
             </EuiFlexGroup>
           </Fragment>
         ))}

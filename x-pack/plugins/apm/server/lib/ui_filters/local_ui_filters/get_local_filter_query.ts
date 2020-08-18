@@ -5,8 +5,8 @@
  */
 
 import { omit } from 'lodash';
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
-import { Projection } from '../../../../common/projections/typings';
+import { mergeProjection } from '../../../projections/util/merge_projection';
+import { Projection } from '../../../projections/typings';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
 import { localUIFilters, LocalUIFilterName } from './config';
@@ -35,7 +35,7 @@ export const getLocalFilterQuery = ({
           },
         },
       }
-    : {};
+    : null;
 
   return mergeProjection(projection, {
     body: {

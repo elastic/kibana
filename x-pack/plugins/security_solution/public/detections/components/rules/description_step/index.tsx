@@ -34,9 +34,11 @@ import {
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
   buildNoteDescription,
+  buildRiskScoreDescription,
   buildRuleTypeDescription,
+  buildThresholdDescription,
 } from './helpers';
-import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
@@ -65,7 +67,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
 }) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const [, siemJobs] = useSiemJobs(true);
+  const { jobs } = useSecurityJobs(false);
 
   const keys = Object.keys(schema);
   const listItems = keys.reduce((acc: ListItems[], key: string) => {
@@ -75,7 +77,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         buildMlJobDescription(
           get(key, data) as string,
           (get(key, schema) as { label: string }).label,
-          siemJobs
+          jobs
         ),
       ];
     }
@@ -179,6 +181,9 @@ export const getDescriptionItem = (
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
+  } else if (field === 'threshold') {
+    const threshold = get(field, data);
+    return buildThresholdDescription(label, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);
@@ -188,18 +193,12 @@ export const getDescriptionItem = (
   } else if (Array.isArray(get(field, data))) {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
-    // TODO: Add custom UI for Risk/Severity Mappings (and fix missing label)
   } else if (field === 'riskScore') {
-    const val: AboutStepRiskScore = get(field, data);
-    return [
-      {
-        title: label,
-        description: val.value,
-      },
-    ];
+    const values: AboutStepRiskScore = get(field, data);
+    return buildRiskScoreDescription(values);
   } else if (field === 'severity') {
-    const val: AboutStepSeverity = get(field, data);
-    return buildSeverityDescription(label, val.value);
+    const values: AboutStepSeverity = get(field, data);
+    return buildSeverityDescription(values);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
     return [
@@ -214,6 +213,8 @@ export const getDescriptionItem = (
   } else if (field === 'ruleType') {
     const ruleType: RuleType = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
+  } else if (field === 'kibanaSiemAppUrl') {
+    return [];
   }
 
   const description: string = get(field, data);

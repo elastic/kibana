@@ -5,6 +5,7 @@
  */
 
 export interface Observer {
+  name?: string;
   version: string;
   version_major: number;
 }

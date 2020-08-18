@@ -10,3 +10,4 @@ export * from './log_entry_category_examples';
 export * from './log_entry_rate';
 export * from './log_entry_examples';
 export * from './log_entry_anomalies';
+export * from './log_entry_anomalies_datasets';

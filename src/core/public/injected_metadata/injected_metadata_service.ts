@@ -68,6 +68,7 @@ export interface InjectedMetadataParams {
     };
     uiPlugins: InjectedPluginMetadata[];
     legacyMode: boolean;
+    anonymousStatusPage: boolean;
     legacyMetadata: {
       app: {
         id: string;
@@ -118,6 +119,10 @@ export class InjectedMetadataService {
 
       getServerBasePath: () => {
         return this.state.serverBasePath;
+      },
+
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
       },
 
       getKibanaVersion: () => {
@@ -179,6 +184,7 @@ export interface InjectedMetadataSetup {
   getPlugins: () => InjectedPluginMetadata[];
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
     app: {
       id: string;

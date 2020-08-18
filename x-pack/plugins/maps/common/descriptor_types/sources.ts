@@ -168,6 +168,7 @@ export type LayerDescriptor = {
   __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;
+  joins?: JoinDescriptor[];
   label?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
@@ -180,7 +181,6 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
-  joins?: JoinDescriptor[];
   style?: VectorStyleDescriptor;
 };
 

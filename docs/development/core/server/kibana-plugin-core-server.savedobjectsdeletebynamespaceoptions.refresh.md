@@ -4,10 +4,10 @@
 
 ## SavedObjectsDeleteByNamespaceOptions.refresh property
 
-The Elasticsearch Refresh setting for this operation
+The Elasticsearch supports only boolean flag for this operation
 
 <b>Signature:</b>
 
 ```typescript
-refresh?: MutatingOperationRefreshSetting;
+refresh?: boolean;
 ```

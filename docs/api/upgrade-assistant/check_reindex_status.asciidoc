@@ -64,6 +64,7 @@ The API returns the following:
 
 `3`::
   Paused
++
 NOTE: If the {kib} node that started the reindex is shutdown or restarted, the reindex goes into a paused state after some time.
 To resume the reindex, you must submit a new POST request to the `/api/upgrade_assistant/reindex/<indexName>` endpoint.
 

@@ -9,6 +9,7 @@ import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { stringMatch } from '../../../util/string_utils';
@@ -158,8 +159,9 @@ function showResults(resp, action) {
 
   if (failures.length > 0) {
     failures.forEach((f) => {
-      mlMessageBarService.notify.error(f.result.error);
-      toastNotifications.addDanger(
+      const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+      toastNotificationService.displayErrorToast(
+        f.result.error,
         i18n.translate('xpack.ml.jobsList.actionFailedNotificationMessage', {
           defaultMessage: '{failureId} failed to {actionText}',
           values: {
@@ -368,21 +370,34 @@ function getUrlVars(url) {
   return vars;
 }
 
-export function getSelectedJobIdFromUrl(url) {
+export function getSelectedIdFromUrl(url) {
+  const result = {};
   if (typeof url === 'string') {
+    const isGroup = url.includes('groupIds');
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+
+    if (url.includes('mlManagement')) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
-      return decodedJson.jobId;
+
+      if (isGroup) {
+        result.groupIds = decodedJson.groupIds;
+      } else {
+        result.jobId = decodedJson.jobId;
+      }
     }
   }
+  return result;
+}
+
+export function getGroupQueryText(groupIds) {
+  return `groups:(${groupIds.join(' or ')})`;
 }
 
 export function clearSelectedJobIdFromUrl(url) {
   if (typeof url === 'string') {
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
       const urlParams = getUrlVars(url);
       const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
       window.history.replaceState({}, document.title, clearedParams);

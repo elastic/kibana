@@ -9,6 +9,7 @@ import { createMemoryHistory } from 'history';
 
 const history = createMemoryHistory();
 
+import '../../../../../common/mock/match_media';
 import { mockRule } from './__mocks__/mock';
 import { getActions } from './columns';
 

@@ -9,7 +9,7 @@ import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { ComponentStrings } from '../../../../../i18n/components';
 
-import { OnDownloadFn } from './share_website_flyout';
+import { OnDownloadFn } from './flyout';
 
 const { ShareWebsiteWorkpadStep: strings } = ComponentStrings;
 

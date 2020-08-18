@@ -12,7 +12,7 @@ interface Props extends APMLinkExtendProps {
   serviceName: string;
 }
 
-const TransactionOverviewLink = ({ serviceName, ...rest }: Props) => {
+function TransactionOverviewLink({ serviceName, ...rest }: Props) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -31,6 +31,6 @@ const TransactionOverviewLink = ({ serviceName, ...rest }: Props) => {
       {...rest}
     />
   );
-};
+}
 
 export { TransactionOverviewLink };

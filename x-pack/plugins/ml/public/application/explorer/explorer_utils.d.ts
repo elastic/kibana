@@ -7,6 +7,7 @@
 import { Moment } from 'moment';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { SwimlaneType } from './explorer_constants';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -182,9 +183,9 @@ export declare interface FilterData {
 }
 
 export declare interface AppStateSelectedCells {
-  type: string;
+  type: SwimlaneType;
   lanes: string[];
   times: number[];
-  showTopFieldValues: boolean;
-  viewByFieldName: string;
+  showTopFieldValues?: boolean;
+  viewByFieldName?: string;
 }

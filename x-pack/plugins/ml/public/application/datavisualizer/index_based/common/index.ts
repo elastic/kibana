@@ -5,4 +5,4 @@
  */
 
 export { FieldVisConfig } from './field_vis_config';
-export { FieldRequestConfig } from './request';
+export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';

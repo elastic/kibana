@@ -33,18 +33,15 @@ import {
   PHASE_DELETE,
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_ROLLOVER_ENABLED,
 } from '../../constants';
 
 import { toasts } from '../../services/notification';
 import { findFirstError } from '../../services/find_errors';
-import { LearnMoreLink } from '../components';
-import { NodeAttrsDetails } from './components/node_attrs_details';
-import { PolicyJsonFlyout } from './components/policy_json_flyout';
-import { ErrableFormRow } from './form_errors';
-import { HotPhase } from './components/hot_phase';
-import { WarmPhase } from './components/warm_phase';
-import { DeletePhase } from './components/delete_phase';
-import { ColdPhase } from './components/cold_phase';
+import { LearnMoreLink, PolicyJsonFlyout, ErrableFormRow } from './components';
+
+import { HotPhase, WarmPhase, ColdPhase, DeletePhase } from './phases';
 
 export class EditPolicy extends Component {
   static propTypes = {
@@ -56,8 +53,6 @@ export class EditPolicy extends Component {
     super(props);
     this.state = {
       isShowingErrors: false,
-      isShowingNodeDetailsFlyout: false,
-      selectedNodeAttrsForDetails: undefined,
       isShowingPolicyJsonFlyout: false,
     };
   }
@@ -124,10 +119,6 @@ export class EditPolicy extends Component {
     }
   };
 
-  showNodeDetailsFlyout = (selectedNodeAttrsForDetails) => {
-    this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
-  };
-
   togglePolicyJsonFlyout = () => {
     this.setState(({ isShowingPolicyJsonFlyout }) => ({
       isShowingPolicyJsonFlyout: !isShowingPolicyJsonFlyout,
@@ -144,6 +135,8 @@ export class EditPolicy extends Component {
       isNewPolicy,
       lifecycle,
       originalPolicyName,
+      phases,
+      setPhaseData,
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
     const { isShowingErrors, isShowingPolicyJsonFlyout } = this.state;
@@ -282,25 +275,33 @@ export class EditPolicy extends Component {
               <EuiSpacer />
 
               <HotPhase
-                selectedPolicy={selectedPolicy}
                 errors={errors[PHASE_HOT]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_HOT], false)}
+                setPhaseData={(key, value) => setPhaseData(PHASE_HOT, key, value)}
+                phaseData={phases[PHASE_HOT]}
+                setWarmPhaseOnRollover={(value) =>
+                  setPhaseData(PHASE_WARM, WARM_PHASE_ON_ROLLOVER, value)
+                }
               />
 
               <EuiHorizontalRule />
 
               <WarmPhase
                 errors={errors[PHASE_WARM]}
-                showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
+                setPhaseData={(key, value) => setPhaseData(PHASE_WARM, key, value)}
+                phaseData={phases[PHASE_WARM]}
+                hotPhaseRolloverEnabled={phases[PHASE_HOT][PHASE_ROLLOVER_ENABLED]}
               />
 
               <EuiHorizontalRule />
 
               <ColdPhase
                 errors={errors[PHASE_COLD]}
-                showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
+                setPhaseData={(key, value) => setPhaseData(PHASE_COLD, key, value)}
+                phaseData={phases[PHASE_COLD]}
+                hotPhaseRolloverEnabled={phases[PHASE_HOT][PHASE_ROLLOVER_ENABLED]}
               />
 
               <EuiHorizontalRule />
@@ -308,6 +309,10 @@ export class EditPolicy extends Component {
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
+                getUrlForApp={this.props.getUrlForApp}
+                setPhaseData={(key, value) => setPhaseData(PHASE_DELETE, key, value)}
+                phaseData={phases[PHASE_DELETE]}
+                hotPhaseRolloverEnabled={phases[PHASE_HOT][PHASE_ROLLOVER_ENABLED]}
               />
 
               <EuiHorizontalRule />
@@ -368,13 +373,6 @@ export class EditPolicy extends Component {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-
-              {this.state.isShowingNodeDetailsFlyout ? (
-                <NodeAttrsDetails
-                  selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
-                  close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
-                />
-              ) : null}
 
               {this.state.isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout

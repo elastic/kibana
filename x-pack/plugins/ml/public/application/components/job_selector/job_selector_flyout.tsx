@@ -193,7 +193,6 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
       ref={flyoutEl}
       onClose={onFlyoutClose}
       aria-labelledby="jobSelectorFlyout"
-      size="l"
       data-test-subj="mlFlyoutJobSelector"
     >
       <EuiFlyoutHeader hasBorder>

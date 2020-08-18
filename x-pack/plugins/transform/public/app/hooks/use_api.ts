@@ -5,6 +5,9 @@
  */
 
 import { useMemo } from 'react';
+
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+
 import {
   TransformId,
   TransformEndpointRequest,
@@ -17,6 +20,15 @@ import { useAppDependencies } from '../app_dependencies';
 import { GetTransformsResponse, PreviewRequestBody } from '../common';
 
 import { EsIndex } from './use_api_types';
+import { SavedSearchQuery } from './use_search_items';
+
+// Default sampler shard size used for field histograms
+export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
+
+export interface FieldHistogramRequestConfig {
+  fieldName: string;
+  type?: KBN_FIELD_TYPES;
+}
 
 export const useApi = () => {
   const { http } = useAppDependencies();
@@ -84,6 +96,20 @@ export const useApi = () => {
       },
       getIndices(): Promise<EsIndex[]> {
         return http.get(`/api/index_management/indices`);
+      },
+      getHistogramsForFields(
+        indexPatternTitle: string,
+        fields: FieldHistogramRequestConfig[],
+        query: string | SavedSearchQuery,
+        samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
+      ) {
+        return http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
+          body: JSON.stringify({
+            query,
+            fields,
+            samplerShardSize,
+          }),
+        });
       },
     }),
     [http]

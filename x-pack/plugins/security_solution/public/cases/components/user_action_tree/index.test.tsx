@@ -13,7 +13,8 @@ import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../../common/mock';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 const fetchUserActions = jest.fn();
@@ -225,22 +226,23 @@ describe('UserActionTree ', () => {
       .first()
       .simulate('click');
     await act(async () => {
-      await wait();
-      wrapper.update();
-      expect(
-        wrapper
-          .find(
-            `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
-          )
-          .exists()
-      ).toEqual(false);
-      expect(patchComment).toBeCalledWith({
-        commentUpdate: sampleData.content,
-        caseId: props.data.id,
-        commentId: props.data.comments[0].id,
-        fetchUserActions,
-        updateCase,
-        version: props.data.comments[0].version,
+      await waitFor(() => {
+        wrapper.update();
+        expect(
+          wrapper
+            .find(
+              `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+            )
+            .exists()
+        ).toEqual(false);
+        expect(patchComment).toBeCalledWith({
+          commentUpdate: sampleData.content,
+          caseId: props.data.id,
+          commentId: props.data.comments[0].id,
+          fetchUserActions,
+          updateCase,
+          version: props.data.comments[0].version,
+        });
       });
     });
   });
@@ -269,15 +271,16 @@ describe('UserActionTree ', () => {
       .first()
       .simulate('click');
     await act(async () => {
-      await wait();
-      expect(
-        wrapper
-          .find(
-            `[data-test-subj="user-action-${props.data.id}"] [data-test-subj="user-action-markdown-form"]`
-          )
-          .exists()
-      ).toEqual(false);
-      expect(onUpdateField).toBeCalledWith('description', sampleData.content);
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find(
+              `[data-test-subj="user-action-${props.data.id}"] [data-test-subj="user-action-markdown-form"]`
+            )
+            .exists()
+        ).toEqual(false);
+        expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
+      });
     });
   });
 

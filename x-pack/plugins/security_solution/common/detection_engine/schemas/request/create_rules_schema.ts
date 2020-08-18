@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   description,
   anomaly_threshold,
@@ -28,6 +27,7 @@ import {
   To,
   type,
   Threat,
+  threshold,
   ThrottleOrNull,
   note,
   Version,
@@ -46,7 +46,6 @@ import {
   RiskScoreMapping,
   SeverityMapping,
 } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 import {
   DefaultStringArray,
@@ -106,6 +105,7 @@ export const createRulesSchema = t.intersection([
       tags: DefaultStringArray, // defaults to empty string array if not set during decode
       to: DefaultToString, // defaults to "now" if not set during decode
       threat: DefaultThreatArray, // defaults to empty array if not set during decode
+      threshold, // defaults to "undefined" if not set during decode
       throttle: DefaultThrottleNull, // defaults to "null" if not set during decode
       timestamp_override, // defaults to "undefined" if not set during decode
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode

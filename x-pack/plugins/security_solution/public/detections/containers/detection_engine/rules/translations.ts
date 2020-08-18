@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RULE_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.rules',
+export const RULE_AND_TIMELINE_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.rulesAndTimelines',
   {
-    defaultMessage: 'Failed to fetch Rules',
+    defaultMessage: 'Failed to fetch Rules and Timelines',
   }
 );
 
@@ -20,17 +20,17 @@ export const RULE_ADD_FAILURE = i18n.translate(
   }
 );
 
-export const RULE_PREPACKAGED_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleFailDescription',
+export const RULE_AND_TIMELINE_PREPACKAGED_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleAndTimelineFailDescription',
   {
-    defaultMessage: 'Failed to installed pre-packaged rules from elastic',
+    defaultMessage: 'Failed to installed pre-packaged rules and timelines from elastic',
   }
 );
 
-export const RULE_PREPACKAGED_SUCCESS = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleSuccesDescription',
+export const RULE_AND_TIMELINE_PREPACKAGED_SUCCESS = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleAndTimelineSuccesDescription',
   {
-    defaultMessage: 'Installed pre-packaged rules from elastic',
+    defaultMessage: 'Installed pre-packaged rules and timelines from elastic',
   }
 );
 

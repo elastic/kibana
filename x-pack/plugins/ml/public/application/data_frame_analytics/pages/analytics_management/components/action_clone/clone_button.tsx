@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { FC } from 'react';
 import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -13,14 +13,13 @@ import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import {
   CreateAnalyticsFormProps,
   DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
 } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 interface PropDefinition {
@@ -255,6 +254,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     optional: true,
     formKey: 'modelMemoryLimit',
   },
+  max_num_threads: {
+    optional: true,
+    formKey: 'maxNumThreads',
+  },
 });
 
 /**
@@ -311,6 +314,7 @@ export type CloneDataFrameAnalyticsConfig = Omit<
 export function extractCloningConfig({
   id,
   version,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   create_time,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
@@ -324,11 +328,11 @@ export function extractCloningConfig({
   }) as unknown) as CloneDataFrameAnalyticsConfig;
 }
 
-export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
-    defaultMessage: 'Clone job',
-  });
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
+  defaultMessage: 'Clone job',
+});
 
+export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   const { actions } = createAnalyticsForm;
 
   const onClick = async (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
@@ -344,34 +348,18 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   };
 }
 
-interface CloneButtonProps {
-  item: DataFrameAnalyticsListRow;
-  createAnalyticsForm: CreateAnalyticsFormProps;
-}
-
-/**
- * Temp component to have Clone job button with the same look as the other actions.
- * Replace with {@link getCloneAction} as soon as all the actions are refactored
- * to support EuiContext with a valid DOM structure without nested buttons.
- */
-export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item }) => {
-  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
-    defaultMessage: 'Clone job',
-  });
-
+export const useNavigateToWizardWithClonedJob = () => {
   const {
     services: {
-      application: { navigateToUrl },
       notifications: { toasts },
       savedObjects,
     },
   } = useMlKibana();
+  const navigateToPath = useNavigateToPath();
 
   const savedObjectsClient = savedObjects.client;
 
-  const onClick = async () => {
+  return async (item: DataFrameAnalyticsListRow) => {
     const sourceIndex = Array.isArray(item.config.source.index)
       ? item.config.source.index[0]
       : item.config.source.index;
@@ -408,25 +396,53 @@ export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item })
     }
 
     if (sourceIndexId) {
-      await navigateToUrl(
-        `ml#/data_frame_analytics/new_job?index=${encodeURIComponent(sourceIndexId)}&jobId=${
+      await navigateToPath(
+        `/data_frame_analytics/new_job?index=${encodeURIComponent(sourceIndexId)}&jobId=${
           item.config.id
         }`
       );
     }
   };
+};
 
-  return (
+interface CloneButtonProps {
+  isDisabled: boolean;
+  onClick: () => void;
+}
+
+/**
+ * Temp component to have Clone job button with the same look as the other actions.
+ * Replace with {@link getCloneAction} as soon as all the actions are refactored
+ * to support EuiContext with a valid DOM structure without nested buttons.
+ */
+export const CloneButton: FC<CloneButtonProps> = ({ isDisabled, onClick }) => {
+  const button = (
     <EuiButtonEmpty
-      data-test-subj="mlAnalyticsJobCloneButton"
-      size="xs"
-      color="text"
-      iconType="copy"
-      onClick={onClick}
       aria-label={buttonText}
-      disabled={canCreateDataFrameAnalytics === false}
+      color="text"
+      data-test-subj="mlAnalyticsJobCloneButton"
+      flush="left"
+      iconType="copy"
+      isDisabled={isDisabled}
+      onClick={onClick}
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>
   );
+
+  if (isDisabled) {
+    return (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.ml.dataframe.analyticsList.cloneActionPermissionTooltip', {
+          defaultMessage: 'You do not have permission to clone analytics jobs.',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }
+
+  return button;
 };

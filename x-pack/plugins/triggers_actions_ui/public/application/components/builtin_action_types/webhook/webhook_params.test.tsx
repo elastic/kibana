@@ -6,6 +6,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import WebhookParamsFields from './webhook_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -18,6 +19,7 @@ describe('WebhookParamsFields renders', () => {
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

@@ -19,13 +19,23 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
+import {
+  ENTERPRISE_SEARCH_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+} from '../common/constants';
 import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
 import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
-import { registerEnginesRoute } from './routes/app_search/engines';
-import { registerTelemetryRoute } from './routes/app_search/telemetry';
-import { registerTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerEnginesRoute } from './routes/app_search/engines';
+
+import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
+import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import { registerWSOverviewRoute } from './routes/workplace_search/overview';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -59,13 +69,13 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register space/feature control
      */
     features.registerFeature({
-      id: 'enterpriseSearch',
-      name: 'Enterprise Search',
+      id: ENTERPRISE_SEARCH_PLUGIN.ID,
+      name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
       icon: 'logoEnterpriseSearch',
-      navLinkId: 'appSearch', // TODO - remove this once functional tests no longer rely on navLinkId
-      app: ['kibana', 'appSearch'], // TODO: 'enterpriseSearch', 'workplaceSearch'
-      catalogue: ['appSearch'], // TODO: 'enterpriseSearch', 'workplaceSearch'
+      navLinkId: APP_SEARCH_PLUGIN.ID, // TODO - remove this once functional tests no longer rely on navLinkId
+      app: ['kibana', APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
+      catalogue: [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
       privileges: null,
     });
 
@@ -75,15 +85,16 @@ export class EnterpriseSearchPlugin implements Plugin {
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
       const dependencies = { config, security, request, log: this.logger };
 
-      const { hasAppSearchAccess } = await checkAccess(dependencies);
-      // TODO: hasWorkplaceSearchAccess
+      const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
 
       return {
         navLinks: {
           appSearch: hasAppSearchAccess,
+          workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
           appSearch: hasAppSearchAccess,
+          workplaceSearch: hasWorkplaceSearchAccess,
         },
       };
     });
@@ -96,23 +107,24 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     registerPublicUrlRoute(dependencies);
     registerEnginesRoute(dependencies);
+    registerWSOverviewRoute(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(appSearchTelemetryType);
+    savedObjects.registerType(workplaceSearchTelemetryType);
     let savedObjectsStarted: SavedObjectsServiceStart;
 
     getStartServices().then(([coreStart]) => {
       savedObjectsStarted = coreStart.savedObjects;
+
       if (usageCollection) {
-        registerTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
-    registerTelemetryRoute({
-      ...dependencies,
-      getSavedObjectsService: () => savedObjectsStarted,
-    });
+    registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
   }
 
   public start() {}

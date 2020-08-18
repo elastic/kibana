@@ -9,7 +9,6 @@ import React from 'react';
 import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
-import { showGraphView } from '../body/helpers';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
@@ -74,13 +73,13 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     {status === TimelineStatus.immutable && (
       <EuiCallOut
         data-test-subj="timelineImmutableCallOut"
-        title={i18n.CALL_OUT_IMMUTIABLE}
+        title={i18n.CALL_OUT_IMMUTABLE}
         color="primary"
-        iconType="info"
+        iconType="alert"
         size="s"
       />
     )}
-    {show && !showGraphView(graphEventId) && (
+    {show && !graphEventId && (
       <>
         <DataProviders
           browserFields={browserFields}

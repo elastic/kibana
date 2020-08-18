@@ -33,3 +33,17 @@ export const ML_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Select ML job to detect anomalous activity.',
   }
 );
+
+export const THRESHOLD_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeTitle',
+  {
+    defaultMessage: 'Threshold',
+  }
+);
+
+export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeDescription',
+  {
+    defaultMessage: 'Aggregate query results to detect when number of matches exceeds threshold.',
+  }
+);

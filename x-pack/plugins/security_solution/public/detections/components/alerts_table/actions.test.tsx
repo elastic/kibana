@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { get } from 'lodash/fp';
 import sinon from 'sinon';
 import moment from 'moment';
 
@@ -12,6 +14,7 @@ import {
   defaultTimelineProps,
   apolloClient,
   mockTimelineApolloResult,
+  mockTimelineDetailsApollo,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../graphql/types';
@@ -37,7 +40,13 @@ describe('alert actions', () => {
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
 
-    jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResult);
+    jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
+      const id = get('variables.id', obj);
+      if (id != null) {
+        return Promise.resolve(mockTimelineApolloResult);
+      }
+      return Promise.resolve(mockTimelineDetailsApollo);
+    });
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -53,6 +62,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -65,10 +75,12 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
         const expected = {
-          from: 1541444305937,
+          from: '2018-11-05T18:58:25.937Z',
+          notes: null,
           timeline: {
             columns: [
               {
@@ -151,8 +163,8 @@ describe('alert actions', () => {
             ],
             dataProviders: [],
             dateRange: {
-              end: 1541444605937,
-              start: 1541444305937,
+              end: '2018-11-05T19:03:25.937Z',
+              start: '2018-11-05T18:58:25.937Z',
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
@@ -223,7 +235,7 @@ describe('alert actions', () => {
             version: null,
             width: 1100,
           },
-          to: 1541444605937,
+          to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',
         };
 
@@ -250,10 +262,10 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
-        // @ts-ignore
-        const createTimelineArg = createTimeline.mock.calls[0][0];
+        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
@@ -279,10 +291,10 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
-        // @ts-ignore
-        const createTimelineArg = createTimeline.mock.calls[0][0];
+        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQueryDraft.kind).toEqual('kuery');
@@ -297,6 +309,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -326,6 +339,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: ecsDataMock,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -350,6 +364,7 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
+          nonEcsData: [],
           updateTimelineIsLoading,
         });
 
@@ -368,8 +383,8 @@ describe('alert actions', () => {
       };
       const result = determineToAndFrom({ ecsData: ecsDataMock });
 
-      expect(result.from).toEqual(1584726886349);
-      expect(result.to).toEqual(1584727186349);
+      expect(result.from).toEqual('2020-03-20T17:54:46.349Z');
+      expect(result.to).toEqual('2020-03-20T17:59:46.349Z');
     });
 
     test('it uses current time timestamp if ecsData.timestamp is not provided', () => {
@@ -378,8 +393,8 @@ describe('alert actions', () => {
       };
       const result = determineToAndFrom({ ecsData: ecsDataMock });
 
-      expect(result.from).toEqual(1583085286349);
-      expect(result.to).toEqual(1583085586349);
+      expect(result.from).toEqual('2020-03-01T17:54:46.349Z');
+      expect(result.to).toEqual('2020-03-01T17:59:46.349Z');
     });
   });
 });

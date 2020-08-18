@@ -2,7 +2,7 @@
 
 exports[`Metrics UI Observability Homepage Functions createMetricsFetchData() should just work 1`] = `
 Object {
-  "appLink": "/app/metrics",
+  "appLink": "/app/metrics/inventory?waffleTime=(currentTime:1593696311629,isAutoReloading:!f)",
   "series": Object {
     "inboundTraffic": Object {
       "coordinates": Array [
@@ -203,6 +203,5 @@ Object {
       "value": 3,
     },
   },
-  "title": "Metrics",
 }
 `;

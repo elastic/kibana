@@ -33,7 +33,7 @@ interface Props {
   alerts: Alert[];
 }
 
-export const AlertsSection = ({ alerts }: Props) => {
+export function AlertsSection({ alerts }: Props) {
   const { core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
 
@@ -44,12 +44,16 @@ export const AlertsSection = ({ alerts }: Props) => {
 
   return (
     <SectionContainer
-      title="Alerts"
-      appLink={'/app/management/insightsAndAlerting/triggersActions/alerts'}
-      hasError={false}
-      appLinkName={i18n.translate('xpack.observability.overview.alert.appLink', {
-        defaultMessage: 'Manage alerts',
+      title={i18n.translate('xpack.observability.overview.alerts.title', {
+        defaultMessage: 'Alerts',
       })}
+      appLink={{
+        href: '/app/management/insightsAndAlerting/triggersActions/alerts',
+        label: i18n.translate('xpack.observability.overview.alert.appLink', {
+          defaultMessage: 'Manage alerts',
+        }),
+      }}
+      hasError={false}
     >
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
@@ -126,4 +130,4 @@ export const AlertsSection = ({ alerts }: Props) => {
       </EuiFlexGroup>
     </SectionContainer>
   );
-};
+}

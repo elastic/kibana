@@ -84,7 +84,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     request: FrameworkRequest,
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData> {
-    const dsl = buildDetailsQuery(options.indexName, options.eventId);
+    const dsl = buildDetailsQuery(options.indexName, options.eventId, options.docValueFields ?? []);
     const searchResponse = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',

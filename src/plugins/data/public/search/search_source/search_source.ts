@@ -69,23 +69,13 @@
  *    `appSearchSource`.
  */
 
-import {
-  uniqueId,
-  uniq,
-  extend,
-  pick,
-  difference,
-  omit,
-  setWith,
-  isObject,
-  keys,
-  isFunction,
-} from 'lodash';
+import { setWith } from '@elastic/safer-lodash-set';
+import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
-import { fieldWildcardFilter } from '../../../../kibana_utils/public';
+import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';

@@ -137,14 +137,14 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
       "interval": "day",
     }
   }
-  endDate={1560837600000}
+  endDate="2019-06-18T06:00:00.000Z"
   flowTarget="source"
   id="ipOverview"
   ip="10.10.10.10"
   isLoadingAnomaliesData={false}
   loading={false}
   narrowDateRange={[MockFunction]}
-  startDate={1560578400000}
+  startDate="2019-06-15T06:00:00.000Z"
   type="details"
   updateFlowTargetAction={[MockFunction]}
 />

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
 import {
@@ -21,6 +22,8 @@ import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
+import { appContextService } from '../..';
+import { PackageNotFoundError } from '../../../errors';
 
 export { ArchiveEntry } from './extract';
 
@@ -33,12 +36,34 @@ export interface CategoriesParams {
   experimental?: boolean;
 }
 
+/**
+ * Extract the package name and package version from a string.
+ *
+ * @param pkgkey a string containing the package name delimited by the package version
+ */
+export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
+  // this will return an empty string if `indexOf` returns -1
+  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  if (pkgName === '') {
+    throw new Error('Package key parsing failed: package name was empty');
+  }
+
+  // this will return the entire string if `indexOf` return -1
+  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
+  if (!semver.valid(pkgVersion)) {
+    throw new Error('Package key parsing failed: package version was not a valid semver');
+  }
+  return { pkgName, pkgVersion };
+}
+
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -48,20 +73,32 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
   }
 
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
+
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
     return searchResults[0];
   } else {
-    throw new Error('package not found');
+    throw new PackageNotFoundError(`${packageName} not found`);
   }
 }
 

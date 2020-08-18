@@ -61,7 +61,7 @@ export const SubscriptionSplashContent: React.FC = () => {
     description = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
-        defaultMessage="Our free, 14-day trial includes machine learning features, which enable you to detect anomalies in your logs."
+        defaultMessage="Our free trial includes machine learning features, which enable you to detect anomalies in your logs."
       />
     );
 

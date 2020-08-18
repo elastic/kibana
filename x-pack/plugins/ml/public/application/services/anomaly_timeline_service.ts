@@ -5,7 +5,6 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import {
   TimefilterContract,
   TimeRange,
@@ -18,7 +17,7 @@ import {
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../explorer/explorer_utils';
-import { VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import { MlResultsService } from './results_service';
 
 /**
@@ -288,9 +287,7 @@ export class AnomalyTimelineService {
     searchBounds: Required<TimeRangeBounds>,
     interval: number
   ): OverallSwimlaneData {
-    const overallLabel = i18n.translate('xpack.ml.explorer.overallLabel', {
-      defaultMessage: 'Overall',
-    });
+    const overallLabel = OVERALL_LABEL;
     const dataset: OverallSwimlaneData = {
       laneLabels: [overallLabel],
       points: [],
@@ -302,7 +299,7 @@ export class AnomalyTimelineService {
     // Store the earliest and latest times of the data returned by the ES aggregations,
     // These will be used for calculating the earliest and latest times for the swim lane charts.
     Object.entries(scoresByTime).forEach(([timeMs, score]) => {
-      const time = Number(timeMs) / 1000;
+      const time = +timeMs / 1000;
       dataset.points.push({
         laneLabel: overallLabel,
         time,
@@ -346,7 +343,7 @@ export class AnomalyTimelineService {
       maxScoreByLaneLabel[influencerFieldValue] = 0;
 
       Object.entries(influencerData).forEach(([timeMs, anomalyScore]) => {
-        const time = Number(timeMs) / 1000;
+        const time = +timeMs / 1000;
         dataset.points.push({
           laneLabel: influencerFieldValue,
           time,

@@ -7,7 +7,6 @@
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ScopedHistory } from 'kibana/public';
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
@@ -46,7 +45,7 @@ featuresStart.getFeatures.mockResolvedValue([
 
 describe('ManageSpacePage', () => {
   const getUrlForApp = (appId: string) => appId;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create();
 
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();

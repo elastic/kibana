@@ -10,8 +10,8 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }>;
 
 export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {

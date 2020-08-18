@@ -9,11 +9,11 @@
 set -e
 ./check_env_variables.sh
 
-LIST_ID=${1-list-ip}
+LIST_ID=${1-ip_list}
 PAGE=${2-1}
 PER_PAGE=${3-20}
 
-# Example: ./find_list_items.sh list-ip 1 20
+# Example: ./find_list_items.sh ip_list 1 20
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET "${KIBANA_URL}${SPACE_URL}/api/lists/items/_find?list_id=${LIST_ID}&page=${PAGE}&per_page=${PER_PAGE}" | jq .

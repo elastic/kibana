@@ -50,42 +50,6 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('data streams', () => {
-      it('can be an index pattern', async () => {
-        await es.transport.request({
-          path: '/_index_template/generic-logs',
-          method: 'PUT',
-          body: {
-            index_patterns: ['logs-*', 'test_data_stream'],
-            template: {
-              mappings: {
-                properties: {
-                  '@timestamp': {
-                    type: 'date',
-                  },
-                },
-              },
-            },
-            data_stream: {
-              timestamp_field: '@timestamp',
-            },
-          },
-        });
-
-        await es.transport.request({
-          path: '/_data_stream/test_data_stream',
-          method: 'PUT',
-        });
-
-        await PageObjects.settings.createIndexPattern('test_data_stream', false);
-
-        await es.transport.request({
-          path: '/_data_stream/test_data_stream',
-          method: 'DELETE',
-        });
-      });
-    });
-
     describe('index alias', () => {
       it('can be an index pattern', async () => {
         await es.transport.request({

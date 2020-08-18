@@ -93,8 +93,8 @@ export class CMBeatsDomain {
     remoteAddress: string,
     beat: Partial<CMBeat>
   ): Promise<{ status: string; accessToken?: string }> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { token, expires_on } = await this.tokens.getEnrollmentToken(enrollmentToken);
-    // eslint-disable-next-line @typescript-eslint/camelcase
     if (expires_on && moment(expires_on).isBefore(moment())) {
       return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
     }

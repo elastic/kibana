@@ -39,9 +39,9 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
 import {
-  fetchLandingPageData,
+  fetchOverviewPageData,
   hasData,
-} from './services/rest/observability_dashboard';
+} from './services/rest/apm_overview_fetchers';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -81,9 +81,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (plugins.observability) {
       plugins.observability.dashboard.register({
         appName: 'apm',
-        fetchData: async (params) => {
-          return fetchLandingPageData(params);
-        },
+        fetchData: fetchOverviewPageData,
         hasData,
       });
     }

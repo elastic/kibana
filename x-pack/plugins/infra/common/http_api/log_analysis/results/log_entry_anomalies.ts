@@ -128,6 +128,8 @@ export const getLogEntryAnomaliesRequestPayloadRT = rt.type({
       pagination: paginationRT,
       // Sort properties
       sort: sortRT,
+      // Dataset filters
+      datasets: rt.array(rt.string),
     }),
   ]),
 });

@@ -10,6 +10,7 @@ import { SearchEsListSchema } from '../../../common/schemas';
 import {
   DATE_NOW,
   DESCRIPTION,
+  IMMUTABLE,
   LIST_ID,
   LIST_INDEX,
   META,
@@ -17,6 +18,7 @@ import {
   TIE_BREAKER,
   TYPE,
   USER,
+  VERSION,
 } from '../../../common/constants.mock';
 import { getShardMock } from '../../get_shard.mock';
 
@@ -25,6 +27,7 @@ export const getSearchEsListMock = (): SearchEsListSchema => ({
   created_by: USER,
   description: DESCRIPTION,
   deserializer: undefined,
+  immutable: IMMUTABLE,
   meta: META,
   name: NAME,
   serializer: undefined,
@@ -32,6 +35,7 @@ export const getSearchEsListMock = (): SearchEsListSchema => ({
   type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
+  version: VERSION,
 });
 
 export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => ({

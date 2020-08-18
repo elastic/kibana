@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { ShapePreview } from '../shape_preview';
@@ -16,7 +16,7 @@ interface Props {
   onChange?: (key: string) => void;
 }
 
-export const ShapePicker = ({ shapes, onChange = () => {} }: Props) => {
+export const ShapePicker: FC<Props> = ({ shapes, onChange = () => {} }) => {
   return (
     <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
       {Object.keys(shapes)
@@ -33,6 +33,6 @@ export const ShapePicker = ({ shapes, onChange = () => {} }: Props) => {
 };
 
 ShapePicker.propTypes = {
-  shapes: PropTypes.object.isRequired,
   onChange: PropTypes.func,
+  shapes: PropTypes.object.isRequired,
 };

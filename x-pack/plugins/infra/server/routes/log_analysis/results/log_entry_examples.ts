@@ -7,13 +7,14 @@
 import Boom from 'boom';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
-import { NoLogAnalysisResultsIndexError, getLogEntryExamples } from '../../../lib/log_analysis';
+import { getLogEntryExamples } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import {
   getLogEntryExamplesRequestPayloadRT,
   getLogEntryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../common/http_api/log_analysis';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -68,8 +69,13 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
           throw error;
         }
 
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({

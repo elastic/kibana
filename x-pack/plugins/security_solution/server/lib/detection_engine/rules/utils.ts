@@ -29,6 +29,7 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
   AuthorOrUndefined,
@@ -82,6 +83,7 @@ export interface UpdateProperties {
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

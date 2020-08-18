@@ -292,7 +292,7 @@ export const TransformList: FC<Props> = ({
         button={buttonIcon}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         anchorPosition="rightUp"
       >
         {bulkActionMenuItems}

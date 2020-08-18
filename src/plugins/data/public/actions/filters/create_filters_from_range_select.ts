@@ -22,7 +22,7 @@ import moment from 'moment';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import { deserializeAggConfig } from '../../search/expressions/utils';
-import { RangeSelectContext } from '../../../../embeddable/public';
+import type { RangeSelectContext } from '../../../../embeddable/public';
 
 export async function createFiltersFromRangeSelectAction(event: RangeSelectContext['data']) {
   const column: Record<string, any> = event.table.columns[event.column];

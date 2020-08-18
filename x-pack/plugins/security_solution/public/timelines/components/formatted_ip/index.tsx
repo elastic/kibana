@@ -114,7 +114,7 @@ const AddressLinksComponent: React.FC<{
           fieldName,
           address,
         })}`}
-        render={(_, __, snapshot) =>
+        render={(_props, _provided, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
               <Provider

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import ApolloClient from 'apollo-client';
 import { Dispatch } from 'redux';
 
 import { EuiText } from '@elastic/eui';
 import { RowRendererId } from '../../../../common/types/timeline';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
@@ -38,7 +37,7 @@ import {
   UpdateTimelineLoading,
 } from './types';
 import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
-import { AddExceptionOnClick } from '../../../common/components/exceptions/add_exception_modal';
+import { AddExceptionModalBaseProps } from '../../../common/components/exceptions/add_exception_modal';
 import { getMappedNonEcsValue } from '../../../common/components/exceptions/helpers';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
@@ -79,6 +78,25 @@ export const buildAlertsRuleIdFilter = (ruleId: string): Filter[] => [
       },
     },
   },
+];
+
+export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] => [
+  ...(showBuildingBlockAlerts
+    ? []
+    : [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'signal.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'signal.rule.building_block_type' },
+        },
+      ]),
 ];
 
 export const alertsHeaders: ColumnHeaderOptions[] = [
@@ -182,8 +200,9 @@ export const requiredFieldsForActions = [
   'file.path',
   'file.Ext.code_signature.subject_name',
   'file.Ext.code_signature.trusted',
-  'file.hash.sha1',
+  'file.hash.sha256',
   'host.os.family',
+  'event.code',
 ];
 
 interface AlertActionArgs {
@@ -206,7 +225,7 @@ interface AlertActionArgs {
     alertData,
     ruleName,
     ruleId,
-  }: AddExceptionOnClick) => void;
+  }: AddExceptionModalBaseProps) => void;
 }
 
 export const getAlertActions = ({
@@ -309,11 +328,12 @@ export const getAlertActions = ({
       displayType: 'icon',
       iconType: 'timeline',
       id: 'sendAlertToTimeline',
-      onClick: ({ ecsData }: TimelineRowActionOnClick) =>
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) =>
         sendAlertToTimelineAction({
           apolloClient,
           createTimeline,
           ecsData,
+          nonEcsData: data,
           updateTimelineIsLoading,
         }),
       width: DEFAULT_ICON_BUTTON_WIDTH,
@@ -326,10 +346,12 @@ export const getAlertActions = ({
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
         const [ruleId] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        const ruleIndices = getMappedNonEcsValue({ data, fieldName: 'signal.rule.index' });
         if (ruleId !== undefined) {
           openAddExceptionModal({
             ruleName: ruleName ?? '',
             ruleId,
+            ruleIndices: ruleIndices.length > 0 ? ruleIndices : DEFAULT_INDEX_PATTERN,
             exceptionListType: 'endpoint',
             alertData: {
               ecsData,
@@ -349,10 +371,12 @@ export const getAlertActions = ({
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
         const [ruleId] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        const ruleIndices = getMappedNonEcsValue({ data, fieldName: 'signal.rule.index' });
         if (ruleId !== undefined) {
           openAddExceptionModal({
             ruleName: ruleName ?? '',
             ruleId,
+            ruleIndices: ruleIndices.length > 0 ? ruleIndices : DEFAULT_INDEX_PATTERN,
             exceptionListType: 'detection',
             alertData: {
               ecsData,

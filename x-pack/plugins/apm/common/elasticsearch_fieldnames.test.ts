@@ -16,6 +16,7 @@ describe('Transaction', () => {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: {
+      name: 'an observer',
       version: 'whatever',
       version_major: 8,
     },
@@ -72,6 +73,7 @@ describe('Span', () => {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: {
+      name: 'an observer',
       version: 'whatever',
       version_major: 8,
     },
@@ -124,6 +126,7 @@ describe('Error', () => {
   const errorDoc: AllowUnknownProperties<APMError> = {
     '@metadata': 'whatever',
     observer: {
+      name: 'an observer',
       version: 'whatever',
       version_major: 8,
     },

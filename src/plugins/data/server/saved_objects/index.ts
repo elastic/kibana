@@ -18,4 +18,5 @@
  */
 export { querySavedObjectType } from './query';
 export { indexPatternSavedObjectType } from './index_patterns';
-export { kqlTelemetry } from './kql_telementry';
+export { kqlTelemetry } from './kql_telemetry';
+export { searchTelemetry } from './search_telemetry';

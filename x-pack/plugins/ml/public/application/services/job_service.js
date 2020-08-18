@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import each from 'lodash/each';
+import find from 'lodash/find';
+import get from 'lodash/get';
+import isNumber from 'lodash/isNumber';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import { ml } from './ml_api_service';
 
 import { mlMessageBarService } from '../components/messagebar';
+import { getToastNotifications } from '../util/dependency_cache';
 import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -133,10 +139,10 @@ class JobService {
                   const jobStats = statsResp.jobs[j];
                   if (job.job_id === jobStats.job_id) {
                     job.state = jobStats.state;
-                    job.data_counts = _.cloneDeep(jobStats.data_counts);
-                    job.model_size_stats = _.cloneDeep(jobStats.model_size_stats);
+                    job.data_counts = cloneDeep(jobStats.data_counts);
+                    job.model_size_stats = cloneDeep(jobStats.model_size_stats);
                     if (jobStats.node) {
-                      job.node = _.cloneDeep(jobStats.node);
+                      job.node = cloneDeep(jobStats.node);
                     }
                     if (jobStats.open_time) {
                       job.open_time = jobStats.open_time;
@@ -210,10 +216,10 @@ class JobService {
                     newJob.state = statsJob.state;
                     newJob.data_counts = {};
                     newJob.model_size_stats = {};
-                    newJob.data_counts = _.cloneDeep(statsJob.data_counts);
-                    newJob.model_size_stats = _.cloneDeep(statsJob.model_size_stats);
+                    newJob.data_counts = cloneDeep(statsJob.data_counts);
+                    newJob.model_size_stats = cloneDeep(statsJob.model_size_stats);
                     if (newJob.node) {
-                      newJob.node = _.cloneDeep(statsJob.node);
+                      newJob.node = cloneDeep(statsJob.node);
                     }
 
                     if (statsJob.open_time) {
@@ -350,7 +356,7 @@ class JobService {
     // create a deep copy of a job object
     // also remove items from the job which are set by the server and not needed
     // in the future this formatting could be optional
-    const tempJob = _.cloneDeep(job);
+    const tempJob = cloneDeep(job);
 
     // remove all of the items which should not be copied
     // such as counts, state and times
@@ -373,7 +379,7 @@ class JobService {
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 
-    _.each(tempJob.analysis_config.detectors, (d) => {
+    each(tempJob.analysis_config.detectors, (d) => {
       delete d.detector_index;
     });
 
@@ -417,14 +423,21 @@ class JobService {
         return { success: true };
       })
       .catch((err) => {
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
+        // TODO - all the functions in here should just return the error and not
+        // display the toast, as currently both the component and this service display
+        // errors, so we end up with duplicate toasts.
+        const toastNotifications = getToastNotifications();
+        const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+        toastNotificationService.displayErrorToast(
+          err,
+          i18n.translate('xpack.ml.jobService.updateJobErrorTitle', {
             defaultMessage: 'Could not update job: {jobId}',
             values: { jobId },
           })
         );
+
         console.error('update job', err);
-        return { success: false, message: err.message };
+        return { success: false, message: err };
       });
   }
 
@@ -436,12 +449,15 @@ class JobService {
         return { success: true, messages };
       })
       .catch((err) => {
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
-            defaultMessage: 'Job Validation Error: {errorMessage}',
-            values: { errorMessage: err.message },
+        const toastNotifications = getToastNotifications();
+        const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+        toastNotificationService.displayErrorToast(
+          err,
+          i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+            defaultMessage: 'Job Validation Error',
           })
         );
+
         console.log('validate job', err);
         return {
           success: false,
@@ -457,7 +473,7 @@ class JobService {
 
   // find a job based on the id
   getJob(jobId) {
-    const job = _.find(jobs, (j) => {
+    const job = find(jobs, (j) => {
       return j.job_id === jobId;
     });
 
@@ -538,7 +554,7 @@ class JobService {
 
               // get fields from detectors
               if (job.analysis_config.detectors) {
-                _.each(job.analysis_config.detectors, (dtr) => {
+                each(job.analysis_config.detectors, (dtr) => {
                   if (dtr.by_field_name) {
                     fields[dtr.by_field_name] = {};
                   }
@@ -556,7 +572,7 @@ class JobService {
 
               // get fields from influencers
               if (job.analysis_config.influencers) {
-                _.each(job.analysis_config.influencers, (inf) => {
+                each(job.analysis_config.influencers, (inf) => {
                   fields[inf] = {};
                 });
               }
@@ -647,7 +663,7 @@ class JobService {
     return new Promise((resolve, reject) => {
       // if the end timestamp is a number, add one ms to it to make it
       // inclusive of the end of the data
-      if (_.isNumber(end)) {
+      if (isNumber(end)) {
         end++;
       }
 
@@ -768,7 +784,7 @@ class JobService {
         });
       }
     });
-    _.each(tempGroups, (js, id) => {
+    each(tempGroups, (js, id) => {
       groups.push({ id, jobs: js });
     });
     return groups;
@@ -825,9 +841,9 @@ function processBasicJobInfo(localJobService, jobsList) {
   const customUrlsByJob = {};
 
   // use cloned copy of jobs list so not to alter the original
-  const jobsListCopy = _.cloneDeep(jobsList);
+  const jobsListCopy = cloneDeep(jobsList);
 
-  _.each(jobsListCopy, (jobObj) => {
+  each(jobsListCopy, (jobObj) => {
     const analysisConfig = jobObj.analysis_config;
     const bucketSpan = parseInterval(analysisConfig.bucket_span);
 
@@ -836,20 +852,20 @@ function processBasicJobInfo(localJobService, jobsList) {
       bucketSpanSeconds: bucketSpan.asSeconds(),
     };
 
-    if (_.has(jobObj, 'description') && /^\s*$/.test(jobObj.description) === false) {
+    if (jobObj.description !== undefined && /^\s*$/.test(jobObj.description) === false) {
       job.description = jobObj.description;
     } else {
       // Just use the id as the description.
       job.description = jobObj.job_id;
     }
 
-    job.detectors = _.get(analysisConfig, 'detectors', []);
+    job.detectors = get(analysisConfig, 'detectors', []);
     detectorsByJob[job.id] = job.detectors;
 
-    if (_.has(jobObj, 'custom_settings.custom_urls')) {
+    if (jobObj.custom_settings !== undefined && jobObj.custom_settings.custom_urls !== undefined) {
       job.customUrls = [];
-      _.each(jobObj.custom_settings.custom_urls, (url) => {
-        if (_.has(url, 'url_name') && _.has(url, 'url_value') && isWebUrl(url.url_value)) {
+      each(jobObj.custom_settings.custom_urls, (url) => {
+        if (url.url_name !== undefined && url.url_value !== undefined && isWebUrl(url.url_value)) {
           // Only make web URLs (i.e. http or https) available in dashboard drilldowns.
           job.customUrls.push(url);
         }
@@ -885,7 +901,7 @@ function createJobStats(jobsList, jobStats) {
   const mlNodes = {};
   let failedJobs = 0;
 
-  _.each(jobsList, (job) => {
+  each(jobsList, (job) => {
     if (job.state === 'opened') {
       jobStats.open.value++;
     } else if (job.state === 'closed') {

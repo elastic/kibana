@@ -82,3 +82,7 @@ export function isFullLicense(license: ILicense) {
 export function isMinimumLicense(license: ILicense) {
   return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid';
 }
+
+export function isMlEnabled(license: ILicense) {
+  return license.getFeature(PLUGIN_ID).isEnabled;
+}

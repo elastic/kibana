@@ -9,9 +9,10 @@ import { deflate } from 'zlib';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
+import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
+import { ENDPOINT_LIST_ID } from '../../../../common/shared_imports';
 import {
   InternalArtifactSchema,
   TranslatedEntry,
@@ -24,6 +25,8 @@ import {
   translatedEntryMatchMatcher,
   translatedEntryMatchAnyMatcher,
   TranslatedExceptionListItem,
+  internalArtifactCompleteSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -31,7 +34,7 @@ export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
   os: string,
   schemaVersion: string
-): Promise<InternalArtifactSchema> {
+): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
@@ -44,9 +47,30 @@ export async function buildArtifact(
     encodedSha256: sha256,
     decodedSize: exceptionsBuffer.byteLength,
     encodedSize: exceptionsBuffer.byteLength,
-    created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
   };
+}
+
+export async function maybeCompressArtifact(
+  uncompressedArtifact: InternalArtifactSchema
+): Promise<InternalArtifactSchema> {
+  const compressedArtifact = { ...uncompressedArtifact };
+  if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
+    const compressedExceptionList = await compressExceptionList(
+      Buffer.from(uncompressedArtifact.body, 'base64')
+    );
+    compressedArtifact.body = compressedExceptionList.toString('base64');
+    compressedArtifact.encodedSize = compressedExceptionList.byteLength;
+    compressedArtifact.compressionAlgorithm = 'zlib';
+    compressedArtifact.encodedSha256 = createHash('sha256')
+      .update(compressedExceptionList)
+      .digest('hex');
+  }
+  return compressedArtifact;
+}
+
+export function isCompressed(artifact: InternalArtifactSchema) {
+  return artifact.compressionAlgorithm === 'zlib';
 }
 
 export async function getFullEndpointExceptionList(
@@ -55,12 +79,12 @@ export async function getFullEndpointExceptionList(
   schemaVersion: string
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
-  let numResponses = 0;
   let page = 1;
+  let paging = true;
 
-  do {
+  while (paging) {
     const response = await eClient.findExceptionListItem({
-      listId: 'endpoint_list',
+      listId: ENDPOINT_LIST_ID,
       namespaceType: 'agnostic',
       filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
       perPage: 100,
@@ -70,17 +94,16 @@ export async function getFullEndpointExceptionList(
     });
 
     if (response?.data !== undefined) {
-      numResponses = response.data.length;
-
       exceptions.entries = exceptions.entries.concat(
         translateToEndpointExceptions(response, schemaVersion)
       );
 
+      paging = (page - 1) * 100 + response.data.length < response.total;
       page++;
     } else {
       break;
     }
-  } while (numResponses > 0);
+  }
 
   const [validated, errors] = validate(exceptions, wrappedTranslatedExceptionList);
   if (errors != null) {
@@ -135,7 +158,7 @@ function translateItem(
   const itemSet = new Set();
   return {
     type: item.type,
-    entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
+    entries: item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
       const translatedEntry = translateEntry(schemaVersion, entry);
       if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
         const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
@@ -155,8 +178,8 @@ function translateEntry(
 ): TranslatedEntry | undefined {
   switch (entry.type) {
     case 'nested': {
-      const nestedEntries = entry.entries.reduce(
-        (entries: TranslatedEntryNestedEntry[], nestedEntry) => {
+      const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
+        (entries, nestedEntry) => {
           const translatedEntry = translateEntry(schemaVersion, nestedEntry);
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);

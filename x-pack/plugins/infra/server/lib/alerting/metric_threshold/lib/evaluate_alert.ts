@@ -15,6 +15,7 @@ import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler
 import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
+import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
@@ -66,10 +67,15 @@ export const evaluateAlert = (
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
           shouldFire: Array.isArray(points)
-            ? points.map((point) => comparisonFunction(point.value, threshold))
+            ? points.map(
+                (point) =>
+                  typeof point.value === 'number' && comparisonFunction(point.value, threshold)
+              )
             : [false],
-          isNoData: points === null,
-          isError: isNaN(points),
+          isNoData: Array.isArray(points)
+            ? points.map((point) => point?.value === null || point === null)
+            : [points === null],
+          isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
         };
       });
     })
@@ -133,21 +139,21 @@ const getMetric: (
       index,
     });
 
-    return { '*': getValuesFromAggregations(result.aggregations, aggType) };
+    return { [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(result.aggregations, aggType) };
   } catch (e) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;
       if (causedByType === 'too_many_buckets_exception') {
         return {
-          '*': {
+          [UNGROUPED_FACTORY_KEY]: {
             [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
             maxBuckets: e.body.error.caused_by.max_buckets,
           },
         };
       }
     }
-    return { '*': NaN }; // Trigger an Error state
+    return { [UNGROUPED_FACTORY_KEY]: NaN }; // Trigger an Error state
   }
 };
 
@@ -171,7 +177,7 @@ const getValuesFromAggregations = (
     }
     return buckets.map((bucket) => ({
       key: bucket.key_as_string,
-      value: bucket.aggregatedValue.value,
+      value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {
     return NaN; // Error state

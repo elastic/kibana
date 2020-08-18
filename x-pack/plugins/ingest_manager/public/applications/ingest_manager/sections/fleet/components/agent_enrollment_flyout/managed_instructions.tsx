@@ -21,10 +21,10 @@ import { ManualInstructions } from '../../../../components/enrollment_instructio
 import { DownloadStep, AgentConfigSelectionStep } from './steps';
 
 interface Props {
-  agentConfigs: AgentConfig[];
+  agentConfigs?: AgentConfig[];
 }
 
-export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfigs = [] }) => {
+export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfigs }) => {
   const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
@@ -85,7 +85,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
             }}
           />
         </>
-      )}{' '}
+      )}
     </>
   );
 };

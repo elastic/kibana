@@ -15,11 +15,14 @@ describe('MLJobLink', () => {
       () => (
         <MLJobLink jobId="myservicename-mytransactiontype-high_mean_response_time" />
       ),
-      { search: '?rangeFrom=now/w&rangeTo=now-4h' } as Location
+      {
+        search:
+          '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
+      } as Location
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))"`
+      `"/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))"`
     );
   });
   it('should produce the correct URL with jobId, serviceName, and transactionType', async () => {
@@ -31,11 +34,14 @@ describe('MLJobLink', () => {
           transactionType="request"
         />
       ),
-      { search: '?rangeFrom=now/w&rangeTo=now-4h' } as Location
+      {
+        search:
+          '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
+      } as Location
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))&_a=(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request)))"`
+      `"/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))&_a=(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request),zoom:(from:now/w,to:now-4h)))"`
     );
   });
 });

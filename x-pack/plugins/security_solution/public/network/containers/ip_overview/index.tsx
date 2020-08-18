@@ -35,7 +35,7 @@ export interface IpOverviewProps extends QueryTemplateProps {
 }
 
 const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
-  ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
+  ({ id = ID, docValueFields, isInspected, children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
       fetchPolicy={getDefaultFetchPolicy()}
@@ -46,6 +46,7 @@ const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
         filterQuery: createFilter(filterQuery),
         ip,
         defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+        docValueFields: docValueFields ?? [],
         inspect: isInspected,
       }}
     >

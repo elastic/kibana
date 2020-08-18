@@ -48,6 +48,7 @@ export default function ({ getService }) {
                   },
                   score: 0,
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  namespaces: ['default'],
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -107,6 +108,93 @@ export default function ({ getService }) {
             }));
       });
 
+      describe('unknown namespace', () => {
+        it('should return 200 with empty response', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&namespaces=foo')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: [],
+              });
+            }));
+      });
+
+      describe('known namespace', () => {
+        it('should return 200 with individual responses', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=default')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 1,
+                saved_objects: [
+                  {
+                    type: 'visualization',
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    version: 'WzIsMV0=',
+                    attributes: {
+                      title: 'Count of requests',
+                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    namespaces: ['default'],
+                    score: 0,
+                    references: [
+                      {
+                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                        type: 'index-pattern',
+                      },
+                    ],
+                    updated_at: '2017-09-21T18:51:23.794Z',
+                  },
+                ],
+              });
+              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+            }));
+      });
+
+      describe('wildcard namespace', () => {
+        it('should return 200 with individual responses from the default namespace', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 1,
+                saved_objects: [
+                  {
+                    type: 'visualization',
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    version: 'WzIsMV0=',
+                    attributes: {
+                      title: 'Count of requests',
+                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    namespaces: ['default'],
+                    score: 0,
+                    references: [
+                      {
+                        id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                        type: 'index-pattern',
+                      },
+                    ],
+                    updated_at: '2017-09-21T18:51:23.794Z',
+                  },
+                ],
+              });
+              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+            }));
+      });
+
       describe('with a filter', () => {
         it('should return 200 with a valid response', async () =>
           await supertest
@@ -135,6 +223,7 @@ export default function ({ getService }) {
                             .searchSourceJSON,
                       },
                     },
+                    namespaces: ['default'],
                     score: 0,
                     references: [
                       {

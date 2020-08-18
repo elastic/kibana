@@ -5,11 +5,17 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
-
-import { LogEntryAnomaly } from '../../../../common/http_api';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useMount } from 'react-use';
+import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
-import { Sort, Pagination, PaginationCursor } from '../../../../common/http_api/log_analysis';
+import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
+import {
+  Sort,
+  Pagination,
+  PaginationCursor,
+  GetLogEntryAnomaliesDatasetsSuccessResponsePayload,
+  LogEntryAnomaly,
+} from '../../../../common/http_api/log_analysis';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -19,6 +25,7 @@ export type FetchPreviousPage = () => void;
 export type ChangeSortOptions = (sortOptions: Sort) => void;
 export type ChangePaginationOptions = (paginationOptions: PaginationOptions) => void;
 export type LogEntryAnomalies = LogEntryAnomaly[];
+type LogEntryAnomaliesDatasets = GetLogEntryAnomaliesDatasetsSuccessResponsePayload['data']['datasets'];
 interface PaginationCursors {
   previousPageCursor: PaginationCursor;
   nextPageCursor: PaginationCursor;
@@ -35,6 +42,7 @@ interface ReducerState {
     start: number;
     end: number;
   };
+  filteredDatasets?: string[];
 }
 
 type ReducerStateDefaults = Pick<
@@ -49,7 +57,8 @@ type ReducerAction =
   | { type: 'fetchPreviousPage' }
   | { type: 'changeHasNextPage'; payload: { hasNextPage: boolean } }
   | { type: 'changeLastReceivedCursors'; payload: { lastReceivedCursors: PaginationCursors } }
-  | { type: 'changeTimeRange'; payload: { timeRange: { start: number; end: number } } };
+  | { type: 'changeTimeRange'; payload: { timeRange: { start: number; end: number } } }
+  | { type: 'changeFilteredDatasets'; payload: { filteredDatasets?: string[] } };
 
 const stateReducer = (state: ReducerState, action: ReducerAction): ReducerState => {
   const resetPagination = {
@@ -101,6 +110,12 @@ const stateReducer = (state: ReducerState, action: ReducerAction): ReducerState 
         ...resetPagination,
         ...action.payload,
       };
+    case 'changeFilteredDatasets':
+      return {
+        ...state,
+        ...resetPagination,
+        ...action.payload,
+      };
     default:
       return state;
   }
@@ -122,18 +137,23 @@ export const useLogEntryAnomaliesResults = ({
   sourceId,
   defaultSortOptions,
   defaultPaginationOptions,
+  onGetLogEntryAnomaliesDatasetsError,
+  filteredDatasets,
 }: {
   endTime: number;
   startTime: number;
   sourceId: string;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
+  onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
+  filteredDatasets?: string[];
 }) => {
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
       ...stateDefaults,
       paginationOptions: defaultPaginationOptions,
       sortOptions: defaultSortOptions,
+      filteredDatasets,
       timeRange: {
         start: startTime,
         end: endTime,
@@ -154,6 +174,7 @@ export const useLogEntryAnomaliesResults = ({
           sortOptions,
           paginationOptions,
           paginationCursor,
+          filteredDatasets: queryFilteredDatasets,
         } = reducerState;
         return await callGetLogEntryAnomaliesAPI(
           sourceId,
@@ -163,7 +184,8 @@ export const useLogEntryAnomaliesResults = ({
           {
             ...paginationOptions,
             cursor: paginationCursor,
-          }
+          },
+          queryFilteredDatasets
         );
       },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
@@ -192,6 +214,7 @@ export const useLogEntryAnomaliesResults = ({
       reducerState.sortOptions,
       reducerState.paginationOptions,
       reducerState.paginationCursor,
+      reducerState.filteredDatasets,
     ]
   );
 
@@ -220,6 +243,14 @@ export const useLogEntryAnomaliesResults = ({
     });
   }, [startTime, endTime]);
 
+  // Selected datasets have changed
+  useEffect(() => {
+    dispatch({
+      type: 'changeFilteredDatasets',
+      payload: { filteredDatasets },
+    });
+  }, [filteredDatasets]);
+
   useEffect(() => {
     getLogEntryAnomalies();
   }, [getLogEntryAnomalies]);
@@ -246,10 +277,53 @@ export const useLogEntryAnomaliesResults = ({
     [getLogEntryAnomaliesRequest.state]
   );
 
+  // Anomalies datasets
+  const [logEntryAnomaliesDatasets, setLogEntryAnomaliesDatasets] = useState<
+    LogEntryAnomaliesDatasets
+  >([]);
+
+  const [getLogEntryAnomaliesDatasetsRequest, getLogEntryAnomaliesDatasets] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'creation',
+      createPromise: async () => {
+        return await callGetLogEntryAnomaliesDatasetsAPI(sourceId, startTime, endTime);
+      },
+      onResolve: ({ data: { datasets } }) => {
+        setLogEntryAnomaliesDatasets(datasets);
+      },
+      onReject: (error) => {
+        if (
+          error instanceof Error &&
+          !(error instanceof CanceledPromiseError) &&
+          onGetLogEntryAnomaliesDatasetsError
+        ) {
+          onGetLogEntryAnomaliesDatasetsError(error);
+        }
+      },
+    },
+    [endTime, sourceId, startTime]
+  );
+
+  const isLoadingDatasets = useMemo(() => getLogEntryAnomaliesDatasetsRequest.state === 'pending', [
+    getLogEntryAnomaliesDatasetsRequest.state,
+  ]);
+
+  const hasFailedLoadingDatasets = useMemo(
+    () => getLogEntryAnomaliesDatasetsRequest.state === 'rejected',
+    [getLogEntryAnomaliesDatasetsRequest.state]
+  );
+
+  useMount(() => {
+    getLogEntryAnomaliesDatasets();
+  });
+
   return {
     logEntryAnomalies,
     getLogEntryAnomalies,
     isLoadingLogEntryAnomalies,
+    isLoadingDatasets,
+    hasFailedLoadingDatasets,
+    datasets: logEntryAnomaliesDatasets,
     hasFailedLoadingLogEntryAnomalies,
     changeSortOptions,
     sortOptions: reducerState.sortOptions,

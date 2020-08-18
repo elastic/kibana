@@ -9,7 +9,7 @@ import {
   EuiAccordion,
   EuiFieldNumber,
   EuiFieldText,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
@@ -57,6 +57,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     gamma,
     jobType,
     lambda,
+    maxNumThreads,
     maxTrees,
     method,
     modelMemoryLimit,
@@ -82,7 +83,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const isStepInvalid =
     mmlInvalid ||
     Object.keys(advancedParamErrors).length > 0 ||
-    fetchingAdvancedParamErrors === true;
+    fetchingAdvancedParamErrors === true ||
+    maxNumThreads === 0;
 
   useEffect(() => {
     setFetchingAdvancedParamErrors(true);
@@ -112,6 +114,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     featureInfluenceThreshold,
     gamma,
     lambda,
+    maxNumThreads,
     maxTrees,
     method,
     nNeighbors,
@@ -123,7 +126,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const outlierDetectionAdvancedConfig = (
     <Fragment>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate(
             'xpack.ml.dataframe.analytics.create.computeFeatureInfluenceLabel',
@@ -171,7 +174,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate(
             'xpack.ml.dataframe.analytics.create.featureInfluenceThresholdLabel',
@@ -210,7 +213,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const regAndClassAdvancedConfig = (
     <Fragment>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate(
             'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesLabel',
@@ -261,7 +264,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.predictionFieldNameLabel', {
             defaultMessage: 'Prediction field name',
@@ -294,11 +297,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           })}
         </h3>
       </EuiTitle>
-      <EuiFlexGroup wrap>
+      <EuiFlexGrid columns={3}>
         {jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && outlierDetectionAdvancedConfig}
         {isRegOrClassJob && regAndClassAdvancedConfig}
         {jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-          <EuiFlexItem style={{ minWidth: '30%' }}>
+          <EuiFlexItem>
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.analytics.create.numTopClassesLabel', {
                 defaultMessage: 'Top classes',
@@ -332,7 +335,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             </EuiFormRow>
           </EuiFlexItem>
         )}
-        <EuiFlexItem style={{ width: '30%', minWidth: '30%' }}>
+        <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
@@ -361,7 +364,43 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.maxNumThreadsLabel', {
+              defaultMessage: 'Maximum number of threads',
+            })}
+            helpText={i18n.translate('xpack.ml.dataframe.analytics.create.maxNumThreadsHelpText', {
+              defaultMessage:
+                'The maximum number of threads to be used by the analysis. The default value is 1',
+            })}
+            isInvalid={maxNumThreads === 0}
+            error={
+              maxNumThreads === 0 &&
+              i18n.translate('xpack.ml.dataframe.analytics.create.maxNumThreadsError', {
+                defaultMessage: 'The minimum value is 1.',
+              })
+            }
+          >
+            <EuiFieldNumber
+              aria-label={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.maxNumThreadsInputAriaLabel',
+                {
+                  defaultMessage: 'The maximum number of threads to be used by the analysis.',
+                }
+              )}
+              data-test-subj="mlAnalyticsCreateJobWizardMaxNumThreadsInput"
+              min={1}
+              onChange={(e) =>
+                setFormState({
+                  maxNumThreads: e.target.value === '' ? undefined : +e.target.value,
+                })
+              }
+              step={1}
+              value={getNumberValue(maxNumThreads)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGrid>
       <EuiSpacer />
       <EuiAccordion
         id="hyper-parameters"
@@ -369,7 +408,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.ml.dataframe.analytics.create.hyperParametersSectionTitle', {
-                defaultMessage: 'Hyper parameters',
+                defaultMessage: 'Hyperparameters',
               })}
             </h3>
           </EuiTitle>
@@ -377,7 +416,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
         initialIsOpen={false}
         data-test-subj="mlAnalyticsCreateJobWizardHyperParametersSection"
       >
-        <EuiFlexGroup wrap>
+        <EuiFlexGrid columns={3}>
           {jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
             <OutlierHyperParameters
               actions={actions}
@@ -392,7 +431,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               advancedParamErrors={advancedParamErrors}
             />
           )}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </EuiAccordion>
       <EuiSpacer />
       <ContinueButton

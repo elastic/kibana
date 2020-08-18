@@ -75,6 +75,7 @@ interface AppReceivedNewExternalProperties {
      * the `_id` of an ES document. This defines the origin of the Resolver graph.
      */
     databaseDocumentID?: string;
+    resolverComponentInstanceID: string;
   };
 }
 

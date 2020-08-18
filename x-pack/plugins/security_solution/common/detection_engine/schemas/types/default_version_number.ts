@@ -12,7 +12,7 @@ import { version, Version } from '../common/schemas';
  * Types the DefaultVersionNumber as:
  *   - If null or undefined, then a default of the number 1 will be used
  */
-export const DefaultVersionNumber = new t.Type<Version, Version, unknown>(
+export const DefaultVersionNumber = new t.Type<Version, Version | undefined, unknown>(
   'DefaultVersionNumber',
   version.is,
   (input, context): Either<t.Errors, Version> =>
@@ -20,4 +20,4 @@ export const DefaultVersionNumber = new t.Type<Version, Version, unknown>(
   t.identity
 );
 
-export type DefaultVersionNumberC = typeof DefaultVersionNumber;
+export type DefaultVersionNumberDecoded = t.TypeOf<typeof DefaultVersionNumber>;

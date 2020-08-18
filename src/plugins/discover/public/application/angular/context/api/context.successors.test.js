@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import * as _ from 'lodash';
+import { get, last } from 'lodash';
 
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { setServices } from '../../../../kibana_services';
@@ -125,9 +125,7 @@ describe('context app', function () {
       ).then((hits) => {
         const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
-          .map(([, { query }]) =>
-            _.get(query, ['constant_score', 'filter', 'range', '@timestamp'])
-          );
+          .map(([, { query }]) => get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
         expect(
           intervals.every(({ gte, lte }) => (gte && lte ? moment(gte).isBefore(lte) : true))
@@ -135,7 +133,7 @@ describe('context app', function () {
         // should have started at the given time
         expect(intervals[0].lte).toEqual(moment(MS_PER_DAY * 3000).toISOString());
         // should have ended with a half-open interval
-        expect(Object.keys(_.last(intervals))).toEqual(['format', 'lte']);
+        expect(Object.keys(last(intervals))).toEqual(['format', 'lte']);
         expect(intervals.length).toBeGreaterThan(1);
 
         expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
@@ -165,14 +163,12 @@ describe('context app', function () {
       ).then((hits) => {
         const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
-          .map(([, { query }]) =>
-            _.get(query, ['constant_score', 'filter', 'range', '@timestamp'])
-          );
+          .map(([, { query }]) => get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
         // should have started at the given time
         expect(intervals[0].lte).toEqual(moment(MS_PER_DAY * 3000).toISOString());
         // should have stopped before reaching MS_PER_DAY * 2200
-        expect(moment(_.last(intervals).gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
+        expect(moment(last(intervals).gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
         expect(intervals.length).toBeGreaterThan(1);
 
         expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 4));

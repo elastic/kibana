@@ -80,10 +80,14 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
 
 const NO_LEGEND_DATA: LegendItem[] = [];
 
+const DEFAULT_STACK_BY = 'signal.rule.name';
+const getDefaultStackByOption = (): AlertsHistogramOption =>
+  alertsHistogramOptions.find(({ text }) => text === DEFAULT_STACK_BY) ?? alertsHistogramOptions[0];
+
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     chartHeight,
-    defaultStackByOption = alertsHistogramOptions[0],
+    defaultStackByOption = getDefaultStackByOption(),
     deleteQuery,
     filters,
     headerChildren,

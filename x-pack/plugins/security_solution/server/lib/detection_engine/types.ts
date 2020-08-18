@@ -9,6 +9,7 @@ import {
   Description,
   NoteOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   FalsePositives,
   From,
   Immutable,
@@ -71,6 +72,7 @@ export interface RuleTypeParams {
   severity: Severity;
   severityMapping: SeverityMappingOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: RuleType;

@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { IngestManagerSetup } from '../../ingest_manager/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
@@ -51,7 +51,7 @@ export class IndexMgmtUIPlugin {
     notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
-    management.sections.getSection(ManagementSectionId.Data).registerApp({
+    management.sections.section.data.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
       order: 0,

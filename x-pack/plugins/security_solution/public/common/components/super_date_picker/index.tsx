@@ -216,9 +216,9 @@ export const formatDate = (
   options?: {
     roundUp?: boolean;
   }
-) => {
+): string => {
   const momentDate = dateMath.parse(date, options);
-  return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
+  return momentDate != null && momentDate.isValid() ? momentDate.toISOString() : '';
 };
 
 export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({

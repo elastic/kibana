@@ -14,6 +14,7 @@ export const light: CanvasTemplate = {
   template: {
     name: 'Light',
     css: '',
+    variables: [],
     width: 1080,
     height: 720,
     page: 0,

@@ -12,11 +12,9 @@ import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 import { ViewButton } from './view_button';
 
-export const getViewAction = (
-  isManagementTable: boolean = false
-): EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'][number] => ({
+export const getViewAction = (): EuiTableActionsColumnType<
+  DataFrameAnalyticsListRow
+>['actions'][number] => ({
   isPrimary: true,
-  render: (item: DataFrameAnalyticsListRow) => (
-    <ViewButton item={item} isManagementTable={isManagementTable} />
-  ),
+  render: (item: DataFrameAnalyticsListRow) => <ViewButton item={item} />,
 });

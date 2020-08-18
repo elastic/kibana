@@ -1,6 +1,6 @@
 [role="xpack"]
 [[elasticsearch-metrics]]
-== {es} Monitoring Metrics
+= {es} Monitoring Metrics
 [subs="attributes"]
 ++++
 <titleabbrev>{es} Metrics</titleabbrev>
@@ -18,7 +18,7 @@ See also {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
 [float]
 [[cluster-overview-page]]
-==== Cluster Overview
+== Cluster Overview
 
 To view the key metrics that indicate the overall health of an {es} cluster,
 click **Overview** in the {es} section. Anything that needs your attention is
@@ -44,7 +44,7 @@ From there, you can dive into detailed metrics for particular nodes and indices.
 
 [float]
 [[nodes-page]]
-==== Nodes
+== Nodes
 
 To view node metrics, click **Nodes**. The Nodes section shows the status
 of each node in your cluster.
@@ -54,7 +54,7 @@ image::user/monitoring/images/monitoring-nodes.png["Elasticsearch Nodes"]
 
 [float]
 [[nodes-page-overview]]
-===== Node Overview
+=== Node Overview
 
 Click the name of a node to view its node statistics over time. These represent
 high-level statistics collected from {es} that provide a good overview of
@@ -66,7 +66,7 @@ image::user/monitoring/images/monitoring-node.png["Elasticsearch Node Overview"]
 
 [float]
 [[nodes-page-advanced]]
-===== Node Advanced
+=== Node Advanced
 
 To view advanced node metrics, click the **Advanced** tab for a node. The
 *Advanced* tab shows additional metrics, such as memory and garbage collection
@@ -81,7 +81,7 @@ more advanced knowledge of {es}, such as poor garbage collection performance.
 
 [float]
 [[indices-overview-page]]
-==== Indices
+== Indices
 
 To view index metrics, click **Indices**. The Indices section shows the same
 overall index and search metrics as the Overview and a table of your indices.
@@ -91,7 +91,7 @@ image::user/monitoring/images/monitoring-indices.png["Elasticsearch Indices"]
 
 [float]
 [[indices-page-overview]]
-===== Index Overview
+=== Index Overview
 
 From the Indices listing, you can view data for a particular index. To drill
 down into the data for a particular index, click its name in the Indices table.
@@ -101,7 +101,7 @@ image::user/monitoring/images/monitoring-index.png["Elasticsearch Index Overview
 
 [float]
 [[indices-page-advanced]]
-===== Index Advanced
+=== Index Advanced
 
 To view advanced index metrics, click the **Advanced** tab for an index. The
 *Advanced*  tab shows additional metrics, such as memory statistics reported
@@ -116,7 +116,7 @@ more advanced knowledge of {es}, such as wasteful index memory usage.
 
 [float]
 [[jobs-page]]
-==== Jobs
+== Jobs
 
 To view {ml} job metrics, click **Jobs**. For each job in your cluster, it shows
 information such as its status, the number of records processed, the size of the
@@ -127,7 +127,7 @@ image::user/monitoring/images/monitoring-jobs.png["Machine learning jobs",link="
 
 [float]
 [[ccr-overview-page]]
-==== CCR
+== CCR
 
 To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
 shows information such as the leader index, an indication of how much the
@@ -149,7 +149,7 @@ For more information, see {ref}/xpack-ccr.html[{ccr-cap}].
 
 [float]
 [[logs-monitor-page]]
-==== Logs
+== Logs
 
 If you use {filebeat} to collect log data from your cluster, you can see its
 recent logs in the *Stack Monitoring* application. The *Clusters* page lists the

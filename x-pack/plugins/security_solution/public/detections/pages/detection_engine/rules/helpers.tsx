@@ -5,17 +5,17 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { get } from 'lodash/fp';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { FormData, FormHook, FormSchema } from '../../../../shared_imports';
 import {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -24,6 +24,8 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { SeverityMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -84,6 +86,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
   },
+  threshold: {
+    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    value: `${rule.threshold?.value || 100}`,
+  },
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
@@ -118,6 +124,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   const {
     author,
     building_block_type: buildingBlockType,
+    exceptions_list: exceptionsList,
     license,
     risk_score_mapping: riskScoreMapping,
     rule_name_override: ruleNameOverride,
@@ -134,6 +141,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   return {
     isNew: false,
     author,
+    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
@@ -144,16 +152,36 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     references,
     severity: {
       value: severity,
-      mapping: severityMapping,
+      mapping: fillEmptySeverityMappings(severityMapping),
+      isMappingChecked: severityMapping.length > 0,
     },
     tags,
     riskScore: {
       value: riskScore,
       mapping: riskScoreMapping,
+      isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
     threat: threat as IMitreEnterpriseAttack[],
   };
+};
+
+const severitySortMapping = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+};
+
+export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
+  const missingMappings: SeverityMapping = severityOptions.flatMap((so) =>
+    mappings.find((mapping) => mapping.severity === so.value) == null
+      ? [{ field: '', value: '', operator: 'equals', severity: so.value }]
+      : []
+  );
+  return [...mappings, ...missingMappings].sort(
+    (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
+  );
 };
 
 export const determineDetailsValue = (
@@ -180,6 +208,13 @@ export type PrePackagedRuleStatus =
   | 'ruleNotInstalled'
   | 'ruleNeedUpdate'
   | 'someRuleUninstall'
+  | 'unknown';
+
+export type PrePackagedTimelineStatus =
+  | 'timelinesNotInstalled'
+  | 'timelinesInstalled'
+  | 'someTimelineUninstall'
+  | 'timelineNeedUpdate'
   | 'unknown';
 
 export const getPrePackagedRuleStatus = (
@@ -221,27 +256,70 @@ export const getPrePackagedRuleStatus = (
   }
   return 'unknown';
 };
-export const setFieldValue = (
-  form: FormHook<FormData>,
-  schema: FormSchema<FormData>,
-  defaultValues: unknown
-) =>
-  Object.keys(schema).forEach((key) => {
-    const val = get(key, defaultValues);
-    if (val != null) {
-      form.setFieldValue(key, val);
-    }
-  });
+export const getPrePackagedTimelineStatus = (
+  timelinesInstalled: number | null,
+  timelinesNotInstalled: number | null,
+  timelinesNotUpdated: number | null
+): PrePackagedTimelineStatus => {
+  if (
+    timelinesNotInstalled != null &&
+    timelinesInstalled === 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesNotInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled === 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'someTimelineUninstall';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesNotUpdated != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled >= 0 &&
+    timelinesNotUpdated > 0
+  ) {
+    return 'timelineNeedUpdate';
+  }
+  return 'unknown';
+};
 
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
-  hasEncryptionKey: boolean | null
+  hasEncryptionKey: boolean | null,
+  needsListsConfiguration: boolean
 ) =>
-  isSignalIndexExists != null &&
-  isAuthenticated != null &&
-  hasEncryptionKey != null &&
-  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+  isSignalIndexExists === false ||
+  isAuthenticated === false ||
+  hasEncryptionKey === false ||
+  needsListsConfiguration;
+
+const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+  const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+
+  if (isMlRule(ruleType)) {
+    return ['anomaly_threshold', 'machine_learning_job_id'];
+  }
+
+  if (ruleType === 'threshold') {
+    return ['threshold', ...queryRuleParams];
+  }
+
+  return queryRuleParams;
+};
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [
@@ -265,26 +343,29 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
 
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
-    ...(isMlRule(ruleType)
-      ? ['anomaly_threshold', 'machine_learning_job_id']
-      : ['index', 'filters', 'language', 'query', 'saved_id']),
+    ...getRuleSpecificRuleParamKeys(ruleType),
   ].sort();
 
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined): string[] => {
-  if (!ruleType) {
-    return [];
-  }
-  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+export const getActionMessageParams = memoizeOne(
+  (ruleType: RuleType | undefined): ActionVariable[] => {
+    if (!ruleType) {
+      return [];
+    }
+    const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
 
-  return [
-    'state.signals_count',
-    '{context.results_link}',
-    ...actionMessageRuleParams.map((param) => `context.rule.${param}`),
-  ];
-});
+    return [
+      { name: 'state.signals_count', description: 'state.signals_count' },
+      { name: '{context.results_link}', description: 'context.results_link' },
+      ...actionMessageRuleParams.map((param) => {
+        const extendedParam = `context.rule.${param}`;
+        return { name: extendedParam, description: extendedParam };
+      }),
+    ];
+  }
+);
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>

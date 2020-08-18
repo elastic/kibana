@@ -6,3 +6,4 @@
 
 export { sendTelemetry } from './send_telemetry';
 export { SendAppSearchTelemetry } from './send_telemetry';
+export { SendWorkplaceSearchTelemetry } from './send_telemetry';

@@ -7,7 +7,7 @@ import {
   CASES,
   DETECTIONS,
   HOSTS,
-  MANAGEMENT,
+  ADMINISTRATION,
   NETWORK,
   OVERVIEW,
   TIMELINES,
@@ -73,7 +73,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 
   it('navigates to the Administration page', () => {
-    navigateFromHeaderTo(MANAGEMENT);
+    navigateFromHeaderTo(ADMINISTRATION);
     cy.url().should('include', ADMINISTRATION_URL);
   });
 });

@@ -18,7 +18,8 @@ export const callGetLogEntryAnomaliesAPI = async (
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  datasets?: string[]
 ) => {
   const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH, {
     method: 'POST',
@@ -32,6 +33,7 @@ export const callGetLogEntryAnomaliesAPI = async (
           },
           sort,
           pagination,
+          datasets,
         },
       })
     ),
