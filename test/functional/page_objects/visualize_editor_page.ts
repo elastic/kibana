@@ -322,7 +322,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async toggleOtherBucket(agg = 2) {
-      await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
+      await testSubjects.click(`otherBucketSwitch`);
     }
 
     public async toggleMissingBucket(agg = 2) {

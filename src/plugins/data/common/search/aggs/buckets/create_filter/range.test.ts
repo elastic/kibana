@@ -30,7 +30,6 @@ describe('AggConfig Filters', () => {
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
-        format: new BytesFormat({}, getConfig),
       };
 
       const indexPattern = {
@@ -40,6 +39,7 @@ describe('AggConfig Filters', () => {
           getByName: () => field,
           filter: () => [field],
         },
+        getFormatterForField: () => new BytesFormat({}, getConfig),
       } as any;
 
       return new AggConfigs(
