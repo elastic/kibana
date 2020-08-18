@@ -277,8 +277,10 @@ export class Plugin {
   }
 
   async setupLegacy(legacyAPI: LegacyAPI) {
-    // Set the stats getter
-    this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
+    // Set the stats gette
+    if (this.bulkUploader) {
+      this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
+    }
   }
 
   getLegacyShim(
