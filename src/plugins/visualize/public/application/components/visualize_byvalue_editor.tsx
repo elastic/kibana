@@ -19,13 +19,13 @@
 
 import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   useChromeVisibility,
-  useSavedVisInstance,
+  useVisByValue,
   useVisualizeAppState,
   useEditorUpdates,
   useLinkedSearchUpdates,
@@ -33,42 +33,51 @@ import {
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 
-export const VisualizeEditor = () => {
-  const { id: visualizationIdFromUrl } = useParams();
+export const VisualizeByValueEditor = () => {
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(true);
+  const [embeddableId, setEmbeddableId] = useState<string>();
+  const [valueInput, setValueInput] = useState<VisualizeInput>();
+
+  useEffect(() => {
+    const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
+      services.embeddable
+        .getStateTransfer(services.scopedHistory)
+        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'valueInput'] }) ||
+      {};
+    setOriginatingApp(value);
+    setValueInput(valueInputValue);
+    setEmbeddableId(embeddableIdValue);
+    if (!valueInputValue) {
+      history.back();
+    }
+  }, [services]);
 
   const isChromeVisible = useChromeVisibility(services.chrome);
-  const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
+
+  const { byValueVisInstance, visEditorRef, visEditorController } = useVisByValue(
     services,
     eventEmitter,
     isChromeVisible,
-    visualizationIdFromUrl
+    valueInput,
+    originatingApp
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
-    savedVisInstance
+    byValueVisInstance
   );
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
-    savedVisInstance,
+    byValueVisInstance,
     visEditorController
   );
-  useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
-
-  useEffect(() => {
-    const { originatingApp: value } =
-      services.embeddable
-        .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
-    setOriginatingApp(value);
-  }, [services]);
+  useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -79,7 +88,7 @@ export const VisualizeEditor = () => {
 
   return (
     <VisualizeEditorCommon
-      visInstance={savedVisInstance}
+      visInstance={byValueVisInstance}
       appState={appState}
       currentAppState={currentAppState}
       isChromeVisible={isChromeVisible}
@@ -88,9 +97,9 @@ export const VisualizeEditor = () => {
       isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
-      visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
+      embeddableId={embeddableId}
     />
   );
 };
