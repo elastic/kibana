@@ -95,6 +95,11 @@ export default function ({ getService }: FtrProviderContext) {
     it('Make sure that we get Host details data', async () => {
       const expectedHostDetails = {
         _id: 'zeek-sensor-san-francisco',
+        endpoint: null,
+        agent: {
+          id: '',
+          __typename: 'AgentFields',
+        },
         host: {
           architecture: ['x86_64'],
           id: [CURSOR_ID],
