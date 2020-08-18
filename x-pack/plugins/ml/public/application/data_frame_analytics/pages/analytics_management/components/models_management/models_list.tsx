@@ -80,7 +80,7 @@ export const ModelsList: FC = () => {
   // Subscribe to the refresh observable to trigger reloading the model list.
   useRefreshAnalyticsList({
     isLoading: setIsLoading,
-    onRefresh: () => fetchData(),
+    onRefresh: fetchData,
   });
 
   /**

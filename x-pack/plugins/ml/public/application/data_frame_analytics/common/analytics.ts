@@ -329,9 +329,6 @@ export const useRefreshAnalyticsList = (
     const subscriptions: Subscription[] = [];
 
     if (typeof callback.onRefresh === 'function') {
-      // initial call to refresh
-      callback.onRefresh();
-
       subscriptions.push(
         distinct$
           .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))

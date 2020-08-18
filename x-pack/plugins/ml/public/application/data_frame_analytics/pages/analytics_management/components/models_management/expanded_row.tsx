@@ -184,7 +184,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 <EuiSpacer size={'m'} />
                 <EuiFlexGroup>
                   {formatToListItems(stats.inference_stats).map(({ title, description }) => (
-                    <EuiFlexItem>
+                    <EuiFlexItem key={title}>
                       <EuiStat title={description} description={title} titleSize={'s'} />
                     </EuiFlexItem>
                   ))}
@@ -206,7 +206,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               <EuiSpacer size={'m'} />
               <EuiFlexGroup>
                 {formatToListItems(stats.ingest.total).map(({ title, description }) => (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={title}>
                     <EuiStat title={description} description={title} titleSize={'s'} />
                   </EuiFlexItem>
                 ))}
@@ -233,7 +233,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                           <EuiSpacer size={'m'} />
                           <EuiFlexGroup>
                             {formatToListItems(pipelineStats).map(({ title, description }) => (
-                              <EuiFlexItem>
+                              <EuiFlexItem key={title}>
                                 <EuiStat title={description} description={title} titleSize={'xs'} />
                               </EuiFlexItem>
                             ))}
@@ -258,7 +258,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                                 <EuiFlexGroup>
                                   {formatToListItems(processorStats).map(
                                     ({ title, description }) => (
-                                      <EuiFlexItem>
+                                      <EuiFlexItem key={title}>
                                         <EuiStat
                                           title={description}
                                           description={title}
