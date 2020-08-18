@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 
 import { DefaultNamespace } from '../types/default_namespace';
 import { DefaultStringArray, NonEmptyString } from '../../shared_imports';
+import { ENDPOINT_TRUSTED_APPS_LIST_TYPE } from '../../constants';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -216,7 +217,11 @@ export type _Tags = t.TypeOf<typeof _tags>;
 export const _tagsOrUndefined = t.union([_tags, t.undefined]);
 export type _TagsOrUndefined = t.TypeOf<typeof _tagsOrUndefined>;
 
-export const exceptionListType = t.keyof({ detection: null, endpoint: null });
+export const exceptionListType = t.keyof({
+  [ENDPOINT_TRUSTED_APPS_LIST_TYPE]: null,
+  detection: null,
+  endpoint: null,
+});
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;

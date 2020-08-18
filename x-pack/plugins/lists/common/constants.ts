@@ -54,6 +54,9 @@ export const MAX_EXCEPTION_LIST_SIZE = 10000;
 /** ID of trusted apps agnostic list */
 export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';
 
+/** The type for the Endpoint Trusted Apps list/list items */
+export const ENDPOINT_TRUSTED_APPS_LIST_TYPE = 'endpoint-trusted-apps';
+
 /** Name of trusted apps agnostic list */
 export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Elastic Endpoint Security Trusted Apps List';
 
