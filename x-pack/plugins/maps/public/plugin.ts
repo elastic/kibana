@@ -24,8 +24,6 @@ import {
   setLicenseId,
   setMapAppConfig,
   setStartServices,
-  setApplication,
-  setShareService,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -140,8 +138,6 @@ export class MapsPlugin
       });
     }
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
-    setApplication(core.application);
-    setShareService(plugins.share);
     setStartServices(core, plugins);
 
     return {

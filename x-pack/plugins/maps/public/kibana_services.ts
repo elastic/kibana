@@ -9,8 +9,7 @@ import { esFilters } from '../../../../src/plugins/data/public';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
-import { CoreStart, ApplicationStart } from '../../../../src/core/public';
-import { SharePluginStart } from '../../../../src/plugins/share/public';
+import { CoreStart } from '../../../../src/core/public';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 
@@ -46,6 +45,7 @@ export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
+export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
@@ -83,11 +83,4 @@ export const getProxyElasticMapsServiceInMaps = () =>
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
 
-let coreApplication: ApplicationStart;
-export const setApplication = (application: ApplicationStart) => (coreApplication = application);
-export const getApplication = () => coreApplication;
-
-let coreShareService: SharePluginStart;
-export const setShareService = (shareService: SharePluginStart) =>
-  (coreShareService = shareService);
-export const getShareService = () => coreShareService;
+export const getShareService = () => pluginsStart.share;

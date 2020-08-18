@@ -12,10 +12,11 @@ import {
   VisualizeFieldContext,
 } from '../../../../../src/plugins/ui_actions/public';
 import {
-  getApplication,
+  getVisualizeCapabilities,
   getIndexPatternService,
   getData,
   getShareService,
+  getNavigateToApp,
 } from '../kibana_services';
 import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES, APP_ID, MAP_PATH } from '../../common/constants';
@@ -26,7 +27,7 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {
       defaultMessage: 'Visualize in Maps',
     }),
-  isCompatible: async () => !!getApplication().capabilities.visualize.show,
+  isCompatible: async () => !!getVisualizeCapabilities().show,
   getHref: async (context) => {
     const url = await getMapsLink(context);
     return url;
@@ -35,7 +36,7 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     const url = await getMapsLink(context);
     const hash = url.split('#')[1];
 
-    getApplication().navigateToApp(APP_ID, {
+    getNavigateToApp()(APP_ID, {
       path: `${MAP_PATH}/#${hash}`,
     });
   },
