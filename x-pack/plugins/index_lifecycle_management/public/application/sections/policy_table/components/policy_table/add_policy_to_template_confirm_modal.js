@@ -23,7 +23,7 @@ import {
 import { toasts } from '../../../../services/notification';
 import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';
 import { showApiError } from '../../../../services/api_errors';
-import { LearnMoreLink } from '../../../components/learn_more_link';
+import { LearnMoreLink } from '../../../edit_policy/components';
 
 export class AddPolicyToTemplateConfirmModal extends Component {
   state = {

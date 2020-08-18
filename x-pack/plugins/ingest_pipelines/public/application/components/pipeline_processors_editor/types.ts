@@ -5,16 +5,10 @@
  */
 
 import { Dispatch } from 'react';
-import { NotificationsSetup } from 'src/core/public';
 import { OnFormUpdateArg } from '../../../shared_imports';
-import { ApiService } from '../../services';
 import { SerializeResult } from './serialize';
 import { OnActionHandler, ProcessorInfo } from './components';
 import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
-
-export interface Links {
-  esDocsBasePath: string;
-}
 
 /**
  * An array of keys that map to a value in an object
@@ -76,9 +70,6 @@ export interface ContextValueState {
 }
 
 export interface ContextValue {
-  links: Links;
-  toasts: NotificationsSetup['toasts'];
-  api: ApiService;
   onTreeAction: OnActionHandler;
   state: ContextValueState;
 }
