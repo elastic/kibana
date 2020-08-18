@@ -276,7 +276,6 @@ export class ExceptionListClient {
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
-    await this.createTrustedAppsList();
     return createExceptionListItem({
       _tags,
       comments,
@@ -309,7 +308,6 @@ export class ExceptionListClient {
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
-    await this.createTrustedAppsList();
     return updateExceptionListItem({
       _tags,
       _version,
@@ -380,7 +378,6 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createTrustedAppsList();
     return findExceptionListItem({
       filter,
       listId,
@@ -403,7 +400,6 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListsItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createTrustedAppsList();
     return findExceptionListsItem({
       filter,
       listId,
