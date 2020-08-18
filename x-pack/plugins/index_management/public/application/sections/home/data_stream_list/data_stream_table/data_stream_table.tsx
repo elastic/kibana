@@ -61,7 +61,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   columns.push({
     field: 'health',
-    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.nameColumnTitle', {
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.healthColumnTitle', {
       defaultMessage: 'Health',
     }),
     truncateText: true,
