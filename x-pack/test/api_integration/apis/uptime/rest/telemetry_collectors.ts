@@ -124,8 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should receive expected results after calling overview logging', async () => {
-      // wait few seconds to make sure data is refreshed, just to avoid flakiness
-      await delay(2000);
       // call overview page
       const { body } = await supertest
         .post(API_URLS.LOG_PAGE_VIEW)
