@@ -10,7 +10,6 @@ import React from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
 import { useLinkProps } from '../../../../hooks/use_link_props';
-import { getOverallAnomalyExplorerLinkDescriptor } from '../../log_analysis_results/analyze_in_ml_button';
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;
@@ -34,12 +33,11 @@ export const LogAnalysisModuleListCard: React.FC<{
       <EuiIcon color="secondary" size="xxl" type="check" />
     );
 
-  const viewInMlLinkProps = useLinkProps(
-    getOverallAnomalyExplorerLinkDescriptor(jobId, {
-      endTime: Date.now(),
-      startTime: Date.now() - 86400000 * 14,
-    })
-  );
+  const viewInMlLinkProps = useLinkProps({
+    app: 'ml',
+    hash: '/jobs',
+    search: { mlManagement: `(jobId:${jobId})` },
+  });
 
   const moduleSetupButton =
     moduleStatus.type === 'required' ? (
