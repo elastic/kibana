@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 200 for transform view-only user', async () => {
       await supertest
-        .get(`/api/transform/transforms`)
+        .get(`/api/transform/transforms/_stats`)
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
