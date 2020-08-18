@@ -35,6 +35,7 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
+  toSpec(): FieldSpec[];
 }
 
 export type CreateIndexPatternFieldList = (
@@ -48,7 +49,7 @@ export const fieldList = (
   specs: FieldSpec[] = [],
   shortDotsEnable = false,
   onNotification = () => {}
-): any => {
+): IIndexPatternFieldList => {
   class FldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<IndexPatternField['type'], FieldMap> = new Map();

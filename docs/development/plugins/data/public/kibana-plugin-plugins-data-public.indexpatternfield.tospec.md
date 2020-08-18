@@ -20,7 +20,6 @@ toSpec(): {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        format: any;
     };
 ```
 <b>Returns:</b>
@@ -38,6 +37,5 @@ toSpec(): {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        format: any;
     }`
 

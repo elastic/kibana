@@ -586,7 +586,7 @@ export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T
 // Warning: (ae-missing-release-tag) "fieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const fieldList: (indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void) => any;
+export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void) => any;
 
 // @public (undocumented)
 export interface FieldMappingSpec {
@@ -1031,7 +1031,7 @@ export interface IndexPatternAttributes {
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
     // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, onNotification: OnNotification);
+    constructor(spec: FieldSpec, displayName: string, onNotification: OnNotification);
     // (undocumented)
     get aggregatable(): boolean;
     // (undocumented)
@@ -1046,10 +1046,6 @@ export class IndexPatternField implements IFieldType {
     get esTypes(): string[] | undefined;
     // (undocumented)
     get filterable(): boolean;
-    // (undocumented)
-    get format(): FieldFormat;
-    // (undocumented)
-    readonly indexPattern: IndexPattern;
     // (undocumented)
     get lang(): string | undefined;
     set lang(lang: string | undefined);
@@ -1099,7 +1095,6 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        format: any;
     };
     // (undocumented)
     get type(): string;
