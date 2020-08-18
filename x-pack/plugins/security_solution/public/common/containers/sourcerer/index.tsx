@@ -265,8 +265,6 @@ export const useSourceManager = (): UseSourceManager => {
           id,
           defaultIndex: indexToAdd,
           payload: {
-            // ...getSourceDefaults(id, indexToAdd),
-            // loading: false ,
             browserFields: EMPTY_BROWSER_FIELDS,
             docValueFields: EMPTY_DOCVALUE_FIELD,
             errorMessage: null,
