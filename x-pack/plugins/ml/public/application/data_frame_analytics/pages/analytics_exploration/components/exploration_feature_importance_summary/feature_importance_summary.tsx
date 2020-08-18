@@ -79,10 +79,12 @@ export const FeatureImportanceSummary = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
-              defaultMessage="Feature importance summary"
-            />
+            <span>
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.exploration.featureImportanceSummaryTitle"
+                defaultMessage="Feature importance summary"
+              />
+            </span>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
