@@ -2880,7 +2880,7 @@ Default: `""`
 [[var_fn]]
 === `var`
 
-Updates kibana global context
+Updates the Kibana global context.
 
 *Accepts:* `any`
 
@@ -2892,7 +2892,7 @@ Updates kibana global context
 
 Alias: `name`
 |`string`
-|Specify name of the variable
+|Specify the name of the variable.
 |===
 
 *Returns:* Depends on your input and arguments
@@ -2902,7 +2902,7 @@ Alias: `name`
 [[var_set_fn]]
 === `var_set`
 
-Updates kibana global context
+Updates the Kibana global context.
 
 *Accepts:* `any`
 
@@ -2914,13 +2914,13 @@ Updates kibana global context
 
 Alias: `name`
 |`string`
-|Specify name of the variable
+|Specify the name of the variable.
 
 |`value`
 
 Alias: `val`
 |`any`
-|Specify value for the variable. If not provided input context will be used
+|Specify the value for the variable. When unspecified, the input context is used.
 |===
 
 *Returns:* Depends on your input and arguments
