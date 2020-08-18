@@ -7,6 +7,7 @@
 import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { Observable } from 'rxjs';
+import { SearchResponse } from 'elasticsearch';
 import {
   SharedGlobalConfig,
   RequestHandlerContext,
@@ -146,10 +147,10 @@ async function rollupSearch(
     querystring,
   });
 
-  const { response } = esResponse.body;
+  const response = esResponse.body as SearchResponse<any>;
   return {
     rawResponse: shimHitsTotal(response),
-    ...getTotalLoaded(esResponse.body._shards),
+    ...getTotalLoaded(response._shards),
   };
 }
 
