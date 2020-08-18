@@ -78,7 +78,9 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
       return key;
     },
     getSerializedFormat(agg) {
-      const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+      const format = agg.params.field
+        ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+        : { id: undefined, params: undefined };
       return {
         id: 'range',
         params: {
