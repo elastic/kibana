@@ -36,6 +36,7 @@ import {
   TOP_CLASSES,
 } from '../../../../common/constants';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
+import { isRegressionAnalysis } from '../../../../common/analytics';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -118,7 +119,11 @@ export const useExplorationResults = (
 
   const getAnalyticsBaseline = useCallback(async () => {
     try {
-      if (jobConfig !== undefined && jobConfig.analysis !== undefined) {
+      if (
+        jobConfig !== undefined &&
+        jobConfig.analysis !== undefined &&
+        isRegressionAnalysis(jobConfig.analysis)
+      ) {
         const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(
           jobConfig.id,
           jobConfig.dest.index,
