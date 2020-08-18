@@ -62,9 +62,9 @@ const StyledAccordion = styled(EuiAccordion)<
       content: ${(props) => `'${props.childrenCount}'`};
       position: absolute;
       left: 20px;
-      top: -3px;
+      top: -1px;
       z-index: 1;
-      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+      font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     }
   }
 
