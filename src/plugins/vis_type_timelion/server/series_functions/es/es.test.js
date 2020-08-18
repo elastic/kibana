@@ -25,7 +25,6 @@ import buildRequest from './lib/build_request';
 import createDateAgg from './lib/create_date_agg';
 import esResponse from '../fixtures/es_response';
 
-import Bluebird from 'bluebird';
 import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -34,14 +33,15 @@ import { UI_SETTINGS } from '../../../../data/server';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
-    esDataClient: sinon.stub().returns(Bluebird.resolve(response)),
+    esDataClient: sinon.stub().returns(Promise.resolve(response)),
     savedObjectsClient: {
       find: function () {
-        return Bluebird.resolve({
+        return Promise.resolve({
           saved_objects: indexPatternSavedObjects,
         });
       },
     },
+    esRequestTimeout: 30000,
   };
 }
 

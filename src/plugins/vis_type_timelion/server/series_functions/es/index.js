@@ -134,8 +134,9 @@ export default new Datasource('es', {
       {
         params: {
           ...body,
-          waitForCompletionTimeout: '5m',
-          keepAlive: '5m',
+          waitForCompletionTimeout:
+            tlConfig.esRequestTimeout > 60000 ? `${tlConfig.esRequestTimeout}ms` : '1m',
+          keepAlive: tlConfig.esRequestTimeout > 60000 ? `${tlConfig.esRequestTimeout}ms` : '1m',
         },
       },
       {}

@@ -23,6 +23,7 @@ import { configSchema } from '../../config';
 
 export class ConfigManager {
   private esShardTimeout: number = 0;
+  private esRequestTimeout: number = 0;
   private graphiteUrls: string[] = [];
 
   constructor(config: PluginInitializerContext['config']) {
@@ -32,11 +33,16 @@ export class ConfigManager {
 
     config.legacy.globalConfig$.subscribe((configUpdate) => {
       this.esShardTimeout = configUpdate.elasticsearch.shardTimeout.asMilliseconds();
+      this.esRequestTimeout = configUpdate.elasticsearch.requestTimeout.asMilliseconds();
     });
   }
 
   getEsShardTimeout() {
     return this.esShardTimeout;
+  }
+
+  getEsRequestTimeout() {
+    return this.esRequestTimeout;
   }
 
   getGraphiteUrls() {

@@ -84,11 +84,13 @@ export function runRoute(
         const uiSettings = await context.core.uiSettings.client.getAll();
 
         const tlConfig = getTlConfig({
+          context,
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
           getFunction,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
+          esRequestTimeout: configManager.getEsRequestTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
           esDataClient: data.search.search,
         });
