@@ -10,7 +10,7 @@ async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-describe('limitOne', () => {
+describe('awaitIfPending', () => {
   it('first promise called blocks others', async () => {
     const fnA = jest.fn();
     const fnB = jest.fn();
