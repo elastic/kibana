@@ -161,7 +161,6 @@ describe('IndexPattern', () => {
     test('should have expected properties on fields', function () {
       expect(indexPattern.fields[0]).toHaveProperty('displayName');
       expect(indexPattern.fields[0]).toHaveProperty('filterable');
-      expect(indexPattern.fields[0]).toHaveProperty('format');
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
     });

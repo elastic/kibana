@@ -39,6 +39,7 @@ export function getDetails(
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,
+      indexPattern,
       count: 5,
       grouped: false,
     }),

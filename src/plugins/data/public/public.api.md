@@ -586,7 +586,7 @@ export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T
 // Warning: (ae-missing-release-tag) "fieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void) => any;
+export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void) => IIndexPatternFieldList;
 
 // @public (undocumented)
 export interface FieldMappingSpec {
@@ -861,6 +861,8 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     removeAll(): void;
     // (undocumented)
     replaceAll(specs: FieldSpec[]): void;
+    // (undocumented)
+    toSpec(): FieldSpec[];
     // (undocumented)
     update(field: FieldSpec): void;
 }

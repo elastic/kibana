@@ -10,12 +10,6 @@ Object {
       "esTypes": Array [
         "long",
       ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
       "lang": undefined,
       "name": "bytes",
       "readFromDocValues": true,
@@ -32,7 +26,6 @@ Object {
       "esTypes": Array [
         "boolean",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "ssl",
       "readFromDocValues": true,
@@ -49,7 +42,6 @@ Object {
       "esTypes": Array [
         "date",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "@timestamp",
       "readFromDocValues": true,
@@ -66,7 +58,6 @@ Object {
       "esTypes": Array [
         "date",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "time",
       "readFromDocValues": true,
@@ -83,7 +74,6 @@ Object {
       "esTypes": Array [
         "keyword",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "@tags",
       "readFromDocValues": true,
@@ -100,7 +90,6 @@ Object {
       "esTypes": Array [
         "date",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "utc_time",
       "readFromDocValues": true,
@@ -117,7 +106,6 @@ Object {
       "esTypes": Array [
         "integer",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "phpmemory",
       "readFromDocValues": true,
@@ -134,7 +122,6 @@ Object {
       "esTypes": Array [
         "ip",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "ip",
       "readFromDocValues": true,
@@ -151,7 +138,6 @@ Object {
       "esTypes": Array [
         "attachment",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "request_body",
       "readFromDocValues": true,
@@ -168,7 +154,6 @@ Object {
       "esTypes": Array [
         "geo_point",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "point",
       "readFromDocValues": true,
@@ -185,7 +170,6 @@ Object {
       "esTypes": Array [
         "geo_shape",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "area",
       "readFromDocValues": false,
@@ -202,7 +186,6 @@ Object {
       "esTypes": Array [
         "murmur3",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "hashed",
       "readFromDocValues": false,
@@ -219,7 +202,6 @@ Object {
       "esTypes": Array [
         "geo_point",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "geo.coordinates",
       "readFromDocValues": true,
@@ -236,7 +218,6 @@ Object {
       "esTypes": Array [
         "text",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "extension",
       "readFromDocValues": false,
@@ -253,7 +234,6 @@ Object {
       "esTypes": Array [
         "keyword",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "extension.keyword",
       "readFromDocValues": true,
@@ -274,7 +254,6 @@ Object {
       "esTypes": Array [
         "text",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "machine.os",
       "readFromDocValues": false,
@@ -291,7 +270,6 @@ Object {
       "esTypes": Array [
         "keyword",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "machine.os.raw",
       "readFromDocValues": true,
@@ -312,7 +290,6 @@ Object {
       "esTypes": Array [
         "keyword",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "geo.src",
       "readFromDocValues": true,
@@ -329,7 +306,6 @@ Object {
       "esTypes": Array [
         "_id",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "_id",
       "readFromDocValues": false,
@@ -346,7 +322,6 @@ Object {
       "esTypes": Array [
         "_type",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "_type",
       "readFromDocValues": false,
@@ -363,7 +338,6 @@ Object {
       "esTypes": Array [
         "_source",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "_source",
       "readFromDocValues": false,
@@ -380,7 +354,6 @@ Object {
       "esTypes": Array [
         "text",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "non-filterable",
       "readFromDocValues": false,
@@ -397,7 +370,6 @@ Object {
       "esTypes": Array [
         "text",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "non-sortable",
       "readFromDocValues": false,
@@ -414,7 +386,6 @@ Object {
       "esTypes": Array [
         "conflict",
       ],
-      "format": undefined,
       "lang": undefined,
       "name": "custom_user_field",
       "readFromDocValues": true,
@@ -431,7 +402,6 @@ Object {
       "esTypes": Array [
         "text",
       ],
-      "format": undefined,
       "lang": "expression",
       "name": "script string",
       "readFromDocValues": false,
@@ -448,7 +418,6 @@ Object {
       "esTypes": Array [
         "long",
       ],
-      "format": undefined,
       "lang": "expression",
       "name": "script number",
       "readFromDocValues": false,
@@ -465,7 +434,6 @@ Object {
       "esTypes": Array [
         "date",
       ],
-      "format": undefined,
       "lang": "painless",
       "name": "script date",
       "readFromDocValues": false,
@@ -482,7 +450,6 @@ Object {
       "esTypes": Array [
         "murmur3",
       ],
-      "format": undefined,
       "lang": "expression",
       "name": "script murmur3",
       "readFromDocValues": false,

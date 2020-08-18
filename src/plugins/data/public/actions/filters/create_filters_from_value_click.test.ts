@@ -30,11 +30,7 @@ import { ValueClickContext } from '../../../../embeddable/public';
 
 const mockField = {
   name: 'bytes',
-  indexPattern: {
-    id: 'logstash-*',
-  },
   filterable: true,
-  format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
 };
 
 describe('createFiltersFromValueClick', () => {
@@ -81,6 +77,8 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
+        getFormatterForField: () =>
+          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
     } as unknown) as IndexPatternsContract);
   });

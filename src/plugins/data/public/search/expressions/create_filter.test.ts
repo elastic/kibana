@@ -52,6 +52,7 @@ describe('createFilter', () => {
         getByName: () => field,
         filter: () => [field],
       },
+      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
     } as any;
 
     return new AggConfigs(

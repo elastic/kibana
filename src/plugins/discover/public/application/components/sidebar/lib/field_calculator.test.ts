@@ -148,7 +148,8 @@ describe('fieldCalculator', function () {
     it('Should return an array of values for _source fields', function () {
       const extensions = fieldCalculator.getFieldValues(
         hits,
-        indexPattern.fields.getByName('extension')
+        indexPattern.fields.getByName('extension'),
+        indexPattern
       );
       expect(extensions).toBeInstanceOf(Array);
       expect(

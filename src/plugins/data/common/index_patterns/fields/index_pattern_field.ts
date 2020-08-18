@@ -42,7 +42,8 @@ export class IndexPatternField implements IFieldType {
       const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
         // values: { name: spec.name, title: indexPattern.title },
         values: { name: spec.name },
-        defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
+        // defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
+        defaultMessage: 'Field {name} in indexPattern is using an unknown field type.',
       });
       onNotification({ title, text, color: 'danger', iconType: 'alert' });
     }
