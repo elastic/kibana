@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analytics/pages/job_map/common'; // eslint-disable-line
 
 // interface NextLinkReturnType {
@@ -28,9 +28,9 @@ import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analy
 // }
 
 export class AnalyticsManager {
-  private _client: ILegacyScopedClusterClient['callAsInternalUser'];
+  private _client: IScopedClusterClient['asInternalUser'];
 
-  constructor(client: any) {
+  constructor(client: IScopedClusterClient['asInternalUser']) {
     this._client = client;
   }
 
@@ -45,26 +45,26 @@ export class AnalyticsManager {
   }
 
   private async getAnalyticsJobData(analyticsId: string) {
-    const resp = await this._client('ml.getDataFrameAnalytics', {
-      analyticsId,
+    const resp = await this._client.ml.getDataFrameAnalytics({
+      id: analyticsId,
     });
-    const jobData = resp?.data_frame_analytics[0];
+    const jobData = resp?.body?.data_frame_analytics[0];
     return jobData;
   }
 
   private async getIndexData(index: string) {
-    const indexData = await this._client('indices.get', {
+    const indexData = await this._client.indices.get({
       index,
     });
-    return indexData;
+
+    return indexData?.body;
   }
 
   private async getTransformData(transformId: string) {
-    const transform = await this._client('transport.request', {
-      path: `/_transform/${transformId}`,
-      method: 'GET',
+    const transform = await this._client.transform.getTransform({
+      transform_id: transformId,
     });
-    const transformData = transform?.transforms[0];
+    const transformData = transform?.body?.transforms[0];
     return transformData;
   }
 
@@ -193,8 +193,8 @@ export class AnalyticsManager {
 
       // fetch all jobs associated with root transform if defined, otherwise check root index
       if (rootTransform !== undefined || rootIndexPattern !== undefined) {
-        const analyticsJobs = await this._client('ml.getDataFrameAnalytics');
-        const jobs = analyticsJobs?.data_frame_analytics || [];
+        const analyticsJobs = await this._client.ml.getDataFrameAnalytics();
+        const jobs = analyticsJobs?.body?.data_frame_analytics || [];
         const comparator = rootTransform !== undefined ? rootTransform : rootIndexPattern;
 
         for (let i = 0; i < jobs.length; i++) {
@@ -236,9 +236,8 @@ export class AnalyticsManager {
         ? jobData?.dest?.index[0]
         : jobData?.dest?.index;
       const destIndexNodeId = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX_PATTERN}`;
-
-      const analyticsJobs = await this._client('ml.getDataFrameAnalytics');
-      const jobs = analyticsJobs?.data_frame_analytics || [];
+      const analyticsJobs = await this._client.ml.getDataFrameAnalytics();
+      const jobs = analyticsJobs?.body?.data_frame_analytics || [];
 
       // If destIndex node has not been created, create it
       const destIndexDetails = await this.getIndexData(destIndex);

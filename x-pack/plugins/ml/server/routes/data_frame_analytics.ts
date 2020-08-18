@@ -5,6 +5,7 @@
  */
 
 import { RequestHandlerContext, ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
@@ -34,13 +35,13 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
-function getAnalyticsMap(client: ILegacyScopedClusterClient, analyticsId: string) {
-  const analytics = new AnalyticsManager(client.callAsInternalUser);
+function getAnalyticsMap(client: IScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(client.asInternalUser);
   return analytics.getAnalyticsMap(analyticsId);
 }
 
-function getExtendedMap(client: ILegacyScopedClusterClient, analyticsId: string) {
-  const analytics = new AnalyticsManager(client.callAsInternalUser);
+function getExtendedMap(client: IScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(client.asInternalUser);
   return analytics.extendAnalyticsMapForAnalyticsJob(analyticsId);
 }
 
@@ -152,7 +153,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         query: analyticsMapQuerySchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
         // @ts-ignore
@@ -160,7 +161,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const caller =
           treatAsRoot === 'true' || treatAsRoot === true ? getExtendedMap : getAnalyticsMap;
 
-        const results = await caller(legacyClient, analyticsId);
+        const results = await caller(client, analyticsId);
 
         return response.ok({
           body: results,
