@@ -24,7 +24,6 @@ import {
   sendGetAgentConfigList,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
-import { startPoll, POLL_INTERVAL } from '../../../common/polling';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
   // eslint-disable-next-line complexity
@@ -154,6 +153,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         type: 'serverCancelledPolicyItemsLoading',
       });
 
+      dispatch({
+        type: 'appToggledEndpointListAutoRefresh',
+        payload: false,
+      });
+
       // If user navigated directly to a endpoint details page, load the endpoint list
       if (listData(getState()).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
@@ -246,27 +250,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           payload: error,
         });
       }
-    }
-
-    if (action.type === 'appToggledEndpointListAutoRefresh' && isAutoRefreshEnabled(getState())) {
-      startPoll({
-        pollAction: () => {
-          dispatch({
-            type: 'appRequestedEndpointList',
-          });
-        },
-        interval: POLL_INTERVAL,
-        shouldStop: () => {
-          const currentState = getState();
-          return !isOnEndpointPage(currentState) || hasSelectedEndpoint(currentState);
-        },
-        stopAction: () => {
-          dispatch({
-            type: 'appToggledEndpointListAutoRefresh',
-            payload: false,
-          });
-        },
-      });
     }
   };
 };
