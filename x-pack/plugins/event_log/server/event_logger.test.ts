@@ -115,6 +115,28 @@ describe('EventLogger', () => {
     expect(event?.event?.action).toEqual('b');
   });
 
+  test('setTiming method works', async () => {
+    const delayMS = 1000;
+    const event: IEvent = {};
+    const dateEnd = Date.now();
+    const dateStart = new Date(dateEnd - delayMS);
+
+    eventLogger.setTiming(event, dateStart);
+
+    const timeStart = event.event!.start!;
+    const timeStop = event.event!.end!;
+    expect(timeStart).toBeTruthy();
+    expect(timeStop).toBeTruthy();
+    const timeStopValue = new Date(timeStop).valueOf();
+    const timeStartValue = new Date(timeStart).valueOf();
+
+    expect(timeStopValue).toBeGreaterThanOrEqual(timeStartValue);
+
+    const duration = event.event!.duration!;
+    expect(duration).toBeGreaterThan(0.95 * delayMS * 1000 * 1000);
+    expect(duration / (1000 * 1000)).toBeCloseTo(timeStopValue - timeStartValue);
+  });
+
   test('timing methods work', async () => {
     const delayMS = 100;
     const event: IEvent = {};

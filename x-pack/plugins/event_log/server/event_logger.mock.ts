@@ -11,6 +11,7 @@ const createEventLoggerMock = () => {
     logEvent: jest.fn(),
     startTiming: jest.fn(),
     stopTiming: jest.fn(),
+    setTiming: jest.fn(),
   };
   return mock;
 };

@@ -16,7 +16,9 @@ export const EVENT_LOG_ACTIONS = {
   pollError: 'poll-error',
   pluginStart: 'plugin-start',
   runNow: 'run-now',
+  runTask: 'run-task',
   taskManagerEvent: 'taskmanager-event',
+  claimAvailableTasks: 'claimAvailableTasks',
 };
 
 import { IEvent, IEventLogger, IEventLogService } from '../../event_log/server';
@@ -43,6 +45,64 @@ export class TaskLogger {
     this.eventLogger.logEvent({ event: { action: EVENT_LOG_ACTIONS.pluginStart } });
   }
 
+  logRunTask(taskType: string, taskId: string, dateStart: Date, error?: Error) {
+    const event: IEvent = {
+      event: { action: EVENT_LOG_ACTIONS.runTask, outcome: 'success' },
+      kibana: {
+        saved_objects: [
+          {
+            type: 'task',
+            id: taskId,
+            rel: 'primary',
+          },
+        ],
+      },
+    };
+
+    if (error) {
+      event.event!.outcome = 'failure';
+      event.error = { message: error.message };
+      event.message = `error running task ${taskType}:${taskId}: ${error.message}`;
+    } else {
+      event.message = `success running task ${taskType}:${taskId}`;
+    }
+
+    this.eventLogger.setTiming(event, dateStart);
+    this.eventLogger.logEvent(event);
+  }
+
+  logClaimAvailableTasks(
+    dateStart: Date,
+    availableWorkers: number,
+    claimedTasks: number,
+    docsReturned: number
+  ) {
+    const message = [
+      'claimAvailableTasks;',
+      `availableWorkers: ${availableWorkers};`,
+      `claimedTasks: ${claimedTasks};`,
+      `docsReturned: ${docsReturned};`,
+    ].join(' ');
+    const event: IEvent = {
+      event: { action: EVENT_LOG_ACTIONS.claimAvailableTasks, outcome: 'success' },
+      message,
+    };
+
+    this.eventLogger.setTiming(event, dateStart);
+    this.eventLogger.logEvent(event);
+  }
+
+  logClaimAvailableTasksError(dateStart: Date, error: Error) {
+    const event: IEvent = {
+      event: { action: EVENT_LOG_ACTIONS.claimAvailableTasks, outcome: 'failure' },
+      message: `claimAvailableTasks error: ${error.message}`,
+      error: { message: error.message },
+    };
+
+    this.eventLogger.setTiming(event, dateStart);
+    this.eventLogger.logEvent(event);
+  }
+
   logTaskManagerEvent(taskEvent: TaskLifecycleEvent) {
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.taskManagerEvent, outcome: 'success' },
@@ -57,7 +117,7 @@ export class TaskLogger {
       },
     };
 
-    let message = `task manager event ${taskEvent.type}`;
+    event.message = `task manager event ${taskEvent.type}`;
     if (
       isTaskMarkRunningEvent(taskEvent) ||
       isTaskRunEvent(taskEvent) ||
@@ -66,7 +126,7 @@ export class TaskLogger {
       if (isErr(taskEvent.event)) {
         event.event!.outcome = 'failure';
         event.error = { message: taskEvent.event.error.message };
-        message = `${message}: error: ${taskEvent.event.error.message}`;
+        event.message = `${event.message}: error: ${taskEvent.event.error.message}`;
       }
     }
     this.eventLogger.logEvent(event);

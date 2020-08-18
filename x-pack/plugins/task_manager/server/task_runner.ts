@@ -33,6 +33,7 @@ import {
   validateRunResult,
   TaskStatus,
 } from './task';
+import { TaskLogger } from './task_log';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
@@ -63,6 +64,7 @@ interface Opts {
   beforeRun: BeforeRunFunction;
   beforeMarkRunning: BeforeMarkRunningFunction;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  taskLogger: TaskLogger;
 }
 
 /**
@@ -82,6 +84,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeRun: BeforeRunFunction;
   private beforeMarkRunning: BeforeMarkRunningFunction;
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private taskLogger: TaskLogger;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -101,6 +104,7 @@ export class TaskManagerRunner implements TaskRunner {
     beforeRun,
     beforeMarkRunning,
     onTaskEvent = identity,
+    taskLogger,
   }: Opts) {
     this.instance = sanitizeInstance(instance);
     this.definitions = definitions;
@@ -109,6 +113,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeRun = beforeRun;
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
+    this.taskLogger = taskLogger;
   }
 
   /**
@@ -174,6 +179,7 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance,
     });
 
+    const dateStart = new Date();
     const apmTrans = apm.startTransaction(
       `taskManager run ${this.instance.taskType}`,
       'taskManager'
@@ -183,12 +189,14 @@ export class TaskManagerRunner implements TaskRunner {
       const result = await this.task.run();
       const validatedResult = this.validateResult(result);
       if (apmTrans) apmTrans.end('success');
+      this.taskLogger.logRunTask(this.taskType, this.id, dateStart);
       return this.processResult(validatedResult);
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       if (apmTrans) apmTrans.end('error');
+      this.taskLogger.logRunTask(this.taskType, this.id, dateStart, err);
       return this.processResult(asErr({ error: err, state: modifiedContext.taskInstance.state }));
     }
   }

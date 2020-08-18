@@ -184,6 +184,7 @@ export class TaskManager {
       beforeRun: this.middleware.beforeRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
+      taskLogger: this.taskLogger,
     });
   };
 
@@ -199,7 +200,8 @@ export class TaskManager {
           tasksToClaim.splice(0, this.pool.availableWorkers),
           this.store.claimAvailableTasks,
           this.pool.availableWorkers,
-          this.logger
+          this.logger,
+          this.taskLogger
         ),
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
@@ -400,11 +402,13 @@ export async function claimAvailableTasks(
   claimTasksById: string[],
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
   availableWorkers: number,
-  logger: Logger
+  logger: Logger,
+  taskLogger: TaskLogger
 ) {
   if (availableWorkers > 0) {
-    performance.mark('claimAvailableTasks_start');
+    const dateStart = new Date();
 
+    performance.mark('claimAvailableTasks_start');
     try {
       const { docs, claimedTasks } = await claim({
         size: availableWorkers,
@@ -429,6 +433,7 @@ export async function claimAvailableTasks(
           } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
         );
       }
+      taskLogger.logClaimAvailableTasks(dateStart, availableWorkers, claimedTasks, docs.length);
       return docs;
     } catch (ex) {
       if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
@@ -436,11 +441,13 @@ export async function claimAvailableTasks(
           `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
         );
       } else {
+        taskLogger.logClaimAvailableTasksError(dateStart, ex);
         throw ex;
       }
     }
   } else {
     performance.mark('claimAvailableTasks.noAvailableWorkers');
+    taskLogger.logClaimAvailableTasks(new Date(), availableWorkers, 0, 0);
     logger.debug(
       `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
