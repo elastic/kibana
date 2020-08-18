@@ -35,6 +35,6 @@ jest.mock('react', () => ({
  * // ... etc.
  *
  * it('some test', () => {
- *   useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: 'someOverride' }));
+ *   useContext.mockImplementationOnce(() => ({ config: { host: 'someOverride' } }));
  * });
  */

@@ -69,31 +69,33 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
-    const originalPanels = this.props.container.getInput().panels;
-    const filteredPanels = { ...originalPanels };
+    const { panelToRemove, container } = this.props;
+    const { w, h, x, y } = (container.getInput().panels[
+      panelToRemove.id
+    ] as DashboardPanelState).gridData;
 
-    const nnw = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.w;
-    const nnh = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.h;
-    const nnx = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.x;
-    const nny = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.y;
-
-    // add the new view
-    const newObj = await this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
+    const { id } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
       savedObjectId,
     });
 
-    const finalPanels = _.cloneDeep(this.props.container.getInput().panels);
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.w = nnw;
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.h = nnh;
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.x = nnx;
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.y = nny;
+    const { [panelToRemove.id]: omit, ...panels } = container.getInput().panels;
 
-    // delete the old view
-    delete finalPanels[this.props.panelToRemove.id];
-
-    // apply changes
-    this.props.container.updateInput({ panels: finalPanels });
-    this.props.container.reload();
+    container.updateInput({
+      panels: {
+        ...panels,
+        [id]: {
+          ...panels[id],
+          gridData: {
+            ...(panels[id] as DashboardPanelState).gridData,
+            w,
+            h,
+            x,
+            y,
+          },
+        } as DashboardPanelState,
+      },
+    });
+    container.reload();
 
     this.showToast(name);
     this.props.onClose();

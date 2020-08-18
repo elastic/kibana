@@ -99,6 +99,12 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
           "warning": "#ffce7a",
         },
         "euiCardBottomNodeHeight": "40px",
+        "euiCardPaddingModifiers": Object {
+          "paddingLarge": "24px",
+          "paddingMedium": "16px",
+          "paddingNone": 0,
+          "paddingSmall": "8px",
+        },
         "euiCardSelectButtonBackgrounds": Object {
           "danger": "#4d1f1f",
           "ghost": "#98a2b3",

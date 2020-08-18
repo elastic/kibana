@@ -13,7 +13,6 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';

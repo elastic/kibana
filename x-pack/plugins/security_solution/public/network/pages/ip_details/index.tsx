@@ -7,7 +7,6 @@
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -89,8 +88,8 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
   return (
     <div data-test-subj="ip-details-page">
       {indicesExist ? (
-        <StickyContainer>
-          <FiltersGlobal globalFullScreen={false}>
+        <>
+          <FiltersGlobal>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
@@ -260,7 +259,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
               AnomaliesTableComponent={AnomaliesNetworkTable}
             />
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <HeaderPage border title={ip} />

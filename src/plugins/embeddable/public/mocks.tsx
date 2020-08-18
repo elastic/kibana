@@ -33,9 +33,7 @@ import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
 import { dataPluginMock } from '../../data/public/mocks';
 
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../inspector/public/mocks';
-// eslint-disable-next-line
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
@@ -99,11 +97,8 @@ const createStartContract = (): Start => {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    getAttributeService: jest.fn(),
     getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    filtersAndTimeRangeFromContext: jest.fn(),
-    filtersFromContext: jest.fn(),
   };
   return startContract;
 };

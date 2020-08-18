@@ -6,7 +6,6 @@
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const oidcAPITestsConfig = await readConfigFile(require.resolve('./config.ts'));
 

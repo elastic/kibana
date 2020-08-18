@@ -716,6 +716,7 @@ export class ElasticsearchConfig {
 export interface ElasticsearchServiceSetup {
     // @deprecated (undocumented)
     legacy: {
+        readonly config$: Observable<ElasticsearchConfig>;
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
         readonly client: ILegacyClusterClient;
     };
@@ -727,6 +728,7 @@ export interface ElasticsearchServiceStart {
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
     // @deprecated (undocumented)
     legacy: {
+        readonly config$: Observable<ElasticsearchConfig>;
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
         readonly client: ILegacyClusterClient;
     };
@@ -1071,6 +1073,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
 // @public
 export interface KibanaRequestEvents {
     aborted$: Observable<void>;
+    completed$: Observable<void>;
 }
 
 // @public

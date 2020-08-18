@@ -8,21 +8,21 @@ exports[`ML Integrations renders without errors 1`] = `
     class="euiPopover__anchor"
   >
     <button
-      class="euiButton euiButton--primary euiButton--small"
+      aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."
+      class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
       data-test-subj="uptimeEnableAnomalyBtn"
+      disabled=""
       type="button"
     >
       <span
-        class="euiButton__content"
+        class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
+          class="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
         />
         <span
           class="euiButton__text"
-        >
-          Enable anomaly detection
-        </span>
+        />
       </span>
     </button>
   </div>

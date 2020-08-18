@@ -17,10 +17,10 @@ import styled from 'styled-components';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 
 interface Props {
-  projection: PROJECTION;
+  projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;

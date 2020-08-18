@@ -30,15 +30,18 @@ import {
   mergeConfigs,
 } from './i18n/tasks';
 
-const skipNoTranslations = ({ config }: { config: I18nConfig }) => !config.translations.length;
+const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
+  !config.translations.length && 'No translations found.';
 
 run(
   async ({
     flags: {
       'ignore-incompatible': ignoreIncompatible,
+      'ignore-malformed': ignoreMalformed,
       'ignore-missing': ignoreMissing,
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
+      'ignore-untracked': ignoreUntracked,
       fix = false,
       path,
     },
@@ -48,12 +51,14 @@ run(
       fix &&
       (ignoreIncompatible !== undefined ||
         ignoreUnused !== undefined ||
-        ignoreMissing !== undefined)
+        ignoreMalformed !== undefined ||
+        ignoreMissing !== undefined ||
+        ignoreUntracked !== undefined)
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --ignore-malformed, --ignore-unused or --ignore-missing,  --ignore-untracked is allowed when --fix is set.`
       );
     }
 
@@ -81,24 +86,26 @@ run(
         },
         {
           title: 'Checking For Untracked Messages based on .i18nrc.json',
-          skip: skipNoTranslations,
+          enabled: (_) => !ignoreUntracked,
+          skip: skipOnNoTranslations,
           task: ({ config }) =>
             new Listr(extractUntrackedMessages(srcPaths), { exitOnError: true }),
         },
         {
           title: 'Validating Default Messages',
-          skip: skipNoTranslations,
+          skip: skipOnNoTranslations,
           task: ({ config }) =>
             new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Compatibility Checks',
-          skip: skipNoTranslations,
+          skip: skipOnNoTranslations,
           task: ({ config }) =>
             new Listr(
               checkCompatibility(
                 config,
                 {
+                  ignoreMalformed: !!ignoreMalformed,
                   ignoreIncompatible: !!ignoreIncompatible,
                   ignoreUnused: !!ignoreUnused,
                   ignoreMissing: !!ignoreMissing,

@@ -49,7 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
-        '--xpack.security.authc.providers=["oidc"]',
+        `--xpack.security.authc.providers=${JSON.stringify(['oidc', 'basic'])}`,
         '--xpack.security.authc.oidc.realm="oidc1"',
       ],
     },

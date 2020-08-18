@@ -11,6 +11,7 @@ import { registerWSOverviewRoute } from './overview';
 jest.mock('node-fetch');
 const fetch = jest.requireActual('node-fetch');
 const { Response } = fetch;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mocked<typeof fetch>;
 
 const ORG_ROUTE = 'http://localhost:3002/ws/org';
