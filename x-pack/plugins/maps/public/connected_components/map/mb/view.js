@@ -26,7 +26,7 @@ import { getPreserveDrawingBuffer } from '../../../kibana_services';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-export class MBMapContainer extends React.Component {
+export class MBMap extends React.Component {
   state = {
     prevLayerList: undefined,
     hasSyncedLayerList: false,

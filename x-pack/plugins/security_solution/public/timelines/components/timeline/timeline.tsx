@@ -286,6 +286,7 @@ export const TimelineComponent: React.FC<Props> = ({
           filterQuery={combinedQueries!.filterQuery}
           sortField={timelineQuerySortField}
           startDate={start}
+          queryDeduplication="timeline"
         >
           {({
             events,

@@ -127,6 +127,11 @@ export async function setupIngestManager(
     // if anything errors, reject/fail
     onSetupReject(error);
   }
+
+  // be sure to return the promise because it has the resolved/rejected status attached to it
+  // otherwise, we effectively return success every time even if there are errors
+  // because `return undefined` -> `Promise.resolve(undefined)` in an `async` function
+  return setupIngestStatus;
 }
 
 export async function setupFleet(

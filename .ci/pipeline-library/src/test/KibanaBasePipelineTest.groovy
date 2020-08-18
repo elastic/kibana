@@ -78,6 +78,10 @@ class KibanaBasePipelineTest extends BasePipelineTest {
     return helper.callStack.find { it.methodName == name }
   }
 
+  def fnMocks(String name) {
+    helper.callStack.findAll { it.methodName == name }
+  }
+
   void mockFailureBuild() {
     props([
       buildUtils: [

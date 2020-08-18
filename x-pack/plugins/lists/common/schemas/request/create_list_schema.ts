@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 
 import { description, deserializer, id, meta, name, serializer, type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { DefaultVersionNumber, DefaultVersionNumberDecoded } from '../../siem_common_deps';
+import { DefaultVersionNumber, DefaultVersionNumberDecoded } from '../../shared_imports';
 
 export const createListSchema = t.intersection([
   t.exact(

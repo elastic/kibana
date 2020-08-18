@@ -967,6 +967,7 @@ describe('helpers', () => {
 
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
         id: TimelineId.active,
+        savedTimeline: true,
         timeline: mockTimelineModel,
       });
     });

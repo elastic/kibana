@@ -12,11 +12,9 @@ import {
 } from '../../../../common/http_api/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
-import {
-  getLogEntryAnomaliesDatasets,
-  NoLogAnalysisResultsIndexError,
-} from '../../../lib/log_analysis';
+import { getLogEntryAnomaliesDatasets } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -58,8 +56,13 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
           throw error;
         }
 
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({

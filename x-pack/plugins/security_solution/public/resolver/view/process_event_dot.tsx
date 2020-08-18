@@ -14,10 +14,9 @@ import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3 } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
-import * as processEventModel from '../models/process_event';
 import * as selectors from '../store/selectors';
 import { useResolverQueryParams } from './use_resolver_query_params';
 
@@ -85,7 +84,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * An event which contains details about the process node.
      */
-    event: ResolverEvent;
+    event: SafeResolverEvent;
     /**
      * projectionMatrix which can be used to convert `position` to screen coordinates.
      */
@@ -114,7 +113,11 @@ const UnstyledProcessEventDot = React.memo(
     // Node (html id=) IDs
     const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
-    const nodeID = processEventModel.uniquePidForProcess(event);
+    const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
+    if (nodeID === undefined) {
+      // NB: this component should be taking nodeID as a `string` instead of handling this logic here
+      throw new Error('Tried to render a node with no ID');
+    }
     const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
@@ -195,7 +198,7 @@ const UnstyledProcessEventDot = React.memo(
              * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
              * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
              */
-            beginElement: () => void;
+            beginElement?: () => void;
           })
         | null;
     } = React.createRef();
@@ -238,10 +241,8 @@ const UnstyledProcessEventDot = React.memo(
     const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
-      if (animationTarget.current !== null) {
-        // This works but the types are missing in the typescript DOM lib
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (animationTarget.current as any).beginElement();
+      if (animationTarget.current?.beginElement) {
+        animationTarget.current.beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
@@ -289,7 +290,9 @@ const UnstyledProcessEventDot = React.memo(
       ? subMenuAssets.initialMenuStatus
       : relatedEventOptions;
 
-    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(event);
+    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(
+      event as ResolverEvent
+    );
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -297,7 +300,8 @@ const UnstyledProcessEventDot = React.memo(
      */
     return (
       <div
-        data-test-subj={'resolverNode'}
+        data-test-subj="resolver:node"
+        data-test-resolver-node-id={nodeID}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
         aria-level={ariaLevel === null ? undefined : ariaLevel}
@@ -317,7 +321,7 @@ const UnstyledProcessEventDot = React.memo(
             () => {
               handleFocus();
               handleClick();
-            } /* a11y note: this is strictly an alternate to the button, so no tabindex  is necessary*/
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
           }
           role="img"
           aria-labelledby={labelHTMLID}
@@ -399,11 +403,13 @@ const UnstyledProcessEventDot = React.memo(
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              title={eventModel.eventName(event)}
+              title={eventModel.processNameSafeVersion(event)}
+              data-test-subj="resolver:node:primary-button"
+              data-test-resolver-node-id={nodeID}
             >
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {eventModel.eventName(event)}
+                  {eventModel.processNameSafeVersion(event)}
                 </span>
               </span>
             </EuiButton>
@@ -429,6 +435,7 @@ const UnstyledProcessEventDot = React.memo(
                   menuTitle={subMenuAssets.relatedEvents.title}
                   projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
+                  nodeID={nodeID}
                 />
               )}
             </EuiFlexItem>

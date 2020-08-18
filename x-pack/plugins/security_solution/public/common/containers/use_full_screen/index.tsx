@@ -6,9 +6,26 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
 
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
+
+export const resetScroll = () => {
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+
+    const kibanaBody = document.querySelector('#kibana-body');
+    if (kibanaBody != null) {
+      kibanaBody.scrollTop = 0;
+    }
+
+    const pageContainer = document.querySelector('[data-test-subj="pageContainer"]');
+    if (pageContainer != null) {
+      pageContainer.scrollTop = 0;
+    }
+  }, 0);
+};
 
 export const useFullScreen = () => {
   const dispatch = useDispatch();
@@ -16,7 +33,17 @@ export const useFullScreen = () => {
   const timelineFullScreen = useSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const setGlobalFullScreen = useCallback(
-    (fullScreen: boolean) => dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen })),
+    (fullScreen: boolean) => {
+      if (fullScreen) {
+        document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME);
+        resetScroll();
+      } else {
+        document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME);
+        resetScroll();
+      }
+
+      dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));
+    },
     [dispatch]
   );
 

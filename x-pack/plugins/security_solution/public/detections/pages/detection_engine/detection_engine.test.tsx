@@ -53,6 +53,9 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
+jest.mock('../../components/alerts_info', () => ({
+  useAlertInfo: jest.fn().mockReturnValue([]),
+}));
 
 const state: State = {
   ...mockGlobalState,

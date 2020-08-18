@@ -5,34 +5,26 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
-import { ResolverState } from '../../types';
+import { ResolverState, DataAccessLayer } from '../../types';
 import { ResolverRelatedEvents } from '../../../../common/endpoint/types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 import { ResolverAction } from '../actions';
 
 type MiddlewareFactory<S = ResolverState> = (
-  context?: KibanaReactContextValue<StartServices>
+  dataAccessLayer: DataAccessLayer
 ) => (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
 /**
- * The redux middleware that the app uses to trigger side effects.
+ * The `redux` middleware that the application uses to trigger side effects.
  * All data fetching should be done here.
- * For actions that the app triggers directly, use `app` as a prefix for the type.
+ * For actions that the application triggers directly, use `app` as a prefix for the type.
  * For actions that are triggered as a result of server interaction, use `server` as a prefix for the type.
  */
-export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
+export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: DataAccessLayer) => {
   return (api) => (next) => {
-    // This cannot work w/o `context`.
-    if (!context) {
-      return async (action: ResolverAction) => {
-        next(action);
-      };
-    }
-    const resolverTreeFetcher = ResolverTreeFetcher(context, api);
+    const resolverTreeFetcher = ResolverTreeFetcher(dataAccessLayer, api);
     return async (action: ResolverAction) => {
       next(action);
 
@@ -45,12 +37,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
         const entityIdToFetchFor = action.payload;
         let result: ResolverRelatedEvents | undefined;
         try {
-          result = await context.services.http.get(
-            `/api/endpoint/resolver/${entityIdToFetchFor}/events`,
-            {
-              query: { events: 100 },
-            }
-          );
+          result = await dataAccessLayer.relatedEvents(entityIdToFetchFor);
         } catch {
           api.dispatch({
             type: 'serverFailedToReturnRelatedEventData',

@@ -7,7 +7,8 @@
     "Legitimate scheduled tasks may be created during installation of new software."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

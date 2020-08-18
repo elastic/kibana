@@ -39,7 +39,6 @@ import {
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -364,10 +363,11 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId')}
+        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}
+        showNoDataResults={alertParams.alertOnNoData}
       />
       <EuiSpacer size={'m'} />
     </>

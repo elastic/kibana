@@ -9,7 +9,4 @@ export {
   DashboardToDashboardDrilldown,
   Params as DashboardToDashboardDrilldownParams,
 } from './drilldown';
-export {
-  ActionContext as DashboardToDashboardActionContext,
-  Config as DashboardToDashboardConfig,
-} from './types';
+export { Config } from './types';

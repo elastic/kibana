@@ -68,7 +68,7 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
       iconType="stop"
       isDisabled={buttonDisabled}
       onClick={handleStop}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>

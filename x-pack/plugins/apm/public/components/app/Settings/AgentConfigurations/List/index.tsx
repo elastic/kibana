@@ -38,7 +38,7 @@ interface Props {
   refetch: () => void;
 }
 
-export const AgentConfigurationList = ({ status, data, refetch }: Props) => {
+export function AgentConfigurationList({ status, data, refetch }: Props) {
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
     null
@@ -219,4 +219,4 @@ export const AgentConfigurationList = ({ status, data, refetch }: Props) => {
       />
     </>
   );
-};
+}

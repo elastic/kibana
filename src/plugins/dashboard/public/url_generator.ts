@@ -26,7 +26,7 @@ import {
   RefreshInterval,
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
+import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { ViewMode } from '../../embeddable/public';
 
@@ -35,7 +35,7 @@ export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
 
-export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
+export interface DashboardUrlGeneratorState {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -79,7 +79,7 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * View mode of the dashboard.
    */
   viewMode?: ViewMode;
-}>;
+}
 
 export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{

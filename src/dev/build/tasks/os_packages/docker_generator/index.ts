@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// @ts-expect-error not ts yet
 export { runDockerGenerator, runDockerGeneratorForUBI } from './run';

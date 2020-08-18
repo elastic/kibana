@@ -23,8 +23,6 @@ export const encryptionAlgorithm = t.keyof({
 
 export const identifier = t.string;
 
-export const manifestVersion = t.string;
-
 export const manifestSchemaVersion = t.keyof({
   v1: null,
 });
@@ -33,5 +31,8 @@ export type ManifestSchemaVersion = t.TypeOf<typeof manifestSchemaVersion>;
 export const relativeUrl = t.string;
 
 export const sha256 = t.string;
+
+export const semanticVersion = t.string;
+export type SemanticVersion = t.TypeOf<typeof semanticVersion>;
 
 export const size = t.number;

@@ -51,7 +51,8 @@ export class SampleTaskManagerFixturePlugin
     .toPromise();
 
   public setup(core: CoreSetup) {
-    core.http.createRouter().get(
+    const router = core.http.createRouter();
+    router.get(
       {
         path: '/api/alerting_tasks/{taskId}',
         validate: {
@@ -75,6 +76,23 @@ export class SampleTaskManagerFixturePlugin
         } catch (err) {
           return res.badRequest({ body: err });
         }
+      }
+    );
+
+    router.get(
+      {
+        path: `/api/ensure_tasks_index_refreshed`,
+        validate: {},
+      },
+      async function (
+        context: RequestHandlerContext,
+        req: KibanaRequest<any, any, any, any>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse<any>> {
+        await core.elasticsearch.legacy.client.callAsInternalUser('indices.refresh', {
+          index: '.kibana_task_manager',
+        });
+        return res.ok({ body: {} });
       }
     );
   }

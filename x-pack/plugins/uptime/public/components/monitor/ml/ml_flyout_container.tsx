@@ -22,13 +22,14 @@ import {
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import { MLFlyoutView } from './ml_flyout';
-import { CLIENT_ALERT_TYPES, ML_JOB_ID } from '../../../../common/constants';
+import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 
 interface Props {
   onClose: () => void;

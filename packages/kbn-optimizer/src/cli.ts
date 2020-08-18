@@ -116,7 +116,7 @@ run(
         log.warning('Unable to initialize CiStatsReporter from env');
       }
 
-      update$ = update$.pipe(reportOptimizerStats(reporter, config));
+      update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
     }
 
     await update$.pipe(logOptimizerState(log, config)).toPromise();

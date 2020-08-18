@@ -40,11 +40,7 @@ export const workpadReducer = handleActions(
     [setName]: (workpadState, { payload }) => {
       platformService
         .getService()
-        .coreStart.chrome.recentlyAccessed.add(
-          `${APP_ROUTE_WORKPAD}/${workpadState.id}`,
-          payload,
-          workpadState.id
-        );
+        .setRecentlyAccessed(`${APP_ROUTE_WORKPAD}/${workpadState.id}`, payload, workpadState.id);
       return { ...workpadState, name: payload };
     },
 

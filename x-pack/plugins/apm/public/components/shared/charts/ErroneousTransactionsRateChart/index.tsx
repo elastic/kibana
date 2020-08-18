@@ -6,7 +6,6 @@
 import { EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { mean } from 'lodash';
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
@@ -21,7 +20,7 @@ const tickFormatY = (y?: number) => {
   return asPercent(y || 0, 1);
 };
 
-export const ErroneousTransactionsRateChart = () => {
+export function ErroneousTransactionsRateChart() {
   const { urlParams, uiFilters } = useUrlParams();
   const syncedChartsProps = useChartsSync();
 
@@ -79,7 +78,7 @@ export const ErroneousTransactionsRateChart = () => {
           {
             color: theme.euiColorVis7,
             data: [],
-            legendValue: tickFormatY(mean(errorRates.map((rate) => rate.y))),
+            legendValue: tickFormatY(data?.average),
             legendClickDisabled: true,
             title: i18n.translate('xpack.apm.errorRateChart.avgLabel', {
               defaultMessage: 'Avg.',
@@ -105,4 +104,4 @@ export const ErroneousTransactionsRateChart = () => {
       />
     </EuiPanel>
   );
-};
+}

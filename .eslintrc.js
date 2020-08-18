@@ -133,12 +133,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/lens/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -406,7 +400,7 @@ module.exports = {
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
-                from: ['ui/**/*', 'uiExports/**/*'],
+                from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
               },
               {
@@ -463,14 +457,13 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': ['plugins', 'legacy/ui'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
@@ -529,6 +522,7 @@ module.exports = {
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/plugins/canvas/shareable_runtime/postcss.config.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -610,7 +604,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
@@ -771,19 +764,22 @@ module.exports = {
     },
 
     /**
-     * APM overrides
+     * APM and Observability overrides
      */
     {
-      files: ['x-pack/plugins/apm/**/*.js'],
+      files: [
+        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
-        'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
-      },
-    },
-    {
-      plugins: ['react-hooks'],
-      files: ['x-pack/plugins/apm/**/*.{ts,tsx}'],
-      rules: {
+        'react/function-component-definition': [
+          'warn',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },

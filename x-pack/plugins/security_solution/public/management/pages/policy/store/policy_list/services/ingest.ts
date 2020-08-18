@@ -12,12 +12,15 @@ import {
   DeletePackageConfigsRequest,
   PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
+  GetAgentConfigsRequest,
+  GetAgentConfigsResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
 export const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_configs`;
+export const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_configs`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
@@ -73,6 +76,18 @@ export const sendDeletePackageConfig = (
     ...options,
     body: JSON.stringify(body.body),
   });
+};
+
+/**
+ * Retrieve a list of Agent Configurations
+ * @param http
+ * @param options
+ */
+export const sendGetAgentConfigList = (
+  http: HttpStart,
+  options: HttpFetchOptions & GetAgentConfigsRequest
+) => {
+  return http.get<GetAgentConfigsResponse>(INGEST_API_AGENT_CONFIGS, options);
 };
 
 /**

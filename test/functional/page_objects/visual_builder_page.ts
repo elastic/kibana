@@ -315,9 +315,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`))[
-        nth
-      ];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -408,7 +408,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getViewTable(): Promise<string> {
-      const tableView = await testSubjects.find('tableView');
+      const tableView = await testSubjects.find('tableView', 20000);
       return await tableView.getVisibleText();
     }
 
@@ -420,7 +420,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async setIndexPatternValue(value: string) {
       const el = await testSubjects.find('metricsIndexPatternInput');
       await el.clearValue();
-      await el.type(value);
+      await el.type(value, { charByChar: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

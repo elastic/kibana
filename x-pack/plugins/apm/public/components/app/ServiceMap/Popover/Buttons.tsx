@@ -22,7 +22,12 @@ export function Buttons({
   onFocusClick = () => {},
   selectedNodeServiceName,
 }: ButtonsProps) {
-  const urlParams = useUrlParams().urlParams as APMQueryParams;
+  // The params may contain the service name. We want to use the selected node's
+  // service name in the button URLs, so make a copy and set the
+  // `serviceName` property.
+  const urlParams = { ...useUrlParams().urlParams } as APMQueryParams;
+  urlParams.serviceName = selectedNodeServiceName;
+
   const detailsUrl = getAPMHref(
     `/services/${selectedNodeServiceName}/transactions`,
     '',

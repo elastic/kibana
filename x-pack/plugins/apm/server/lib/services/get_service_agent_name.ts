@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   AGENT_NAME,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
@@ -15,24 +15,23 @@ export async function getServiceAgentName(
   serviceName: string,
   setup: Setup & SetupTimeRange
 ) {
-  const { start, end, client, indices } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const params = {
     terminateAfter: 1,
-    index: [
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-      indices['apm_oss.metricsIndices'],
-    ],
+    apm: {
+      events: [
+        ProcessorEvent.error,
+        ProcessorEvent.transaction,
+        ProcessorEvent.metric,
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            {
-              terms: { [PROCESSOR_EVENT]: ['error', 'transaction', 'metric'] },
-            },
             { range: rangeFilter(start, end) },
           ],
         },
@@ -45,7 +44,7 @@ export async function getServiceAgentName(
     },
   };
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
   const agentName = aggregations?.agents.buckets[0]?.key as string | undefined;
   return { agentName };
 }

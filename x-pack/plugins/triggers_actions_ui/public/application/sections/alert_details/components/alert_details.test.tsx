@@ -29,9 +29,6 @@ jest.mock('../../../app_context', () => ({
     http: jest.fn(),
     capabilities: {
       get: jest.fn(() => ({})),
-      securitySolution: {
-        'alerting:show': true,
-      },
     },
     actionTypeRegistry: jest.fn(),
     alertTypeRegistry: {

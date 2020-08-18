@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { get, isEmpty, noop } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 
 import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
@@ -65,11 +65,16 @@ export const getPinOnClick = ({
   onPinEvent,
   onUnPinEvent,
   isEventPinned,
-}: GetPinOnClickParams): (() => void) => {
+}: GetPinOnClickParams) => {
   if (!allowUnpinning) {
-    return noop;
+    return;
   }
-  return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
+
+  if (isEventPinned) {
+    onUnPinEvent(eventId);
+  } else {
+    onPinEvent(eventId);
+  }
 };
 
 /**
@@ -83,8 +88,8 @@ export const getEventIdToDataMapping = (
   timelineData: TimelineItem[],
   eventIds: string[],
   fieldsToKeep: string[]
-): Record<string, TimelineNonEcsData[]> => {
-  return timelineData.reduce((acc, v) => {
+): Record<string, TimelineNonEcsData[]> =>
+  timelineData.reduce((acc, v) => {
     const fvm = eventIds.includes(v._id)
       ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }
       : {};
@@ -93,7 +98,6 @@ export const getEventIdToDataMapping = (
       ...fvm,
     };
   }, {});
-};
 
 /** Return eventType raw or signal */
 export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
@@ -105,7 +109,8 @@ export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
   get(['agent', 'type', 0], ecsData) === 'endpoint' &&
-  get(['process', 'entity_id'], ecsData)?.length > 0;
+  get(['process', 'entity_id'], ecsData)?.length === 1 &&
+  get(['process', 'entity_id', 0], ecsData) !== '';
 
 interface InvestigateInResolverActionProps {
   timelineId: string;
@@ -137,38 +142,3 @@ export const InvestigateInResolverAction = React.memo<InvestigateInResolverActio
 );
 
 InvestigateInResolverAction.displayName = 'InvestigateInResolverAction';
-
-/**
- * The minimum height of a timeline-based events viewer body, as seen in several
- * views, e.g. `Detections`, `Events`, `External events`, etc
- */
-export const MIN_EVENTS_VIEWER_BODY_HEIGHT = 500; // px
-
-interface GetEventsViewerBodyHeightParams {
-  /** the height of the header, e.g. the section containing "`Showing n event / alerts`, and `Open` / `In progress` / `Closed` filters" */
-  headerHeight: number;
-  /** the height of the footer, e.g. "`25 of 100 events / alerts`, `Load More`, `Updated n minutes ago`" */
-  footerHeight: number;
-  /** the height of the global Kibana chrome, common throughout the app */
-  kibanaChromeHeight: number;
-  /** the (combined) height of other non-events viewer content, e.g. the global search / filter bar in full screen mode */
-  otherContentHeight: number;
-  /** the full height of the window */
-  windowHeight: number;
-}
-
-export const getEventsViewerBodyHeight = ({
-  footerHeight,
-  headerHeight,
-  kibanaChromeHeight,
-  otherContentHeight,
-  windowHeight,
-}: GetEventsViewerBodyHeightParams) => {
-  if (windowHeight === 0 || !isFinite(windowHeight)) {
-    return MIN_EVENTS_VIEWER_BODY_HEIGHT;
-  }
-
-  const combinedHeights = kibanaChromeHeight + otherContentHeight + headerHeight + footerHeight;
-
-  return Math.max(MIN_EVENTS_VIEWER_BODY_HEIGHT, windowHeight - combinedHeights);
-};

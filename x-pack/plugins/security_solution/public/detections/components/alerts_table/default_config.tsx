@@ -71,7 +71,7 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             key: 'signal.rule.building_block_type',
             value: 'exists',
           },
-          // @ts-ignore TODO: Rework parent typings to support ExistsFilter[]
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
       ]),
@@ -179,7 +179,7 @@ export const requiredFieldsForActions = [
   'file.path',
   'file.Ext.code_signature.subject_name',
   'file.Ext.code_signature.trusted',
-  'file.hash.sha1',
+  'file.hash.sha256',
   'host.os.family',
   'event.code',
 ];

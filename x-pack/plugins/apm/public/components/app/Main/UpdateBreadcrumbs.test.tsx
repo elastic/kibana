@@ -16,6 +16,7 @@ import {
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 const setBreadcrumbs = jest.fn();
+const changeTitle = jest.fn();
 
 function mountBreadcrumb(route: string, params = '') {
   mount(
@@ -27,6 +28,7 @@ function mountBreadcrumb(route: string, params = '') {
             ...mockApmPluginContextValue.core,
             chrome: {
               ...mockApmPluginContextValue.core.chrome,
+              docTitle: { change: changeTitle },
               setBreadcrumbs,
             },
           },
@@ -42,23 +44,14 @@ function mountBreadcrumb(route: string, params = '') {
 }
 
 describe('UpdateBreadcrumbs', () => {
-  let realDoc: Document;
-
   beforeEach(() => {
-    realDoc = window.document;
-    (window.document as any) = {
-      title: 'Kibana',
-    };
     setBreadcrumbs.mockReset();
+    changeTitle.mockReset();
   });
 
-  afterEach(() => {
-    (window.document as any) = realDoc;
-  });
-
-  it('Homepage', () => {
+  it('Changes the homepage title', () => {
     mountBreadcrumb('/');
-    expect(window.document.title).toMatchInlineSnapshot(`"APM"`);
+    expect(changeTitle).toHaveBeenCalledWith(['APM']);
   });
 
   it('/services/:serviceName/errors/:groupId', () => {
@@ -90,9 +83,13 @@ describe('UpdateBreadcrumbs', () => {
       },
       { text: 'myGroupId', href: undefined },
     ]);
-    expect(window.document.title).toMatchInlineSnapshot(
-      `"myGroupId | Errors | opbeans-node | Services | APM"`
-    );
+    expect(changeTitle).toHaveBeenCalledWith([
+      'myGroupId',
+      'Errors',
+      'opbeans-node',
+      'Services',
+      'APM',
+    ]);
   });
 
   it('/services/:serviceName/errors', () => {
@@ -104,9 +101,12 @@ describe('UpdateBreadcrumbs', () => {
       { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
       { text: 'Errors', href: undefined },
     ]);
-    expect(window.document.title).toMatchInlineSnapshot(
-      `"Errors | opbeans-node | Services | APM"`
-    );
+    expect(changeTitle).toHaveBeenCalledWith([
+      'Errors',
+      'opbeans-node',
+      'Services',
+      'APM',
+    ]);
   });
 
   it('/services/:serviceName/transactions', () => {
@@ -118,9 +118,12 @@ describe('UpdateBreadcrumbs', () => {
       { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
       { text: 'Transactions', href: undefined },
     ]);
-    expect(window.document.title).toMatchInlineSnapshot(
-      `"Transactions | opbeans-node | Services | APM"`
-    );
+    expect(changeTitle).toHaveBeenCalledWith([
+      'Transactions',
+      'opbeans-node',
+      'Services',
+      'APM',
+    ]);
   });
 
   it('/services/:serviceName/transactions/view?transactionName=my-transaction-name', () => {
@@ -139,8 +142,12 @@ describe('UpdateBreadcrumbs', () => {
       },
       { text: 'my-transaction-name', href: undefined },
     ]);
-    expect(window.document.title).toMatchInlineSnapshot(
-      `"my-transaction-name | Transactions | opbeans-node | Services | APM"`
-    );
+    expect(changeTitle).toHaveBeenCalledWith([
+      'my-transaction-name',
+      'Transactions',
+      'opbeans-node',
+      'Services',
+      'APM',
+    ]);
   });
 });

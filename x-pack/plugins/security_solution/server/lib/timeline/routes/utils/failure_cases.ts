@@ -37,6 +37,7 @@ export const NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE =
   'You cannot convert a Timeline template to a timeline, or a timeline to a Timeline template.';
 export const UPDAT_TIMELINE_VIA_IMPORT_NOT_ALLOWED_ERROR_MESSAGE =
   'You cannot update a timeline via imports. Use the UI to modify existing timelines.';
+export const DEFAULT_ERROR = `Something has gone wrong. We didn't handle something properly. To help us fix this, please upload your file to https://discuss.elastic.co/c/security/siem.`;
 
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,
@@ -78,7 +79,10 @@ const commonUpdateTemplateTimelineCheck = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   if (isHandlingTemplateTimeline) {
-    if (existTimeline != null && timelineType !== existTimeline.timelineType) {
+    if (
+      (existTimeline != null && timelineType !== existTimeline.timelineType) ||
+      (existTemplateTimeline != null && timelineType !== existTemplateTimeline.timelineType)
+    ) {
       return {
         body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
         statusCode: 403,
@@ -106,11 +110,7 @@ const commonUpdateTemplateTimelineCheck = (
       };
     }
 
-    if (
-      existTemplateTimeline != null &&
-      existTemplateTimeline.templateTimelineVersion == null &&
-      existTemplateTimeline.version !== version
-    ) {
+    if (existTemplateTimeline != null && existTemplateTimeline.version !== version) {
       // throw error 409 conflict timeline
       return {
         body: NO_MATCH_VERSION_ERROR_MESSAGE,
@@ -231,12 +231,6 @@ export const checkIsUpdateViaImportFailureCases = (
       };
     }
   } else {
-    if (existTemplateTimeline != null && timelineType !== existTemplateTimeline?.timelineType) {
-      return {
-        body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
-        statusCode: 403,
-      };
-    }
     const isStatusValid =
       ((existTemplateTimeline?.status == null ||
         existTemplateTimeline?.status === TimelineStatus.active) &&

@@ -61,6 +61,7 @@ function normalize(
   }
 
   // Don't include unmapped_type for _score field
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
   return {
     [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions) },

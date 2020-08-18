@@ -65,14 +65,13 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   };
 
   const onSearchChange = (searchVal: string) => {
-    const signal = new AbortController().signal;
-
-    updateSuggestions({
-      fieldSelected: selectedField,
-      value: `${searchVal}`,
-      patterns: indexPattern,
-      signal,
-    });
+    if (updateSuggestions != null) {
+      updateSuggestions({
+        fieldSelected: selectedField,
+        value: searchVal,
+        patterns: indexPattern,
+      });
+    }
   };
 
   const onCreateOption = (option: string) => onChange([...(selectedValue || []), option]);

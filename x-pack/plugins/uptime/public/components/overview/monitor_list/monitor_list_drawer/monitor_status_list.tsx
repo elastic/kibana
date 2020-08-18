@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { upperFirst } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../../../common/location_link';
@@ -29,9 +28,9 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
     const location = ping.observer?.geo?.name ?? UNNAMED_LOCATION;
 
     if (ping.monitor.status === STATUS.UP) {
-      upChecks.add(upperFirst(location));
+      upChecks.add(location);
     } else if (ping.monitor.status === STATUS.DOWN) {
-      downChecks.add(upperFirst(location));
+      downChecks.add(location);
     }
   });
 

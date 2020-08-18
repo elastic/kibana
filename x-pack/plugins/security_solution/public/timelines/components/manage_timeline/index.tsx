@@ -112,7 +112,7 @@ const reducerManageTimeline = (
   }
 };
 
-interface UseTimelineManager {
+export interface UseTimelineManager {
   getIndexToAddById: (id: string) => string[] | null;
   getManageTimelineById: (id: string) => ManageTimeline;
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
@@ -122,7 +122,9 @@ interface UseTimelineManager {
   setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
 }
 
-const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseTimelineManager => {
+export const useTimelineManager = (
+  manageTimelineForTesting?: ManageTimelineById
+): UseTimelineManager => {
   const [state, dispatch] = useReducer<
     (state: ManageTimelineById, action: ActionManageTimeline) => ManageTimelineById
   >(reducerManageTimeline, manageTimelineForTesting ?? initManageTimeline);
@@ -191,12 +193,12 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
 };
 
 const init = {
-  getManageTimelineById: (id: string) => getTimelineDefaults(id),
   getIndexToAddById: (id: string) => null,
+  getManageTimelineById: (id: string) => getTimelineDefaults(id),
   getTimelineFilterManager: () => undefined,
-  setIndexToAdd: () => undefined,
-  isManagedTimeline: () => false,
   initializeTimeline: () => noop,
+  isManagedTimeline: () => false,
+  setIndexToAdd: () => undefined,
   setIsTimelineLoading: () => noop,
 };
 

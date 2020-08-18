@@ -20,15 +20,13 @@
 import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { EventEmitter } from 'events';
-import { merge } from 'rxjs';
 
-import { migrateLegacyQuery } from '../../../../../kibana_legacy/public';
 import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  SavedVisInstance,
   IEditorController,
+  VisualizeEditorVisInstance,
 } from '../../types';
 
 export const useEditorUpdates = (
@@ -36,19 +34,22 @@ export const useEditorUpdates = (
   eventEmitter: EventEmitter,
   setHasUnsavedChanges: (value: boolean) => void,
   appState: VisualizeAppStateContainer | null,
-  savedVisInstance: SavedVisInstance | undefined,
+  visInstance: VisualizeEditorVisInstance | undefined,
   visEditorController: IEditorController | undefined
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<VisualizeAppState>();
 
   useEffect(() => {
-    if (appState && savedVisInstance) {
+    if (appState && visInstance) {
       const {
         timefilter: { timefilter },
         filterManager,
+        queryString,
+        state$,
       } = services.data.query;
-      const { embeddableHandler, savedVis, savedSearch, vis } = savedVisInstance;
+      const { embeddableHandler, savedSearch, vis } = visInstance;
+      const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
       const initialState = appState.getState();
       setCurrentAppState(initialState);
 
@@ -60,7 +61,7 @@ export const useEditorUpdates = (
             uiState: vis.uiState,
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
-            query: appState.getState().query,
+            query: queryString.getQuery(),
             linked: !!vis.data.savedSearchId,
             savedSearch,
           });
@@ -68,30 +69,28 @@ export const useEditorUpdates = (
           embeddableHandler.updateInput({
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
-            query: appState.getState().query,
+            query: queryString.getQuery(),
           });
         }
       };
 
-      const subscriptions = merge(
-        timefilter.getTimeUpdate$(),
-        timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$(),
-        filterManager.getFetches$()
-      ).subscribe({
+      const subscriptions = state$.subscribe({
         next: reloadVisualization,
         error: services.fatalErrors.add,
       });
 
       const handleLinkedSearch = (linked: boolean) => {
-        if (linked && !savedVis.savedSearchId && savedSearch) {
+        if (linked && savedVis && !savedVis.savedSearchId && savedSearch) {
           savedVis.savedSearchId = savedSearch.id;
           vis.data.savedSearchId = savedSearch.id;
           if (vis.data.searchSource) {
             vis.data.searchSource.setParent(savedSearch.searchSource);
           }
-        } else if (!linked && savedVis.savedSearchId) {
+        } else if (!linked && savedVis && savedVis.savedSearchId) {
           delete savedVis.savedSearchId;
+          delete vis.data.savedSearchId;
+        } else if (!linked && !savedVis) {
+          // delete link when it's not a saved vis
           delete vis.data.savedSearchId;
         }
       };
@@ -110,15 +109,10 @@ export const useEditorUpdates = (
 
       const unsubscribeStateUpdates = appState.subscribe((state) => {
         setCurrentAppState(state);
-
-        if (savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
+        if (savedVis && savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
           // this filters out the case when manipulating the browser history back/forward
           // and initializing different visualizations
           return;
-        }
-        const newQuery = migrateLegacyQuery(state.query);
-        if (!isEqual(state.query, newQuery)) {
-          appState.transitions.set('query', newQuery);
         }
 
         if (!isEqual(state.uiState, vis.uiState.getChanges())) {
@@ -127,6 +121,7 @@ export const useEditorUpdates = (
 
         // if the browser history was changed manually we need to reflect changes in the editor
         if (
+          savedVis &&
           !isEqual(
             {
               ...services.visualizations.convertFromSerializedVis(vis.serialize()).visState,
@@ -169,14 +164,7 @@ export const useEditorUpdates = (
         unsubscribeStateUpdates();
       };
     }
-  }, [
-    appState,
-    eventEmitter,
-    savedVisInstance,
-    services,
-    setHasUnsavedChanges,
-    visEditorController,
-  ]);
+  }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges, visEditorController]);
 
   return { isEmbeddableRendered, currentAppState };
 };

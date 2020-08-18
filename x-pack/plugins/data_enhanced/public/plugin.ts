@@ -31,20 +31,26 @@ export class DataEnhancedPlugin
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
+
+    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
+    );
+
+    data.__enhance({
+      search: {
+        searchInterceptor: enhancedSearchInterceptor,
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
-    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        application: core.application,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        usageCollector: plugins.data.search.usageCollector,
-      },
-      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
-    );
-    plugins.data.search.setInterceptor(enhancedSearchInterceptor);
   }
 }

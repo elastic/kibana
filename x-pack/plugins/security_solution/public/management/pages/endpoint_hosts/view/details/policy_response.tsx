@@ -90,7 +90,7 @@ const ResponseActions = memo(
             <EuiAccordion
               id={action + index}
               key={action + index}
-              data-test-subj="hostDetailsPolicyResponseActionsAccordion"
+              data-test-subj="endpointDetailsPolicyResponseActionsAccordion"
               className="policyResponseActionsAccordion"
               buttonContent={
                 <EuiText
@@ -140,21 +140,17 @@ export const PolicyResponse = memo(
     responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
     responseAttentionCount: Map<string, number>;
   }) => {
+    const generateId = useMemo(() => htmlIdGenerator(), []);
+
     return (
       <>
         {Object.entries(responseConfig).map(([key, val]) => {
           const attentionCount = responseAttentionCount.get(key);
           return (
             <PolicyResponseConfigAccordion
-              id={
-                /* eslint-disable-next-line react-hooks/rules-of-hooks */
-                useMemo(() => htmlIdGenerator()(), [])
-              }
-              key={
-                /* eslint-disable-next-line react-hooks/rules-of-hooks */
-                useMemo(() => htmlIdGenerator()(), [])
-              }
-              data-test-subj="hostDetailsPolicyResponseConfigAccordion"
+              id={generateId(`id_${key}`)}
+              key={generateId(`key_${key}`)}
+              data-test-subj="endpointDetailsPolicyResponseConfigAccordion"
               buttonContent={
                 <EuiText size="s">
                   <p>{formatResponse(key)}</p>
@@ -166,7 +162,7 @@ export const PolicyResponse = memo(
                 attentionCount > 0 && (
                   <EuiNotificationBadge
                     className="policyResponseAttentionBadge"
-                    data-test-subj="hostDetailsPolicyResponseAttentionBadge"
+                    data-test-subj="endpointDetailsPolicyResponseAttentionBadge"
                   >
                     {attentionCount}
                   </EuiNotificationBadge>

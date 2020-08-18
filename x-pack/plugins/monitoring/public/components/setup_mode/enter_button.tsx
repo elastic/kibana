@@ -30,7 +30,7 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   }
 
   return (
-    <div className="monSetupModeEnterButton__buttonWrapper">
+    <div className="monSetupModeEnterButton__buttonWrapper" data-test-subj="monitoringSetupModeBtn">
       <EuiButton
         onClick={enterSetupMode}
         iconType="flag"

@@ -236,7 +236,6 @@ const CreateRulePageComponent: React.FC = () => {
     }
   };
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageAccordions = useCallback(
     (id: RuleStep, isOpen: boolean) => {
       const activeRuleIdx = stepsRuleOrder.findIndex((step) => step === openAccordionId);
@@ -258,7 +257,6 @@ const CreateRulePageComponent: React.FC = () => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData]
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageIsEditable = useCallback(
     async (id: RuleStep) => {
       const activeForm = await stepsForm.current[openAccordionId]?.submit();

@@ -161,12 +161,18 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired, tags, body = {} } = route.options;
+        const { authRequired, tags, body = {}, timeout } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
 
         const kibanaRouteState: KibanaRouteState = {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
         };
+
+        // To work around https://github.com/hapijs/hapi/issues/4122 until v20, set the socket
+        // timeout on the route to a fake timeout only when the payload timeout is specified.
+        // Within the onPreAuth lifecycle of the route itself, we'll override the timeout with the
+        // real socket timeout.
+        const fakeSocketTimeout = timeout?.payload ? timeout.payload + 1 : undefined;
 
         this.server.route({
           handler: route.handler,
@@ -175,15 +181,42 @@ export class HttpServer {
           options: {
             auth: this.getAuthOption(authRequired),
             app: kibanaRouteState,
+            ext: {
+              onPreAuth: {
+                method: (request, h) => {
+                  // At this point, the socket timeout has only been set to work-around the HapiJS bug.
+                  // We need to either set the real per-route timeout or use the default idle socket timeout
+                  if (timeout?.idleSocket) {
+                    request.raw.req.socket.setTimeout(timeout.idleSocket);
+                  } else if (fakeSocketTimeout) {
+                    // NodeJS uses a socket timeout of `0` to denote "no timeout"
+                    request.raw.req.socket.setTimeout(this.config!.socketTimeout ?? 0);
+                  }
+
+                  return h.continue;
+                },
+              },
+            },
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
-            payload: [allow, maxBytes, output, parse].some((v) => typeof v !== 'undefined')
-              ? { allow, maxBytes, output, parse }
+            payload: [allow, maxBytes, output, parse, timeout?.payload].some(
+              (v) => typeof v !== 'undefined'
+            )
+              ? {
+                  allow,
+                  maxBytes,
+                  output,
+                  parse,
+                  timeout: timeout?.payload,
+                }
               : undefined,
+            timeout: {
+              socket: fakeSocketTimeout,
+            },
           },
         });
       }

@@ -18,34 +18,26 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
-interface IEngineOverviewHeaderProps {
-  isButtonDisabled?: boolean;
-}
-
-export const EngineOverviewHeader: React.FC<IEngineOverviewHeaderProps> = ({
-  isButtonDisabled,
-}) => {
-  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
+export const EngineOverviewHeader: React.FC = () => {
+  const {
+    externalUrl: { getAppSearchUrl },
+    http,
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {
     fill: true,
     iconType: 'popout',
     'data-test-subj': 'launchButton',
-  } as EuiButtonProps & EuiLinkProps;
-
-  if (isButtonDisabled) {
-    buttonProps.isDisabled = true;
-  } else {
-    buttonProps.href = `${enterpriseSearchUrl}/as`;
-    buttonProps.target = '_blank';
-    buttonProps.onClick = () =>
+    href: getAppSearchUrl(),
+    target: '_blank',
+    onClick: () =>
       sendTelemetry({
         http,
         product: 'app_search',
         action: 'clicked',
         metric: 'header_launch_button',
-      });
-  }
+      }),
+  } as EuiButtonProps & EuiLinkProps;
 
   return (
     <EuiPageHeader>

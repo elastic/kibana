@@ -8,9 +8,12 @@ import * as t from 'io-ts';
 
 import { exceptionListType, namespaceType } from '../../../shared_imports';
 
+import { NonEmptyString } from './non_empty_string';
+
 export const list = t.exact(
   t.type({
-    id: t.string,
+    id: NonEmptyString,
+    list_id: NonEmptyString,
     type: exceptionListType,
     namespace_type: namespaceType,
   })

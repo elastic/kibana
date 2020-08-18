@@ -7,14 +7,14 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getEntryListMock } from './entry_list.mock';
 import { EntryList, entriesList } from './entry_list';
 
 describe('entriesList', () => {
   test('it should validate an entry', () => {
-    const payload = { ...getEntryListMock() };
+    const payload = getEntryListMock();
     const decoded = entriesList.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -23,7 +23,7 @@ describe('entriesList', () => {
   });
 
   test('it should validate when operator is "included"', () => {
-    const payload = { ...getEntryListMock() };
+    const payload = getEntryListMock();
     const decoded = entriesList.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -32,7 +32,7 @@ describe('entriesList', () => {
   });
 
   test('it should validate when "operator" is "excluded"', () => {
-    const payload = { ...getEntryListMock() };
+    const payload = getEntryListMock();
     payload.operator = 'excluded';
     const decoded = entriesList.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -41,7 +41,7 @@ describe('entriesList', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate when "list" is not expected value', () => {
+  test('it should FAIL validation when "list" is not expected value', () => {
     const payload: Omit<EntryList, 'list'> & { list: string } = {
       ...getEntryListMock(),
       list: 'someListId',
@@ -55,7 +55,7 @@ describe('entriesList', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not validate when "list.id" is empty string', () => {
+  test('it should FAIL validation when "list.id" is empty string', () => {
     const payload: Omit<EntryList, 'list'> & { list: { id: string; type: 'ip' } } = {
       ...getEntryListMock(),
       list: { id: '', type: 'ip' },
@@ -67,7 +67,7 @@ describe('entriesList', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not validate when "type" is not "lists"', () => {
+  test('it should FAIL validation when "type" is not "lists"', () => {
     const payload: Omit<EntryList, 'type'> & { type: 'match_any' } = {
       ...getEntryListMock(),
       type: 'match_any',
@@ -84,12 +84,12 @@ describe('entriesList', () => {
   test('it should strip out extra keys', () => {
     const payload: EntryList & {
       extraKey?: string;
-    } = { ...getEntryListMock() };
+    } = getEntryListMock();
     payload.extraKey = 'some extra key';
     const decoded = entriesList.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({ ...getEntryListMock() });
+    expect(message.schema).toEqual(getEntryListMock());
   });
 });

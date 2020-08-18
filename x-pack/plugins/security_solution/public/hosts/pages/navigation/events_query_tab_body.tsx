@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useWindowSize } from 'react-use';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -22,14 +21,6 @@ import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import {
-  getEventsViewerBodyHeight,
-  MIN_EVENTS_VIEWER_BODY_HEIGHT,
-} from '../../../timelines/components/timeline/body/helpers';
-import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
-import { globalHeaderHeightPx } from '../../../app/home';
-import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../common/components/events_viewer/events_viewer';
-import { footerHeight } from '../../../timelines/components/timeline/footer';
 
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
@@ -70,7 +61,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 }) => {
   const { initializeTimeline } = useManageTimeline();
   const dispatch = useDispatch();
-  const { height: windowHeight } = useWindowSize();
   const { globalFullScreen } = useFullScreen();
   useEffect(() => {
     initializeTimeline({
@@ -86,20 +76,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
       }
     };
   }, [deleteQuery]);
-
-  const eventsViewerHeight = useMemo(
-    () =>
-      globalFullScreen
-        ? getEventsViewerBodyHeight({
-            footerHeight,
-            headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
-            kibanaChromeHeight: globalHeaderHeightPx,
-            otherContentHeight: FILTERS_GLOBAL_HEIGHT,
-            windowHeight,
-          })
-        : MIN_EVENTS_VIEWER_BODY_HEIGHT,
-    [globalFullScreen, windowHeight]
-  );
 
   return (
     <>
@@ -118,7 +94,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}
-        height={eventsViewerHeight}
         id={TimelineId.hostsPageEvents}
         start={startDate}
         pageFilters={pageFilters}

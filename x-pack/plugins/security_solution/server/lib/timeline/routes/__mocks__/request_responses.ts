@@ -175,11 +175,11 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     },
   });
 
-export const getTimelineByIdRequest = (query: GetTimelineByIdSchemaQuery) =>
+export const getTimelineRequest = (query?: GetTimelineByIdSchemaQuery) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_URL,
-    query,
+    query: query ?? {},
   });
 
 export const installPrepackedTimelinesRequest = () =>

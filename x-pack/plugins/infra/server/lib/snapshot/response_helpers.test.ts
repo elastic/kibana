@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isIPv4, getIPFromBucket, InfraSnapshotNodeGroupByBucket } from './response_helpers';
+import {
+  isIPv4,
+  getIPFromBucket,
+  InfraSnapshotNodeGroupByBucket,
+  getMetricValueFromBucket,
+  InfraSnapshotMetricsBucket,
+} from './response_helpers';
 
 describe('InfraOps ResponseHelpers', () => {
   describe('isIPv4', () => {
@@ -74,4 +80,40 @@ describe('InfraOps ResponseHelpers', () => {
       expect(getIPFromBucket('host', bucket)).toBe(null);
     });
   });
+
+  describe('getMetricValueFromBucket', () => {
+    it('should return the value of a bucket with data', () => {
+      expect(getMetricValueFromBucket('custom', testBucket, 1)).toBe(0.5);
+    });
+    it('should return the normalized value of a bucket with data', () => {
+      expect(getMetricValueFromBucket('cpu', testNormalizedBucket, 1)).toBe(50);
+    });
+    it('should return null for a bucket with no data', () => {
+      expect(getMetricValueFromBucket('custom', testEmptyBucket, 1)).toBe(null);
+    });
+  });
 });
+
+// Hack to get around TypeScript
+const buckets = [
+  {
+    key: 'a',
+    doc_count: 1,
+    custom_1: {
+      value: 0.5,
+    },
+  },
+  {
+    key: 'b',
+    doc_count: 1,
+    cpu: {
+      value: 0.5,
+      normalized_value: 50,
+    },
+  },
+  {
+    key: 'c',
+    doc_count: 0,
+  },
+] as InfraSnapshotMetricsBucket[];
+const [testBucket, testNormalizedBucket, testEmptyBucket] = buckets;

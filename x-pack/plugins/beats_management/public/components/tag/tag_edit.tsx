@@ -24,11 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import {
-  BeatTag,
-  CMBeat,
-  ConfigurationBlock,
-} from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
 import { AssignmentActionType, BeatsTableType, Table, tagConfigActions } from '../table';
 import { ConfigView } from './config_view';
@@ -67,6 +63,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { tag, attachedBeats, configuration_blocks } = this.props;
 
     return (
@@ -151,9 +148,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <div>
               <ConfigList
                 onTableChange={this.props.onConfigListChange}
-                configs={
-                  configuration_blocks // eslint-disable-line @typescript-eslint/camelcase
-                }
+                configs={configuration_blocks}
                 onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
                     this.props.onConfigRemoved(block);

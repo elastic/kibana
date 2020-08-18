@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAlertPrefillContext } from '../../use_alert_prefill';
 import { AlertFlyout } from './alert_flyout';
+import { ManageAlertsContextMenuItem } from '../../inventory/components/manage_alerts_context_menu_item';
 
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const kibana = useKibana();
 
   const { metricThresholdPrefill } = useAlertPrefillContext();
   const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
@@ -27,26 +26,12 @@ export const MetricsAlertDropdown = () => {
     setPopoverOpen(true);
   }, [setPopoverOpen]);
 
-  const menuItems = useMemo(() => {
-    return [
-      <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
-        <FormattedMessage
-          id="xpack.infra.alerting.createAlertButton"
-          defaultMessage="Create alert"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="tableOfContents"
-        key="manageLink"
-        href={kibana.services?.application?.getUrlForApp(
-          'management/insightsAndAlerting/triggersActions/alerts'
-        )}
-      >
-        <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />
-      </EuiContextMenuItem>,
-    ];
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [kibana.services]);
+  const menuItems = [
+    <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
+      <FormattedMessage id="xpack.infra.alerting.createAlertButton" defaultMessage="Create alert" />
+    </EuiContextMenuItem>,
+    <ManageAlertsContextMenuItem />,
+  ];
 
   return (
     <>

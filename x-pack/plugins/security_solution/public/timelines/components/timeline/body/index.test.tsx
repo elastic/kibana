@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
@@ -22,7 +22,6 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 import { TimelineType } from '../../../../../common/types/timeline';
 
-const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
   columnId: '@timestamp',
@@ -65,7 +64,6 @@ describe('Body', () => {
     data: mockTimelineData,
     docValueFields: [],
     eventIdToNoteIds: {},
-    height: testBodyHeight,
     isSelectAllChecked: false,
     getNotesByIds: mockGetNotesByIds,
     loadingEventIds: [],

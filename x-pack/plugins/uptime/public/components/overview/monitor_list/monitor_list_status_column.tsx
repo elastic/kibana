@@ -7,7 +7,6 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { upperFirst } from 'lodash';
 import styled from 'styled-components';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
@@ -83,9 +82,9 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
     const location = summaryPing?.observer?.geo?.name ?? UNNAMED_LOCATION;
 
     if (summaryPing.monitor.status === STATUS.UP) {
-      upPings.add(upperFirst(location));
+      upPings.add(location);
     } else if (summaryPing.monitor.status === STATUS.DOWN) {
-      downPings.add(upperFirst(location));
+      downPings.add(location);
     }
   });
 

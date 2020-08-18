@@ -96,6 +96,10 @@ export function SavedViewManageViewsFlyout<ViewState>({
 
   const renderDeleteAction = useCallback(
     (item: SavedView<ViewState>) => {
+      if (item.id === '0') {
+        return <></>;
+      }
+
       return (
         <DeleteConfimation
           isDisabled={item.isDefault}

@@ -42,7 +42,6 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   docValueFields: DocValueFields[];
-  height?: number;
   id: string;
   isEventViewer?: boolean;
   sort: Sort;
@@ -64,7 +63,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     eventIdToNoteIds,
     eventType,
     excludedRowRendererIds,
-    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -201,7 +199,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         eventType={eventType}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
-        height={height}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
@@ -237,7 +234,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.eventType === nextProps.eventType &&
     prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
-    prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&

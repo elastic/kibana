@@ -66,14 +66,7 @@ interface Props {
 
 type Option = EuiSelectable['props']['options'][0];
 
-const Filter = ({
-  name,
-  title,
-  options,
-  onChange,
-  value,
-  showCount,
-}: Props) => {
+function Filter({ name, title, options, onChange, value, showCount }: Props) {
   const [showPopover, setShowPopover] = useState(false);
 
   const toggleShowPopover = () => setShowPopover((show) => !show);
@@ -176,6 +169,6 @@ const Filter = ({
       ) : null}
     </>
   );
-};
+}
 
 export { Filter };
