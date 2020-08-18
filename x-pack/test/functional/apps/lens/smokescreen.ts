@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
     });
 
-    it('should switch from a multi-layer stacked bar to pie chart using suggestions', async () => {
+    it('should switch from a multi-layer stacked bar to donut chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
