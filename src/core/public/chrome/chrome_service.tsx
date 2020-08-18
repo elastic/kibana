@@ -37,7 +37,6 @@ import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 

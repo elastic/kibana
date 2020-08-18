@@ -75,7 +75,6 @@ const createStartContractMock = () => {
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
     getIsNavDrawerLocked$: jest.fn(),
-    getNavType$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
   };
@@ -88,7 +87,6 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getNavType$.mockReturnValue(new BehaviorSubject('modern' as NavType));
   return startContract;
 };
 

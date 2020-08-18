@@ -154,25 +154,18 @@ exports[`SearchBar basically works 1`] = `
     <div
       className="euiSelectable"
       onBlur={[Function]}
+      onFocus={[Function]}
       onKeyDown={[Function]}
     >
       <EuiPopover
         anchorPosition="downCenter"
         button={
-          <EuiSelectableSearch
-            aria-label="Search for anything..."
-            compressed={true}
-            data-test-subj="header-search"
-            defaultValue=""
-            incremental={true}
-            inputRef={[Function]}
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            onSearch={[Function]}
-            options={Array []}
-            placeholder="Search for anything..."
-          />
+          <EuiI18n
+            default="Filter options"
+            token="euiSelectable.placeholderName"
+          >
+            [Function]
+          </EuiI18n>
         }
         closePopover={[Function]}
         display="inlineBlock"
@@ -197,95 +190,118 @@ exports[`SearchBar basically works 1`] = `
             <div
               className="euiPopover__anchor"
             >
-              <EuiSelectableSearch
-                aria-label="Search for anything..."
-                compressed={true}
-                data-test-subj="header-search"
-                defaultValue=""
-                incremental={true}
-                inputRef={[Function]}
-                key="listSearch"
-                onBlur={[Function]}
-                onChange={[Function]}
-                onFocus={[Function]}
-                onSearch={[Function]}
-                options={Array []}
-                placeholder="Search for anything..."
+              <EuiI18n
+                default="Filter options"
+                token="euiSelectable.placeholderName"
               >
-                <EuiFieldSearch
+                <EuiSelectableSearch
+                  aria-activedescendant=""
                   aria-label="Search for anything..."
-                  className="euiSelectableSearch"
                   compressed={true}
                   data-test-subj="header-search"
                   defaultValue=""
-                  fullWidth={true}
                   incremental={true}
                   inputRef={[Function]}
-                  isClearable={true}
-                  isLoading={false}
+                  key="listSearch"
+                  listId="ie43f8d70-e18d-11ea-a274-31d7159f902f_listbox"
                   onBlur={[Function]}
+                  onChange={[Function]}
                   onFocus={[Function]}
                   onSearch={[Function]}
+                  options={Array []}
                   placeholder="Search for anything..."
                 >
-                  <EuiFormControlLayout
+                  <EuiFieldSearch
+                    aria-activedescendant=""
+                    aria-autocomplete="list"
+                    aria-controls="ie43f8d70-e18d-11ea-a274-31d7159f902f_listbox"
+                    aria-expanded="true"
+                    aria-haspopup="listbox"
+                    aria-label="Search for anything..."
+                    aria-owns="ie43f8d70-e18d-11ea-a274-31d7159f902f_listbox"
+                    autoComplete="off"
+                    className="euiSelectableSearch"
                     compressed={true}
+                    data-test-subj="header-search"
+                    defaultValue=""
                     fullWidth={true}
-                    icon="search"
+                    incremental={true}
+                    inputRef={[Function]}
+                    isClearable={true}
                     isLoading={false}
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onSearch={[Function]}
+                    placeholder="Search for anything..."
+                    role="combobox"
                   >
-                    <div
-                      className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                    <EuiFormControlLayout
+                      compressed={true}
+                      fullWidth={true}
+                      icon="search"
+                      isLoading={false}
                     >
                       <div
-                        className="euiFormControlLayout__childrenWrapper"
+                        className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                       >
-                        <EuiValidatableControl>
-                          <input
-                            aria-label="Search for anything..."
-                            className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                            data-test-subj="header-search"
-                            defaultValue=""
-                            onBlur={[Function]}
-                            onFocus={[Function]}
-                            onKeyUp={[Function]}
-                            placeholder="Search for anything..."
-                            type="search"
-                          />
-                        </EuiValidatableControl>
-                        <EuiFormControlLayoutIcons
-                          icon="search"
-                          isLoading={false}
+                        <div
+                          className="euiFormControlLayout__childrenWrapper"
                         >
-                          <div
-                            className="euiFormControlLayoutIcons"
-                          >
-                            <EuiFormControlLayoutCustomIcon
+                          <EuiValidatableControl>
+                            <input
+                              aria-activedescendant=""
+                              aria-autocomplete="list"
+                              aria-controls="ie43f8d70-e18d-11ea-a274-31d7159f902f_listbox"
+                              aria-expanded="true"
+                              aria-haspopup="listbox"
+                              aria-label="Search for anything..."
+                              aria-owns="ie43f8d70-e18d-11ea-a274-31d7159f902f_listbox"
+                              autoComplete="off"
+                              className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                              data-test-subj="header-search"
+                              defaultValue=""
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              onKeyUp={[Function]}
+                              placeholder="Search for anything..."
+                              role="combobox"
                               type="search"
+                            />
+                          </EuiValidatableControl>
+                          <EuiFormControlLayoutIcons
+                            icon="search"
+                            isLoading={false}
+                          >
+                            <div
+                              className="euiFormControlLayoutIcons"
                             >
-                              <span
-                                className="euiFormControlLayoutCustomIcon"
+                              <EuiFormControlLayoutCustomIcon
+                                type="search"
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFormControlLayoutCustomIcon__icon"
-                                  type="search"
+                                <span
+                                  className="euiFormControlLayoutCustomIcon"
                                 >
-                                  <div
+                                  <EuiIcon
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
-                                    data-euiicon-type="search"
-                                  />
-                                </EuiIcon>
-                              </span>
-                            </EuiFormControlLayoutCustomIcon>
-                          </div>
-                        </EuiFormControlLayoutIcons>
+                                    type="search"
+                                  >
+                                    <div
+                                      aria-hidden="true"
+                                      className="euiFormControlLayoutCustomIcon__icon"
+                                      data-euiicon-type="search"
+                                    />
+                                  </EuiIcon>
+                                </span>
+                              </EuiFormControlLayoutCustomIcon>
+                            </div>
+                          </EuiFormControlLayoutIcons>
+                        </div>
                       </div>
-                    </div>
-                  </EuiFormControlLayout>
-                </EuiFieldSearch>
-              </EuiSelectableSearch>
+                    </EuiFormControlLayout>
+                  </EuiFieldSearch>
+                </EuiSelectableSearch>
+              </EuiI18n>
             </div>
           </div>
         </EuiOutsideClickDetector>

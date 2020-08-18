@@ -23,8 +23,6 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  EuiNavDrawer,
-  EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +48,6 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
-import { NavDrawer } from './nav_drawer';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -77,19 +74,6 @@ export interface HeaderProps {
   onIsLockedUpdate: OnIsLockedUpdate;
 }
 
-function renderMenuTrigger(toggleOpen: () => void) {
-  return (
-    <EuiHeaderSectionItemButton
-      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
-        defaultMessage: 'Toggle side navigation',
-      })}
-      onClick={toggleOpen}
-    >
-      <EuiIcon type="apps" size="m" />
-    </EuiHeaderSectionItemButton>
-  );
-}
-
 export function Header({
   kibanaVersion,
   kibanaDocLink,
@@ -108,7 +92,6 @@ export function Header({
     return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
   }
 
-  const navDrawerRef = createRef<EuiNavDrawer>();
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing');

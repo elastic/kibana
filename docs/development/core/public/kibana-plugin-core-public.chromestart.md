@@ -59,7 +59,6 @@ core.chrome.setHelpExtension(elem => {
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
 |  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
-|  [getNavType$()](./kibana-plugin-core-public.chromestart.getnavtype_.md) | Get the navigation type TODO \#64541 Can delete |
 |  [removeApplicationClass(className)](./kibana-plugin-core-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
 |  [setAppTitle(appTitle)](./kibana-plugin-core-public.chromestart.setapptitle.md) | Sets the current app's title |
 |  [setBadge(badge)](./kibana-plugin-core-public.chromestart.setbadge.md) | Override the current badge |
