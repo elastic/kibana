@@ -19,7 +19,7 @@
 
 module.exports = {
   addons: ['@kbn/storybook/preset'],
-  stories: ['../public/**/*.stories.tsx'],
+  stories: ['../**/*.examples.tsx', '../**/*.stories.tsx', '../**/*.story.tsx'],
   typescript: {
     reactDocgen: 'none',
   },
