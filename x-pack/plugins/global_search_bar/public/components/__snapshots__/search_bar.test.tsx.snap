@@ -1,0 +1,296 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchBar basically works 1`] = `
+<SearchBar
+  globalSearch={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          "",
+          Object {},
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        },
+      ],
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  navigateToUrl={[MockFunction]}
+>
+  <EuiSelectable
+    height={300}
+    listProps={
+      Object {
+        "rowHeight": 68,
+      }
+    }
+    onChange={[Function]}
+    options={Array []}
+    renderOption={[Function]}
+    searchProps={
+      Object {
+        "aria-label": "Search for anything...",
+        "compressed": true,
+        "data-test-subj": "header-search",
+        "incremental": true,
+        "inputRef": [Function],
+        "onBlur": [Function],
+        "onFocus": [Function],
+        "onSearch": [Function],
+        "placeholder": "Search for anything...",
+      }
+    }
+    searchable={true}
+    singleSelection={true}
+  >
+    <div
+      className="euiSelectable"
+      onBlur={[Function]}
+      onKeyDown={[Function]}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiSelectableSearch
+            aria-label="Search for anything..."
+            compressed={true}
+            data-test-subj="header-search"
+            defaultValue=""
+            incremental={true}
+            inputRef={[Function]}
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            onSearch={[Function]}
+            options={Array []}
+            placeholder="Search for anything..."
+          />
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={false}
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="none"
+        panelRef={[Function]}
+      >
+        <EuiOutsideClickDetector
+          isDisabled={true}
+          onOutsideClick={[Function]}
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <EuiSelectableSearch
+                aria-label="Search for anything..."
+                compressed={true}
+                data-test-subj="header-search"
+                defaultValue=""
+                incremental={true}
+                inputRef={[Function]}
+                key="listSearch"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                onSearch={[Function]}
+                options={Array []}
+                placeholder="Search for anything..."
+              >
+                <EuiFieldSearch
+                  aria-label="Search for anything..."
+                  className="euiSelectableSearch"
+                  compressed={true}
+                  data-test-subj="header-search"
+                  defaultValue=""
+                  fullWidth={true}
+                  incremental={true}
+                  inputRef={[Function]}
+                  isClearable={true}
+                  isLoading={false}
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onSearch={[Function]}
+                  placeholder="Search for anything..."
+                >
+                  <EuiFormControlLayout
+                    compressed={true}
+                    fullWidth={true}
+                    icon="search"
+                    isLoading={false}
+                  >
+                    <div
+                      className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                    >
+                      <div
+                        className="euiFormControlLayout__childrenWrapper"
+                      >
+                        <EuiValidatableControl>
+                          <input
+                            aria-label="Search for anything..."
+                            className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                            data-test-subj="header-search"
+                            defaultValue=""
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            onKeyUp={[Function]}
+                            placeholder="Search for anything..."
+                            type="search"
+                          />
+                        </EuiValidatableControl>
+                        <EuiFormControlLayoutIcons
+                          icon="search"
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayoutIcons"
+                          >
+                            <EuiFormControlLayoutCustomIcon
+                              type="search"
+                            >
+                              <span
+                                className="euiFormControlLayoutCustomIcon"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFormControlLayoutCustomIcon__icon"
+                                  type="search"
+                                >
+                                  <div
+                                    aria-hidden="true"
+                                    className="euiFormControlLayoutCustomIcon__icon"
+                                    data-euiicon-type="search"
+                                  />
+                                </EuiIcon>
+                              </span>
+                            </EuiFormControlLayoutCustomIcon>
+                          </div>
+                        </EuiFormControlLayoutIcons>
+                      </div>
+                    </div>
+                  </EuiFormControlLayout>
+                </EuiFieldSearch>
+              </EuiSelectableSearch>
+            </div>
+          </div>
+        </EuiOutsideClickDetector>
+      </EuiPopover>
+    </div>
+  </EuiSelectable>
+</SearchBar>
+`;
