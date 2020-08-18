@@ -40,9 +40,7 @@ type Func = (refreshPrePackagedRule?: boolean) => void;
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
-  const [isValueListsModalShown, setIsValueListsModalShown] = useState(false);
-  const showValueListsModal = useCallback(() => setIsValueListsModalShown(true), []);
-  const hideValueListsModal = useCallback(() => setIsValueListsModalShown(false), []);
+  const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
   const {
     loading: userInfoLoading,
@@ -148,7 +146,10 @@ const RulesPageComponent: React.FC = () => {
   return (
     <>
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
-      <ValueListsModal showModal={isValueListsModalShown} onClose={hideValueListsModal} />
+      <ValueListsModal
+        showModal={showValueListsModal}
+        onClose={() => setShowValueListsModal(false)}
+      />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={() => setShowImportModal(false)}
@@ -210,7 +211,7 @@ const RulesPageComponent: React.FC = () => {
                   data-test-subj="open-value-lists-modal-button"
                   iconType="importAction"
                   isDisabled={!canWriteListsIndex || loading}
-                  onClick={showValueListsModal}
+                  onClick={() => setShowValueListsModal(true)}
                 >
                   {i18n.UPLOAD_VALUE_LISTS}
                 </EuiButton>
