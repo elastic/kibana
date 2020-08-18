@@ -21,7 +21,6 @@ import React from 'react';
 import { EmptyState } from '../empty_state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
-// @ts-expect-error
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { docLinksServiceMock } from '../../../../../../core/public/mocks';

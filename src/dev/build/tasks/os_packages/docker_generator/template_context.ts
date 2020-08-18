@@ -20,7 +20,7 @@
 export interface TemplateContext {
   artifactTarball: string;
   imageFlavor: string;
-  versionTag: string;
+  version: string;
   license: string;
   artifactsDir: string;
   imageTag: string;
@@ -30,4 +30,6 @@ export interface TemplateContext {
   ubiImageFlavor: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
+  ubi: boolean;
+  revision: string;
 }

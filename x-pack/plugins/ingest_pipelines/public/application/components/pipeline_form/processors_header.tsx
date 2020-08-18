@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
+import { useKibana } from '../../../shared_imports';
 
 import {
   LoadFromJsonButton,
@@ -22,7 +22,7 @@ export interface Props {
 }
 
 export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
-  const { links } = usePipelineProcessorsContext();
+  const { services } = useKibana();
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -44,7 +44,10 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={links.esDocsBasePath + '/ingest-processors.html'} target="_blank">
+                <EuiLink
+                  href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {
