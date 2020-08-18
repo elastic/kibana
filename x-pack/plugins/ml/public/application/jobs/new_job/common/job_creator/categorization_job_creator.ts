@@ -41,7 +41,7 @@ export class CategorizationJobCreator extends JobCreator {
     ML_JOB_AGGREGATION.COUNT;
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
-  private _partitionField: string | null = null;
+  private _partitionFieldName: string | null = null;
 
   constructor(
     indexPattern: IndexPattern,
@@ -181,7 +181,7 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public get categorizationPerPartitionField() {
-    return this._partitionField;
+    return this._partitionFieldName;
   }
 
   public set categorizationPerPartitionField(fieldName: string | null) {
@@ -189,10 +189,10 @@ export class CategorizationJobCreator extends JobCreator {
       this._detectors.forEach((detector) => {
         delete detector.partition_field_name;
       });
-      this._partitionField = null;
+      this._partitionFieldName = null;
     } else {
-      if (this._partitionField !== fieldName) {
-        this._partitionField = fieldName;
+      if (this._partitionFieldName !== fieldName) {
+        this._partitionFieldName = fieldName;
         this._detectors.forEach((detector) => {
           detector.partition_field_name = fieldName;
         });

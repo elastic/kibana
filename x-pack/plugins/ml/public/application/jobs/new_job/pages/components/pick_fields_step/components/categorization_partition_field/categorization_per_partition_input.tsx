@@ -37,7 +37,8 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
   }, [selectedField]);
 
   const onChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => changeHandler(selectedOptions[0].label ?? null),
+    (selectedOptions: EuiComboBoxOptionOption[]) =>
+      changeHandler((selectedOptions[0] && selectedOptions[0].label) || null),
     [changeHandler]
   );
 
