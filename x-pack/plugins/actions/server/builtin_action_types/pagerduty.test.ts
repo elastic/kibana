@@ -64,12 +64,12 @@ describe('validateConfig()', () => {
     );
   });
 
-  test('should validate and pass when the pagerduty url is added to hostsAllowList', () => {
+  test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureAllowListedUri: (url) => {
+        ensureUriAllowed: (url) => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
       },
@@ -80,13 +80,13 @@ describe('validateConfig()', () => {
     ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
   });
 
-  test('config validation returns an error if the specified URL isnt added to hostsAllowList', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureAllowListedUri: (_) => {
-          throw new Error(`target url is not added to hostsAllowList`);
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not added to allowedHosts`);
         },
       },
     });
@@ -94,7 +94,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring pagerduty action: target url is not added to hostsAllowList"`
+      `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
   });
 });

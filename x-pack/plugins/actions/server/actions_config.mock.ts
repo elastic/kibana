@@ -8,11 +8,11 @@ import { ActionsConfigurationUtilities } from './actions_config';
 
 const createActionsConfigMock = () => {
   const mocked: jest.Mocked<ActionsConfigurationUtilities> = {
-    isAllowListedHostname: jest.fn().mockReturnValue(true),
-    isAllowListedUri: jest.fn().mockReturnValue(true),
+    isHostnameAllowed: jest.fn().mockReturnValue(true),
+    isUriAllowed: jest.fn().mockReturnValue(true),
     isActionTypeEnabled: jest.fn().mockReturnValue(true),
-    ensureAllowListedHostname: jest.fn().mockReturnValue({}),
-    ensureAllowListedUri: jest.fn().mockReturnValue({}),
+    ensureHostnameAllowed: jest.fn().mockReturnValue({}),
+    ensureUriAllowed: jest.fn().mockReturnValue({}),
     ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
   };
   return mocked;

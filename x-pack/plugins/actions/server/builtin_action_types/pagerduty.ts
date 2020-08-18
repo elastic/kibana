@@ -135,7 +135,7 @@ function valdiateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   try {
-    configurationUtilities.ensureAllowListedUri(getPagerDutyApiUrl(configObject));
+    configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
       defaultMessage: 'error configuring pagerduty action: {message}',

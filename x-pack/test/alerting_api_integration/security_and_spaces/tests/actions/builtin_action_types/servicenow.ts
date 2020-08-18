@@ -156,7 +156,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with a not present in hostsAllowList apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a servicenow action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -176,7 +176,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not present in the Kibana config xpack.actions.hostsAllowList',
+                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not present in the Kibana config xpack.actions.allowedHosts',
             });
           });
       });

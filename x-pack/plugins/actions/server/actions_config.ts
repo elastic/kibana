@@ -13,7 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { ActionsConfigType } from './types';
 import { ActionTypeDisabledError } from './lib';
 
-export enum HostsAllowList {
+export enum AllowedHosts {
   Any = '*',
 }
 
@@ -27,18 +27,18 @@ enum AllowingField {
 }
 
 export interface ActionsConfigurationUtilities {
-  isAllowListedHostname: (hostname: string) => boolean;
-  isAllowListedUri: (uri: string) => boolean;
+  isHostnameAllowed: (hostname: string) => boolean;
+  isUriAllowed: (uri: string) => boolean;
   isActionTypeEnabled: (actionType: string) => boolean;
-  ensureAllowListedHostname: (hostname: string) => void;
-  ensureAllowListedUri: (uri: string) => void;
+  ensureHostnameAllowed: (hostname: string) => void;
+  ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
 }
 
 function allowingErrorMessage(field: AllowingField, value: string) {
-  return i18n.translate('xpack.actions.urlHostsAllowListConfigurationError', {
+  return i18n.translate('xpack.actions.urlallowedHostsConfigurationError', {
     defaultMessage:
-      'target {field} "{value}" is not present in the Kibana config xpack.actions.hostsAllowList',
+      'target {field} "{value}" is not present in the Kibana config xpack.actions.allowedHosts',
     values: {
       value,
       field,
@@ -56,18 +56,18 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isAllowed({ hostsAllowList }: ActionsConfigType, hostname: string): boolean {
-  const allowed = new Set(hostsAllowList);
-  if (allowed.has(HostsAllowList.Any)) return true;
+function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string): boolean {
+  const allowed = new Set(allowedHosts);
+  if (allowed.has(AllowedHosts.Any)) return true;
   if (allowed.has(hostname)) return true;
   return false;
 }
 
-function isAllowListedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
+function isHostnameAllowedInUri(config: ActionsConfigType, uri: string): boolean {
   return pipe(
     tryCatch(() => new URL(uri)),
     map((url) => url.hostname),
-    mapNullable((hostname) => isAllowListed(config, hostname)),
+    mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)
   );
 }
@@ -85,20 +85,20 @@ function isActionTypeEnabledInConfig(
 export function getActionsConfigurationUtilities(
   config: ActionsConfigType
 ): ActionsConfigurationUtilities {
-  const isAllowedHostname = curry(isAllowed)(config);
-  const isAllowedUri = curry(isAllowListedHostnameInUri)(config);
+  const isHostnameAllowed = curry(isAllowed)(config);
+  const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   return {
-    isAllowListedHostname,
-    isAllowListedUri,
+    isHostnameAllowed,
+    isUriAllowed,
     isActionTypeEnabled,
-    ensureAllowListedUri(uri: string) {
-      if (!isAllowListedUri(uri)) {
+    ensureUriAllowed(uri: string) {
+      if (!isUriAllowed(uri)) {
         throw new Error(allowingErrorMessage(AllowingField.url, uri));
       }
     },
-    ensureAllowListedHostname(hostname: string) {
-      if (!isAllowListedHostname(hostname)) {
+    ensureHostnameAllowed(hostname: string) {
+      if (!isHostnameAllowed(hostname)) {
         throw new Error(allowingErrorMessage(AllowingField.hostname, hostname));
       }
     },

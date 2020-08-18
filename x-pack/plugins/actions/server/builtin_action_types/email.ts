@@ -66,16 +66,16 @@ function validateConfig(
       return '[port] is required if [service] is not provided';
     }
 
-    if (!configurationUtilities.isAllowListedHostname(config.host)) {
-      return `[host] value '${config.host}' is not in the hostsAllowList configuration`;
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
     const host = getServiceNameHost(config.service);
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isAllowListedHostname(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the hostsAllowList configuration`;
+    if (!configurationUtilities.isHostnameAllowed(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
 }

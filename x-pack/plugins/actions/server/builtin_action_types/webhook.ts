@@ -111,7 +111,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureAllowListedUri(url.toString());
+    configurationUtilities.ensureUriAllowed(url.toString());
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',

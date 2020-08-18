@@ -203,13 +203,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             password: 'mypassphrase',
           },
           config: {
-            url: 'http://a.none.hostsAllowList.webhook/endpoint',
+            url: 'http://a.none.allowedHosts.webhook/endpoint',
           },
         })
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/is not added to hostsAllowList in the Kibana config/);
+      expect(result.message).to.match(/is not added to allowedHosts in the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {

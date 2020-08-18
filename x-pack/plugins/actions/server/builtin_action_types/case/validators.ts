@@ -23,7 +23,7 @@ export const validateCommonConfig = (
       return i18n.MAPPING_EMPTY;
     }
 
-    configurationUtilities.ensureAllowListedUri(configObject.apiUrl);
+    configurationUtilities.ensureUriAllowed(configObject.apiUrl);
   } catch (allowListError) {
     return i18n.WHITE_LISTED_ERROR(allowListError.message);
   }
