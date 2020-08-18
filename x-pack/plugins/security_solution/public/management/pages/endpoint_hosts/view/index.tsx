@@ -19,6 +19,7 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +37,7 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
@@ -90,6 +92,8 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     endpointsExist,
+    autoRefreshInterval,
+    isAutoRefreshEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -374,6 +378,7 @@ export const EndpointList = () => {
     handleCreatePolicyClick,
   ]);
 
+  const hasListData = listData && listData.length > 0;
   return (
     <ManagementPageView
       viewType="list"
@@ -412,7 +417,33 @@ export const EndpointList = () => {
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {listData && listData.length > 0 && (
+      {
+        <div style={{ visibility: hasListData ? 'visible' : 'hidden' }}>
+          <EuiSuperDatePicker
+            onTimeChange={() => {}}
+            onRefresh={() => {
+              dispatch({
+                type: 'appRequestedEndpointList',
+              });
+            }}
+            isPaused={!hasListData ? false : !isAutoRefreshEnabled}
+            refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
+            onRefreshChange={(evt) => {
+              dispatch({
+                type: 'userToggledEndpointListAutoRefresh',
+                payload: !evt.isPaused,
+              });
+              dispatch({
+                type: 'userUpdatedEndpointListAutoRefreshInterval',
+                payload: evt.refreshInterval,
+              });
+            }}
+            isAutoRefreshOnly={true}
+          />
+          <EuiSpacer size="m" />
+        </div>
+      }
+      {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage
