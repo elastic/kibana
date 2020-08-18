@@ -45,7 +45,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
       .forEach((key) => {
         const propType = typeof obj[key];
         if (propType === 'function') {
-          obj[key] = jest.fn();
+          obj[key] = jest.fn(() => createSuccessTransportRequestPromise({}));
         } else if (propType === 'object' && obj[key] != null) {
           mockify(obj[key]);
         }
@@ -70,14 +70,14 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   return (mock as unknown) as DeeplyMockedKeys<Client>;
 };
 
-export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
+export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
-const createClientMock = (): ElasticSearchClientMock =>
-  (createInternalClientMock() as unknown) as ElasticSearchClientMock;
+const createClientMock = (): ElasticsearchClientMock =>
+  (createInternalClientMock() as unknown) as ElasticsearchClientMock;
 
 interface ScopedClusterClientMock {
-  asInternalUser: ElasticSearchClientMock;
-  asCurrentUser: ElasticSearchClientMock;
+  asInternalUser: ElasticsearchClientMock;
+  asCurrentUser: ElasticsearchClientMock;
 }
 
 const createScopedClusterClientMock = () => {
@@ -90,7 +90,7 @@ const createScopedClusterClientMock = () => {
 };
 
 export interface ClusterClientMock {
-  asInternalUser: ElasticSearchClientMock;
+  asInternalUser: ElasticsearchClientMock;
   asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
@@ -124,32 +124,41 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
   abort: jest.MockedFunction<() => undefined>;
 };
 
-const createMockedClientResponse = <T>(body: T): MockedTransportRequestPromise<ApiResponse<T>> => {
-  const response: ApiResponse<T> = {
-    body,
-    statusCode: 200,
-    warnings: [],
-    headers: {},
-    meta: {} as any,
-  };
+const createSuccessTransportRequestPromise = <T>(
+  body: T,
+  { statusCode = 200 }: { statusCode?: number } = {}
+): MockedTransportRequestPromise<ApiResponse<T>> => {
+  const response = createApiResponse({ body, statusCode });
   const promise = Promise.resolve(response);
   (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
 
   return promise as MockedTransportRequestPromise<ApiResponse<T>>;
 };
 
-const createMockedClientError = (err: any): MockedTransportRequestPromise<never> => {
+const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPromise<never> => {
   const promise = Promise.reject(err);
   (promise as MockedTransportRequestPromise<never>).abort = jest.fn();
   return promise as MockedTransportRequestPromise<never>;
 };
 
+function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
+  return {
+    body: {},
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+    ...opts,
+  };
+}
+
 export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
-  createElasticSearchClient: createClientMock,
+  createElasticsearchClient: createClientMock,
   createInternalClient: createInternalClientMock,
-  createClientResponse: createMockedClientResponse,
-  createClientError: createMockedClientError,
+  createSuccessTransportRequestPromise,
+  createErrorTransportRequestPromise,
+  createApiResponse,
 };

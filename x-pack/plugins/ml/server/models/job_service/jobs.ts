@@ -48,7 +48,7 @@ interface Results {
 }
 
 export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
-  const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
+  const { callAsInternalUser } = mlClusterClient;
 
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClusterClient);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(mlClusterClient);
@@ -400,7 +400,7 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     const detailed = true;
     const jobIds = [];
     try {
-      const tasksList = await callAsCurrentUser('tasks.list', { actions, detailed });
+      const tasksList = await callAsInternalUser('tasks.list', { actions, detailed });
       Object.keys(tasksList.nodes).forEach((nodeId) => {
         const tasks = tasksList.nodes[nodeId].tasks;
         Object.keys(tasks).forEach((taskId) => {

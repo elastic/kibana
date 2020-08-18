@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
-  // Skipped as failing on ES Promotion: https://github.com/elastic/kibana/issues/70818
-  describe.skip('dls', function () {
+  describe('dls', function () {
     before('initialize tests', async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');

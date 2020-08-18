@@ -25,8 +25,7 @@ interface Props {
   setAlertParams: (key: string, value: any) => void;
 }
 
-// eslint-disable-next-line import/no-default-export
-export default function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
+export function AnomalyAlertComponent({ setAlertParams, alertParams }: Props) {
   const [severity, setSeverity] = useState(DEFAULT_SEVERITY);
 
   const monitorIdStore = useSelector(monitorIdSelector);

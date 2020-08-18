@@ -25,7 +25,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
     return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
-  } else if (sourceStatus?.logIndicesExist) {
+  } else if (sourceStatus?.logIndexStatus !== 'missing') {
     return <LogsPageLogsContent />;
   } else {
     return <LogsPageNoIndicesContent />;

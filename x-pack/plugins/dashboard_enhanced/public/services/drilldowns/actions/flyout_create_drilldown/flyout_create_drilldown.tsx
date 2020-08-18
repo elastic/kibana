@@ -6,7 +6,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
+import {
+  ActionByType,
+  APPLY_FILTER_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
@@ -42,7 +47,9 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
 
-    return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
+    return supportedTriggers.some((trigger) =>
+      [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, APPLY_FILTER_TRIGGER].includes(trigger)
+    );
   }
 
   public async isCompatible(context: EmbeddableContext) {

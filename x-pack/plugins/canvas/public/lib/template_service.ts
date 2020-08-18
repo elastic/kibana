@@ -10,7 +10,7 @@ import { platformService } from '../services';
 import { CanvasTemplate } from '../../types';
 
 const getApiPath = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_TEMPLATES}`;
 };
 

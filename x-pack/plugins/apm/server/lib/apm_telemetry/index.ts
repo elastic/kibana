@@ -5,8 +5,12 @@
  */
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CoreSetup, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  CoreSetup,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server';
 import { APMConfig } from '../..';
 import {
   TaskManagerSetupContract,
@@ -110,7 +114,7 @@ export async function createApmTelemetry({
 
         return data;
       } catch (err) {
-        if (err.output?.statusCode === 404) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           // task has not run yet, so no saved object to return
           return {};
         }

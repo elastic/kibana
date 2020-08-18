@@ -10,12 +10,7 @@ import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  AnomalySwimlaneEmbeddable,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
+import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
@@ -24,11 +19,16 @@ import {
 } from '../../application/explorer/swimlane_container';
 import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import { MlDependencies } from '../../application/app';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions/triggers';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
+import {
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneServices,
+} from '..';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
-  embeddableContext: AnomalySwimlaneEmbeddable;
+  embeddableContext: InstanceType<IAnomalySwimlaneEmbeddable>;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;

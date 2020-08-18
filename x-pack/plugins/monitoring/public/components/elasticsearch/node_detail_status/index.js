@@ -11,7 +11,7 @@ import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { AlertsStatus } from '../../../alerts/status';
 
-export function NodeDetailStatus({ stats, alerts = {} }) {
+export function NodeDetailStatus({ stats, alerts = {}, alertsStateFilter = () => true }) {
   const {
     transport_address: transportAddress,
     usedHeap,
@@ -33,7 +33,7 @@ export function NodeDetailStatus({ stats, alerts = {} }) {
       label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.alerts', {
         defaultMessage: 'Alerts',
       }),
-      value: <AlertsStatus alerts={alerts} showOnlyCount={true} />,
+      value: <AlertsStatus alerts={alerts} showOnlyCount={true} stateFilter={alertsStateFilter} />,
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress', {

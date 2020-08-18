@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   Setup,
@@ -32,17 +31,18 @@ export async function getErrorGroup({
   groupId: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const params = {
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      events: [ProcessorEvent.error as const],
+    },
     body: {
       size: 1,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES,
@@ -57,7 +57,7 @@ export async function getErrorGroup({
     },
   };
 
-  const resp = await client.search<APMError>(params);
+  const resp = await apmEventClient.search(params);
   const error = resp.hits.hits[0]?._source;
   const transactionId = error?.transaction?.id;
   const traceId = error?.trace?.id;

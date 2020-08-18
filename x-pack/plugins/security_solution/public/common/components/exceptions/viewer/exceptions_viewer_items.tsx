@@ -33,6 +33,7 @@ const MyExceptionItemContainer = styled(EuiFlexGroup)`
 
 interface ExceptionsViewerItemsProps {
   showEmpty: boolean;
+  showNoResults: boolean;
   isInitLoading: boolean;
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
@@ -43,6 +44,7 @@ interface ExceptionsViewerItemsProps {
 
 const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   showEmpty,
+  showNoResults,
   isInitLoading,
   exceptions,
   loadingItemIds,
@@ -51,12 +53,22 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   onEditExceptionItem,
 }): JSX.Element => (
   <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
-    {showEmpty || isInitLoading ? (
+    {showEmpty || showNoResults || isInitLoading ? (
       <EuiFlexItem grow={1}>
         <EuiEmptyPrompt
-          iconType="advancedSettingsApp"
-          title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
-          body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
+          iconType={showNoResults ? 'searchProfilerApp' : 'list'}
+          title={
+            <h2 data-test-subj="exceptionsEmptyPromptTitle">
+              {showNoResults ? '' : i18n.EXCEPTION_EMPTY_PROMPT_TITLE}
+            </h2>
+          }
+          body={
+            <p data-test-subj="exceptionsEmptyPromptBody">
+              {showNoResults
+                ? i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
+                : i18n.EXCEPTION_EMPTY_PROMPT_BODY}
+            </p>
+          }
           data-test-subj="exceptionsEmptyPrompt"
         />
       </EuiFlexItem>

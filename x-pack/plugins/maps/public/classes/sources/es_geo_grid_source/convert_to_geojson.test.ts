@@ -53,6 +53,7 @@ describe('convertCompositeRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
@@ -80,6 +81,7 @@ describe('convertCompositeRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
@@ -127,6 +129,7 @@ describe('convertRegularRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
@@ -154,6 +157,7 @@ describe('convertRegularRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',

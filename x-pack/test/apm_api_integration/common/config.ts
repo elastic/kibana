@@ -53,6 +53,7 @@ export function createTestConfig(settings: Settings) {
         ...services,
         supertest: supertestAsApmReadUser,
         supertestAsApmReadUser,
+        supertestAsNoAccessUser: supertestAsApmUser(servers.kibana, ApmUser.noAccessUser),
         supertestAsApmWriteUser: supertestAsApmUser(servers.kibana, ApmUser.apmWriteUser),
         supertestAsApmAnnotationsWriteUser: supertestAsApmUser(
           servers.kibana,

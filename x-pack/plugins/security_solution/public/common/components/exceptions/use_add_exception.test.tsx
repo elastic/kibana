@@ -144,7 +144,7 @@ describe('useAddOrUpdateException', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = render();
       await waitForNextUpdate();
-      expect(result.current).toEqual([{ isLoading: false }, null]);
+      expect(result.current).toEqual([{ isLoading: false }, result.current[1]]);
     });
   });
 

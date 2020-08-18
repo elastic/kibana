@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
@@ -109,13 +109,11 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
 }
 
 interface SpanActionToolTipProps {
+  children: ReactNode;
   item?: IWaterfallItem;
 }
 
-const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
-  item,
-  children,
-}) => {
+function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
   if (item?.docType === 'span') {
     return (
       <EuiToolTip content={`${item.doc.span.subtype}.${item.doc.span.action}`}>
@@ -124,7 +122,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
     );
   }
   return <>{children}</>;
-};
+}
 
 function Duration({ item }: { item: IWaterfallItem }) {
   return (

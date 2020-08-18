@@ -46,14 +46,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertJobTypeSelection(expectedSelection: string) {
-      const actualSelection = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardJobTypeSelect',
-        'value'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const actualSelection = await testSubjects.getAttribute(
+          'mlAnalyticsCreateJobWizardJobTypeSelect',
+          'value'
+        );
+        expect(actualSelection).to.eql(
+          expectedSelection,
+          `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
+        );
+      });
     },
 
     async selectJobType(jobType: string) {
@@ -199,7 +201,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     // },
 
     async assertDestIndexInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      await retry.tryForTime(4000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      });
     },
 
     async assertDestIndexValue(expectedValue: string) {
@@ -224,23 +228,33 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexValue(destIndex);
     },
 
+    async waitForDependentVariableInputLoaded() {
+      await testSubjects.existOrFail('~mlAnalyticsCreateJobWizardDependentVariableSelect', {
+        timeout: 5 * 1000,
+      });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDependentVariableSelect loaded', {
+        timeout: 30 * 1000,
+      });
+    },
+
     async assertDependentVariableInputExists() {
       await retry.tryForTime(8000, async () => {
         await testSubjects.existOrFail(
-          'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+          '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
         );
       });
     },
 
     async assertDependentVariableInputMissing() {
       await testSubjects.missingOrFail(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
     },
 
     async assertDependentVariableSelection(expectedSelection: string[]) {
+      await this.waitForDependentVariableInputLoaded();
       const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
       expect(actualSelection).to.eql(
         expectedSelection,
@@ -249,8 +263,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async selectDependentVariable(dependentVariable: string) {
+      await this.waitForDependentVariableInputLoaded();
       await comboBox.set(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
       await this.assertDependentVariableSelection([dependentVariable]);
@@ -333,18 +348,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToAdditionalOptionsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertAdditionalOptionsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertAdditionalOptionsStepActive();
+      });
     },
 
     async continueToDetailsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertDetailsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertDetailsStepActive();
+      });
     },
 
     async continueToCreateStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertCreateStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertCreateStepActive();
+      });
     },
 
     async assertModelMemoryInputExists() {
@@ -415,6 +436,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         expectedCheckState,
         `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {

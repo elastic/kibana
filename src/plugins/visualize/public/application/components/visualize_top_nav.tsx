@@ -18,10 +18,8 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { isEqual } from 'lodash';
 
 import { OverlayRef } from 'kibana/public';
-import { Query } from 'src/plugins/data/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   VisualizeServices,
@@ -40,6 +38,7 @@ interface VisualizeTopNavProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   originatingApp?: string;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
   savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
@@ -53,6 +52,7 @@ const TopNav = ({
   setHasUnsavedChanges,
   hasUnappliedChanges,
   originatingApp,
+  setOriginatingApp,
   savedVisInstance,
   stateContainer,
   visualizationIdFromUrl,
@@ -66,15 +66,13 @@ const TopNav = ({
     setInspectorSession(session);
   }, [embeddableHandler]);
 
-  const updateQuery = useCallback(
-    ({ query }: { query?: Query }) => {
-      if (!isEqual(currentAppState.query, query)) {
-        stateContainer.transitions.set('query', query || currentAppState.query);
-      } else {
+  const handleRefresh = useCallback(
+    (_payload: any, isUpdate?: boolean) => {
+      if (isUpdate === false) {
         savedVisInstance.embeddableHandler.reload();
       }
     },
-    [currentAppState.query, savedVisInstance.embeddableHandler, stateContainer.transitions]
+    [savedVisInstance.embeddableHandler]
   );
 
   const config = useMemo(() => {
@@ -86,6 +84,7 @@ const TopNav = ({
           hasUnappliedChanges,
           openInspector,
           originatingApp,
+          setOriginatingApp,
           savedVisInstance,
           stateContainer,
           visualizationIdFromUrl,
@@ -100,6 +99,7 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
+    setOriginatingApp,
     savedVisInstance,
     stateContainer,
     visualizationIdFromUrl,
@@ -145,8 +145,7 @@ const TopNav = ({
     <TopNavMenu
       appName={APP_NAME}
       config={config}
-      query={currentAppState.query}
-      onQuerySubmit={updateQuery}
+      onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPattern ? [indexPattern] : undefined}

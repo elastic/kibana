@@ -12,7 +12,10 @@ import { createStore } from 'redux';
 import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
-} from '../mocks/resolver_tree';
+  mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
+  mockTreeWithAllProcessesTerminated,
+  mockTreeWithNoProcessEvents,
+} from '../../mocks/resolver_tree';
 import { uniquePidForProcess } from '../../models/process_event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 
@@ -298,6 +301,34 @@ describe('data state', () => {
       expect(selectors.ariaFlowtoCandidate(state())(secondAncestorID)).toBe(null);
     });
   });
+  describe('with a tree with all processes terminated', () => {
+    const originID = 'c';
+    const firstAncestorID = 'b';
+    const secondAncestorID = 'a';
+    beforeEach(() => {
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: mockTreeWithAllProcessesTerminated({
+            originID,
+            firstAncestorID,
+            secondAncestorID,
+          }),
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have origin as terminated', () => {
+      expect(selectors.isProcessTerminated(state())(originID)).toBe(true);
+    });
+    it('should have first ancestor as termianted', () => {
+      expect(selectors.isProcessTerminated(state())(firstAncestorID)).toBe(true);
+    });
+    it('should have second ancestor as terminated', () => {
+      expect(selectors.isProcessTerminated(state())(secondAncestorID)).toBe(true);
+    });
+  });
   describe('with a tree with 2 children and no ancestors', () => {
     const originID = 'c';
     const firstChildID = 'd';
@@ -351,6 +382,53 @@ describe('data state', () => {
           selectors.ariaFlowtoCandidate(state())(uniquePidForProcess(event));
         }).not.toThrow();
       }
+    });
+  });
+  describe('with a tree with 1 ancestor and 2 children, where all nodes have 2 graphable events', () => {
+    const ancestorID = 'b';
+    const originID = 'c';
+    const firstChildID = 'd';
+    const secondChildID = 'e';
+    beforeEach(() => {
+      const tree = mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents({
+        ancestorID,
+        originID,
+        firstChildID,
+        secondChildID,
+      });
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: tree,
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have 4 graphable processes', () => {
+      expect(selectors.graphableProcesses(state()).length).toBe(4);
+    });
+  });
+  describe('with a tree with no process events', () => {
+    beforeEach(() => {
+      const tree = mockTreeWithNoProcessEvents();
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: tree,
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should return an empty layout', () => {
+      expect(selectors.layout(state())).toMatchInlineSnapshot(`
+        Object {
+          "ariaLevels": Map {},
+          "edgeLineSegments": Array [],
+          "processNodePositions": Map {},
+        }
+      `);
     });
   });
 });

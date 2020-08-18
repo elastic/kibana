@@ -408,10 +408,47 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
+  test('keeps existing seriesType for initial tables', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
+      preferredSeriesType: 'line',
+      layers: [
+        {
+          accessors: [],
+          layerId: 'first',
+          seriesType: 'line',
+          splitAccessor: undefined,
+          xAccessor: '',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'initial',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].hide).toEqual(false);
+    expect(suggestions[0].state.preferredSeriesType).toEqual('line');
+    expect(suggestions[0].state.layers[0].seriesType).toEqual('line');
+  });
+
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -450,6 +487,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -559,6 +600,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -598,6 +643,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price'],
@@ -638,6 +687,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],

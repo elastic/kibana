@@ -18,9 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  // Temporarily skipped to promote snapshot
-  // Re-enabled in https://github.com/elastic/kibana/pull/71727
-  describe.skip('Package Config - create', async function () {
+  describe('Package Config - create', async function () {
     let agentConfigId: string;
 
     before(async function () {
@@ -102,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.8.0',
+              version: '0.13.0',
             },
           })
           .expect(200);
@@ -120,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.8.0',
+              version: '0.13.0',
             },
           })
           .expect(500);

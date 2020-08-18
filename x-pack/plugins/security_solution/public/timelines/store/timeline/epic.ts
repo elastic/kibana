@@ -6,6 +6,7 @@
 
 import {
   get,
+  getOr,
   has,
   merge as mergeObject,
   set,
@@ -172,7 +173,7 @@ export const createTimelineEpic = <State>(): Epic<
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
           myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
           myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
-          return true;
+          return getOr(false, 'payload.savedTimeline', action);
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&

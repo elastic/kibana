@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Flaky: https://github.com/elastic/kibana/issues/70885
-  describe.skip('jobs cloning supported by UI form', function () {
+  describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -157,6 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
+          await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
         });
 
         it('should open the wizard with a proper header', async () => {

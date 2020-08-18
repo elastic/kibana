@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { Tray as Component } from './tray';
-
-export const Tray = pure(Component);
+export { Tray } from './tray';

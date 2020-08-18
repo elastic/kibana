@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS IAM Deactivation of MFA Device",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:DeactivateMFADevice and event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iam/deactivate-mfa-device.html",
@@ -24,7 +25,10 @@
   "severity": "medium",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Monitoring",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

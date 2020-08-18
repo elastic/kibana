@@ -16,6 +16,7 @@ export const getDnsParsedData = <T>(
   data.forEach((bucketData: unknown) => {
     const time = get('key', bucketData);
     const histData = getOr([], keyBucket, bucketData).map(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ({ key, doc_count }: DnsHistogramSubBucket) => ({
         x: time,
         y: doc_count,
@@ -35,6 +36,7 @@ export const getGenericData = <T>(
   data.forEach((bucketData: unknown) => {
     const group = get('key', bucketData);
     const histData = getOr([], keyBucket, bucketData).map(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ({ key, doc_count }: HistogramBucket) => ({
         x: key,
         y: doc_count,

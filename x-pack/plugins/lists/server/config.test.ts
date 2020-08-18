@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
+
 import { ConfigSchema, ConfigType } from './config';
 import { getConfigMock, getConfigMockDecoded } from './config.mock';
 
@@ -59,6 +61,26 @@ describe('config_schema', () => {
     };
     expect(() => ConfigSchema.validate(mock)).toThrow(
       '[importBufferSize]: Value must be equal to or greater than [1].'
+    );
+  });
+
+  test('it throws if the "importTimeout" value is less than 2 minutes', () => {
+    const mock: ConfigType = {
+      ...getConfigMockDecoded(),
+      importTimeout: moment.duration(2, 'minutes').subtract(1, 'second'),
+    };
+    expect(() => ConfigSchema.validate(mock)).toThrow(
+      '[importTimeout]: duration cannot be less than 2 minutes'
+    );
+  });
+
+  test('it throws if the "importTimeout" value is greater than 1 hour', () => {
+    const mock: ConfigType = {
+      ...getConfigMockDecoded(),
+      importTimeout: moment.duration(1, 'hour').add(1, 'second'),
+    };
+    expect(() => ConfigSchema.validate(mock)).toThrow(
+      '[importTimeout]: duration cannot be greater than 30 minutes'
     );
   });
 });

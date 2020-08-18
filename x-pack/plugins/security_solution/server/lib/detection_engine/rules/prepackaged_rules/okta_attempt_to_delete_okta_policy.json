@@ -12,6 +12,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Attempt to Delete Okta Policy",
+  "note": "The Okta Filebeat module must be enabled to use this rule.",
   "query": "event.module:okta and event.dataset:okta.system and event.action:policy.lifecycle.delete",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
@@ -22,7 +23,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Okta"
+    "Okta",
+    "SecOps",
+    "Monitoring",
+    "Continuous Monitoring"
   ],
   "type": "query",
   "version": 1

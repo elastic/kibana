@@ -11,7 +11,7 @@ interface Props {
   section: ISection;
 }
 
-export const EmptySection = ({ section }: Props) => {
+export function EmptySection({ section }: Props) {
   return (
     <EuiEmptyPrompt
       style={{ maxWidth: 'none' }}
@@ -36,4 +36,4 @@ export const EmptySection = ({ section }: Props) => {
       }
     />
   );
-};
+}

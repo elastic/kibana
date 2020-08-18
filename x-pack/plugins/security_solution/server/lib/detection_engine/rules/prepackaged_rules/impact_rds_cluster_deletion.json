@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS RDS Cluster Deletion",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:(DeleteDBCluster or DeleteGlobalCluster) and event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/delete-db-cluster.html",
@@ -26,7 +27,10 @@
   "severity": "medium",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Asset Visibility",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

@@ -17,7 +17,7 @@ import {
   EuiOverlayMask,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
@@ -192,18 +192,28 @@ export const NewCase = React.memo<NewCaseProps>(
       timelineTitle,
     ]);
 
-    return (
-      <EuiButtonEmpty
-        data-test-subj="attach-timeline-case"
-        color={compact ? undefined : 'text'}
-        iconSide="left"
-        iconType="paperClip"
-        disabled={timelineStatus === TimelineStatus.draft}
-        onClick={handleClick}
-        size={compact ? 'xs' : undefined}
-      >
-        {buttonText}
-      </EuiButtonEmpty>
+    const button = useMemo(
+      () => (
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-case"
+          color={compact ? undefined : 'text'}
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+          size={compact ? 'xs' : undefined}
+        >
+          {buttonText}
+        </EuiButtonEmpty>
+      ),
+      [compact, timelineStatus, handleClick, buttonText]
+    );
+    return timelineStatus === TimelineStatus.draft ? (
+      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
     );
   }
 );
@@ -225,8 +235,8 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
       ? i18n.ATTACH_TO_EXISTING_CASE
       : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
 
-    return (
-      <>
+    const button = useMemo(
+      () => (
         <EuiButtonEmpty
           data-test-subj="attach-timeline-existing-case"
           color={compact ? undefined : 'text'}
@@ -238,7 +248,15 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
         >
           {buttonText}
         </EuiButtonEmpty>
-      </>
+      ),
+      [buttonText, handleClick, timelineStatus, compact]
+    );
+    return timelineStatus === TimelineStatus.draft ? (
+      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
     );
   }
 );

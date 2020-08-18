@@ -37,7 +37,7 @@ const MainContainer = styled.div`
   height: 100%;
 `;
 
-const App = () => {
+function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
@@ -59,9 +59,9 @@ const App = () => {
       </MainContainer>
     </ThemeProvider>
   );
-};
+}
 
-const ApmAppRoot = ({
+function ApmAppRoot({
   core,
   deps,
   routerHistory,
@@ -71,7 +71,7 @@ const ApmAppRoot = ({
   deps: ApmPluginSetupDeps;
   routerHistory: typeof history;
   config: ConfigSchema;
-}) => {
+}) {
   const i18nCore = core.i18n;
   const plugins = deps;
   const apmPluginContextValue = {
@@ -111,7 +111,7 @@ const ApmAppRoot = ({
       </AlertsContextProvider>
     </ApmPluginContext.Provider>
   );
-};
+}
 
 /**
  * This module is rendered asynchronously in the Kibana platform.

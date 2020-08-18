@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validate, initMonitorStatusAlertType } from '../monitor_status';
+import { initMonitorStatusAlertType } from '../monitor_status';
+import { validateMonitorStatusParams as validate } from '../lazy_wrapper/validate_monitor_status';
 
 describe('monitor status alert type', () => {
   describe('validate', () => {
@@ -201,24 +202,14 @@ describe('monitor status alert type', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "alertParamsExpression": [Function],
-        "defaultActionMessage": "{{context.message}}
-      Last triggered at: {{state.lastTriggeredAt}}
-      ",
+        "defaultActionMessage": "Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
-        "name": <Provider
-          store={
-            Object {
-              "dispatch": [Function],
-              "getState": [Function],
-              "replaceReducer": [Function],
-              "subscribe": [Function],
-              Symbol(observable): [Function],
-            }
-          }
-        >
-          <MonitorStatusTitle />
-        </Provider>,
+        "name": <FormattedMessage
+          defaultMessage="Uptime monitor status"
+          id="xpack.uptime.alerts.monitorStatus.title.label"
+          values={Object {}}
+        />,
         "requiresAppContext": false,
         "validate": [Function],
       }

@@ -68,7 +68,7 @@ const FooterContainer = styled(EuiFlexGroup).attrs<HeightProp>(({ height }) => (
     height: `${height}px`,
   },
 }))<HeightProp>`
-  flex: 0;
+  flex: 0 0 auto;
 `;
 
 FooterContainer.displayName = 'FooterContainer';

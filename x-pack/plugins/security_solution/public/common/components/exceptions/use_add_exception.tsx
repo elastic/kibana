@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import {
@@ -60,7 +60,19 @@ export const useAddOrUpdateException = ({
   onSuccess,
 }: UseAddOrUpdateExceptionProps): ReturnUseAddOrUpdateException => {
   const [isLoading, setIsLoading] = useState(false);
-  const addOrUpdateException = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
+    async (exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+      if (addOrUpdateExceptionRef.current !== null) {
+        addOrUpdateExceptionRef.current(
+          exceptionItemsToAddOrUpdate,
+          alertIdToClose,
+          bulkCloseIndex
+        );
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -114,6 +126,7 @@ export const useAddOrUpdateException = ({
           await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
             status: 'closed',
+            signal: abortCtrl.signal,
           });
         }
 
@@ -131,6 +144,7 @@ export const useAddOrUpdateException = ({
               query: filter,
             },
             status: 'closed',
+            signal: abortCtrl.signal,
           });
         }
 
@@ -148,12 +162,12 @@ export const useAddOrUpdateException = ({
       }
     };
 
-    addOrUpdateException.current = addOrUpdateExceptionItems;
+    addOrUpdateExceptionRef.current = addOrUpdateExceptionItems;
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();
     };
   }, [http, onSuccess, onError]);
 
-  return [{ isLoading }, addOrUpdateException.current];
+  return [{ isLoading }, addOrUpdateException];
 };

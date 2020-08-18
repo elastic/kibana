@@ -11,10 +11,12 @@ import React from 'react';
 import { RecreateJobCallout } from './recreate_job_callout';
 
 export const JobConfigurationOutdatedCallout: React.FC<{
+  hasSetupCapabilities: boolean;
   moduleName: string;
   onRecreateMlJob: () => void;
-}> = ({ moduleName, onRecreateMlJob }) => (
+}> = ({ hasSetupCapabilities, moduleName, onRecreateMlJob }) => (
   <RecreateJobCallout
+    hasSetupCapabilities={hasSetupCapabilities}
     title={i18n.translate('xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutTitle', {
       defaultMessage: 'The {moduleName} ML job configuration is outdated',
       values: {

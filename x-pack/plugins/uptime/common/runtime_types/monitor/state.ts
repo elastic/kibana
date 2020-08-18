@@ -37,6 +37,9 @@ export const StateType = t.intersection([
         name: t.array(t.string),
       }),
     }),
+    service: t.partial({
+      name: t.string,
+    }),
   }),
 ]);
 

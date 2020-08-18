@@ -157,7 +157,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle() || '',
+      title: this.getTitle() || this.title || '',
     });
   };
 
@@ -215,8 +215,17 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dirty = true;
     }
 
+    // propagate the title to the output embeddable
+    // but only when the visualization is in edit/Visualize mode
+    if (!this.parent && this.vis.title !== this.output.title) {
+      this.updateOutput({ title: this.vis.title });
+    }
+
+    // Keep title depending on the output Embeddable to decouple the
+    // visual appearance of the title and the actual title content (useful in Dashboard)
     if (this.output.title !== this.title) {
       this.title = this.output.title;
+
       if (this.domNode) {
         this.domNode.setAttribute('data-title', this.title || '');
       }
@@ -301,12 +310,21 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId =
-            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
-          const context = {
-            embeddable: this,
-            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-          };
+          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+          let context;
+
+          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+            context = {
+              embeddable: this,
+              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+              ...event.data,
+            };
+          } else {
+            context = {
+              embeddable: this,
+              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
+            };
+          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }

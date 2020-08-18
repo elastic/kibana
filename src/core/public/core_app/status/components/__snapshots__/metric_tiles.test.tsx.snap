@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricTile correct displays a byte metric 1`] = `
+<EuiCard
+  data-test-subj="serverMetric-heap-total"
+  description="Heap Total"
+  layout="horizontal"
+  title="1.40 GB"
+/>
+`;
+
+exports[`MetricTile correct displays a float metric 1`] = `
+<EuiCard
+  data-test-subj="serverMetric-load"
+  description="Load"
+  layout="horizontal"
+  title="4.05, 3.37, 3.12"
+/>
+`;
+
+exports[`MetricTile correct displays a time metric 1`] = `
+<EuiCard
+  data-test-subj="serverMetric-response-time-max"
+  description="Response Time Max"
+  layout="horizontal"
+  title="1234.00 ms"
+/>
+`;
+
+exports[`MetricTile correct displays an untyped metric 1`] = `
+<EuiCard
+  data-test-subj="serverMetric-a-metric"
+  description="A metric"
+  layout="horizontal"
+  title="1.80"
+/>
+`;

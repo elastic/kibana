@@ -45,6 +45,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
   );
 
   beforeEach(() => {
+    jest.useFakeTimers();
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
@@ -158,6 +159,8 @@ describe('AddFilterToGlobalSearchBar Component', () => {
     );
 
     wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+    wrapper.update();
+    jest.runAllTimers();
     wrapper.update();
 
     wrapper

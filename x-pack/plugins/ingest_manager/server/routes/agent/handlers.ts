@@ -48,7 +48,7 @@ export const getAgentHandler: RequestHandler<TypeOf<
 
     return response.ok({ body });
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (soClient.errors.isNotFoundError(e)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });

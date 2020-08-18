@@ -17,11 +17,9 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { HttpService } from '../../core/public/http';
 import { fatalErrorsServiceMock } from '../../core/public/fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../../core/public/injected_metadata/injected_metadata_service.mock';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export type SetupTap = (
   injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>,

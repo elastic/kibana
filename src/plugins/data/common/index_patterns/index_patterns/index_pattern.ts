@@ -22,10 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
+import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -36,7 +36,7 @@ import {
   IIndexPatternsApiClient,
   IndexPatternAttributes,
 } from '../types';
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
@@ -138,12 +138,8 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats,
-      onNotification,
-    });
+    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
 
-    this.fields = this.createFieldList(this, [], this.shortDotsEnable);
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
     this.flattenHit = flattenHitWrapper(this, uiSettingsValues.metaFields);
@@ -161,49 +157,45 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = this.fieldFormats.getType(mapping.id);
+    const FieldFormatter = this.fieldFormats.getType(mapping.id);
 
     return (
-      FieldFormat &&
-      new FieldFormat(
+      FieldFormatter &&
+      new FieldFormatter(
         mapping.params,
         (key: string) => this.uiSettingsValues[key]?.userValue || this.uiSettingsValues[key]?.value
       )
     );
   }
 
-  private initFields(input?: any) {
-    const newValue = input || this.fields;
-
-    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
-  }
-
-  private isFieldRefreshRequired(): boolean {
-    if (!this.fields) {
+  private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
+    if (!specs) {
       return true;
     }
 
-    return this.fields.every((field) => {
+    return specs.every((spec) => {
       // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in field && 'searchable' in field;
+      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
 
       // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in field;
+      const hasDocValuesFlag = 'readFromDocValues' in spec;
 
       return !hasFieldCaps || !hasDocValuesFlag;
     });
   }
 
-  private async indexFields(forceFieldRefresh: boolean = false) {
+  private async indexFields(forceFieldRefresh: boolean = false, specs?: FieldSpec[]) {
     if (!this.id) {
       return;
     }
 
-    if (forceFieldRefresh || this.isFieldRefreshRequired()) {
+    if (forceFieldRefresh || this.isFieldRefreshRequired(specs)) {
       await this.refreshFields();
+    } else {
+      if (specs) {
+        this.fields.replaceAll(specs);
+      }
     }
-
-    this.initFields();
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
@@ -223,15 +215,13 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    // ignoring this because the same thing happens elsewhere but via _.assign
-    // @ts-expect-error
-    this.fields = spec.fields || [];
+    this.fields.replaceAll(spec.fields || []);
     this.typeMeta = spec.typeMeta;
+
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
 
-    this.initFields();
     return this;
   }
 
@@ -249,14 +239,16 @@ export class IndexPattern implements IIndexPattern {
     });
 
     // give index pattern all of the values
+    const fieldList = this.fields;
     _.assign(this, response);
+    this.fields = fieldList;
 
     if (!this.title && this.id) {
       this.title = this.id;
     }
     this.version = response.version;
 
-    return this.indexFields(forceFieldRefresh);
+    return this.indexFields(forceFieldRefresh, response.fields);
   }
 
   getComputedFields() {
@@ -359,32 +351,26 @@ export class IndexPattern implements IIndexPattern {
       throw new DuplicateField(name);
     }
 
-    this.fields.add(
-      new Field(
-        this,
-        {
-          name,
-          script,
-          fieldType,
-          scripted: true,
-          lang,
-          aggregatable: true,
-          filterable: true,
-          searchable: true,
-        },
-        false,
-        {
-          fieldFormats: this.fieldFormats,
-          onNotification: this.onNotification,
-        }
-      )
-    );
+    this.fields.add({
+      name,
+      script,
+      type: fieldType,
+      scripted: true,
+      lang,
+      aggregatable: true,
+      searchable: true,
+      count: 0,
+      readFromDocValues: false,
+    });
 
     await this.save();
   }
 
-  removeScriptedField(field: IFieldType) {
-    this.fields.remove(field);
+  removeScriptedField(fieldName: string) {
+    const field = this.fields.getByName(fieldName);
+    if (field) {
+      this.fields.remove(field);
+    }
     return this.save();
   }
 
@@ -417,11 +403,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.filter(this.fields, { scripted: false });
+    return [...this.fields.getAll().filter((field) => !field.scripted)];
   }
 
   getScriptedFields() {
-    return _.filter(this.fields, { scripted: true });
+    return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
   isTimeBased(): boolean {
@@ -438,11 +424,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getTimeField() {
-    if (!this.timeFieldName || !this.fields || !this.fields.getByName) return;
-    return this.fields.getByName(this.timeFieldName);
+    if (!this.timeFieldName || !this.fields || !this.fields.getByName) return undefined;
+    return this.fields.getByName(this.timeFieldName) || undefined;
   }
 
-  getFieldByName(name: string): Field | undefined {
+  getFieldByName(name: string): IndexPatternField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
   }
@@ -468,6 +454,16 @@ export class IndexPattern implements IIndexPattern {
     });
 
     return body;
+  }
+
+  getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
+    return (
+      this.fieldFormatMap[field.name] ||
+      this.fieldFormats.getDefaultInstance(
+        field.type as KBN_FIELD_TYPES,
+        field.esTypes as ES_FIELD_TYPES[]
+      )
+    );
   }
 
   async create(allowOverride: boolean = false) {
@@ -581,9 +577,8 @@ export class IndexPattern implements IIndexPattern {
 
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
-    const scripted = this.getScriptedFields();
-    const all = fields.concat(scripted);
-    await this.initFields(all);
+    const scripted = this.getScriptedFields().map((field) => field.spec);
+    this.fields.replaceAll([...fields, ...scripted]);
   }
 
   refreshFields() {

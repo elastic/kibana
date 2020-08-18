@@ -160,12 +160,16 @@ export function ChartSwitch(props: Props) {
         : () => {
             return switchVisType(
               subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI)
+              newVisualization.initialize(
+                props.framePublicAPI,
+                props.visualizationId === newVisualization.id ? props.visualizationState : undefined
+              )
             );
           },
       keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
       datasourceId: topSuggestion ? topSuggestion.datasourceId : undefined,
+      sameDatasources: dataLoss === 'nothing' && props.visualizationId === newVisualization.id,
     };
   }
 
@@ -184,6 +188,7 @@ export function ChartSwitch(props: Props) {
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
       props.visualizationMap,

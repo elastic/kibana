@@ -12,10 +12,11 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-import { UMFrontendLibs } from '../lib/lib';
-import { PLUGIN } from '../../common/constants';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
+
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -26,10 +27,8 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { kibanaService } from '../state/kibana_service';
-import { fetchIndexStatus } from '../state/api';
-import { ObservabilityPluginSetup } from '../../../observability/public';
-import { fetchUptimeOverviewData } from './uptime_overview_fetcher';
+import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
+import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -66,14 +65,23 @@ export class UptimePlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+    const getUptimeDataHelper = async () => {
+      const [coreStart] = await core.getStartServices();
+      const { UptimeDataHelper } = await import('./uptime_overview_fetcher');
 
+      return UptimeDataHelper(coreStart);
+    };
     plugins.observability.dashboard.register({
       appName: 'uptime',
       hasData: async () => {
-        const status = await fetchIndexStatus();
+        const dataHelper = await getUptimeDataHelper();
+        const status = await dataHelper.indexStatus();
         return status.docCount > 0;
       },
-      fetchData: fetchUptimeOverviewData,
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUptimeDataHelper();
+        return await dataHelper.overviewData(params);
+      },
     });
 
     core.application.register({
@@ -85,22 +93,15 @@ export class UptimePlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-        const { getKibanaFrameworkAdapter } = await import(
-          '../lib/adapters/framework/new_platform_adapter'
-        );
 
-        const { element } = params;
+        const { renderApp } = await import('./render_app');
 
-        const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
-        };
-        return libs.framework.render(element);
+        return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
-    kibanaService.core = start;
     alertTypeInitializers.forEach((init) => {
       const alertInitializer = init({
         core: start,

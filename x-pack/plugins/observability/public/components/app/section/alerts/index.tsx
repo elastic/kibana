@@ -33,7 +33,7 @@ interface Props {
   alerts: Alert[];
 }
 
-export const AlertsSection = ({ alerts }: Props) => {
+export function AlertsSection({ alerts }: Props) {
   const { core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
 
@@ -130,4 +130,4 @@ export const AlertsSection = ({ alerts }: Props) => {
       </EuiFlexGroup>
     </SectionContainer>
   );
-};
+}

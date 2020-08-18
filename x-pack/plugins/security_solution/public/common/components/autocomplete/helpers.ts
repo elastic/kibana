@@ -30,13 +30,18 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
   }
 };
 
-export const validateParams = (
+export const paramIsValid = (
   params: string | undefined,
-  field: IFieldType | undefined
+  field: IFieldType | undefined,
+  isRequired: boolean,
+  touched: boolean
 ): boolean => {
-  // Box would show error state if empty otherwise
-  if (params == null || params === '') {
+  if (isRequired && touched && (params == null || params === '')) {
     return false;
+  }
+
+  if ((isRequired && !touched) || (!isRequired && (params == null || params === ''))) {
+    return true;
   }
 
   const types = field != null && field.esTypes != null ? field.esTypes : [];
@@ -44,7 +49,7 @@ export const validateParams = (
   return types.reduce<boolean>((acc, type) => {
     switch (type) {
       case 'date':
-        const moment = dateMath.parse(params);
+        const moment = dateMath.parse(params ?? '');
         return Boolean(moment && moment.isValid());
       default:
         return acc;
@@ -64,11 +69,12 @@ export function getGenericComboBoxProps<T>({
   const newLabels = options.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
   const newSelectedComboOptions = selectedOptions
+    .map(getLabel)
     .filter((option) => {
-      return options.indexOf(option) !== -1;
+      return newLabels.indexOf(option) !== -1;
     })
     .map((option) => {
-      return newComboOptions[options.indexOf(option)];
+      return newComboOptions[newLabels.indexOf(option)];
     });
 
   return {

@@ -46,7 +46,7 @@ const StyledProgress = styled.div<{ color?: string }>`
   }
 `;
 
-export const MetricsSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
+export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
   const theme = useContext(ThemeContext);
 
   const { start, end } = absoluteTime;
@@ -58,7 +58,7 @@ export const MetricsSection = ({ absoluteTime, relativeTime, bucketSize }: Props
         bucketSize,
       });
     }
-  }, [start, end, bucketSize]);
+  }, [start, end, bucketSize, relativeTime]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
@@ -162,9 +162,9 @@ export const MetricsSection = ({ absoluteTime, relativeTime, bucketSize }: Props
       </EuiFlexGroup>
     </SectionContainer>
   );
-};
+}
 
-const AreaChart = ({
+function AreaChart({
   serie,
   isLoading,
   color,
@@ -172,7 +172,7 @@ const AreaChart = ({
   serie?: Series;
   isLoading: boolean;
   color: string;
-}) => {
+}) {
   const chartTheme = useChartTheme();
 
   return (
@@ -191,4 +191,4 @@ const AreaChart = ({
       )}
     </ChartContainer>
   );
-};
+}

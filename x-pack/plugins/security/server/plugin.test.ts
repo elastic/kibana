@@ -69,6 +69,9 @@ describe('Security Plugin', () => {
                 },
                 "authz": Object {
                   "actions": Actions {
+                    "alerting": AlertingActions {
+                      "prefix": "alerting:version:",
+                    },
                     "api": ApiActions {
                       "prefix": "api:version:",
                     },
@@ -88,6 +91,7 @@ describe('Security Plugin', () => {
                     "version": "version:version",
                     "versionNumber": "version",
                   },
+                  "checkPrivilegesDynamicallyWithRequest": [Function],
                   "checkPrivilegesWithRequest": [Function],
                   "mode": Object {
                     "useRbacForRequest": [Function],

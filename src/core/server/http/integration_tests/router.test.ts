@@ -302,6 +302,130 @@ describe('Options', () => {
       });
     });
   });
+
+  describe('timeout', () => {
+    it('should timeout if configured with a small timeout value for a POST', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.post(
+        { path: '/a', validate: false, options: { timeout: 1000 } },
+        async (context, req, res) => {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return res.ok({});
+        }
+      );
+      router.post({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+      expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).post('/b').expect(200, {});
+    });
+
+    it('should timeout if configured with a small timeout value for a PUT', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.put(
+        { path: '/a', validate: false, options: { timeout: 1000 } },
+        async (context, req, res) => {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return res.ok({});
+        }
+      );
+      router.put({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+
+      expect(supertest(innerServer.listener).put('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).put('/b').expect(200, {});
+    });
+
+    it('should timeout if configured with a small timeout value for a DELETE', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.delete(
+        { path: '/a', validate: false, options: { timeout: 1000 } },
+        async (context, req, res) => {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return res.ok({});
+        }
+      );
+      router.delete({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+      expect(supertest(innerServer.listener).delete('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).delete('/b').expect(200, {});
+    });
+
+    it('should timeout if configured with a small timeout value for a GET', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        // Note: There is a bug within Hapi Server where it cannot set the payload timeout for a GET call but it also cannot configure a timeout less than the payload body
+        // so the least amount of possible time to configure the timeout is 10 seconds.
+        { path: '/a', validate: false, options: { timeout: 100000 } },
+        async (context, req, res) => {
+          // Cause a wait of 20 seconds to cause the socket hangup
+          await new Promise((resolve) => setTimeout(resolve, 200000));
+          return res.ok({});
+        }
+      );
+      router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+      await server.start();
+
+      expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+      await supertest(innerServer.listener).get('/b').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a POST', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.post(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+      await supertest(innerServer.listener).post('/a').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a PUT', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.put(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+
+      await supertest(innerServer.listener).put('/a').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a DELETE', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.delete(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+      await supertest(innerServer.listener).delete('/a').expect(200, {});
+    });
+
+    it('should not timeout if configured with a 5 minute timeout value for a GET', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        { path: '/a', validate: false, options: { timeout: 300000 } },
+        async (context, req, res) => res.ok({})
+      );
+      await server.start();
+      await supertest(innerServer.listener).get('/a').expect(200, {});
+    });
+  });
 });
 
 describe('Cache-Control', () => {

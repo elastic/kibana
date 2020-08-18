@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { times } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -28,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         name: generateUniqueKey(),
         tags: ['foo', 'bar'],
         alertTypeId: 'test.noop',
-        consumer: 'test',
+        consumer: 'alerts',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
@@ -86,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('variableMenuButton-1');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertId}} some additional text {{alertName}}'
+        'test message {{alertId}} some additional text {{alertInstanceId}}'
       );
 
       await testSubjects.click('saveAlertButton');
@@ -361,25 +362,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete all selection', async () => {
-      const createdAlert = await createAlert();
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const namePrefix = generateUniqueKey();
+      let count = 0;
+      const createdAlertsFirstPage = await Promise.all(
+        times(10, () => createAlert({ name: `${namePrefix}-0${count++}` }))
+      );
 
-      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
+      const createdAlertsSecondPage = await Promise.all(
+        times(2, () => createAlert({ name: `${namePrefix}-1${count++}` }))
+      );
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
+
+      for (const createdAlert of createdAlertsFirstPage) {
+        await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
+      }
 
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('deleteAll');
       await testSubjects.existOrFail('deleteIdsConfirmation');
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      await testSubjects.missingOrFail('deleteIdsConfirmation', { timeout: 5000 });
 
       await pageObjects.common.closeToast();
 
       await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      expect(searchResultsAfterDelete).to.have.length(2);
+      expect(searchResultsAfterDelete[0].name).to.eql(createdAlertsSecondPage[0].name);
+      expect(searchResultsAfterDelete[1].name).to.eql(createdAlertsSecondPage[1].name);
     });
   });
 };

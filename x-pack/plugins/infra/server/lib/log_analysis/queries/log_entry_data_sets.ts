@@ -67,7 +67,7 @@ export type LogEntryDatasetBucket = rt.TypeOf<typeof logEntryDatasetBucketRT>;
 
 export const logEntryDatasetsResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
-  rt.type({
+  rt.partial({
     aggregations: rt.type({
       dataset_buckets: rt.intersection([
         rt.type({

@@ -25,15 +25,10 @@
   }
 
   &__label {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
     min-width: 1px;
-    flex: 1 1 auto;
   }
 
   &__value {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
     font-weight: $euiFontWeightBold;
     text-align: right;
     font-feature-settings: 'tnum';

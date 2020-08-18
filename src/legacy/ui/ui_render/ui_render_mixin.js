@@ -19,7 +19,6 @@
 
 import { createHash } from 'crypto';
 import Boom from 'boom';
-import Path from 'path';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
@@ -37,9 +36,6 @@ import { getApmConfig } from '../apm';
  * @param {KbnServer['config']} config
  */
 export function uiRenderMixin(kbnServer, server, config) {
-  // render all views from ./views
-  server.setupViews(Path.resolve(__dirname, 'views'));
-
   const translationsCache = { translations: null, hash: null };
   server.route({
     path: '/translations/{locale}.json',
@@ -76,17 +72,13 @@ export function uiRenderMixin(kbnServer, server, config) {
     const authEnabled = !!server.auth.settings.default;
 
     server.route({
-      path: '/bundles/app/{id}/bootstrap.js',
+      path: '/bootstrap.js',
       method: 'GET',
       config: {
         tags: ['api'],
         auth: authEnabled ? { mode: 'try' } : false,
       },
       async handler(request, h) {
-        const { id } = request.params;
-        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-        const isCore = !app;
-
         const uiSettings = request.getUiSettingsService();
 
         const darkMode =
@@ -114,29 +106,14 @@ export function uiRenderMixin(kbnServer, server, config) {
                   ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
                   : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-                `${regularBundlePath}/dark_theme.style.css`,
+                `${basePath}/ui/legacy_dark_theme.css`,
               ]
             : [
                 themeVersion === 'v7'
                   ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
                   : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-                `${regularBundlePath}/light_theme.style.css`,
-              ]),
-          ...(isCore
-            ? []
-            : [
-                `${regularBundlePath}/${app.getId()}.style.css`,
-                ...kbnServer.uiExports.styleSheetPaths
-                  .filter(
-                    (path) => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
-                  )
-                  .map((path) =>
-                    path.localPath.endsWith('.scss')
-                      ? `${basePath}/${buildHash}/built_assets/css/${path.publicPath}`
-                      : `${basePath}/${path.publicPath}`
-                  )
-                  .reverse(),
+                `${basePath}/ui/legacy_light_theme.css`,
               ]),
         ];
 
@@ -182,7 +159,6 @@ export function uiRenderMixin(kbnServer, server, config) {
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
@@ -204,13 +180,8 @@ export function uiRenderMixin(kbnServer, server, config) {
     async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-
       try {
-        if (kbnServer.status.isGreen()) {
-          return await h.renderApp(app);
-        } else {
-          return await h.renderStatusPage();
-        }
+        return await h.renderApp(app);
       } catch (err) {
         throw Boom.boomify(err);
       }

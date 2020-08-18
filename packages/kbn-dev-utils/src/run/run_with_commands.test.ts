@@ -61,9 +61,7 @@ it('extends the context using extendContext()', async () => {
 
   expect(context.flags).toMatchInlineSnapshot(`
     Object {
-      "_": Array [
-        "foo",
-      ],
+      "_": Array [],
       "debug": false,
       "help": false,
       "quiet": false,

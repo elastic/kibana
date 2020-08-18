@@ -91,6 +91,13 @@ export class RunWithCommands<T> {
 
     const commandFlagOptions = mergeFlagOptions(this.options.globalFlags, command.flags);
     const commandFlags = getFlags(process.argv.slice(2), commandFlagOptions);
+    // strip command name plus "help" if we're actually executing the fake "help" command
+    if (isHelpCommand) {
+      commandFlags._.splice(0, 2);
+    } else {
+      commandFlags._.splice(0, 1);
+    }
+
     const commandHelp = getCommandLevelHelp({
       usage: this.options.usage,
       globalFlagHelp: this.options.globalFlags?.help,
@@ -115,7 +122,7 @@ export class RunWithCommands<T> {
           log,
           flags: commandFlags,
           procRunner,
-          addCleanupTask: cleanup.add,
+          addCleanupTask: cleanup.add.bind(cleanup),
         };
 
         const extendedContext = {

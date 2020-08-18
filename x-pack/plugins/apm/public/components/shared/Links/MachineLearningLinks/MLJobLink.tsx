@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useTimeSeriesExplorerHref } from './useTimeSeriesExplorerHref';
 
 interface Props {
+  children?: ReactNode;
   jobId: string;
   external?: boolean;
   serviceName?: string;
   transactionType?: string;
 }
 
-export const MLJobLink: React.FC<Props> = ({
+export function MLJobLink({
   jobId,
   serviceName,
   transactionType,
   external,
   children,
-}) => {
+}: Props) {
   const href = useTimeSeriesExplorerHref({
     jobId,
     serviceName,
@@ -36,4 +37,4 @@ export const MLJobLink: React.FC<Props> = ({
       target={external ? '_blank' : undefined}
     />
   );
-};
+}

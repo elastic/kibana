@@ -5,41 +5,42 @@
  */
 
 import { EuiCard, EuiIcon } from '@elastic/eui';
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RecreateJobButton } from '../../log_analysis_job_status';
+import React from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
+import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
 
 export const LogAnalysisModuleListCard: React.FC<{
+  hasSetupCapabilities: boolean;
   moduleDescription: string;
   moduleName: string;
   moduleStatus: SetupStatus;
   onViewSetup: () => void;
-}> = ({ moduleDescription, moduleName, moduleStatus, onViewSetup }) => {
-  const icon =
+}> = ({ hasSetupCapabilities, moduleDescription, moduleName, moduleStatus, onViewSetup }) => {
+  const moduleIcon =
     moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
     ) : (
       <EuiIcon color="secondary" size="xxl" type="check" />
     );
-  const footerContent =
+
+  const moduleSetupButton =
     moduleStatus.type === 'required' ? (
-      <EuiButton onClick={onViewSetup}>
+      <CreateJobButton hasSetupCapabilities={hasSetupCapabilities} onClick={onViewSetup}>
         <FormattedMessage
           id="xpack.infra.logs.analysis.enableAnomalyDetectionButtonLabel"
           defaultMessage="Enable anomaly detection"
         />
-      </EuiButton>
+      </CreateJobButton>
     ) : (
-      <RecreateJobButton onClick={onViewSetup} />
+      <RecreateJobButton hasSetupCapabilities={hasSetupCapabilities} onClick={onViewSetup} />
     );
 
   return (
     <EuiCard
       description={moduleDescription}
-      footer={<div>{footerContent}</div>}
-      icon={icon}
+      footer={<div>{moduleSetupButton}</div>}
+      icon={moduleIcon}
       title={moduleName}
     />
   );

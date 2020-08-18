@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { Loading as Component } from './loading';
-
-export const Loading = pure(Component);
+export { Loading } from './loading';

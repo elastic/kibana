@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ComponentTemplateDetailsFlyout } from './component_template_details';
+export {
+  ComponentTemplateDetailsFlyoutContent,
+  defaultFlyoutProps,
+  Props as ComponentTemplateDetailsProps,
+} from './component_template_details';

@@ -59,7 +59,9 @@ describe('isLicenseValidForActionType', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
-    executor: async () => {},
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
   };
 
   beforeEach(() => {
@@ -120,7 +122,9 @@ describe('ensureLicenseForActionType()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
-    executor: async () => {},
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
   };
 
   beforeEach(() => {

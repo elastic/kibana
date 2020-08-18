@@ -8,6 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
   ExceptionListItemSchema,
+  Id,
   IdOrUndefined,
   ItemIdOrUndefined,
   NamespaceType,
@@ -19,6 +20,12 @@ import { getExceptionListItem } from './get_exception_list_item';
 interface DeleteExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   id: IdOrUndefined;
+  namespaceType: NamespaceType;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+interface DeleteExceptionListItemByIdOptions {
+  id: Id;
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -42,4 +49,13 @@ export const deleteExceptionListItem = async ({
     await savedObjectsClient.delete(savedObjectType, exceptionListItem.id);
     return exceptionListItem;
   }
+};
+
+export const deleteExceptionListItemById = async ({
+  id,
+  namespaceType,
+  savedObjectsClient,
+}: DeleteExceptionListItemByIdOptions): Promise<void> => {
+  const savedObjectType = getSavedObjectType({ namespaceType });
+  await savedObjectsClient.delete(savedObjectType, id);
 };

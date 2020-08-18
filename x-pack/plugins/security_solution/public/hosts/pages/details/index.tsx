@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -17,7 +17,7 @@ import { LastEventTime } from '../../../common/components/last_event_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { useMlCapabilities } from '../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../../common/components/navigation';
 import { KpiHostsComponent } from '../../components/kpi_hosts';
@@ -44,6 +44,13 @@ import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
+import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
+import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { Display } from '../display';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { TimelineId } from '../../../../common/types/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -51,6 +58,7 @@ const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
   ({
     filters,
+    graphEventId,
     query,
     setAbsoluteRangeDatePicker,
     setHostDetailsTablesActivePageToZero,
@@ -58,6 +66,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     hostDetailsPagePath,
   }) => {
     const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
+    const { globalFullScreen } = useFullScreen();
     useEffect(() => {
       setHostDetailsTablesActivePageToZero();
     }, [setHostDetailsTablesActivePageToZero, detailName]);
@@ -92,91 +101,94 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     return (
       <>
         {indicesExist ? (
-          <StickyContainer>
-            <FiltersGlobal>
+          <>
+            <EuiWindowEvent event="resize" handler={noop} />
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
-            <WrapperPage>
-              <HeaderPage
-                border
-                subtitle={
-                  <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
-                }
-                title={detailName}
-              />
+            <WrapperPage noPadding={globalFullScreen}>
+              <Display show={!globalFullScreen}>
+                <HeaderPage
+                  border
+                  subtitle={
+                    <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
+                  }
+                  title={detailName}
+                />
 
-              <HostOverviewByNameQuery
-                sourceId="default"
-                hostName={detailName}
-                skip={isInitializing}
-                startDate={from}
-                endDate={to}
-              >
-                {({ hostOverview, loading, id, inspect, refetch }) => (
-                  <AnomalyTableProvider
-                    criteriaFields={hostToCriteria(hostOverview)}
-                    startDate={from}
-                    endDate={to}
-                    skip={isInitializing}
-                  >
-                    {({ isLoadingAnomaliesData, anomaliesData }) => (
-                      <HostOverviewManage
-                        id={id}
-                        inspect={inspect}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        data={hostOverview}
-                        anomaliesData={anomaliesData}
-                        isLoadingAnomaliesData={isLoadingAnomaliesData}
-                        loading={loading}
-                        startDate={from}
-                        endDate={to}
-                        narrowDateRange={(score, interval) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
-                        }}
-                      />
-                    )}
-                  </AnomalyTableProvider>
-                )}
-              </HostOverviewByNameQuery>
+                <HostOverviewByNameQuery
+                  sourceId="default"
+                  hostName={detailName}
+                  skip={isInitializing}
+                  startDate={from}
+                  endDate={to}
+                >
+                  {({ hostOverview, loading, id, inspect, refetch }) => (
+                    <AnomalyTableProvider
+                      criteriaFields={hostToCriteria(hostOverview)}
+                      startDate={from}
+                      endDate={to}
+                      skip={isInitializing}
+                    >
+                      {({ isLoadingAnomaliesData, anomaliesData }) => (
+                        <HostOverviewManage
+                          id={id}
+                          inspect={inspect}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          data={hostOverview}
+                          anomaliesData={anomaliesData}
+                          isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          loading={loading}
+                          startDate={from}
+                          endDate={to}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
+                        />
+                      )}
+                    </AnomalyTableProvider>
+                  )}
+                </HostOverviewByNameQuery>
 
-              <EuiHorizontalRule />
+                <EuiHorizontalRule />
 
-              <KpiHostDetailsQuery
-                sourceId="default"
-                filterQuery={filterQuery}
-                skip={isInitializing}
-                startDate={from}
-                endDate={to}
-              >
-                {({ kpiHostDetails, id, inspect, loading, refetch }) => (
-                  <KpiHostDetailsManage
-                    data={kpiHostDetails}
-                    from={from}
-                    id={id}
-                    inspect={inspect}
-                    loading={loading}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    to={to}
-                    narrowDateRange={narrowDateRange}
-                  />
-                )}
-              </KpiHostDetailsQuery>
+                <KpiHostDetailsQuery
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  skip={isInitializing}
+                  startDate={from}
+                  endDate={to}
+                >
+                  {({ kpiHostDetails, id, inspect, loading, refetch }) => (
+                    <KpiHostDetailsManage
+                      data={kpiHostDetails}
+                      from={from}
+                      id={id}
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      to={to}
+                      narrowDateRange={narrowDateRange}
+                    />
+                  )}
+                </KpiHostDetailsQuery>
 
-              <EuiSpacer />
+                <EuiSpacer />
 
-              <SiemNavigation
-                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-              />
+                <SiemNavigation
+                  navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+                />
 
-              <EuiSpacer />
+                <EuiSpacer />
+              </Display>
 
               <HostDetailsTabs
                 docValueFields={docValueFields}
@@ -194,7 +206,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               />
             </WrapperPage>
-          </StickyContainer>
+          </>
         ) : (
           <WrapperPage>
             <HeaderPage border title={detailName} />
@@ -213,10 +225,18 @@ HostDetailsComponent.displayName = 'HostDetailsComponent';
 export const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  return (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  return (state: State) => {
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
+    return {
+      query: getGlobalQuerySelector(state),
+      filters: getGlobalFiltersQuerySelector(state),
+      graphEventId,
+    };
+  };
 };
 
 const mapDispatchToProps = {

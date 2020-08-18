@@ -25,6 +25,12 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     describe('Settings', function () {
       loadTestFile(require.resolve('./settings/custom_link'));
       loadTestFile(require.resolve('./settings/agent_configuration'));
+
+      describe('Anomaly detection', function () {
+        loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/write_user'));
+      });
     });
 
     describe('Traces', function () {
@@ -35,6 +41,13 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./transaction_groups/top_transaction_groups'));
       loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
       loadTestFile(require.resolve('./transaction_groups/error_rate'));
+      loadTestFile(require.resolve('./transaction_groups/breakdown'));
+      loadTestFile(require.resolve('./transaction_groups/avg_duration_by_browser'));
+    });
+
+    describe('Observability overview', function () {
+      loadTestFile(require.resolve('./observability_overview/has_data'));
+      loadTestFile(require.resolve('./observability_overview/observability_overview'));
     });
   });
 }

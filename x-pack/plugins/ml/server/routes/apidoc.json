@@ -48,6 +48,7 @@
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
     "GetPartitionFieldsValues",
+    "AnomalySearch",
 
     "Modules",
     "DataRecognizer",

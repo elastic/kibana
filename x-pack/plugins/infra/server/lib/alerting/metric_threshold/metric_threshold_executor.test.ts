@@ -318,6 +318,31 @@ describe('The metric threshold alert type', () => {
     });
   });
 
+  describe("querying a rate-aggregated metric that hasn't reported data", () => {
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold: 1,
+              metric: 'test.metric.3',
+              aggType: 'rate',
+            },
+          ],
+          alertOnNoData: true,
+        },
+      });
+    test('sends a No Data alert', async () => {
+      await execute();
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
+    });
+  });
+
   // describe('querying a metric that later recovers', () => {
   //   const instanceID = '*';
   //   const execute = (threshold: number[]) =>
@@ -401,7 +426,9 @@ services.callCluster.mockImplementation(async (_: string, { body, index }: any) 
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricResponse;
   } else if (metric === 'test.metric.3') {
-    return mocks.emptyMetricResponse;
+    return body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
+      ? mocks.emptyRateResponse
+      : mocks.emptyMetricResponse;
   }
   return mocks.basicMetricResponse;
 });

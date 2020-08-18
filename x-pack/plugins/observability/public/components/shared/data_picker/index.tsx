@@ -31,7 +31,7 @@ interface Props {
   refreshInterval: number;
 }
 
-export const DatePicker = ({ rangeFrom, rangeTo, refreshPaused, refreshInterval }: Props) => {
+export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval }: Props) {
   const location = useLocation();
   const history = useHistory();
 
@@ -86,4 +86,4 @@ export const DatePicker = ({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
       onRefresh={onTimeChange}
     />
   );
-};
+}

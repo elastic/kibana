@@ -75,7 +75,6 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
 }
 
 export const getPartitionFieldsValuesFactory = ({
-  callAsCurrentUser,
   callAsInternalUser,
 }: ILegacyScopedClusterClient) =>
   /**
@@ -102,7 +101,7 @@ export const getPartitionFieldsValuesFactory = ({
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
 
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {

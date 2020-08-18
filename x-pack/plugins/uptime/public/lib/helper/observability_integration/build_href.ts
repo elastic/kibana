@@ -4,24 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { Ping } from '../../../../common/runtime_types';
 
 /**
  * Builds URLs to the designated features by extracting values from the provided
  * monitor object on a given path. Then returns the result of a provided function
  * to place the value in its rightful place on the URI string.
- * @param checks array of summary checks containing the data to extract
- * @param path the location on the object of the desired data
+ * @param summaryPings array of summary checks containing the data to extract
+ * @param getData the location on the object of the desired data
  * @param getHref a function that returns the full URL
  */
 export const buildHref = (
   summaryPings: Ping[],
-  path: string,
+  getData: (ping: Ping) => string | undefined,
   getHref: (value: string | string[] | undefined) => string | undefined
 ): string | undefined => {
   const queryValue = summaryPings
-    .map((ping) => get(ping, path, undefined))
+    .map((ping) => getData(ping))
     .filter((value: string | undefined) => value !== undefined);
   if (queryValue.length === 0) {
     return getHref(undefined);
