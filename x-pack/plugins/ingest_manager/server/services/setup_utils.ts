@@ -4,38 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetupStatus } from './setup';
-
 // the promise which tracks the setup
-let setupIngestStatus: Promise<SetupStatus> | undefined;
+let status: Promise<unknown> | undefined;
 // default resolve to guard against "undefined is not a function" errors
-let onSetupResolve = (status: SetupStatus) => {};
-let onSetupReject = (reason: any) => {};
+let onResolve = (value?: unknown) => {};
+let onReject = (reason: any) => {};
 
-export async function limitOne(asyncFunction: Function) {
-  // pending pending or successful attempt
-  if (setupIngestStatus) {
+export async function firstPromiseBlocksAndFufills(asyncFunction: Function) {
+  // pending successful or failed attempt
+  if (status) {
     // don't run concurrent installs
-    return setupIngestStatus;
+    return status;
   } else {
     // create the initial promise
-    setupIngestStatus = new Promise((res, rej) => {
-      onSetupResolve = res;
-      onSetupReject = rej;
+    status = new Promise((res, rej) => {
+      onResolve = res;
+      onReject = rej;
     });
   }
   try {
     // if everything works, mark the tracking promise as resolved
     const result = await asyncFunction();
-    onSetupResolve(result);
+    onResolve(result);
     // * reset the tracking promise to try again next time
-    setupIngestStatus = undefined;
+    status = undefined;
     return result;
   } catch (error) {
     // if something fails
-    onSetupReject(error);
+    onReject(error);
     // * reset the tracking promise to try again next time
-    setupIngestStatus = undefined;
+    status = undefined;
     // * return the rejection so it can be dealt with now
     return Promise.reject(error);
   }
