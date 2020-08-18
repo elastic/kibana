@@ -4,18 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash';
+
 import { PluginInitializerContext, Logger } from '../../../../../../core/server';
 
 export interface TelemetryEventsSenderContract {
   logger: Logger;
 }
 
+// Allowlist for the fields that we copy from the original event to the
+// telemetry event.
+// Top level fields:
+const allowlistTop = ['@timestamp', 'agent', 'endpoint', 'ecs', 'elastic'];
+// file.* fields:
+const allowlistFile = ['path', 'size', 'created', 'accessed', 'mtime', 'directory', 'hash'];
+// file.Ext.* fields:
+const allowlistFileExt = ['code_signature', 'malware_classification'];
+// file.* fields:
+const allowlistHost = ['os'];
+// event.* fields:
+const allowlistEvent = ['kind'];
+
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 5 * 1000;
+  private readonly maxQueueSize = 100;
   private readonly logger: Logger;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
+  private queue: object[] = [];
 
   public start(startContract: TelemetryEventsSenderContract) {
     this.logger = startContract.logger.get('telemetry_events');
@@ -45,5 +62,42 @@ export class TelemetryEventsSender {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
     }
     this.isSending = false;
+  }
+
+  public queueTelemetryEvents(events: object[]) {
+    const qlength = this.queue.length;
+
+    if (qlength > this.maxQueueSize) {
+      // we're full already
+      return;
+    }
+
+    // TODO check that telemetry is opted-in
+
+    if (events.length > this.maxQueueSize - qlength) {
+      this.queue.push(this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
+    } else {
+      this.queue.push(this.processEvents(events));
+    }
+  }
+
+  private processEvents(events: object[]): object[] {
+    return events.map(function (obj: object): object {
+      const newObj = pick(obj, allowlistTop);
+      if ('file' in obj) {
+        newObj.file = pick(obj.file, allowlistFile);
+        if ('Ext' in obj.file) {
+          newObj.file.Ext = pick(obj.file.Ext, allowlistFileExt);
+        }
+      }
+      if ('host' in obj) {
+        newObj.host = pick(obj.host, allowlistHost);
+      }
+      if ('event' in obj) {
+        newObj.event = pick(obj.event, allowlistEvent);
+      }
+
+      return newObj;
+    });
   }
 }
