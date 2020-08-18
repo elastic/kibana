@@ -56,7 +56,9 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
           canStartStopDataFrameAnalytics={canStartStopDataFrameAnalytics}
         />
       ),
-      available: (i: DataFrameAnalyticsListRow) => !isDataFrameAnalyticsRunning(i.stats.state),
+      available: (i: DataFrameAnalyticsListRow) =>
+        !isDataFrameAnalyticsRunning(item.stats.state) &&
+        !isDataFrameAnalyticsFailed(item.stats.state),
       enabled: startButtonEnabled,
       description: startActionNameText,
       icon: 'play',

@@ -40,7 +40,7 @@ export const ViewLink: FC<Props> = ({ item }) => {
         color="text"
         size="xs"
         onClick={clickHandler}
-        iconType="tableOfContents"
+        iconType="visTable"
         aria-label={openJobsInAnomalyExplorerText}
         className="results-button"
         data-test-subj="mlAnalyticsJobViewButton"
