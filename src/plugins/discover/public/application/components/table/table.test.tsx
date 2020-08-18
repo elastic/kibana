@@ -74,6 +74,8 @@ describe('DocViewTable at Discover', () => {
 
   const hit = {
     _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
     _score: 1,
     _source: {
       message:
@@ -191,6 +193,8 @@ describe('DocViewTable at Discover Doc', () => {
   const hit = {
     _index: 'logstash-2014.09.09',
     _score: 1,
+    _type: 'doc',
+    _id: 'id123',
     _source: {
       extension: 'html',
       not_mapped: 'yes',
@@ -213,6 +217,9 @@ describe('DocViewTable at Discover Context', () => {
   // here no toggleColumnButtons  are rendered
   const hit = {
     _index: 'logstash-2014.09.09',
+    _type: 'doc',
+    _id: 'id123',
+    _score: 1,
     _source: {
       message:
         'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. \
