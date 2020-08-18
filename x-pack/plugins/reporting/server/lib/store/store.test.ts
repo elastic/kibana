@@ -164,7 +164,7 @@ describe('ReportingStore', () => {
       });
     });
 
-    it('allows username string to be `null`', async () => {
+    it('allows username string to be `false`', async () => {
       // setup
       callClusterStub.withArgs('indices.exists').resolves(false);
       callClusterStub
@@ -184,7 +184,7 @@ describe('ReportingStore', () => {
         attempts: 0,
         browser_type: undefined,
         completed_at: undefined,
-        created_by: null,
+        created_by: false,
         jobtype: 'unknowntype',
         max_attempts: undefined,
         payload: {},
