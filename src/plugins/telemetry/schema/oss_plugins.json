@@ -582,7 +582,7 @@
             }
           }
         },
-        "'observability-overview'": {
+        "observability-overview": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -778,7 +778,7 @@
             }
           }
         },
-        "'securitySolution:overview'": {
+        "securitySolution:overview": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -806,7 +806,7 @@
             }
           }
         },
-        "'securitySolution:detections'": {
+        "securitySolution:detections": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -834,7 +834,7 @@
             }
           }
         },
-        "'securitySolution:hosts'": {
+        "securitySolution:hosts": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -862,7 +862,7 @@
             }
           }
         },
-        "'securitySolution:network'": {
+        "securitySolution:network": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -890,7 +890,7 @@
             }
           }
         },
-        "'securitySolution:timelines'": {
+        "securitySolution:timelines": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -918,7 +918,7 @@
             }
           }
         },
-        "'securitySolution:case'": {
+        "securitySolution:case": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -946,7 +946,7 @@
             }
           }
         },
-        "'securitySolution:administration'": {
+        "securitySolution:administration": {
           "properties": {
             "clicks_total": {
               "type": "long"

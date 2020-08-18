@@ -120,10 +120,11 @@ export function serializeObject(node: ts.Node) {
     if (typeof propertyName === 'undefined') {
       throw new Error(`Unable to get property name ${property.getText()}`);
     }
+    const cleanPropertyName = propertyName.replace(/["']/g, '');
     if (ts.isPropertyAssignment(property)) {
-      value[propertyName] = getVariableValue(property.initializer);
+      value[cleanPropertyName] = getVariableValue(property.initializer);
     } else {
-      value[propertyName] = getVariableValue(property);
+      value[cleanPropertyName] = getVariableValue(property);
     }
   }
 
