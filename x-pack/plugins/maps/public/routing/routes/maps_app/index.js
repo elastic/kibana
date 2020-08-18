@@ -14,7 +14,7 @@ import {
   getRefreshConfig,
   getTimeFilters,
   hasDirtyState,
-  hasUnsavedChanges,
+  getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
 import {
   replaceLayerList,
@@ -29,7 +29,6 @@ import {
   updateFlyout,
   enableFullScreen,
   openMapSettings,
-  removePreviewLayers,
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getMapsCapabilities } from '../../../kibana_services';
@@ -45,9 +44,7 @@ function mapStateToProps(state = {}) {
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
     filters: getFilters(state),
-    hasUnsavedChanges: (savedMap, initialLayerListConfig) => {
-      return hasUnsavedChanges(state, savedMap, initialLayerListConfig);
-    },
+    layerListConfigOnly: getLayerListConfigOnly(state),
     query: getQuery(state),
     timeFilters: getTimeFilters(state),
   };
@@ -55,13 +52,13 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    dispatchSetQuery: ({ refresh, filters, query, timeFilters }) => {
+    dispatchSetQuery: ({ forceRefresh, filters, query, timeFilters }) => {
       dispatch(
         setQuery({
           filters,
           query,
           timeFilters,
-          refresh,
+          forceRefresh,
         })
       );
     },
@@ -75,11 +72,6 @@ function mapDispatchToProps(dispatch) {
       dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(setReadOnly(!getMapsCapabilities().save));
-    },
-    closeFlyout: () => {
-      dispatch(setSelectedLayer(null));
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch(removePreviewLayers());
     },
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),

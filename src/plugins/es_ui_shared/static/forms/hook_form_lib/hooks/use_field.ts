@@ -41,6 +41,7 @@ export const useField = <T>(
     serializer,
     deserializer,
   } = config;
+
   const { getFormData, __removeField, __updateFormDataAt, __validateFields } = form;
 
   const initialValue = useMemo(() => {
@@ -117,15 +118,13 @@ export const useField = <T>(
       setIsChangingValue(true);
     }
 
-    const newValue = serializeOutput(value);
-
     // Notify listener
     if (valueChangeListener) {
-      valueChangeListener(newValue as T);
+      valueChangeListener(value);
     }
 
     // Update the form data observable
-    __updateFormDataAt(path, newValue);
+    __updateFormDataAt(path, value);
 
     // Validate field(s) and update form.isValid state
     await __validateFields(fieldsToValidateOnChange ?? [path]);
@@ -152,7 +151,6 @@ export const useField = <T>(
       }
     }
   }, [
-    serializeOutput,
     valueChangeListener,
     errorDisplayDelay,
     path,
@@ -441,13 +439,7 @@ export const useField = <T>(
 
       if (resetValue) {
         setValue(initialValue);
-        /**
-         * Having to call serializeOutput() is a current bug of the lib and will be fixed
-         * in a future PR. The serializer function should only be called when outputting
-         * the form data. If we need to continuously format the data while it changes,
-         * we need to use the field `formatter` config.
-         */
-        return serializeOutput(initialValue);
+        return initialValue;
       }
     },
     [setValue, serializeOutput, initialValue]

@@ -5,26 +5,24 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
+import { useKibana } from '../../../shared_imports';
 
-import { LoadFromJsonButton, OnDoneLoadJsonHandler } from '../pipeline_processors_editor';
+import {
+  LoadFromJsonButton,
+  OnDoneLoadJsonHandler,
+  TestPipelineButton,
+} from '../pipeline_processors_editor';
 
 export interface Props {
-  onTestPipelineClick: () => void;
-  isTestButtonDisabled: boolean;
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const ProcessorsHeader: FunctionComponent<Props> = ({
-  onTestPipelineClick,
-  isTestButtonDisabled,
-  onLoadJson,
-}) => {
-  const { links } = usePipelineProcessorsContext();
+export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
+  const { services } = useKibana();
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -46,7 +44,10 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={links.esDocsBasePath + '/ingest-processors.html'} target="_blank">
+                <EuiLink
+                  href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {
@@ -63,17 +64,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({
         <LoadFromJsonButton onDone={onLoadJson} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="testPipelineButton"
-          size="s"
-          onClick={onTestPipelineClick}
-          disabled={isTestButtonDisabled}
-        >
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.testPipelineButtonLabel"
-            defaultMessage="Test pipeline"
-          />
-        </EuiButton>
+        <TestPipelineButton />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

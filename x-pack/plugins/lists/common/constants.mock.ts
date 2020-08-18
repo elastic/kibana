@@ -6,9 +6,11 @@
 import moment from 'moment';
 
 import { EntriesArray } from './schemas/types';
+import { EndpointEntriesArray } from './schemas/types/endpoint';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
 export const USER = 'some user';
+export const ELASTIC_USER = 'elastic';
 export const LIST_INDEX = '.lists';
 export const LIST_ITEM_INDEX = '.items';
 export const NAME = 'some name';
@@ -40,6 +42,7 @@ export const ITEM_ID = 'some-list-item-id';
 export const ENDPOINT_TYPE = 'endpoint';
 export const FIELD = 'host.name';
 export const OPERATOR = 'included';
+export const OPERATOR_EXCLUDED = 'excluded';
 export const ENTRY_VALUE = 'some host name';
 export const MATCH = 'match';
 export const MATCH_ANY = 'match_any';
@@ -49,6 +52,14 @@ export const LIST = 'list';
 export const EXISTS = 'exists';
 export const NESTED = 'nested';
 export const ENTRIES: EntriesArray = [
+  {
+    entries: [{ field: 'nested.field', operator: 'included', type: 'match', value: 'some value' }],
+    field: 'some.parentField',
+    type: 'nested',
+  },
+  { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
+];
+export const ENDPOINT_ENTRIES: EndpointEntriesArray = [
   {
     entries: [{ field: 'nested.field', operator: 'included', type: 'match', value: 'some value' }],
     field: 'some.parentField',

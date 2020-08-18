@@ -222,19 +222,19 @@ might increase the search time. This setting is off by default. Users must opt-i
 
 [float]
 [[kibana-siem-settings]]
-==== SIEM
+==== Security Solution
 
 [horizontal]
-`siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
-`siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
-`siem:ipReputationLinks`:: A JSON array containing links for verifying the reputation of an IP address. The links are displayed on
-{security-guide}/siem-ui-overview.html#network-ui[IP detail] pages.
-`siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
+`securitySolution:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the Security app.
+`securitySolution:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the Security app collects events.
+`securitySolution:ipReputationLinks`:: A JSON array containing links for verifying the reputation of an IP address. The links are displayed on
+{security-guide}/network-page-overview.html[IP detail] pages.
+`securitySolution:enableNewsFeed`:: Enables the security news feed on the Security *Overview*
 page.
-`siem:newsFeedUrl`:: The URL from which the security news feed content is
+`securitySolution:newsFeedUrl`:: The URL from which the security news feed content is
 retrieved.
-`siem:refreshIntervalDefaults`:: The default refresh interval for the SIEM time filter, in milliseconds.
-`siem:timeDefaults`:: The default period of time in the SIEM time filter.
+`securitySolution:refreshIntervalDefaults`:: The default refresh interval for the Security time filter, in milliseconds.
+`securitySolution:timeDefaults`:: The default period of time in the Security time filter.
 
 [float]
 [[kibana-timelion-settings]]

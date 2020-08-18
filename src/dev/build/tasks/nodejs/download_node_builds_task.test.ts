@@ -26,13 +26,10 @@ import {
 import { Config, Platform } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
 
-// import * as NodeShasumsNS from '../node_shasums';
-// import * as NodeDownloadInfoNS from '../node_download_info';
-// import * as DownloadNS from '../../../lib/download';
-// import { DownloadNodeBuilds } from '../download_node_builds_task';
 jest.mock('./node_shasums');
 jest.mock('./node_download_info');
 jest.mock('../../lib/download');
+jest.mock('../../lib/get_build_number');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 

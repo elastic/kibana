@@ -21,15 +21,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   url: schema.maybe(schema.string()),
-  deprecated: schema.any({
-    defaultValue: {
-      config: {
-        options: {
-          attribution: '',
-        },
-      },
-    },
-  }),
   options: schema.object({
     attribution: schema.string({ defaultValue: '' }),
     minZoom: schema.number({ defaultValue: 0, min: 0 }),

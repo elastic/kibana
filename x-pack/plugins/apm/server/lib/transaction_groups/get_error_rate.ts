@@ -74,10 +74,14 @@ export async function getErrorRate({
 
   const erroneousTransactionsRate =
     resp.aggregations?.total_transactions.buckets.map(
-      ({ key, doc_count: totalTransactions, erroneous_transactions }) => {
+      ({
+        key,
+        doc_count: totalTransactions,
+        erroneous_transactions: erroneousTransactions,
+      }) => {
         const errornousTransactionsCount =
-          // @ts-ignore
-          erroneous_transactions.doc_count;
+          // @ts-expect-error
+          erroneousTransactions.doc_count;
         return {
           x: key,
           y: errornousTransactionsCount / totalTransactions,
