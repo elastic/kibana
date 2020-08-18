@@ -2,14 +2,8 @@
 
 source test/scripts/jenkins_test_setup_xpack.sh
 
-echo " -> Running SIEM cypress tests"
-cd "$XPACK_DIR"
-
-checks-reporter-with-killswitch "SIEM Cypress Tests" \
+checks-reporter-with-killswitch "Capture Kibana Saved Objects field count metrics" \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --config test/siem_cypress/config.ts
-
-echo ""
-echo ""
+    --config test/saved_objects_field_count/config.ts;
