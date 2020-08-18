@@ -56,6 +56,8 @@ export interface EndpointState {
   endpointsExist: boolean;
   /** Is auto-refresh enabled */
   isAutoRefreshEnabled: boolean;
+  /** The current auto refresh interval for data in ms */
+  autoRefreshInterval: number;
 }
 
 /**
