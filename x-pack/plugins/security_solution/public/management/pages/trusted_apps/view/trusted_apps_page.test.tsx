@@ -3,16 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { shallow } from 'enzyme';
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
 
-import { EndpointList } from './view';
+import { TrustedAppsPage } from './trusted_apps_page';
 
-export const EndpointHostsRoutes: React.FC = () => (
-  <Switch>
-    <Route path="/:pageName(endpoint-endpoints)">
-      <EndpointList />
-    </Route>
-  </Switch>
-);
+describe('TrustedAppsPage', () => {
+  test('rendering', () => {
+    expect(shallow(<TrustedAppsPage />)).toMatchSnapshot();
+  });
+});
