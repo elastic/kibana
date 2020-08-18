@@ -14,7 +14,7 @@ import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 type Props = {
   fieldMetaOptions: FieldMetaOptions;
   onChange: (fieldMetaOptions: FieldMetaOptions) => void;
-  switchDisabled: booelan;
+  switchDisabled: boolean;
 };
 
 export function CategoricalFieldMetaPopover(props: Props) {

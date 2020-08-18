@@ -326,7 +326,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
       return null;
     }
 
-    const switchDisabled = this._field && !this._field.canReadFromGeoJson();
+    const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
 
     return this.isCategorical() ? (
       <CategoricalFieldMetaPopover
