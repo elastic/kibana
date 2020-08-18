@@ -44,7 +44,7 @@ export interface FormDrilldownWizardProps<
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  triggers: TriggerId[];
 
   triggerPickerDocsLink?: string;
 }
@@ -60,10 +60,10 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   actionFactoryContext,
   onSelectedTriggersChange,
   getTriggerInfo,
-  supportedTriggers,
+  triggers,
   triggerPickerDocsLink,
 }) => {
-  if (!supportedTriggers || !supportedTriggers.length) {
+  if (!triggers || !triggers.length) {
     // Below callout is not translated, because this message is only for developers.
     return (
       <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
@@ -123,7 +123,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         context={actionFactoryContext}
         onSelectedTriggersChange={onSelectedTriggersChange}
         getTriggerInfo={getTriggerInfo}
-        supportedTriggers={supportedTriggers}
+        triggers={triggers}
         triggerPickerDocsLink={triggerPickerDocsLink}
       />
     </EuiFormRow>

@@ -205,7 +205,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         actionFactories={drilldownActionFactories}
         actionFactoryContext={actionFactoryContext}
         onSelectedTriggersChange={setSelectedTriggers}
-        supportedTriggers={supportedTriggers}
+        triggers={supportedTriggers}
         getTriggerInfo={getTrigger}
         triggerPickerDocsLink={docsLink}
       />

@@ -72,7 +72,7 @@ export interface ActionWizardProps<
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  triggers: TriggerId[];
 
   triggerPickerDocsLink?: string;
 }
@@ -86,7 +86,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   context,
   onSelectedTriggersChange,
   getTriggerInfo,
-  supportedTriggers,
+  triggers,
   triggerPickerDocsLink,
 }) => {
   // auto pick action factory if there is only 1 available
@@ -100,14 +100,14 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 
   // auto pick selected trigger if none is picked
   if (currentActionFactory && !((context.triggers?.length ?? 0) > 0)) {
-    const triggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
-    if (triggers.length > 0) {
-      onSelectedTriggersChange([triggers[0]]);
+    const actionTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
+    if (actionTriggers.length > 0) {
+      onSelectedTriggersChange([actionTriggers[0]]);
     }
   }
 
   if (currentActionFactory && config) {
-    const allTriggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
+    const allTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
     return (
       <SelectedActionFactory
         actionFactory={currentActionFactory}
