@@ -34,7 +34,6 @@ const DATAFEED_CONFIG: Datafeed = {
   query: { bool: { must: [{ match_all: {} }] } },
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');

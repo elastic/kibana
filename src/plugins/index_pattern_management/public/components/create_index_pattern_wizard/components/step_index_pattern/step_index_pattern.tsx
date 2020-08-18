@@ -106,6 +106,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     indexPatternName: '',
     isIncludingSystemIndices: false,
   };
+
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
@@ -158,7 +159,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       const exactMatchedIndices = await ensureMinimumTime(
         getIndices(
           this.context.services.http,
-          indexPatternCreationType,
+          (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
           query,
           this.state.isIncludingSystemIndices
         )
@@ -174,13 +175,13 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
       getIndices(
         this.context.services.http,
-        indexPatternCreationType,
+        (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
         `${query}*`,
         this.state.isIncludingSystemIndices
       ),
       getIndices(
         this.context.services.http,
-        indexPatternCreationType,
+        (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
         query,
         this.state.isIncludingSystemIndices
       ),
@@ -226,7 +227,13 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       return null;
     }
 
-    return <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />;
+    return (
+      <>
+        <EuiSpacer />
+        <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
+        <EuiSpacer />
+      </>
+    );
   }
 
   renderStatusMessage(matchedIndices: {
