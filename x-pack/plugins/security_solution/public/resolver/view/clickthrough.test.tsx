@@ -252,7 +252,7 @@ function computedNodeBoundaries(entityID: string): AABB {
  * Coordinates for where the edgelines "start"
  */
 function computedEdgeStartingCoordinates(): Vector2[] {
-  return simulator.edgeLines().map((edge) => {
+  return simulator.testSubject('resolver:graph:edgeline').map((edge) => {
     const { left, top } = getComputedStyle(edge.getDOMNode());
     return [pxNum(left), pxNum(top)];
   });
@@ -262,7 +262,7 @@ function computedEdgeStartingCoordinates(): Vector2[] {
  * Coordinates for where edgelines "end" (after application of transform)
  */
 function computedEdgeTerminalCoordinates(): Vector2[] {
-  return simulator.edgeLines().map((edge) => {
+  return simulator.testSubject('resolver:graph:edgeline').map((edge) => {
     const { left, top, width, transform } = getComputedStyle(edge.getDOMNode());
     /**
      * Without the transform in the rotation, edgelines lay flat across the x-axis.
