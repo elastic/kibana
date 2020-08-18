@@ -22,7 +22,7 @@ import * as Registry from '../registry';
 import { getInstallation, getInstallationObject, isRequiredPackage } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { installPipelines, deletePipelines } from '../elasticsearch/ingest_pipeline/';
+import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import {
   installKibanaAssets,
@@ -183,7 +183,7 @@ export async function installPackage({
 
   // if this is an update, delete the previous version's pipelines
   if (installedPkg && !reinstall) {
-    await deletePipelines(
+    await deletePreviousPipelines(
       callCluster,
       savedObjectsClient,
       pkgName,
