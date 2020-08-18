@@ -28,6 +28,7 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { name } = req.params as typeof paramsSchema.type;
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
       const template = req.body as TemplateDeserialized;
       const {

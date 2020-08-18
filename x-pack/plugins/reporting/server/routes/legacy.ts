@@ -42,7 +42,10 @@ export function registerLegacy(
         logger.warn(message, ['deprecation']);
 
         try {
-          const { savedObjectId }: { savedObjectId: string } = req.params as any;
+          const {
+            savedObjectId,
+            browserTimezone,
+          }: { savedObjectId: string; browserTimezone: string } = req.params as any;
           const queryString = querystring.stringify(req.query as any);
 
           return await handler(
@@ -51,6 +54,7 @@ export function registerLegacy(
             {
               objectType,
               savedObjectId,
+              browserTimezone,
               queryString,
             },
             context,

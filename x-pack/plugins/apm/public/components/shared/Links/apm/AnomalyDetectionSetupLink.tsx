@@ -30,7 +30,10 @@ export function AnomalyDetectionSetupLink() {
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   return (
-    <APMLink path="/settings/anomaly-detection">
+    <APMLink
+      path="/settings/anomaly-detection"
+      style={{ whiteSpace: 'nowrap' }}
+    >
       <EuiButtonEmpty size="s" color="primary" iconType="inspect">
         {ANOMALY_DETECTION_LINK_LABEL}
       </EuiButtonEmpty>

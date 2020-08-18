@@ -10,6 +10,10 @@ import { schema } from '@kbn/config-schema';
 import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
 
 import { ExecutorParamsSchema } from './schema';
+import {
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+} from './types';
 
 import {
   CreateExternalServiceArgs,
@@ -23,6 +27,7 @@ import {
   TransformFieldsArgs,
   Comment,
   ExecutorSubActionPushParams,
+  PushToServiceResponse,
 } from './types';
 
 import { transformers } from './transformers';
@@ -62,23 +67,31 @@ export const mapParams = (
 export const createConnectorExecutor = ({
   api,
   createExternalService,
+  logger,
 }: CreateExternalServiceBasicArgs) => async (
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> => {
+  execOptions: ActionTypeExecutorOptions<
+    ExternalIncidentServiceConfiguration,
+    ExternalIncidentServiceSecretConfiguration,
+    ExecutorParams
+  >
+): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> => {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data = {};
 
-  const res: Pick<ActionTypeExecutorResult, 'status'> &
-    Pick<ActionTypeExecutorResult, 'actionId'> = {
+  const res: ActionTypeExecutorResult<void> = {
     status: 'ok',
     actionId,
   };
 
-  const externalService = createExternalService({
-    config,
-    secrets,
-  });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    logger,
+    execOptions.proxySettings
+  );
 
   if (!api[subAction]) {
     throw new Error('[Action][ExternalService] Unsupported subAction type.');
@@ -114,10 +127,11 @@ export const createConnector = ({
   validate,
   createExternalService,
   validationSchema,
+  logger,
 }: CreateExternalServiceArgs) => {
   return ({
     configurationUtilities,
-    executor = createConnectorExecutor({ api, createExternalService }),
+    executor = createConnectorExecutor({ api, createExternalService, logger }),
   }: CreateActionTypeArgs): ActionType => ({
     ...config,
     validate: {

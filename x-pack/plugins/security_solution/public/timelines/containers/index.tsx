@@ -11,7 +11,6 @@ import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { TimelineId } from '../../../common/types/timeline';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import {
@@ -28,8 +27,7 @@ import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query
 import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
-
-const timelineIds = [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage];
+import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -130,6 +128,7 @@ class TimelineQueryComponent extends QueryTemplate<
         query={timelineQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
+        skip={skipQueryForDetectionsPage(id, defaultIndex)}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -202,7 +201,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   clearSignalsState: ({ id }: { id?: string }) => {
-    if (id != null && timelineIds.some((timelineId) => timelineId === id)) {
+    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }

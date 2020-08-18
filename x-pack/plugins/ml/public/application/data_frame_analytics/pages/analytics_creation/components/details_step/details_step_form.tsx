@@ -44,7 +44,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const { setFormState } = actions;
-  const { form, cloneJob, isJobCreated } = state;
+  const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
     createIndexPattern,
     description,
@@ -61,7 +61,9 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     resultsField,
   } = form;
 
-  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(cloneJob === undefined);
+  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
+    cloneJob === undefined && hasSwitchedToEditor === false
+  );
 
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -90,7 +92,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destinationIndexNameValid === true) {
       debouncedIndexCheck();
-    } else if (destinationIndex.trim() === '' && destinationIndexNameExists === true) {
+    } else if (
+      typeof destinationIndex === 'string' &&
+      destinationIndex.trim() === '' &&
+      destinationIndexNameExists === true
+    ) {
       setFormState({ destinationIndexNameExists: false });
     }
 
@@ -102,7 +108,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destIndexSameAsId === true && !jobIdEmpty && jobIdValid) {
       setFormState({ destinationIndex: jobId });
-    } else if (destIndexSameAsId === false) {
+    } else if (destIndexSameAsId === false && hasSwitchedToEditor === false) {
       setFormState({ destinationIndex: '' });
     }
   }, [destIndexSameAsId, jobId]);

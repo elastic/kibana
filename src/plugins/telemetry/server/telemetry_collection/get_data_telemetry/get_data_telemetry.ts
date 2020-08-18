@@ -36,6 +36,9 @@ export interface DataTelemetryDocument extends DataTelemetryBasePayload {
     name?: string;
     type?: DataTelemetryType | 'unknown' | string; // The union of types is to help autocompletion with some known `dataset.type`s
   };
+  package?: {
+    name: string;
+  };
   shipper?: string;
   pattern_name?: DataPatternName;
 }
@@ -44,6 +47,8 @@ export type DataTelemetryPayload = DataTelemetryDocument[];
 
 export interface DataTelemetryIndex {
   name: string;
+  packageName?: string; // Populated by Ingest Manager at `_meta.package.name`
+  managedBy?: string; // Populated by Ingest Manager at `_meta.managed_by`
   datasetName?: string; // To be obtained from `mappings.dataset.name` if it's a constant keyword
   datasetType?: string; // To be obtained from `mappings.dataset.type` if it's a constant keyword
   shipper?: string; // To be obtained from `_meta.beat` if it's set
@@ -58,6 +63,7 @@ export interface DataTelemetryIndex {
 type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
 
 type DataDescriptor = AtLeastOne<{
+  packageName: string;
   datasetName: string;
   datasetType: string;
   shipper: string;
@@ -67,17 +73,28 @@ type DataDescriptor = AtLeastOne<{
 function findMatchingDescriptors({
   name,
   shipper,
+  packageName,
+  managedBy,
   datasetName,
   datasetType,
 }: DataTelemetryIndex): DataDescriptor[] {
   // If we already have the data from the indices' mappings...
-  if ([shipper, datasetName, datasetType].some(Boolean)) {
+  if (
+    [shipper, packageName].some(Boolean) ||
+    (managedBy === 'ingest-manager' && [datasetType, datasetName].some(Boolean))
+  ) {
     return [
       {
         ...(shipper && { shipper }),
+        ...(packageName && { packageName }),
         ...(datasetName && { datasetName }),
         ...(datasetType && { datasetType }),
-      } as AtLeastOne<{ datasetName: string; datasetType: string; shipper: string }>, // Using casting here because TS doesn't infer at least one exists from the if clause
+      } as AtLeastOne<{
+        packageName: string;
+        datasetName: string;
+        datasetType: string;
+        shipper: string;
+      }>, // Using casting here because TS doesn't infer at least one exists from the if clause
     ];
   }
 
@@ -122,6 +139,7 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
     ({ name }) =>
       !(
         name.startsWith('.') &&
+        !name.startsWith('.ds-') && // data_stream-related indices can be included
         !startingDotPatternsUntilTheFirstAsterisk.find((pattern) => name.startsWith(pattern))
       )
   );
@@ -130,10 +148,17 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
 
   for (const indexCandidate of indexCandidates) {
     const matchingDescriptors = findMatchingDescriptors(indexCandidate);
-    for (const { datasetName, datasetType, shipper, patternName } of matchingDescriptors) {
-      const key = `${datasetName}-${datasetType}-${shipper}-${patternName}`;
+    for (const {
+      datasetName,
+      datasetType,
+      packageName,
+      shipper,
+      patternName,
+    } of matchingDescriptors) {
+      const key = `${datasetName}-${datasetType}-${packageName}-${shipper}-${patternName}`;
       acc.set(key, {
         ...((datasetName || datasetType) && { dataset: { name: datasetName, type: datasetType } }),
+        ...(packageName && { package: { name: packageName } }),
         ...(shipper && { shipper }),
         ...(patternName && { pattern_name: patternName }),
         ...increaseCounters(acc.get(key), indexCandidate),
@@ -165,6 +190,12 @@ interface IndexMappings {
     mappings: {
       _meta?: {
         beat?: string;
+
+        // Ingest Manager provided metadata
+        package?: {
+          name?: string;
+        };
+        managed_by?: string; // Typically "ingest-manager"
       };
       properties: {
         dataset?: {
@@ -195,7 +226,7 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
-      '*-*-*-*', // Include new indexing strategy indices {type}-{dataset}-{namespace}-{rollover_counter}
+      '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
     const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
       // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
@@ -204,16 +235,17 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
         filterPath: [
           // _meta.beat tells the shipper
           '*.mappings._meta.beat',
+          // _meta.package.name tells the Ingest Manager's package
+          '*.mappings._meta.package.name',
+          // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
+          '*.mappings._meta.managed_by',
           // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
           '*.mappings.properties.ecs.properties.version.type',
 
-          // Disable the fields below because they are still pending to be confirmed:
-          // https://github.com/elastic/ecs/pull/845
-          // TODO: Re-enable when the final fields are confirmed
-          // // If `dataset.type` is a `constant_keyword`, it can be reported as a type
-          // '*.mappings.properties.dataset.properties.type.value',
-          // // If `dataset.name` is a `constant_keyword`, it can be reported as the dataset
-          // '*.mappings.properties.dataset.properties.name.value',
+          // If `dataset.type` is a `constant_keyword`, it can be reported as a type
+          '*.mappings.properties.dataset.properties.type.value',
+          // If `dataset.name` is a `constant_keyword`, it can be reported as the dataset
+          '*.mappings.properties.dataset.properties.name.value',
         ],
       }),
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
@@ -227,24 +259,25 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
 
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
     const indices = indexNames.map((name) => {
-      const isECS = !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type;
-      const shipper = indexMappings[name]?.mappings?._meta?.beat;
-      const datasetName = indexMappings[name]?.mappings?.properties.dataset?.properties.name?.value;
-      const datasetType = indexMappings[name]?.mappings?.properties.dataset?.properties.type?.value;
+      const baseIndexInfo = {
+        name,
+        isECS: !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type,
+        shipper: indexMappings[name]?.mappings?._meta?.beat,
+        packageName: indexMappings[name]?.mappings?._meta?.package?.name,
+        managedBy: indexMappings[name]?.mappings?._meta?.managed_by,
+        datasetName: indexMappings[name]?.mappings?.properties.dataset?.properties.name?.value,
+        datasetType: indexMappings[name]?.mappings?.properties.dataset?.properties.type?.value,
+      };
 
       const stats = (indexStats?.indices || {})[name];
       if (stats) {
         return {
-          name,
-          datasetName,
-          datasetType,
-          shipper,
-          isECS,
+          ...baseIndexInfo,
           docCount: stats.total?.docs?.count,
           sizeInBytes: stats.total?.store?.size_in_bytes,
         };
       }
-      return { name, datasetName, datasetType, shipper, isECS };
+      return baseIndexInfo;
     });
     return buildDataTelemetryPayload(indices);
   } catch (e) {

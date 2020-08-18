@@ -45,7 +45,7 @@ const PackageConfigBaseSchema = {
         schema.object({
           id: schema.string(),
           enabled: schema.boolean(),
-          dataset: schema.object({ name: schema.string(), type: schema.string() }),
+          data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
             schema.recordOf(

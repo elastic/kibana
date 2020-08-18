@@ -70,7 +70,7 @@ export const RiskScoreField = ({
           {
             field: newField?.name ?? '',
             operator: 'equals',
-            value: undefined,
+            value: '',
             riskScore: undefined,
           },
         ],
@@ -179,7 +179,7 @@ export const RiskScoreField = ({
           error={'errorMessage'}
           isInvalid={false}
           fullWidth
-          data-test-subj={dataTestSubj}
+          data-test-subj={`${dataTestSubj}-riskOverride`}
           describedByIds={idAria ? [idAria] : undefined}
         >
           <NestedContent>

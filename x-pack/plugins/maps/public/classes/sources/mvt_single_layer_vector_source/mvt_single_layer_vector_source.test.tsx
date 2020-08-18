@@ -84,7 +84,7 @@ describe('getImmutableSourceProperties', () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
     const properties = await source.getImmutableProperties();
     expect(properties).toEqual([
-      { label: 'Data source', value: '.pbf vector tiles' },
+      { label: 'Data source', value: 'Vector tiles' },
       { label: 'Url', value: 'https://example.com/{x}/{y}/{z}.pbf' },
     ]);
   });

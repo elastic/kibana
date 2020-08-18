@@ -32,7 +32,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
   {
-    defaultMessage: '.pbf vector tiles',
+    defaultMessage: 'Vector tiles',
   }
 );
 

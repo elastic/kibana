@@ -26,6 +26,7 @@ export const saveTemplate = async ({
   template,
   callAsCurrentUser,
   isLegacy,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   include_type_name,
 }: {
   template: TemplateDeserialized;
@@ -40,6 +41,7 @@ export const saveTemplate = async ({
   if (isLegacy) {
     const {
       order,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       index_patterns,
       version,
       settings,

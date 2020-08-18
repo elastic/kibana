@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { deleteListItemSchema, listItemArraySchema, listItemSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -33,7 +33,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
           const deleted = await lists.deleteListItem({ id });
           if (deleted == null) {
             return siemResponse.error({
-              body: `list item with id: "${id}" item not found`,
+              body: `list item with id: "${id}" not found`,
               statusCode: 404,
             });
           } else {

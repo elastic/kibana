@@ -18,7 +18,6 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es: Client = getService('legacyEs');
@@ -191,8 +190,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
         bar_stacked: 1,
+        lnsPie: 1,
       });
-      expect(results.saved_overall_total).to.eql(2);
+      expect(results.saved_overall_total).to.eql(3);
 
       await esArchiver.unload('lens/basic');
     });

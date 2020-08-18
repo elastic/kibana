@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   CreateExceptionListItemSchemaDecoded,
   createExceptionListItemSchema,
@@ -57,7 +57,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
         });
         if (exceptionList == null) {
           return siemResponse.error({
-            body: `list id: "${listId}" does not exist`,
+            body: `exception list id: "${listId}" does not exist`,
             statusCode: 404,
           });
         } else {

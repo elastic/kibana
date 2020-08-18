@@ -24,6 +24,7 @@ jest.mock('../../../id_generator');
 
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
+  let mockVisualization2: jest.Mocked<Visualization>;
   let mockDatasource: DatasourceMock;
 
   function getDefaultProps() {
@@ -36,6 +37,7 @@ describe('LayerPanel', () => {
       activeVisualizationId: 'vis1',
       visualizationMap: {
         vis1: mockVisualization,
+        vis2: mockVisualization2,
       },
       activeDatasourceId: 'ds1',
       datasourceMap: {
@@ -68,6 +70,18 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+        },
+      ],
+    };
+
+    mockVisualization2 = {
+      ...createMockVisualization(),
+      id: 'testVis2',
+      visualizationTypes: [
+        {
+          icon: 'empty',
+          id: 'testVis2',
+          label: 'TEST2',
         },
       ],
     };
@@ -209,16 +223,6 @@ describe('LayerPanel', () => {
       const panel = mount(group.prop('panel'));
 
       expect(panel.find('EuiTabbedContent').prop('tabs')).toHaveLength(2);
-      act(() => {
-        panel.find('EuiTab#visualization').simulate('click');
-      });
-      expect(mockVisualization.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          groupId: 'a',
-          accessor: 'newid',
-        })
-      );
     });
 
     it('should keep the popover open when configuring a new dimension', () => {
@@ -266,6 +270,57 @@ describe('LayerPanel', () => {
       component.update();
 
       expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+    });
+    it('should close the popover when the active visualization changes', () => {
+      /**
+       * The ID generation system for new dimensions has been messy before, so
+       * this tests that the ID used in the first render is used to keep the popover
+       * open in future renders
+       */
+
+      (generateId as jest.Mock).mockReturnValueOnce(`newid`);
+      (generateId as jest.Mock).mockReturnValueOnce(`bad`);
+      mockVisualization.getConfiguration.mockReturnValueOnce({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+      // Normally the configuration would change in response to a state update,
+      // but this test is updating it directly
+      mockVisualization.getConfiguration.mockReturnValueOnce({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: ['newid'],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
+
+      const group = component.find('DimensionPopover');
+      const triggerButton = mountWithIntl(group.prop('trigger'));
+      act(() => {
+        triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      component.update();
+      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+      act(() => {
+        component.setProps({ activeVisualizationId: 'vis2' });
+      });
+      component.update();
+      expect(component.find(EuiPopover).prop('isOpen')).toBe(false);
     });
   });
 });

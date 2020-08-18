@@ -64,7 +64,7 @@ export function AddEnvironments({
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="warning"
+          iconType="alert"
           body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
         />
       </EuiPanel>

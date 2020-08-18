@@ -6,7 +6,7 @@
 import {
   fields,
   getField,
-} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getEntryNestedMock } from '../../../../../../lists/common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
@@ -161,10 +161,7 @@ describe('Exception builder helpers', () => {
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
         const expected: IIndexPattern = {
-          fields: [
-            { ...getField('nestedField.child') },
-            { ...getField('nestedField.nestedChild.doublyNestedChild') },
-          ],
+          fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
           title: 'logstash-*',
         };
@@ -243,7 +240,7 @@ describe('Exception builder helpers', () => {
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
         const expected: IIndexPattern = {
-          fields: [getEndpointField('file.Ext.code_signature.status')],
+          fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
           id: '1234',
           title: 'logstash-*',
         };
@@ -405,7 +402,7 @@ describe('Exception builder helpers', () => {
           aggregatable: false,
           count: 0,
           esTypes: ['text'],
-          name: 'nestedField.child',
+          name: 'child',
           readFromDocValues: false,
           scripted: false,
           searchable: true,
@@ -466,7 +463,7 @@ describe('Exception builder helpers', () => {
 
   describe('#isEntryNested', () => {
     test('it returns "false" if payload is not of type EntryNested', () => {
-      const payload: BuilderEntry = { ...getEntryMatchMock() };
+      const payload: BuilderEntry = getEntryMatchMock();
       const output = isEntryNested(payload);
       const expected = false;
       expect(output).toEqual(expected);
@@ -483,7 +480,7 @@ describe('Exception builder helpers', () => {
   describe('#getFormattedBuilderEntries', () => {
     test('it returns formatted entry with field undefined if it unable to find a matching index pattern field', () => {
       const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItems: BuilderEntry[] = [{ ...getEntryMatchMock() }];
+      const payloadItems: BuilderEntry[] = [getEntryMatchMock()];
       const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedBuilderEntry[] = [
         {
@@ -600,7 +597,7 @@ describe('Exception builder helpers', () => {
             aggregatable: false,
             count: 0,
             esTypes: ['text'],
-            name: 'nestedField.child',
+            name: 'child',
             readFromDocValues: false,
             scripted: false,
             searchable: true,
@@ -654,7 +651,7 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it removes entry corresponding to "nestedEntryIndex"', () => {
+    test('it removes nested entry of "entryIndex" with corresponding parent index', () => {
       const payloadItem: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
         entries: [
@@ -664,10 +661,10 @@ describe('Exception builder helpers', () => {
           },
         ],
       };
-      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 1);
+      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 0);
       const expected: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
-        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryExistsMock() }] }],
+        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryMatchAnyMock() }] }],
       };
       expect(output).toEqual(expected);
     });

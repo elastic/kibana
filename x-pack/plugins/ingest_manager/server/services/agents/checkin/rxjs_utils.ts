@@ -43,23 +43,37 @@ export const toPromiseAbortable = <T>(
     }
   });
 
-export function createSubscriberConcurrencyLimiter(maxConcurrency: number) {
+export function createRateLimiter(
+  ratelimitIntervalMs: number,
+  ratelimitRequestPerInterval: number
+) {
+  function createCurrentInterval() {
+    return {
+      startedAt: Rx.asyncScheduler.now(),
+      numRequests: 0,
+    };
+  }
+
+  let currentInterval: { startedAt: number; numRequests: number } = createCurrentInterval();
   let observers: Array<[Rx.Subscriber<any>, any]> = [];
-  let activeObservers: Array<Rx.Subscriber<any>> = [];
+  let timerSubscription: Rx.Subscription | undefined;
 
-  function processNext() {
-    if (activeObservers.length >= maxConcurrency) {
+  function createTimeout() {
+    if (timerSubscription) {
       return;
     }
-    const observerValuePair = observers.shift();
-
-    if (!observerValuePair) {
-      return;
-    }
-
-    const [observer, value] = observerValuePair;
-    activeObservers.push(observer);
-    observer.next(value);
+    timerSubscription = Rx.asyncScheduler.schedule(() => {
+      timerSubscription = undefined;
+      currentInterval = createCurrentInterval();
+      for (const [waitingObserver, value] of observers) {
+        if (currentInterval.numRequests >= ratelimitRequestPerInterval) {
+          createTimeout();
+          continue;
+        }
+        currentInterval.numRequests++;
+        waitingObserver.next(value);
+      }
+    }, ratelimitIntervalMs);
   }
 
   return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
@@ -67,8 +81,14 @@ export function createSubscriberConcurrencyLimiter(maxConcurrency: number) {
       new Rx.Observable<T>((observer) => {
         const subscription = observable.subscribe({
           next(value) {
+            if (currentInterval.numRequests < ratelimitRequestPerInterval) {
+              currentInterval.numRequests++;
+              observer.next(value);
+              return;
+            }
+
             observers = [...observers, [observer, value]];
-            processNext();
+            createTimeout();
           },
           error(err) {
             observer.error(err);
@@ -79,10 +99,8 @@ export function createSubscriberConcurrencyLimiter(maxConcurrency: number) {
         });
 
         return () => {
-          activeObservers = activeObservers.filter((o) => o !== observer);
           observers = observers.filter((o) => o[0] !== observer);
           subscription.unsubscribe();
-          processNext();
         };
       });
   };

@@ -64,6 +64,16 @@ export interface KibanaRequestEvents {
    * Observable that emits once if and when the request has been aborted.
    */
   aborted$: Observable<void>;
+
+  /**
+   * Observable that emits once if and when the request has been completely handled.
+   *
+   * @remarks
+   * The request may be considered completed if:
+   * - A response has been sent to the client; or
+   * - The request was aborted.
+   */
+  completed$: Observable<void>;
 }
 
 /**
@@ -186,11 +196,16 @@ export class KibanaRequest<
 
   private getEvents(request: Request): KibanaRequestEvents {
     const finish$ = merge(
-      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.res, 'finish'), // Response has been sent
       fromEvent(request.raw.req, 'close') // connection was closed
     ).pipe(shareReplay(1), first());
+
+    const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
+    const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
+
     return {
-      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
+      aborted$,
+      completed$,
     } as const;
   }
 

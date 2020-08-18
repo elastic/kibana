@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'timePicker']);
   const browser = getService('browser');

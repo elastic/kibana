@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getReadEndpointListItemSchemaMock } from './read_endpoint_list_item_schema.mock';
 import {

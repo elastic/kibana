@@ -55,6 +55,11 @@ export async function bootstrap({
     onRootShutdown('Kibana REPL mode can only be run in development mode.');
   }
 
+  if (cliArgs.optimize) {
+    // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
+    return;
+  }
+
   const env = Env.createDefault({
     configs,
     cliArgs,
@@ -105,12 +110,6 @@ export async function bootstrap({
     await root.start();
   } catch (err) {
     await shutdown(err);
-  }
-
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
   }
 }
 

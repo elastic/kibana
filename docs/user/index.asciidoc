@@ -27,6 +27,8 @@ include::graph/index.asciidoc[]
 
 include::visualize.asciidoc[]
 
+include::{kib-repo-dir}/observability/index.asciidoc[]
+
 include::{kib-repo-dir}/logs/index.asciidoc[]
 
 include::{kib-repo-dir}/infrastructure/index.asciidoc[]

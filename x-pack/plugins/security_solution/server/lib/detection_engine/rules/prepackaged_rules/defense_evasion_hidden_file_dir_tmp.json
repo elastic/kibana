@@ -7,7 +7,8 @@
     "Certain tools may create hidden temporary files or directories upon installation or as part of their normal behavior. These events can be filtered by the process arguments, username, or process name values."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "lucene",
   "license": "Elastic License",

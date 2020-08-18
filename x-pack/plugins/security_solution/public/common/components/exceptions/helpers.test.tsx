@@ -365,7 +365,7 @@ describe('Exception helpers', () => {
       const mockEmptyException: EntryNested = {
         field: '',
         type: OperatorTypeEnum.NESTED,
-        entries: [{ ...getEntryMatchMock() }],
+        entries: [getEntryMatchMock()],
       };
       const output: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema

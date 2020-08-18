@@ -22,6 +22,6 @@ import { Trigger } from '.';
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
 export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
   id: APPLY_FILTER_TRIGGER,
-  title: 'Filter click',
+  title: 'Apply filter',
   description: 'Triggered when user applies filter to an embeddable.',
 };

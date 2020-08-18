@@ -129,17 +129,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show venn when clicking a line', async function () {
       await buildGraph();
-      const { edges } = await PageObjects.graph.getGraphObjects();
 
       await PageObjects.graph.isolateEdge('test', '/test/wp-admin/');
 
       await PageObjects.graph.stopLayout();
       await PageObjects.common.sleep(1000);
-      const testTestWpAdminBlogEdge = edges.find(
-        ({ sourceNode, targetNode }) =>
-          targetNode.label === '/test/wp-admin/' && sourceNode.label === 'test'
-      )!;
-      await testTestWpAdminBlogEdge.element.click();
+      await browser.execute(() => {
+        const event = document.createEvent('SVGEvents');
+        event.initEvent('click', true, true);
+        return document.getElementsByClassName('gphEdge')[0].dispatchEvent(event);
+      });
       await PageObjects.common.sleep(1000);
       await PageObjects.graph.startLayout();
 

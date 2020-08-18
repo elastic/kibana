@@ -25,7 +25,7 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
-import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
+import { IndexPatternField } from '../fields';
 import {
   OnNotification,
   OnError,
@@ -33,7 +33,6 @@ import {
   UiSettingsCommon,
   IIndexPatternsApiClient,
   GetFieldsOptions,
-  FieldSpec,
   IndexPatternSpec,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -68,12 +67,6 @@ export class IndexPatternsService {
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
-  createFieldList: CreateIndexPatternFieldList;
-  createField: (
-    indexPattern: IndexPattern,
-    spec: FieldSpec | Field,
-    shortDotsEnable: boolean
-  ) => Field;
 
   constructor({
     uiSettings,
@@ -96,16 +89,15 @@ export class IndexPatternsService {
       uiSettings,
       onRedirectNoIndexPattern
     );
-    this.createFieldList = getIndexPatternFieldListCreator({
-      fieldFormats,
-      onNotification,
-    });
-    this.createField = (indexPattern, spec, shortDotsEnable) => {
-      return new Field(indexPattern, spec, shortDotsEnable, {
-        fieldFormats,
-        onNotification,
-      });
-    };
+  }
+
+  public createField(
+    indexPattern: IndexPattern,
+    spec: IndexPatternField['spec'],
+    displayName: string,
+    onNotification: OnNotification
+  ) {
+    return new IndexPatternField(indexPattern, spec, displayName, onNotification);
   }
 
   private async refreshSavedObjectsCache() {

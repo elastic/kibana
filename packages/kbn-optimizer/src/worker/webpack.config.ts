@@ -29,7 +29,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
@@ -68,7 +68,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     plugins: [
       new CleanWebpackPlugin(),
-      new DisallowedSyntaxPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
@@ -155,47 +154,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   },
                 },
                 {
-                  loader: 'resolve-url-loader',
-                  options: {
-                    join: (_: string, __: any) => (uri: string, base?: string) => {
-                      // apply only to legacy platform styles
-                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
-                        return null;
-                      }
-
-                      if (uri.startsWith('ui/assets')) {
-                        return Path.resolve(
-                          worker.repoRoot,
-                          'src/core/server/core_app/',
-                          uri.replace('ui/', '')
-                        );
-                      }
-
-                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/')) {
-                        return Path.resolve(
-                          worker.repoRoot,
-                          'src/legacy/ui/public',
-                          uri.replace('ui/', '')
-                        );
-                      }
-
-                      return null;
-                    },
-                  },
-                },
-                {
                   loader: 'sass-loader',
                   options: {
-                    // must always be enabled as long as we're using the `resolve-url-loader` to
-                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
-                    sourceMap: true,
                     prependData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          `src/legacy/ui/public/styles/_globals_${theme}.scss`
+                          `src/core/public/core_app/styles/_globals_${theme}.scss`
                         )
                       )};\n`;
                     },
@@ -251,6 +217,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
+        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },
     },
 
