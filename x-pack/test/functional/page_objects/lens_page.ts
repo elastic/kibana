@@ -89,6 +89,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
+     * @param layerIndex - the index of the layer
      */
     async configureDimension(
       opts: { dimension: string; operation: string; field: string },
