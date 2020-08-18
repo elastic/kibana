@@ -40,7 +40,7 @@ export async function getUpgradeAssistantStatus(
 
     indices.forEach((indexData) => {
       indexData.blockerForReindexing =
-        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
+        indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
     });
   }
 
