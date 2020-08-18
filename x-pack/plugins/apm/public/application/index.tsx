@@ -118,7 +118,7 @@ export function ApmAppRoot({
 }
 
 /**
- * These module is rendered asynchronously in the Kibana platform.
+ * This module is rendered asynchronously in the Kibana platform.
  */
 
 export const renderApp = (
