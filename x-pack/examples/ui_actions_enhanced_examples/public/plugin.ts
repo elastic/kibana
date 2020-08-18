@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '../../../../src/core/public';
+import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   AdvancedUiActionsSetup,
@@ -16,11 +16,14 @@ import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
+import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
+import { mount } from './mount';
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;
   discover: DiscoverSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
+  developerExamples: DeveloperExamplesSetup;
 }
 
 export interface StartDependencies {
@@ -33,7 +36,7 @@ export class UiActionsEnhancedExamplesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   public setup(
     core: CoreSetup<StartDependencies>,
-    { uiActionsEnhanced: uiActions }: SetupDependencies
+    { uiActionsEnhanced: uiActions, developerExamples }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
 
@@ -41,6 +44,29 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new DashboardHelloWorldOnlyRangeSelectDrilldown());
     uiActions.registerDrilldown(new DashboardToUrlDrilldown());
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
+
+    core.application.register({
+      id: 'ui_actions_enhanced-explorer',
+      title: 'UI Actions Enhanced Explorer',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: mount(core),
+    });
+
+    developerExamples.register({
+      appId: 'ui_actions_enhanced-explorer',
+      title: 'UI Actions Enhanced',
+      description: '',
+      links: [
+        {
+          label: 'README',
+          href:
+            'https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples#ui-actions-enhanced-examples',
+          iconType: 'logoGithub',
+          size: 's',
+          target: '_blank',
+        },
+      ],
+    });
   }
 
   public start(core: CoreStart, plugins: StartDependencies) {}
