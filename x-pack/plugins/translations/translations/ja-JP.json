@@ -12304,7 +12304,6 @@
     "xpack.ml.overview.anomalyDetection.emptyPromptText": "異常検知により、時系列データの異常な動作を検出できます。データに隠れた異常を自動的に検出して問題をより素早く解決しましょう。",
     "xpack.ml.overview.anomalyDetection.errorPromptTitle": "異常検出ジョブリストの取得中にエラーが発生しました。",
     "xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage": "異常スコアの取得中にエラーが発生しました: {error}",
-    "xpack.ml.overview.anomalyDetection.exploreActionName": "探索",
     "xpack.ml.overview.anomalyDetection.manageJobsButtonText": "ジョブの管理",
     "xpack.ml.overview.anomalyDetection.panelTitle": "異常検知",
     "xpack.ml.overview.anomalyDetection.refreshJobsButtonText": "更新",

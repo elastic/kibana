@@ -12308,7 +12308,6 @@
     "xpack.ml.overview.anomalyDetection.emptyPromptText": "通过异常检测，可发现时序数据中的异常行为。开始自动发现数据中隐藏的异常并更快捷地解决问题。",
     "xpack.ml.overview.anomalyDetection.errorPromptTitle": "获取异常检测作业列表时出错。",
     "xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage": "获取异常分数时出错：{error}",
-    "xpack.ml.overview.anomalyDetection.exploreActionName": "浏览",
     "xpack.ml.overview.anomalyDetection.manageJobsButtonText": "管理作业",
     "xpack.ml.overview.anomalyDetection.panelTitle": "异常检测",
     "xpack.ml.overview.anomalyDetection.refreshJobsButtonText": "刷新",
