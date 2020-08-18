@@ -37,8 +37,11 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.ml.inference.modelsList.deleteModal.header"
-              defaultMessage="Delete {modelIds}"
-              values={{ modelIds: models.map((model) => model.model_id).join(', ') }}
+              defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}"
+              values={{
+                modelId: models[0].model_id,
+                modelsCount: models.length,
+              }}
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>

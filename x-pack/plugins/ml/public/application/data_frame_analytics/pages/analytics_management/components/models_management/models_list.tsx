@@ -203,7 +203,7 @@ export const ModelsList: FC = () => {
       toasts.addSuccess(
         i18n.translate('xpack.ml.inference.modelsList.successfullyDeletedMessage', {
           defaultMessage:
-            '{modelsCount, plural, one {Model} other {Models}} {modelsToDeleteIds} {modelsCount, plural, one {has} other {have}} been successfully deleted',
+            '{modelsCount, plural, one {Model {modelsToDeleteIds}} other {# models}} {modelsCount, plural, one {has} other {have}} been successfully deleted',
           values: {
             modelsCount: modelsToDeleteIds.length,
             modelsToDeleteIds: modelsToDeleteIds.join(', '),
