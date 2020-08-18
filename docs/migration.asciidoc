@@ -6,6 +6,7 @@
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
 
+* <<breaking-changes-7.9, Breaking changes in 7.9>>
 * <<breaking-changes-7.8, Breaking changes in 7.8>>
 * <<breaking-changes-7.7, Breaking changes in 7.7>>
 * <<breaking-changes-7.6, Breaking changes in 7.6>>
@@ -16,9 +17,10 @@ your application from one version of Kibana to another.
 * <<breaking-changes-7.1, Breaking changes in 7.1>>
 * <<breaking-changes-7.0, Breaking changes in 7.0>>
 
-See also <<whats-new>> and <<release-notes>>. 
+See also <<whats-new>> and <<release-notes>>.
 --
 
+include::migration/migrate_7_9.asciidoc[]
 include::migration/migrate_7_8.asciidoc[]
 include::migration/migrate_7_7.asciidoc[]
 include::migration/migrate_7_6.asciidoc[]

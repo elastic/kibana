@@ -513,6 +513,7 @@ class ReportListingUi extends Component<Props, State> {
           isSelectable={true}
           onChange={this.onTableChange}
           data-test-subj="reportJobListing"
+          data-test-page={this.state.page}
         />
         {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>
