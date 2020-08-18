@@ -80,6 +80,9 @@ import {
   RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+  UnlinkFromLibraryActionContext,
+  UnlinkFromLibraryAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -152,6 +155,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
+    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
   }
 }
 
@@ -163,6 +167,7 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
@@ -170,6 +175,9 @@ export class DashboardPlugin
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
   ): Setup {
+    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
+      DashboardFeatureFlagConfig
+    >();
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
@@ -415,6 +423,12 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
+    if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+      uiActions.registerAction(unlinkFromLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+    }
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
@@ -430,7 +444,7 @@ export class DashboardPlugin
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
-      dashboardFeatureFlagConfig: this.initializerContext.config.get<DashboardFeatureFlagConfig>(),
+      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
