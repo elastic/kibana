@@ -256,6 +256,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/security_solution/ @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/lists_api_integration @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/api_integration/apis/security_solution @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
