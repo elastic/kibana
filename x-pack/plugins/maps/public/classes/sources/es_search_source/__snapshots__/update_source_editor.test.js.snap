@@ -92,6 +92,7 @@ exports[`should enable sort order select when sort field provided 1`] = `
   />
   <EuiPanel>
     <ScalingForm
+      clusteringDisabledReason={null}
       filterByMapBounds={true}
       indexPatternId="indexPattern1"
       mvtDisabledReason={null}
@@ -201,6 +202,7 @@ exports[`should render update source editor 1`] = `
   />
   <EuiPanel>
     <ScalingForm
+      clusteringDisabledReason={null}
       filterByMapBounds={true}
       indexPatternId="indexPattern1"
       mvtDisabledReason={null}
