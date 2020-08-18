@@ -223,38 +223,6 @@ describe('when on the list page', () => {
         expect(firstPolicyName.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
       });
 
-      it('should poll', async () => {
-        const pollInterval = 10;
-        await reactTestingLibrary.act(async () => {
-          store.dispatch({
-            type: 'userUpdatedEndpointListRefreshOptions',
-            payload: {
-              autoRefreshInterval: pollInterval,
-            },
-          });
-        });
-        let renderResult = render();
-        await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedEndpointList');
-        });
-        const total = await renderResult.findAllByTestId('endpointListTableTotal');
-        expect(total[0].textContent).toEqual('4 Hosts');
-
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockEndpointResultList({ total: 1 }).hosts,
-        });
-
-        await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('appRequestedEndpointList');
-          await middlewareSpy.waitForAction('serverReturnedEndpointList');
-        });
-
-        renderResult = render();
-
-        const updatedTotal = await renderResult.findAllByTestId('endpointListTableTotal');
-        expect(updatedTotal[0].textContent).toEqual('1 Host');
-      });
-
       describe('when the user clicks the first hostname in the table', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
@@ -274,6 +242,52 @@ describe('when on the list page', () => {
           });
         });
       });
+    });
+  });
+
+  describe('when polling on Endpoint List', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        const hostListData = mockEndpointResultList({ total: 4 }).hosts;
+
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: hostListData,
+        });
+
+        const pollInterval = 10;
+        store.dispatch({
+          type: 'userUpdatedEndpointListRefreshOptions',
+          payload: {
+            autoRefreshInterval: pollInterval,
+          },
+        });
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should update data after some time', async () => {
+      let renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      });
+      const total = await renderResult.findAllByTestId('endpointListTableTotal');
+      expect(total[0].textContent).toEqual('4 Hosts');
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: mockEndpointResultList({ total: 1 }).hosts,
+      });
+
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('appRequestedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      });
+
+      renderResult = render();
+
+      const updatedTotal = await renderResult.findAllByTestId('endpointListTableTotal');
+      expect(updatedTotal[0].textContent).toEqual('1 Host');
     });
   });
 
