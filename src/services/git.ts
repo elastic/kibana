@@ -233,9 +233,8 @@ export async function setCommitAuthor(
 }
 
 // How the commit flows:
-// ${sourceBranch} -> ${backportBranch} -> ${targetBranch}
-// Example:
-// master -> backport/7.x/pr-1234 -> 7.x
+// ${sourceBranch} ->   ${backportBranch}   -> ${targetBranch}
+//     master      ->  backport/7.x/pr-1234 ->      7.x
 export async function createBackportBranch({
   options,
   targetBranch,
@@ -288,21 +287,11 @@ export async function deleteBackportBranch({
   spinner.stop();
 }
 
-export function getRemoteName(options: BackportOptions) {
-  return options.fork ? options.username : options.repoOwner;
-}
-
 /*
- * Returns the full name of the backport branch, which includes the upstream
- *
- * Example: `sqren:backport/7.x/pr-1234`
+ * Returns the repo owner of the forked repo or the source repo
  */
-export function getFullBackportBranch(
-  options: BackportOptions,
-  backportBranch: string
-) {
-  const remoteName = getRemoteName(options);
-  return `${remoteName}:${backportBranch}`;
+export function getRepoForkOwner(options: BackportOptions) {
+  return options.fork ? options.username : options.repoOwner;
 }
 
 export async function pushBackportBranch({
@@ -312,8 +301,8 @@ export async function pushBackportBranch({
   options: BackportOptions;
   backportBranch: string;
 }) {
-  const fullBackportBranch = getFullBackportBranch(options, backportBranch);
-  const spinnerText = `Pushing branch "${fullBackportBranch}"`;
+  const repoForkOwner = getRepoForkOwner(options);
+  const spinnerText = `Pushing branch "${repoForkOwner}:${backportBranch}"`;
   const spinner = ora(spinnerText).start();
 
   if (options.dryRun) {
@@ -321,10 +310,9 @@ export async function pushBackportBranch({
     return;
   }
 
-  const remoteName = getRemoteName(options);
   try {
     const res = await exec(
-      `git push ${remoteName} ${backportBranch}:${backportBranch} --force`,
+      `git push ${repoForkOwner} ${backportBranch}:${backportBranch} --force`,
       { cwd: getRepoPath(options) }
     );
     spinner.succeed();
@@ -334,7 +322,7 @@ export async function pushBackportBranch({
 
     if (e.stderr?.toLowerCase().includes(`repository not found`)) {
       throw new HandledError(
-        `Error pushing to https://github.com/${remoteName}/${options.repoName}. Repository does not exist. Either fork the source repository (https://github.com/${options.repoOwner}/${options.repoName}) or disable fork mode "--fork false".  Read more about "fork mode" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork`
+        `Error pushing to https://github.com/${repoForkOwner}/${options.repoName}. Repository does not exist. Either fork the source repository (https://github.com/${options.repoOwner}/${options.repoName}) or disable fork mode "--fork false".  Read more about "fork mode" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork`
       );
     }
 

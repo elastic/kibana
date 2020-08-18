@@ -11,6 +11,11 @@ import {
 } from '../services/git';
 
 export async function maybeSetupRepo(options: BackportOptions) {
+  // don't setup repo on CI
+  if (options.ci) {
+    return;
+  }
+
   const isAlreadyCloned = await repoExists(options);
 
   // clone repo if folder does not already exists

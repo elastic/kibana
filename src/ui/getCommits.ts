@@ -1,4 +1,5 @@
 import { BackportOptions } from '../options/options';
+import { HandledError } from '../services/HandledError';
 import { fetchCommitBySha } from '../services/github/v3/fetchCommitBySha';
 import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommitByPullNumber';
 import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommitsByAuthor';
@@ -17,6 +18,12 @@ export async function getCommits(options: BackportOptions) {
         pullNumber: options.pullNumber, // must extract pullNumber to satisfy the ts gods
       }),
     ];
+  }
+
+  if (options.ci) {
+    throw new HandledError(
+      'When "--ci" flag is enabled either `--sha` or `--pr` must be specified'
+    );
   }
 
   if (options.prFilter) {

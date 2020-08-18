@@ -12,16 +12,20 @@ describe('fetchExistingPullRequest', () => {
   describe('when PR does not exist', () => {
     it('returns undefined', async () => {
       const options = {
-        repoOwner: 'sqren',
-        repoName: 'backport-e2e',
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as BackportOptions;
-      const res = await fetchExistingPullRequest({
-        options,
-        backportBranch: 'backport/7.8/pr-9',
-        targetBranch: 'master',
-      });
+
+      const prPayload = {
+        owner: 'backport-org',
+        repo: 'backport-e2e',
+        title: 'My PR title',
+        body: 'My PR body',
+        head: 'sqren:backport/7.8/pr-foo',
+        base: '7.8',
+      };
+
+      const res = await fetchExistingPullRequest({ options, prPayload });
 
       expect(res).toBe(undefined);
     });
@@ -30,19 +34,22 @@ describe('fetchExistingPullRequest', () => {
   describe('when PR exists', () => {
     it('returns the PR number and url', async () => {
       const options = {
-        repoOwner: 'sqren',
-        repoName: 'backport-e2e',
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as BackportOptions;
-      const res = await fetchExistingPullRequest({
-        options,
-        backportBranch: 'backport/7.8/pr-9',
-        targetBranch: '7.8',
-      });
+
+      const prPayload = {
+        owner: 'backport-org',
+        repo: 'backport-e2e',
+        title: 'My PR title',
+        body: 'My PR body',
+        head: 'sqren:backport/7.8/pr-9',
+        base: '7.8',
+      };
+      const res = await fetchExistingPullRequest({ options, prPayload });
 
       expect(res).toEqual({
-        html_url: 'https://github.com/backport-org/backport-e2e/pull/10',
+        url: 'https://github.com/backport-org/backport-e2e/pull/10',
         number: 10,
       });
     });

@@ -1,6 +1,7 @@
 {
   "include": ["src/**/*"],
   "compilerOptions": {
+    "skipLibCheck": true,
     "declaration": true,
     "target": "es2018",
     "lib": ["es2019"],

@@ -1,4 +1,6 @@
+import { Octokit } from '@octokit/rest';
 import chalk from 'chalk';
+import { backportPullRequest } from 'github-backport';
 import difference from 'lodash.difference';
 import isEmpty from 'lodash.isempty';
 import ora = require('ora');
@@ -15,11 +17,21 @@ import {
   getUnstagedFiles,
   finalizeCherrypick,
   getConflictingFiles,
+  getRepoForkOwner,
 } from '../services/git';
 import { getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
 import { addLabelsToPullRequest } from '../services/github/v3/addLabelsToPullRequest';
-import { createPullRequest } from '../services/github/v3/createPullRequest';
+import {
+  createPullRequest,
+  getTitle,
+  getBody,
+  PullRequestPayload,
+} from '../services/github/v3/createPullRequest';
+import {
+  splitHead,
+  fetchExistingPullRequest,
+} from '../services/github/v4/fetchExistingPullRequest';
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
@@ -34,28 +46,48 @@ export async function cherrypickAndCreateTargetPullRequest({
   commits: CommitSelected[];
   targetBranch: string;
 }) {
-  const backportBranch = getBackportBranch(targetBranch, commits);
+  const backportBranch = getBackportBranchName(targetBranch, commits);
+  const repoForkOwner = getRepoForkOwner(options);
   consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
 
-  await createBackportBranch({ options, targetBranch, backportBranch });
+  const prPayload: PullRequestPayload = {
+    owner: options.repoOwner,
+    repo: options.repoName,
+    title: getTitle({ options, commits, targetBranch }),
+    body: getBody({ options, commits, targetBranch }),
+    head: `${repoForkOwner}:${backportBranch}`, // eg. sqren:backport/7.x/pr-75007
+    base: targetBranch, // eg. 7.x
+  };
 
-  await sequentially(commits, (commit) =>
-    waitForCherrypick(options, commit, targetBranch)
-  );
+  const sourcePullNumber =
+    commits.length === 1 ? commits[0].pullNumber : undefined;
 
-  if (options.resetAuthor) {
-    await setCommitAuthor(options, options.username);
-  }
-
-  await pushBackportBranch({ options, backportBranch });
-  await deleteBackportBranch({ options, backportBranch });
-
-  const targetPullRequest = await createPullRequest({
-    options,
-    commits,
-    targetBranch,
-    backportBranch,
-  });
+  // backport using Github API
+  const targetPullRequest =
+    // fork mode not supported via API
+    (options.username === options.repoName || !options.fork) &&
+    // only enable for ci mode until fork-mode is supported
+    options.ci &&
+    // has exactly 1 PR to backport
+    sourcePullNumber != undefined &&
+    // `autoFixConflicts` is not supported via API
+    !options.autoFixConflicts &&
+    // `mainline` (merge commits) is not supported via API
+    !options.mainline &&
+    // `resetAuthor` is not supported via API
+    !options.resetAuthor
+      ? await backportViaGithubApi({
+          options,
+          prPayload,
+          pullNumber: sourcePullNumber,
+        })
+      : await backportViaFilesystem({
+          options,
+          prPayload,
+          targetBranch,
+          backportBranch,
+          commits,
+        });
 
   // add assignees to target pull request
   if (options.assignees.length > 0) {
@@ -89,20 +121,105 @@ export async function cherrypickAndCreateTargetPullRequest({
     await Promise.all(promises);
   }
 
-  consoleLog(`View pull request: ${targetPullRequest.html_url}`);
+  consoleLog(`View pull request: ${targetPullRequest.url}`);
 
   return targetPullRequest;
 }
 
+async function backportViaGithubApi({
+  options,
+  prPayload,
+  pullNumber,
+}: {
+  options: BackportOptions;
+  prPayload: PullRequestPayload;
+  pullNumber: number;
+}) {
+  logger.info('Backporting via api');
+
+  const spinner = ora(`Performing backport via Github API...`).start();
+
+  const octokit = new Octokit({
+    auth: options.accessToken,
+    baseUrl: options.githubApiBaseUrlV3,
+    log: logger,
+  });
+
+  let number;
+  try {
+    const { head } = splitHead(prPayload);
+    number = await backportPullRequest({
+      octokit,
+      pullRequestNumber: pullNumber,
+      ...prPayload,
+      head,
+    });
+    spinner.succeed();
+  } catch (e) {
+    spinner.fail();
+
+    // PR already exists
+    if (
+      e.name === 'HttpError' &&
+      e.message.includes('Reference already exists')
+    ) {
+      const res = await fetchExistingPullRequest({ options, prPayload });
+      throw new HandledError(`Pull request already exists: ${res?.url}`);
+    }
+
+    // merge conflict
+    if (e.message.includes('could not be cherry-picked on top of')) {
+      throw new HandledError(
+        'Commit could not be cherrypicked due to conflicts'
+      );
+    }
+
+    throw e;
+  }
+
+  const url = `https://github.com/${options.repoOwner}/${options.repoName}/pull/${number}`;
+  return { number, url };
+}
+
+async function backportViaFilesystem({
+  options,
+  prPayload,
+  commits,
+  targetBranch,
+  backportBranch,
+}: {
+  options: BackportOptions;
+  prPayload: PullRequestPayload;
+  commits: CommitSelected[];
+  targetBranch: string;
+  backportBranch: string;
+}) {
+  logger.info('Backporting via filesystem');
+
+  await createBackportBranch({ options, targetBranch, backportBranch });
+
+  await sequentially(commits, (commit) =>
+    waitForCherrypick(options, commit, targetBranch)
+  );
+
+  if (options.resetAuthor) {
+    await setCommitAuthor(options, options.username);
+  }
+
+  await pushBackportBranch({ options, backportBranch });
+  await deleteBackportBranch({ options, backportBranch });
+  return createPullRequest({ options, prPayload });
+}
+
 /*
- * Returns the name of the backport brancha
+ * Returns the name of the backport branch without remote name
  *
  * Examples:
  * For a single PR: `backport/7.x/pr-1234`
  * For a single commit: `backport/7.x/commit-abcdef`
  * For multiple: `backport/7.x/pr-1234_commit-abcdef`
  */
-export function getBackportBranch(
+export function getBackportBranchName(
   targetBranch: string,
   commits: CommitSelected[]
 ) {

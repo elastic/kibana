@@ -4,35 +4,32 @@ import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { CommitSelected } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
-import { getFullBackportBranch } from '../../git';
 import { logger, consoleLog } from '../../logger';
 import { fetchExistingPullRequest } from '../v4/fetchExistingPullRequest';
 import { getGithubV3ErrorMessage } from './getGithubV3ErrorMessage';
 
+export interface PullRequestPayload {
+  owner: string;
+  repo: string;
+  title: string;
+  body: string;
+  head: string;
+  base: string;
+  [key: string]: unknown;
+}
+
 export async function createPullRequest({
   options,
-  commits,
-  targetBranch,
-  backportBranch,
+  prPayload,
 }: {
   options: BackportOptions;
-  commits: CommitSelected[];
-  targetBranch: string;
-  backportBranch: string;
+  prPayload: PullRequestPayload;
 }) {
-  const title = getTitle({ options, commits, targetBranch });
-  const body = getBody({ options, commits, targetBranch });
-  const head = getFullBackportBranch(options, backportBranch);
-  const base = targetBranch;
-  logger.info(`Creating PR with title: "${title}". ${head} -> ${base}`);
+  logger.info(
+    `Creating PR with title: "${prPayload.title}". ${prPayload.head} -> ${prPayload.base}`
+  );
 
-  const {
-    accessToken,
-    dryRun,
-    githubApiBaseUrlV3,
-    repoName,
-    repoOwner,
-  } = options;
+  const { accessToken, dryRun, githubApiBaseUrlV3 } = options;
   const spinner = ora(`Creating pull request`).start();
 
   if (dryRun) {
@@ -40,11 +37,11 @@ export async function createPullRequest({
 
     // output PR summary
     consoleLog(chalk.bold('\nPull request summary:'));
-    consoleLog(`Branch: ${head} -> ${base}`);
-    consoleLog(`Title: ${title}`);
-    consoleLog(`Body: ${body}\n`);
+    consoleLog(`Branch: ${prPayload.head} -> ${prPayload.base}`);
+    consoleLog(`Title: ${prPayload.title}`);
+    consoleLog(`Body: ${prPayload.body}\n`);
 
-    return { html_url: 'example_url', number: 1337 };
+    return { url: 'example_url', number: 1337 };
   }
 
   try {
@@ -54,19 +51,12 @@ export async function createPullRequest({
       log: logger,
     });
 
-    const res = await octokit.pulls.create({
-      owner: repoOwner,
-      repo: repoName,
-      title,
-      head: head,
-      base: base,
-      body: body,
-    });
+    const res = await octokit.pulls.create(prPayload);
 
     spinner.succeed();
 
     return {
-      html_url: res.data.html_url,
+      url: res.data.html_url,
       number: res.data.number,
     };
   } catch (e) {
@@ -74,8 +64,7 @@ export async function createPullRequest({
     try {
       const existingPR = await fetchExistingPullRequest({
         options,
-        targetBranch,
-        backportBranch,
+        prPayload,
       });
 
       if (existingPR) {
@@ -94,7 +83,7 @@ export async function createPullRequest({
   }
 }
 
-function getBody({
+export function getBody({
   options,
   commits,
   targetBranch,
@@ -112,14 +101,14 @@ function getBody({
   return `Backports the following commits to ${targetBranch}:\n${commitMessages}${bodySuffix}`;
 }
 
-function getTitle({
+export function getTitle({
   options,
-  targetBranch,
   commits,
+  targetBranch,
 }: {
   options: BackportOptions;
-  targetBranch: string;
   commits: CommitSelected[];
+  targetBranch: string;
 }) {
   const commitMessages = commits
     .map((commit) => commit.formattedMessage)

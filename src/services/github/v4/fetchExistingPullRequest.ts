@@ -1,33 +1,31 @@
 import { BackportOptions } from '../../../options/options';
-import { getRemoteName } from '../../git';
+import { PullRequestPayload } from '../v3/createPullRequest';
 import { apiRequestV4 } from './apiRequestV4';
 
 export async function fetchExistingPullRequest({
   options,
-  targetBranch,
-  backportBranch,
+  prPayload,
 }: {
   options: BackportOptions;
-  targetBranch: string;
-  backportBranch: string;
+  prPayload: PullRequestPayload;
 }) {
-  const { githubApiBaseUrlV4, repoName, accessToken } = options;
+  const { githubApiBaseUrlV4, accessToken } = options;
   const query = /* GraphQL */ `
     query ExistingPullRequest(
       $repoOwner: String!
       $repoName: String!
-      $targetBranch: String!
-      $backportBranch: String!
+      $base: String!
+      $head: String!
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         name
-        ref(qualifiedName: $backportBranch) {
+        ref(qualifiedName: $head) {
           name
           associatedPullRequests(
             first: 1
             states: OPEN
-            baseRefName: $targetBranch
-            headRefName: $backportBranch
+            baseRefName: $base
+            headRefName: $head
           ) {
             edges {
               node {
@@ -41,15 +39,17 @@ export async function fetchExistingPullRequest({
     }
   `;
 
+  const { repoForkOwner, head } = splitHead(prPayload);
+
   const res = await apiRequestV4<DataResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,
     variables: {
-      repoOwner: getRemoteName(options),
-      repoName,
-      targetBranch,
-      backportBranch,
+      repoOwner: repoForkOwner,
+      repoName: prPayload.repo,
+      base: prPayload.base,
+      head: head,
     },
   });
 
@@ -61,7 +61,7 @@ export async function fetchExistingPullRequest({
   }
 
   return {
-    html_url: existingPullRequest.node.url,
+    url: existingPullRequest.node.url,
     number: existingPullRequest.node.number,
   };
 }
@@ -81,4 +81,9 @@ interface DataResponse {
       };
     } | null;
   };
+}
+
+export function splitHead(prPayload: PullRequestPayload) {
+  const [repoForkOwner, head] = prPayload.head.split(':');
+  return { repoForkOwner, head };
 }
