@@ -221,8 +221,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { injectedMetadata, legacySearch, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+    const { legacySearch, uiSettings } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -233,7 +232,6 @@ export class SearchSource {
       {
         legacySearchService: legacySearch,
         config: uiSettings,
-        esShardTimeout,
       }
     );
   }

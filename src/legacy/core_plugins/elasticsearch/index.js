@@ -44,7 +44,6 @@ export default function (kibana) {
 
       defaultVars = {
         esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
-        esShardTimeout: esConfig.shardTimeout.asMilliseconds(),
         esApiVersion: esConfig.apiVersion,
       };
 

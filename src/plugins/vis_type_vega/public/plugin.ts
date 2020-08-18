@@ -78,7 +78,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
-      esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);

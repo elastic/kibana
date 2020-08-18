@@ -59,13 +59,4 @@ describe('getSearchParams', () => {
     searchParams = getSearchParams(config);
     expect(searchParams.max_concurrent_shard_requests).toBe(5);
   });
-
-  test('includes timeout according to esShardTimeout if greater than 0', () => {
-    const config = getConfigStub();
-    let searchParams = getSearchParams(config, 0);
-    expect(searchParams.timeout).toBe(undefined);
-
-    searchParams = getSearchParams(config, 100);
-    expect(searchParams.timeout).toBe('100ms');
-  });
 });

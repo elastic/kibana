@@ -23,14 +23,13 @@ import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 
-export function getSearchParams(config: IUiSettingsClient, esShardTimeout: number = 0) {
+export function getSearchParams(config: IUiSettingsClient) {
   return {
     rest_total_hits_as_int: true,
     ignore_unavailable: true,
     ignore_throttled: getIgnoreThrottled(config),
     max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
     preference: getPreference(config),
-    timeout: getTimeout(esShardTimeout),
   };
 }
 
@@ -51,17 +50,12 @@ export function getPreference(config: IUiSettingsClient) {
     : undefined;
 }
 
-export function getTimeout(esShardTimeout: number) {
-  return esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined;
-}
-
 export function getSearchParamsFromRequest(
   searchRequest: SearchRequest,
   dependencies: { injectedMetadata: CoreStart['injectedMetadata']; uiSettings: IUiSettingsClient }
 ): ISearchRequestParams {
-  const { injectedMetadata, uiSettings } = dependencies;
-  const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-  const searchParams = getSearchParams(uiSettings, esShardTimeout);
+  const { uiSettings } = dependencies;
+  const searchParams = getSearchParams(uiSettings);
 
   return {
     index: searchRequest.index.title || searchRequest.index,

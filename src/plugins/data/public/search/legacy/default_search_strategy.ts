@@ -30,12 +30,7 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({
-  searchRequests,
-  legacySearchService,
-  config,
-  esShardTimeout,
-}: SearchStrategySearchParams) {
+function msearch({ searchRequests, legacySearchService, config }: SearchStrategySearchParams) {
   const es = legacySearchService.esClient;
   const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
     const inlineHeader = {
@@ -46,7 +41,6 @@ function msearch({
     };
     const inlineBody = {
       ...body,
-      timeout: getTimeout(esShardTimeout),
     };
     return `${JSON.stringify(inlineHeader)}\n${JSON.stringify(inlineBody)}`;
   });

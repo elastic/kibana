@@ -62,7 +62,6 @@ describe('defaultSearchStrategy', function () {
             index: { title: 'foo' },
           },
         ],
-        esShardTimeout: 0,
         legacySearchService: searchService.__LEGACY,
       };
 

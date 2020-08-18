@@ -31,7 +31,6 @@ export interface FetchOptions {
 export interface FetchHandlers {
   legacySearchService: ISearchStartLegacy;
   config: IUiSettingsClient;
-  esShardTimeout: number;
 }
 
 export interface SearchError {
