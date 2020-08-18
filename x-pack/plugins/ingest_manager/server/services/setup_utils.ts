@@ -10,7 +10,7 @@ let status: Promise<unknown> | undefined;
 let onResolve = (value?: unknown) => {};
 let onReject = (reason: any) => {};
 
-export async function firstPromiseBlocksAndFufills(asyncFunction: Function) {
+export async function awaitIfPending(asyncFunction: Function) {
   // pending successful or failed attempt
   if (status) {
     // don't run concurrent installs

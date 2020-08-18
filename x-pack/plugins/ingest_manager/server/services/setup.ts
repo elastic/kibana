@@ -26,7 +26,7 @@ import { packageConfigService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
-import { firstPromiseBlocksAndFufills } from './setup_utils';
+import { awaitIfPending } from './setup_utils';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -35,7 +35,14 @@ export interface SetupStatus {
   isIntialized: true | undefined;
 }
 
-async function _setupIngestManager(
+export async function setupIngestManager(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<SetupStatus> {
+  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+}
+
+async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
@@ -108,13 +115,6 @@ async function _setupIngestManager(
   }
 
   return { isIntialized: true };
-}
-
-export async function setupIngestManager(
-  soClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
-): Promise<SetupStatus> {
-  return firstPromiseBlocksAndFufills(() => _setupIngestManager(soClient, callCluster));
 }
 
 export async function setupFleet(

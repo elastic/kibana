@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { firstPromiseBlocksAndFufills } from './setup_utils';
+import { awaitIfPending } from './setup_utils';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -17,10 +17,10 @@ describe('limitOne', () => {
     const fnC = jest.fn();
     const fnD = jest.fn();
     const promises = [
-      firstPromiseBlocksAndFufills(fnA),
-      firstPromiseBlocksAndFufills(fnB),
-      firstPromiseBlocksAndFufills(fnC),
-      firstPromiseBlocksAndFufills(fnD),
+      awaitIfPending(fnA),
+      awaitIfPending(fnB),
+      awaitIfPending(fnC),
+      awaitIfPending(fnD),
     ];
     await Promise.all(promises);
 
@@ -40,10 +40,10 @@ describe('limitOne', () => {
       const fnC = jest.fn().mockImplementation(async () => 'called third');
       const fnD = jest.fn().mockImplementation(async () => 'called fourth');
       const promises = [
-        firstPromiseBlocksAndFufills(fnA),
-        firstPromiseBlocksAndFufills(fnB),
-        firstPromiseBlocksAndFufills(fnC),
-        firstPromiseBlocksAndFufills(fnD),
+        awaitIfPending(fnA),
+        awaitIfPending(fnB),
+        awaitIfPending(fnC),
+        awaitIfPending(fnD),
       ];
 
       expect(fnA).toHaveBeenCalledTimes(1);
@@ -68,10 +68,10 @@ describe('limitOne', () => {
       const fnC = jest.fn().mockImplementation(async () => 'called third');
       const fnD = jest.fn().mockImplementation(async () => 'called fourth');
       const promises = [
-        firstPromiseBlocksAndFufills(fnA),
-        firstPromiseBlocksAndFufills(fnB),
-        firstPromiseBlocksAndFufills(fnC),
-        firstPromiseBlocksAndFufills(fnD),
+        awaitIfPending(fnA),
+        awaitIfPending(fnB),
+        awaitIfPending(fnC),
+        awaitIfPending(fnD),
       ];
 
       await expect(Promise.all(promises)).rejects.toThrow(expectedError);
@@ -99,10 +99,10 @@ describe('limitOne', () => {
     const fnC = jest.fn();
     const fnD = jest.fn();
     let promises = [
-      firstPromiseBlocksAndFufills(fnA),
-      firstPromiseBlocksAndFufills(fnB),
-      firstPromiseBlocksAndFufills(fnC),
-      firstPromiseBlocksAndFufills(fnD),
+      awaitIfPending(fnA),
+      awaitIfPending(fnB),
+      awaitIfPending(fnC),
+      awaitIfPending(fnD),
     ];
     let results = await Promise.all(promises);
 
@@ -112,12 +112,7 @@ describe('limitOne', () => {
     expect(fnD).toHaveBeenCalledTimes(0);
     expect(results).toEqual(['fnA first', 'fnA first', 'fnA first', 'fnA first']);
 
-    promises = [
-      firstPromiseBlocksAndFufills(fnA),
-      firstPromiseBlocksAndFufills(fnB),
-      firstPromiseBlocksAndFufills(fnC),
-      firstPromiseBlocksAndFufills(fnD),
-    ];
+    promises = [awaitIfPending(fnA), awaitIfPending(fnB), awaitIfPending(fnC), awaitIfPending(fnD)];
     results = await Promise.all(promises);
     expect(fnA).toHaveBeenCalledTimes(2);
     expect(fnB).toHaveBeenCalledTimes(0);
@@ -125,12 +120,7 @@ describe('limitOne', () => {
     expect(fnD).toHaveBeenCalledTimes(0);
     expect(results).toEqual(['fnA second', 'fnA second', 'fnA second', 'fnA second']);
 
-    promises = [
-      firstPromiseBlocksAndFufills(fnA),
-      firstPromiseBlocksAndFufills(fnB),
-      firstPromiseBlocksAndFufills(fnC),
-      firstPromiseBlocksAndFufills(fnD),
-    ];
+    promises = [awaitIfPending(fnA), awaitIfPending(fnB), awaitIfPending(fnC), awaitIfPending(fnD)];
     results = await Promise.all(promises);
     expect(fnA).toHaveBeenCalledTimes(3);
     expect(fnB).toHaveBeenCalledTimes(0);
@@ -143,12 +133,7 @@ describe('limitOne', () => {
       'fnA default/2+',
     ]);
 
-    promises = [
-      firstPromiseBlocksAndFufills(fnA),
-      firstPromiseBlocksAndFufills(fnB),
-      firstPromiseBlocksAndFufills(fnC),
-      firstPromiseBlocksAndFufills(fnD),
-    ];
+    promises = [awaitIfPending(fnA), awaitIfPending(fnB), awaitIfPending(fnC), awaitIfPending(fnD)];
     results = await Promise.all(promises);
     expect(fnA).toHaveBeenCalledTimes(4);
     expect(fnB).toHaveBeenCalledTimes(0);
