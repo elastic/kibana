@@ -227,8 +227,10 @@ describe('when on the list page', () => {
         const pollInterval = 10;
         await reactTestingLibrary.act(async () => {
           store.dispatch({
-            type: 'userUpdatedEndpointListAutoRefreshInterval',
-            payload: pollInterval,
+            type: 'userUpdatedEndpointListRefreshOptions',
+            payload: {
+              autoRefreshInterval: pollInterval,
+            },
           });
         });
         let renderResult = render();

@@ -418,30 +418,32 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       {
-        <div style={{ visibility: hasListData ? 'visible' : 'hidden' }}>
-          <EuiSuperDatePicker
-            onTimeChange={() => {}}
-            onRefresh={() => {
-              dispatch({
-                type: 'appRequestedEndpointList',
-              });
-            }}
-            isPaused={!hasListData ? false : !isAutoRefreshEnabled}
-            refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
-            onRefreshChange={(evt) => {
-              dispatch({
-                type: 'userToggledEndpointListAutoRefresh',
-                payload: !evt.isPaused,
-              });
-              dispatch({
-                type: 'userUpdatedEndpointListAutoRefreshInterval',
-                payload: evt.refreshInterval,
-              });
-            }}
-            isAutoRefreshOnly={true}
-          />
+        <>
+          <div style={{ display: hasListData ? 'flex' : 'none', maxWidth: 200 }}>
+            <EuiSuperDatePicker
+              onTimeChange={() => {}}
+              isDisabled={hasSelectedEndpoint}
+              onRefresh={() => {
+                dispatch({
+                  type: 'appRequestedEndpointList',
+                });
+              }}
+              isPaused={!hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled}
+              refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
+              onRefreshChange={(evt) => {
+                dispatch({
+                  type: 'userUpdatedEndpointListRefreshOptions',
+                  payload: {
+                    isAutoRefreshEnabled: !evt.isPaused,
+                    autoRefreshInterval: evt.refreshInterval,
+                  },
+                });
+              }}
+              isAutoRefreshOnly={true}
+            />
+          </div>
           <EuiSpacer size="m" />
-        </div>
+        </>
       }
       {hasListData && (
         <>

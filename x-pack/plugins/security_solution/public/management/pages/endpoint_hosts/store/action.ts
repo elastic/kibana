@@ -86,19 +86,12 @@ interface ServerReturnedEndpointExistValue {
   payload: boolean;
 }
 
-interface AppToggledEndpointListAutoRefresh {
-  type: 'appToggledEndpointListAutoRefresh';
-  payload: boolean;
-}
-
-interface UserToggledEndpointListAutoRefresh {
-  type: 'userToggledEndpointListAutoRefresh';
-  payload: boolean;
-}
-
-interface UserUpdatedEndpointListAutoRefreshInterval {
-  type: 'userUpdatedEndpointListAutoRefreshInterval';
-  payload: number;
+interface UserUpdatedEndpointListRefreshOptions {
+  type: 'userUpdatedEndpointListRefreshOptions';
+  payload: {
+    isAutoRefreshEnabled?: boolean;
+    autoRefreshInterval?: number;
+  };
 }
 
 interface AppRequestedEndpointList {
@@ -119,8 +112,6 @@ export type EndpointAction =
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | AppToggledEndpointListAutoRefresh
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
-  | UserToggledEndpointListAutoRefresh
-  | UserUpdatedEndpointListAutoRefreshInterval;
+  | UserUpdatedEndpointListRefreshOptions;

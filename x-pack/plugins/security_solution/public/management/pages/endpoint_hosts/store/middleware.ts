@@ -15,7 +15,6 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
-  isAutoRefreshEnabled,
 } from './selectors';
 import { EndpointState } from '../types';
 import {
@@ -64,13 +63,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointList',
           payload: endpointResponse,
         });
-
-        if (!isAutoRefreshEnabled(getState())) {
-          dispatch({
-            type: 'appToggledEndpointListAutoRefresh',
-            payload: true,
-          });
-        }
 
         try {
           const missingPolicies = await getNonExistingPoliciesForEndpointsList(
@@ -151,11 +143,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
       dispatch({
         type: 'serverCancelledPolicyItemsLoading',
-      });
-
-      dispatch({
-        type: 'appToggledEndpointListAutoRefresh',
-        payload: false,
       });
 
       // If user navigated directly to a endpoint details page, load the endpoint list

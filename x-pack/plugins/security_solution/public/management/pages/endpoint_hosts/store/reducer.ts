@@ -134,20 +134,17 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       endpointsExist: action.payload,
     };
-  } else if (action.type === 'appToggledEndpointListAutoRefresh') {
+  } else if (action.type === 'userUpdatedEndpointListRefreshOptions') {
     return {
       ...state,
-      isAutoRefreshEnabled: action.payload,
-    };
-  } else if (action.type === 'userToggledEndpointListAutoRefresh') {
-    return {
-      ...state,
-      isAutoRefreshEnabled: action.payload,
-    };
-  } else if (action.type === 'userUpdatedEndpointListAutoRefreshInterval') {
-    return {
-      ...state,
-      autoRefreshInterval: action.payload,
+      isAutoRefreshEnabled:
+        action.payload.isAutoRefreshEnabled !== undefined
+          ? action.payload.isAutoRefreshEnabled
+          : state.isAutoRefreshEnabled,
+      autoRefreshInterval:
+        action.payload.autoRefreshInterval !== undefined
+          ? action.payload.autoRefreshInterval
+          : state.autoRefreshInterval,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<EndpointState> = {
