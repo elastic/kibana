@@ -153,7 +153,6 @@ export class IndexPatternField implements IFieldType {
       script: this.script,
       lang: this.lang,
       conflictDescriptions: this.conflictDescriptions,
-
       name: this.name,
       type: this.type,
       esTypes: this.esTypes,
