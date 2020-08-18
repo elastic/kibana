@@ -11,7 +11,6 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
-  ENDPOINT_TRUSTED_APPS_LIST_TYPE,
 } from '../../../common/constants';
 import { ExceptionListSchema, ExceptionListSoSchema, Version } from '../../../common/schemas';
 
@@ -58,7 +57,7 @@ export const createEndpointTrustedAppsList = async ({
         name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
         tags: [],
         tie_breaker_id: tieBreaker ?? uuid.v4(),
-        type: ENDPOINT_TRUSTED_APPS_LIST_TYPE,
+        type: 'endpoint',
         updated_by: user,
         version,
       },
