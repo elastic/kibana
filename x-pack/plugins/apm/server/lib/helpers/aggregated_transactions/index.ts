@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
@@ -57,9 +58,18 @@ export async function getSearchAggregatedTransactions({
   end?: number;
   apmEventClient: APMEventClient;
 }): Promise<boolean> {
-  return config['xpack.apm.searchAggregatedTransactions']
-    ? await getHasAggregatedTransactions({ start, end, apmEventClient })
-    : false;
+  const searchAggregatedTransactions =
+    config['xpack.apm.searchAggregatedTransactions'];
+
+  if (
+    searchAggregatedTransactions === SearchAggregatedTransactionSetting.auto
+  ) {
+    return getHasAggregatedTransactions({ start, end, apmEventClient });
+  }
+
+  return (
+    searchAggregatedTransactions === SearchAggregatedTransactionSetting.always
+  );
 }
 
 export function getTransactionDurationFieldForAggregatedTransactions(

@@ -8,6 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
+import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 
 export const config = {
   exposeToBrowser: {
@@ -30,7 +31,16 @@ export const config = {
       transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
       maxTraceItems: schema.number({ defaultValue: 1000 }),
     }),
-    searchAggregatedTransactions: schema.boolean({ defaultValue: false }),
+    searchAggregatedTransactions: schema.oneOf(
+      [
+        schema.literal(SearchAggregatedTransactionSetting.auto),
+        schema.literal(SearchAggregatedTransactionSetting.always),
+        schema.literal(SearchAggregatedTransactionSetting.never),
+      ],
+      {
+        defaultValue: SearchAggregatedTransactionSetting.never,
+      }
+    ),
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   }),
 };

@@ -6,7 +6,7 @@
 import { format } from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 
-export const redirectToTransactionDetailPage = ({
+export const getRedirectToTransactionDetailPageUrl = ({
   transaction,
   rangeFrom,
   rangeTo,
