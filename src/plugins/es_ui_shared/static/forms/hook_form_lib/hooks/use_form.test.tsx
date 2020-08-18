@@ -22,7 +22,7 @@ import { act } from 'react-dom/test-utils';
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 
 import { Form, UseField } from '../components';
-import { FormSubmitHandler, OnUpdateHandler } from '../types';
+import { FormSubmitHandler, OnUpdateHandler, FormHook, ValidationFunc } from '../types';
 import { useForm } from './use_form';
 
 interface MyForm {
@@ -122,6 +122,71 @@ describe('use_form() hook', () => {
       const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
       expect(formData).toEqual(expectedData);
+    });
+
+    test('should not build the object if the form is not valid', async () => {
+      let formHook: FormHook<MyForm> | null = null;
+
+      const onFormHook = (_form: FormHook<MyForm>) => {
+        formHook = _form;
+      };
+
+      const TestComp = ({ onForm }: { onForm: (form: FormHook<MyForm>) => void }) => {
+        const { form } = useForm<MyForm>({ defaultValue: { username: 'initialValue' } });
+        const validator: ValidationFunc = ({ value }) => {
+          if (value === 'wrongValue') {
+            return { message: 'Error on the field' };
+          }
+        };
+
+        useEffect(() => {
+          onForm(form);
+        }, [form]);
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="username"
+              config={{ validations: [{ validator }] }}
+              data-test-subj="myField"
+            />
+          </Form>
+        );
+      };
+
+      const setup = registerTestBed(TestComp, {
+        defaultProps: { onForm: onFormHook },
+        memoryRouter: { wrapComponent: false },
+      });
+
+      const {
+        form: { setInputValue },
+      } = setup() as TestBed;
+
+      if (!formHook) {
+        throw new Error(
+          `formHook is not defined. Use the onForm() prop to update the reference to the form hook.`
+        );
+      }
+
+      let data;
+      let isValid;
+
+      await act(async () => {
+        ({ data, isValid } = await formHook!.submit());
+      });
+
+      expect(isValid).toBe(true);
+      expect(data).toEqual({ username: 'initialValue' });
+
+      setInputValue('myField', 'wrongValue'); // Validation will fail
+
+      await act(async () => {
+        ({ data, isValid } = await formHook!.submit());
+      });
+
+      expect(isValid).toBe(false);
+      expect(data).toEqual({}); // Don't build the object (and call the serializers()) when invalid
     });
   });
 

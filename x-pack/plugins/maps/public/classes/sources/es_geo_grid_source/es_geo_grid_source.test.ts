@@ -8,11 +8,7 @@ import { MapExtent, MapFilters } from '../../../../common/descriptor_types';
 jest.mock('../../../kibana_services');
 jest.mock('ui/new_platform');
 
-import {
-  getIndexPatternService,
-  getSearchService,
-  fetchSearchSourceAndRecordWithInspector,
-} from '../../../kibana_services';
+import { getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -54,6 +50,51 @@ describe('ESGeoGridSource', () => {
     },
     {}
   );
+  geogridSource._runEsQuery = async (args: unknown) => {
+    return {
+      took: 71,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 748 + 683,
+        max_score: null,
+        hits: [],
+      },
+      aggregations: {
+        gridSplit: {
+          buckets: [
+            {
+              key: '4/4/6',
+              doc_count: 748,
+              gridCentroid: {
+                location: {
+                  lat: 35.64189018148127,
+                  lon: -82.84314106196105,
+                },
+                count: 748,
+              },
+            },
+            {
+              key: '4/3/6',
+              doc_count: 683,
+              gridCentroid: {
+                location: {
+                  lat: 35.24134021274211,
+                  lon: -98.45945192042787,
+                },
+                count: 683,
+              },
+            },
+          ],
+        },
+      },
+    };
+  };
 
   describe('getGeoJsonWithMeta', () => {
     let mockSearchSource: unknown;
@@ -71,50 +112,6 @@ describe('ESGeoGridSource', () => {
       getIndexPatternService.mockReturnValue(mockIndexPatternService);
       // @ts-expect-error
       getSearchService.mockReturnValue(mockSearchService);
-      // @ts-expect-error
-      fetchSearchSourceAndRecordWithInspector.mockReturnValue({
-        took: 71,
-        timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 748 + 683,
-          max_score: null,
-          hits: [],
-        },
-        aggregations: {
-          gridSplit: {
-            buckets: [
-              {
-                key: '4/4/6',
-                doc_count: 748,
-                gridCentroid: {
-                  location: {
-                    lat: 35.64189018148127,
-                    lon: -82.84314106196105,
-                  },
-                  count: 748,
-                },
-              },
-              {
-                key: '4/3/6',
-                doc_count: 683,
-                gridCentroid: {
-                  location: {
-                    lat: 35.24134021274211,
-                    lon: -98.45945192042787,
-                  },
-                  count: 683,
-                },
-              },
-            ],
-          },
-        },
-      });
     });
 
     const extent: MapExtent = {
