@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should receive expected results after calling overview logging', async () => {
       // call overview page
-      const { body } = await supertest
+      await supertest
         .post(API_URLS.LOG_PAGE_VIEW)
         .set('kbn-xsrf', 'true')
         .send({
