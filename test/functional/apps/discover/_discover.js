@@ -39,8 +39,9 @@ export default function ({ getService, getPageObjects }) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
