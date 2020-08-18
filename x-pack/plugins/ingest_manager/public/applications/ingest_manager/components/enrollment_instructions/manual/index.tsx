@@ -90,7 +90,7 @@ systemctl start elastic-agent`;
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
-          defaultMessage="The {command} command runs the agent in the foreground. If the agent's host reboots, you will need to run the command again."
+          defaultMessage="The {command} command runs the agent in the foreground. If the agent's host reboots, you'll need to run the command again."
           values={{
             command: <EuiCode>./elastic-agent run</EuiCode>,
           }}

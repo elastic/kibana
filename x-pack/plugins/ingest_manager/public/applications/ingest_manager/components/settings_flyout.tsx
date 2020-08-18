@@ -168,7 +168,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               'xpack.ingestManager.settings.integrationUpgradeEnabledFieldLabel',
               {
                 defaultMessage:
-                  'Automatically update integrations to the latest version to receive the latest assets. You might need to update agent configurations to use new features.',
+                  'Automatically update integrations to the latest version to get the latest assets. You might need to update agent configurations to use new features.',
               }
             ),
           },

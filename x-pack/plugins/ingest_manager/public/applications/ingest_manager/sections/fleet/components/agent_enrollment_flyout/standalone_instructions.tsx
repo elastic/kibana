@@ -81,7 +81,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage="Copy this configuration to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the configuration file to use your Elasticsearch credentials."
+              defaultMessage="Copy this configuration to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
               values={{
                 fileName: <EuiCode>elastic-agent.yml</EuiCode>,
                 ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
