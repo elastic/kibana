@@ -13,6 +13,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -32,6 +35,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -51,6 +57,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -70,6 +79,9 @@
         "type": "PERMANENT",
         "local_metadata": {},
         "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
       }
     }
   }
@@ -89,7 +101,10 @@
         "active" : true
       },
       "type" : "fleet-enrollment-api-keys",
-      "references": []
+      "references": [],
+      "migrationVersion": {
+        "fleet-enrollment-api-keys": "7.10.0"
+      }
     }
   }
 }
@@ -108,6 +123,9 @@
         "message": "State changed from STOPPED to STARTED",
         "payload": "{\"previous_state\": \"STOPPED\"}",
         "timestamp": "2019-09-20T17:30:22.950Z"
+      },
+      "migrationVersion": {
+        "fleet-agent-events": "7.10.0"
       }
     }
   }
@@ -221,6 +239,9 @@
         "revision": 2,
         "updated_at": "2020-05-07T19:34:42.533Z",
         "updated_by": "system"
+      },
+      "migrationVersion": {
+        "ingest-agent-policies": "7.10.0"
       }
     }
   }

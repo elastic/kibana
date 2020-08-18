@@ -180,7 +180,10 @@
       "references": [
       ],
       "type": "fleet-agents",
-      "updated_at": "2020-06-25T18:52:48.464Z"
+      "updated_at": "2020-06-25T18:52:48.464Z",
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
     }
   }
 }
@@ -202,7 +205,10 @@
       "references": [
       ],
       "type": "fleet-enrollment-api-keys",
-      "updated_at": "2020-06-25T17:25:30.114Z"
+      "updated_at": "2020-06-25T17:25:30.114Z",
+      "migrationVersion": {
+        "fleet-enrollment-api-keys": "7.10.0"
+      }
     }
   }
 }
