@@ -46,6 +46,8 @@ export async function getTile({
   logger: Logger;
   requestBody: any;
 }): Promise<Buffer | null> {
+  logger.info(JSON.stringify({ x, y, z, requestBody, geometryFieldName }));
+
   const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
 
   let resultFeatures: Feature[];
@@ -60,6 +62,8 @@ export async function getTile({
           },
         },
       };
+
+      // http://localhost:5601/veq/api/maps/mvt/getTile?x=0&y=0&z=0&geometryFieldName=coordinates&index=world_countries_v1&fields=_id&requestBody=(_source:(excludes:!()),docvalue_fields:!(),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),script_fields:(),size:10000,stored_fields:!(%27*%27))
 
       requestBody.query.bool.filter.push(geoShapeFilter);
 
