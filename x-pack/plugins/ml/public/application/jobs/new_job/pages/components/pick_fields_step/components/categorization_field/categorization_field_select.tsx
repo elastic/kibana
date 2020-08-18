@@ -34,7 +34,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
 
   const onChange = useCallback(
     (selectedOptions: EuiComboBoxOptionOption[]) =>
-      changeHandler((selectedOptions[0] && selectedOptions[0].label) || null),
+      changeHandler((selectedOptions[0] && selectedOptions[0].label) ?? null),
     [changeHandler]
   );
 
