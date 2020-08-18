@@ -4,24 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('fs');
-
-import fs from 'fs';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { initializeDownloadShareableWorkpadRoute } from './download';
+import { ExpressionFunction } from 'src/plugins/expressions/common/expression_functions';
+import { initializeGetFunctionsRoute } from './functions';
 import { getMockedRouterDeps } from '../test_helpers';
+import { API_ROUTE_FUNCTIONS } from '../../../common/lib';
+import { functions } from '../../../canvas_plugin_src/functions/server';
 
 const mockRouteContext = {} as RequestHandlerContext;
-const path = `api/canvas/workpad/find`;
-const mockRuntime = 'Canvas shareable runtime';
+const routePath = API_ROUTE_FUNCTIONS;
 
-describe('Download Canvas shareables runtime', () => {
+describe('Get list of serverside expression functions', () => {
   let routeHandler: RequestHandler<any, any, any>;
+  let mockFuncs: Record<string, ExpressionFunction>;
 
   beforeEach(() => {
+    mockFuncs = {
+      demodata: new ExpressionFunction(functions[0]()),
+    };
+
     const routerDeps = getMockedRouterDeps();
-    initializeDownloadShareableWorkpadRoute(routerDeps);
+
+    routerDeps.expressions.getFunctions.mockReturnValueOnce(mockFuncs);
+
+    initializeGetFunctionsRoute(routerDeps);
 
     routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
@@ -30,18 +37,15 @@ describe('Download Canvas shareables runtime', () => {
     jest.restoreAllMocks();
   });
 
-  it(`returns 200 with canvas shareables runtime`, async () => {
+  it(`returns 200 with list of functions`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
-      path,
+      path: routePath,
     });
-
-    const readFileSyncMock = fs.readFileSync as jest.Mock;
-    readFileSyncMock.mockReturnValueOnce(mockRuntime);
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(response.payload).toMatchInlineSnapshot(`"Canvas shareable runtime"`);
+    expect(response.payload).toBe(JSON.stringify(mockFuncs));
   });
 });
