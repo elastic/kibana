@@ -24,4 +24,5 @@ export {
   configToYaml,
   isPackageLimited,
   doesAgentConfigAlreadyIncludePackage,
+  isValidNamespace,
 } from '../../../../common';

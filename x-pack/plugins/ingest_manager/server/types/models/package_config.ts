@@ -5,6 +5,15 @@
  */
 import { schema } from '@kbn/config-schema';
 
+export const NamespaceSchema = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    if (!isNamespaceValid) {
+      return 'Namespace contains invalid characters';
+    }
+  },
+});
+
 const ConfigRecordSchema = schema.recordOf(
   schema.string(),
   schema.object({
@@ -16,7 +25,7 @@ const ConfigRecordSchema = schema.recordOf(
 const PackageConfigBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: schema.string({ minLength: 1 }),
+  namespace: NamespaceSchema,
   config_id: schema.string(),
   enabled: schema.boolean(),
   package: schema.maybe(
