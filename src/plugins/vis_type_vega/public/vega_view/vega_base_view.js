@@ -22,14 +22,14 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite } from '../lib/vega';
 import { Utils } from '../data_model/utils';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
 import { getEnableExternalUrls } from '../services';
 
-vega.scheme('elastic', VISUALIZATION_COLORS);
+vega.scheme('elastic', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
