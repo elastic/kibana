@@ -21,7 +21,8 @@ export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
 }: AppMountParameters) => {
   const [core, plugins] = await coreSetup.getStartServices();
   const deps: BfetchDeps = { appBasePath, core, plugins };
-  const reactElement = <div>hello</div>;
+  const { App } = await import('./containers/app');
+  const reactElement = <App />;
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
 };
