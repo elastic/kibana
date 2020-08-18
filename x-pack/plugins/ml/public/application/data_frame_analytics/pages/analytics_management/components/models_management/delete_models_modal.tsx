@@ -27,7 +27,7 @@ interface DeleteModelsModalProps {
 
 export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
   const modelsWithPipelines = models
-    .filter((model) => model.stats.pipeline_count > 0)
+    .filter((model) => !!model.pipelines)
     .map((model) => model.model_id);
 
   return (

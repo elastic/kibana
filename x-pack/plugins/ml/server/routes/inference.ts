@@ -43,14 +43,21 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
           ...(modelId ? { model_id: modelId } : {}),
         });
         const result = body.trained_model_configs;
-        if (withPipelines) {
-          const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
-            result.map(({ model_id: id }: { model_id: string }) => id)
-          );
-          for (const model of result) {
-            model.pipelines = pipelinesResponse.get(model.model_id)!;
+        try {
+          if (withPipelines) {
+            const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
+              result.map(({ model_id: id }: { model_id: string }) => id)
+            );
+            for (const model of result) {
+              model.pipelines = pipelinesResponse.get(model.model_id)!;
+            }
           }
+        } catch (e) {
+          // the user might not have required permissions to fetch pipelines
+          // eslint-disable-next-line no-console
+          console.log(e);
         }
+
         return response.ok({
           body: result,
         });

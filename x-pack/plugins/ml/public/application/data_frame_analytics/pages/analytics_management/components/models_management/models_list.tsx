@@ -56,9 +56,12 @@ export type ModelItemFull = Required<ModelItem>;
 export const ModelsList: FC = () => {
   const {
     services: {
-      application: { navigateToUrl },
+      application: { navigateToUrl, capabilities },
     },
   } = useMlKibana();
+
+  const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
+
   const inferenceApiService = useInferenceApiService();
   const { toasts } = useNotifications();
 
@@ -222,6 +225,9 @@ export const ModelsList: FC = () => {
     }
   }
 
+  /**
+   * Table actions
+   */
   const actions: Array<Action<ModelItem>> = [
     {
       name: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
@@ -257,7 +263,10 @@ export const ModelsList: FC = () => {
       onClick: async (model) => {
         await prepareModelsForDeletion([model]);
       },
+      available: (item) => canDeleteDataFrameAnalytics,
       enabled: (item) => {
+        // TODO check for permissions to delete ingest pipelines.
+        // ATM undefined means pipelines fetch failed server-side.
         return !item.pipelines;
       },
     },
@@ -415,12 +424,17 @@ export const ModelsList: FC = () => {
     setSortDirection(direction);
   };
 
-  const selection: EuiTableSelectionType<ModelItem> = {
-    selectable: (item) => !item.pipelines,
-    onSelectionChange: (selectedItems) => {
-      setSelectedModels(selectedItems);
-    },
-  };
+  const isSelectionAllowed = canDeleteDataFrameAnalytics;
+
+  const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
+    ? {
+        selectable: (item) => !item.pipelines,
+        onSelectionChange: (selectedItems) => {
+          setSelectedModels(selectedItems);
+        },
+      }
+    : undefined;
+
   return (
     <>
       <EuiSpacer size="m" />
