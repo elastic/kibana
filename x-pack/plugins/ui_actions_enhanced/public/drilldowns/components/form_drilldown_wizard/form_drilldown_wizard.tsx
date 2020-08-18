@@ -7,6 +7,8 @@
 import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
@@ -61,6 +63,17 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   supportedTriggers,
   triggerPickerDocsLink,
 }) => {
+  if (!supportedTriggers || !supportedTriggers.length) {
+    // Below callout is not translated, because this message is only for developers.
+    return (
+      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        <p>
+          No triggers provided in <EuiCode>trigger</EuiCode> prop.
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown}>
       <EuiFieldText

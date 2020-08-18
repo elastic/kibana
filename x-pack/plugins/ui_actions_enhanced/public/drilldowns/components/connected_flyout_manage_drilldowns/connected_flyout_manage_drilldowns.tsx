@@ -71,7 +71,7 @@ export function createFlyoutManageDrilldowns({
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
-}) {
+}): React.FC<ConnectedFlyoutManageDrilldownsProps> {
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
