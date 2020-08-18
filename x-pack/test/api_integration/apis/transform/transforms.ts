@@ -14,11 +14,19 @@ export default ({ getService }: FtrProviderContext) => {
   const transform = getService('transform');
 
   const expected = {
-    count: 2,
-    transform1: { id: 'the-transform-1', destIndex: 'user-the-transform-1' },
-    transform2: { id: 'the-transform-2', destIndex: 'user-the-transform-2' },
-    typeOfVersion: 'string',
-    typeOfCreateTime: 'number',
+    apiTransformTransforms: {
+      count: 2,
+      transform1: { id: 'the-transform-1', destIndex: 'user-the-transform-1' },
+      transform2: { id: 'the-transform-2', destIndex: 'user-the-transform-2' },
+      typeOfVersion: 'string',
+      typeOfCreateTime: 'number',
+    },
+    apiTransformTransformsTransformId: {
+      count: 1,
+      transform1: { id: 'the-transform-1', destIndex: 'user-the-transform-1' },
+      typeOfVersion: 'string',
+      typeOfCreateTime: 'number',
+    },
   };
 
   function generateDestIndex(transformId: string): string {
@@ -49,46 +57,93 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      // await transform.api.cleanTransforms();
+      await transform.api.deleteIndices('user-the-transform-1,user-the-transform-2');
     });
 
-    it('should return a list of transforms', async () => {
-      const { body } = await supertest
-        .get('/api/transform/transforms')
-        .auth(
-          USER.TRANSFORM_POWERUSER,
-          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-        )
-        .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+    describe('/transforms', function () {
+      it('should return a list of transforms', async () => {
+        const { body } = await supertest
+          .get('/api/transform/transforms')
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send()
+          .expect(200);
 
-      expect(body.count).to.eql(expected.count);
-      expect(body.transforms).to.have.length(expected.count);
+        expect(body.count).to.eql(expected.apiTransformTransforms.count);
+        expect(body.transforms).to.have.length(expected.apiTransformTransforms.count);
 
-      const transform1 = body.transforms[0];
-      expect(transform1.id).to.eql(expected.transform1.id);
-      expect(transform1.dest.index).to.eql(expected.transform1.destIndex);
-      expect(typeof transform1.version).to.eql(expected.typeOfVersion);
-      expect(typeof transform1.create_time).to.eql(expected.typeOfCreateTime);
+        const transform1 = body.transforms[0];
+        expect(transform1.id).to.eql(expected.apiTransformTransforms.transform1.id);
+        expect(transform1.dest.index).to.eql(expected.apiTransformTransforms.transform1.destIndex);
+        expect(typeof transform1.version).to.eql(expected.apiTransformTransforms.typeOfVersion);
+        expect(typeof transform1.create_time).to.eql(
+          expected.apiTransformTransforms.typeOfCreateTime
+        );
 
-      const transform2 = body.transforms[1];
-      expect(transform2.id).to.eql(expected.transform2.id);
-      expect(transform2.dest.index).to.eql(expected.transform2.destIndex);
-      expect(typeof transform2.version).to.eql(expected.typeOfVersion);
-      expect(typeof transform2.create_time).to.eql(expected.typeOfCreateTime);
+        const transform2 = body.transforms[1];
+        expect(transform2.id).to.eql(expected.apiTransformTransforms.transform2.id);
+        expect(transform2.dest.index).to.eql(expected.apiTransformTransforms.transform2.destIndex);
+        expect(typeof transform2.version).to.eql(expected.apiTransformTransforms.typeOfVersion);
+        expect(typeof transform2.create_time).to.eql(
+          expected.apiTransformTransforms.typeOfCreateTime
+        );
+      });
+
+      it('should return 200 for transform view-only user', async () => {
+        await supertest
+          .get(`/api/transform/transforms`)
+          .auth(
+            USER.TRANSFORM_VIEWER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send()
+          .expect(200);
+      });
     });
 
-    it('should return 200 for tranform view-only user', async () => {
-      await supertest
-        .get(`/api/transform/transforms`)
-        .auth(
-          USER.TRANSFORM_VIEWER,
-          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
-        )
-        .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+    describe('/transforms/{transformId}', function () {
+      it('should return a specific transform configuration', async () => {
+        const { body } = await supertest
+          .get('/api/transform/transforms/the-transform-1')
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send()
+          .expect(200);
+
+        expect(body.count).to.eql(expected.apiTransformTransformsTransformId.count);
+        expect(body.transforms).to.have.length(expected.apiTransformTransformsTransformId.count);
+
+        const transform1 = body.transforms[0];
+        expect(transform1.id).to.eql(expected.apiTransformTransformsTransformId.transform1.id);
+        expect(transform1.dest.index).to.eql(
+          expected.apiTransformTransformsTransformId.transform1.destIndex
+        );
+        expect(typeof transform1.version).to.eql(
+          expected.apiTransformTransformsTransformId.typeOfVersion
+        );
+        expect(typeof transform1.create_time).to.eql(
+          expected.apiTransformTransformsTransformId.typeOfCreateTime
+        );
+      });
+
+      it('should return 200 for transform view-only user', async () => {
+        await supertest
+          .get(`/api/transform/transforms/the-transform-1`)
+          .auth(
+            USER.TRANSFORM_VIEWER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send()
+          .expect(200);
+      });
     });
   });
 };
