@@ -127,7 +127,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     params: {
       field: column.sourceField,
       time_zone: column.params.timeZone,
-      useNormalizedEsInterval: true,
+      useNormalizedEsInterval: false,
       interval: column.params.interval,
       drop_partials: false,
       min_doc_count: 0,

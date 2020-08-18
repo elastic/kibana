@@ -126,6 +126,7 @@ export function IndexPatternDataPanel({
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
       fields: indexPatterns[id].fields,
+      hasRestrictions: indexPatterns[id].hasRestrictions,
     }));
 
   const dslQuery = buildSafeEsQuery(
@@ -422,6 +423,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
+  const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
+
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -568,7 +571,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 initialIsOpen={localState.isAvailableAccordionOpen}
                 id="lnsIndexPatternAvailableFields"
                 label={
-                  existenceFetchFailed
+                  fieldInfoUnavailable
                     ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
                         defaultMessage: 'All fields',
                       })
@@ -596,7 +599,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
-                showExistenceFetchError={existenceFetchFailed}
+                showExistenceFetchError={fieldInfoUnavailable}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}
@@ -609,7 +612,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               />
               <EuiSpacer size="m" />
-              {!existenceFetchFailed && (
+              {!fieldInfoUnavailable && (
                 <FieldsAccordion
                   initialIsOpen={localState.isEmptyAccordionOpen}
                   isFiltered={
