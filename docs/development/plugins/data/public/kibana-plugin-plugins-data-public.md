@@ -126,7 +126,9 @@
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esaggsexpressionfunctiondefinition.md) |  |
+|  [EsdslExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esdslexpressionfunctiondefinition.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
+|  [EsRawResponseExpressionTypeDefinition](./kibana-plugin-plugins-data-public.esrawresponseexpressiontypedefinition.md) |  |
 |  [ExistsFilter](./kibana-plugin-plugins-data-public.existsfilter.md) |  |
 |  [FieldFormatId](./kibana-plugin-plugins-data-public.fieldformatid.md) |  id type is needed for creating custom converters. |
 |  [FieldFormatsContentType](./kibana-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
