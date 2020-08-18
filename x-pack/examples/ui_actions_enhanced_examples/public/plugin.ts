@@ -10,12 +10,12 @@ import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '../../../../x-pack/plugins/ui_actions_enhanced/public';
-import { DashboardHelloWorldDrilldown } from './dashboard_hello_world_drilldown';
-import { DashboardToUrlDrilldown } from './dashboard_to_url_drilldown';
-import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
+import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
+import { DashboardToUrlDrilldown } from './drilldowns/dashboard_to_url_drilldown';
+import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
-import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './dashboard_hello_world_only_range_select_drilldown';
+import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;

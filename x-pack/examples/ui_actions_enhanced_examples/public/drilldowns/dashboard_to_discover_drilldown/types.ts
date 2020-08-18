@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
-import { ApplyGlobalFilterActionContext } from '../../../../../src/plugins/data/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/data/public';
 
 export type ActionContext = ApplyGlobalFilterActionContext;
 

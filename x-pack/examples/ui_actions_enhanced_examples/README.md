@@ -5,7 +5,8 @@ To run this example plugin, use the command `yarn start --run-examples`.
 
 ## Drilldown examples
 
-This plugin holds few examples on how to add drilldown types to dashboard.
+This plugin holds few examples on how to add drilldown types to dashboard. See
+`./public/drilldowns/` folder.
 
 To play with drilldowns, open any dashboard, click "Edit" to put it in *edit mode*.
 Now when opening context menu of dashboard panels you should see "Create drilldown" option.

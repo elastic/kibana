@@ -6,15 +6,15 @@
 
 import React from 'react';
 import { EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
-import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
+import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
+import { ChartActionContext } from '../../../../../../src/plugins/embeddable/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../src/plugins/ui_actions/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/ui_actions/public';
+import { ActionExecutionContext } from '../../../../../../src/plugins/ui_actions/public';
 
 function isValidUrl(url: string) {
   try {
