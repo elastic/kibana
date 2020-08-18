@@ -28,6 +28,8 @@ import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
+import { withSourcerer } from '../../common/containers/sourcerer/hoc';
+import { SOURCERER_FEATURE_FLAG_ON } from '../../common/containers/sourcerer/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -90,11 +92,14 @@ class TimelineQueryComponent extends QueryTemplate<
       fields,
       filterQuery,
       sourceId,
+      sourcererIndexPatterns,
       sortField,
       startDate,
       queryDeduplication,
     } = this.props;
-    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+    const defaultKibanaIndex = SOURCERER_FEATURE_FLAG_ON
+      ? sourcererIndexPatterns
+      : kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex =
       indexPattern == null || (indexPattern != null && indexPattern.title === '')
         ? [
@@ -214,5 +219,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
   connector,
-  withKibana
+  withKibana,
+  withSourcerer
 )(TimelineQueryComponent);

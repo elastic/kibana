@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SOURCERER_FEATURE_FLAG_ON = false;
+export const SOURCERER_FEATURE_FLAG_ON = true;
 
 export enum SecurityPageName {
   default = 'default',

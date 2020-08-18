@@ -259,6 +259,25 @@ export const useSourceManager = (): UseSourceManager => {
     (id: SourceGroupsType, indexToAdd?: string[] | null, onlyCheckIndexToAdd?: boolean) => {
       let isSubscribed = true;
       const abortCtrl = new AbortController();
+      if (onlyCheckIndexToAdd && isEmpty(indexToAdd)) {
+        return dispatch({
+          type: 'SET_SOURCE',
+          id,
+          defaultIndex: indexToAdd,
+          payload: {
+            // ...getSourceDefaults(id, indexToAdd),
+            // loading: false ,
+            browserFields: EMPTY_BROWSER_FIELDS,
+            docValueFields: EMPTY_DOCVALUE_FIELD,
+            errorMessage: null,
+            id,
+            indexPattern: getIndexFields('', []),
+            indexPatterns: [],
+            indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
+            loading: false,
+          },
+        });
+      }
       const defaultIndex = getDefaultIndex(indexToAdd, onlyCheckIndexToAdd);
       const selectedPatterns = defaultIndex.filter((pattern) =>
         state.availableIndexPatterns.includes(pattern)
@@ -356,7 +375,9 @@ export const useSourceManager = (): UseSourceManager => {
   );
 
   const updateSourceGroupIndicies = useCallback(
-    (id: SourceGroupsType, updatedIndicies: string[]) => enrichSource(id, updatedIndicies, true),
+    (id: SourceGroupsType, updatedIndicies: string[]) => {
+      enrichSource(id, updatedIndicies, true);
+    },
     [enrichSource]
   );
   const getManageSourceGroupById = useCallback(
@@ -384,7 +405,6 @@ export const useSourceManager = (): UseSourceManager => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isIndexPatternsLoading]);
-
   return {
     ...state,
     getManageSourceGroupById,
