@@ -22,10 +22,10 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
   changeHandler,
   selectedField,
 }) => {
-  const { jobCreator } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = useMemo(
     () => [...createFieldOptions(fields, jobCreator.additionalFields)],
-    [fields, jobCreator]
+    [fields, jobCreatorUpdated]
   );
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {
@@ -37,14 +37,7 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
   }, [selectedField]);
 
   const onChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      const option = selectedOptions[0];
-      if (typeof option !== 'undefined') {
-        changeHandler(option.label);
-      } else {
-        changeHandler(null);
-      }
-    },
+    (selectedOptions: EuiComboBoxOptionOption[]) => changeHandler(selectedOptions[0].label ?? null),
     [changeHandler]
   );
 

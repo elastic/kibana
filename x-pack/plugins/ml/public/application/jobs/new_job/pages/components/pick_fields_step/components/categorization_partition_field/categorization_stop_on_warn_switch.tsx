@@ -11,7 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
 
 export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
-  const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const [stopOnWarn, setStopOnWarn] = useState(jobCreator.perPartitionStopOnWarn);
 
@@ -21,6 +21,10 @@ export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
     jobCreator.perPartitionStopOnWarn = stopOnWarn;
     jobCreatorUpdate();
   }, [stopOnWarn]);
+
+  useEffect(() => {
+    setStopOnWarn(jobCreator.perPartitionStopOnWarn);
+  }, [jobCreatorUpdated]);
 
   return (
     <EuiSwitch

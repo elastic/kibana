@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useContext, useEffect, useState, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -25,8 +25,9 @@ export const CategorizationPerPartitionFieldDropdown = ({
   >(jobCreator.categorizationPerPartitionField);
   const { categoryFields } = newJobCapsService;
 
-  const filteredCategories = categoryFields.filter(
-    (c) => c.id !== jobCreator.categorizationFieldName
+  const filteredCategories = useMemo(
+    () => categoryFields.filter((c) => c.id !== jobCreator.categorizationFieldName),
+    [categoryFields, jobCreatorUpdated]
   );
   useEffect(() => {
     jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;

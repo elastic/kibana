@@ -11,7 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
 
 export const CategorizationPerPartitionSwitch: FC = () => {
-  const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(
     jobCreator.perPartitionCategorization
@@ -21,6 +21,10 @@ export const CategorizationPerPartitionSwitch: FC = () => {
     () => setEnablePerPartitionCategorization(!enablePerPartitionCategorization),
     [enablePerPartitionCategorization]
   );
+
+  useEffect(() => {
+    setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+  }, [jobCreatorUpdated]);
 
   useEffect(() => {
     // also turn off stop on warn if per_partition_categorization is turned off

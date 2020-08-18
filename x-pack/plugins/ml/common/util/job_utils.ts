@@ -8,6 +8,7 @@ import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 import each from 'lodash/each';
 import pick from 'lodash/pick';
+import uniq from 'lodash/uniq';
 
 import semver from 'semver';
 import moment, { Duration } from 'moment';
@@ -23,6 +24,7 @@ import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+import { MLCATEGORY } from '../constants/field_types';
 
 export interface ValidationResults {
   valid: boolean;
@@ -86,9 +88,9 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
     isSourceDataChartable =
       mlFunctionToESAggregation(functionName) !== null &&
-      dtr.by_field_name !== 'mlcategory' &&
-      dtr.partition_field_name !== 'mlcategory' &&
-      dtr.over_field_name !== 'mlcategory';
+      dtr.by_field_name !== MLCATEGORY &&
+      dtr.partition_field_name !== MLCATEGORY &&
+      dtr.over_field_name !== MLCATEGORY;
 
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
@@ -400,6 +402,32 @@ export function basicJobValidation(
     }
 
     if (job.analysis_config.detectors.length >= 2) {
+      // check if the detectors with mlcategory might have different per_partition_field values
+      // if per_partition_categorization is enabled
+      if (job.analysis_config.per_partition_categorization !== undefined) {
+        if (
+          job.analysis_config.per_partition_categorization.enabled ||
+          (job.analysis_config.per_partition_categorization.stop_on_warn &&
+            Array.isArray(job.analysis_config.detectors) &&
+            job.analysis_config.detectors.length >= 2)
+        ) {
+          const categorizationDetectors = job.analysis_config.detectors.filter(
+            (d) =>
+              d.by_field_name === MLCATEGORY ||
+              d.over_field_name === MLCATEGORY ||
+              d.partition_field_name === MLCATEGORY
+          );
+          const uniqPartitions = uniq(categorizationDetectors.map((d) => d.partition_field_name));
+          if (uniqPartitions.length > 1) {
+            valid = false;
+            messages.push({
+              id: 'varying_per_partition_fields',
+              fields: uniqPartitions.join(', '),
+            });
+          }
+        }
+      }
+
       // check for duplicate detectors
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
