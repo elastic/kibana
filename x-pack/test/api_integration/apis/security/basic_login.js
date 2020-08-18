@@ -39,19 +39,34 @@ export default function ({ getService }) {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username: wrongUsername, password: wrongPassword })
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username: wrongUsername, password: wrongPassword },
+        })
         .expect(401);
 
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username: validUsername, password: wrongPassword })
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username: validUsername, password: wrongPassword },
+        })
         .expect(401);
 
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username: wrongUsername, password: validPassword })
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username: wrongUsername, password: validPassword },
+        })
         .expect(401);
     });
 
@@ -59,8 +74,13 @@ export default function ({ getService }) {
       const loginResponse = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username: validUsername, password: validPassword })
-        .expect(204);
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username: validUsername, password: validPassword },
+        })
+        .expect(200);
 
       const cookies = loginResponse.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -134,8 +154,13 @@ export default function ({ getService }) {
         const loginResponse = await supertest
           .post('/internal/security/login')
           .set('kbn-xsrf', 'xxx')
-          .send({ username: validUsername, password: validPassword })
-          .expect(204);
+          .send({
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: '/',
+            params: { username: validUsername, password: validPassword },
+          })
+          .expect(200);
 
         sessionCookie = request.cookie(loginResponse.headers['set-cookie'][0]);
       });
