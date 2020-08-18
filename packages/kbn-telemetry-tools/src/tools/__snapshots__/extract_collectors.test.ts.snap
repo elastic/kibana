@@ -91,6 +91,38 @@ Array [
     },
   ],
   Array [
+    "src/fixtures/telemetry_collectors/indexed_interface_with_not_matching_schema.ts",
+    Object {
+      "collectorName": "indexed_interface_with_not_matching_schema",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "": Object {
+            "@@INDEX@@": Object {
+              "count_1": Object {
+                "kind": 140,
+                "type": "NumberKeyword",
+              },
+              "count_2": Object {
+                "kind": 140,
+                "type": "NumberKeyword",
+              },
+            },
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "something": Object {
+            "count_1": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
     "src/fixtures/telemetry_collectors/nested_collector.ts",
     Object {
       "collectorName": "my_nested_collector",

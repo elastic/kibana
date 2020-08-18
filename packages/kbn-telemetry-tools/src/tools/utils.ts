@@ -231,21 +231,26 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
 };
 
 export function difference(actual: any, expected: any) {
-  function changes(obj: any, base: any) {
+  function changes(obj: { [key: string]: any }, base: { [key: string]: any }) {
     return transform(obj, function (result, value, key) {
       if (key && /@@INDEX@@/.test(`${key}`)) {
         // The type definition is an Index Signature, fuzzy searching for similar keys
-        const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.*)?'));
+        const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
         const keysInBase = Object.keys(base)
           .map((k) => {
             const match = k.match(regexp);
             return match && match[0];
           })
           .filter((s): s is string => !!s);
+
+        if (keysInBase.length === 0) {
+          // Mark this key as wrong because we couldn't find any matching keys
+          result[key] = value;
+        }
+
         keysInBase.forEach((k) => {
           if (!isEqual(value, base[k])) {
-            result[k as any] =
-              isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+            result[k] = isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
           }
         });
       } else if (key && !isEqual(value, base[key])) {
