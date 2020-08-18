@@ -21,7 +21,7 @@ yarn kbn bootstrap --prefer-offline
 ### Generate code owners
 ###
 echo " -- generating code owners"
-node scripts/generate_code_owners.js --verbose --codeOwnersPath .github/CODEOWNERS
+node scripts/generate_code_owners.js --verbose --output .github/CODEOWNERS
 
 ###
 ### verify no git modifications

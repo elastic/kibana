@@ -30,16 +30,18 @@ Create .github/CODEOWNERS file from authoritative source
 export const generateCodeOwners = () => {
   run(
     ({ flags, log }: RunContext) => {
-      if (flags.codeOwnersPath === '')
-        throw createFlagError('please provide a single --codeOwnersPath flag');
+      const output = flags.output;
+      if (!output || typeof output !== 'string') {
+        throw createFlagError('please provide a single --output flag');
+      }
 
-      record(flags.codeOwnersPath as string, log, rules);
+      record(flags.output as string, log, rules);
     },
     {
       description,
       flags: {
-        string: ['codeOwnersPath'],
-        help: '--codeOwnersPath       Required, path to CODEOWNERS file.',
+        string: ['output'],
+        help: '--output           Required, path to CODEOWNERS file.',
       },
     }
   );
