@@ -288,10 +288,7 @@ export class LegacyService implements CoreService {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        legacy: {
-          client: setupDeps.core.elasticsearch.legacy.client,
-          createClient: setupDeps.core.elasticsearch.legacy.createClient,
-        },
+        legacy: setupDeps.core.elasticsearch.legacy,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,

@@ -45,8 +45,13 @@ export default function ({ getService }: FtrProviderContext) {
       await supertestWithoutAuth
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username: validUsername, password: validPassword })
-        .expect(204)
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username: validUsername, password: validPassword },
+        })
+        .expect(200)
         .then(saveCookie);
     });
 
