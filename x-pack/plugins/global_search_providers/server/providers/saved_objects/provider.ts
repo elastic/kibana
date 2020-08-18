@@ -25,7 +25,7 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
       const responsePromise = client.find({
         page: 1,
         perPage: maxResults,
-        search: term,
+        search: term ? `${term}*` : undefined,
         preference,
         searchFields,
         type: searchableTypes.map((type) => type.name),
