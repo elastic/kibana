@@ -14,9 +14,7 @@ import * as Registry from '../../registry';
 import { AssetType, KibanaAssetType, AssetReference } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 
-type SavedObjectToBe = Required<Omit<SavedObjectsBulkCreateObject, 'version'>> & {
-  type: AssetType;
-};
+type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
 export type ArchiveAsset = Pick<
   SavedObject,
   'id' | 'attributes' | 'migrationVersion' | 'references'

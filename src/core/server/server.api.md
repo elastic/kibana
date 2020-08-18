@@ -2041,8 +2041,6 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     references?: SavedObjectReference[];
     // (undocumented)
     type: string;
-    // (undocumented)
-    version?: string;
 }
 
 // @public (undocumented)
