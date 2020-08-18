@@ -48,6 +48,10 @@ export interface MapsLegacyConfigType {
   includeElasticMapsService: boolean;
   proxyElasticMapsServiceInMaps: boolean;
   tilemap: any;
+  emsFontLibraryUrl: string;
+  emsFileApiUrl: string;
+  emsTileApiUrl: string;
+  emsLandingPageUrl: string;
 }
 
 export function plugin(initializerContext: PluginInitializerContext) {
