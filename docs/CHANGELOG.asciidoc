@@ -42,7 +42,6 @@ This section summarizes the changes in each release.
 --
 [[release-notes-7.9.0]]
 == {kib} 7.9.0
-coming[7.9.0]
 
 //See also <<breaking-changes-7.9,breaking changes in 7.9>>.
 
