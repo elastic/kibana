@@ -26,7 +26,7 @@ const AgentEventBase = {
       schema.literal('RUNNING'),
       schema.literal('STARTING'),
       schema.literal('IN_PROGRESS'),
-      schema.literal('POLICY'),
+      schema.literal('CONFIG'),
       schema.literal('FAILED'),
       schema.literal('STOPPING'),
       schema.literal('STOPPED'),

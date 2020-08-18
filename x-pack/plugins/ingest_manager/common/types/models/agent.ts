@@ -49,7 +49,7 @@ export interface NewAgentEvent {
   | 'RUNNING'
     | 'STARTING'
     | 'IN_PROGRESS'
-    | 'POLICY'
+    | 'CONFIG'
     | 'FAILED'
     | 'STOPPING'
     | 'STOPPED'

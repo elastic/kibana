@@ -74,7 +74,7 @@ describe('test agent acks services', () => {
       [
         {
           type: 'ACTION_RESULT',
-          subtype: 'POLICY',
+          subtype: 'CONFIG',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
           action_id: 'action1',
           agent_id: 'id',
@@ -212,7 +212,7 @@ describe('test agent acks services', () => {
       [
         {
           type: 'ACTION_RESULT',
-          subtype: 'POLICY',
+          subtype: 'CONFIG',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
           action_id: 'action1',
           agent_id: 'id',
@@ -355,7 +355,7 @@ describe('test agent acks services', () => {
       [
         {
           type: 'ACTION_RESULT',
-          subtype: 'POLICY',
+          subtype: 'CONFIG',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
           action_id: 'action1',
           agent_id: 'id',
@@ -392,7 +392,7 @@ describe('test agent acks services', () => {
         [
           ({
             type: 'ACTION_RESULT',
-            subtype: 'POLICY',
+            subtype: 'CONFIG',
             timestamp: '2019-01-04T14:32:03.36764-05:00',
             action_id: 'action2',
             agent_id: 'id',
