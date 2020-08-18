@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
-import { getFlattenedObject, isNamespaceValid } from '../../../../services';
+import { getFlattenedObject, isValidNamespace } from '../../../../services';
 import {
   NewPackageConfig,
   PackageConfigInput,
@@ -65,7 +65,7 @@ export const validatePackageConfig = (
         defaultMessage: 'Namespace is required',
       }),
     ];
-  } else if (!isNamespaceValid(packageConfig.namespace)) {
+  } else if (!isValidNamespace(packageConfig.namespace)) {
     validationResults.namespace = [
       i18n.translate('xpack.ingestManager.packageConfigValidation.namespaceInvalidErrorMessage', {
         defaultMessage: 'Namespace contains invalid characters',

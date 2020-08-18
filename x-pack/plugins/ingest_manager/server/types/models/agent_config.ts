@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { PackageConfigSchema, NamespaceSchema } from './package_config';
-import { AgentConfigStatus, isNamespaceValid } from '../../../common';
+import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
   name: schema.string({ minLength: 1 }),

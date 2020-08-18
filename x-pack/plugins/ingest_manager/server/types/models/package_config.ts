@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { isValidNamespace } from '../../../common';
 
 export const NamespaceSchema = schema.string({
   minLength: 1,
   validate: (value) => {
-    if (!isNamespaceValid) {
+    if (!isValidNamespace) {
       return 'Namespace contains invalid characters';
     }
   },
