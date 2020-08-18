@@ -27,15 +27,17 @@ type ExcludedFileList = string[];
 const appendUtf8 = { flag: 'a', encoding: 'utf8' };
 
 const write = (
-  codeOwnersPath: PathLike,
+  output: PathLike,
   owner: string,
   files: FileList,
   excludeFiles: ExcludedFileList
 ) => {
-  const writeToFile = writeFileSync.bind(null, codeOwnersPath);
+  const writeToFile = writeFileSync.bind(null, output);
   writeToFile(`\n#${drop(owner)}\n`, appendUtf8);
 
-  for (const file of files) writeToFile(`${file} ${owner}\n`, appendUtf8);
+  for (const file of files) {
+    writeToFile(`${file} ${owner}\n`, appendUtf8);
+  }
 
   for (const excluded of excludeFiles) {
     const formatted = `!${excluded}`;
@@ -43,14 +45,16 @@ const write = (
   }
 };
 
-export const record = (codeOwnersPath: string, log: ToolingLog, rules: OwnershipRule[]) => {
-  writeFileSync(codeOwnersPath, preamble(), { encoding: 'utf8' });
+export const record = (output: string, log: ToolingLog, rules: OwnershipRule[]) => {
+  writeFileSync(output, preamble(), { encoding: 'utf8' });
 
-  rules.forEach(({ files, excludeFiles, codeOwner }) => {
-    if (codeOwner) write(codeOwnersPath as PathLike, codeOwner, files, excludeFiles);
-  });
+  for (const { files, excludeFiles, codeOwner } of rules) {
+    if (codeOwner) {
+      write(output as PathLike, codeOwner, files, excludeFiles);
+    }
+  }
 
-  log.info(`\n### CODEOWNERS generation complete against: ${codeOwnersPath}`);
+  log.info(`\n### CODEOWNERS generation complete against: ${output}`);
 };
 
 function drop(x: string) {
