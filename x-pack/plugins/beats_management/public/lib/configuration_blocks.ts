@@ -7,10 +7,7 @@
 import yaml from 'js-yaml';
 import { set } from '@elastic/safer-lodash-set';
 import { get, has, omit } from 'lodash';
-import {
-  ConfigBlockSchema,
-  ConfigurationBlock,
-} from '../../../../legacy/plugins/beats_management/common/domain_types';
+import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types';
 import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/adapter_types';
 
 export class ConfigBlocksLib {

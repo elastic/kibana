@@ -237,6 +237,7 @@ kibana_vars=(
     xpack.security.sessionTimeout
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
+    xpack.security.session.cleanupInterval
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.spaces.enabled
