@@ -5,11 +5,11 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
 import { TimelineDetailsQuery } from '../../../../containers/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { Note } from '../../../../../common/lib/note';
@@ -130,9 +130,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const timeline = useSelector<StoreState, TimelineModel>((state) => {
-    return state.timeline.timelineById['timeline-1'];
-  });
+  const timeline = useShallowEqualSelector<StoreState, TimelineModel>(
+    (state) => state.timeline.timelineById['timeline-1']
+  );
   const divElement = useRef<HTMLDivElement | null>(null);
 
   const onToggleShowNotes = useCallback(() => {

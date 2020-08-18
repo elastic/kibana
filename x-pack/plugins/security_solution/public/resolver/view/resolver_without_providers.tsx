@@ -7,9 +7,9 @@
 /* eslint-disable react/display-name */
 
 import React, { useContext, useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
@@ -20,6 +20,7 @@ import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps } from '../types';
 
@@ -46,10 +47,10 @@ export const ResolverWithoutProviders = React.memo(
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
+    const { processNodePositions, connectingEdgeLineSegments } = useShallowEqualSelector(
       selectors.visibleNodesAndEdgeLines
     )(timeAtRender);
-    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+    const terminatedProcesses = useShallowEqualSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
     const ref = useCallback(
@@ -66,9 +67,9 @@ export const ResolverWithoutProviders = React.memo(
       },
       [cameraRef, refToForward]
     );
-    const isLoading = useSelector(selectors.isLoading);
-    const hasError = useSelector(selectors.hasError);
-    const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
+    const isLoading = useShallowEqualSelector(selectors.isLoading);
+    const hasError = useShallowEqualSelector(selectors.hasError);
+    const activeDescendantId = useShallowEqualSelector(selectors.ariaActiveDescendant);
     const { colorMap } = useResolverTheme();
 
     return (

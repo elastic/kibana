@@ -5,8 +5,9 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
 import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -34,7 +35,7 @@ export const useAllCasesModal = ({
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
-  const timeline = useSelector((state: State) =>
+  const timeline = useShallowEqualSelector((state: State) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
 

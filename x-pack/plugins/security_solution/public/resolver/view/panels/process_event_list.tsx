@@ -7,9 +7,9 @@
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
+
 import {
   CrumbInfo,
   formatDate,
@@ -18,6 +18,7 @@ import {
   StyledTime,
 } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
+import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
@@ -72,7 +73,7 @@ const DisplayList = memo(function DisplayList({
   eventType: string;
   processEntityId: string;
 }) {
-  const relatedLookupsByCategory = useSelector(selectors.relatedEventInfoByEntityId);
+  const relatedLookupsByCategory = useShallowEqualSelector(selectors.relatedEventInfoByEntityId);
   const lookupsForThisNode = relatedLookupsByCategory(processEntityId);
   const shouldShowLimitWarning = lookupsForThisNode?.shouldShowLimitForCategory(eventType);
   const numberDisplayed = lookupsForThisNode?.numberActuallyDisplayedForCategory(eventType);
@@ -160,7 +161,7 @@ export const ProcessEventList = memo(function ProcessEventList({
     }
   );
 
-  const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
+  const relatedsReadyMap = useShallowEqualSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId);
 
   const dispatch = useResolverDispatch();
@@ -185,7 +186,7 @@ export const ProcessEventList = memo(function ProcessEventList({
     ];
   }, [pushToQueryParams, eventsString]);
 
-  const relatedByCategory = useSelector(selectors.relatedEventsByCategory);
+  const relatedByCategory = useShallowEqualSelector(selectors.relatedEventsByCategory);
 
   /**
    * A list entry will be displayed for each of these

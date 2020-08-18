@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3 } from '../types';
@@ -17,6 +17,7 @@ import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets
 import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
+import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
 import * as selectors from '../store/selectors';
 import { useResolverQueryParams } from './use_resolver_query_params';
 
@@ -99,7 +100,9 @@ const UnstyledProcessEventDot = React.memo(
      */
     timeAtRender: number;
   }) => {
-    const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+    const resolverComponentInstanceID = useShallowEqualSelector(
+      selectors.resolverComponentInstanceID
+    );
     // This should be unique to each instance of Resolver
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
 
@@ -111,14 +114,14 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
-    const selectedNode = useSelector(selectors.selectedNode);
+    const ariaActiveDescendant = useShallowEqualSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useShallowEqualSelector(selectors.selectedNode);
     const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
     if (nodeID === undefined) {
       // NB: this component should be taking nodeID as a `string` instead of handling this logic here
       throw new Error('Tried to render a node with no ID');
     }
-    const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
+    const relatedEventStats = useShallowEqualSelector(selectors.relatedEventsStats)(nodeID);
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
@@ -126,12 +129,12 @@ const UnstyledProcessEventDot = React.memo(
       htmlIDPrefix,
     ]);
 
-    const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
+    const ariaLevel: number | null = useShallowEqualSelector(selectors.ariaLevel)(nodeID);
 
     // the node ID to 'flowto'
-    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(timeAtRender)(
-      nodeID
-    );
+    const ariaFlowtoNodeID: string | null = useShallowEqualSelector(selectors.ariaFlowtoNodeID)(
+      timeAtRender
+    )(nodeID);
 
     const isShowingEventActions = xScale > 0.8;
     const isShowingDescriptionText = xScale >= 0.55;
@@ -290,9 +293,9 @@ const UnstyledProcessEventDot = React.memo(
       ? subMenuAssets.initialMenuStatus
       : relatedEventOptions;
 
-    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(
-      event as ResolverEvent
-    );
+    const grandTotal: number | null = useShallowEqualSelector(
+      selectors.relatedEventTotalForProcess
+    )(event as ResolverEvent);
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**

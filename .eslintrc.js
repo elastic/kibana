@@ -827,6 +827,17 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: [
+              /*
+                prevents importing raw useSelector which is using different equality function than mapStateToProps,
+                so to make sure we keep the logic while moving to hooks let's use useShallowEqualSelector
+              */
+              {
+                name: 'react-redux',
+                importNames: ['useSelector'],
+                message: 'Please use "useShallowEqualSelector" instead or create your own selector',
+              },
+            ],
           },
         ],
       },

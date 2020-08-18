@@ -11,11 +11,12 @@ import React, {
   useLayoutEffect,
   useContext,
 } from 'react';
-import { useSelector } from 'react-redux';
+
 import { SideEffectContext } from './side_effect_context';
 import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
+import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
 
 export function useCamera(): {
   /**
@@ -40,7 +41,7 @@ export function useCamera(): {
    * to determine where it belongs on the screen.
    * The projection matrix changes over time if the camera is currently animating.
    */
-  const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
+  const projectionMatrixAtTime = useShallowEqualSelector(selectors.projectionMatrix);
 
   /**
    * Use a ref to refer to the `projectionMatrixAtTime` function. The rAF loop
@@ -61,8 +62,8 @@ export function useCamera(): {
     projectionMatrixAtTime(sideEffectors.timestamp())
   );
 
-  const userIsPanning = useSelector(selectors.userIsPanning);
-  const isAnimatingAtTime = useSelector(selectors.isAnimating);
+  const userIsPanning = useShallowEqualSelector(selectors.userIsPanning);
+  const isAnimatingAtTime = useShallowEqualSelector(selectors.isAnimating);
 
   const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 

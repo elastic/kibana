@@ -8,8 +8,8 @@ import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+
 import {
   CrumbInfo,
   formatDate,
@@ -19,6 +19,7 @@ import {
 } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
@@ -121,7 +122,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     }
   );
 
-  const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
+  const relatedsReadyMap = useShallowEqualSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId!);
   const dispatch = useResolverDispatch();
 
@@ -138,9 +139,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     }
   }, [relatedsReady, dispatch, processEntityId]);
 
-  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
-    processEntityId!
-  );
+  const relatedEventsForThisProcess = useShallowEqualSelector(
+    selectors.relatedEventsByEntityId
+  ).get(processEntityId!);
 
   const [relatedEventToShowDetailsFor, countBySameCategory, relatedEventCategory] = useMemo(() => {
     if (!relatedEventsForThisProcess) {

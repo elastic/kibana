@@ -5,9 +5,10 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
+import { useDispatch } from 'react-redux';
 
+import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
+import { useShallowEqualSelector } from '../../hooks/use_shallow_equal_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 
@@ -29,8 +30,8 @@ export const resetScroll = () => {
 
 export const useFullScreen = () => {
   const dispatch = useDispatch();
-  const globalFullScreen = useSelector(inputsSelectors.globalFullScreenSelector) ?? false;
-  const timelineFullScreen = useSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
+  const globalFullScreen = useShallowEqualSelector(inputsSelectors.globalFullScreenSelector);
+  const timelineFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector);
 
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {

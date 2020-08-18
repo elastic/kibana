@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useSelector } from 'react-redux';
 import { PolicyListState, PolicyDetailsState } from '../types';
 import { State } from '../../../../common/store';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
@@ -17,28 +17,26 @@ import {
  * Narrows global state down to the PolicyListState before calling the provided Policy List Selector
  * @param selector
  */
-export function usePolicyListSelector<TSelected>(selector: (state: PolicyListState) => TSelected) {
-  return useSelector((state: State) => {
-    return selector(
+export const usePolicyListSelector = <TSelected>(selector: (state: PolicyListState) => TSelected) =>
+  useShallowEqualSelector((state: State) =>
+    selector(
       state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
         MANAGEMENT_STORE_POLICY_LIST_NAMESPACE
       ] as PolicyListState
-    );
-  });
-}
+    )
+  );
 
 /**
  * Narrows global state down to the PolicyDetailsState before calling the provided Policy Details Selector
  * @param selector
  */
-export function usePolicyDetailsSelector<TSelected>(
+export const usePolicyDetailsSelector = <TSelected>(
   selector: (state: PolicyDetailsState) => TSelected
-) {
-  return useSelector((state: State) =>
+) =>
+  useShallowEqualSelector((state: State) =>
     selector(
       state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
         MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE
       ] as PolicyDetailsState
     )
   );
-}

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import { Note } from '../../../../../common/lib/note';
 import { StoreState } from '../../../../../common/store/types';
 import { TimelineType } from '../../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
 
 import { TimelineModel } from '../../../../store/timeline/model';
 
@@ -87,9 +87,10 @@ export const Actions = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const timeline = useSelector<StoreState, TimelineModel>((state) => {
-      return state.timeline.timelineById['timeline-1'];
-    });
+    const timeline = useShallowEqualSelector<StoreState, TimelineModel>(
+      (state) => state.timeline.timelineById['timeline-1']
+    );
+
     return (
       <EventsTdGroupActions
         actionsColumnWidth={actionsColumnWidth}

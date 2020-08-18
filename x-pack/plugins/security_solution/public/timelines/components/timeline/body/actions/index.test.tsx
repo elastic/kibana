@@ -5,7 +5,6 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
@@ -13,17 +12,16 @@ import * as i18n from '../translations';
 
 import { Actions } from '.';
 import { TimelineType } from '../../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useSelector: jest.fn(),
-  };
-});
+jest.mock('../../../../../common/hooks/use_shallow_equal_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+}));
 
 describe('Actions', () => {
-  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  beforeEach(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
 
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
@@ -235,7 +233,7 @@ describe('Actions', () => {
   });
 
   test('it renders correct tooltip for NotesButton - timeline template', () => {
-    (useSelector as jest.Mock).mockReturnValue({
+    (useShallowEqualSelector as jest.Mock).mockReturnValue({
       ...mockTimelineModel,
       timelineType: TimelineType.template,
     });
@@ -268,7 +266,6 @@ describe('Actions', () => {
     expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
       i18n.NOTES_DISABLE_TOOLTIP
     );
-    (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
   test('it does NOT render a pin button when isEventViewer is true', () => {
