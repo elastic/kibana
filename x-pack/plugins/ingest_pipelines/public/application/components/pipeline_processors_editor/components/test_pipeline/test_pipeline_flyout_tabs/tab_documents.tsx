@@ -48,7 +48,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
     config: { documents: cachedDocuments, verbose: cachedVerbose },
   } = testPipelineData;
 
-  const executePipeline = async () => {
+  const testPipeline = async () => {
     const { isValid, data } = await form.submit();
 
     if (!isValid) {
@@ -104,7 +104,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         form={form}
         data-test-subj="testPipelineForm"
         isInvalid={form.isSubmitted && !form.isValid}
-        onSubmit={executePipeline}
+        onSubmit={testPipeline}
         error={form.getErrors()}
       >
         {/* Documents editor */}
@@ -128,7 +128,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
 
         <EuiButton
-          onClick={executePipeline}
+          onClick={testPipeline}
           size="s"
           isLoading={isRunningTest}
           disabled={form.isSubmitted && !form.isValid}
