@@ -298,7 +298,7 @@ export const ModelsList: FC = () => {
     {
       field: ModelsTableToConfigMapping.id,
       name: i18n.translate('xpack.ml.inference.modelsList.modelIdHeader', {
-        defaultMessage: 'Model ID',
+        defaultMessage: 'ID',
       }),
       sortable: true,
       truncateText: true,
@@ -315,7 +315,7 @@ export const ModelsList: FC = () => {
     {
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.inference.modelsList.createdAtHeader', {
-        defaultMessage: 'Created At',
+        defaultMessage: 'Created at',
       }),
       dataType: 'date',
       render: (date: string) => formatDate(date, TIME_FORMAT),
