@@ -115,7 +115,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  getStoppedPartitions(
+  getCategoryStoppedPartitions(
     jobIds: string[],
     fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
   ) {

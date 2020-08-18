@@ -83,10 +83,10 @@ function getCategorizerStats(legacyClient: ILegacyScopedClusterClient, params: a
   return rs.getCategorizerStats(jobId, partitionByValue);
 }
 
-function getStoppedPartitions(legacyClient: ILegacyScopedClusterClient, payload: any) {
+function getCategoryStoppedPartitions(legacyClient: ILegacyScopedClusterClient, payload: any) {
   const { jobIds, fieldToBucket } = payload;
   const rs = resultsServiceProvider(legacyClient);
-  return rs.getStoppedPartitions(jobIds, fieldToBucket);
+  return rs.getCategoryStoppedPartitions(jobIds, fieldToBucket);
 }
 
 /**
@@ -320,7 +320,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiGroup ResultsService
    *
    * @api {get} /api/ml/results/category_stopped_partitions
-   * @apiName GetStoppedPartitions
+   * @apiName GetCategoryStoppedPartitions
    * @apiDescription Returns list of partitions we stopped categorizing whens status changed to warn
    * @apiSchema (body) getCategorizerStoppedPartitionsSchema
    */
@@ -336,7 +336,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
     },
     mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getStoppedPartitions(legacyClient, request.body);
+        const resp = await getCategoryStoppedPartitions(legacyClient, request.body);
         return response.ok({
           body: resp,
         });

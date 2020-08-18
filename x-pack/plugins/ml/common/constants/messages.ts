@@ -50,10 +50,6 @@ export const getMessages = once(() => {
         {
           defaultMessage:
             'Partition field name must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
-
-          values: {
-            fields: '"{{fields}}"',
-          },
         }
       ),
       url:

@@ -476,7 +476,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     return results ? results.hits.hits.map((r) => r._source) : [];
   }
 
-  async function getStoppedPartitions(
+  async function getCategoryStoppedPartitions(
     jobIds: string[],
     fieldToBucket: typeof JOB_ID | typeof PARTITION_FIELD_VALUE = PARTITION_FIELD_VALUE
   ): Promise<GetStoppedPartitionResult> {
@@ -596,6 +596,6 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     getMaxAnomalyScore,
     getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClusterClient),
     getCategorizerStats,
-    getStoppedPartitions,
+    getCategoryStoppedPartitions,
   };
 }
