@@ -54,6 +54,7 @@ const RulesPageComponent: React.FC = () => {
   } = useUserInfo();
   const {
     loading: listsConfigLoading,
+    canWriteIndex: canWriteListsIndex,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
@@ -208,7 +209,7 @@ const RulesPageComponent: React.FC = () => {
                 <EuiButton
                   data-test-subj="open-value-lists-modal-button"
                   iconType="importAction"
-                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                  isDisabled={!canWriteListsIndex || loading}
                   onClick={showValueListsModal}
                 >
                   {i18n.UPLOAD_VALUE_LISTS}
