@@ -192,8 +192,43 @@ export type StyleDescriptor = {
   type: string;
 };
 
+export type RangeFieldMeta = {
+  min: number;
+  max: number;
+  delta: number;
+  isMinOutsideStdRange?: boolean;
+  isMaxOutsideStdRange?: boolean;
+};
+
+export type Category = {
+  key: string;
+  count: number;
+};
+
+export type CategoryFieldMeta = {
+  categories: Category[];
+};
+
+export type GeometryTypes = {
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  isPolygonsOnly: boolean;
+};
+
+export type StyleMetaDescriptor = {
+  geometryTypes?: GeometryTypes;
+  fieldMeta: {
+    [key: string]: {
+      range?: RangeFieldMeta;
+      categories?: CategoryFieldMeta;
+    };
+  };
+};
+
 export type VectorStyleDescriptor = StyleDescriptor & {
   properties: VectorStylePropertiesDescriptor;
+  isTimeAware: boolean;
+  __styleMeta?: StyleMetaDescriptor;
 };
 
 export type HeatmapStyleDescriptor = StyleDescriptor & {
