@@ -82,10 +82,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('endpointDetailsFlyout');
       });
 
-      it('shows an empty table when the user enters a filter that will return no matches into the KQL bar', async () => {
-        await testSubjects.existOrFail('adminSearchBar');
-      });
-
       describe('when the hostname is clicked on,', () => {
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
@@ -183,6 +179,82 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '6.8.0',
           ]);
         });
+      });
+    });
+
+    describe('displays the correct table data for the kql queries', () => {
+      before(async () => {
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await pageObjects.endpoint.navigateToEndpointList();
+      });
+      after(async () => {
+        await deleteMetadataStream(getService);
+      });
+      it('for the kql query: na, table shows an empty list', async () => {
+        const submitButton = await testSubjects.find('querySubmitButton');
+        await testSubjects.setValue('adminSearchBar', 'na');
+        submitButton.click();
+        const expectedData = [
+          [
+            'Hostname',
+            'Agent Status',
+            'Integration',
+            'Configuration Status',
+            'Operating System',
+            'IP Address',
+            'Version',
+            'Last Active',
+          ],
+          ['No items found'],
+        ];
+
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedData);
+      });
+
+      it('for the kql query: Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
+        await pageObjects.endpoint.navigateToEndpointList();
+        const submitButton = await testSubjects.find('querySubmitButton');
+        await testSubjects.setValue(
+          'adminSearchBar',
+          'Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
+        );
+        submitButton.click();
+        const expectedData = [
+          [
+            'Hostname',
+            'Agent Status',
+            'Integration',
+            'Configuration Status',
+            'Operating System',
+            'IP Address',
+            'Version',
+            'Last Active',
+          ],
+          [
+            'cadmann-4.example.com',
+            'Error',
+            'Default',
+            'Failure',
+            'windows 10.0',
+            '10.192.213.130, 10.70.28.129',
+            '6.6.1',
+            'Jan 24, 2020 @ 16:06:09.541',
+          ],
+          [
+            'thurlow-9.example.com',
+            'Error',
+            'Default',
+            'Success',
+            'windows 10.0',
+            '10.46.229.234',
+            '6.0.0',
+            'Jan 24, 2020 @ 16:06:09.541',
+          ],
+        ];
+
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedData);
       });
     });
 
