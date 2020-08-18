@@ -1,8 +1,9 @@
+package builds.oss
+
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
-class OssVisualRegression(val build: BuildType) : BuildType({
+object OssVisualRegression : BuildType({
   id("OssVisualRegression")
   name = "Visual Regression"
   paused = true
@@ -31,7 +32,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
   }
 
   dependencies {
-    dependency(build) {
+    dependency(OssBuild) {
       snapshot {
       }
 

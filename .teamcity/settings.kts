@@ -1,5 +1,5 @@
-import builds.oss.OssBuild
-import builds.default.DefaultBuild
+import builds.oss.*
+import builds.default.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import templates.DefaultTemplate
 
@@ -26,40 +26,53 @@ project {
     id("OSS")
     name = "OSS Distro"
 
-    buildType(OssBuild)
-
-    subProject {
-      id("OSS_Functional")
-      name = "Functional"
-
-      val ciGroups = (1..12).map { OssCiGroup(it, OssBuild) }
-
-      buildType {
-        id("CIGroups_Composite")
-        name = "CI Groups"
-        type = BuildTypeSettings.Type.COMPOSITE
-
-        dependencies {
-          for (ciGroup in ciGroups) {
-            snapshot(ciGroup) {
-              reuseBuilds = ReuseBuilds.SUCCESSFUL
-              onDependencyCancel = FailureAction.CANCEL
-              onDependencyFailure = FailureAction.CANCEL
-              synchronizeRevisions = true
-            }
-          }
-        }
-      }
-
-      buildType(OssVisualRegression(OssBuild))
-
-      subProject {
-        id("CIGroups")
-        name = "CI Groups"
-
-        for (ciGroup in ciGroups) buildType(ciGroup)
+    sequential {
+      buildType(OssBuild)
+      parallel (options = {
+        onDependencyFailure = FailureAction.CANCEL
+        onDependencyCancel = FailureAction.CANCEL
+        synchronizeRevisions = true
+        reuseBuilds = ReuseBuilds.SUCCESSFUL
+      }) {
+        (1..12).forEach { buildType(OssCiGroup(it)) }
+        buildType(OssVisualRegression)
       }
     }
+
+//    buildType(OssBuild)
+//
+//    subProject {
+//      id("OSS_Functional")
+//      name = "Functional"
+//
+//      val ciGroups = (1..12).map { OssCiGroup(it) }
+//
+//      buildType {
+//        id("CIGroups_Composite")
+//        name = "CI Groups"
+//        type = BuildTypeSettings.Type.COMPOSITE
+//
+//        dependencies {
+//          for (ciGroup in ciGroups) {
+//            snapshot(ciGroup) {
+//              reuseBuilds = ReuseBuilds.SUCCESSFUL
+//              onDependencyCancel = FailureAction.CANCEL
+//              onDependencyFailure = FailureAction.CANCEL
+//              synchronizeRevisions = true
+//            }
+//          }
+//        }
+//      }
+//
+//      buildType(OssVisualRegression)
+//
+//      subProject {
+//        id("CIGroups")
+//        name = "CI Groups"
+//
+//        for (ciGroup in ciGroups) buildType(ciGroup)
+//      }
+//    }
   }
 
   subProject {
@@ -72,7 +85,7 @@ project {
       id("Default_Functional")
       name = "Functional"
 
-       val ciGroups = (1..10).map { DefaultCiGroup(it, DefaultBuild) }
+       val ciGroups = (1..10).map { DefaultCiGroup(it) }
 
        buildType {
          id("Default_CIGroups_Composite")
@@ -91,7 +104,7 @@ project {
          }
        }
 
-      buildType(DefaultVisualRegression(DefaultBuild))
+      buildType(DefaultVisualRegression)
 
        subProject {
          id("Default_CIGroups")

@@ -1,8 +1,9 @@
+package builds.default
+
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
-class DefaultVisualRegression(val build: BuildType) : BuildType({
+object DefaultVisualRegression : BuildType({
   id("DefaultVisualRegression")
   name = "Visual Regression"
   paused = true
@@ -31,7 +32,7 @@ class DefaultVisualRegression(val build: BuildType) : BuildType({
   }
 
   dependencies {
-    dependency(build) {
+    dependency(DefaultBuild) {
       snapshot {
       }
 
