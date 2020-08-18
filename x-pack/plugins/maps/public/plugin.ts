@@ -5,6 +5,9 @@
  */
 
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import {
   CoreSetup,
   CoreStart,
@@ -16,18 +19,6 @@ import { SharePluginSetup, UrlGeneratorState } from '../../../../src/plugins/sha
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
-  setAutocompleteService,
-  setCore,
-  setCoreChrome,
-  setCoreI18n,
-  setCoreOverlays,
-  setData,
-  setDocLinks,
-  setFileUpload,
-  setHttp,
-  setIndexPatternSelect,
-  setIndexPatternService,
-  setInspector,
   setIsGoldPlus,
   setKibanaCommonConfig,
   setKibanaVersion,
@@ -46,6 +37,7 @@ import {
   setShareService,
   setEmbeddableService,
   setNavigateToApp,
+  setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -68,17 +60,20 @@ import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { LicensingPluginStart } from '../../licensing/public';
+import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsLegacy: { config: unknown };
   share: SharePluginSetup;
+  mapsLegacy: { config: MapsLegacyConfigType };
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsPluginStartDependencies {}
 
 declare module '../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
@@ -148,6 +143,15 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setEmbeddableService(plugins.embeddable);
   setNavigateToApp(core.application.navigateToApp);
 };
+export interface MapsPluginStartDependencies {
+  data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
+  fileUpload: FileUploadStartContract;
+  inspector: InspectorStartContract;
+  licensing: LicensingPluginStart;
+  navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
+}
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -174,14 +178,16 @@ export class MapsPlugin
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
     const config = this._initializerContext.config.get<MapsConfigType>();
-    const kibanaVersion = this._initializerContext.env.packageInfo.version;
-    const { inspector, home, visualizations, embeddable } = plugins;
-    bindSetupCoreAndPlugins(core, plugins, config, kibanaVersion);
+    setKibanaCommonConfig(plugins.mapsLegacy.config);
+    setMapAppConfig(config);
+    setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    inspector.registerView(MapView);
-    home.featureCatalogue.register(featureCatalogueEntry);
-    visualizations.registerAlias(getMapsVisTypeAlias());
-    embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+    plugins.inspector.registerView(MapView);
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    plugins.visualizations.registerAlias(
+      getMapsVisTypeAlias(plugins.visualizations, config.showMapVisualizationTypes)
+    );
+    plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     core.application.register({
       id: APP_ID,
@@ -192,16 +198,23 @@ export class MapsPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       // @ts-expect-error
       async mount(context, params) {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        bindStartCoreAndPlugins(coreStart, startPlugins);
         const { renderApp } = await lazyLoadMapModules();
         return renderApp(context, params);
       },
     });
   }
 
-  public start(core: CoreStart, plugins: any): MapsStartApi {
-    bindStartCoreAndPlugins(core, plugins);
+  public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
+    if (plugins.licensing) {
+      plugins.licensing.license$.subscribe((license: ILicense) => {
+        const gold = license.check(APP_ID, 'gold');
+        setIsGoldPlus(gold.state === 'valid');
+        setLicenseId(license.uid);
+      });
+    }
+
+    setStartServices(core, plugins);
+
     return {
       createSecurityLayerDescriptors,
       registerLayerWizard,
