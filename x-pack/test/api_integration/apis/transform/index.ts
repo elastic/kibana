@@ -29,5 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./delete_transforms'));
     loadTestFile(require.resolve('./transforms'));
+    loadTestFile(require.resolve('./transforms_stats'));
   });
 }
