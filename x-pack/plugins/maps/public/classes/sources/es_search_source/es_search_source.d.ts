@@ -22,7 +22,5 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     minSourceZoom: number;
     maxSourceZoom: number;
   }>;
-  getMinZoom(): number;
-  getMaxZoom(): number;
   getLayerName(): string;
 }

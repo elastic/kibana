@@ -22,8 +22,6 @@ import {
   MVT_SOURCE_LAYER_NAME,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MIN_ZOOM,
-  MAX_ZOOM,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -616,14 +614,6 @@ export class ESSearchSource extends AbstractESSource {
       maxSourceZoom: this.getMaxZoom(),
       urlTemplate: urlTemplate,
     };
-  }
-
-  getMinZoom() {
-    return MIN_ZOOM;
-  }
-
-  getMaxZoom() {
-    return MAX_ZOOM;
   }
 }
 
