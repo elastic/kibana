@@ -40,6 +40,8 @@ import {
   TRANSACTION_ROUTE_CHANGE,
   TRANSACTION_REQUEST,
 } from '../../../../../common/transaction_types';
+import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
+import { TransactionBreakdown } from '../../TransactionBreakdown';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
@@ -162,46 +164,52 @@ export class TransactionCharts extends Component<TransactionChartProps> {
         <EuiFlexGrid columns={2} gutterSize="s">
           <EuiFlexItem data-cy={`transaction-duration-charts`}>
             <EuiPanel>
-              <React.Fragment>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <span>{responseTimeLabel(transactionType)}</span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <LicenseContext.Consumer>
-                    {(license) =>
-                      this.renderMLHeader(license?.getFeature('ml').isAvailable)
-                    }
-                  </LicenseContext.Consumer>
-                </EuiFlexGroup>
-                <TransactionLineChart
-                  series={responseTimeSeries}
-                  tickFormatY={getResponseTimeTickFormatter(formatter)}
-                  formatTooltipValue={getResponseTimeTooltipFormatter(
-                    formatter
-                  )}
-                />
-              </React.Fragment>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <span>{responseTimeLabel(transactionType)}</span>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <LicenseContext.Consumer>
+                  {(license) =>
+                    this.renderMLHeader(license?.getFeature('ml').isAvailable)
+                  }
+                </LicenseContext.Consumer>
+              </EuiFlexGroup>
+              <TransactionLineChart
+                series={responseTimeSeries}
+                tickFormatY={getResponseTimeTickFormatter(formatter)}
+                formatTooltipValue={getResponseTimeTooltipFormatter(formatter)}
+              />
             </EuiPanel>
           </EuiFlexItem>
 
           <EuiFlexItem style={{ flexShrink: 1 }}>
             <EuiPanel>
-              <React.Fragment>
-                <EuiTitle size="xs">
-                  <span>{tpmLabel(transactionType)}</span>
-                </EuiTitle>
-                <TransactionLineChart
-                  series={tpmSeries}
-                  tickFormatY={this.getTPMFormatter}
-                  formatTooltipValue={this.getTPMTooltipFormatter}
-                  truncateLegends
-                />
-              </React.Fragment>
+              <EuiTitle size="xs">
+                <span>{tpmLabel(transactionType)}</span>
+              </EuiTitle>
+              <TransactionLineChart
+                series={tpmSeries}
+                tickFormatY={this.getTPMFormatter}
+                formatTooltipValue={this.getTPMTooltipFormatter}
+                truncateLegends
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGrid columns={2} gutterSize="s">
+          <EuiFlexItem>
+            <ErroneousTransactionsRateChart />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TransactionBreakdown />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+
         {transactionType === TRANSACTION_PAGE_LOAD && (
           <>
             <EuiSpacer size="s" />
