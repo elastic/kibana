@@ -9944,7 +9944,6 @@
     "xpack.lens.indexPattern.fieldStatsButtonLabel": "单击以进行字段预览，或拖放以进行可视化。",
     "xpack.lens.indexPattern.fieldStatsCountLabel": "计数",
     "xpack.lens.indexPattern.fieldStatsDisplayToggle": "切换",
-    "xpack.lens.indexPattern.fieldStatsNoData": "没有可显示的数据",
     "xpack.lens.indexPattern.fieldTimeDistributionLabel": "时间分布",
     "xpack.lens.indexPattern.fieldTopValuesLabel": "排名最前值",
     "xpack.lens.indexPattern.groupByDropdown": "分组依据",

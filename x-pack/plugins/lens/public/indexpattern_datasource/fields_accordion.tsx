@@ -65,13 +65,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField) => (
-      <FieldItem
-        {...fieldProps}
-        key={field.name}
-        field={field}
-        exists={!!exists}
-        hideDetails={!exists}
-      />
+      <FieldItem {...fieldProps} key={field.name} field={field} exists={!!exists} />
     ),
     [fieldProps, exists]
   );
