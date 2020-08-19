@@ -4,10 +4,13 @@
 
 ## RouteConfigOptions.timeout property
 
-Timeouts for processing durations. Response timeout is in milliseconds. Default value: 2 minutes
+Defines per-route timeouts.
 
 <b>Signature:</b>
 
 ```typescript
-timeout?: number;
+timeout?: {
+        payload?: Method extends 'get' | 'options' ? undefined : number;
+        idleSocket?: number;
+    };
 ```
