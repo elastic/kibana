@@ -20,6 +20,7 @@
 const webpackConfig = require('./storybook_config/webpack.config');
 
 module.exports = {
+  addons: ['@storybook/addon-actions'],
   managerEntries: (entry = []) => {
     return [...entry, require.resolve('./lib/register')];
   },
