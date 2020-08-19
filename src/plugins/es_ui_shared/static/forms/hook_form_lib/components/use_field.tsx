@@ -54,19 +54,24 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
   const propsToForward =
     componentProps !== undefined ? { ...componentProps, ...rest } : { ...rest };
 
-  const fieldConfig =
+  const fieldConfig: FieldConfig<any, T> & { initialValue?: T } =
     config !== undefined
       ? { ...config }
       : ({
           ...form.__readFieldConfigFromSchema(path),
         } as Partial<FieldConfig<any, T>>);
 
-  if (defaultValue === undefined && readDefaultValueOnForm) {
-    // Read the field default value from the "defaultValue" object passed to the form
-    (fieldConfig.defaultValue as any) = form.getFieldDefaultValue(path) ?? fieldConfig.defaultValue;
-  } else if (defaultValue !== undefined) {
-    // Read the field default value from the propvided prop
-    (fieldConfig.defaultValue as any) = defaultValue;
+  if (defaultValue !== undefined) {
+    // update the form "defaultValue" ref object so when/if we reset the form we can go back to this value
+    form.__updateDefaultValueAt(path, defaultValue);
+
+    // Use the defaultValue prop as initial value
+    fieldConfig.initialValue = defaultValue;
+  } else {
+    if (readDefaultValueOnForm) {
+      // Read the field initial value from the "defaultValue" object passed to the form
+      fieldConfig.initialValue = (form.getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
+    }
   }
 
   if (!fieldConfig.path) {
