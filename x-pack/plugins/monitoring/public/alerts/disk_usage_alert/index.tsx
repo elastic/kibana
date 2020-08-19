@@ -3,23 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { ALERT_CPU_USAGE } from '../../../common/constants';
 import { validate } from '../components/duration/validation';
 import { Expression, Props } from '../components/duration/expression';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CpuUsageAlert } from '../../../server/alerts';
 
-export function createCpuUsageAlertType(): AlertTypeModel {
-  const alert = new CpuUsageAlert();
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { DiskUsageAlert } from '../../../server/alerts';
+
+export function createDiskUsageAlertType(): AlertTypeModel {
   return {
-    id: ALERT_CPU_USAGE,
-    name: alert.label,
+    id: DiskUsageAlert.TYPE,
+    name: DiskUsageAlert.LABEL,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={CpuUsageAlert.paramDetails} />
+      <Expression {...props} paramDetails={DiskUsageAlert.PARAM_DETAILS} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

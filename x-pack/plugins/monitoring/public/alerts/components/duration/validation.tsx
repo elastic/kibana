@@ -6,25 +6,30 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../triggers_actions_ui/public/types';
+import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
 
-export function validate(opts: any): ValidationResult {
+interface ValidateOptions {
+  duration: string;
+  threshold: number;
+}
+
+export function validate(inputValues: ValidateOptions): ValidationResult {
   const validationResult = { errors: {} };
 
   const errors: { [key: string]: string[] } = {
     duration: [],
     threshold: [],
   };
-  if (!opts.duration) {
+  if (!inputValues.duration) {
     errors.duration.push(
-      i18n.translate('xpack.monitoring.alerts.cpuUsage.validation.duration', {
+      i18n.translate('xpack.monitoring.alerts.validation.duration', {
         defaultMessage: 'A valid duration is required.',
       })
     );
   }
-  if (isNaN(opts.threshold)) {
+  if (isNaN(inputValues.threshold)) {
     errors.threshold.push(
-      i18n.translate('xpack.monitoring.alerts.cpuUsage.validation.threshold', {
+      i18n.translate('xpack.monitoring.alerts.validation.threshold', {
         defaultMessage: 'A valid number is required.',
       })
     );
