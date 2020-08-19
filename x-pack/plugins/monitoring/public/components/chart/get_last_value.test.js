@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getLastValue } from '../get_last_value';
+import { getLastValue } from './get_last_value';
 
 describe('monitoringChartGetLastValue', function () {
   it('getLastValue for single number', () => {

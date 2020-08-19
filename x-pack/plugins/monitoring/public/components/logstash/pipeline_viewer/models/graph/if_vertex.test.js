@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { IfVertex } from '../if_vertex';
-import { Vertex } from '../vertex';
+import { IfVertex } from './if_vertex';
+import { Vertex } from './vertex';
 
 describe('IfVertex', () => {
   let graph;

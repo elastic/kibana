@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Edge } from '../edge';
+import { Edge } from './edge';
 
 describe('Edge', () => {
   let graph;

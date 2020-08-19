@@ -5,10 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Graph } from '../';
-import { Vertex } from '../vertex';
-import { PluginVertex } from '../plugin_vertex';
-import { Edge } from '../edge';
+import { Graph } from './';
+import { Vertex } from './vertex';
+import { PluginVertex } from './plugin_vertex';
+import { Edge } from './edge';
 
 describe('Graph', () => {
   let graphJson;

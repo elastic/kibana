@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { QueueVertex } from '../queue_vertex';
-import { Vertex } from '../vertex';
+import { QueueVertex } from './queue_vertex';
+import { Vertex } from './vertex';
 
 describe('QueueVertex', () => {
   let graph;

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getColor } from '../get_color';
+import { getColor } from './get_color';
 
 describe('getColors', function () {
   it('elasticsearch colors', () => {
