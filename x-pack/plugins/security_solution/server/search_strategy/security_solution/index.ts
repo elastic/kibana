@@ -5,13 +5,13 @@
  */
 
 import { ISearchStrategy, PluginStart } from '../../../../../../src/plugins/data/server';
-import { FactoryQueryTypes } from '../../../common/search_strategy/security_solution';
-import { securitySolutionFactory } from './factory';
 import {
+  FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
-  SecuritySolutionFactory,
-} from './factory/types';
+} from '../../../common/search_strategy/security_solution';
+import { securitySolutionFactory } from './factory';
+import { SecuritySolutionFactory } from './factory/types';
 
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart

@@ -46,7 +46,7 @@ export const allHost: SecuritySolutionFactory<'host_all'> = {
       'aggregations.host_data.buckets',
       response.rawResponse
     );
-    const hostsEdges = buckets.map((bucket) => formatHostEdgesData(options.fields, bucket));
+    const hostsEdges = buckets.map((bucket) => formatHostEdgesData(bucket));
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
@@ -82,7 +82,7 @@ export const detailsHost: SecuritySolutionFactory<'host_details'> = {
       dsl: [inspectStringifyObject(buildHostOverviewQuery(options))],
       response: [inspectStringifyObject(response)],
     };
-    const formattedHostItem = formatHostItem(options.fields, aggregations);
+    const formattedHostItem = formatHostItem(aggregations);
     return { ...response, inspect, _id: options.hostName, ...formattedHostItem };
   },
 };

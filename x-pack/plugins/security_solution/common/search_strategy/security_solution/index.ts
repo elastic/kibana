@@ -5,7 +5,13 @@
  */
 
 import { ESQuery } from '../../typed_json';
-import { HostsQueries } from './hosts';
+import {
+  HostDetailsStrategyResponse,
+  HostOverviewRequestOptions,
+  HostsQueries,
+  HostsRequestOptions,
+  HostsStrategyResponse,
+} from './hosts';
 export * from './hosts';
 export type Maybe<T> = T | null;
 
@@ -66,27 +72,37 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface DocValueFieldsInput {
+export interface DocValueFields {
   field: string;
   format: string;
 }
 
 export interface RequestBasicOptions {
   timerange: TimerangeInput;
-  filterQuery: ESQuery | undefined;
+  filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: DocValueFieldsInput[];
+  docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
-  fields: readonly string[];
   sortField?: SortField;
 }
 
 export interface RequestOptionsPaginated extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
-  fields: readonly string[];
   sortField?: SortField;
 }
+
+export type StrategyResponseType<T extends FactoryQueryTypes> = T extends 'host_all'
+  ? HostsStrategyResponse
+  : T extends 'host_details'
+  ? HostDetailsStrategyResponse
+  : never;
+
+export type StrategyRequestType<T extends FactoryQueryTypes> = T extends 'host_all'
+  ? HostsRequestOptions
+  : T extends 'host_details'
+  ? HostOverviewRequestOptions
+  : never;

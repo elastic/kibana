@@ -13,15 +13,21 @@ import { hostFieldsMap } from '../../../../lib/ecs_fields';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../lib/hosts/types';
 
-export const formatHostEdgesData = (fields: readonly string[], bucket: HostAggEsItem): HostsEdges =>
-  fields.reduce<HostsEdges>(
+const hostsFields = ['_id', 'lastSeen', 'host.id', 'host.name', 'host.os.name', 'host.os.version'];
+
+export const formatHostEdgesData = (bucket: HostAggEsItem): HostsEdges =>
+  hostsFields.reduce<HostsEdges>(
     (flattenedFields, fieldName) => {
       const hostId = get('key', bucket);
       flattenedFields.node._id = hostId || null;
       flattenedFields.cursor.value = hostId || '';
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
-        return set(`node.${fieldName}`, fieldValue, flattenedFields);
+        return set(
+          `node.${fieldName}`,
+          Array.isArray(fieldValue) ? fieldValue : [fieldValue],
+          flattenedFields
+        );
       }
       return flattenedFields;
     },
@@ -34,8 +40,30 @@ export const formatHostEdgesData = (fields: readonly string[], bucket: HostAggEs
     } as HostsEdges
   );
 
-export const formatHostItem = (fields: readonly string[], bucket: HostAggEsItem): HostItem =>
-  fields.reduce<HostItem>((flattenedFields, fieldName) => {
+const hostFields = [
+  '_id',
+  'host.architecture',
+  'host.id',
+  'host.ip',
+  'host.id',
+  'host.mac',
+  'host.name',
+  'host.os.family',
+  'host.os.name',
+  'host.os.platform',
+  'host.os.version',
+  'host.type',
+  'cloud.instance.id',
+  'cloud.machine.type',
+  'cloud.provider',
+  'cloud.region',
+  'endpoint.endpointPolicy',
+  'endpoint.policyStatus',
+  'endpoint.sensorVersion',
+];
+
+export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
+  hostFields.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
       return set(fieldName, fieldValue, flattenedFields);

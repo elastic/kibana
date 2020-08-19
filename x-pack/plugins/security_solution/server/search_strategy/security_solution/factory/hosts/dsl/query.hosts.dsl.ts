@@ -15,7 +15,6 @@ import { assertUnreachable, createQueryFilterClauses } from '../../../../../util
 export const buildHostsQuery = ({
   defaultIndex,
   docValueFields,
-  fields,
   filterQuery,
   pagination: { querySize },
   sort,
