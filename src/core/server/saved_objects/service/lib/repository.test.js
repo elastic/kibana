@@ -1545,7 +1545,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalled();
       });
 
-      it(`should use the ES index with version of ID and version are defined and overwrite=true`, async () => {
+      it(`should use the ES index with version if ID and version are defined and overwrite=true`, async () => {
         await createSuccess(type, attributes, { id, overwrite: true, version: mockVersion });
         expect(client.index).toHaveBeenCalled();
 
