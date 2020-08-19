@@ -27,6 +27,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
+import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -114,7 +115,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
-  const { addError, addSuccess } = useAppToasts();
+  const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
     { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
@@ -132,10 +133,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     },
     [addError, onCancel]
   );
-  const onSuccess = useCallback(() => {
-    addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
-    onConfirm(shouldCloseAlert);
-  }, [addSuccess, onConfirm, shouldCloseAlert]);
+  const onSuccess = useCallback(
+    (updated: number, conflicts: number) => {
+      addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
+      onConfirm(shouldCloseAlert);
+      if (conflicts > 0) {
+        addWarning({
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      }
+    },
+    [addSuccess, addWarning, onConfirm, shouldCloseAlert]
+  );
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {

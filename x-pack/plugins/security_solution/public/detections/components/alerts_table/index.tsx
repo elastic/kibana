@@ -37,6 +37,7 @@ import {
 } from './default_config';
 import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
+import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import {
   CreateTimelineProps,
@@ -186,8 +187,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       if (conflicts > 0) {
         // Partial failure
         addWarning({
-          title: i18n.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18n.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
         let title: string;

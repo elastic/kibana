@@ -43,7 +43,7 @@ export type ReturnUseAddOrUpdateException = [
 export interface UseAddOrUpdateExceptionProps {
   http: HttpStart;
   onError: (arg: Error) => void;
-  onSuccess: () => void;
+  onSuccess: (updated: number, conficts: number) => void;
 }
 
 /**
@@ -130,6 +130,8 @@ export const useAddOrUpdateException = ({
           });
         }
 
+        let conflicts = 0;
+        let updated = 0;
         if (bulkCloseIndex != null) {
           const filter = getQueryFilter(
             '',
@@ -139,20 +141,23 @@ export const useAddOrUpdateException = ({
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
           );
-          await updateAlertStatus({
+
+          const response = await updateAlertStatus({
             query: {
               query: filter,
             },
             status: 'closed',
             signal: abortCtrl.signal,
           });
+          conflicts = response.version_conflicts;
+          updated = response.updated;
         }
 
         await addOrUpdateItems(exceptionItemsToAddOrUpdate);
 
         if (isSubscribed) {
           setIsLoading(false);
-          onSuccess();
+          onSuccess(updated, conflicts);
         }
       } catch (error) {
         if (isSubscribed) {

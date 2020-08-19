@@ -173,17 +173,3 @@ export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
     defaultMessage: 'Failed to mark alert(s) as in progress',
   }
 );
-
-export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailed', {
-    values: { conflicts },
-    defaultMessage:
-      'Failed to update { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedDetailed', {
-    values: { updated, conflicts },
-    defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
-         because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
-  });
