@@ -46,8 +46,6 @@ export async function getTile({
   logger: Logger;
   requestBody: any;
 }): Promise<Buffer | null> {
-  logger.info(JSON.stringify({ x, y, z, requestBody, geometryFieldName }));
-
   const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
 
   let resultFeatures: Feature[];

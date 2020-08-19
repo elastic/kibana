@@ -33,18 +33,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
       const { query } = request;
 
       const callElasticsearch = async (type: string, ...args: any[]): Promise<unknown> => {
-        logger.info('calling es');
-        logger.info(type);
-        logger.info(JSON.stringify([...args]));
-
-        const result = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-          type,
-          ...args
-        );
-
-        // logger.info(JSON.stringify(result));
-
-        return result;
+        return await context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
       };
 
       const requestBodyDSL = rison.decode(query.requestBody);
