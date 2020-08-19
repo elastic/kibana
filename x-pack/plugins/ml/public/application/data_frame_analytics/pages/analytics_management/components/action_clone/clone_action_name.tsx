@@ -393,11 +393,6 @@ interface CloneActionNameProps {
   isDisabled: boolean;
 }
 
-/**
- * Temp component to have Clone job button with the same look as the other actions.
- * Replace with {@link getCloneAction} as soon as all the actions are refactored
- * to support EuiContext with a valid DOM structure without nested buttons.
- */
 export const CloneActionName: FC<CloneActionNameProps> = ({ isDisabled }) => {
   if (isDisabled) {
     return (
