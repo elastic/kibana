@@ -40,8 +40,8 @@ import {
 export class EmbeddableStateTransfer {
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
-    private appList: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo> | undefined,
-    private scopedHistory?: ScopedHistory
+    private scopedHistory?: ScopedHistory,
+    private appList?: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo> | undefined
   ) {}
 
   /**
