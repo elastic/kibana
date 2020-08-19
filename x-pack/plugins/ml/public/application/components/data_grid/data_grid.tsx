@@ -94,7 +94,13 @@ export const DataGrid: FC<Props> = memo(
 
     const popOverContent = useMemo(() => {
       return {
-        featureImportance: ({ cellContentsElement, children }) => {
+        featureImportance: ({
+          cellContentsElement,
+          children,
+        }: {
+          cellContentsElement: any;
+          children: any;
+        }) => {
           const stringContents = cellContentsElement.textContent;
           const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
           const rowIndex = children?.props?.rowIndex;
