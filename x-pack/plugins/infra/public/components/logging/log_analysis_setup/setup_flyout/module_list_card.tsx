@@ -35,7 +35,7 @@ export const LogAnalysisModuleListCard: React.FC<{
 
   const viewInMlLinkProps = useLinkProps({
     app: 'ml',
-    hash: '/jobs',
+    pathname: '/jobs',
     search: { mlManagement: `(jobId:${jobId})` },
   });
 
