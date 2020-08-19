@@ -76,7 +76,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
-      const availablePort = await getPort({ port: 9000 });
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       webhookServer.listen(availablePort);
       webhookSimulatorURL = `http://localhost:${availablePort}`;
 

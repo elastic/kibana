@@ -62,7 +62,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     // if options.proxyPort is defined than use it for a proxy service in other case try to use port from range 4000 till 4100
     const proxyPort = options.proxyPort ?? (await getPort({ port: getPort.makeRange(4000, 4100) }));
     const actionsProxyUrl = options.enableActionsProxy
-      ? [`--xpack.actions.proxyUrl=http://localhost:${proxyPort}`]
+      ? [
+          `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          '--xpack.actions.rejectUnauthorizedCertificates=false',
+        ]
       : [];
 
     return {
@@ -95,7 +98,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           ...actionsProxyUrl,
-          '--xpack.actions.rejectUnauthorizedCertificates=false',
 
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({
