@@ -23,7 +23,6 @@ div[data-rbd-draggable-id='Time'] {
   align-items: start;
 }
 
-
 .dscEuiDataGridRowCellFilter {
   display: none;
   text-align: right;
@@ -82,7 +81,6 @@ div[data-rbd-draggable-id='Time'] {
 
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
-
   .euiDataGridHeaderCell__content {
     @include euiTextTruncate;
     overflow: hidden;

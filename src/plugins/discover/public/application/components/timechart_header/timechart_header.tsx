@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import './timechart_header.scss';
 
 export interface TimechartHeaderProps {
   /**
@@ -94,7 +95,7 @@ export function TimechartHeader({
             })}
             delay="long"
           >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s">
+            <EuiText data-test-subj="discoverIntervalDateRange" textAlign="center" size="s">
               {`${from} - ${to} ${
                 interval !== 'auto'
                   ? i18n.translate('discover.timechartHeader.timeIntervalSelect.per', {
@@ -105,7 +106,7 @@ export function TimechartHeader({
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className="dscTimeIntervalSelect" grow={false}>
           <EuiSelect
             aria-label={i18n.translate('discover.timechartHeader.timeIntervalSelect.ariaLabel', {
               defaultMessage: 'Time interval',
