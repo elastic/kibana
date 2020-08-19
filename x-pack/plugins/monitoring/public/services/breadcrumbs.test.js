@@ -5,10 +5,40 @@
  */
 
 import expect from '@kbn/expect';
-import { breadcrumbsProvider } from '../breadcrumbs';
-import { MonitoringMainController } from '../../directives/main';
+import { breadcrumbsProvider } from './breadcrumbs';
+import { MonitoringMainController } from '../directives/main';
+import { Legacy } from '../legacy_shims';
 
 describe('Monitoring Breadcrumbs Service', () => {
+  const core = {
+    notifications: {},
+    application: {},
+    i18n: {},
+    chrome: {},
+  };
+  const data = {
+    query: {
+      timefilter: {
+        timefilter: {
+          isTimeRangeSelectorEnabled: () => true,
+          getTime: () => 1,
+          getRefreshInterval: () => 1,
+        },
+      },
+    },
+  };
+  const isCloud = false;
+  const triggersActionsUi = {};
+
+  beforeAll(() => {
+    Legacy.init({
+      core,
+      data,
+      isCloud,
+      triggersActionsUi,
+    });
+  });
+
   it('in Cluster Alerts', () => {
     const controller = new MonitoringMainController();
     controller.setup({

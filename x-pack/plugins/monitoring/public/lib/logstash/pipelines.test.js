@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { isPipelineMonitoringSupportedInVersion } from '../pipelines';
+import { isPipelineMonitoringSupportedInVersion } from './pipelines';
 
 describe('pipelines', () => {
   describe('isPipelineMonitoringSupportedInVersion', () => {

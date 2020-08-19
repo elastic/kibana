@@ -6,12 +6,42 @@
 
 import { noop } from 'lodash';
 import expect from '@kbn/expect';
-import { MonitoringMainController } from '../';
+import { Legacy } from '../../legacy_shims';
+import { MonitoringMainController } from './';
 
 const getMockLicenseService = (options) => ({ mlIsSupported: () => options.mlIsSupported });
 const getMockBreadcrumbsService = () => noop; // breadcrumb service has its own test
 
 describe('Monitoring Main Directive Controller', () => {
+  const core = {
+    notifications: {},
+    application: {},
+    i18n: {},
+    chrome: {},
+  };
+  const data = {
+    query: {
+      timefilter: {
+        timefilter: {
+          isTimeRangeSelectorEnabled: () => true,
+          getTime: () => 1,
+          getRefreshInterval: () => 1,
+        },
+      },
+    },
+  };
+  const isCloud = false;
+  const triggersActionsUi = {};
+
+  beforeAll(() => {
+    Legacy.init({
+      core,
+      data,
+      isCloud,
+      triggersActionsUi,
+    });
+  });
+
   /*
    * Simulates calling the monitoringMain directive the way Cluster Listing
    * does:
