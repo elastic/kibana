@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { BooleanEdge } from '../boolean_edge';
-import { Edge } from '../edge';
+import { BooleanEdge } from './boolean_edge';
+import { Edge } from './edge';
 
 describe('BooleanEdge', () => {
   let graph;

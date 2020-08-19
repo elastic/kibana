@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Graph } from '../';
+import { Graph } from './';
 
 describe('Vertex', () => {
   let graph;
@@ -205,40 +205,39 @@ describe('Vertex', () => {
        *            \---- v
        *                  F5
        */
-      const complexGraphJson = {
-        vertices: [
-          { id: 'I1', type: 'plugin', explicit_id: false },
-          { id: 'my-queue', type: 'queue', config_name: 'some-name' },
-          { id: 'IF1', type: 'if', config_name: 'some-name' },
-          {
-            id: 'IF2',
-            type: 'plugin',
-            meta: { source_text: 'foobar', source_line: 33, source_column: 4 },
-          },
-          { id: 'F1', type: 'plugin', explicit_id: true },
-          { id: 'F2', type: 'plugin', explicit_id: true },
-          { id: 'F3', type: 'plugin', explicit_id: true },
-          { id: 'F4', type: 'plugin', explicit_id: true },
-          { id: 'F5', type: 'plugin', explicit_id: true },
-        ],
-        edges: [
-          { id: '1', type: 'plain', from: 'I1', to: 'my-queue' },
-          { id: '2', type: 'plain', from: 'my-queue', to: 'IF1' },
-          { id: '3', type: 'boolean', when: true, from: 'IF1', to: 'IF2' },
-          { id: '4', type: 'boolean', when: false, from: 'IF1', to: 'F1' },
-          { id: '5', type: 'boolean', when: true, from: 'IF2', to: 'F2' },
-          { id: '6', type: 'boolean', when: false, from: 'IF2', to: 'F3' },
-          { id: '7', type: 'plain', from: 'F2', to: 'F5' },
-          { id: '8', type: 'plain', from: 'F3', to: 'F5' },
-          { id: '9', type: 'plain', from: 'F1', to: 'F4' },
-          { id: '10', type: 'plain', from: 'F4', to: 'F5' },
-        ],
-      };
-
-      beforeEach(() => {
-        graph = new Graph();
-        graph.update(complexGraphJson);
-      });
+      // const complexGraphJson = {
+      //   vertices: [
+      //     { id: 'I1', type: 'plugin', explicit_id: false },
+      //     { id: 'my-queue', type: 'queue', config_name: 'some-name' },
+      //     { id: 'IF1', type: 'if', config_name: 'some-name' },
+      //     {
+      //       id: 'IF2',
+      //       type: 'plugin',
+      //       meta: { source_text: 'foobar', source_line: 33, source_column: 4 },
+      //     },
+      //     { id: 'F1', type: 'plugin', explicit_id: true },
+      //     { id: 'F2', type: 'plugin', explicit_id: true },
+      //     { id: 'F3', type: 'plugin', explicit_id: true },
+      //     { id: 'F4', type: 'plugin', explicit_id: true },
+      //     { id: 'F5', type: 'plugin', explicit_id: true },
+      //   ],
+      //   edges: [
+      //     { id: '1', type: 'plain', from: 'I1', to: 'my-queue' },
+      //     { id: '2', type: 'plain', from: 'my-queue', to: 'IF1' },
+      //     { id: '3', type: 'boolean', when: true, from: 'IF1', to: 'IF2' },
+      //     { id: '4', type: 'boolean', when: false, from: 'IF1', to: 'F1' },
+      //     { id: '5', type: 'boolean', when: true, from: 'IF2', to: 'F2' },
+      //     { id: '6', type: 'boolean', when: false, from: 'IF2', to: 'F3' },
+      //     { id: '7', type: 'plain', from: 'F2', to: 'F5' },
+      //     { id: '8', type: 'plain', from: 'F3', to: 'F5' },
+      //     { id: '9', type: 'plain', from: 'F1', to: 'F4' },
+      //     { id: '10', type: 'plain', from: 'F4', to: 'F5' },
+      //   ],
+      // };
+      // beforeEach(() => {
+      //   graph = new Graph();
+      //   graph.update(complexGraphJson);
+      // });
     });
   });
 

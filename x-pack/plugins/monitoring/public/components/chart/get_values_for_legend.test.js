@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { findIndexByX, getValuesByX, getValuesForSeriesIndex } from '../get_values_for_legend';
+import { findIndexByX, getValuesByX, getValuesForSeriesIndex } from './get_values_for_legend';
 
 describe('monitoringChartHelpers', function () {
   it('getValuesForSeriesIndex sets does not impact callback without series', () => {

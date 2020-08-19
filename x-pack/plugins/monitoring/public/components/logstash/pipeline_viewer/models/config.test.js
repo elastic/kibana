@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { Config } from '../config';
-import { Graph } from '../graph';
+import { Config } from './config';
+import { Graph } from './graph';
 
 describe('Config class', () => {
   let configJson;
