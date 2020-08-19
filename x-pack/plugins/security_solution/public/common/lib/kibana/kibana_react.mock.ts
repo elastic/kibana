@@ -7,10 +7,11 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
+
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
-
 import {
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -27,7 +28,6 @@ import {
   DEFAULT_BYTES_FORMAT,
   DEFAULT_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 
@@ -71,7 +71,7 @@ export const createUseUiSetting$Mock = () => {
 };
 
 export const createStartServicesMock = (): StartServices => {
-  const core = createKibanaCoreStartMock();
+  const core = coreMock.createStart();
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();

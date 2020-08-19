@@ -7,13 +7,13 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux
