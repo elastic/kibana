@@ -274,6 +274,7 @@ export const SeverityField = ({
 
                         <EuiFlexItem>
                           <AutocompleteFieldMatchComponent
+                            rowLabel={undefined}
                             placeholder={''}
                             selectedField={getIFieldTypeFromFieldName(
                               severityMappingItem.field,

@@ -263,4 +263,28 @@ describe('When the edit exception modal is opened', () => {
       ).toBeDisabled();
     });
   });
+
+  describe('when there are exception builder errors', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <EditExceptionModal
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'endpoint'}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </ThemeProvider>
+      );
+      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      act(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
+    });
+    it('has the add exception button disabled', () => {
+      expect(
+        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
+      ).toBeDisabled();
+    });
+  });
 });

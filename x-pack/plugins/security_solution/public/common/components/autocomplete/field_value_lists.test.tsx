@@ -48,6 +48,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue="some-list-id"
@@ -70,6 +71,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('@tags')}
           selectedValue=""
@@ -98,6 +100,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue=""
@@ -119,6 +122,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('@tags')}
           selectedValue=""
@@ -143,6 +147,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue=""
@@ -167,6 +172,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue="some-list-id"
@@ -191,6 +197,7 @@ describe('AutocompleteFieldListsComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
+          rowLabel={undefined}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue=""

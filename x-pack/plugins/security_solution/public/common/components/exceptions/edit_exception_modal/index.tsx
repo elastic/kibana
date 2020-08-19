@@ -91,6 +91,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const [errorsExist, setErrorExists] = useState(false);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
@@ -155,17 +156,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [shouldDisableBulkClose]);
 
   const isSubmitButtonDisabled = useMemo(
-    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
-    [exceptionItemsToAdd, hasVersionConflict]
+    () =>
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      hasVersionConflict ||
+      errorsExist,
+    [exceptionItemsToAdd, hasVersionConflict, errorsExist]
   );
 
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
