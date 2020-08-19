@@ -29,6 +29,7 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { ActionTimeline, TimelineById } from './types';
+import { State, MiddlewareDependencies } from '../../../common/store';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 
@@ -137,7 +138,12 @@ export const epicPersistPinnedEvent = (
     )
   );
 
-export const createTimelinePinnedEventEpic = <State>(): Epic<Action, Action, State> => (action$) =>
+export const createTimelinePinnedEventEpic = (): Epic<
+  Action,
+  Action,
+  State,
+  MiddlewareDependencies
+> => (action$) =>
   action$.pipe(
     filter((action) => timelinePinnedEventActionsType.includes(action.type)),
     mergeMap((action) => {

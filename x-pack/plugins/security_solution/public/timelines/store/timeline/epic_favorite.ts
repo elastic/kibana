@@ -27,6 +27,7 @@ import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { inputsModel } from '../../../common/store/inputs';
+import { State, MiddlewareDependencies } from '../../../common/store';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
@@ -104,7 +105,12 @@ export const epicPersistTimelineFavorite = (
     )
   );
 
-export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => (action$) => {
+export const createTimelineFavoriteEpic = (): Epic<
+  Action,
+  Action,
+  State,
+  MiddlewareDependencies
+> => (action$) => {
   return action$.pipe(
     filter((action) => timelineFavoriteActionsType.includes(action.type)),
     mergeMap((action) => {

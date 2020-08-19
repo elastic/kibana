@@ -15,7 +15,7 @@ import {
   PreloadedState,
 } from 'redux';
 
-import { createEpicMiddleware } from 'redux-observable';
+import { createEpicMiddleware, Epic } from 'redux-observable';
 import { Observable } from 'rxjs';
 
 import { telemetryMiddleware } from '../lib/telemetry';
@@ -27,7 +27,7 @@ import { createRootEpic } from './epic';
 import { AppApolloClient } from '../lib/lib';
 import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
-import { State } from './types';
+import { State, MiddlewareDependencies } from './types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
 
@@ -56,7 +56,7 @@ export const createStore = (
 ): Store<State, Action> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  const middlewareDependencies = {
+  const middlewareDependencies: MiddlewareDependencies = {
     apolloClient$: apolloClient,
     kibana$: kibana,
     selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
@@ -66,11 +66,9 @@ export const createStore = (
     storage,
   };
 
-  const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
-    {
-      dependencies: middlewareDependencies,
-    }
-  );
+  const epicMiddleware = createEpicMiddleware<Action, Action, State, MiddlewareDependencies>({
+    dependencies: middlewareDependencies,
+  });
 
   store = createReduxStore(
     createReducer(pluginsReducer),
@@ -80,7 +78,9 @@ export const createStore = (
     )
   );
 
-  epicMiddleware.run(createRootEpic<State>());
+  const rootEpic: Epic<Action, Action, State, MiddlewareDependencies> = createRootEpic();
+
+  epicMiddleware.run(rootEpic);
 
   return store;
 };

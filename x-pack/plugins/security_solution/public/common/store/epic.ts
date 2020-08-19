@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineEpics } from 'redux-observable';
+import { combineEpics, Epic } from 'redux-observable';
+import { Action } from 'redux';
 import { createTimelineEpic } from '../../timelines/store/timeline/epic';
 import { createTimelineFavoriteEpic } from '../../timelines/store/timeline/epic_favorite';
 import { createTimelineNoteEpic } from '../../timelines/store/timeline/epic_note';
 import { createTimelinePinnedEventEpic } from '../../timelines/store/timeline/epic_pinned_event';
 import { createTimelineLocalStorageEpic } from '../../timelines/store/timeline/epic_local_storage';
+import { MiddlewareDependencies, State } from './types';
 
-export const createRootEpic = <State>() =>
+export const createRootEpic: () => Epic<Action, Action, State, MiddlewareDependencies> = () =>
   combineEpics(
-    createTimelineEpic<State>(),
-    createTimelineFavoriteEpic<State>(),
-    createTimelineNoteEpic<State>(),
-    createTimelinePinnedEventEpic<State>(),
-    createTimelineLocalStorageEpic<State>()
+    createTimelineEpic(),
+    createTimelineFavoriteEpic(),
+    createTimelineNoteEpic(),
+    createTimelinePinnedEventEpic(),
+    createTimelineLocalStorageEpic()
   );

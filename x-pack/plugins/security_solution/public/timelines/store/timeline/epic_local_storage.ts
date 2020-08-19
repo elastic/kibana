@@ -21,8 +21,8 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import { TimelineEpicDependencies } from './types';
 import { isNotNull } from './helpers';
+import { MiddlewareDependencies, State } from '../../../common/store';
 
 const timelineActionTypes = [
   removeColumn.type,
@@ -38,11 +38,11 @@ export const isPageTimeline = (timelineId: string | undefined): boolean =>
   // Is not a flyout timeline
   !(timelineId && timelineId.toLowerCase().startsWith('timeline'));
 
-export const createTimelineLocalStorageEpic = <State>(): Epic<
+export const createTimelineLocalStorageEpic = (): Epic<
   Action,
   Action,
   State,
-  TimelineEpicDependencies<State>
+  MiddlewareDependencies
 > => (action$, state$, { timelineByIdSelector, storage }) => {
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
   return action$.pipe(

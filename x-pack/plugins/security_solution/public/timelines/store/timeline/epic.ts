@@ -85,7 +85,8 @@ import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { ActionTimeline, TimelineEpicDependencies } from './types';
+import { ActionTimeline } from './types';
+import { MiddlewareDependencies, State } from '../../../common/store/types';
 
 const timelineActionsType = [
   applyKqlFilterQuery.type,
@@ -115,12 +116,7 @@ const timelineActionsType = [
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');
 
-export const createTimelineEpic = <State>(): Epic<
-  Action,
-  Action,
-  State,
-  TimelineEpicDependencies<State>
-> => (
+export const createTimelineEpic = (): Epic<Action, Action, State, MiddlewareDependencies> => (
   action$,
   state$,
   {

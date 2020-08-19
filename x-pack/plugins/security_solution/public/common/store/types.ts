@@ -6,6 +6,8 @@
 
 import { Dispatch, Action, Middleware, CombinedState } from 'redux';
 
+import { Observable } from 'rxjs';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { StartPlugins } from '../../types';
 import { AppAction } from './actions';
@@ -17,6 +19,10 @@ import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
 import { ManagementPluginState } from '../../management';
+import { AppApolloClient } from '../lib/lib';
+import { TimeRange, GlobalQuery } from './inputs/model';
+import { NotesById } from './app/model';
+import { TimelineById } from '../../timelines/store/timeline/types';
 
 export type StoreState = HostsPluginState &
   NetworkPluginState &
@@ -44,6 +50,19 @@ export interface KueryFilterQuery {
 export interface SerializedFilterQuery {
   kuery: KueryFilterQuery | null;
   serializedQuery: string;
+}
+
+/**
+ * Dependencies available to Security Solution App Epics defined with redux-observable.
+ */
+export interface MiddlewareDependencies {
+  apolloClient$: Observable<AppApolloClient>;
+  kibana$: Observable<CoreStart>;
+  selectAllTimelineQuery: () => (state: State, id: string) => GlobalQuery;
+  selectNotesByIdSelector: (state: State) => NotesById;
+  timelineByIdSelector: (state: State) => TimelineById;
+  timelineTimeRangeSelector: (state: State) => TimeRange;
+  storage: Storage;
 }
 
 /**

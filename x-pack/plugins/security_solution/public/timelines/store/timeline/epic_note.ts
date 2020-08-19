@@ -30,6 +30,7 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { ActionTimeline, TimelineById } from './types';
+import { State, MiddlewareDependencies } from '../../../common/store';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 
@@ -131,7 +132,9 @@ export const epicPersistNote = (
     )
   );
 
-export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => (action$) =>
+export const createTimelineNoteEpic = (): Epic<Action, Action, State, MiddlewareDependencies> => (
+  action$
+) =>
   action$.pipe(
     filter((action) => timelineNoteActionsType.includes(action.type)),
     switchMap((action) => {
