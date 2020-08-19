@@ -5673,7 +5673,6 @@
     "xpack.canvas.functions.joinRows.args.separatorHelpText": "用于分隔行值的分隔符",
     "xpack.canvas.functions.joinRows.columnNotFoundErrorMessage": "找不到列：“{column}”",
     "xpack.canvas.functions.joinRowsHelpText": "将数据库中的行的值联接成字符串",
-    "xpack.canvas.functions.locationHelpText": "使用浏览器的 {geolocationAPI} 查找您的当前位置。性能可能会因浏览器而异，但相当准确。请参见 {url}。",
     "xpack.canvas.functions.lt.args.valueHelpText": "与 {CONTEXT} 比较的值。",
     "xpack.canvas.functions.lte.args.valueHelpText": "与 {CONTEXT} 比较的值。",
     "xpack.canvas.functions.lteHelpText": "返回 {CONTEXT} 是否小于或等于参数。",

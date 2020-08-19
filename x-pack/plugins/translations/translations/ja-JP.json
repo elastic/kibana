@@ -5671,7 +5671,6 @@
     "xpack.canvas.functions.joinRows.args.separatorHelpText": "行の値の間で使用する区切り文字",
     "xpack.canvas.functions.joinRows.columnNotFoundErrorMessage": "列が見つかりません。'{column}'",
     "xpack.canvas.functions.joinRowsHelpText": "データベースの行の値を文字列に結合",
-    "xpack.canvas.functions.locationHelpText": "ブラウザの {geolocationAPI} を使用して現在位置を取得します。パフォーマンスに違いはありますが、比較的正確です。{url} を参照。",
     "xpack.canvas.functions.lt.args.valueHelpText": "{CONTEXT} と比較される値です。",
     "xpack.canvas.functions.lte.args.valueHelpText": "{CONTEXT} と比較される値です。",
     "xpack.canvas.functions.lteHelpText": "{CONTEXT} が引数以下かを戻します。",
