@@ -15,24 +15,59 @@ interface Props {
   fitToBounds: () => void;
 }
 
-export const FitToData: React.FunctionComponent<Props> = ({ layerList, fitToBounds }: Props) => {
-  if (layerList.length === 0) {
-    return null;
+interface State {
+  canFit: boolean;
+}
+
+export class FitToData extends React.Component<State, Props> {
+  _isMounted: boolean = false;
+
+  state = { canFit: false };
+
+  componentDidMount(): void {
+    this._isMounted = true;
+    this._loadCanFit();
   }
 
-  return (
-    <EuiButtonIcon
-      className="mapToolbarOverlay__button"
-      onClick={fitToBounds}
-      data-test-subj="fitToData"
-      iconType="expand"
-      color="text"
-      aria-label={i18n.translate('xpack.maps.fitToData.fitButtonLabel', {
-        defaultMessage: 'Fit to data bounds',
-      })}
-      title={i18n.translate('xpack.maps.fitToData.fitAriaLabel', {
-        defaultMessage: 'Fit to data bounds',
-      })}
-    />
-  );
-};
+  componentWillUnmount(): void {
+    this._isMounted = false;
+  }
+
+  componentDidUpdate(prevProps: Readonly<State>, prevState: Readonly<Props>, snapshot?: any): void {
+    this._loadCanFit();
+  }
+
+  async _loadCanFit() {
+    const fittableLayersPromise = this.props.layerList.map((layer) => layer.isFittable());
+    const isFittables = (await Promise.all(fittableLayersPromise)).filter((l) => l === true);
+
+    const canFit = !!isFittables.length;
+    if (this._isMounted && this.state.canFit !== canFit) {
+      this.setState({
+        canFit,
+      });
+    }
+  }
+
+  render() {
+    if (!this.state.canFit) {
+      return null;
+    }
+
+    return (
+      <EuiButtonIcon
+        className="mapToolbarOverlay__button"
+        onClick={this.props.fitToBounds}
+        data-test-subj="fitToData"
+        iconType="expand"
+        color="text"
+        aria-label={i18n.translate('xpack.maps.fitToData.fitButtonLabel', {
+          defaultMessage: 'Fit to data bounds',
+        })}
+        title={i18n.translate('xpack.maps.fitToData.fitAriaLabel', {
+          defaultMessage: 'Fit to data bounds',
+        })}
+      />
+    );
+  }
+}

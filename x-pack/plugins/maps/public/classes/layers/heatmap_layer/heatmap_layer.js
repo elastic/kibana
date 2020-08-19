@@ -106,4 +106,8 @@ export class HeatmapLayer extends VectorLayer {
     const metricFields = this.getSource().getMetricFields();
     return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
   }
+
+  async isFittable() {
+    return true;
+  }
 }

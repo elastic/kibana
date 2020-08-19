@@ -90,6 +90,7 @@ export interface ILayer {
   supportsLabelsOnTop: () => boolean;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
+  isFittable(): Promise<boolean>;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -534,6 +535,10 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
+    return false;
+  }
+
+  async isFittable(): boolean {
     return false;
   }
 }
