@@ -23,7 +23,7 @@ jest.mock('../../lib/proxy_request', () => ({
 
 import { duration } from 'moment';
 import { ProxyConfigCollection } from '../../lib';
-import { CreateHandlerDependencies } from '../../routes/api/console/proxy/create_handler';
+import { ProxyHandlerDependencies } from '../../routes/api/console/proxy/create_handler';
 import { coreMock } from '../../../../../core/server/mocks';
 
 export const getProxyRouteHandlerDeps = ({
@@ -36,7 +36,7 @@ export const getProxyRouteHandlerDeps = ({
     hosts: ['http://localhost:9200'],
   }),
   log = coreMock.createPluginInitializerContext().logger.get(),
-}: Partial<CreateHandlerDependencies>): CreateHandlerDependencies => ({
+}: Partial<ProxyHandlerDependencies>): ProxyHandlerDependencies => ({
   proxyConfigCollection,
   pathFilters,
   readLegacyESConfig,

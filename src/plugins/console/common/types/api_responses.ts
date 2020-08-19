@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import { routeValidationConfig } from './validation_config';
-import { createHandler } from './create_handler';
-
-import { RouteDependencies } from '../../../';
-
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  deps.router.post(
-    {
-      path: '/api/console/proxy',
-      options: {
-        tags: ['access:console'],
-        body: {
-          output: 'stream',
-          parse: false,
-        },
-      },
-      validate: routeValidationConfig,
-    },
-    createHandler(deps)
-  );
-};
+export interface EsConfigApiResponse {
+  /**
+   * This is the first host in the hosts array that Kibana is configured to use
+   * to communicate with ES.
+   *
+   * At the moment this is used to power the copy as cURL functionality in Console
+   * to complete the host portion of the URL.
+   */
+  host?: string;
+}
