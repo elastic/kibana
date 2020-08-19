@@ -19,7 +19,7 @@
 
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
-  canvas: 'x-pack/plugins/canvas/scripts/storybook_new.js',
+  canvas: 'x-pack/plugins/canvas/storybook',
   codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
