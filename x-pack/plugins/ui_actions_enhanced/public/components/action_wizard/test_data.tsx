@@ -220,7 +220,9 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
 
     setState({
       currentActionFactory: newActionFactory,
-      config: newActionFactory.createConfig(),
+      config: newActionFactory.createConfig({
+        triggers: state.selectedTriggers ?? [],
+      }),
     });
   }
 
@@ -255,7 +257,11 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
       <div>Action Factory Config: {JSON.stringify(state.config)}</div>
       <div>
         Is config valid:{' '}
-        {JSON.stringify(state.currentActionFactory?.isConfigValid(state.config!) ?? false)}
+        {JSON.stringify(
+          state.currentActionFactory?.isConfigValid(state.config!, {
+            triggers: state.selectedTriggers ?? [],
+          }) ?? false
+        )}
       </div>
       <div>Picked trigger: {state.selectedTriggers?.[0]}</div>
     </>
