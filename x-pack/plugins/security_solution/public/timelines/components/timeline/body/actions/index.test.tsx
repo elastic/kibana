@@ -9,10 +9,7 @@ import { useSelector } from 'react-redux';
 
 import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
-import * as i18n from '../translations';
-
 import { Actions } from '.';
-import { TimelineType } from '../../../../../../common/types/timeline';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
