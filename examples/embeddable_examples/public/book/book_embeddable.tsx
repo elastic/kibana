@@ -26,6 +26,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  Container,
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
@@ -103,7 +104,12 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   };
 
   getInputAsValueType = async (): Promise<BookByValueInput> => {
-    return this.attributeService.getInputAsValueType(this.input);
+    const input =
+      this.getRoot() && (this.getRoot() as Container).getInput().panels[this.id].explicitInput
+        ? ((this.getRoot() as Container).getInput().panels[this.id]
+            .explicitInput as BookEmbeddableInput)
+        : this.input;
+    return this.attributeService.getInputAsValueType(input);
   };
 
   getInputAsRefType = async (): Promise<BookByReferenceInput> => {

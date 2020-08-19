@@ -8,10 +8,10 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
+import { useKibana } from '../../../shared_imports';
 
 export const OnFailureProcessorsTitle: FunctionComponent = () => {
-  const { links } = usePipelineProcessorsContext();
+  const { services } = useKibana();
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -35,7 +35,10 @@ export const OnFailureProcessorsTitle: FunctionComponent = () => {
             values={{
               learnMoreLink: (
                 <EuiLink
-                  href={links.esDocsBasePath + '/handling-failure-in-pipelines.html'}
+                  href={
+                    services.documentation.getEsDocsBasePath() +
+                    '/handling-failure-in-pipelines.html'
+                  }
                   target="_blank"
                 >
                   {i18n.translate(

@@ -17,10 +17,15 @@
  * under the License.
  */
 
+import { readFileSync } from 'fs';
+import Path from 'path';
+
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAbsolutePathSerializer,
+  createRecursiveSerializer,
+  REPO_ROOT,
 } from '@kbn/dev-utils';
 
 import { Config } from '../../lib';
@@ -36,6 +41,14 @@ const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
+
+const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (s) => typeof s === 'string' && s.includes(nodeVersion),
+    (s) => s.split(nodeVersion).join('<node version>')
+  )
+);
 
 async function setup() {
   const config = await Config.create({
@@ -74,8 +87,8 @@ it('runs expected fs operations', async () => {
     Object {
       "copy": Array [
         Array [
-          <absolute path>/.node_binaries/10.21.0/node.exe,
-          <absolute path>/.node_binaries/10.21.0/win32-x64/node.exe,
+          <absolute path>/.node_binaries/<node version>/node.exe,
+          <absolute path>/.node_binaries/<node version>/win32-x64/node.exe,
           Object {
             "clone": true,
           },
@@ -83,22 +96,22 @@ it('runs expected fs operations', async () => {
       ],
       "untar": Array [
         Array [
-          <absolute path>/.node_binaries/10.21.0/node-v10.21.0-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/10.21.0/linux-x64,
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/linux-x64,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/10.21.0/node-v10.21.0-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/10.21.0/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/linux-arm64,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/10.21.0/node-v10.21.0-darwin-x64.tar.gz,
-          <absolute path>/.node_binaries/10.21.0/darwin-x64,
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-darwin-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/darwin-x64,
           Object {
             "strip": 1,
           },
