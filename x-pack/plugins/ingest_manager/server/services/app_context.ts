@@ -5,7 +5,13 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServiceSetup, Logger, KibanaRequest } from 'src/core/server';
+import {
+  SavedObjectsServiceStart,
+  HttpServiceSetup,
+  Logger,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -30,6 +36,8 @@ class AppContextService {
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
+
+  private internalSOClient?: SavedObjectsClientContract;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
@@ -96,10 +104,14 @@ class AppContextService {
   }
 
   public getInternalUserSOClient(request: KibanaRequest) {
-    // soClient as kibana internal users, be carefull on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedWrappers: ['security'],
-    });
+    if (!this.internalSOClient) {
+      // soClient as kibana internal users, be carefull on how you use it, security is not enabled
+      this.internalSOClient = appContextService.getSavedObjects().getScopedClient(request, {
+        excludedWrappers: ['security'],
+      });
+    }
+
+    return this.internalSOClient;
   }
 
   public getIsProductionMode() {
