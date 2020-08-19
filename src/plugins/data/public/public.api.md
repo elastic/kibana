@@ -603,7 +603,7 @@ export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T
 // Warning: (ae-missing-release-tag) "fieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void) => IIndexPatternFieldList;
+export const fieldList: (specs?: FieldSpec[], shortDotsEnable?: boolean) => IIndexPatternFieldList;
 
 // @public (undocumented)
 export interface FieldMappingSpec {
@@ -828,7 +828,9 @@ export interface IFieldType {
     // (undocumented)
     subType?: IFieldSubType;
     // (undocumented)
-    toSpec?: () => FieldSpec;
+    toSpec?: (options?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }) => FieldSpec;
     // (undocumented)
     type: string;
     // (undocumented)
@@ -879,7 +881,9 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     // (undocumented)
     replaceAll(specs: FieldSpec[]): void;
     // (undocumented)
-    toSpec(): FieldSpec[];
+    toSpec(options?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): FieldSpec[];
     // (undocumented)
     update(field: FieldSpec): void;
 }
@@ -1049,8 +1053,7 @@ export interface IndexPatternAttributes {
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
-    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    constructor(spec: FieldSpec, displayName: string, onNotification: OnNotification);
+    constructor(spec: FieldSpec, displayName: string);
     // (undocumented)
     get aggregatable(): boolean;
     // (undocumented)
@@ -1101,7 +1104,9 @@ export class IndexPatternField implements IFieldType {
         subType: import("../types").IFieldSubType | undefined;
     };
     // (undocumented)
-    toSpec(): {
+    toSpec({ getFormatterForField, }?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): {
         count: number;
         script: string | undefined;
         lang: string | undefined;
@@ -1114,6 +1119,10 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        format: {
+            id: any;
+            params: any;
+        } | undefined;
     };
     // (undocumented)
     get type(): string;

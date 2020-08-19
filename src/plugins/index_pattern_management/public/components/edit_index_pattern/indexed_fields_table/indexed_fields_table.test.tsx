@@ -48,8 +48,7 @@ const indexPattern = ({
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
   return new IndexPatternField(
     (spec as unknown) as IndexPatternField['spec'],
-    spec.displayName as string,
-    () => {}
+    spec.displayName as string
   );
 };
 
@@ -58,7 +57,7 @@ const fields = [
     name: 'Elastic',
     displayName: 'Elastic',
     searchable: true,
-    type: 'name',
+    type: 'string',
   },
   { name: 'timestamp', displayName: 'timestamp', type: 'date' },
   { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },

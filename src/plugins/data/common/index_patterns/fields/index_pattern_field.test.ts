@@ -19,7 +19,7 @@
 
 import { IndexPatternField } from './index_pattern_field';
 import { IndexPattern } from '../index_patterns';
-import { KBN_FIELD_TYPES } from '../../../common';
+import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
 import { FieldSpec } from '../types';
 
 describe('Field', function () {
@@ -145,6 +145,15 @@ describe('Field', function () {
 
   it('spec snapshot', () => {
     const field = new IndexPatternField(fieldValues, 'displayName');
-    expect(field.toSpec()).toMatchSnapshot();
+    const getFormatterForField = () =>
+      ({
+        toJSON: () => ({
+          id: 'number',
+          params: {
+            pattern: '$0,0.[00]',
+          },
+        }),
+      } as FieldFormat);
+    expect(field.toSpec({ getFormatterForField })).toMatchSnapshot();
   });
 });

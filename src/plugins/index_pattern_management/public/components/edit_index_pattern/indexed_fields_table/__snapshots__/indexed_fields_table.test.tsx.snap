@@ -18,7 +18,7 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
           "info": Array [],
           "name": "Elastic",
           "searchable": true,
-          "type": "name",
+          "type": "string",
         },
       ]
     }
@@ -69,7 +69,7 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "info": Array [],
           "name": "Elastic",
           "searchable": true,
-          "type": "name",
+          "type": "string",
         },
         Object {
           "displayName": "timestamp",

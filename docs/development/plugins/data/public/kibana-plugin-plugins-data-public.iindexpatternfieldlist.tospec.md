@@ -7,8 +7,17 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec(): FieldSpec[];
+toSpec(options?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): FieldSpec[];
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  options | <code>{</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }</code> |  |
+
 <b>Returns:</b>
 
 `FieldSpec[]`
