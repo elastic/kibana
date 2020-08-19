@@ -43,6 +43,8 @@ import { networkActions } from '../../../network/store';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 
+const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
+
 interface SiemSearchBarProps {
   id: InputsModelId;
   indexPattern: IIndexPattern;
@@ -81,6 +83,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         },
         ui: { SearchBar },
       },
+      storage,
     } = useKibana().services;
 
     useEffect(() => {
@@ -226,6 +229,15 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       }
     }, [savedQuery, updateSearch, id, toStr, end, fromStr, start, filterManager]);
 
+    const saveAppStateToStorage = useCallback(
+      (filters: Filter[]) => storage.set(APP_STATE_STORAGE_KEY, filters),
+      [storage]
+    );
+
+    const getAppStateFromStorage = useCallback(() => storage.get(APP_STATE_STORAGE_KEY) ?? [], [
+      storage,
+    ]);
+
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
@@ -234,6 +246,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
+              saveAppStateToStorage(filterManager.getAppFilters());
               setSearchBarFilter({
                 id,
                 filters: filterManager.getFilters(),
@@ -244,7 +257,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       );
 
       // for the initial state
-      setSearchBarFilter({ id, filters: filterManager.getFilters() });
+      filterManager.setAppFilters(getAppStateFromStorage());
 
       return () => {
         isSubscribed = false;
