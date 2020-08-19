@@ -209,7 +209,7 @@ describe('execute()', () => {
         rejectUnauthorizedCertificates: false,
       },
     });
-    expect(mockedLogger.info).toHaveBeenCalledWith(
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
     );
   });
