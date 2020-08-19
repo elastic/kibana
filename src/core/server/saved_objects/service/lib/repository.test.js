@@ -464,8 +464,16 @@ describe('SavedObjectsRepository', () => {
       { method, _index = expect.any(String), getId = () => expect.any(String) }
     ) => {
       const body = [];
-      for (const { type, id } of objects) {
-        body.push({ [method]: { _index, _id: getId(type, id) } });
+      for (const { type, id, if_primary_term: ifPrimaryTerm, if_seq_no: ifSeqNo } of objects) {
+        body.push({
+          [method]: {
+            _index,
+            _id: getId(type, id),
+            ...(ifPrimaryTerm && ifSeqNo
+              ? { if_primary_term: expect.any(Number), if_seq_no: expect.any(Number) }
+              : {}),
+          },
+        });
         body.push(expect.any(Object));
       }
       expect(client.bulk).toHaveBeenCalledWith(
@@ -523,6 +531,27 @@ describe('SavedObjectsRepository', () => {
       it(`should use the ES index method if ID is defined and overwrite=true`, async () => {
         await bulkCreateSuccess([obj1, obj2], { overwrite: true });
         expectClientCallArgsAction([obj1, obj2], { method: 'index' });
+      });
+
+      it(`should use the ES index method with version if ID and version are defined and overwrite=true`, async () => {
+        await bulkCreateSuccess(
+          [
+            {
+              ...obj1,
+              version: mockVersion,
+            },
+            obj2,
+          ],
+          { overwrite: true }
+        );
+
+        const obj1WithSeq = {
+          ...obj1,
+          if_seq_no: mockVersionProps._seq_no,
+          if_primary_term: mockVersionProps._primary_term,
+        };
+
+        expectClientCallArgsAction([obj1WithSeq, obj2], { method: 'index' });
       });
 
       it(`should use the ES create method if ID is defined and overwrite=false`, async () => {

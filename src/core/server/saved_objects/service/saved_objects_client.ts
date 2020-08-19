@@ -57,6 +57,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   id?: string;
   type: string;
   attributes: T;
+  version?: string;
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
