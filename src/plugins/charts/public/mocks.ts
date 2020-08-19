@@ -19,18 +19,18 @@
 
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
-import { colorsServiceMock } from './services/colors/mock';
+import { colorsServiceMock } from './services/legacyColors/mock';
 
 export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({
-  colors: colorsServiceMock,
+  legacyColors: colorsServiceMock,
   theme: themeServiceMock,
 });
 
 const createStartContract = (): Start => ({
-  colors: colorsServiceMock,
+  legacyColors: colorsServiceMock,
   theme: themeServiceMock,
 });
 

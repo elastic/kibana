@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { LegacyColorsService } from './legacyColors';
-export { ThemeService } from './theme';
+import { LegacyColorsService } from './colors';
+import { coreMock } from '../../../../../core/public/mocks';
+
+const colors = new LegacyColorsService();
+colors.init(coreMock.createSetup().uiSettings);
+
+export const colorsServiceMock: LegacyColorsService = {
+  createColorLookupFunction: jest.fn(colors.createColorLookupFunction.bind(colors)),
+} as any;

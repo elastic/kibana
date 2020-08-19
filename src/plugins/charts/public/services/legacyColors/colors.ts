@@ -30,7 +30,7 @@ import { seedColors } from '../../static/colors';
  * Returns a function that accepts a value (i.e. a string or number)
  * and returns a hex color associated with that value.
  */
-export class ColorsService {
+export class LegacyColorsService {
   private _mappedColors?: MappedColors;
 
   public readonly seedColors = seedColors;

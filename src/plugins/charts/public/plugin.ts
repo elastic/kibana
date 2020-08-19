@@ -19,14 +19,14 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 
-import { ThemeService, ColorsService } from './services';
+import { ThemeService, LegacyColorsService } from './services';
 
 export type Theme = Omit<ThemeService, 'init'>;
-export type Color = Omit<ColorsService, 'init'>;
+export type Color = Omit<LegacyColorsService, 'init'>;
 
 /** @public */
 export interface ChartsPluginSetup {
-  colors: Color;
+  legacyColors: Color;
   theme: Theme;
 }
 
@@ -36,21 +36,21 @@ export type ChartsPluginStart = ChartsPluginSetup;
 /** @public */
 export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart> {
   private readonly themeService = new ThemeService();
-  private readonly colorsService = new ColorsService();
+  private readonly legacyColorsService = new LegacyColorsService();
 
   public setup({ uiSettings }: CoreSetup): ChartsPluginSetup {
     this.themeService.init(uiSettings);
-    this.colorsService.init(uiSettings);
+    this.legacyColorsService.init(uiSettings);
 
     return {
-      colors: this.colorsService,
+      legacyColors: this.legacyColorsService,
       theme: this.themeService,
     };
   }
 
   public start(): ChartsPluginStart {
     return {
-      colors: this.colorsService,
+      legacyColors: this.legacyColorsService,
       theme: this.themeService,
     };
   }

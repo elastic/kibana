@@ -1,11 +1,23 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import { i18n } from '@kbn/i18n';
-import { Ast } from '@kbn/interpreter/common';
 import {
   euiPaletteColorBlind,
   euiPaletteCool,
@@ -13,23 +25,39 @@ import {
   euiPaletteNegative,
   euiPalettePositive,
   euiPaletteWarm,
+  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import { PaletteDefinition, SeriesLayer } from '../../types';
 import { PaletteSetupPlugins } from './service';
-import { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions';
 import { lightenColor } from './lighten_color';
+import { PaletteDefinition, SeriesLayer } from './types';
 
 function buildRoundRobinCategoricalWithMappedColors(
-  colorService: ChartsPluginSetup['colors'],
+  colorService: ChartsPluginSetup['legacyColors'],
   id: string,
-  colors: (n: number) => string[]
+  colors: (n: number) => string[],
+  behindTextColors?: (n: number) => string[]
 ) {
+  const colorCache: Partial<Record<string, string>> = {};
   function getColor(series: SeriesLayer[]) {
     const colorFromSettings = colorService.mappedColors.getColorFromConfig(series[0].name);
     const actualColors = colors(series[0].totalSeriesAtDepth);
-    const outputColor =
-      colorFromSettings || actualColors[series[0].rankAtDepth % actualColors.length];
+    const actualBehindTextColors =
+      behindTextColors && behindTextColors(series[0].totalSeriesAtDepth);
+    let outputColor =
+      colorFromSettings ||
+      colorCache[series[0].name] ||
+      actualColors[series[0].rankAtDepth % actualColors.length];
+
+    colorCache[series[0].name] = outputColor;
+
+    // translate the color to the behind text variant if possible
+    if (series[0].behindText && actualBehindTextColors) {
+      const colorIndex = actualColors.findIndex((color) => outputColor);
+      if (colorIndex !== -1) {
+        outputColor = actualBehindTextColors[colorIndex];
+      }
+    }
 
     if (series[0].maxDepth === 1) {
       return outputColor;
@@ -40,12 +68,12 @@ function buildRoundRobinCategoricalWithMappedColors(
   return {
     id,
     getColor,
-    ...buildStatelessExpressionIntegration(id, getColor),
+    getColors: colors,
     getPreview: () => ({ colors: colors(10) }),
   };
 }
 
-function buildSyncedKibanaPalette(colors: ChartsPluginSetup['colors']) {
+function buildSyncedKibanaPalette(colors: ChartsPluginSetup['legacyColors']) {
   function getColor(series: SeriesLayer[]) {
     colors.mappedColors.mapKeys([series[0].name]);
     const outputColor = colors.mappedColors.get(series[0].name);
@@ -55,79 +83,42 @@ function buildSyncedKibanaPalette(colors: ChartsPluginSetup['colors']) {
   return {
     id: 'kibana_palette',
     getColor,
-    ...buildStatelessExpressionIntegration('kibana_palette', getColor),
+    getColors: () => colors.seedColors.slice(0, 10),
     getPreview: () => ({ colors: colors.seedColors.slice(0, 10) }),
   };
 }
 
-export interface LensPalette {
-  getColor: PaletteDefinition['getColor'];
-}
-
-function buildStatelessExpressionIntegration(
-  id: string,
-  getColor: PaletteDefinition['getColor']
-): {
-  toExpression: () => Ast;
-  expressionFunctionDefinition: ExpressionFunctionDefinition<
-    string,
-    null,
-    {},
-    LensPalette & { type: 'lens_palette' }
-  >;
-} {
-  return {
-    toExpression: () => ({
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: `lens_palette_${id}`,
-          arguments: {},
-        },
-      ],
-    }),
-    expressionFunctionDefinition: {
-      name: `lens_palette_${id}`,
-      type: 'lens_palette',
-      help: i18n.translate('xpack.lens.functions.palette.help', {
-        defaultMessage: 'Create a color palette to be used in a lens visualization',
-      }),
-      args: {},
-      inputTypes: ['null'],
-      fn() {
-        return {
-          type: 'lens_palette',
-          getColor,
-        };
-      },
-    },
-  };
-}
-
-// These definitions will be rolled up into the implementation of the lens_palette expression function definition in the service
-type SerializableColorFunctionDefinition = PaletteDefinition & {
-  expressionFunctionDefinition: ExpressionFunctionDefinition<string, unknown, unknown, unknown>;
-};
-
 export const buildPalettes: (
   dependencies: PaletteSetupPlugins
-) => Record<string, SerializableColorFunctionDefinition> = ({ charts }) => {
-  const buildRoundRobinCategorical = (id: string, colors: (n: number) => string[]) => {
-    return buildRoundRobinCategoricalWithMappedColors(charts.colors, id, colors);
+) => Record<string, PaletteDefinition> = ({ charts }) => {
+  const buildRoundRobinCategorical = (
+    id: string,
+    colors: (n: number) => string[],
+    behindTextColors?: (n: number) => string[]
+  ) => {
+    return buildRoundRobinCategoricalWithMappedColors(
+      charts.legacyColors,
+      id,
+      colors,
+      behindTextColors
+    );
   };
   return {
     default: {
       title: i18n.translate('xpack.lens.palettes.defaultPaletteLabel', {
         defaultMessage: 'default',
       }),
-      ...buildRoundRobinCategorical('default', () => euiPaletteColorBlind()),
+      ...buildRoundRobinCategorical(
+        'default',
+        () => euiPaletteColorBlind(),
+        () => euiPaletteColorBlindBehindText()
+      ),
     },
     kibana_palette: {
       title: i18n.translate('xpack.lens.palettes.kibanaPaletteLabel', {
         defaultMessage: 'legacy',
       }),
-      ...buildSyncedKibanaPalette(charts.colors),
+      ...buildSyncedKibanaPalette(charts.legacyColors),
     },
     negative: {
       title: i18n.translate('xpack.lens.palettes.negativeLabel', { defaultMessage: 'negative' }),

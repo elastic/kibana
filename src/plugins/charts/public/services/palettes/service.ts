@@ -17,4 +17,22 @@
  * under the License.
  */
 
-export { ColorsService } from './colors';
+import { CoreSetup } from 'kibana/public';
+import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
+import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
+import { buildPalettes } from './palettes';
+
+export interface PaletteSetupPlugins {
+  expressions: ExpressionsSetup;
+  charts: ChartsPluginSetup;
+}
+
+export class PaletteService {
+  constructor() {}
+
+  public setup(core: CoreSetup, plugins: PaletteSetupPlugins) {
+    const palettes = buildPalettes(plugins);
+
+    return { palettes };
+  }
+}
