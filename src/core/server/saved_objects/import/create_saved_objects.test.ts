@@ -238,6 +238,14 @@ describe('#createSavedObjects', () => {
     });
   });
 
+  it('filters out version from objects before create', async () => {
+    const options = setupParams({ objects: [{ ...obj1, version: 'foo' }] });
+    bulkCreate.mockResolvedValue({ saved_objects: [getResultMock.success(obj1, options)] });
+
+    await createSavedObjects(options);
+    expectBulkCreateArgs.objects(1, [obj1]);
+  });
+
   const testBulkCreateObjects = async (namespace?: string) => {
     const options = setupParams({ objects: objs, namespace });
     setupMockResults(options);

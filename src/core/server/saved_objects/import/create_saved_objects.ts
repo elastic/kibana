@@ -64,7 +64,8 @@ export const createSavedObjects = async <T>({
     new Map<string, SavedObject<T>>()
   );
 
-  const objectsToCreate = filteredObjects.map((object) => {
+  // filter out the 'version' field of each object, if it exists
+  const objectsToCreate = filteredObjects.map(({ version, ...object }) => {
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
       const { type, id } = reference;

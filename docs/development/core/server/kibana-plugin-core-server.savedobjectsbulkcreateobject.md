@@ -21,4 +21,5 @@ export interface SavedObjectsBulkCreateObject<T = unknown>
 |  [originId](./kibana-plugin-core-server.savedobjectsbulkcreateobject.originid.md) | <code>string</code> | Optional ID of the original saved object, if this object's <code>id</code> was regenerated |
 |  [references](./kibana-plugin-core-server.savedobjectsbulkcreateobject.references.md) | <code>SavedObjectReference[]</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsbulkcreateobject.type.md) | <code>string</code> |  |
+|  [version](./kibana-plugin-core-server.savedobjectsbulkcreateobject.version.md) | <code>string</code> |  |
 
