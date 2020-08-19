@@ -22,6 +22,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/alerting_api_integration/basic/config.ts'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
+  require.resolve('../test/case_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/trial/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
@@ -57,7 +58,8 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.public.ts'),
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
-  require.resolve('../test/reporting_api_integration/config.js'),
+  require.resolve('../test/reporting_api_integration/reporting_and_security.config.ts'),
+  require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
 ];
