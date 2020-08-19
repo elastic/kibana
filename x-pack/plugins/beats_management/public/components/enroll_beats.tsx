@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { upperFirst } from 'lodash';
 import React from 'react';
-import { CMBeat } from '../../../../legacy/plugins/beats_management/common/domain_types';
+import { CMBeat } from '../../common/domain_types';
 
 interface ComponentProps {
   /** Such as kibanas basePath, for use to generate command */
