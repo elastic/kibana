@@ -12,36 +12,24 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
   const log = getService('log');
-  const config = getService('config');
   const retry = getService('retry');
 
   describe('Event Log service API', () => {
     it('should check if it is enabled', async () => {
-      const configValue = config
-        .get('kbnTestServer.serverArgs')
-        .find((val: string) => val === '--xpack.eventLog.enabled=true');
       const result = await isEventLogServiceEnabled();
-      expect(configValue).to.be.eql(`--xpack.eventLog.enabled=${result.body.isEnabled}`);
+      expect(result.body.isEnabled).to.be(true);
     });
 
     it('should check if logging entries is enabled', async () => {
-      const configValue = config
-        .get('kbnTestServer.serverArgs')
-        .find((val: string) => val === '--xpack.eventLog.logEntries=true');
       const result = await isEventLogServiceLoggingEntries();
-      expect(configValue).to.be.eql(`--xpack.eventLog.logEntries=${result.body.isLoggingEntries}`);
+      expect(result.body.isEnabled).to.be(true);
     });
 
     it('should check if indexing entries is enabled', async () => {
-      const configValue = config
-        .get('kbnTestServer.serverArgs')
-        .find((val: string) => val === '--xpack.eventLog.indexEntries=true');
       const result = await isIndexingEntries();
       const exists = await es.indices.exists({ index: '.kibana-event-log-*' });
       expect(exists).to.be.eql(true);
-      expect(configValue).to.be.eql(
-        `--xpack.eventLog.indexEntries=${result.body.isIndexingEntries}`
-      );
+      expect(result.body.isEnabled).to.be(true);
     });
 
     it('should be able to check if provider actions is registered', async () => {

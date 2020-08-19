@@ -41,7 +41,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
         // '--xpack.eventLog.logEntries=true', // uncomment to see events logged to console
-        '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.event_log_enabled=true',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
