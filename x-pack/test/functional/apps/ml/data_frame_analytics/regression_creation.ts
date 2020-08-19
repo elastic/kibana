@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // failing test due to backend issue, see #75095
-  describe.skip('regression creation', function () {
+  describe('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');

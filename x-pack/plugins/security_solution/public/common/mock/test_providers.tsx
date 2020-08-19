@@ -74,23 +74,6 @@ const TestProvidersComponent: React.FC<Props> = ({
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
-  children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  ),
-}) => (
-  <I18nProvider>
-    <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
-  </I18nProvider>
-);
-
-export const TestProviderWithoutDragAndDrop = React.memo(TestProviderWithoutDragAndDropComponent);
-
 export const useFormFieldMock = (options?: Partial<FieldHook>): FieldHook => {
   const { form } = useForm();
 

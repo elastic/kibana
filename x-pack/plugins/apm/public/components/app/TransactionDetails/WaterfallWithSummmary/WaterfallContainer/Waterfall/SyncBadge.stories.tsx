@@ -4,31 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { boolean, withKnobs } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { SyncBadge } from './SyncBadge';
 
 storiesOf('app/TransactionDetails/SyncBadge', module)
+  .addDecorator(withKnobs)
   .add(
-    'sync=true',
+    'example',
     () => {
-      return <SyncBadge sync={true} />;
+      return <SyncBadge sync={boolean('sync', true)} />;
     },
     {
-      info: {
-        source: false,
-      },
-    }
-  )
-  .add(
-    'sync=false',
-    () => {
-      return <SyncBadge sync={false} />;
-    },
-    {
-      info: {
-        source: false,
-      },
+      showPanel: true,
+      info: { source: false },
     }
   )
   .add(
@@ -36,9 +26,5 @@ storiesOf('app/TransactionDetails/SyncBadge', module)
     () => {
       return <SyncBadge />;
     },
-    {
-      info: {
-        source: false,
-      },
-    }
+    { info: { source: false } }
   );

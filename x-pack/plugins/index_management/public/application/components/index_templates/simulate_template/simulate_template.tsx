@@ -5,7 +5,8 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import uuid from 'uuid';
-import { EuiCodeBlock } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
 import { serializers } from '../../../../shared_imports';
 import { TemplateDeserialized } from '../../../../../common';
@@ -14,12 +15,18 @@ import { simulateIndexTemplate } from '../../../services';
 
 const { stripEmptyFields } = serializers;
 
-interface Props {
-  template: { [key: string]: any };
-  minHeightCodeBlock?: string;
+export interface Filters {
+  mappings: boolean;
+  settings: boolean;
+  aliases: boolean;
 }
 
-export const SimulateTemplate = React.memo(({ template, minHeightCodeBlock }: Props) => {
+interface Props {
+  template: { [key: string]: any };
+  filters?: Filters;
+}
+
+export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
   const [templatePreview, setTemplatePreview] = useState('{}');
 
   const updatePreview = useCallback(async () => {
@@ -34,26 +41,60 @@ export const SimulateTemplate = React.memo(({ template, minHeightCodeBlock }: Pr
     indexTemplate.index_patterns = [uuid.v4()];
 
     const { data, error } = await simulateIndexTemplate(indexTemplate);
+    let filteredTemplate = data;
 
     if (data) {
       // "Overlapping" info is only useful when simulating against an index
       // which we don't do here.
       delete data.overlapping;
+
+      if (data.template && data.template.mappings === undefined) {
+        // Adding some extra logic to return an empty object for "mappings" as ES does not
+        // return one in that case (empty objects _are_ returned for "settings" and "aliases")
+        // Issue: https://github.com/elastic/elasticsearch/issues/60968
+        data.template.mappings = {};
+      }
+
+      if (filters) {
+        filteredTemplate = Object.entries(filters).reduce(
+          (acc, [key, value]) => {
+            if (!value) {
+              delete acc[key];
+            }
+            return acc;
+          },
+          { ...data.template } as any
+        );
+      }
     }
 
-    setTemplatePreview(JSON.stringify(data ?? error, null, 2));
-  }, [template]);
+    setTemplatePreview(JSON.stringify(filteredTemplate ?? error, null, 2));
+  }, [template, filters]);
 
   useEffect(() => {
     updatePreview();
   }, [updatePreview]);
 
-  return templatePreview === '{}' ? null : (
-    <EuiCodeBlock
-      style={{ minHeight: minHeightCodeBlock }}
-      lang="json"
-      data-test-subj="simulateTemplatePreview"
-    >
+  const isEmpty = templatePreview === '{}';
+  const hasFilters = Boolean(filters);
+
+  if (isEmpty && hasFilters) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.simulateTemplate.noFilterSelected"
+            defaultMessage="Select at least one option to preview."
+          />
+        }
+        iconType="pin"
+        size="s"
+      />
+    );
+  }
+
+  return isEmpty ? null : (
+    <EuiCodeBlock lang="json" data-test-subj="simulateTemplatePreview">
       {templatePreview}
     </EuiCodeBlock>
   );
