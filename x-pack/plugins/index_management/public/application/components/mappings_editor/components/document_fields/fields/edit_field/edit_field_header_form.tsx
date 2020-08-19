@@ -36,15 +36,18 @@ export const EditFieldHeaderForm = React.memo(
 
           {/* Field subType (if any) */}
           <FormDataProvider pathsToWatch="type">
-            {({ type }) => (
-              <SubTypeParameter
-                key={type}
-                type={type}
-                defaultValueType={defaultValue.type}
-                isMultiField={isMultiField}
-                isRootLevelField={isRootLevelField}
-              />
-            )}
+            {({ type }) => {
+              const [fieldType] = type;
+              return (
+                <SubTypeParameter
+                  key={fieldType.value}
+                  type={fieldType.value}
+                  defaultValueType={defaultValue.type}
+                  isMultiField={isMultiField}
+                  isRootLevelField={isRootLevelField}
+                />
+              );
+            }}
           </FormDataProvider>
         </EuiFlexGroup>
 
@@ -52,7 +55,7 @@ export const EditFieldHeaderForm = React.memo(
         <FieldDescriptionSection isMultiField={isMultiField}>
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {
-              const typeDefinition = TYPE_DEFINITION[type as MainType];
+              const typeDefinition = TYPE_DEFINITION[type[0].value as MainType];
               const hasSubType = typeDefinition.subTypes !== undefined;
 
               if (hasSubType) {
