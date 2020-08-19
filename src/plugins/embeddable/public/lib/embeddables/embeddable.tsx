@@ -19,6 +19,7 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
@@ -80,6 +81,15 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
+
+    this.getOutput$()
+      .pipe(
+        map(({ title }) => title || ''),
+        distinctUntilChanged()
+      )
+      .subscribe((title) => {
+        this.renderComplete.setTitle(title);
+      });
   }
 
   public getIsContainer(): this is IContainer {
@@ -108,8 +118,8 @@ export abstract class Embeddable<
     return this.input;
   }
 
-  public getTitle() {
-    return this.output.title;
+  public getTitle(): string {
+    return this.output.title || '';
   }
 
   /**
@@ -138,8 +148,7 @@ export abstract class Embeddable<
 
   public render(el: HTMLElement): void {
     this.renderComplete.setEl(el);
-
-    el.setAttribute('data-title', this.output.title || '');
+    this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');

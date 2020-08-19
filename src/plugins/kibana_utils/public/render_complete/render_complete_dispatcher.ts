@@ -75,4 +75,9 @@ export class RenderCompleteDispatcher {
     this.el.setAttribute('data-render-complete', 'false');
     this.el.setAttribute('data-rendering-count', String(this.count));
   }
+
+  public setTitle(title: string) {
+    if (!this.el) return;
+    this.el.setAttribute('data-title', title);
+  }
 }

@@ -84,7 +84,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
-  private title?: string;
   private filters?: Filter[];
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -157,7 +156,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle() || this.title || '',
+      title: this.getTitle(),
     });
   };
 
@@ -219,16 +218,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     // but only when the visualization is in edit/Visualize mode
     if (!this.parent && this.vis.title !== this.output.title) {
       this.updateOutput({ title: this.vis.title });
-    }
-
-    // Keep title depending on the output Embeddable to decouple the
-    // visual appearance of the title and the actual title content (useful in Dashboard)
-    if (this.output.title !== this.title) {
-      this.title = this.output.title;
-
-      if (this.domNode) {
-        this.domNode.setAttribute('data-title', this.title || '');
-      }
     }
 
     if (this.vis.description && this.domNode) {
