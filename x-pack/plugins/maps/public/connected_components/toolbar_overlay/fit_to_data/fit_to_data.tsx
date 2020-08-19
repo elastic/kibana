@@ -33,7 +33,7 @@ export class FitToData extends React.Component<Props, State> {
     this._isMounted = false;
   }
 
-  componentDidUpdate(prevProps: Readonly<State>, prevState: Readonly<Props>, snapshot?: any): void {
+  componentDidUpdate(): void {
     this._loadCanFit();
   }
 
