@@ -4834,7 +4834,6 @@
     "xpack.apm.header.badge.readOnly.tooltip": "无法保存",
     "xpack.apm.helpMenu.upgradeAssistantLink": "升级助手",
     "xpack.apm.histogram.plot.noDataLabel": "此时间范围内没有数据。",
-    "xpack.apm.home.rumOverview.title": "真实用户监测",
     "xpack.apm.home.serviceMapTabLabel": "服务地图",
     "xpack.apm.home.servicesTabLabel": "服务",
     "xpack.apm.home.tracesTabLabel": "追溯",
