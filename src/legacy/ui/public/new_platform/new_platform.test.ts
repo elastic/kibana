@@ -66,6 +66,7 @@ describe('ui/new_platform', () => {
         element: expect.any(HTMLElement),
         appBasePath: '/test/base/path/app/test',
         onAppLeave: expect.any(Function),
+        setHeaderActionMenu: expect.any(Function),
         history: historyMock,
       });
     });
@@ -100,6 +101,7 @@ describe('ui/new_platform', () => {
         element: expect.any(HTMLElement),
         appBasePath: '/test/base/path/app/test',
         onAppLeave: expect.any(Function),
+        setHeaderActionMenu: expect.any(Function),
         history: historyMock,
       });
     });
