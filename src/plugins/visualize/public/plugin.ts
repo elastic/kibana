@@ -39,7 +39,7 @@ import {
 } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart } from '../../share/public';
+import { SharePluginStart, SharePluginSetup } from '../../share/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
@@ -48,6 +48,16 @@ import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import {
+  setUISettings,
+  setApplication,
+  setIndexPatterns,
+  setQueryService,
+  setShareService,
+} from './services';
+import { visualizeFieldAction } from './actions/visualize_field_action';
+import { createVisualizeUrlGenerator } from './url_generator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -57,12 +67,14 @@ export interface VisualizePluginStartDependencies {
   embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
+  uiActions: UiActionsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface FeatureFlagConfig {
@@ -80,7 +92,7 @@ export class VisualizePlugin
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, data, share }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -113,6 +125,18 @@ export class VisualizePlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createVisualizeUrlGenerator(async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            appBasePath: coreStart.application.getUrlForApp('visualize'),
+            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          };
+        })
+      );
+    }
+    setUISettings(core.uiSettings);
 
     core.application.register({
       id: 'visualize',
@@ -140,7 +164,6 @@ export class VisualizePlugin
         const unlistenParentHistory = params.history.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
-
         /**
          * current implementation uses 2 history objects:
          * 1. the hash history (used for the react hash router)
@@ -207,7 +230,15 @@ export class VisualizePlugin
     }
   }
 
-  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {}
+  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+    setApplication(core.application);
+    setIndexPatterns(plugins.data.indexPatterns);
+    setQueryService(plugins.data.query);
+    if (plugins.share) {
+      setShareService(plugins.share);
+    }
+    plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
+  }
 
   stop() {
     if (this.stopUrlTracking) {

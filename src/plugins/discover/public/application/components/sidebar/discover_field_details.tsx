@@ -16,13 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
+import {
+  triggerVisualizeActions,
+  isFieldVisualizable,
+  getVisualizeHref,
+} from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
-import { getServices } from '../../../kibana_services';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import './discover_field_details.scss';
 
@@ -40,6 +44,34 @@ export function DiscoverFieldDetails({
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
+  const [showVisualizeLink, setShowVisualizeLink] = useState<boolean>(false);
+  const [visualizeLink, setVisualizeLink] = useState<string>('');
+
+  useEffect(() => {
+    isFieldVisualizable(field, indexPattern.id, details.columns).then(
+      (flag) => {
+        setShowVisualizeLink(flag);
+        // get href only if Visualize button is enabled
+        getVisualizeHref(field, indexPattern.id, details.columns).then(
+          (uri) => {
+            if (uri) setVisualizeLink(uri);
+          },
+          () => {
+            setVisualizeLink('');
+          }
+        );
+      },
+      () => {
+        setShowVisualizeLink(false);
+      }
+    );
+  }, [field, indexPattern.id, details.columns]);
+
+  const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    // regular link click. let the uiActions code handle the navigation and show popup if needed
+    event.preventDefault();
+    triggerVisualizeActions(field, indexPattern.id, details.columns);
+  };
 
   return (
     <>
@@ -58,15 +90,13 @@ export function DiscoverFieldDetails({
           </div>
         )}
 
-        {details.visualizeUrl && (
+        {showVisualizeLink && (
           <>
             <EuiSpacer size="xs" />
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButton
-              onClick={() => {
-                getServices().core.application.navigateToApp(details.visualizeUrl.app, {
-                  path: details.visualizeUrl.path,
-                });
-              }}
+              onClick={(e) => handleVisualizeLinkClick(e)}
+              href={visualizeLink}
               size="s"
               className="dscFieldDetails__visualizeBtn"
               data-test-subj={`fieldVisualize-${field.name}`}
