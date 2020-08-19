@@ -6,6 +6,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
+import {
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+} from '../common';
 export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
 export {
   IngestManagerSetupContract,
@@ -35,8 +39,12 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
-      agentPolicyRolloutRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
-      agentPolicyRolloutRateLimitRequestPerInterval: schema.number({ defaultValue: 5 }),
+      agentPolicyRolloutRateLimitIntervalMs: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+      }),
+      agentPolicyRolloutRateLimitRequestPerInterval: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+      }),
     }),
   }),
 };

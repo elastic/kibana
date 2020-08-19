@@ -20,6 +20,7 @@ import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchUsage } from '../collectors/usage';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
@@ -46,11 +47,10 @@ export const esSearchStrategyProvider = (
       };
 
       try {
-        const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'search',
-          params,
-          options
-        )) as SearchResponse<any>;
+        const esResponse = (await context.core.elasticsearch.client.asCurrentUser.search(
+          params
+        )) as ApiResponse<SearchResponse<any>>;
+        const rawResponse = esResponse.body;
 
         if (usage) usage.trackSuccess(rawResponse.took);
 
