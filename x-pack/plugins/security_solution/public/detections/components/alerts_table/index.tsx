@@ -44,7 +44,6 @@ import {
   SetEventsLoadingProps,
   UpdateAlertsStatusCallback,
   UpdateAlertsStatusProps,
-  UpdateAlertStatusActionProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
 import {
@@ -184,24 +183,24 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, status: Status) => {
-      let title: string;
-      switch (status) {
-        case 'closed':
-          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
-          break;
-        case 'open':
-          title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
-          break;
-        case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
-      }
-
       if (conflicts > 0) {
+        // Partial failure
         addWarning({
           title: i18n.UPDATE_ALERT_STATUS_FAILED(conflicts),
           text: i18n.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
+        let title: string;
+        switch (status) {
+          case 'closed':
+            title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'open':
+            title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'in-progress':
+            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+        }
         displaySuccessToast(title, dispatchToaster);
       }
     },
