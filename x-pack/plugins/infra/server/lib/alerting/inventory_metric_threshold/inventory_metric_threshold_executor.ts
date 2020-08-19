@@ -52,7 +52,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     )
   );
 
-  const inventoryItems = Object.keys(first(results) as any);
+  const inventoryItems = Object.keys(first(results)!);
   for (const item of inventoryItems) {
     const alertInstance = services.alertInstanceFactory(`${item}`);
     // AND logic; all criteria must be across the threshold

@@ -57,7 +57,7 @@ export const previewInventoryMetricThresholdAlert = async ({
       )
     );
 
-    const inventoryItems = Object.keys(first(results) as any);
+    const inventoryItems = Object.keys(first(results)!);
     const previewResults = inventoryItems.map((item) => {
       const numberOfResultBuckets = lookbackSize;
       const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);

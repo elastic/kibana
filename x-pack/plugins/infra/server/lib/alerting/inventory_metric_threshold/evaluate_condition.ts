@@ -115,7 +115,7 @@ const getData = async (
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 
     return nodes.reduce((acc, n) => {
-      const nodePathItem = last(n.path) as any;
+      const nodePathItem = last(n.path)!;
       const m = first(n.metrics);
       if (m && m.value && m.timeseries) {
         const { timeseries } = m;

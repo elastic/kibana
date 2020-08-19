@@ -33,8 +33,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
     const alertResults = await evaluateAlert(services.callCluster, params, config);
 
-    // Because each alert result has the same group definitions, just grap the groups from the first one.
-    const groups = Object.keys(first(alertResults) as any);
+    // Because each alert result has the same group definitions, just grab the groups from the first one.
+    const groups = Object.keys(first(alertResults)!);
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${group}`);
 
@@ -58,9 +58,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults
-          .map((result) => buildFiredAlertReason(result[group] as any))
-          .join('\n');
+        reason = alertResults.map((result) => buildFiredAlertReason(result[group])).join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
