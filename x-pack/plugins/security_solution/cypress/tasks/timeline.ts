@@ -7,8 +7,11 @@
 import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
 
 import {
+  BULK_ACTIONS,
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
+  EXPORT_TIMELINE_ACTION,
+  FIRST_TIMELINE,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -20,6 +23,7 @@ import {
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
+  TIMELINES_TABLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
   REMOVE_COLUMN,
@@ -120,4 +124,15 @@ export const removeColumn = (column: number) => {
 
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const waitForTimelinesPanelToBeLoaded = () => {
+  cy.get(TIMELINES_TABLE).should('exist');
+};
+
+export const exportFirstTimeline = () => {
+  cy.get(FIRST_TIMELINE).first().click({ force: true });
+
+  cy.get(BULK_ACTIONS).first().click({ force: true });
+  cy.get(EXPORT_TIMELINE_ACTION).click();
 };

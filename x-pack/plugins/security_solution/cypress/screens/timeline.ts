@@ -72,3 +72,11 @@ export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]
 export const TIMESTAMP_TOGGLE_FIELD = '[data-test-subj="toggle-field-@timestamp"]';
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
+
+export const TIMELINES_TABLE = '[data-test-subj="timelines-table"]';
+
+export const BULK_ACTIONS = '.siemUtilityBar__action button';
+
+export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
+
+export const FIRST_TIMELINE = `${TIMELINES_TABLE} tr td input`;
