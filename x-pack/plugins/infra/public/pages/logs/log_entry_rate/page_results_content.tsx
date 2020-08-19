@@ -8,6 +8,7 @@ import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
@@ -44,6 +45,11 @@ export const PAGINATION_DEFAULTS = {
 export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
+
+  const history = useHistory();
+  const linkToLogStream = useCallback((filter) => history.push(`/link-to?filter=${filter}`), [
+    history,
+  ]);
 
   const { sourceId } = useLogSourceContext();
 
@@ -280,7 +286,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           flyoutItem={flyoutItem}
           setFlyoutVisibility={setFlyoutVisibility}
           loading={isFlyoutLoading}
-          setFilter={() => {}}
+          setFilter={linkToLogStream}
           setTarget={() => {}}
         />
       ) : null}
