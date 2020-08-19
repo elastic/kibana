@@ -26,14 +26,19 @@ import { InfraLoadingPanel } from '../../loading';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntriesItem, LogEntriesItemField } from '../../../../common/http_api';
 
-interface Props {
+export interface LogEntryFlyoutProps {
   flyoutItem: LogEntriesItem | null;
   setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
   loading: boolean;
 }
 
-export const LogEntryFlyout = ({ flyoutItem, loading, setFlyoutVisibility, setFilter }: Props) => {
+export const LogEntryFlyout = ({
+  flyoutItem,
+  loading,
+  setFlyoutVisibility,
+  setFilter,
+}: LogEntryFlyoutProps) => {
   const createFilterHandler = useCallback(
     (field: LogEntriesItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;

@@ -7,6 +7,8 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
+import { encode, RisonValue } from 'rison-node';
+import { stringify } from 'query-string';
 import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
@@ -30,7 +32,7 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
-import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
+import { LogEntryFlyout, LogEntryFlyoutProps } from '../../../components/logging/log_entry_flyout';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 
 export const SORT_DEFAULTS = {
@@ -45,11 +47,6 @@ export const PAGINATION_DEFAULTS = {
 export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
-
-  const history = useHistory();
-  const linkToLogStream = useCallback((filter) => history.push(`/link-to?filter=${filter}`), [
-    history,
-  ]);
 
   const { sourceId } = useLogSourceContext();
 
@@ -86,6 +83,30 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     value: stringToNumericTimeRange(selectedTimeRange),
     lastChangedTime: Date.now(),
   }));
+
+  const history = useHistory();
+  const linkToLogStream = useCallback<LogEntryFlyoutProps['setFilter']>(
+    (filter, id, timeKey) => {
+      const params = {
+        logPosition: encode({
+          end: moment(queryTimeRange.value.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          position: timeKey as RisonValue,
+          start: moment(queryTimeRange.value.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          streamLive: false,
+        }),
+        flyoutOptions: encode({
+          surroundingLogsId: id,
+        }),
+        logFilter: encode({
+          expression: filter,
+          kind: 'kuery',
+        }),
+      };
+
+      history.push(`/stream?${stringify(params)}`);
+    },
+    [history, queryTimeRange]
+  );
 
   const bucketDuration = useMemo(
     () => getBucketDuration(queryTimeRange.value.startTime, queryTimeRange.value.endTime),
