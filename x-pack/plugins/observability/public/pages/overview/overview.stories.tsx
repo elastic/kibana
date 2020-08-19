@@ -19,10 +19,10 @@ import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 
-const core = {
+const core = ({
   http: {
     basePath: {
-      prepend: (link) => `http://localhost:5601${link}`,
+      prepend: (link: string) => `http://localhost:5601${link}`,
     },
     get: () => Promise.resolve({ data: [] }),
   },
@@ -94,7 +94,7 @@ const core = {
       return euiSettings[key];
     },
   },
-} as AppMountContext['core'];
+} as unknown) as AppMountContext['core'];
 
 const coreWithAlerts = ({
   ...core,
@@ -130,7 +130,7 @@ function unregisterAll() {
 }
 
 function getDecorator(coreMock: AppMountContext['core']) {
-  return (Story) => (
+  return (Story: React.ComponentType) => (
     <MemoryRouter>
       <PluginContext.Provider value={{ core: coreMock }}>
         <EuiThemeProvider>
@@ -170,225 +170,277 @@ export function EmptyState() {
     hasData: async () => false,
   });
 
-  return <OverviewPage routeParams={{ query: {} }} />;
-}
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('single panel', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-export function SinglePanel() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('logs and metrics', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: fetchMetricsData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core: coreWithAlerts }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('logs, metrics and alerts', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: fetchMetricsData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-export function LogsMetrics() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: fetchMetricsData,
-    hasData: async () => true,
-  });
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core: coreWithAlerts }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('logs, metrics, APM  and alerts', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: fetchMetricsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: fetchApmData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
-LogsMetrics.storyName = 'Logs and Metrics';
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('logs, metrics, APM and Uptime', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: fetchApmData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: fetchMetricsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: fetchUptimeData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-export function LogsMetricsAlerts() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: fetchMetricsData,
-    hasData: async () => true,
-  });
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core: coreWithAlerts }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('logs, metrics, APM, Uptime and Alerts', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: fetchApmData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: fetchMetricsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: fetchUptimeData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
-LogsMetricsAlerts.decorators = [getDecorator(coreWithAlerts)];
-LogsMetricsAlerts.storyName = 'Logs, Metrics, and Alerts';
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core: coreWithNewsFeed }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('logs, metrics, APM, Uptime and News feed', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: fetchApmData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: fetchLogsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: fetchMetricsData,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: fetchUptimeData,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
-export function LogsMetricsApmAlerts() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: fetchMetricsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'apm',
-    fetchData: fetchApmData,
-    hasData: async () => true,
-  });
-
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
-LogsMetricsApmAlerts.decorators = [getDecorator(coreWithAlerts)];
-LogsMetricsApmAlerts.storyName = 'Logs, Metrics, APM, and Alerts';
-
-export function LogsMetricsApmUptime() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'apm',
-    fetchData: fetchApmData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: fetchMetricsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'uptime',
-    fetchData: fetchUptimeData,
-    hasData: async () => true,
-  });
-
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
-LogsMetricsApmUptime.storyName = 'Logs, Metrics, APM, and Uptime';
-
-export function LogsMetricsApmUptimeAlerts() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'apm',
-    fetchData: fetchApmData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: fetchMetricsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'uptime',
-    fetchData: fetchUptimeData,
-    hasData: async () => true,
-  });
-
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
-LogsMetricsApmAlerts.decorators = [getDecorator(coreWithAlerts)];
-LogsMetricsApmUptimeAlerts.storyName = 'Logs, Metrics, APM, Uptime, and Alerts';
-
-export function LogsMetricsApmUptimeNewsFeed() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'apm',
-    fetchData: fetchApmData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: fetchLogsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: fetchMetricsData,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'uptime',
-    fetchData: fetchUptimeData,
-    hasData: async () => true,
-  });
-
-  return (
-    <OverviewPage
-      routeParams={{
-        query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-      }}
-    />
-  );
-}
-LogsMetricsApmUptimeNewsFeed.decorators = [getDecorator(coreWithNewsFeed)];
-LogsMetricsApmUptimeNewsFeed.storyName = 'Logs, Metrics, APM, Uptime, and News feed';
-
-export function NoData() {
-  unregisterAll();
-  registerDataHandler({
-    appName: 'apm',
-    fetchData: async () => emptyAPMResponse,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_logs',
-    fetchData: async () => emptyLogsResponse,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'infra_metrics',
-    fetchData: async () => emptyMetricsResponse,
-    hasData: async () => true,
-  });
-  registerDataHandler({
-    appName: 'uptime',
-    fetchData: async () => emptyUptimeResponse,
-    hasData: async () => true,
-  });
+  storiesOf('app/Overview', module)
+    .addDecorator((storyFn) => (
+      <MemoryRouter>
+        <PluginContext.Provider value={{ core }}>
+          <EuiThemeProvider>{storyFn()}</EuiThemeProvider>
+        </PluginContext.Provider>
+      </MemoryRouter>
+    ))
+    .add('no data', () => {
+      unregisterAll();
+      registerDataHandler({
+        appName: 'apm',
+        fetchData: async () => emptyAPMResponse,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_logs',
+        fetchData: async () => emptyLogsResponse,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'infra_metrics',
+        fetchData: async () => emptyMetricsResponse,
+        hasData: async () => true,
+      });
+      registerDataHandler({
+        appName: 'uptime',
+        fetchData: async () => emptyUptimeResponse,
+        hasData: async () => true,
+      });
+      return (
+        <OverviewPage
+          routeParams={{
+            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
+          }}
+        />
+      );
+    });
 
   return (
     <OverviewPage

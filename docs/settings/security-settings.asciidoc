@@ -96,15 +96,12 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 `<provider-type>.<provider-name>.showInSelector`
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
-|===
-
+2+a|
+[TIP]
 [NOTE]
 ============
 You are unable to set this setting to `false` for `basic` and `token` authentication providers.
 ============
-
-[cols="2*<"]
-|===
 
 | `xpack.security.authc.providers.`
 `<provider-type>.<provider-name>.accessAgreement.message`
@@ -125,8 +122,8 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 | SAML realm in {es} that provider should use.
 
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.maxRedirectURLSize`
-| The maximum size of the URL that {kib} is allowed to store during the authentication SAML handshake. For more information, refer to <<security-saml-and-long-urls>>.
+`saml.<provider-name>.useRelayStateDeepLink`
+| Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
 
 |===
 
@@ -164,19 +161,27 @@ There is a very limited set of cases when you'd want to change these settings. F
 |===
 
 [float]
-[[login-selector-settings]]
-===== Login Selector UI settings
+[[login-ui-settings]]
+===== Login user interface settings
+
+You can configure the following settings in the `kibana.yml` file.
 
 [cols="2*<"]
 |===
+| `xpack.security.loginAssistanceMessage`
+| Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
+
+| `xpack.security.loginHelp`
+| Adds a message accessible at the login UI with additional help information for the login process.
+
 | `xpack.security.authc.selector.enabled`
-| Determines if the Login Selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
+| Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
 
 |===
 
 [float]
-[[security-ui-settings]]
-==== User interface security settings
+[[security-session-and-cookie-settings]]
+==== Session and cookie security settings
 
 You can configure the following settings in the `kibana.yml` file.
 
@@ -186,8 +191,7 @@ You can configure the following settings in the `kibana.yml` file.
   | Sets the name of the cookie used for the session. The default value is `"sid"`.
 
 | `xpack.security.encryptionKey`
-  | An arbitrary string of 32 characters or more that is used to encrypt credentials
-  in a cookie. It is crucial that this key is not exposed to users of {kib}. By
+  | An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {kib}. By
   default, a value is automatically generated in memory. If you use that default
   behavior, all sessions are invalidated when {kib} restarts.
   In addition, high-availability deployments of {kib} will behave unexpectedly
@@ -205,42 +209,33 @@ You can configure the following settings in the `kibana.yml` file.
   This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting `xpack.security.secureCookies: true`.
 
 | `xpack.security.session.idleTimeout`
-  | Sets the session duration. By default, sessions stay active until the
-  browser is closed. When this is set to an explicit idle timeout, closing the
-  browser still requires the user to log back in to {kib}.
+  | Ensures that user sessions will expire after a period of inactivity. This and `xpack.security.session.lifespan` are both
+highly recommended. By default, this setting is not set.
 
-|===
-
+2+a|
 [TIP]
 ============
-The format is a string of `<count>[ms|s|m|h|d|w|M|Y]`
-(e.g. '70ms', '5s', '3d', '1Y').
+The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
-
-[cols="2*<"]
-|===
 
 | `xpack.security.session.lifespan`
-  | Sets the maximum duration, also known as "absolute timeout". By default,
-  a session can be renewed indefinitely. When this value is set, a session will end
-  once its lifespan is exceeded, even if the user is not idle. NOTE: if `idleTimeout`
-  is not set, this setting will still cause sessions to expire.
+  | Ensures that user sessions will expire after the defined time period. This behavior also known as an "absolute timeout". If
+this is _not_ set, user sessions could stay active indefinitely. This and `xpack.security.session.idleTimeout` are both highly
+recommended. By default, this setting is not set.
 
-|===
-
+2+a|
 [TIP]
 ============
-The format is a
-string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y').
+The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
-[cols="2*<"]
-|===
+| `xpack.security.session.cleanupInterval`
+| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
 
-| `xpack.security.loginAssistanceMessage`
-  | Adds a message to the login screen. Useful for displaying information about maintenance windows, links to corporate sign up pages etc.
-
-| `xpack.security.loginHelp`
-  | Adds a message accessible at the Login Selector UI with additional help information for the login process.
+2+a|
+[TIP]
+============
+The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
 
 |===

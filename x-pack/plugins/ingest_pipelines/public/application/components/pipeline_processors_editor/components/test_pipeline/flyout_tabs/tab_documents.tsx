@@ -17,9 +17,10 @@ import {
   Form,
   useForm,
   FormConfig,
+  useKibana,
 } from '../../../../../../shared_imports';
 
-import { usePipelineProcessorsContext, useTestConfigContext, TestConfig } from '../../../context';
+import { useTestConfigContext, TestConfig } from '../../../context';
 
 import { documentsSchema } from './schema';
 
@@ -31,7 +32,7 @@ interface Props {
 }
 
 export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
-  const { links } = usePipelineProcessorsContext();
+  const { services } = useKibana();
 
   const { setCurrentTestConfig, testConfig } = useTestConfigContext();
   const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
@@ -71,7 +72,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
             values={{
               learnMoreLink: (
                 <EuiLink
-                  href={`${links.esDocsBasePath}/simulate-pipeline-api.html`}
+                  href={`${services.documentation.getEsDocsBasePath()}/simulate-pipeline-api.html`}
                   target="_blank"
                   external
                 >
