@@ -10,22 +10,44 @@ import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
+import { SetupGuide } from './components/setup_guide';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { AppSearch, AppSearchNav } from './';
+import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
-  it('renders', () => {
+  it('renders AppSearchUnconfigured when config.host is not set', () => {
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<AppSearch />);
+
+    expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
+  });
+
+  it('renders AppSearchConfigured when config.host set', () => {
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
+    const wrapper = shallow(<AppSearch />);
+
+    expect(wrapper.find(AppSearchConfigured)).toHaveLength(0);
+  });
+});
+
+describe('AppSearchUnconfigured', () => {
+  it('renders the Setup Guide and redirects to the Setup Guide', () => {
+    const wrapper = shallow(<AppSearchUnconfigured />);
+
+    expect(wrapper.find(SetupGuide)).toHaveLength(1);
+    expect(wrapper.find(Redirect)).toHaveLength(1);
+  });
+});
+
+describe('AppSearchConfigured', () => {
+  it('renders with layout', () => {
+    const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(Layout)).toHaveLength(1);
   });
 
-  it('redirects to Setup Guide when config.host is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
-    const wrapper = shallow(<AppSearch />);
-
-    expect(wrapper.find(Redirect)).toHaveLength(1);
-    expect(wrapper.find(Layout)).toHaveLength(0);
+  it('initializes app data', () => {
+    // TODO
   });
 });
 
