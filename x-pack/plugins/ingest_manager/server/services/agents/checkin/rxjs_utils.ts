@@ -58,11 +58,18 @@ export function createRateLimiter(
   let observers: Array<[Rx.Subscriber<any>, any]> = [];
   let timerSubscription: Rx.Subscription | undefined;
 
+  function addObserver(observer: Rx.Subscriber<any>, value: any) {
+    observers = [...observers, [observer, value]];
+  }
+
+  function removeObserver(observer: Rx.Subscriber<any>) {
+    observers = observers.filter((o) => o[0] !== observer);
+  }
   function createTimeout() {
     if (timerSubscription) {
       return;
     }
-    timerSubscription = Rx.asyncScheduler.schedule(() => {
+    timerSubscription = Rx.asyncScheduler.schedule(function rateLimiterTimeout() {
       timerSubscription = undefined;
       currentInterval = createCurrentInterval();
       for (const [waitingObserver, value] of observers) {
@@ -77,8 +84,8 @@ export function createRateLimiter(
   }
 
   return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
-    return (observable) =>
-      new Rx.Observable<T>((observer) => {
+    return function createLimiter(observable) {
+      return new Rx.Observable<T>(function createRateLimiterSubscriber(observer) {
         const subscription = observable.subscribe({
           next(value) {
             if (currentInterval.numRequests < ratelimitRequestPerInterval) {
@@ -86,8 +93,7 @@ export function createRateLimiter(
               observer.next(value);
               return;
             }
-
-            observers = [...observers, [observer, value]];
+            addObserver(observer, value);
             createTimeout();
           },
           error(err) {
@@ -98,10 +104,12 @@ export function createRateLimiter(
           },
         });
 
-        return () => {
-          observers = observers.filter((o) => o[0] !== observer);
+        return function cleanRateLimiterSubscriber() {
+          removeObserver(observer);
+
           subscription.unsubscribe();
         };
       });
+    };
   };
 }
