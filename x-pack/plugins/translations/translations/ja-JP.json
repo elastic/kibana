@@ -5113,7 +5113,6 @@
     "xpack.apm.transactionActionMenu.viewInUptime": "ステータス",
     "xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel": "サンプルドキュメントを表示",
     "xpack.apm.transactionBreakdown.chartTitle": "スパンタイプ別時間",
-    "xpack.apm.transactionBreakdown.noData": "この時間範囲のデータがありません。",
     "xpack.apm.transactionCardinalityWarning.body": "一意のトランザクション名の数が構成された値{bucketSize}を超えています。エージェントを再構成し、類似したトランザクションをグループ化するか、{codeBlock}の値を増やしてください。",
     "xpack.apm.transactionCardinalityWarning.docsLink": "詳細はドキュメントをご覧ください",
     "xpack.apm.transactionCardinalityWarning.title": "このビューには、報告されたトランザクションのサブセットが表示されます。",

@@ -5115,7 +5115,6 @@
     "xpack.apm.transactionActionMenu.viewInUptime": "状态",
     "xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel": "查看样例文档",
     "xpack.apm.transactionBreakdown.chartTitle": "跨度类型花费的时间",
-    "xpack.apm.transactionBreakdown.noData": "此时间范围内没有数据。",
     "xpack.apm.transactionCardinalityWarning.body": "唯一事务名称的数目超过 {bucketSize} 的已配置值。尝试重新配置您的代理以对类似的事务分组或增大 {codeBlock} 的值",
     "xpack.apm.transactionCardinalityWarning.docsLink": "在文档中了解详情",
     "xpack.apm.transactionCardinalityWarning.title": "此视图显示已报告事务的子集。",
