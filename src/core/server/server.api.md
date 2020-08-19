@@ -974,6 +974,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
 // @public
 export interface KibanaRequestEvents {
     aborted$: Observable<void>;
+    completed$: Observable<void>;
 }
 
 // @public
@@ -1789,6 +1790,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    timeout?: number;
     xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 

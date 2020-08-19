@@ -5,24 +5,21 @@
  */
 
 import { Logger } from 'kibana/server';
-import { ErrorCode } from '../../../common/anomaly_detection';
+import Boom from 'boom';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { Setup } from '../helpers/setup_request';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
-import { AnomalyDetectionError } from './anomaly_detection_error';
 
 export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   const { ml } = setup;
+
   if (!ml) {
-    return [];
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    throw new AnomalyDetectionError(ErrorCode.ML_NOT_AVAILABLE_IN_SPACE);
-  }
-
-  if (!mlCapabilities.isPlatinumOrTrialLicense) {
-    throw new AnomalyDetectionError(ErrorCode.INSUFFICIENT_LICENSE);
+    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
   const response = await getMlJobsWithAPMGroup(ml);

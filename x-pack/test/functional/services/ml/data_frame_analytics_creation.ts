@@ -224,23 +224,33 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexValue(destIndex);
     },
 
+    async waitForDependentVariableInputLoaded() {
+      await testSubjects.existOrFail('~mlAnalyticsCreateJobWizardDependentVariableSelect', {
+        timeout: 5 * 1000,
+      });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDependentVariableSelect loaded', {
+        timeout: 30 * 1000,
+      });
+    },
+
     async assertDependentVariableInputExists() {
       await retry.tryForTime(8000, async () => {
         await testSubjects.existOrFail(
-          'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+          '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
         );
       });
     },
 
     async assertDependentVariableInputMissing() {
       await testSubjects.missingOrFail(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
     },
 
     async assertDependentVariableSelection(expectedSelection: string[]) {
+      await this.waitForDependentVariableInputLoaded();
       const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
       expect(actualSelection).to.eql(
         expectedSelection,
@@ -249,8 +259,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async selectDependentVariable(dependentVariable: string) {
+      await this.waitForDependentVariableInputLoaded();
       await comboBox.set(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
       await this.assertDependentVariableSelection([dependentVariable]);
@@ -333,18 +344,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToAdditionalOptionsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertAdditionalOptionsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertAdditionalOptionsStepActive();
+      });
     },
 
     async continueToDetailsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertDetailsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertDetailsStepActive();
+      });
     },
 
     async continueToCreateStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertCreateStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertCreateStepActive();
+      });
     },
 
     async assertModelMemoryInputExists() {

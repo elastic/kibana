@@ -7,8 +7,11 @@ import {
   TreeOptions,
   Tree,
   EndpointDocGenerator,
+  Event,
 } from '../../../plugins/security_solution/common/endpoint/generate_data';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const processIndex = 'logs-endpoint.events.process-default';
 
 /**
  * Options for build a resolver tree
@@ -26,17 +29,41 @@ export interface Options extends TreeOptions {
  */
 export interface GeneratedTrees {
   trees: Tree[];
-  eventsIndex: string;
-  alertsIndex: string;
+  indices: string[];
+}
+
+/**
+ * Structure containing the events inserted into ES and the index they live in
+ */
+export interface InsertedEvents {
+  events: Event[];
+  indices: string[];
+}
+
+interface BulkCreateHeader {
+  create: {
+    _index: string;
+  };
 }
 
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
 
   return {
+    async insertEvents(
+      events: Event[],
+      eventsIndex: string = processIndex
+    ): Promise<InsertedEvents> {
+      const body = events.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
+        array.push({ create: { _index: eventsIndex } }, doc);
+        return array;
+      }, []);
+      await client.bulk({ body, refresh: 'true' });
+      return { events, indices: [eventsIndex] };
+    },
     async createTrees(
       options: Options,
-      eventsIndex: string = 'logs-endpoint.events.process-default',
+      eventsIndex: string = processIndex,
       alertsIndex: string = 'logs-endpoint.alerts-default'
     ): Promise<GeneratedTrees> {
       const seed = options.seed || 'resolver-seed';
@@ -45,7 +72,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       const numTrees = options.numTrees ?? 1;
       for (let j = 0; j < numTrees; j++) {
         const tree = generator.generateTree(options);
-        const body = tree.allEvents.reduce((array: Array<Record<string, any>>, doc) => {
+        const body = tree.allEvents.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
           let index = eventsIndex;
           if (doc.event.kind === 'alert') {
             index = alertsIndex;
@@ -60,23 +87,21 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         await client.bulk({ body, refresh: 'true' });
         allTrees.push(tree);
       }
-      return { trees: allTrees, eventsIndex, alertsIndex };
+      return { trees: allTrees, indices: [eventsIndex, alertsIndex] };
     },
-    async deleteTrees(trees: GeneratedTrees) {
-      /**
-       * The ingest manager handles creating the template for the endpoint's indices. It is using a V2 template
-       * with data streams. Data streams aren't included in the javascript elasticsearch client in kibana yet so we
-       * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
-       * is why we're using _data_stream here.
-       */
-      await client.transport.request({
-        method: 'DELETE',
-        path: `_data_stream/${trees.eventsIndex}`,
-      });
-      await client.transport.request({
-        method: 'DELETE',
-        path: `_data_stream/${trees.alertsIndex}`,
-      });
+    async deleteData(genData: { indices: string[] }) {
+      for (const index of genData.indices) {
+        /**
+         * The ingest manager handles creating the template for the endpoint's indices. It is using a V2 template
+         * with data streams. Data streams aren't included in the javascript elasticsearch client in kibana yet so we
+         * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
+         * is why we're using _data_stream here.
+         */
+        await client.transport.request({
+          method: 'DELETE',
+          path: `_data_stream/${index}`,
+        });
+      }
     },
   };
 }

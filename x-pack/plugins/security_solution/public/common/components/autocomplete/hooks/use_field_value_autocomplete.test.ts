@@ -199,12 +199,17 @@ describe('useFieldValueAutocomplete', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      result.current[2]({
-        fieldSelected: getField('@tags'),
-        value: 'hello',
-        patterns: stubIndexPatternWithFields,
-        signal: new AbortController().signal,
-      });
+      expect(result.current[2]).not.toBeNull();
+
+      // Added check for typescripts sake, if null,
+      // would not reach below logic as test would stop above
+      if (result.current[2] != null) {
+        result.current[2]({
+          fieldSelected: getField('@tags'),
+          value: 'hello',
+          patterns: stubIndexPatternWithFields,
+        });
+      }
 
       await waitForNextUpdate();
 

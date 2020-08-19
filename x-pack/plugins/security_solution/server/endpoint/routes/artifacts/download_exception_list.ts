@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   IRouter,
   SavedObjectsClientContract,
@@ -14,7 +13,6 @@ import {
 import LRU from 'lru-cache';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
-import { validate } from '../../../../common/validate';
 import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants } from '../../lib/artifacts';
@@ -63,6 +61,7 @@ export function registerDownloadExceptionListRoute(
         }
       }
 
+      const validateDownload = (await endpointContext.config()).validateArtifactDownloads;
       const buildAndValidateResponse = (artName: string, body: Buffer): IKibanaResponse => {
         const artifact: HttpResponseOptions = {
           body,
@@ -72,11 +71,10 @@ export function registerDownloadExceptionListRoute(
           },
         };
 
-        const [validated, errors] = validate(artifact, downloadArtifactResponseSchema);
-        if (errors !== null || validated === null) {
-          return res.internalError({ body: errors! });
+        if (validateDownload && !downloadArtifactResponseSchema.is(artifact)) {
+          return res.internalError({ body: 'Artifact failed to validate.' });
         } else {
-          return res.ok((validated as unknown) as HttpResponseOptions);
+          return res.ok(artifact);
         }
       };
 

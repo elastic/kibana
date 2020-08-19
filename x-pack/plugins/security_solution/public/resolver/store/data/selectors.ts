@@ -374,9 +374,9 @@ export const layout = createSelector(
     // find the origin node
     const originNode = indexedProcessTreeModel.processEvent(indexedProcessTree, originID);
 
-    if (!originNode) {
-      // this should only happen if the `ResolverTree` from the server has an entity ID with no matching lifecycle events.
-      throw new Error('Origin node not found in ResolverTree');
+    if (originNode === null) {
+      // If a tree is returned that has no process events for the origin, this can happen.
+      return taxiLayout;
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically

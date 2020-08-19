@@ -80,6 +80,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.singleMetricViewer.assertChartExsist();
     });
 
+    it('should display the annotations section', async () => {
+      await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+    });
+
     it('displays the anomalies table', async () => {
       await ml.anomaliesTable.assertTableExists();
     });

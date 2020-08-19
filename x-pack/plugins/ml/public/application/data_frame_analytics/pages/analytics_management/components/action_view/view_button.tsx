@@ -8,15 +8,12 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import {
-  getAnalysisType,
-  isRegressionAnalysis,
-  isOutlierAnalysis,
-  isClassificationAnalysis,
-} from '../../../../common/analytics';
+import { getAnalysisType } from '../../../../common/analytics';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { getResultsUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
+
+import { getViewLinkStatus } from './get_view_link_status';
 
 interface ViewButtonProps {
   item: DataFrameAnalyticsListRow;
@@ -30,11 +27,8 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
     },
   } = useMlKibana();
 
+  const { disabled, tooltipContent } = getViewLinkStatus(item);
   const analysisType = getAnalysisType(item.config.analysis);
-  const buttonDisabled =
-    !isRegressionAnalysis(item.config.analysis) &&
-    !isOutlierAnalysis(item.config.analysis) &&
-    !isClassificationAnalysis(item.config.analysis);
 
   const url = getResultsUrl(item.id, analysisType);
   const navigator = isManagementTable
@@ -52,23 +46,17 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
       data-test-subj="mlAnalyticsJobViewButton"
       flush="left"
       iconType="visTable"
-      isDisabled={buttonDisabled}
+      isDisabled={disabled}
       onClick={navigator}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>
   );
 
-  if (buttonDisabled) {
+  if (disabled) {
     return (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.ml.dataframe.analyticsList.viewActionToolTipContent', {
-          defaultMessage:
-            'There is no results page available for this type of data frame analytics job.',
-        })}
-      >
+      <EuiToolTip position="top" content={tooltipContent}>
         {button}
       </EuiToolTip>
     );

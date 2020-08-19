@@ -36,7 +36,7 @@ export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
       iconType="pencil"
       isDisabled={buttonDisabled}
       onClick={onClick}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>

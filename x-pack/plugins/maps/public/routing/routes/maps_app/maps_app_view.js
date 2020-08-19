@@ -102,19 +102,19 @@ export class MapsAppView extends React.Component {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
     }
 
-    // Clean up app state filters
-    const { filterManager } = getData().query;
-    filterManager.filters.forEach((filter) => {
-      if (filter.$state.store === esFilters.FilterStateStore.APP_STATE) {
-        filterManager.removeFilter(filter);
-      }
-    });
-
     getCoreChrome().setBreadcrumbs([]);
   }
 
   _hasUnsavedChanges() {
-    return this.props.hasUnsavedChanges(this.props.savedMap, this.state.initialLayerListConfig);
+    const savedLayerList = this.props.savedMap.getLayerList();
+    return !savedLayerList
+      ? !_.isEqual(this.props.layerListConfigOnly, this.state.initialLayerListConfig)
+      : // savedMap stores layerList as a JSON string using JSON.stringify.
+        // JSON.stringify removes undefined properties from objects.
+        // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+        // Need to perform the same process for layerListConfigOnly to compare apples to apples
+        // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+        !_.isEqual(JSON.parse(JSON.stringify(this.props.layerListConfigOnly)), savedLayerList);
   }
 
   _setBreadcrumbs = () => {
@@ -455,22 +455,20 @@ export class MapsAppView extends React.Component {
     ) : null;
   }
 
-  render() {
-    const { filters, isFullScreen } = this.props;
+  _addFilter = (newFilters) => {
+    newFilters.forEach((filter) => {
+      filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+    });
+    this._onFiltersChange([...this.props.filters, ...newFilters]);
+  };
 
+  render() {
     return this.state.initialized ? (
-      <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
+      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
-          <GisMap
-            addFilters={(newFilters) => {
-              newFilters.forEach((filter) => {
-                filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
-              });
-              this._updateFiltersAndDispatch([...filters, ...newFilters]);
-            }}
-          />
+          <GisMap addFilters={this._addFilter} />
         </div>
       </div>
     ) : null;

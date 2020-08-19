@@ -222,8 +222,9 @@ export const risk_score_mapping_value = t.string;
 export const risk_score_mapping_item = t.exact(
   t.type({
     field: risk_score_mapping_field,
-    operator,
     value: risk_score_mapping_value,
+    operator,
+    risk_score: riskScoreOrUndefined,
   })
 );
 

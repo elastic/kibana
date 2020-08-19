@@ -19,9 +19,7 @@
     ],
     "patterns": [
       "_mapping",
-      "{indices}/_mapping",
-      "_mapping/{type}",
-      "{indices}/_mapping/{type}"
+      "{indices}/_mapping"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html"
   }

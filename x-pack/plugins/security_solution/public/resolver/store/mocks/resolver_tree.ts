@@ -226,3 +226,33 @@ export function mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents
     lifecycle: [origin, originClone],
   } as unknown) as ResolverTree;
 }
+
+export function mockTreeWithNoProcessEvents(): ResolverTree {
+  return {
+    entityID: 'entityID',
+    children: {
+      childNodes: [],
+      nextChild: null,
+    },
+    relatedEvents: {
+      events: [],
+      nextEvent: null,
+    },
+    relatedAlerts: {
+      alerts: [],
+      nextAlert: null,
+    },
+    lifecycle: [],
+    ancestry: {
+      ancestors: [],
+      nextAncestor: null,
+    },
+    stats: {
+      totalAlerts: 0,
+      events: {
+        total: 0,
+        byCategory: {},
+      },
+    },
+  };
+}

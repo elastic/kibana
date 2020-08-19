@@ -7,7 +7,7 @@
 import {
   entityId,
   parentEntityId,
-  isStart,
+  isProcessRunning,
   getAncestryAsArray,
 } from '../../../../../common/endpoint/models/event';
 import {
@@ -99,7 +99,7 @@ export class ChildrenNodesHelper {
     for (const event of startEvents) {
       const parentID = parentEntityId(event);
       const entityID = entityId(event);
-      if (parentID && entityID && isStart(event)) {
+      if (parentID && entityID && isProcessRunning(event)) {
         // don't actually add the start event to the node, because that'll be done in
         // a different call
         const childNode = this.getOrCreateChildNode(entityID);

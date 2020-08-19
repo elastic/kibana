@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
+import { getPolicyDetailPath, getHostListPath } from '../../../common/routing';
 import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
@@ -19,7 +19,7 @@ describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
   const policyDetailsPathUrl = getPolicyDetailPath('1');
-  const policyListPathUrl = getPoliciesPath();
+  const hostListPath = getHostListPath({ name: 'hostList' });
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
@@ -127,8 +127,8 @@ describe('Policy Details', () => {
 
       const backToListButton = pageHeaderLeft.find('EuiButtonEmpty');
       expect(backToListButton.prop('iconType')).toBe('arrowLeft');
-      expect(backToListButton.prop('href')).toBe(policyListPathUrl);
-      expect(backToListButton.text()).toBe('Back to policy list');
+      expect(backToListButton.prop('href')).toBe(hostListPath);
+      expect(backToListButton.text()).toBe('Back to endpoint hosts');
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
       expect(pageTitle).toHaveLength(1);
@@ -141,7 +141,7 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListButton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(policyListPathUrl);
+      expect(history.location.pathname).toEqual(hostListPath);
     });
     it('should display agent stats', async () => {
       await asyncActions;
@@ -173,7 +173,7 @@ describe('Policy Details', () => {
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
         'securitySolution:administration',
-        { path: policyListPathUrl },
+        { path: hostListPath },
       ]);
     });
     it('should display save button', async () => {
@@ -232,7 +232,7 @@ describe('Policy Details', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this policy'
+          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent configuration.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {

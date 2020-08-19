@@ -77,7 +77,12 @@ export const HostDetailsFlyout = memo(() => {
   }, [error, notifications.toasts]);
 
   return (
-    <EuiFlyout onClose={handleFlyoutClose} data-test-subj="hostDetailsFlyout" size="s">
+    <EuiFlyout
+      onClose={handleFlyoutClose}
+      style={{ zIndex: 4001 }}
+      data-test-subj="hostDetailsFlyout"
+      size="s"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 data-test-subj="hostDetailsFlyoutTitle">
@@ -158,7 +163,7 @@ const PolicyResponseFlyoutPanel = memo<{
           <h4>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.host.policyResponse.title"
-              defaultMessage="Policy Response"
+              defaultMessage="Configuration Response"
             />
           </h4>
         </EuiText>
@@ -167,7 +172,7 @@ const PolicyResponseFlyoutPanel = memo<{
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostDetails.noPolicyResponse"
-                defaultMessage="No policy response available"
+                defaultMessage="No configuration response available"
               />
             }
           />

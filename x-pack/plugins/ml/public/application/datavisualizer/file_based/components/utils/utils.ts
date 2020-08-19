@@ -167,7 +167,7 @@ export function processResults({ results, overrides }: AnalysisResult) {
  */
 export async function hasImportPermission(indexName: string) {
   const priv: { cluster: string[]; index?: any } = {
-    cluster: ['cluster:monitor/nodes/info', 'cluster:admin/ingest/pipeline/put'],
+    cluster: ['cluster:admin/ingest/pipeline/put'],
   };
 
   if (indexName !== undefined) {

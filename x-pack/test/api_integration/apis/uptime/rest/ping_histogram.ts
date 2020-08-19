@@ -6,7 +6,6 @@
 
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { assertCloseTo } from '../../../../../plugins/uptime/server/lib/helper';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('pingHistogram', () => {
@@ -21,10 +20,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
       const data = apiResponse.body;
 
-      // manually testing this value and then removing it to avoid flakiness
-      const { interval } = data;
-      assertCloseTo(interval, 22801, 100);
-      delete data.interval;
       expectFixtureEql(data, 'ping_histogram');
     });
 
@@ -38,9 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
       const data = apiResponse.body;
 
-      const { interval } = data;
-      assertCloseTo(interval, 22801, 100);
-      delete data.interval;
       expectFixtureEql(data, 'ping_histogram_by_id');
     });
 
@@ -55,9 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
       const data = apiResponse.body;
 
-      const { interval } = data;
-      assertCloseTo(interval, 22801, 100);
-      delete data.interval;
       expectFixtureEql(data, 'ping_histogram_by_filter');
     });
   });

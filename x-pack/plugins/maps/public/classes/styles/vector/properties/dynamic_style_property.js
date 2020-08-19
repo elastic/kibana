@@ -8,9 +8,10 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
-  STYLE_TYPE,
-  SOURCE_META_DATA_REQUEST_ID,
   FIELD_ORIGIN,
+  MB_LOOKUP_FUNCTION,
+  SOURCE_META_DATA_REQUEST_ID,
+  STYLE_TYPE,
 } from '../../../../../common/constants';
 import React from 'react';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
@@ -150,7 +151,13 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsMbFeatureState() {
-    return true;
+    return !!this._field && this._field.canReadFromGeoJson();
+  }
+
+  getMbLookupFunction() {
+    return this.supportsMbFeatureState()
+      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+      : MB_LOOKUP_FUNCTION.GET;
   }
 
   getFieldMetaOptions() {

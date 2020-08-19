@@ -90,18 +90,4 @@ describe('Search Usage Collector', () => {
       SEARCH_EVENT_TYPE.LONG_QUERY_RUN_BEYOND_TIMEOUT
     );
   });
-
-  test('tracks response errors', async () => {
-    const duration = 10;
-    await usageCollector.trackError(duration);
-    expect(mockCoreSetup.http.post).toBeCalled();
-    expect(mockCoreSetup.http.post.mock.calls[0][0]).toBe('/api/search/usage');
-  });
-
-  test('tracks response duration', async () => {
-    const duration = 5;
-    await usageCollector.trackSuccess(duration);
-    expect(mockCoreSetup.http.post).toBeCalled();
-    expect(mockCoreSetup.http.post.mock.calls[0][0]).toBe('/api/search/usage');
-  });
 });

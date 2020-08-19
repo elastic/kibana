@@ -9,16 +9,26 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isStart(event: ResolverEvent): boolean {
+export function isProcessRunning(event: ResolverEvent): boolean {
   if (isLegacyEvent(event)) {
-    return event.event?.type === 'process_start' || event.event?.action === 'fork_event';
+    return (
+      event.event?.type === 'process_start' ||
+      event.event?.action === 'fork_event' ||
+      event.event?.type === 'already_running'
+    );
   }
 
   if (Array.isArray(event.event.type)) {
-    return event.event.type.includes('start');
+    return (
+      event.event.type.includes('start') ||
+      event.event.type.includes('change') ||
+      event.event.type.includes('info')
+    );
   }
 
-  return event.event.type === 'start';
+  return (
+    event.event.type === 'start' || event.event.type === 'change' || event.event.type === 'info'
+  );
 }
 
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {

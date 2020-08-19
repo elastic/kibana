@@ -431,7 +431,7 @@ describe('when on the hosts page', () => {
       const renderResult = render();
       const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
-      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.textContent).toEqual('Reassign Configuration');
       expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
@@ -492,7 +492,7 @@ describe('when on the hosts page', () => {
       it('should include the sub-panel title', async () => {
         expect(
           (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
-        ).toBe('Policy Response');
+        ).toBe('Configuration Response');
       });
 
       it('should show a configuration section for each protection', async () => {

@@ -70,6 +70,13 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
                     field: 'process.entity_id',
                   },
                 },
+                {
+                  bool: {
+                    must_not: {
+                      term: { 'process.entity_id': '' },
+                    },
+                  },
+                },
               ],
             },
           },

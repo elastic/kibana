@@ -19,6 +19,8 @@ import {
   Ecs,
   TimelineStatus,
   TimelineType,
+  GetTimelineDetailsQuery,
+  DetailItem,
 } from '../../../graphql/types';
 import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -34,6 +36,7 @@ import {
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { timelineDetailsQuery } from '../../../timelines/containers/details/index.gql_query';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -153,35 +156,45 @@ export const sendAlertToTimelineAction = async ({
   if (timelineId !== '' && apolloClient != null) {
     try {
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: true });
-      const responseTimeline = await apolloClient.query<
-        GetOneTimeline.Query,
-        GetOneTimeline.Variables
-      >({
-        query: oneTimelineQuery,
-        fetchPolicy: 'no-cache',
-        variables: {
-          id: timelineId,
-        },
-      });
+      const [responseTimeline, eventDataResp] = await Promise.all([
+        apolloClient.query<GetOneTimeline.Query, GetOneTimeline.Variables>({
+          query: oneTimelineQuery,
+          fetchPolicy: 'no-cache',
+          variables: {
+            id: timelineId,
+          },
+        }),
+        apolloClient.query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>({
+          query: timelineDetailsQuery,
+          fetchPolicy: 'no-cache',
+          variables: {
+            defaultIndex: [],
+            docValueFields: [],
+            eventId: ecsData._id,
+            indexName: ecsData._index ?? '',
+            sourceId: 'default',
+          },
+        }),
+      ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
-
+      const eventData: DetailItem[] = getOr([], 'data.source.TimelineDetails.data', eventDataResp);
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         openAlertInBasicTimeline = false;
-        const { timeline } = formatTimelineResultToModel(
+        const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
           timelineTemplate.timelineType ?? TimelineType.default
         );
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-          ecsData,
+          eventData,
           timeline.timelineType
         );
-        const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
+        const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], eventData);
         const dataProviders = replaceTemplateFieldFromDataProviders(
           timeline.dataProviders ?? [],
-          ecsData,
+          eventData,
           timeline.timelineType
         );
 
@@ -213,10 +226,12 @@ export const sendAlertToTimelineAction = async ({
                 expression: query,
               },
             },
+            noteIds: notes?.map((n) => n.noteId) ?? [],
             show: true,
           },
           to,
           ruleNote: noteContent,
+          notes: notes ?? null,
         });
       }
     } catch {
@@ -232,6 +247,7 @@ export const sendAlertToTimelineAction = async ({
   ) {
     return createTimeline({
       from,
+      notes: null,
       timeline: {
         ...timelineDefaults,
         dataProviders: [
@@ -282,6 +298,7 @@ export const sendAlertToTimelineAction = async ({
   } else {
     return createTimeline({
       from,
+      notes: null,
       timeline: {
         ...timelineDefaults,
         dataProviders: [

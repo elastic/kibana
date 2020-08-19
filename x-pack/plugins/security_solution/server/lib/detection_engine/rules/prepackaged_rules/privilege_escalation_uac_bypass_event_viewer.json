@@ -4,7 +4,8 @@
   ],
   "description": "Identifies User Account Control (UAC) bypass via eventvwr.exe. Attackers bypass UAC to stealthily execute code with elevated permissions.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

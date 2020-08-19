@@ -8,9 +8,27 @@ import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { eventId } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
+type SortFields = [
+  {
+    '@timestamp': string;
+  },
+  { [x: string]: string }
+];
+
+type SearchAfterFields = [number, string];
+
 interface PaginationCursor {
   timestamp: number;
   eventID: string;
+}
+
+/**
+ * Interface for defining the returned pagination information.
+ */
+export interface PaginationFields {
+  sort: SortFields;
+  size: number;
+  searchAfter?: SearchAfterFields;
 }
 
 /**
@@ -101,6 +119,22 @@ export class PaginationBuilder {
   }
 
   /**
+   * Helper for creates an object for adding the pagination fields to a query
+   *
+   * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @returns an object containing the pagination information
+   */
+  buildQueryFieldsAsInterface(tiebreaker: string): PaginationFields {
+    const sort: SortFields = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+    let searchAfter: SearchAfterFields | undefined;
+    if (this.timestamp && this.eventID) {
+      searchAfter = [this.timestamp, this.eventID];
+    }
+
+    return { sort, size: this.size, searchAfter };
+  }
+
+  /**
    * Creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
@@ -108,10 +142,11 @@ export class PaginationBuilder {
    */
   buildQueryFields(tiebreaker: string): JsonObject {
     const fields: JsonObject = {};
-    fields.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
-    fields.size = this.size;
-    if (this.timestamp && this.eventID) {
-      fields.search_after = [this.timestamp, this.eventID] as Array<number | string>;
+    const pagination = this.buildQueryFieldsAsInterface(tiebreaker);
+    fields.sort = pagination.sort;
+    fields.size = pagination.size;
+    if (pagination.searchAfter) {
+      fields.search_after = pagination.searchAfter;
     }
     return fields;
   }

@@ -142,11 +142,14 @@ export async function getServiceMap(options: IEnvOptions) {
   const { logger } = options;
   const anomaliesPromise: Promise<ServiceAnomaliesResponse> = getServiceAnomalies(
     options
+
+    // always catch error to avoid breaking service maps if there is a problem with ML
   ).catch((error) => {
     logger.warn(`Unable to retrieve anomalies for service maps.`);
     logger.error(error);
     return DEFAULT_ANOMALIES;
   });
+
   const [connectionData, servicesData, anomalies] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),

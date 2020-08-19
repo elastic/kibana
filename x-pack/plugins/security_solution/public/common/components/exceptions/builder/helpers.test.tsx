@@ -41,6 +41,7 @@ import {
   getOperatorOptions,
   getUpdatedEntriesOnDelete,
   isEntryNested,
+  getCorrespondingKeywordField,
 } from './helpers';
 import { OperatorOption } from '../../autocomplete/types';
 
@@ -57,6 +58,7 @@ const getMockBuilderEntry = (): FormattedBuilderEntry => ({
   nested: undefined,
   parent: undefined,
   entryIndex: 0,
+  correspondingKeywordField: undefined,
 });
 
 const getMockNestedBuilderEntry = (): FormattedBuilderEntry => ({
@@ -73,6 +75,7 @@ const getMockNestedBuilderEntry = (): FormattedBuilderEntry => ({
     parentIndex: 0,
   },
   entryIndex: 0,
+  correspondingKeywordField: undefined,
 });
 
 const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
@@ -82,69 +85,305 @@ const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
   nested: 'parent',
   parent: undefined,
   entryIndex: 0,
+  correspondingKeywordField: undefined,
 });
 
+const mockEndpointFields = [
+  {
+    name: 'file.path.text',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
+export const getEndpointField = (name: string) =>
+  mockEndpointFields.find((field) => field.name === name) as IFieldType;
+
 describe('Exception builder helpers', () => {
+  describe('#getCorrespondingKeywordField', () => {
+    test('it returns matching keyword field if "selectedFieldIsTextType" is true and keyword field exists', () => {
+      const output = getCorrespondingKeywordField({
+        fields,
+        selectedField: 'machine.os.raw.text',
+      });
+
+      expect(output).toEqual(getField('machine.os.raw'));
+    });
+
+    test('it returns undefined if "selectedFieldIsTextType" is false', () => {
+      const output = getCorrespondingKeywordField({
+        fields,
+        selectedField: 'machine.os.raw',
+      });
+
+      expect(output).toEqual(undefined);
+    });
+
+    test('it returns undefined if "selectedField" is empty string', () => {
+      const output = getCorrespondingKeywordField({
+        fields,
+        selectedField: '',
+      });
+
+      expect(output).toEqual(undefined);
+    });
+
+    test('it returns undefined if "selectedField" is undefined', () => {
+      const output = getCorrespondingKeywordField({
+        fields,
+        selectedField: undefined,
+      });
+
+      expect(output).toEqual(undefined);
+    });
+  });
+
   describe('#getFilteredIndexPatterns', () => {
-    test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
-      const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
-      const expected: IIndexPattern = {
-        fields: [
-          { ...getField('nestedField.child') },
-          { ...getField('nestedField.nestedChild.doublyNestedChild') },
-        ],
-        id: '1234',
-        title: 'logstash-*',
-      };
-      expect(output).toEqual(expected);
+    describe('list type detections', () => {
+      test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
+        const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
+        const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const expected: IIndexPattern = {
+          fields: [
+            { ...getField('nestedField.child') },
+            { ...getField('nestedField.nestedChild.doublyNestedChild') },
+          ],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
+        const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
+        const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const expected: IIndexPattern = {
+          fields: [{ ...getField('nestedField.child'), name: 'nestedField', esTypes: ['nested'] }],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns only nested fields when "item.nested" is "parent" and nested parent field is undefined', () => {
+        const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockNestedParentBuilderEntry(),
+          field: undefined,
+        };
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const expected: IIndexPattern = {
+          fields: [
+            { ...getField('nestedField.child') },
+            { ...getField('nestedField.nestedChild.doublyNestedChild') },
+          ],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
+        const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
+        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const expected: IIndexPattern = {
+          fields: [...fields],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
     });
 
-    test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
-      const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-      const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
-      const expected: IIndexPattern = {
-        fields: [{ ...getField('nestedField.child'), name: 'nestedField', esTypes: ['nested'] }],
-        id: '1234',
-        title: 'logstash-*',
-      };
-      expect(output).toEqual(expected);
-    });
+    describe('list type endpoint', () => {
+      let payloadIndexPattern: IIndexPattern = getMockIndexPattern();
 
-    test('it returns only nested fields when "item.nested" is "parent" and nested parent field is undefined', () => {
-      const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItem: FormattedBuilderEntry = {
-        ...getMockNestedParentBuilderEntry(),
-        field: undefined,
-      };
-      const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
-      const expected: IIndexPattern = {
-        fields: [
-          { ...getField('nestedField.child') },
-          { ...getField('nestedField.nestedChild.doublyNestedChild') },
-        ],
-        id: '1234',
-        title: 'logstash-*',
-      };
-      expect(output).toEqual(expected);
-    });
+      beforeAll(() => {
+        payloadIndexPattern = {
+          ...payloadIndexPattern,
+          fields: [...payloadIndexPattern.fields, ...mockEndpointFields],
+        };
+      });
 
-    test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
-      const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
-      const expected: IIndexPattern = {
-        fields: [...fields],
-        id: '1234',
-        title: 'logstash-*',
-      };
-      expect(output).toEqual(expected);
+      test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          field: getEndpointField('file.Ext.code_signature.status'),
+          operator: isOperator,
+          value: 'some value',
+          nested: 'child',
+          parent: {
+            parent: {
+              ...getEntryNestedMock(),
+              field: 'file.Ext.code_signature',
+              entries: [{ ...getEntryMatchMock(), field: 'child' }],
+            },
+            parentIndex: 0,
+          },
+          entryIndex: 0,
+          correspondingKeywordField: undefined,
+        };
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const expected: IIndexPattern = {
+          fields: [getEndpointField('file.Ext.code_signature.status')],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockNestedParentBuilderEntry(),
+          field: {
+            ...getEndpointField('file.Ext.code_signature.status'),
+            name: 'file.Ext.code_signature',
+            esTypes: ['nested'],
+          },
+        };
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const expected: IIndexPattern = {
+          fields: [
+            {
+              aggregatable: false,
+              count: 0,
+              esTypes: ['nested'],
+              name: 'file.Ext.code_signature',
+              readFromDocValues: false,
+              scripted: false,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'file.Ext.code_signature',
+                },
+              },
+              type: 'string',
+            },
+          ],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns only nested fields when "item.nested" is "parent" and nested parent field is undefined', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockNestedParentBuilderEntry(),
+          field: undefined,
+        };
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const expected: IIndexPattern = {
+          fields: [getEndpointField('file.Ext.code_signature.status')],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
+        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const expected: IIndexPattern = {
+          fields: [
+            {
+              aggregatable: false,
+              count: 0,
+              esTypes: ['text'],
+              name: 'file.path.text',
+              readFromDocValues: false,
+              scripted: false,
+              searchable: true,
+              type: 'string',
+            },
+            {
+              name: 'file.Ext.code_signature.status',
+              type: 'string',
+              esTypes: ['text'],
+              count: 0,
+              scripted: false,
+              searchable: true,
+              aggregatable: false,
+              readFromDocValues: false,
+              subType: { nested: { path: 'file.Ext.code_signature' } },
+            },
+          ],
+          id: '1234',
+          title: 'logstash-*',
+        };
+        expect(output).toEqual(expected);
+      });
     });
   });
 
   describe('#getFormattedBuilderEntry', () => {
+    test('it returns entry with a value for "correspondingKeywordField" when "item.field" is of type "text" and matching keyword field exists', () => {
+      const payloadIndexPattern: IIndexPattern = {
+        ...getMockIndexPattern(),
+        fields: [
+          ...fields,
+          {
+            name: 'machine.os.raw.text',
+            type: 'string',
+            esTypes: ['text'],
+            count: 0,
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+            readFromDocValues: true,
+          },
+        ],
+      };
+      const payloadItem: BuilderEntry = {
+        ...getEntryMatchMock(),
+        field: 'machine.os.raw.text',
+        value: 'some os',
+      };
+      const output = getFormattedBuilderEntry(
+        payloadIndexPattern,
+        payloadItem,
+        0,
+        undefined,
+        undefined
+      );
+      const expected: FormattedBuilderEntry = {
+        entryIndex: 0,
+        field: {
+          name: 'machine.os.raw.text',
+          type: 'string',
+          esTypes: ['text'],
+          count: 0,
+          scripted: false,
+          searchable: false,
+          aggregatable: false,
+          readFromDocValues: true,
+        },
+        nested: undefined,
+        operator: isOperator,
+        parent: undefined,
+        value: 'some os',
+        correspondingKeywordField: getField('machine.os.raw'),
+      };
+      expect(output).toEqual(expected);
+    });
+
     test('it returns "FormattedBuilderEntry" with value "nested" of "child" when "parent" and "parentIndex" are defined', () => {
       const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
       const payloadItem: BuilderEntry = { ...getEntryMatchMock(), field: 'child' };
@@ -188,6 +427,7 @@ describe('Exception builder helpers', () => {
           parentIndex: 1,
         },
         value: 'some host name',
+        correspondingKeywordField: undefined,
       };
       expect(output).toEqual(expected);
     });
@@ -218,6 +458,7 @@ describe('Exception builder helpers', () => {
         operator: isOperator,
         parent: undefined,
         value: 'some ip',
+        correspondingKeywordField: undefined,
       };
       expect(output).toEqual(expected);
     });
@@ -252,6 +493,7 @@ describe('Exception builder helpers', () => {
           operator: isOperator,
           parent: undefined,
           value: 'some host name',
+          correspondingKeywordField: undefined,
         },
       ];
       expect(output).toEqual(expected);
@@ -281,6 +523,7 @@ describe('Exception builder helpers', () => {
           operator: isOperator,
           parent: undefined,
           value: 'some ip',
+          correspondingKeywordField: undefined,
         },
         {
           entryIndex: 1,
@@ -298,6 +541,7 @@ describe('Exception builder helpers', () => {
           operator: isOneOfOperator,
           parent: undefined,
           value: ['some extension'],
+          correspondingKeywordField: undefined,
         },
       ];
       expect(output).toEqual(expected);
@@ -333,6 +577,7 @@ describe('Exception builder helpers', () => {
           operator: isOperator,
           parent: undefined,
           value: 'some ip',
+          correspondingKeywordField: undefined,
         },
         {
           entryIndex: 1,
@@ -347,6 +592,7 @@ describe('Exception builder helpers', () => {
           operator: isOperator,
           parent: undefined,
           value: undefined,
+          correspondingKeywordField: undefined,
         },
         {
           entryIndex: 0,
@@ -383,6 +629,7 @@ describe('Exception builder helpers', () => {
             parentIndex: 1,
           },
           value: 'some host name',
+          correspondingKeywordField: undefined,
         },
       ];
       expect(output).toEqual(expected);
@@ -407,7 +654,7 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it removes entry corresponding to "nestedEntryIndex"', () => {
+    test('it removes nested entry of "entryIndex" with corresponding parent index', () => {
       const payloadItem: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
         entries: [
@@ -417,10 +664,10 @@ describe('Exception builder helpers', () => {
           },
         ],
       };
-      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 1);
+      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 0);
       const expected: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
-        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryExistsMock() }] }],
+        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryMatchAnyMock() }] }],
       };
       expect(output).toEqual(expected);
     });

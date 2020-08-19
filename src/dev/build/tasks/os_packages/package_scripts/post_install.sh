@@ -31,6 +31,10 @@ case $1 in
       --ingroup "<%= group %>" --shell /bin/false "<%= user %>"
     fi
 
+    if [ -n "$2" ]; then
+      IS_UPGRADE=true
+    fi
+
     set_access
   ;;
   abort-deconfigure|abort-upgrade|abort-remove)
@@ -47,6 +51,10 @@ case $1 in
       -c "kibana service user" "<%= user %>"
     fi
 
+    if [ "$1" = "2" ]; then
+      IS_UPGRADE=true
+    fi
+
     set_access
   ;;
 
@@ -55,3 +63,9 @@ case $1 in
       exit 1
   ;;
 esac
+
+if [ "$IS_UPGRADE" = "true" ]; then
+  if command -v systemctl >/dev/null; then
+      systemctl daemon-reload
+  fi
+fi

@@ -24,6 +24,8 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { SeverityMapping } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -150,16 +152,36 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     references,
     severity: {
       value: severity,
-      mapping: severityMapping,
+      mapping: fillEmptySeverityMappings(severityMapping),
+      isMappingChecked: severityMapping.length > 0,
     },
     tags,
     riskScore: {
       value: riskScore,
       mapping: riskScoreMapping,
+      isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
     threat: threat as IMitreEnterpriseAttack[],
   };
+};
+
+const severitySortMapping = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+};
+
+export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
+  const missingMappings: SeverityMapping = severityOptions.flatMap((so) =>
+    mappings.find((mapping) => mapping.severity === so.value) == null
+      ? [{ field: '', value: '', operator: 'equals', severity: so.value }]
+      : []
+  );
+  return [...mappings, ...missingMappings].sort(
+    (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
+  );
 };
 
 export const determineDetailsValue = (

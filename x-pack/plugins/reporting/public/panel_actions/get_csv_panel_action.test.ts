@@ -18,7 +18,11 @@ describe('GetCsvReportPanelAction', () => {
 
   beforeAll(() => {
     if (typeof window.URL.revokeObjectURL === 'undefined') {
-      Object.defineProperty(window.URL, 'revokeObjectURL', { value: () => {} });
+      Object.defineProperty(window.URL, 'revokeObjectURL', {
+        configurable: true,
+        writable: true,
+        value: () => {},
+      });
     }
   });
 

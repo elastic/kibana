@@ -8,7 +8,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -68,24 +68,11 @@ export const ResolverMap = React.memo(function ({
   const hasError = useSelector(selectors.hasError);
   const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
-  const {
-    cleanUpQueryParams,
-    queryParams: { crumbId },
-    pushToQueryParams,
-  } = useResolverQueryParams();
+  const { cleanUpQueryParams } = useResolverQueryParams();
 
   useEffectOnce(() => {
     return () => cleanUpQueryParams();
   });
-
-  useEffect(() => {
-    // When you refresh the page after selecting a process in the table view (not the timeline view)
-    // The old crumbId still exists in the query string even though a resolver is no longer visible
-    // This just makes sure the activeDescendant and crumbId are in sync on load for that view as well as the timeline
-    if (activeDescendantId && crumbId !== activeDescendantId) {
-      pushToQueryParams({ crumbId: activeDescendantId, crumbEvent: '' });
-    }
-  }, [crumbId, activeDescendantId, pushToQueryParams]);
 
   return (
     <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>

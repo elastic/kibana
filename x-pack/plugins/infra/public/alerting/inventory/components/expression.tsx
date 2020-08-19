@@ -364,10 +364,11 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId')}
+        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}
+        showNoDataResults={alertParams.alertOnNoData}
       />
       <EuiSpacer size={'m'} />
     </>

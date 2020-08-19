@@ -16,6 +16,7 @@ import { stepAboutDefaultValue } from './default_value';
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
@@ -176,8 +177,8 @@ describe('StepAboutRuleComponent', () => {
         name: 'Test name text',
         note: '',
         references: [''],
-        riskScore: { value: 50, mapping: [] },
-        severity: { value: 'low', mapping: [] },
+        riskScore: { value: 50, mapping: [], isMappingChecked: false },
+        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: [],
         threat: [
           {
@@ -236,8 +237,8 @@ describe('StepAboutRuleComponent', () => {
         name: 'Test name text',
         note: '',
         references: [''],
-        riskScore: { value: 80, mapping: [] },
-        severity: { value: 'low', mapping: [] },
+        riskScore: { value: 80, mapping: [], isMappingChecked: false },
+        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: [],
         threat: [
           {

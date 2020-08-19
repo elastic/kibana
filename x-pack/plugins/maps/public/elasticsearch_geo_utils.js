@@ -469,3 +469,12 @@ export function extractFeaturesFromFilters(filters) {
 
   return features;
 }
+
+export function turfBboxToBounds(turfBbox) {
+  return {
+    minLon: turfBbox[0],
+    minLat: turfBbox[1],
+    maxLon: turfBbox[2],
+    maxLat: turfBbox[3],
+  };
+}

@@ -20,11 +20,15 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SavedQueryManagementComponentProvider({ getService }: FtrProviderContext) {
+export function SavedQueryManagementComponentProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
   const config = getService('config');
+  const PageObjects = getPageObjects(['common']);
 
   class SavedQueryManagementComponent {
     public async getCurrentlyLoadedQueryID() {
@@ -105,7 +109,7 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
     public async deleteSavedQuery(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`~delete-saved-query-${title}-button`);
-      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.common.clickConfirmOnModal();
     }
 
     async clearCurrentlyLoadedQuery() {
@@ -169,8 +173,8 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
       await retry.waitFor('saved query management popover to have any text', async () => {
+        await testSubjects.click('saved-query-management-popover-button');
         const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
         return queryText.length > 0;
       });
@@ -180,7 +184,10 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (!isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
+      await retry.try(async () => {
+        await testSubjects.click('saved-query-management-popover-button');
+        await testSubjects.missingOrFail('saved-query-management-popover');
+      });
     }
 
     async openSaveCurrentQueryModal() {

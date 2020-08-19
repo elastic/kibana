@@ -28,7 +28,10 @@
   "severity": "low",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Asset Visibility",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

@@ -54,7 +54,8 @@ export const getHostListPath = (
 };
 
 export const getHostDetailsPath = (
-  props: { name: 'hostDetails' | 'hostPolicyResponse' } & HostDetailsUrlProps,
+  props: { name: 'hostDetails' | 'hostPolicyResponse' } & HostIndexUIQueryParams &
+    HostDetailsUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;

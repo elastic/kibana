@@ -39,7 +39,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
-  packageInputStreams: Array<RegistryStream & { dataset: { name: string } }>,
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
   packageConfigInput: PackageConfigInput
 ): boolean => {
   return (
@@ -52,7 +52,7 @@ const shouldShowStreamsByDefault = (
             hasInvalidButRequiredVar(
               stream.vars,
               packageConfigInput.streams.find(
-                (pkgStream) => stream.dataset.name === pkgStream.dataset.name
+                (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
               )?.vars
             )
         )
@@ -62,7 +62,7 @@ const shouldShowStreamsByDefault = (
 
 export const PackageConfigInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
-  packageInputStreams: Array<RegistryStream & { dataset: { name: string } }>;
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
   packageConfigInput: PackageConfigInput;
   updatePackageConfigInput: (updatedInput: Partial<PackageConfigInput>) => void;
   inputValidationResults: PackageConfigInputValidationResults;
@@ -90,7 +90,7 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
         return {
           packageInputStream,
           packageConfigInputStream: packageConfigInput.streams.find(
-            (stream) => stream.dataset.name === packageInputStream.dataset.name
+            (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
           ),
         };
       })
@@ -201,7 +201,8 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                     updatedStream: Partial<PackageConfigInputStream>
                   ) => {
                     const indexOfUpdatedStream = packageConfigInput.streams.findIndex(
-                      (stream) => stream.dataset.name === packageInputStream.dataset.name
+                      (stream) =>
+                        stream.data_stream.dataset === packageInputStream.data_stream.dataset
                     );
                     const newStreams = [...packageConfigInput.streams];
                     newStreams[indexOfUpdatedStream] = {

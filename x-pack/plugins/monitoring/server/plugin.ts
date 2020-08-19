@@ -128,10 +128,17 @@ export class Plugin {
       const coreStart = (await core.getStartServices())[0];
       return coreStart.uiSettings;
     };
-
+    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      alert.initializeAlertType(getUiSettingsService, cluster, this.getLogger, config, kibanaUrl);
+      alert.initializeAlertType(
+        getUiSettingsService,
+        cluster,
+        this.getLogger,
+        config,
+        kibanaUrl,
+        isCloud
+      );
       plugins.alerts.registerType(alert.getAlertType());
     }
 
@@ -316,8 +323,22 @@ export class Plugin {
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getActionTypeRegistry: () => context.actions?.listTypes(),
-            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
-            getActionsClient: () => plugins.actions.getActionsClientWithRequest(req),
+            getAlertsClient: () => {
+              try {
+                return plugins.alerts.getAlertsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
+            getActionsClient: () => {
+              try {
+                return plugins.actions.getActionsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
             server: {
               config: legacyConfigWrapper,
               newPlatform: {

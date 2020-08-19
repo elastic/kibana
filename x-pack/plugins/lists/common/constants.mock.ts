@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EntriesArray } from './schemas/types';
+import moment from 'moment';
 
+import { EntriesArray } from './schemas/types';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
 export const USER = 'some user';
@@ -64,3 +65,4 @@ export const CURSOR = 'c29tZXN0cmluZ2ZvcnlvdQ==';
 export const _VERSION = 'WzI5NywxXQ==';
 export const VERSION = 1;
 export const IMMUTABLE = false;
+export const IMPORT_TIMEOUT = moment.duration(5, 'minutes');

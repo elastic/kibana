@@ -13,7 +13,7 @@ export const MODAL_TITLE = i18n.translate('xpack.securitySolution.lists.uploadVa
 export const FILE_PICKER_LABEL = i18n.translate(
   'xpack.securitySolution.lists.uploadValueListDescription',
   {
-    defaultMessage: 'Upload single value lists to use while writing rules or rule exceptions.',
+    defaultMessage: 'Upload single value lists to use while writing rule exceptions.',
   }
 );
 
@@ -64,6 +64,10 @@ export const uploadSuccessMessage = (fileName: string) =>
     defaultMessage: "Value list '{fileName}' was uploaded",
     values: { fileName },
   });
+
+export const EXPORT_ERROR = i18n.translate('xpack.securitySolution.lists.valueListsExportError', {
+  defaultMessage: 'There was an error exporting the value list.',
+});
 
 export const COLUMN_FILE_NAME = i18n.translate(
   'xpack.securitySolution.lists.valueListsTable.fileNameColumn',
