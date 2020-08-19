@@ -18,7 +18,7 @@
  */
 
 if (process.noProcessWarnings !== true) {
-  var ignore = ['DeprecationWarning', 'MaxListenersExceededWarning'];
+  var ignore = ['MaxListenersExceededWarning'];
 
   process.on('warning', function (warn) {
     if (ignore.includes(warn.name)) return;
