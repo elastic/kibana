@@ -20,7 +20,8 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
 
-  describe('pagerduty action', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/75386
+  describe.skip('pagerduty action', () => {
     let simulatedActionId = '';
     let pagerdutySimulatorURL: string = '<could not determine kibana url>';
     let proxyServer: any;
