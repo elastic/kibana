@@ -64,7 +64,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
     });
   }
 
-  // @ts-ignore
+  // @ts-expect-error
   const metricVis = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     percentageMode,
     colorSchema,
