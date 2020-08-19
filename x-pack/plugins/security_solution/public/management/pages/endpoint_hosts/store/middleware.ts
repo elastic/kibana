@@ -18,11 +18,11 @@ import {
 } from './selectors';
 import { EndpointState } from '../types';
 import {
-  sendGetEndpointSpecificPackageConfigs,
+  sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
-  sendGetAgentConfigList,
+  sendGetAgentPolicyList,
 } from '../../policy/store/policy_list/services/ingest';
-import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
   // eslint-disable-next-line complexity
@@ -106,7 +106,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
 
         try {
-          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackageConfigs(
+          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
             http,
             {
               query: {
@@ -267,21 +267,21 @@ const getNonExistingPoliciesForEndpointsList = async (
     return;
   }
 
-  // We use the Agent Config API here, instead of the Package Config, because we can't use
-  // filter by ID of the Saved Object. Agent Config, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package config (policy)
+  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
+  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
+  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentConfigList(http, {
+    await sendGetAgentPolicyList(http, {
       query: {
-        kuery: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.package_configs: (${policyIdsToCheck.join(
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
           ' or '
         )})`,
       },
     })
-  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentConfig) => {
-    (agentConfig.package_configs as string[]).forEach((packageConfig) => {
-      list[packageConfig as string] = true;
+  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentPolicy) => {
+    (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
+      list[packagePolicy as string] = true;
     });
     return list;
   }, {});

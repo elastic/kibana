@@ -145,7 +145,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Configuration link is clicked', async () => {
+        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
           await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
           await testSubjects.existOrFail('fleetAgentListTable');
