@@ -428,6 +428,15 @@ export const ModelsList: FC = () => {
 
   const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
     ? {
+        selectableMessage: (selectable, item) => {
+          return selectable
+            ? i18n.translate('xpack.ml.inference.modelsList.selectableMessage', {
+                defaultMessage: 'Select a model',
+              })
+            : i18n.translate('xpack.ml.inference.modelsList.disableSelectableMessage', {
+                defaultMessage: 'Model has associated pipelines',
+              });
+        },
         selectable: (item) => !item.pipelines,
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
