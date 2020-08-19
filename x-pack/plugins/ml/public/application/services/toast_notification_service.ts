@@ -20,6 +20,10 @@ export type ToastNotificationService = ReturnType<typeof toastNotificationServic
 
 export function toastNotificationServiceProvider(toastNotifications: ToastsStart) {
   return {
+    displayDangerToast(toastOrTitle: ToastInput, options?: ToastOptions) {
+      toastNotifications.addDanger(toastOrTitle, options);
+    },
+
     displaySuccessToast(toastOrTitle: ToastInput, options?: ToastOptions) {
       toastNotifications.addSuccess(toastOrTitle, options);
     },
