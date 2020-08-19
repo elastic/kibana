@@ -9,9 +9,9 @@ import { combineLatest } from 'rxjs';
 import { initBulkUploader } from './kibana_monitoring';
 import { AlertsFactory } from './alerts';
 
-const rxjs = jest.requireActual('rxjs');
 jest.mock('rxjs', () => ({
-  ...rxjs,
+  // @ts-ignore
+  ...jest.requireActual('rxjs'),
   combineLatest: jest.fn(),
 }));
 
