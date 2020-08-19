@@ -146,6 +146,7 @@ export class TaskManager {
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
+      logger: this.logger,
     });
 
     this.pool = new TaskPool({
@@ -159,6 +160,11 @@ export class TaskManager {
       getCapacity: () => this.pool.availableWorkers,
       pollRequests$: this.claimRequests$,
       work: this.pollForWork,
+      // Time out the `work` phase if it takes longer than a certain number of polling cycles
+      // The `work` phase includes the prework needed *before* executing a task
+      // (such as polling for new work, marking tasks as running etc.) but does not
+      // include the time of actually running the task
+      workTimeout: opts.config.poll_interval * opts.config.max_poll_inactivity_cycles,
     });
   }
 
@@ -283,7 +289,7 @@ export class TaskManager {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: object
+    options?: Record<string, unknown>
   ): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
@@ -318,7 +324,7 @@ export class TaskManager {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: object
+    options?: Record<string, unknown>
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);

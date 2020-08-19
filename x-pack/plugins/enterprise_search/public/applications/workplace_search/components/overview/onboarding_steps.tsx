@@ -22,7 +22,6 @@ import {
   EuiLinkProps,
 } from '@elastic/eui';
 import sharedSourcesIcon from '../shared/assets/share_circle.svg';
-import { useRoutes } from '../shared/use_routes';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
@@ -133,8 +132,10 @@ export const OnboardingSteps: React.FC = () => {
 };
 
 export const OrgNameOnboarding: React.FC = () => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { getWSRoute } = useRoutes();
+  const {
+    http,
+    externalUrl: { getWorkplaceSearchUrl },
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({
@@ -148,7 +149,7 @@ export const OrgNameOnboarding: React.FC = () => {
     onClick,
     target: '_blank',
     color: 'primary',
-    href: getWSRoute(ORG_SETTINGS_PATH),
+    href: getWorkplaceSearchUrl(ORG_SETTINGS_PATH),
     'data-test-subj': 'orgNameChangeButton',
   } as EuiButtonEmptyProps & EuiLinkProps;
 
