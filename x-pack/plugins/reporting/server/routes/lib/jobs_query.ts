@@ -5,28 +5,40 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  CountParams,
-  CountResponse,
-  errors as elasticsearchErrors,
-  SearchParams,
-  SearchResponse,
-} from 'elasticsearch';
+import { errors as elasticsearchErrors } from 'elasticsearch';
 import { get } from 'lodash';
 import { ReportingCore } from '../../';
 import { JobSource, ReportingUser } from '../../types';
 
-// FIXME: typescript definition does not have the proper search API field name!
-declare module 'elasticsearch' {
-  interface SearchParams {
-    _source_excludes?: SearchParams['_sourceExclude'];
-  }
-}
-
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
 
-type QueryType = 'search' | 'count';
+// TODO: use SearchRequest from elasticsearch-client
+interface QueryBody {
+  size?: number;
+  from?: number;
+  _source?: {
+    excludes: string[];
+  };
+  query: {
+    constant_score: {
+      filter: {
+        bool: {
+          must: Array<Record<string, any>>;
+        };
+      };
+    };
+  };
+}
+
+interface GetOpts {
+  includeContent?: boolean;
+}
+
+// TODO: use SearchResult from elasticsearch-client
+interface CountAggResult {
+  count: number;
+}
 
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
@@ -34,31 +46,25 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
   const { elasticsearch } = reportingCore.getPluginSetupDeps();
   const { callAsInternalUser } = elasticsearch.legacy.client;
 
-  function execQuery<ParamType extends SearchParams | CountParams, ResponseType>(
-    queryType: QueryType,
-    params: ParamType
-  ) {
-    const { body: paramsBody, ...restParams } = params;
+  function execQuery(queryType: string, body: QueryBody) {
+    const defaultBody: Record<string, object> = {
+      search: {
+        _source: {
+          excludes: ['output.content'],
+        },
+        sort: [{ created_at: { order: 'desc' } }],
+        size: defaultSize,
+      },
+    };
 
     const config = reportingCore.getConfig();
     const index = config.get('index');
-    let query: SearchParams | CountParams;
-    if (queryType === 'count') {
-      query = {
-        body: paramsBody,
-        index: `${index}-*`,
-      };
-    } else {
-      query = {
-        body: paramsBody,
-        index: `${index}-*`,
-        size: defaultSize,
-        sort: ['created_at'],
-        ...restParams,
-      };
-    }
+    const query = {
+      index: `${index}-*`,
+      body: Object.assign(defaultBody[queryType] || {}, body),
+    };
 
-    return callAsInternalUser<ResponseType>(queryType, query).catch((err) => {
+    return callAsInternalUser(queryType, query).catch((err) => {
       if (err instanceof esErrors['401']) return;
       if (err instanceof esErrors['403']) return;
       if (err instanceof esErrors['404']) return;
@@ -66,7 +72,9 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
     });
   }
 
-  function getHits<ResponseType>(query: Promise<ResponseType>) {
+  type Result = number;
+
+  function getHits(query: Promise<Result>) {
     return query.then((res) => get(res, 'hits.hits', []));
   }
 
@@ -79,17 +87,14 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
       jobIds: string[] | null
     ) {
       const username = getUsername(user);
-      const params: SearchParams = {
+      const body: QueryBody = {
         size,
         from: size * page,
-        _source_excludes: ['output.content'],
-        body: {
-          query: {
-            constant_score: {
-              filter: {
-                bool: {
-                  must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
-                },
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
               },
             },
           },
@@ -97,70 +102,61 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
       };
 
       if (jobIds) {
-        params.body.query.constant_score.filter.bool.must.push({
+        body.query.constant_score.filter.bool.must.push({
           ids: { values: jobIds },
         });
       }
 
-      return getHits(execQuery<SearchParams, SearchResponse<unknown>>('search', params));
+      return getHits(execQuery('search', body));
     },
 
     count(jobTypes: string[], user: ReportingUser) {
       const username = getUsername(user);
-      const params: CountParams = {
-        body: {
-          query: {
-            constant_score: {
-              filter: {
-                bool: {
-                  must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
-                },
+      const body: QueryBody = {
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
               },
             },
           },
         },
       };
 
-      return execQuery<CountParams, CountResponse>('count', params).then((doc) => {
+      return execQuery('count', body).then((doc: CountAggResult) => {
         if (!doc) return 0;
         return doc.count;
       });
     },
 
-    get(
-      user: ReportingUser,
-      id: string,
-      opts: { includeContent?: boolean } = {}
-    ): Promise<JobSource<unknown> | void> {
+    get(user: ReportingUser, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
       if (!id) return Promise.resolve();
       const username = getUsername(user);
 
-      const params: SearchParams = {
-        body: {
-          query: {
-            constant_score: {
-              filter: {
-                bool: {
-                  must: [{ term: { _id: id } }, { term: { created_by: username } }],
-                },
+      const body: QueryBody = {
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ term: { _id: id } }, { term: { created_by: username } }],
               },
             },
           },
         },
-        _source_excludes: ['output.content'],
         size: 1,
       };
 
       if (opts.includeContent) {
-        params._source_excludes = [];
+        body._source = {
+          excludes: [],
+        };
       }
 
-      return getHits(execQuery<SearchParams, SearchResponse<unknown>>('search', params)).then(
-        (hits) => {
-          if (hits.length !== 1) return;
-          return hits[0];
-        }
-      );
+      return getHits(execQuery('search', body)).then((hits) => {
+        if (hits.length !== 1) return;
+        return hits[0];
+      });
     },
 
     async delete(deleteIndex: string, id: string) {
