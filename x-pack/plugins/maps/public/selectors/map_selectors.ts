@@ -297,6 +297,10 @@ export const getLayerList = createSelector(
   }
 );
 
+export const getLayerListConfigOnly = createSelector(getLayerListRaw, (layerDescriptorList) => {
+  return copyPersistentState(layerDescriptorList);
+});
+
 export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find((layer) => {
     return layerId === layer.getId();
@@ -416,23 +420,3 @@ export const areLayersLoaded = createSelector(
     return true;
   }
 );
-
-export function hasUnsavedChanges(
-  state: MapStoreState,
-  savedMap: unknown,
-  initialLayerListConfig: LayerDescriptor[]
-) {
-  const layerListConfigOnly = copyPersistentState(getLayerListRaw(state));
-
-  // @ts-expect-error
-  const savedLayerList = savedMap.getLayerList();
-
-  return !savedLayerList
-    ? !_.isEqual(layerListConfigOnly, initialLayerListConfig)
-    : // savedMap stores layerList as a JSON string using JSON.stringify.
-      // JSON.stringify removes undefined properties from objects.
-      // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
-      // Need to perform the same process for layerListConfigOnly to compare apples to apples
-      // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
-      !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
-}
