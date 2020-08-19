@@ -79,6 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('displays the chart');
       await ml.singleMetricViewer.assertChartExsist();
 
+      await ml.testExecution.logTestStep('should display the annotations section');
+      await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+
       await ml.testExecution.logTestStep('displays the anomalies table');
       await ml.anomaliesTable.assertTableExists();
 
