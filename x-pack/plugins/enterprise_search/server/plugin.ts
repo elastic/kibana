@@ -32,6 +32,7 @@ import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerEnginesRoute } from './routes/app_search/engines';
+import { registerCredentialsRoutes } from './routes/app_search/credentials';
 
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
@@ -107,6 +108,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     registerConfigDataRoute(dependencies);
     registerEnginesRoute(dependencies);
+    registerCredentialsRoutes(dependencies);
     registerWSOverviewRoute(dependencies);
 
     /**
