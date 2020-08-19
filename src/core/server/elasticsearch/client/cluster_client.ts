@@ -20,7 +20,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
-import { ensureRawRequest, filterHeaders, KibanaRequest } from '../../http/router';
+import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
