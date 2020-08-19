@@ -17,7 +17,11 @@ interface Props {
   selectedField: string | null;
 }
 
-export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
+  fields,
+  changeHandler,
+  selectedField,
+}) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = useMemo(
     () => [...createFieldOptions(fields, jobCreator.additionalFields)],
@@ -45,7 +49,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
       selectedOptions={selection}
       onChange={onChange}
       isClearable={true}
-      data-test-subj="mlCategorizationFieldNameSelect"
+      data-test-subj="mlJobWizardCategorizationPerPartitionFieldNameSelect"
     />
   );
 };
