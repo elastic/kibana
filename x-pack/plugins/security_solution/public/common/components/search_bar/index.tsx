@@ -258,6 +258,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
       // for the initial state
       filterManager.setAppFilters(getAppStateFromStorage());
+      setSearchBarFilter({
+        id,
+        filters: filterManager.getFilters(),
+      });
 
       return () => {
         isSubscribed = false;
