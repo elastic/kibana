@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { throttle } from 'lodash';
+import { throttle, isEmpty } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { Maybe } from '../../../../../typings/common';
@@ -14,6 +14,8 @@ import { asPercent } from '../../../../utils/formatters';
 import { unit } from '../../../../style/variables';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { useUiTracker } from '../../../../../../observability/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { getEmptySeries } from '../../charts/CustomPlot/getEmptySeries';
 
 interface Props {
   timeseries: TimeSeries[];
@@ -30,6 +32,8 @@ const formatTooltipValue = (coordinate: Coordinate) => {
 };
 
 function TransactionBreakdownGraph(props: Props) {
+  const { urlParams } = useUrlParams();
+  const { rangeFrom, rangeTo } = urlParams;
   const { timeseries } = props;
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const handleHover = useMemo(
@@ -38,13 +42,23 @@ function TransactionBreakdownGraph(props: Props) {
     [trackApmEvent]
   );
 
+  const isTimeseriesEmpty = isEmpty(timeseries);
+  const chartHeight = isTimeseriesEmpty ? undefined : unit * 12;
+  const emptySeries =
+    rangeFrom && rangeTo
+      ? getEmptySeries(
+          new Date(rangeFrom).valueOf(),
+          new Date(rangeTo).valueOf()
+        )
+      : [];
+
   return (
     <TransactionLineChart
-      series={timeseries}
+      series={isTimeseriesEmpty ? emptySeries : timeseries}
       tickFormatY={tickFormatY}
       formatTooltipValue={formatTooltipValue}
       yMax={1}
-      height={unit * 12}
+      height={chartHeight}
       stacked={true}
       onHover={handleHover}
     />

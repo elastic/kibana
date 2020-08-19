@@ -8,6 +8,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -71,6 +72,7 @@ export function ErroneousTransactionsRateChart() {
           })}
         </span>
       </EuiTitle>
+      <EuiSpacer size="m" />
       <CustomPlot
         {...syncedChartsProps}
         noHits={data?.noHits}
