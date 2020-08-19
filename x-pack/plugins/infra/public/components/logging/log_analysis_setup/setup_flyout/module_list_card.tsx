@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCard, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
@@ -50,6 +50,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     ) : (
       <>
         <RecreateJobButton hasSetupCapabilities={hasSetupCapabilities} onClick={onViewSetup} />
+        <EuiSpacer size="xs" />
         <EuiButtonEmpty {...viewInMlLinkProps}>
           <FormattedMessage
             id="xpack.infra.logs.analysis.viewInMlButtonLabel"
