@@ -295,6 +295,8 @@ export class JobValidator {
         (this._jobCreator.type === JOB_TYPE.ADVANCED && this.modelMemoryLimit.valid)) &&
       this.bucketSpan.valid &&
       this.duplicateDetectors.valid &&
+      this.categorizerMissingPerPartition.valid &&
+      this.categorizerVaryingPerPartitionField.valid &&
       !this.validating &&
       (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
         (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))

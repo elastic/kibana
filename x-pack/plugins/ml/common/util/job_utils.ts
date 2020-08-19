@@ -8,7 +8,6 @@ import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 import each from 'lodash/each';
 import pick from 'lodash/pick';
-import uniq from 'lodash/uniq';
 
 import semver from 'semver';
 import moment, { Duration } from 'moment';
@@ -430,11 +429,13 @@ export function basicJobValidation(
               d.over_field_name === MLCATEGORY ||
               d.partition_field_name === MLCATEGORY
           );
-          const uniqPartitions = uniq(
-            categorizationDetectors
-              .map((d) => d.partition_field_name)
-              .filter((name) => name !== undefined)
-          );
+          const uniqPartitions = [
+            ...new Set(
+              categorizationDetectors
+                .map((d) => d.partition_field_name)
+                .filter((name) => name !== undefined)
+            ),
+          ];
           if (uniqPartitions.length > 1) {
             valid = false;
             messages.push({
