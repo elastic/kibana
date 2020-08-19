@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './analytics_jobs_list';
-export * from './analytics_job_exploration';
-export * from './analytics_job_creation';
-export * from './models_list';
+export { analyticsAuditMessagesProvider } from './analytics_audit_messages';
+export { modelsProvider } from './models_provider';
