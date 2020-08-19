@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { makeChecksWithStatus } from './helper/make_checks';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
@@ -86,7 +84,6 @@ export default function ({ getService }: FtrProviderContext) {
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
 
     beforeEach(async () => {
-      await delay(1000);
       await es.indices.refresh();
     });
 
