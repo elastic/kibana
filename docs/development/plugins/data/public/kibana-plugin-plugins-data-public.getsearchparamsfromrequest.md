@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
+export declare function getSearchParamsFromRequest(searchRequest: Record<string, any>, dependencies: {
     injectedMetadata: CoreStart['injectedMetadata'];
     uiSettings: IUiSettingsClient;
 }): ISearchRequestParams;
@@ -17,7 +17,7 @@ export declare function getSearchParamsFromRequest(searchRequest: SearchRequest,
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  searchRequest | <code>SearchRequest</code> |  |
+|  searchRequest | <code>Record&lt;string, any&gt;</code> |  |
 |  dependencies | <code>{</code><br/><code>    injectedMetadata: CoreStart['injectedMetadata'];</code><br/><code>    uiSettings: IUiSettingsClient;</code><br/><code>}</code> |  |
 
 <b>Returns:</b>

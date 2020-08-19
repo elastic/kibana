@@ -49,7 +49,7 @@ function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
 }
 
 // The current batch/queue of requests to fetch
-let requestsToFetch: Array<Record<any, any>> = [];
+let requestsToFetch: Array<Record<string, any>> = [];
 let requestOptions: FetchOptions[] = [];
 
 // The in-progress fetch (if there is one)
@@ -63,7 +63,7 @@ let fetchInProgress: any = null;
  * @return Promise<SearchResponse> The response for the given request
  */
 async function delayedFetch(
-  request: Record<any, any>,
+  request: Record<string, any>,
   options: FetchOptions,
   fetchHandlers: FetchHandlers,
   ms: number
