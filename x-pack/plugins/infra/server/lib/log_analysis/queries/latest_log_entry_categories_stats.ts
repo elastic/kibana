@@ -13,7 +13,7 @@ import {
   createTimeRangeFilters,
 } from './common';
 
-export const createLogEntryCategoriesQualityQuery = (
+export const createLatestLogEntryCategoriesStatsQuery = (
   logEntryCategoriesJobId: string,
   startTime: number,
   endTime: number,
@@ -99,29 +99,31 @@ const compositeDatasetKeyRT = rt.type({
   dataset: rt.union([rt.string, rt.null]),
 });
 
-type CompositeDatasetKey = rt.TypeOf<typeof compositeDatasetKeyRT>;
+export type CompositeDatasetKey = rt.TypeOf<typeof compositeDatasetKeyRT>;
 
-export const logEntryCategoriesQualityResponseRT = rt.intersection([
+const logEntryCategoryStatsBucketRT = rt.type({
+  key: compositeDatasetKeyRT,
+  categorizer_stats_top_hits: rt.type({
+    hits: rt.type({
+      hits: rt.array(logEntryCategorizerStatsHitRT),
+    }),
+  }),
+});
+
+export type LogEntryCategoryStatsBucket = rt.TypeOf<typeof logEntryCategoryStatsBucketRT>;
+
+export const latestLogEntryCategoriesStatsResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.partial({
     aggregations: rt.type({
       dataset_composite_terms: rt.type({
         after_key: compositeDatasetKeyRT,
-        buckets: rt.array(
-          rt.type({
-            key: compositeDatasetKeyRT,
-            categorizer_stats_top_hits: rt.type({
-              hits: rt.type({
-                hits: rt.array(logEntryCategorizerStatsHitRT),
-              }),
-            }),
-          })
-        ),
+        buckets: rt.array(logEntryCategoryStatsBucketRT),
       }),
     }),
   }),
 ]);
 
-export type LogEntryCategoriesQualityResponse = rt.TypeOf<
-  typeof logEntryCategoriesQualityResponseRT
+export type LatestLogEntryCategoriesStatsResponse = rt.TypeOf<
+  typeof latestLogEntryCategoriesStatsResponseRT
 >;
