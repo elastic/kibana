@@ -89,11 +89,12 @@ function LayerPanels(
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId) => (
+      {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}
           key={layerId}
           layerId={layerId}
+          dataTestSubj={`lns-layerPanel-${index}`}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
