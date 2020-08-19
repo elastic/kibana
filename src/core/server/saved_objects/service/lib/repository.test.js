@@ -555,7 +555,7 @@ describe('SavedObjectsRepository', () => {
           if_primary_term: mockVersionProps._primary_term,
         };
 
-        expectClientCallArgsAction([obj1WithSeq, obj2], { method: 'index' });
+        expectClusterCallArgsAction([obj1WithSeq, obj2], { method: 'index' });
       });
 
       it(`should use the ES create method if ID is defined and overwrite=false`, async () => {
@@ -1489,9 +1489,8 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use the ES index with version if ID and version are defined and overwrite=true`, async () => {
         await createSuccess(type, attributes, { id, overwrite: true, version: mockVersion });
-        expect(client.index).toHaveBeenCalled();
-
-        expect(client.index.mock.calls[0][0]).toMatchObject({
+        expectClusterCalls('index');
+        expectClusterCallArgs({
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         });
