@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+// import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
+import { centralManagementSelector } from '../state/selectors';
+import { showEditMonitorFlyout, hideEditMonitorFlyout } from '../state/actions/central_management';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -20,13 +23,20 @@ interface PageHeaderProps {
   datePicker?: boolean;
 }
 
+interface PageHeaderComponentProps {
+  headingText: string | JSX.Element;
+  extraLinks?: boolean;
+  datePicker?: boolean;
+  toggleCentralManagement: () => void;
+}
+
 export const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
 });
 
-const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
-  defaultMessage: 'Add data',
-});
+// const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
+//   defaultMessage: 'Add data',
+// });
 
 const StyledPicker = styled(EuiFlexItem)`
   &&& {
@@ -44,8 +54,32 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-export const PageHeader = React.memo(
-  ({ headingText, extraLinks = false, datePicker = true }: PageHeaderProps) => {
+const H1Text = styled.h1`
+  white-space: nowrap;
+`;
+
+export const PageHeader: React.FC<PageHeaderProps> = (props) => {
+  const dispatch = useDispatch();
+  const { isEditFlyoutVisible } = useSelector(centralManagementSelector);
+  const to = useCallback(() => {
+    if (isEditFlyoutVisible) {
+      dispatch(hideEditMonitorFlyout());
+    } else {
+      dispatch(showEditMonitorFlyout());
+    }
+  }, [dispatch, isEditFlyoutVisible]);
+  return <PageHeaderComponent {...props} toggleCentralManagement={to} />;
+};
+
+export const PageHeaderComponent: React.MemoExoticComponent<React.FC<
+  PageHeaderComponentProps
+>> = React.memo(
+  ({
+    toggleCentralManagement,
+    headingText,
+    extraLinks = false,
+    datePicker = true,
+  }: PageHeaderProps) => {
     const DatePickerComponent = () =>
       datePicker ? (
         <StyledPicker grow={false} style={{ flexBasis: 485 }}>
@@ -53,7 +87,7 @@ export const PageHeader = React.memo(
         </StyledPicker>
       ) : null;
 
-    const kibana = useKibana();
+    // const kibana = useKibana();
 
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd" responsive={false}>
@@ -69,13 +103,18 @@ export const PageHeader = React.memo(
             {SETTINGS_LINK_TEXT}
           </ReactRouterEuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        {/* <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
             color="primary"
             iconType="plusInCircle"
           >
             {ADD_DATA_LABEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem> */}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={toggleCentralManagement} iconType="plusInCircle">
+            Add monitor
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

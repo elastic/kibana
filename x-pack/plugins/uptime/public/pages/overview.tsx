@@ -21,6 +21,7 @@ import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../compo
 import { StatusPanel } from '../components/overview/status_panel';
 import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
 import { useInitApp } from '../hooks/use_init_app';
+import { EditMonitorFlyout } from '../apps/edit_monitor_flyout';
 
 interface Props {
   loading: boolean;
@@ -75,6 +76,7 @@ export const OverviewPageComponent = React.memo(
     return (
       <>
         <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
+        <EditMonitorFlyout />
         <EmptyState>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
