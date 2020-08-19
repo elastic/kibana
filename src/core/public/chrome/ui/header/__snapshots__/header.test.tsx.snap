@@ -29,6 +29,15 @@ exports[`Header renders 1`] = `
         "management": Object {},
         "navLinks": Object {},
       },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentAppId$": Observable {
         "_isScalar": false,
         "source": Subject {
@@ -640,6 +649,15 @@ exports[`Header renders 2`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+      },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
       },
       "currentAppId$": Observable {
         "_isScalar": false,
@@ -4851,6 +4869,15 @@ exports[`Header renders 3`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+      },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
       },
       "currentAppId$": Observable {
         "_isScalar": false,
@@ -9832,6 +9859,15 @@ exports[`Header renders 4`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+      },
+      "currentActionMenu$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
       },
       "currentAppId$": Observable {
         "_isScalar": false,
