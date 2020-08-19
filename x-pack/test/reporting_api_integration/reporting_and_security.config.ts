@@ -5,10 +5,11 @@
  */
 
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';
 import { ReportingAPIProvider } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
 
@@ -23,7 +24,7 @@ export default async function ({ readConfigFile }) {
   return {
     servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Reporting API Integration Tests' },
-    testFiles: [require.resolve('./reporting')],
+    testFiles: [require.resolve('./reporting_and_security')],
     services: {
       ...apiConfig.get('services'),
       reportingAPI: ReportingAPIProvider,
