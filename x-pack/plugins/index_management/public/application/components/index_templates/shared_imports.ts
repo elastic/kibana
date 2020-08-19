@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 export {
-  SimulateTemplateFlyoutContent,
-  defaultFlyoutProps as simulateTemplateFlyoutProps,
-  Props as SimulateTemplateProps,
-} from './simulate_template_flyout';
+  useForm,
+  Form,
+  getUseField,
+  FormDataProvider,
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
-export { SimulateTemplate, Filters as SimulateTemplateFilters } from './simulate_template';
+export { CheckBoxField } from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
