@@ -396,32 +396,17 @@ export const EndpointList = () => {
 
   const hasListData = listData && listData.length > 0;
 
-  const autoRefresh = useMemo(() => {
-    return (
-      <>
-        <div style={{ display: hasListData ? 'flex' : 'none', maxWidth: 200 }}>
-          <EuiSuperDatePicker
-            onTimeChange={NOOP}
-            isDisabled={hasSelectedEndpoint}
-            onRefresh={onRefresh}
-            isPaused={!hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled}
-            refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
-            onRefreshChange={onRefreshChange}
-            isAutoRefreshOnly={true}
-          />
-        </div>
-        <EuiSpacer size="m" />
-      </>
-    );
-  }, [
-    hasListData,
-    hasSelectedEndpoint,
-    onRefresh,
-    isAutoRefreshEnabled,
-    autoRefreshInterval,
-    onRefreshChange,
-    NOOP,
-  ]);
+  const refreshStyle = useMemo(() => {
+    return { display: hasListData ? 'flex' : 'none', maxWidth: 200 };
+  }, [hasListData]);
+
+  const refreshIsPaused = useMemo(() => {
+    return !hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
+  }, [hasListData, hasSelectedEndpoint, isAutoRefreshEnabled]);
+
+  const refreshInterval = useMemo(() => {
+    return !hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
+  }, [hasListData, autoRefreshInterval]);
 
   return (
     <AdministrationListPage
@@ -441,7 +426,22 @@ export const EndpointList = () => {
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {autoRefresh}
+      {
+        <>
+          <div style={refreshStyle}>
+            <EuiSuperDatePicker
+              onTimeChange={NOOP}
+              isDisabled={hasSelectedEndpoint}
+              onRefresh={onRefresh}
+              isPaused={refreshIsPaused}
+              refreshInterval={refreshInterval}
+              onRefreshChange={onRefreshChange}
+              isAutoRefreshOnly={true}
+            />
+          </div>
+          <EuiSpacer size="m" />
+        </>
+      }
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">

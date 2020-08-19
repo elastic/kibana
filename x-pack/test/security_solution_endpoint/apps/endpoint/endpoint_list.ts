@@ -57,7 +57,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('endpoint list', function () {
     this.tags('ciGroup7');
-    const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when initially navigating to page', () => {
       before(async () => {
@@ -73,8 +72,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(10000);
-        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        const tableData = await pageObjects.endpoint.waitForTableToHaveData(
+          'endpointListTable',
+          10000
+        );
         expect(tableData).to.eql(expectedData);
       });
     });
