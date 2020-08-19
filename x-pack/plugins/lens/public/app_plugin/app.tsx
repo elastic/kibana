@@ -207,9 +207,8 @@ export function App({
       ...(originatingApp && getAppNameFromId
         ? [
             {
-              href: core.http.basePath.prepend(`/app/${originatingApp}#/`),
               onClick: (e) => {
-                redirectTo(undefined, true, undefined);
+                core.application.navigateToApp(originatingApp);
               },
               text: getAppNameFromId(originatingApp),
             } as EuiBreadcrumb,
