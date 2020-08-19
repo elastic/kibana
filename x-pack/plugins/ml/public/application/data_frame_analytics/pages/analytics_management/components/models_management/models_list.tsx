@@ -78,33 +78,51 @@ export const ModelsList: FC = () => {
 
   const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
-
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchData,
-  });
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
   /**
    * Fetches inference trained models.
    */
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     try {
       const response = await inferenceApiService.getInferenceModel(undefined, {
         with_pipelines: true,
         size: 1000,
       });
-      setItems(
-        response.map((v) => ({
-          ...v,
-          ...(typeof v.inference_config === 'object'
-            ? { type: Object.keys(v.inference_config)[0] }
+
+      const newItems = [];
+      const expandedItemsToRefresh = [];
+
+      for (const model of response) {
+        const tableItem = {
+          ...model,
+          ...(typeof model.inference_config === 'object'
+            ? { type: Object.keys(model.inference_config)[0] }
             : {}),
-        }))
-      );
+        };
+        newItems.push(tableItem);
+
+        if (itemIdToExpandedRowMap[model.model_id]) {
+          expandedItemsToRefresh.push(tableItem);
+        }
+      }
+
+      setItems(newItems);
+
+      if (expandedItemsToRefresh.length > 0) {
+        await fetchModelsStats(expandedItemsToRefresh);
+
+        setItemIdToExpandedRowMap(
+          expandedItemsToRefresh.reduce((acc, item) => {
+            acc[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
+            return acc;
+          }, {} as Record<string, JSX.Element>)
+        );
+      }
     } catch (error) {
-      toasts.addError(new Error(error.body.message), {
+      toasts.addError(new Error(error.body?.message), {
         title: i18n.translate('xpack.ml.inference.modelsList.fetchFailedErrorMessage', {
           defaultMessage: 'Models fetch failed',
         }),
@@ -112,7 +130,13 @@ export const ModelsList: FC = () => {
     }
     setIsLoading(false);
     refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
-  }
+  }, [itemIdToExpandedRowMap]);
+
+  // Subscribe to the refresh observable to trigger reloading the model list.
+  useRefreshAnalyticsList({
+    isLoading: setIsLoading,
+    onRefresh: fetchData,
+  });
 
   const modelsStats: ModelsBarStats = useMemo(() => {
     return {
@@ -129,34 +153,27 @@ export const ModelsList: FC = () => {
   /**
    * Fetches models stats and update the original object
    */
-  const fetchModelsStats = useCallback(
-    async (models: ModelItem[]) => {
-      const modelIdsToFetch = models
-        .filter((model) => model.stats === undefined)
-        .map((model) => model.model_id);
+  const fetchModelsStats = useCallback(async (models: ModelItem[]) => {
+    const modelIdsToFetch = models.map((model) => model.model_id);
 
-      // no need to fetch
-      if (modelIdsToFetch.length === 0) return true;
+    try {
+      const {
+        trained_model_stats: modelsStatsResponse,
+      } = await inferenceApiService.getInferenceModelStats(modelIdsToFetch);
 
-      try {
-        const {
-          trained_model_stats: modelsStatsResponse,
-        } = await inferenceApiService.getInferenceModelStats(modelIdsToFetch);
-        for (const { model_id: id, ...stats } of modelsStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          model!.stats = stats;
-        }
-        return true;
-      } catch (error) {
-        toasts.addError(new Error(error.body.message), {
-          title: i18n.translate('xpack.ml.inference.modelsList.fetchModelStatsErrorMessage', {
-            defaultMessage: 'Fetch model stats failed',
-          }),
-        });
+      for (const { model_id: id, ...stats } of modelsStatsResponse) {
+        const model = models.find((m) => m.model_id === id);
+        model!.stats = stats;
       }
-    },
-    [items]
-  );
+      return true;
+    } catch (error) {
+      toasts.addError(new Error(error.body.message), {
+        title: i18n.translate('xpack.ml.inference.modelsList.fetchModelStatsErrorMessage', {
+          defaultMessage: 'Fetch model stats failed',
+        }),
+      });
+    }
+  }, []);
 
   /**
    * Unique inference types from models

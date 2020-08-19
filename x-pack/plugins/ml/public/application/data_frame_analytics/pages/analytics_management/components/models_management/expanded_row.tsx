@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiFlexGroup,
+  EuiTextColor,
 } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -233,9 +234,11 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                               <EuiFlexGroup>
                                 <EuiFlexItem grow={false}>
                                   <EuiTitle size={'xs'}>
-                                    <h5>
-                                      {i + 1}. {pipelineName}
-                                    </h5>
+                                    <EuiTextColor color="subdued">
+                                      <h5>
+                                        {i + 1}. {pipelineName}
+                                      </h5>
+                                    </EuiTextColor>
                                   </EuiTitle>
                                 </EuiFlexItem>
                                 <EuiFlexItem>
@@ -267,7 +270,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                                       <EuiFlexGroup>
                                         <EuiFlexItem grow={false}>
                                           <EuiTitle size={'xxs'}>
-                                            <h6>{name}</h6>
+                                            <EuiTextColor color="subdued">
+                                              <h6>{name}</h6>
+                                            </EuiTextColor>
                                           </EuiTitle>
                                         </EuiFlexItem>
                                         <EuiFlexItem>

@@ -336,7 +336,11 @@ export const useRefreshAnalyticsList = (
       subscriptions.push(
         distinct$
           .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
-          .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
+          .subscribe(() => {
+            if (typeof callback.onRefresh === 'function') {
+              callback.onRefresh();
+            }
+          })
       );
     }
 
@@ -353,7 +357,7 @@ export const useRefreshAnalyticsList = (
     return () => {
       subscriptions.map((sub) => sub.unsubscribe());
     };
-  }, []);
+  }, [callback.onRefresh]);
 
   return {
     refresh: () => {
