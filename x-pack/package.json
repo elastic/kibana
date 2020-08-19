@@ -39,7 +39,7 @@
     "@kbn/utility-types": "1.0.0",
     "@storybook/addon-actions": "^6.0.12",
     "@storybook/addon-console": "^1.2.1",
-    "@storybook/addon-info": "^5.3.19",
+    "@storybook/addon-essentials": "^6.0.12",
     "@storybook/addon-knobs": "^6.0.12",
     "@storybook/addon-storyshots": "^6.0.12",
     "@storybook/react": "^6.0.12",
