@@ -54,6 +54,7 @@ describe('accountManagementApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
     });
 

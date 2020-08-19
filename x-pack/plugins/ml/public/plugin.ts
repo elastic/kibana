@@ -100,6 +100,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             element: params.element,
             appBasePath: params.appBasePath,
             onAppLeave: params.onAppLeave,
+            setHeaderActionMenu: params.setHeaderActionMenu,
             history: params.history,
           }
         );

@@ -191,6 +191,7 @@ export const legacyAppRegister = (app: App<any>) => {
           appRoute
         ),
         onAppLeave: () => undefined,
+        setHeaderActionMenu: () => undefined,
       };
       const unmount = isAppMountDeprecated(app.mount)
         ? await app.mount({ core: npStart.core }, params)

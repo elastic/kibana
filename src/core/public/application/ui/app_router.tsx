@@ -23,6 +23,7 @@ import { History } from 'history';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { ScopedHistory } from '../scoped_history';
@@ -32,6 +33,7 @@ interface Props {
   history: History;
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setAppActionMenu: (appId: string, mount: MountPoint) => void;
   setIsMounting: (isMounting: boolean) => void;
 }
 
@@ -43,6 +45,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   history,
   mounters,
   setAppLeaveHandler,
+  setAppActionMenu,
   appStatuses$,
   setIsMounting,
 }) => {
@@ -69,7 +72,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                   appPath={url}
                   appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                   createScopedHistory={createScopedHistory}
-                  {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}
+                  {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
                 />
               )}
             />
@@ -94,7 +97,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id}
                 appStatus={appStatuses.get(id) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler, setIsMounting }}
+                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
               />
             );
           }}

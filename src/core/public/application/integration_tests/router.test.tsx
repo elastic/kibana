@@ -59,6 +59,7 @@ describe('AppRouter', () => {
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
         setAppLeaveHandler={noop}
+        setAppActionMenu={noop}
         setIsMounting={noop}
       />
     );
