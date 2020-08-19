@@ -17,28 +17,4 @@
  * under the License.
  */
 
-// @ts-ignore
-import { fieldCalculator } from './field_calculator';
-import { IndexPatternField } from '../../../../../../data/public';
-
-export function getDetails(
-  field: IndexPatternField,
-  hits: Array<Record<string, unknown>>,
-  columns: string[]
-) {
-  const details = {
-    ...fieldCalculator.getFieldValueCounts({
-      hits,
-      field,
-      count: 5,
-      grouped: false,
-    }),
-    columns,
-  };
-  if (details.buckets) {
-    for (const bucket of details.buckets) {
-      bucket.display = field.format.convert(bucket.value);
-    }
-  }
-  return details;
-}
+export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
