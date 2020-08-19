@@ -7283,7 +7283,6 @@
     "xpack.idxMgmt.componentTemplatesSelector.filters.mappingsLabel": "マッピング",
     "xpack.idxMgmt.componentTemplatesSelector.loadingComponentsDescription": "コンポーネントテンプレートを読み込んでいます...",
     "xpack.idxMgmt.componentTemplatesSelector.loadingComponentsErrorMessage": "コンポーネントの読み込みエラー",
-    "xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel": "コンポーネントテンプレートが選択されていません。",
     "xpack.idxMgmt.componentTemplatesSelector.removeItemIconLabel": "削除",
     "xpack.idxMgmt.componentTemplatesSelector.searchBox.placeholder": "コンポーネントテンプレートを検索",
     "xpack.idxMgmt.componentTemplatesSelector.searchResult.emptyPrompt.clearSearchButtonLabel": "検索のクリア",
