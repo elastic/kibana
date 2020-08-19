@@ -76,5 +76,43 @@ export function MachineLearningNavigationProvider({
     async navigateToSettings() {
       await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
     },
+
+    async navigateToStackManagementJobsListPage() {
+      // clicks the jobsListLink and loads the jobs list page
+      await testSubjects.click('jobsListLink');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the overall page is present
+        await testSubjects.existOrFail('mlPageStackManagementJobsList');
+        // verify that the default tab with the anomaly detection jobs list got loaded
+        await testSubjects.existOrFail('ml-jobs-list');
+      });
+    },
+
+    async navigateToStackManagementJobsListPageAnalyticsTab() {
+      // clicks the `Analytics` tab and loads the analytics list page
+      await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the empty prompt for analytics jobs list got loaded
+        await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
+      });
+    },
+
+    async navigateToAnomalyExplorerViaSingleMetricViewer() {
+      // clicks the `Anomaly Explorer` icon on the button group to switch result views
+      await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the anomaly explorer page is visible
+        await testSubjects.existOrFail('mlPageAnomalyExplorer');
+      });
+    },
+
+    async navigateToSingleMetricViewerViaAnomalyExplorer() {
+      // clicks the `Single Metric Viewere` icon on the button group to switch result views
+      await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the single metric viewer page is visible
+        await testSubjects.existOrFail('mlPageSingleMetricViewer');
+      });
+    },
   };
 }
