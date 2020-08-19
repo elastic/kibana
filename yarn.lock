@@ -1229,10 +1229,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@28.0.0":
-  version "28.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-28.0.0.tgz#6a3c749004d59ea6bafaa839850c850526a55c41"
-  integrity sha512-GiybGiv/b1LL925OA27vL+8b9pcl4b5JbwVThpc0HS+QFv/LAg2+N/+SjmhmjY19ldGyzUskQqweNtmpUfMbOw==
+"@elastic/eui@28.2.0":
+  version "28.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-28.2.0.tgz#0c89c7adc27d4ac918191af8237a2634a26d0637"
+  integrity sha512-ovVkwbwcJLs87ycaof5pyTGjpuPH2sN38k2e+c3IiZjoeGAqWZJouptQguoKYglCyayxoBUV3TAE82m+qyxCnA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.116"
@@ -1253,7 +1253,7 @@
     react-ace "^7.0.5"
     react-beautiful-dnd "^13.0.0"
     react-dropzone "^10.2.1"
-    react-focus-on "^3.4.1"
+    react-focus-on "^3.5.0"
     react-input-autosize "^2.2.2"
     react-is "~16.3.0"
     react-virtualized-auto-sizer "^1.0.2"
@@ -24093,14 +24093,14 @@ react-focus-lock@^2.1.0, react-focus-lock@^2.3.1:
     use-callback-ref "^1.2.1"
     use-sidecar "^1.0.1"
 
-react-focus-on@^3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/react-focus-on/-/react-focus-on-3.4.1.tgz#e184f3c44185e341598c5d9d44b2987ad459b240"
-  integrity sha512-KGRIl0iAu+1k1dcX7eQCXF5ZR/nl+XyXN5Ukw/OY80vLaK2b6vDzNqnX0HdYbY5xSUhIRUvMWEzSsdEyPjvk/Q==
+react-focus-on@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/react-focus-on/-/react-focus-on-3.5.0.tgz#3cdebbefee26a083976e1700ba75f7377040f7f1"
+  integrity sha512-RqGAHOxhRAaMSVHIN5IpY7YL6AJkD/DMa/+iPDV7aB6XWRQfg3v2q35egIZgMWP2xhXaRVai3B80dpVWyj4Rcw==
   dependencies:
     aria-hidden "^1.1.1"
     react-focus-lock "^2.3.1"
-    react-remove-scroll "^2.3.0"
+    react-remove-scroll "^2.4.0"
     react-style-singleton "^2.1.0"
     use-callback-ref "^1.2.3"
     use-sidecar "^1.0.1"
@@ -24313,10 +24313,10 @@ react-remove-scroll-bar@^2.1.0:
     react-style-singleton "^2.1.0"
     tslib "^1.0.0"
 
-react-remove-scroll@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/react-remove-scroll/-/react-remove-scroll-2.3.0.tgz#3af06fe2f7130500704b676cdef94452c08fe593"
-  integrity sha512-UqVimLeAe+5EHXKfsca081hAkzg3WuDmoT9cayjBegd6UZVhlTEchleNp9J4TMGkb/ftLve7ARB5Wph+HJ7A5g==
+react-remove-scroll@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/react-remove-scroll/-/react-remove-scroll-2.4.0.tgz#190c16eb508c5927595935499e8f5dd9ab0e75cf"
+  integrity sha512-BZIO3GaEs0Or1OhA5C//n1ibUP1HdjJmqUVUsOCMxwoIpaCocbB9TFKwHOkBa/nyYy3slirqXeiPYGwdSDiseA==
   dependencies:
     react-remove-scroll-bar "^2.1.0"
     react-style-singleton "^2.1.0"
