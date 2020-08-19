@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 import { asOk } from './lib/result_type';
@@ -35,6 +35,18 @@ describe('TaskPool', () => {
 
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     expect(pool.availableWorkers).toEqual(7);
+  });
+
+  test('availableWorkers is 0 until maxWorkers$ pushes a value', async () => {
+    const maxWorkers$ = new Subject<number>();
+    const pool = new TaskPool({
+      maxWorkers$,
+      logger: mockLogger(),
+    });
+
+    expect(pool.availableWorkers).toEqual(0);
+    maxWorkers$.next(10);
+    expect(pool.availableWorkers).toEqual(10);
   });
 
   test('does not run tasks that are beyond its available capacity', async () => {

@@ -35,7 +35,7 @@ interface Opts<T, H> {
   getCapacity: () => number;
   pollRequests$: Observable<Option<T>>;
   work: WorkFn<T, H>;
-  workTimeout?: number;
+  workTimeout: number;
 }
 
 /**
@@ -98,7 +98,7 @@ export function createTaskPoller<T, H>({
         await promiseResult<H, Error>(
           timeoutPromiseAfter<H, Error>(
             work(...pullFromSet(set, getCapacity())),
-            workTimeout ?? pollInterval,
+            workTimeout,
             () => new Error(`work has timed out`)
           )
         ),
