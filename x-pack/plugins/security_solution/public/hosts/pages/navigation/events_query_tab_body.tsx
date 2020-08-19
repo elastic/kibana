@@ -105,3 +105,5 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
 
 export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
+
+EventsQueryTabBody.displayName = 'EventsQueryTabBody';

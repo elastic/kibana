@@ -9,10 +9,11 @@ import { shallow } from 'enzyme';
 
 import '../../../common/mock/match_media';
 import { DetectionEngineContainer } from './index';
+import { TestProviders } from '../../../common/mock';
 
 describe('DetectionEngineContainer', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<DetectionEngineContainer />);
+    const wrapper = shallow(<DetectionEngineContainer />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('ManageUserInfo')).toHaveLength(1);
   });

@@ -78,7 +78,7 @@ const EventsComponent: React.FC<Props> = ({
   updateNote,
 }) => (
   <EventsTbody data-test-subj="events">
-    {data.map((event, i) => (
+    {data.map((event) => (
       <StatefulEvent
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
