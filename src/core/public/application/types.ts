@@ -501,13 +501,32 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * A function that can be used to set the mount point used to populate the application action container
    * in the chrome header.
    *
-   * Calling this multiple time will erase the current content of the action menu with the mount from the latest call.
+   * Calling the handler multiple time will erase the current content of the action menu with the mount from the latest call.
+   * Calling the handler with `undefined` will unmount the current mount point.
+   * Calling the handler after the application has been unmounted will have no effect.
    *
-   * Calling this after the application has been unmounted will have no effect.
+   * @example
    *
-   * @param actionMount
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { BrowserRouter, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+   *    const { renderApp } = await import('./application');
+   *    const { renderActionMenu } = await import('./action_menu');
+   *    setHeaderActionMenu((element) => {
+   *      return renderActionMenu(element);
+   *    })
+   *    return renderApp({ element, history });
+   * }
+   * ```
    */
-  setHeaderActionMenu: (menuMount: MountPoint) => void;
+  setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 /**

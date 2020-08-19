@@ -366,7 +366,7 @@ export class ApplicationService {
     });
   };
 
-  private setAppActionMenu = (appId: string, mount: MountPoint) => {
+  private setAppActionMenu = (appId: string, mount: MountPoint | undefined) => {
     this.appInternalStates.set(appId, {
       ...(this.appInternalStates.get(appId) ?? {}),
       actionMenu: mount,

@@ -457,5 +457,43 @@ describe('ApplicationService', () => {
 
       expect(await getValue(currentActionMenu$)).toBe(mounter2);
     });
+
+    it('allow applications to unset the current menu', async () => {
+      const { register } = service.setup(setupDeps);
+
+      let resolveMount: () => void;
+      const promise = new Promise((resolve) => {
+        resolveMount = resolve;
+      });
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          setHeaderActionMenu(mounter1);
+          promise.then(() => {
+            setHeaderActionMenu(undefined);
+          });
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      await act(async () => {
+        resolveMount();
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBeUndefined();
+    });
   });
 });

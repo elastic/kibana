@@ -40,7 +40,7 @@ interface Props {
   mounter?: Mounter;
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
-  setAppActionMenu: (appId: string, mount: MountPoint) => void;
+  setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
 }
