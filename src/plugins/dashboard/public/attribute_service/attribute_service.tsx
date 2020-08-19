@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
@@ -151,7 +152,6 @@ export class AttributeService<
     if (this.inputIsRefType(input)) {
       return input;
     }
-
     return new Promise<RefType>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
         await checkForDuplicateTitle(
@@ -170,12 +170,13 @@ export class AttributeService<
           }
         );
         try {
-          input.attributes.title = props.newTitle;
-          const wrappedInput = (await this.wrapAttributes(input.attributes, true)) as RefType;
+          const newAttributes = { ...input.attributes };
+          newAttributes.title = props.newTitle;
+          const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
           resolve(wrappedInput);
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
-          reject();
+          reject(error);
           return { error };
         }
       };
