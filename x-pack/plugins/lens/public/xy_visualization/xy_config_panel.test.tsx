@@ -60,10 +60,10 @@ describe('XY Config panels', () => {
         'bar',
         'bar_stacked',
         'bar_percentage_stacked',
-        'line',
         'area',
         'area_stacked',
         'area_percentage_stacked',
+        'line',
       ]);
 
       expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);

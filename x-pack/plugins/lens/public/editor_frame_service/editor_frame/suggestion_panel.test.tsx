@@ -20,8 +20,8 @@ import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plug
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { LensIconChartDatatable } from '../../..assets/chart_datatable';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { LensIconChartDatatable } from '../../assets/chart_datatable';
 
 jest.mock('./suggestion_helpers');
 

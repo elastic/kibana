@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
-export const LensIconChartArea = ({ title, titleId, ...props }) => (
+export const LensIconChartArea = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
     viewBox="0 0 30 22"
     width={30}

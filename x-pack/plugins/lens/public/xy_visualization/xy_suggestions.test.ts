@@ -122,10 +122,10 @@ describe('xy_suggestions', () => {
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
+      'line',
       'area_percentage_stacked',
       'area_stacked',
       'area',
-      'line',
       'bar_horizontal_percentage_stacked',
       'bar_horizontal_stacked',
       'bar_percentage_stacked',
@@ -162,10 +162,10 @@ describe('xy_suggestions', () => {
     ]);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
+      'line',
       'area_percentage_stacked',
       'area_stacked',
       'area',
-      'line',
       'bar_horizontal_percentage_stacked',
       'bar_horizontal_stacked',
       'bar_percentage_stacked',
