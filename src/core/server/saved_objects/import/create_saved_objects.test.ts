@@ -157,6 +157,15 @@ describe('#createSavedObjects', () => {
     };
   };
 
+  test('filters out objects that have errors present', async () => {
+    const error = { type: obj1.type, id: obj1.id } as SavedObjectsImportError;
+    const options = setupParams({ objects: [obj1], accumulatedErrors: [error] });
+
+    const createSavedObjectsResult = await createSavedObjects(options);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
+  });
+
   test('exits early if there are no objects to create', async () => {
     const options = setupParams({ objects: [] });
 
@@ -189,17 +198,21 @@ describe('#createSavedObjects', () => {
 
   describe('handles accumulated errors as expected', () => {
     const resolvableErrors: SavedObjectsImportError[] = [
-      { type: 'foo', id: 'foo-id', error: { type: 'conflict' } },
-      { type: 'bar', id: 'bar-id', error: { type: 'ambiguous_conflict', destinations: [] } },
+      { type: 'foo', id: 'foo-id', error: { type: 'conflict' } } as SavedObjectsImportError,
+      {
+        type: 'bar',
+        id: 'bar-id',
+        error: { type: 'ambiguous_conflict' },
+      } as SavedObjectsImportError,
       {
         type: 'baz',
         id: 'baz-id',
-        error: { type: 'missing_references', references: [], blocking: [] },
-      },
+        error: { type: 'missing_references' },
+      } as SavedObjectsImportError,
     ];
     const unresolvableErrors: SavedObjectsImportError[] = [
-      { type: 'qux', id: 'qux-id', error: { type: 'unsupported_type' } },
-      { type: 'quux', id: 'quux-id', error: { type: 'unknown', message: '', statusCode: 400 } },
+      { type: 'qux', id: 'qux-id', error: { type: 'unsupported_type' } } as SavedObjectsImportError,
+      { type: 'quux', id: 'quux-id', error: { type: 'unknown' } } as SavedObjectsImportError,
     ];
 
     test('does not call bulkCreate when resolvable errors are present', async () => {

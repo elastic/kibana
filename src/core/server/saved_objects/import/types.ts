@@ -43,6 +43,10 @@ export interface SavedObjectsImportRetry {
    * `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
    */
   createNewCopy?: boolean;
+  /**
+   * If `ignoreMissingReferences` is specified, reference validation will be skipped for this object.
+   */
+  ignoreMissingReferences?: boolean;
 }
 
 /**
@@ -87,14 +91,7 @@ export interface SavedObjectsImportUnknownError {
  */
 export interface SavedObjectsImportMissingReferencesError {
   type: 'missing_references';
-  references: Array<{
-    type: string;
-    id: string;
-  }>;
-  blocking: Array<{
-    type: string;
-    id: string;
-  }>;
+  references: Array<{ type: string; id: string }>;
 }
 
 /**
@@ -104,7 +101,15 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportError {
   id: string;
   type: string;
+  /**
+   * @deprecated Use `meta.title` instead
+   */
   title?: string;
+  meta: { title?: string; icon?: string };
+  /**
+   * If `overwrite` is specified, an attempt was made to overwrite an existing object.
+   */
+  overwrite?: boolean;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError
@@ -131,6 +136,14 @@ export interface SavedObjectsImportSuccess {
    * this field will be redundant and can be removed.
    */
   createNewCopy?: boolean;
+  meta: {
+    title?: string;
+    icon?: string;
+  };
+  /**
+   * If `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution).
+   */
+  overwrite?: boolean;
 }
 
 /**

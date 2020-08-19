@@ -19,7 +19,7 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import { checkConflicts } from './check_conflicts';
@@ -73,6 +73,7 @@ describe('#checkConflicts', () => {
     objects: SavedObjectType[];
     namespace?: string;
     ignoreRegularConflicts?: boolean;
+    retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
   }): CheckConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
@@ -96,6 +97,7 @@ describe('#checkConflicts', () => {
       filteredObjects: [],
       errors: [],
       importIdMap: new Map(),
+      pendingOverwrites: new Set(),
     });
   });
 
@@ -117,14 +119,21 @@ describe('#checkConflicts', () => {
     expect(checkConflictsResult).toEqual({
       filteredObjects: [obj1, obj3],
       errors: [
-        { ...obj2Error, title: obj2.attributes.title, error: { type: 'conflict' } },
+        {
+          ...obj2Error,
+          title: obj2.attributes.title,
+          meta: { title: obj2.attributes.title },
+          error: { type: 'conflict' },
+        },
         {
           ...obj4Error,
           title: obj4.attributes.title,
+          meta: { title: obj4.attributes.title },
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
       importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
+      pendingOverwrites: new Set(),
     });
   });
 
@@ -141,11 +150,59 @@ describe('#checkConflicts', () => {
           {
             ...obj4Error,
             title: obj4.attributes.title,
+            meta: { title: obj4.attributes.title },
             error: { ...obj4Error.error, type: 'unknown' },
           },
         ],
+        pendingOverwrites: new Set([`${obj2.type}:${obj2.id}`]),
       })
     );
+  });
+
+  it('handles retries', async () => {
+    const namespace = 'foo-namespace';
+    const obj5 = createObject('type-5', 'id-5');
+    const _objects = [...objects, obj5];
+    const retries = [
+      { id: obj1.id, type: obj1.type }, // find no conflict for obj1
+      { id: obj2.id, type: obj2.type, destinationId: 'some-object-id' }, // find a conflict for obj2, and return it with the specified destinationId
+      { id: obj3.id, type: obj3.type, destinationId: 'another-object-id', createNewCopy: true }, // find an unresolvable conflict for obj3, regenerate the destinationId, and then omit originId because of the createNewCopy flag
+      { id: obj4.id, type: obj4.type }, // get an unknown error for obj4
+      { id: obj5.id, type: obj5.type, overwrite: true }, // find a conflict for obj5, but ignore it because of the overwrite flag
+    ] as SavedObjectsImportRetry[];
+    const params = setupParams({ objects: _objects, namespace, retries });
+    const obj5Error = getResultMock.conflict(obj5.type, obj5.id);
+    socCheckConflicts.mockResolvedValue({
+      errors: [
+        { ...obj2Error, id: 'some-object-id' },
+        { ...obj3Error, id: 'another-object-id' },
+        obj4Error,
+        obj5Error,
+      ],
+    });
+
+    const checkConflictsResult = await checkConflicts(params);
+    expect(checkConflictsResult).toEqual({
+      filteredObjects: [obj1, obj3, obj5],
+      errors: [
+        {
+          ...obj2Error,
+          title: obj2.attributes.title,
+          meta: { title: obj2.attributes.title },
+          error: { type: 'conflict', destinationId: 'some-object-id' },
+        },
+        {
+          ...obj4Error,
+          title: obj4.attributes.title,
+          meta: { title: obj4.attributes.title },
+          error: { ...obj4Error.error, type: 'unknown' },
+        },
+      ],
+      importIdMap: new Map([
+        [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
+      ]),
+      pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
+    });
   });
 
   it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {

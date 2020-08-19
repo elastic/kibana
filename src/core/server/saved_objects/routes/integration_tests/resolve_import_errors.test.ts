@@ -24,7 +24,6 @@ import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
-import { SavedObject } from '../../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -63,6 +62,13 @@ describe(`POST ${URL}`, () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
+    );
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
+      (type: string) =>
+        ({
+          // other attributes aren't needed for the purposes of injecting metadata
+          management: { icon: `${type}-icon` },
+        } as any)
     );
 
     savedObjectsClient = handlerContext.savedObjects.client;
@@ -124,8 +130,17 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    const { type, id } = mockDashboard;
-    expect(result.body).toEqual({ success: true, successCount: 1, successResults: [{ type, id }] });
+    const {
+      type,
+      id,
+      attributes: { title },
+    } = mockDashboard;
+    const meta = { title, icon: 'dashboard-icon' };
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [{ type, id, meta }],
+    });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [expect.objectContaining({ migrationVersion: {} })],
@@ -157,7 +172,12 @@ describe(`POST ${URL}`, () => {
       .expect(200);
 
     const { type, id, attributes } = mockDashboard;
-    expect(result.body).toEqual({ success: true, successCount: 1, successResults: [{ type, id }] });
+    const meta = { title: attributes.title, icon: 'dashboard-icon' };
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [{ type, id, meta }],
+    });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [{ type, id, attributes, migrationVersion: {} }],
@@ -190,10 +210,11 @@ describe(`POST ${URL}`, () => {
       .expect(200);
 
     const { type, id, attributes } = mockDashboard;
+    const meta = { title: attributes.title, icon: 'dashboard-icon' };
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type, id }],
+      successResults: [{ type, id, meta, overwrite: true }],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -202,7 +223,7 @@ describe(`POST ${URL}`, () => {
     );
   });
 
-  it('resolves conflicts by replacing the visualization references', async () => {
+  it('resolves `missing_references` errors by replacing the missing references', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
@@ -230,7 +251,13 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type: 'visualization', id: 'my-vis' }],
+      successResults: [
+        {
+          type: 'visualization',
+          id: 'my-vis',
+          meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+        },
+      ],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -244,16 +271,67 @@ describe(`POST ${URL}`, () => {
     );
   });
 
+  it('resolves `missing_references` errors by ignoring the missing references', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+      .send(
+        [
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}',
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="retries"',
+          '',
+          '[{"type":"visualization","id":"my-vis","ignoreMissingReferences":true}]',
+          '--EXAMPLE--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    const { type, id, attributes } = mockVisualization;
+    const references = [{ name: 'ref_0', type: 'index-pattern', id: 'missing' }];
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [
+        {
+          type: 'visualization',
+          id: 'my-vis',
+          meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [{ type, id, attributes, references, migrationVersion: {} }],
+      expect.objectContaining({ overwrite: undefined })
+    );
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
   describe('createNewCopies enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
       mockUuidv4.mockReturnValue('new-id-1');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
-      savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-        saved_objects: [
-          { type: 'visualization', id: 'new-id-1' } as SavedObject,
-          { type: 'dashboard', id: 'new-id-2' } as SavedObject,
-        ],
-      });
+      const obj1 = {
+        type: 'visualization',
+        id: 'new-id-1',
+        attributes: { title: 'Look at my visualization' },
+        references: [],
+      };
+      const obj2 = {
+        type: 'dashboard',
+        id: 'new-id-2',
+        attributes: { title: 'Look at my dashboard' },
+        references: [],
+      };
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
       const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?createNewCopies=true`)
@@ -264,7 +342,7 @@ describe(`POST ${URL}`, () => {
             'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
             'Content-Type: application/ndjson',
             '',
-            '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
+            '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
             '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
             '--EXAMPLE',
             'Content-Disposition: form-data; name="retries"',
@@ -279,8 +357,18 @@ describe(`POST ${URL}`, () => {
         success: true,
         successCount: 2,
         successResults: [
-          { type: 'visualization', id: 'my-vis', destinationId: 'new-id-1' },
-          { type: 'dashboard', id: 'my-dashboard', destinationId: 'new-id-2' },
+          {
+            type: obj1.type,
+            id: 'my-vis',
+            meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+            destinationId: obj1.id,
+          },
+          {
+            type: obj2.type,
+            id: 'my-dashboard',
+            meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
+            destinationId: obj2.id,
+          },
         ],
       });
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present

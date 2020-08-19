@@ -156,20 +156,19 @@ describe('#checkOriginConflicts', () => {
 
   describe('results', () => {
     const getAmbiguousConflicts = (objects: SavedObjectType[]) =>
-      objects
-        .map(({ id, attributes, updated_at: updatedAt }) => ({
-          id,
-          title: attributes?.title,
-          updatedAt,
-        }))
-        .sort((a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : b.id > a.id ? -1 : 0));
+      objects.map(({ id, attributes, updated_at: updatedAt }) => ({
+        id,
+        title: attributes?.title,
+        updatedAt,
+      }));
     const createAmbiguousConflictError = (
       object: SavedObjectType,
       destinations: SavedObjectType[]
     ): SavedObjectsImportError => ({
       type: object.type,
       id: object.id,
-      title: object.attributes?.title,
+      title: object.attributes.title,
+      meta: { title: object.attributes.title },
       error: {
         type: 'ambiguous_conflict',
         destinations: getAmbiguousConflicts(destinations),
@@ -182,6 +181,7 @@ describe('#checkOriginConflicts', () => {
       type: object.type,
       id: object.id,
       title: object.attributes?.title,
+      meta: { title: object.attributes.title },
       error: {
         type: 'conflict',
         ...(destinationId && { destinationId }),
@@ -203,9 +203,9 @@ describe('#checkOriginConflicts', () => {
         const checkOriginConflictsResult = await checkOriginConflicts(params);
 
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map(),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
@@ -232,9 +232,9 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map(),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
@@ -258,9 +258,9 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map(),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
@@ -287,9 +287,9 @@ describe('#checkOriginConflicts', () => {
           const params = setup(false);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: [],
             importIdMap: new Map(),
             errors: [createConflictError(obj1, objA.id), createConflictError(obj2, objB.id)],
+            pendingOverwrites: new Set(),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -298,12 +298,12 @@ describe('#checkOriginConflicts', () => {
           const params = setup(true);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: objects,
             importIdMap: new Map([
               [`${obj1.type}:${obj1.id}`, { id: objA.id }],
               [`${obj2.type}:${obj2.id}`, { id: objB.id }],
             ]),
             errors: [],
+            pendingOverwrites: new Set([`${obj1.type}:${obj1.id}`, `${obj2.type}:${obj2.id}`]),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -340,9 +340,9 @@ describe('#checkOriginConflicts', () => {
           const params = setup(false);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: [],
             importIdMap: new Map(),
             errors: [createConflictError(obj2, objA.id), createConflictError(obj4, objB.id)],
+            pendingOverwrites: new Set(),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -351,12 +351,12 @@ describe('#checkOriginConflicts', () => {
           const params = setup(true);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: objects,
             importIdMap: new Map([
               [`${obj2.type}:${obj2.id}`, { id: objA.id }],
               [`${obj4.type}:${obj4.id}`, { id: objB.id }],
             ]),
             errors: [],
+            pendingOverwrites: new Set([`${obj2.type}:${obj2.id}`, `${obj4.type}:${obj4.id}`]),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -382,7 +382,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map([
             [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
@@ -390,6 +389,7 @@ describe('#checkOriginConflicts', () => {
             [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -411,12 +411,12 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: [],
           importIdMap: new Map(),
           errors: [
             createAmbiguousConflictError(obj1, [objA, objB]),
             createAmbiguousConflictError(obj2, [objC, objD]),
           ],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).not.toHaveBeenCalled();
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -442,7 +442,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map([
             [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
@@ -450,6 +449,7 @@ describe('#checkOriginConflicts', () => {
             [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -493,7 +493,6 @@ describe('#checkOriginConflicts', () => {
         const params = setup(false);
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj4, obj7, obj8],
           importIdMap: new Map([
             [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
@@ -502,6 +501,7 @@ describe('#checkOriginConflicts', () => {
             createConflictError(obj5, objA.id),
             createAmbiguousConflictError(obj6, [objB, objC]),
           ],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(2);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -511,13 +511,13 @@ describe('#checkOriginConflicts', () => {
         const params = setup(true);
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj4, obj5, obj7, obj8],
           importIdMap: new Map([
             [`${obj5.type}:${obj5.id}`, { id: objA.id }],
             [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [createAmbiguousConflictError(obj6, [objB, objC])],
+          pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(2);
         expect(checkOriginConflictsResult).toEqual(expectedResult);

@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { ReactNode } from 'react';
-import { SavedObjectReference } from 'src/core/public';
-
-export interface SavedObjectsManagementRecord {
-  type: string;
-  id: string;
-  meta: {
-    icon: string;
-    title: string;
-  };
-  references: SavedObjectReference[];
-}
+import { ReactNode } from '@elastic/eui/node_modules/@types/react';
+import { SavedObjectsManagementRecord } from '.';
 
 export abstract class SavedObjectsManagementAction {
   public abstract render: () => ReactNode;
@@ -43,6 +33,7 @@ export abstract class SavedObjectsManagementAction {
     onClick?: (item: SavedObjectsManagementRecord) => void;
     render?: (item: SavedObjectsManagementRecord) => any;
   };
+  public refreshOnFinish?: () => boolean;
 
   private callbacks: Function[] = [];
 

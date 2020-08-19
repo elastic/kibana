@@ -23,6 +23,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportError,
   SavedObjectError,
+  SavedObjectsImportRetry,
 } from '../types';
 
 interface CheckConflictsParams {
@@ -30,6 +31,7 @@ interface CheckConflictsParams {
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
+  retries?: SavedObjectsImportRetry[];
   createNewCopies?: boolean;
 }
 
@@ -41,18 +43,30 @@ export async function checkConflicts({
   savedObjectsClient,
   namespace,
   ignoreRegularConflicts,
+  retries = [],
   createNewCopies,
 }: CheckConflictsParams) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
+  const pendingOverwrites = new Set<string>();
 
   // exit early if there are no objects to check
   if (objects.length === 0) {
-    return { filteredObjects, errors, importIdMap };
+    return { filteredObjects, errors, importIdMap, pendingOverwrites };
   }
 
-  const checkConflictsResult = await savedObjectsClient.checkConflicts(objects, { namespace });
+  const retryMap = retries.reduce(
+    (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
+    new Map<string, SavedObjectsImportRetry>()
+  );
+  const objectsToCheck = objects.map((x) => {
+    const id = retryMap.get(`${x.type}:${x.id}`)?.destinationId ?? x.id;
+    return { ...x, id };
+  });
+  const checkConflictsResult = await savedObjectsClient.checkConflicts(objectsToCheck, {
+    namespace,
+  });
   const errorMap = checkConflictsResult.errors.reduce(
     (acc, { type, id, error }) => acc.set(`${type}:${id}`, error),
     new Map<string, SavedObjectError>()
@@ -64,21 +78,28 @@ export async function checkConflicts({
       id,
       attributes: { title },
     } = object;
-    const errorObj = errorMap.get(`${type}:${id}`);
+    const { destinationId, overwrite, createNewCopy } = retryMap.get(`${type}:${id}`) || {};
+    const errorObj = errorMap.get(`${type}:${destinationId ?? id}`);
     if (errorObj && isUnresolvableConflict(errorObj)) {
       // Any object create attempt that would result in an unresolvable conflict should have its ID regenerated. This way, when an object
       // with a "multi-namespace" type is exported from one namespace and imported to another, it does not result in an error, but instead a
       // new object is created.
-      const destinationId = uuidv4();
-      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId: createNewCopies });
+      // This code path should not be triggered for a retry, but in case the consumer is using the import APIs incorrectly and attempting to
+      // retry an object with a destinationId that would result in an unresolvable conflict, we regenerate the ID here as a fail-safe.
+      const omitOriginId = createNewCopies || createNewCopy;
+      importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId });
       filteredObjects.push(object);
     } else if (errorObj && errorObj.statusCode !== 409) {
-      errors.push({ type, id, title, error: { ...errorObj, type: 'unknown' } });
-    } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts) {
-      errors.push({ type, id, title, error: { type: 'conflict' } });
+      errors.push({ type, id, title, meta: { title }, error: { ...errorObj, type: 'unknown' } });
+    } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts && !overwrite) {
+      const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
+      errors.push({ type, id, title, meta: { title }, error });
     } else {
       filteredObjects.push(object);
+      if (errorObj?.statusCode === 409) {
+        pendingOverwrites.add(`${type}:${id}`);
+      }
     }
   });
-  return { filteredObjects, errors, importIdMap };
+  return { filteredObjects, errors, importIdMap, pendingOverwrites };
 }

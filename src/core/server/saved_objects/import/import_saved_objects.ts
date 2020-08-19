@@ -56,6 +56,7 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;
+  let pendingOverwrites = new Set<string>();
 
   // Validate references
   const validateReferencesResult = await validateReferences(
@@ -63,15 +64,14 @@ export async function importSavedObjectsFromStream({
     savedObjectsClient,
     namespace
   );
-  errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
+  errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
-  let objectsToCreate = validateReferencesResult.filteredObjects;
   if (createNewCopies) {
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
-      objects: validateReferencesResult.filteredObjects,
+      objects: collectSavedObjectsResult.collectedObjects,
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
@@ -79,6 +79,7 @@ export async function importSavedObjectsFromStream({
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+    pendingOverwrites = checkConflictsResult.pendingOverwrites;
 
     // Check multi-namespace object types for origin conflicts in this namespace
     const checkOriginConflictsParams = {
@@ -92,12 +93,15 @@ export async function importSavedObjectsFromStream({
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
-    objectsToCreate = checkOriginConflictsResult.filteredObjects;
+    pendingOverwrites = new Set([
+      ...pendingOverwrites,
+      ...checkOriginConflictsResult.pendingOverwrites,
+    ]);
   }
 
   // Create objects in bulk
   const createSavedObjectsParams = {
-    objects: objectsToCreate,
+    objects: collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
     importIdMap,
@@ -108,20 +112,33 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
   const successResults = createSavedObjectsResult.createdObjects.map(
-    ({ type, id, destinationId, originId }) => {
+    ({ type, id, attributes: { title }, destinationId, originId }) => {
+      const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
+      const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
       return {
         type,
         id,
+        meta,
+        ...(attemptedOverwrite && { overwrite: true }),
         ...(destinationId && { destinationId }),
         ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
       };
     }
   );
+  const errorResults = errorAccumulator.map((error) => {
+    const icon = typeRegistry.getType(error.type)?.management?.icon;
+    const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);
+    return {
+      ...error,
+      meta: { ...error.meta, icon },
+      ...(attemptedOverwrite && { overwrite: true }),
+    };
+  });
 
   return {
     successCount: createSavedObjectsResult.createdObjects.length,
     success: errorAccumulator.length === 0,
     ...(successResults.length && { successResults }),
-    ...(errorAccumulator.length && { errors: errorAccumulator }),
+    ...(errorResults.length && { errors: errorResults }),
   };
 }

@@ -149,7 +149,8 @@ describe('collectSavedObjects()', () => {
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       const error = { type: 'unsupported_type' };
-      const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
+      const { title } = obj1.attributes;
+      const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
       expect(result).toEqual({ collectedObjects: [], errors, importIdMap: new Map() });
     });
 
@@ -161,7 +162,8 @@ describe('collectSavedObjects()', () => {
       const collectedObjects = [{ ...obj2, migrationVersion: {} }];
       const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
       const error = { type: 'unsupported_type' };
-      const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
+      const { title } = obj1.attributes;
+      const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
       expect(result).toEqual({ collectedObjects, errors, importIdMap });
     });
 
@@ -178,7 +180,8 @@ describe('collectSavedObjects()', () => {
         });
 
         const error = { type: 'unsupported_type' };
-        const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
+        const { title } = obj1.attributes;
+        const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
         expect(result).toEqual({ collectedObjects: [], errors, importIdMap: new Map() });
       });
 
@@ -196,7 +199,8 @@ describe('collectSavedObjects()', () => {
         const collectedObjects = [{ ...obj2, migrationVersion: {} }];
         const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
         const error = { type: 'unsupported_type' };
-        const errors = [{ error, type: obj1.type, id: obj1.id, title: obj1.attributes.title }];
+        const { title } = obj1.attributes;
+        const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
         expect(result).toEqual({ collectedObjects, errors, importIdMap });
       });
     });

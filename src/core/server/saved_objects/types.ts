@@ -180,9 +180,6 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
  *  * agnostic: this type of saved object is global.
  *
- * Note: do not write logic that uses this value directly; instead, use the appropriate accessors in the
- * {@link SavedObjectTypeRegistry | type registry}.
- *
  * @public
  */
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';

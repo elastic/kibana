@@ -44,6 +44,7 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from '../../server/types';
 
 export {

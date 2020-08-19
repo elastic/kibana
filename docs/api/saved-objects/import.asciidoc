@@ -54,12 +54,15 @@ The request body must include the multipart/form-data type.
 
 `errors`::
   (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
++
+NOTE: One object may result in multiple errors which require separate steps to resolve (for instance, a `missing_references` error and a
+`conflict` error).
 
 `successResults`::
   (array) Indicates the objects that were imported successfully, with any metadata if applicable.
 +
 NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
-errors. See the <<saved-objects-api-resolve-import-errors,Resolve import errors API>> documentation for more information.
+errors. See the examples below for how to resolve these errors.
 
 [[saved-objects-api-import-codes]]
 ==== Response code
@@ -100,12 +103,20 @@ The API returns the following:
     {
       "id": "my-pattern",
       "type": "index-pattern",
-      "destinationId": "4aba3770-0d04-45e1-9e34-4cf0fd2165ae"
+      "destinationId": "4aba3770-0d04-45e1-9e34-4cf0fd2165ae",
+      "meta": {
+        "icon": "indexPatternApp",
+        "title": "my-pattern-*"
+      }
     },
     {
       "id": "my-dashboard",
       "type": "dashboard",
-      "destinationId": "c31d1eca-9bc0-4a81-b5f9-30c442824c48"
+      "destinationId": "c31d1eca-9bc0-4a81-b5f9-30c442824c48",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
+      }
     }
   ]
 }
@@ -143,11 +154,19 @@ The API returns the following:
   "successResults": [
     {
       "id": "my-pattern",
-      "type": "index-pattern"
+      "type": "index-pattern",
+      "meta": {
+        "icon": "indexPatternApp",
+        "title": "my-pattern-*"
+      }
     },
     {
       "id": "my-dashboard",
-      "type": "dashboard"
+      "type": "dashboard",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
+      }
     }
   ]
 }
@@ -190,6 +209,10 @@ The API returns the following:
       "title": "my-pattern-*",
       "error": {
         "type": "conflict"
+      },
+      "meta": {
+        "icon": "indexPatternApp",
+        "title": "my-pattern-*"
       }
     },
     {
@@ -199,6 +222,10 @@ The API returns the following:
       "error": {
         "type": "conflict",
         "destinationId": "another-vis"
+      },
+      "meta": {
+        "icon": "visualizeApp",
+        "title": "Look at my visualization"
       }
     },
     {
@@ -219,13 +246,21 @@ The API returns the following:
             "updatedAt": "2020-07-05T12:29:54.849Z"
           }
         ]
+      },
+      "meta": {
+        "icon": "canvasApp",
+        "title": "Look at my canvas"
       }
     }
   ],
   "successResults": [
     {
       "id": "my-dashboard",
-      "type": "dashboard"
+      "type": "dashboard",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
+      }
     }
   ]
 }
@@ -267,15 +302,17 @@ The `file.ndjson` file contains the following:
 [source,sh]
 --------------------------------------------------
 {"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
-{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
+{"type":"search","id":"my-search","attributes":{"title":"Look at my search"},"references":[{"name":"ref_0","type":"index-pattern","id":"another-pattern-*"}]}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"},{"name":"ref_1","type":"search","id":"my-search"}]}
 --------------------------------------------------
 
 The API returns the following:
 
 [source,sh]
 --------------------------------------------------
+{
   "success": false,
-  "successCount": 0,
+  "successCount": 1,
   "errors": [
     {
       "id": "my-vis",
@@ -288,17 +325,46 @@ The API returns the following:
             "type": "index-pattern",
             "id": "my-pattern-*"
           }
-        ],
-        "blocking": [
+        ]
+      },
+      "meta": {
+        "icon": "visualizeApp",
+        "title": "Look at my visualization"
+      }
+    },
+    {
+      "id": "my-search",
+      "type": "search",
+      "title": "Look at my search",
+      "error": {
+        "type": "missing_references",
+        "references": [
           {
-            "type": "dashboard",
-            "id": "my-dashboard"
+            "type": "index-pattern",
+            "id": "another-pattern-*"
           }
         ]
+      },
+      "meta": {
+        "icon": "searchApp",
+        "title": "Look at my search"
+      }
+    }
+  ],
+  "successResults": [
+    {
+      "id": "my-dashboard",
+      "type": "dashboard",
+      "meta": {
+        "icon": "dashboardApp",
+        "title": "Look at my dashboard"
       }
     }
   ]
+}
 --------------------------------------------------
 
-This result indicates that the import was not successful because the visualization resulted in a missing references error. No objects will
-be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.
+This result indicates that the import was not successful because the visualization and search each resulted in a missing references error.
+
+No objects will be imported until these errors are resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import
+errors API>>.

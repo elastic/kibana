@@ -164,6 +164,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               },
             ],
             "name": "Actions",
+            "width": "80px",
           },
         ]
       }
@@ -379,6 +380,7 @@ exports[`Table should render normally 1`] = `
               },
             ],
             "name": "Actions",
+            "width": "80px",
           },
         ]
       }

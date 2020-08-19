@@ -134,32 +134,38 @@ export function copyToSpaceTestSuiteFactory(
 
   const createExpectNoConflictsWithoutReferencesForSpace = (
     spaceId: string,
+    destination: string,
     expectedDashboardCount: number
   ) => async (resp: TestResponse) => {
     const result = resp.body as CopyResponse;
     expect(result).to.eql({
-      [spaceId]: {
+      [destination]: {
         success: true,
         successCount: 1,
-        successResults: [{ id: 'cts_dashboard', type: 'dashboard' }],
+        successResults: [
+          {
+            id: 'cts_dashboard',
+            type: 'dashboard',
+            meta: {
+              title: `This is the ${spaceId} test space CTS dashboard`,
+              icon: 'dashboardApp',
+            },
+          },
+        ],
       },
     } as CopyResponse);
 
     // Query ES to ensure that we copied everything we expected
-    await assertSpaceCounts(spaceId, {
+    await assertSpaceCounts(destination, {
       dashboard: expectedDashboardCount,
     });
   };
 
-  const expectNoConflictsWithoutReferencesResult = createExpectNoConflictsWithoutReferencesForSpace(
-    getDestinationWithoutConflicts(),
-    2
-  );
+  const expectNoConflictsWithoutReferencesResult = (spaceId: string = DEFAULT_SPACE_ID) =>
+    createExpectNoConflictsWithoutReferencesForSpace(spaceId, getDestinationWithoutConflicts(), 2);
 
-  const expectNoConflictsForNonExistentSpaceResult = createExpectNoConflictsWithoutReferencesForSpace(
-    'non_existent_space',
-    1
-  );
+  const expectNoConflictsForNonExistentSpaceResult = (spaceId: string = DEFAULT_SPACE_ID) =>
+    createExpectNoConflictsWithoutReferencesForSpace(spaceId, 'non_existent_space', 1);
 
   const expectNoConflictsWithReferencesResult = (spaceId: string = DEFAULT_SPACE_ID) => async (
     resp: TestResponse
@@ -171,11 +177,37 @@ export function copyToSpaceTestSuiteFactory(
         success: true,
         successCount: 5,
         successResults: [
-          { id: 'cts_ip_1', type: 'index-pattern' },
-          { id: `cts_vis_1_${spaceId}`, type: 'visualization' },
-          { id: `cts_vis_2_${spaceId}`, type: 'visualization' },
-          { id: 'cts_vis_3', type: 'visualization' },
-          { id: 'cts_dashboard', type: 'dashboard' },
+          {
+            id: 'cts_ip_1',
+            type: 'index-pattern',
+            meta: {
+              icon: 'indexPatternApp',
+              title: `Copy to Space index pattern 1 from ${spaceId} space`,
+            },
+          },
+          {
+            id: `cts_vis_1_${spaceId}`,
+            type: 'visualization',
+            meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+          },
+          {
+            id: `cts_vis_2_${spaceId}`,
+            type: 'visualization',
+            meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+          },
+          {
+            id: 'cts_vis_3',
+            type: 'visualization',
+            meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
+          },
+          {
+            id: 'cts_dashboard',
+            type: 'dashboard',
+            meta: {
+              icon: 'dashboardApp',
+              title: `This is the ${spaceId} test space CTS dashboard`,
+            },
+          },
         ],
       },
     } as CopyResponse);
@@ -261,11 +293,40 @@ export function copyToSpaceTestSuiteFactory(
         success: true,
         successCount: 5,
         successResults: [
-          { id: 'cts_ip_1', type: 'index-pattern' },
-          { id: `cts_vis_1_${spaceId}`, type: 'visualization' },
-          { id: `cts_vis_2_${spaceId}`, type: 'visualization' },
-          { id: 'cts_vis_3', type: 'visualization' },
-          { id: 'cts_dashboard', type: 'dashboard' },
+          {
+            id: 'cts_ip_1',
+            type: 'index-pattern',
+            meta: {
+              icon: 'indexPatternApp',
+              title: `Copy to Space index pattern 1 from ${spaceId} space`,
+            },
+            overwrite: true,
+          },
+          {
+            id: `cts_vis_1_${spaceId}`,
+            type: 'visualization',
+            meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+          },
+          {
+            id: `cts_vis_2_${spaceId}`,
+            type: 'visualization',
+            meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+          },
+          {
+            id: 'cts_vis_3',
+            type: 'visualization',
+            meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
+            overwrite: true,
+          },
+          {
+            id: 'cts_dashboard',
+            type: 'dashboard',
+            meta: {
+              icon: 'dashboardApp',
+              title: `This is the ${spaceId} test space CTS dashboard`,
+            },
+            overwrite: true,
+          },
         ],
       },
     } as CopyResponse);
@@ -289,8 +350,16 @@ export function copyToSpaceTestSuiteFactory(
     result[destination].errors!.sort(errorSorter);
 
     const expectedSuccessResults = [
-      { id: `cts_vis_1_${spaceId}`, type: 'visualization' },
-      { id: `cts_vis_2_${spaceId}`, type: 'visualization' },
+      {
+        id: `cts_vis_1_${spaceId}`,
+        type: 'visualization',
+        meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
+      },
+      {
+        id: `cts_vis_2_${spaceId}`,
+        type: 'visualization',
+        meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
+      },
     ];
     const expectedErrors = [
       {
@@ -298,18 +367,30 @@ export function copyToSpaceTestSuiteFactory(
         id: 'cts_dashboard',
         title: `This is the ${spaceId} test space CTS dashboard`,
         type: 'dashboard',
+        meta: {
+          title: `This is the ${spaceId} test space CTS dashboard`,
+          icon: 'dashboardApp',
+        },
       },
       {
         error: { type: 'conflict' },
         id: 'cts_ip_1',
         title: `Copy to Space index pattern 1 from ${spaceId} space`,
         type: 'index-pattern',
+        meta: {
+          title: `Copy to Space index pattern 1 from ${spaceId} space`,
+          icon: 'indexPatternApp',
+        },
       },
       {
         error: { type: 'conflict' },
         id: 'cts_vis_3',
         title: `CTS vis 3 from ${spaceId} space`,
         type: 'visualization',
+        meta: {
+          title: `CTS vis 3 from ${spaceId} space`,
+          icon: 'visualizeApp',
+        },
       },
     ];
     expectedErrors.sort(errorSorter);
@@ -371,7 +452,8 @@ export function copyToSpaceTestSuiteFactory(
             expect(successCount).to.eql(1);
             const destinationId = successResults![0].destinationId;
             expect(destinationId).to.match(v4);
-            expect(successResults).to.eql([{ type, id: noConflictId, destinationId }]);
+            const meta = { title: 'A shared saved-object in one space', icon: 'beaker' };
+            expect(successResults).to.eql([{ type, id: noConflictId, meta, destinationId }]);
             expect(errors).to.be(undefined);
           } else if (outcome === 'noAccess') {
             expectNotFoundResponse(response);
@@ -388,22 +470,19 @@ export function copyToSpaceTestSuiteFactory(
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
             const { success, successCount, successResults, errors } = getResult(response);
+            const title = 'A shared saved-object in the default, space_1, and space_2 spaces';
+            const meta = { title, icon: 'beaker' };
             if (overwrite) {
               expect(success).to.eql(true);
               expect(successCount).to.eql(1);
-              expect(successResults).to.eql([{ type, id: exactMatchId }]);
+              expect(successResults).to.eql([{ type, id: exactMatchId, meta, overwrite: true }]);
               expect(errors).to.be(undefined);
             } else {
               expect(success).to.eql(false);
               expect(successCount).to.eql(0);
               expect(successResults).to.be(undefined);
               expect(errors).to.eql([
-                {
-                  error: { type: 'conflict' },
-                  type,
-                  id: exactMatchId,
-                  title: 'A shared saved-object in the default, space_1, and space_2 spaces',
-                },
+                { error: { type: 'conflict' }, type, id: exactMatchId, title, meta },
               ]);
             }
           } else if (outcome === 'noAccess') {
@@ -421,11 +500,15 @@ export function copyToSpaceTestSuiteFactory(
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
             const { success, successCount, successResults, errors } = getResult(response);
+            const title = 'A shared saved-object in one space';
+            const meta = { title, icon: 'beaker' };
             const destinationId = 'conflict_1_space_2';
             if (overwrite) {
               expect(success).to.eql(true);
               expect(successCount).to.eql(1);
-              expect(successResults).to.eql([{ type, id: inexactMatchId, destinationId }]);
+              expect(successResults).to.eql([
+                { type, id: inexactMatchId, meta, overwrite: true, destinationId },
+              ]);
               expect(errors).to.be(undefined);
             } else {
               expect(success).to.eql(false);
@@ -436,7 +519,8 @@ export function copyToSpaceTestSuiteFactory(
                   error: { type: 'conflict', destinationId },
                   type,
                   id: inexactMatchId,
-                  title: 'A shared saved-object in one space',
+                  title,
+                  meta,
                 },
               ]);
             }
@@ -457,9 +541,9 @@ export function copyToSpaceTestSuiteFactory(
             const { success, successCount, successResults, errors } = getResult(response);
             const updatedAt = '2017-09-21T18:59:16.270Z';
             const destinations = [
-              // response should be sorted by ID in ascending order
-              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
+              // response should be sorted by updatedAt in descending order
               { id: 'conflict_2_space_2', title: 'A shared saved-object in one space', updatedAt },
+              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
             ];
             expect(success).to.eql(false);
             expect(successCount).to.eql(0);
@@ -470,6 +554,10 @@ export function copyToSpaceTestSuiteFactory(
                 type,
                 id: ambiguousConflictId,
                 title: 'A shared saved-object in one space',
+                meta: {
+                  title: 'A shared saved-object in one space',
+                  icon: 'beaker',
+                },
               },
             ]);
           } else if (outcome === 'noAccess') {

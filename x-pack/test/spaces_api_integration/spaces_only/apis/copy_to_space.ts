@@ -31,7 +31,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
         tests: {
           noConflictsWithoutReferences: {
             statusCode: 200,
-            response: expectNoConflictsWithoutReferencesResult,
+            response: expectNoConflictsWithoutReferencesResult(spaceId),
           },
           noConflictsWithReferences: {
             statusCode: 200,
@@ -52,7 +52,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNoConflictsForNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult(spaceId),
           },
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId),
         },
