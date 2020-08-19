@@ -17,7 +17,6 @@ import {
   ConnectorEditFlyout,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../../../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 import { useKibana } from '../../../common/lib/kibana';
