@@ -24,11 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import {
-  BeatTag,
-  CMBeat,
-  ConfigurationBlock,
-} from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
 import { AssignmentActionType, BeatsTableType, Table, tagConfigActions } from '../table';
 import { ConfigView } from './config_view';
