@@ -86,22 +86,20 @@ export function TransactionDetails() {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
             <TransactionCharts
               charts={transactionChartsData}
               urlParams={urlParams}
               location={location}
             />
+            <EuiSpacer size="s" />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <ErroneousTransactionsRateChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <TransactionBreakdown />
+              </EuiFlexItem>
+            </EuiFlexGrid>
           </ChartsSyncContextProvider>
 
           <EuiHorizontalRule size="full" margin="l" />
