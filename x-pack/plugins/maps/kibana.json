@@ -15,7 +15,8 @@
     "visualizations",
     "embeddable",
     "mapsLegacy",
-    "usageCollection"
+    "usageCollection",
+    "share"
   ],
   "ui": true,
   "server": true,
