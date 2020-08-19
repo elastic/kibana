@@ -8,7 +8,7 @@ import { format as formatUrl } from 'url';
 
 import * as legacyElasticsearch from 'elasticsearch';
 
-import { elasticsearchClientPlugin } from '../../../../plugins/security/server/elasticsearch_client_plugin';
+import { elasticsearchClientPlugin } from '../../../../plugins/security/server/elasticsearch/elasticsearch_client_plugin';
 
 export function LegacyEsProvider({ getService }) {
   const config = getService('config');

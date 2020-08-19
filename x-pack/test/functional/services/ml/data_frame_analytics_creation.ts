@@ -5,14 +5,14 @@
  */
 import expect from '@kbn/expect';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-import {
-  ClassificationAnalysis,
-  RegressionAnalysis,
-} from '../../../../plugins/ml/public/application/data_frame_analytics/common/analytics';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommon } from './common';
 import { MlApi } from './api';
+import {
+  ClassificationAnalysis,
+  RegressionAnalysis,
+} from '../../../../plugins/ml/common/types/data_frame_analytics';
 
 enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',

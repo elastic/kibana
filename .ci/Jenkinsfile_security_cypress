@@ -9,8 +9,15 @@ kibanaPipeline(timeoutMinutes: 180) {
     channel: '#security-solution-slack-testing'
   ) {
     catchError {
-      workers.base(size: 's', ramDisk: false) {
-        kibanaPipeline.bash('test/scripts/jenkins_security_solution_cypress.sh', 'Execute Security Solution Cypress Tests')
+      withEnv([
+        'CI_PARALLEL_PROCESS_NUMBER=1'
+      ]) {
+        def job = 'xpack-securityCypress'
+
+        workers.ci(name: job, size: 'l', ramDisk: true) {
+          kibanaPipeline.bash('test/scripts/jenkins_xpack_build_kibana.sh', 'Build Default Distributable')
+          kibanaPipeline.functionalTestProcess(job, 'test/scripts/jenkins_security_solution_cypress.sh')()
+        }
       }
     }
   }
