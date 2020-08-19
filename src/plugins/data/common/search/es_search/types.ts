@@ -30,7 +30,7 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
   indexType?: string;
 }
 
-export interface IEsSearchResponse<Source = any, Aggs = any> extends IKibanaSearchResponse {
+export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
   /**
    * Indicates whether async search is still in flight
    */
@@ -39,5 +39,5 @@ export interface IEsSearchResponse<Source = any, Aggs = any> extends IKibanaSear
    * Indicates whether the results returned are complete or partial
    */
   isPartial?: boolean;
-  rawResponse: SearchResponse<Source, Aggs>;
+  rawResponse: SearchResponse<Source>;
 }

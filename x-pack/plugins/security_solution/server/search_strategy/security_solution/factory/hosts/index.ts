@@ -20,7 +20,6 @@ import {
 
 // TO DO need to move all this types in common
 import { HostAggEsData, HostAggEsItem } from '../../../../lib/hosts/types';
-import { TermAggregation } from '../../../../lib/types';
 
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../types';
@@ -37,7 +36,7 @@ export const allHost: SecuritySolutionFactory<'host_all'> = {
   },
   parse: async (
     options: HostsRequestOptions,
-    response: IEsSearchResponse<unknown, TermAggregation>
+    response: IEsSearchResponse<unknown>
   ): Promise<HostsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
@@ -75,7 +74,7 @@ export const detailsHost: SecuritySolutionFactory<'host_details'> = {
   },
   parse: async (
     options: HostOverviewRequestOptions,
-    response: IEsSearchResponse<HostAggEsData, TermAggregation>
+    response: IEsSearchResponse<HostAggEsData>
   ): Promise<HostDetailsStrategyResponse> => {
     const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
     const inspect = {
