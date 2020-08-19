@@ -131,6 +131,7 @@ const EdgeLineComponent = React.memo(
         style={style}
         resolverEdgeColor={colorMap.resolverEdge}
         magFactorX={magFactorX}
+        data-test-subj="resolver:graph:edgeline"
       >
         {elapsedTime && (
           <StyledElapsedTime
