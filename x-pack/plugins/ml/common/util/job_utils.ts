@@ -382,13 +382,12 @@ export function basicJobValidation(
         valid = false;
       }
     }
-
+    let categorizerDetectorMissingPartitionField = false;
     if (job.analysis_config.detectors.length === 0) {
       messages.push({ id: 'detectors_empty' });
       valid = false;
     } else {
       let v = true;
-      let categorizerDetectorMissingPartitionField = false;
 
       each(job.analysis_config.detectors, (d) => {
         if (isEmpty(d.function)) {
@@ -411,6 +410,7 @@ export function basicJobValidation(
       }
       if (categorizerDetectorMissingPartitionField) {
         messages.push({ id: 'categorizer_detector_missing_per_partition_field' });
+        valid = false;
       }
     }
 
@@ -430,7 +430,11 @@ export function basicJobValidation(
               d.over_field_name === MLCATEGORY ||
               d.partition_field_name === MLCATEGORY
           );
-          const uniqPartitions = uniq(categorizationDetectors.map((d) => d.partition_field_name));
+          const uniqPartitions = uniq(
+            categorizationDetectors
+              .map((d) => d.partition_field_name)
+              .filter((name) => name !== undefined)
+          );
           if (uniqPartitions.length > 1) {
             valid = false;
             messages.push({

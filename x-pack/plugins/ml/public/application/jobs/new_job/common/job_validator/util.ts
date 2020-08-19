@@ -136,7 +136,7 @@ export function populateValidationMessages(
       'xpack.ml.newJob.wizard.validateJob.categorizerMissingPerPartitionFieldMessage',
       {
         defaultMessage:
-          'Partition field must be set for detectors that reference mlcategory when per-partition categorization is enabled.',
+          'Partition field must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
       }
     );
     basicValidations.categorizerMissingPerPartition.message = msg;

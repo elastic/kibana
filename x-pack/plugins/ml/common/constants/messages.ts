@@ -49,7 +49,7 @@ export const getMessages = once(() => {
         'xpack.ml.models.jobValidation.messages.categorizerMissingPerPartitionFieldMessage',
         {
           defaultMessage:
-            'Partition field name must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
+            'Partition field must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
         }
       ),
       url:
