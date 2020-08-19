@@ -1945,6 +1945,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     references?: SavedObjectReference[];
     // (undocumented)
     type: string;
+    // (undocumented)
+    version?: string;
 }
 
 // @public (undocumented)
@@ -2079,6 +2081,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    version?: string;
 }
 
 // @public (undocumented)
