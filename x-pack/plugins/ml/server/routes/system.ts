@@ -29,7 +29,7 @@ export function systemRoutes(
 
     let count = 0;
     if (typeof resp.nodes === 'object') {
-      Object.keys(resp.nodes).forEach((k) => {
+      Object.keys(resp.nodes).forEach(k => {
         if (resp.nodes[k].attributes !== undefined) {
           const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
           if (maxOpenJobs !== null && maxOpenJobs > 0) {
@@ -240,10 +240,10 @@ export function systemRoutes(
         body: schema.object({ index: schema.string() }),
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const { index } = request.body;
 
