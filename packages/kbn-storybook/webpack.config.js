@@ -25,7 +25,7 @@ const { REPO_ROOT } = require('./lib/constants');
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config: storybookConfig }) => {
-  let config = {
+  const config = {
     externals,
     module: {
       rules: [
@@ -77,29 +77,23 @@ module.exports = async ({ config: storybookConfig }) => {
       ],
     },
     resolve: {
-      // Tell Webpack about the ts/x extensions
-      extensions: ['.ts', '.tsx', '.scss'],
+      // Tell Webpack about the scss extension
+      extensions: ['.scss'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
       },
     },
   };
 
-  // Find and alter the CSS rule to replace the Kibana public path string with a path
-  // to the route we've added in middleware.js
-  const cssRule = storybookConfig.module.rules.find((rule) =>
-    rule.test.source.includes('.css$')
-  ) || { use: [] };
-  cssRule.use.push({
-    loader: 'string-replace-loader',
-    options: {
-      search: '__REPLACE_WITH_PUBLIC_PATH__',
-      replace: '/',
-      flags: 'g',
-    },
+  // This is the hacky part. We find something that looks like the
+  // HtmlWebpackPlugin and mutate its `options.template` to point at our
+  // revised template.
+  const htmlWebpackPlugin = storybookConfig.plugins.find((plugin) => {
+    return plugin.options && typeof plugin.options.template === 'string';
   });
+  if (htmlWebpackPlugin) {
+    htmlWebpackPlugin.options.template = require.resolve('./lib/templates/index.ejs');
+  }
 
-  config = webpackMerge(storybookConfig, config);
-
-  return config;
+  return webpackMerge(storybookConfig, config);
 };

@@ -19,5 +19,5 @@
 
 const { resolve, dirname } = require('path');
 
-exports.ASSET_DIR = resolve(exports.REPO_ROOT, 'built_assets/storybook');
 exports.REPO_ROOT = dirname(require.resolve('../../../package.json'));
+exports.ASSET_DIR = resolve(exports.REPO_ROOT, 'built_assets/storybook');
