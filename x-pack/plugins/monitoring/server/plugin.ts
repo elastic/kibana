@@ -71,7 +71,7 @@ export class Plugin {
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader?: IBulkUploader;
+  private bulkUploader: IBulkUploader = {} as IBulkUploader;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
