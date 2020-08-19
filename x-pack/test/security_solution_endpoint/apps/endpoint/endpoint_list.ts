@@ -73,10 +73,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        const tableData = await pageObjects.endpoint.waitForTableToHaveData(
-          'endpointListTable',
-          10000
-        );
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 10000);
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
     });
