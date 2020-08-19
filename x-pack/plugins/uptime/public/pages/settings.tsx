@@ -163,7 +163,7 @@ export const SettingsPage: React.FC = () => {
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <form onSubmit={onApply}>
+            <div id="settings-form">
               <EuiForm>
                 <IndicesForm
                   loading={dss.loading}
@@ -206,7 +206,7 @@ export const SettingsPage: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       data-test-subj="apply-settings-button"
-                      type="submit"
+                      onClick={onApply}
                       color="primary"
                       isDisabled={!isFormDirty || !isFormValid || isFormDisabled}
                       fill
@@ -219,7 +219,7 @@ export const SettingsPage: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiForm>
-            </form>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

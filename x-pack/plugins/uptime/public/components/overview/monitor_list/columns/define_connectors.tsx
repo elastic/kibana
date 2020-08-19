@@ -41,7 +41,10 @@ export const DefineAlertConnectors = ({ btnContent }: Props) => {
     >
       <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>
         To start enabling alerts, please define a default alert action connector in{' '}
-        <ReactRouterEuiLink to={SETTINGS_ROUTE} data-test-subj={'uptimeSettingsLink'}>
+        <ReactRouterEuiLink
+          to={SETTINGS_ROUTE + '?focusConnector=true'}
+          data-test-subj={'uptimeSettingsLink'}
+        >
           Settings
         </ReactRouterEuiLink>
       </EuiText>

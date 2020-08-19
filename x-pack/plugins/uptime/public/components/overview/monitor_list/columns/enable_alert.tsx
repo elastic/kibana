@@ -17,7 +17,6 @@ import {
   isAlertDeletedSelector,
   newAlertSelector,
 } from '../../../../state/alerts/alerts';
-import { BellIcon } from '../bell_icon';
 import { MONITOR_ROUTE } from '../../../../../common/constants';
 import { DefineAlertConnectors } from './define_connectors';
 import { DISABLE_DOWN_ALERT, ENABLE_DOWN_ALERT } from './translations';
@@ -96,8 +95,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const MonitorPageAlertBtn = (
     <EuiButtonEmpty
       onClick={onAlertClick}
-      iconType={hasAlert ? BellIcon : 'bell'}
-      iconSide={'right'}
+      iconType={hasAlert ? 'bellSlash' : 'bell'}
       isLoading={showSpinner}
     >
       {btnLabel}
@@ -115,7 +113,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
           <EuiButtonIcon
             aria-label={btnLabel}
             onClick={onAlertClick}
-            iconType={hasAlert ? BellIcon : 'bell'}
+            iconType={hasAlert ? 'bellSlash' : 'bell'}
             size="m"
             data-test-subj={
               hasAlert

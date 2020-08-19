@@ -15,12 +15,15 @@ import {
   EuiText,
   EuiIcon,
   EuiComboBoxOptionOption,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { SettingsFormProps } from '../../pages/settings';
-import { connectorsSelector, getConnectorsAction } from '../../state/alerts/alerts';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { connectorsSelector } from '../../state/alerts/alerts';
+import { AddConnectorFlyout } from './add_connector_flyout';
+import { useGetUrlParams, useUrlParams } from '../../hooks';
+import { getActionTypeIcon } from '../../../../triggers_actions_ui/public';
+import { alertFormI18n } from './translations';
+import { useInitApp } from '../../hooks/use_init_app';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
@@ -31,18 +34,20 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   fieldErrors,
   isDisabled,
 }) => {
+  const { focusConnectorField } = useGetUrlParams();
+
+  const updateUrlParams = useUrlParams()[1];
+
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const dispatch = useDispatch();
-
-  const kibana = useKibana();
-  const path = kibana.services?.application?.getUrlForApp(
-    'management/insightsAndAlerting/triggersActions/connectors'
-  );
+  useInitApp();
 
   useEffect(() => {
-    dispatch(getConnectorsAction.get());
-  }, [dispatch]);
+    if (focusConnectorField && inputRef.current && !loading) {
+      inputRef.current.focus();
+      updateUrlParams({ focusConnector: undefined });
+    }
+  }, [focusConnectorField, inputRef, loading, updateUrlParams]);
 
   const { data = [] } = useSelector(connectorsSelector);
 
@@ -73,7 +78,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
     const { actionTypeId: type } = data?.find((dt) => dt.id === value) ?? {};
     return (
       <EuiText size="s">
-        <EuiIcon type={type === '.slack' ? 'logoSlack' : 'email'} /> <span>{label}</span>
+        <EuiIcon type={getActionTypeIcon(type as string)} /> <span>{label}</span>
       </EuiText>
     );
   };
@@ -127,7 +132,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           }
         >
           <EuiComboBox
-            placeholder="Please select one or more connectors"
+            placeholder={alertFormI18n.inputPlaceHolder}
             options={options}
             selectedOptions={options.filter((opt) =>
               formFields?.defaultConnectors.includes(opt.value)
@@ -144,11 +149,15 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             renderOption={renderOption}
           />
         </EuiFormRow>
-        <div>
-          <EuiButtonEmpty iconType="plusInCircleFilled" href={path}>
-            New connector
-          </EuiButtonEmpty>
-        </div>
+        <span>
+          <AddConnectorFlyout
+            focusInput={() => {
+              if (inputRef.current) {
+                inputRef.current.focus();
+              }
+            }}
+          />
+        </span>
       </EuiDescribedFormGroup>
     </>
   );

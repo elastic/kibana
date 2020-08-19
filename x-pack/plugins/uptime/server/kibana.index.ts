@@ -54,7 +54,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
-        ui: ['save', 'configureSettings', 'show'],
+        ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
         app: ['uptime', 'kibana'],
@@ -70,7 +70,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
-        ui: ['show'],
+        ui: ['show', 'alerting:save'],
       },
     },
   });

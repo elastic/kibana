@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { createAsyncAction } from '../actions/utils';
@@ -26,6 +27,7 @@ import {
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
+import { simpleAlertEnabled } from '../../lib/alert_types/alert_messages';
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
@@ -75,13 +77,19 @@ export function* fetchAlertsEffect() {
       yield call(disableAnomalyAlert, action.payload);
       yield put(createAlertAction.success(null));
       yield put(deleteAlertAction.success(action.payload.alertId));
-      kibanaService.core.notifications.toasts.addSuccess('Alert successfully deleted!');
+      kibanaService.core.notifications.toasts.addSuccess(
+        i18n.translate('xpack.uptime.overview.alerts.disabled.success', {
+          defaultMessage: 'Alert successfully disabled!',
+        })
+      );
       const monitorId = yield select(monitorIdSelector);
       yield put(getAnomalyAlertAction.get({ monitorId }));
       yield put(getMonitorAlertsAction.get());
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
-        title: 'Alert cannot be deleted',
+        title: i18n.translate('xpack.uptime.overview.alerts.disabled.failed', {
+          defaultMessage: 'Alert cannot be disabled!',
+        }),
       });
       yield put(deleteAlertAction.fail(err));
     }
@@ -103,11 +111,16 @@ export function* fetchAlertsEffect() {
     try {
       const response = yield call(createAlert, action.payload);
       yield put(createAlertAction.success(response));
-      kibanaService.core.notifications.toasts.addSuccess('Alert successfully added!');
+
+      kibanaService.core.notifications.toasts.addSuccess(
+        simpleAlertEnabled(action.payload.defaultActions)
+      );
       yield put(getMonitorAlertsAction.get());
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
-        title: 'Alert cannot be added',
+        title: i18n.translate('xpack.uptime.overview.alerts.enabled.failed', {
+          defaultMessage: 'Alert cannot be enabled!',
+        }),
       });
       yield put(createAlertAction.fail(err));
     }

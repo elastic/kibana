@@ -31,7 +31,6 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
     listItems.push({
       label: alert.name,
       href: basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + alert.id,
-      iconType: () => <span style={{ marginRight: 5, whiteSpace: 'nowrap' }}>{ind + 1}.</span>,
       size: 's',
       extraAction: {
         color: 'subdued',

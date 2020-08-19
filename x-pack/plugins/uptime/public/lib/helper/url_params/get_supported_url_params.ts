@@ -21,6 +21,7 @@ export interface UptimeUrlParams {
   search: string;
   selectedPingStatus: string;
   statusFilter: string;
+  focusConnectorField?: boolean;
 }
 
 const {
@@ -75,6 +76,7 @@ export const getSupportedUrlParams = (params: {
     selectedPingStatus,
     statusFilter,
     pagination,
+    focusConnector,
   } = filteredParams;
 
   return {
@@ -97,5 +99,6 @@ export const getSupportedUrlParams = (params: {
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     statusFilter: statusFilter || STATUS_FILTER,
     pagination,
+    focusConnectorField: !!focusConnector,
   };
 };

@@ -20,6 +20,7 @@ import { MonitorList } from '../components/overview/monitor_list/monitor_list_co
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
 import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
+import { useInitApp } from '../hooks/use_init_app';
 
 interface Props {
   loading: boolean;
@@ -46,6 +47,8 @@ export const OverviewPageComponent = React.memo(
 
     useTrackPageview({ app: 'uptime', path: 'overview' });
     useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+
+    useInitApp();
 
     const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
