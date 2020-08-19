@@ -84,7 +84,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(configService.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
+      if (!proxyServer.listening) {
+        proxyServer.listen(Number(proxyUrl.port));
+      }
 
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)

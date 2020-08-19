@@ -36,7 +36,9 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
+      if (!proxyServer.listening) {
+        proxyServer.listen(Number(proxyUrl.port));
+      }
     });
 
     it('should return successfully when passed valid create parameters', async () => {

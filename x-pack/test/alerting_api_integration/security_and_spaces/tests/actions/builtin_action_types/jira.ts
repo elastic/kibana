@@ -87,7 +87,9 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
+      if (!proxyServer.listening) {
+        proxyServer.listen(Number(proxyUrl.port));
+      }
     });
 
     describe('Jira - Action Creation', () => {
