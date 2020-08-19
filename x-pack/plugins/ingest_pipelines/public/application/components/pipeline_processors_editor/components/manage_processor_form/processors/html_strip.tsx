@@ -26,7 +26,7 @@ export const HtmlStrip: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.htmlStripForm.targetFieldHelpText',
           {
             defaultMessage:
-              'The field to assign the stripped value to. If blank the field will be updated in-place.',
+              'The field to assign the stripped value to. If blank, the field will be updated in-place.',
           }
         )}
       />

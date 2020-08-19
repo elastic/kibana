@@ -26,7 +26,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.joinForm.separatorFieldHelpText',
       {
-        defaultMessage: 'The separator character',
+        defaultMessage: 'The separator character.',
       }
     ),
     validations: [

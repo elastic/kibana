@@ -89,7 +89,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.enrichForm.overrideFieldHelpText',
       {
         defaultMessage:
-          'Whether this processor will update fields with pre-existing non-null-valued field. When set to false, such fields will not be overridden.',
+          'Whether this processor will update fields with a pre-existing non-null-valued field. When set to false, such fields will not be overridden.',
       }
     ),
   },
@@ -109,7 +109,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.enrichForm.maxMatchesFieldHelpText',
       {
         defaultMessage:
-          'The maximum number of matched documents to include under the configured target field. The target_field will be turned into a json array if max_matches is higher than 1, otherwise target_field will become a json object',
+          'The maximum number of matched documents to include under the configured target field. The target_field will be turned into a json array if max_matches is higher than 1, otherwise target_field will become a json object. Accepts numbers are 1 up to 128.',
       }
     ),
     validations: [
@@ -152,7 +152,7 @@ export const Enrich: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.enrichForm.fieldNameHelpText',
           {
             defaultMessage:
-              'The field in the input document that matches the policies match_field used to retrieve the enrichment data',
+              'The field in the input document that matches the policy field used to retrieve the enrichment data.',
           }
         )}
       />

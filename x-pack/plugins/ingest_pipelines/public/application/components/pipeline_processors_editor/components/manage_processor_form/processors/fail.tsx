@@ -21,7 +21,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Message',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.failForm.messageHelpText', {
-      defaultMessage: 'The error message thrown by the processor',
+      defaultMessage: 'The error message thrown by the processor.',
     }),
     validations: [
       {
@@ -36,9 +36,5 @@ const fieldsConfig: FieldsConfig = {
 };
 
 export const Fail: FunctionComponent = () => {
-  return (
-    <>
-      <UseField component={Field} config={fieldsConfig.message} path="fields.message" />
-    </>
-  );
+  return <UseField component={Field} config={fieldsConfig.message} path="fields.message" />;
 };

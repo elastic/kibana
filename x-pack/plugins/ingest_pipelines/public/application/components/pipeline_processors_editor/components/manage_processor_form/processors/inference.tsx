@@ -50,6 +50,7 @@ const getInferenceConfigHelpText = (esDocsBasePath: string): React.ReactNode => 
       values={{
         regression: (
           <EuiLink
+            external
             target="_blank"
             href={`${esDocsBasePath}/${INFERENCE_CONFIG_DOCS.regression.path}`}
           >
@@ -58,6 +59,7 @@ const getInferenceConfigHelpText = (esDocsBasePath: string): React.ReactNode => 
         ),
         classification: (
           <EuiLink
+            external
             target="_blank"
             href={`${esDocsBasePath}/${INFERENCE_CONFIG_DOCS.classification.path}`}
           >
@@ -164,7 +166,7 @@ export const Inference: FunctionComponent = () => {
         helpText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldHelpText"
-            defaultMessage="Field added to incoming documents to contain results objects. Default value is {targetField}."
+            defaultMessage="Field added to incoming documents that will contain inference processor results. Default value is {targetField}."
             values={{ targetField: <EuiCode inline>{'ml.inference.<processor_tag>'}</EuiCode> }}
           />
         }
