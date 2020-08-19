@@ -83,10 +83,6 @@ export function Discover({
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch } = opts;
 
-  const onToggleChange = (e) => {
-    toggleChart(e.target.checked);
-  };
-
   return (
     <I18nProvider>
       <div className="dscApp" data-fetch-counter={fetchCounter}>
@@ -187,7 +183,9 @@ export function Discover({
                               <EuiButtonToggle
                                 label={toggleOn ? 'Hide chart' : 'Show chart'}
                                 iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                                onChange={onToggleChange}
+                                onChange={(e: any) => {
+                                  toggleChart(e.target.checked);
+                                }}
                                 isSelected={toggleOn}
                                 isEmpty
                               />
