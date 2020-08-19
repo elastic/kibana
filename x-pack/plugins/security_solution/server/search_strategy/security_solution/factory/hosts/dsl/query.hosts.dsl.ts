@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isString } from 'lodash/fp';
 import {
   Direction,
   HostsRequestOptions,
@@ -21,7 +21,7 @@ export const buildHostsQuery = ({
   timerange: { from, to },
 }: HostsRequestOptions) => {
   const filter = [
-    ...createQueryFilterClauses(filterQuery),
+    ...createQueryFilterClauses(isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery),
     {
       range: {
         '@timestamp': {
