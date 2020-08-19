@@ -7,11 +7,24 @@
 /**
  * These exports are used by the plugin 'resolverTest' defined in x-pack's plugin_functional suite.
  */
-export { resolverStoreFactory } from './store/index';
-export { ResolverWithoutProviders } from './view/resolver_without_providers';
-export { noAncestorsTwoChildren as resolverMockDataAccessLayerWithNoAncestorsTwoChildren } from './data_access_layer/mocks/no_ancestors_two_children';
+import { Provider } from 'react-redux';
+import { resolverStoreFactory } from './store/index';
+import { ResolverWithoutProviders } from './view/resolver_without_providers';
+import { ResolverPluginSetup } from './types';
+import { noAncestorsTwoChildren } from './data_access_layer/mocks/no_ancestors_two_children';
 
 /**
- * Provide access to the instance of `Provider` that Resolver recognizes.
+ * Provide access to Resolver APIs.
  */
-export { Provider as ResolverReduxProvider } from 'react-redux';
+export function resolverPluginSetup(): ResolverPluginSetup {
+  return {
+    Provider,
+    storeFactory: resolverStoreFactory,
+    ResolverWithoutProviders,
+    mocks: {
+      dataAccessLayer: {
+        noAncestorsTwoChildren,
+      },
+    },
+  };
+}

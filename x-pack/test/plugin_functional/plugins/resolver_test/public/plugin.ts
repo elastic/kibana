@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { PluginSetup as SecuritySolutionPluginSetup } from '../../../../../plugins/security_solution/public';
 
 export type ResolverTestPluginSetup = void;
 export type ResolverTestPluginStart = void;
-export interface ResolverTestPluginSetupDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface ResolverTestPluginSetupDependencies {
+  securitySolution: SecuritySolutionPluginSetup;
+}
 export interface ResolverTestPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export class ResolverTestPlugin
@@ -20,15 +23,21 @@ export class ResolverTestPlugin
       ResolverTestPluginSetupDependencies,
       ResolverTestPluginStartDependencies
     > {
-  public setup(core: CoreSetup<ResolverTestPluginStartDependencies>) {
+  public setup(
+    core: CoreSetup<ResolverTestPluginStartDependencies, ResolverTestPluginStart>,
+    setupDependencies: ResolverTestPluginSetupDependencies
+  ) {
     core.application.register({
       id: 'resolverTest',
       title: i18n.translate('xpack.resolverTest.pluginTitle', {
         defaultMessage: 'Resolver Test',
       }),
-      mount: async (context, params) => {
+      mount: async (params: AppMountParameters<unknown>) => {
+        const startServices = await core.getStartServices();
+        const [coreStart] = startServices;
+
         const { renderApp } = await import('./applications/resolver_test');
-        return renderApp(context, params);
+        return renderApp(coreStart, params, setupDependencies.securitySolution.resolver);
       },
     });
   }
