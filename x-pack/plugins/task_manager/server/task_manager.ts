@@ -395,7 +395,7 @@ export async function claimAvailableTasks(
 
     try {
       const { docs, claimedTasks } = await claim({
-        size: availableWorkers,
+        size: availableWorkers * 2, // get more than we have capacity for
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
       });
