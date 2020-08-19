@@ -951,6 +951,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     searchSource
       .setField('index', $scope.indexPattern)
       .setField('fields', $scope.state.columns)
+      .setField('source', true)
       .setField('size', $scope.opts.sampleSize)
       .setField(
         'sort',
