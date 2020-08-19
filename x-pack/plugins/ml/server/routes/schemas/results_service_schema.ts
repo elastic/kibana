@@ -55,11 +55,18 @@ export const partitionFieldValuesSchema = schema.object({
 
 export const getCategorizerStatsSchema = schema.nullable(
   schema.object({
+    /**
+     * Optional value to fetch the categorizer stats
+     * where results are filtered by partition_by_value = value
+     */
     partitionByValue: schema.maybe(schema.string()),
   })
 );
 
 export const getCategorizerStoppedPartitionsSchema = schema.object({
+  /**
+   * List of jobIds to fetch the categorizer partitions for
+   */
   jobIds: schema.arrayOf(schema.string()),
   /**
    * Field to aggregate results by: 'job_id' or 'partition_field_value'
