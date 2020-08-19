@@ -191,7 +191,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteMetadataStream(getService);
       });
       it('for the kql query: na, table shows an empty list', async () => {
-        const submitButton = await testSubjects.find('querySubmitButton');
         await testSubjects.setValue('adminSearchBar', 'na');
         await testSubjects.find('querySubmitButton').click();
         const expectedData = [
