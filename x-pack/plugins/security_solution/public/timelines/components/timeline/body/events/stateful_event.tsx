@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { TimelineDetailsQuery } from '../../../../containers/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { Note } from '../../../../../common/lib/note';

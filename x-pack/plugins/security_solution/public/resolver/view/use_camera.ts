@@ -16,7 +16,7 @@ import { SideEffectContext } from './side_effect_context';
 import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
-import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 
 export function useCamera(): {
   /**

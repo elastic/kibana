@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 import * as event from '../../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import * as selectors from '../../store/selectors';
 import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
 import { useResolverDispatch } from '../use_resolver_dispatch';

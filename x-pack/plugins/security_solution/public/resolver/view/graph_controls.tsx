@@ -16,7 +16,7 @@ import { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 import { useResolverTheme } from './assets';
 import { ResolverAction } from '../store/actions';
-import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 
 interface StyledGraphControls {
   graphControlsBackground: string;

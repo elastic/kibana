@@ -13,7 +13,7 @@ import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 
 interface InsertTimelinePopoverProps {

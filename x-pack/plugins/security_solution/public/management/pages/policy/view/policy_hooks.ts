@@ -5,7 +5,7 @@
  */
 
 import { PolicyListState, PolicyDetailsState } from '../types';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,

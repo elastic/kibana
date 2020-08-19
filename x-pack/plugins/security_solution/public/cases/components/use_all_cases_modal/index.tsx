@@ -7,7 +7,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';

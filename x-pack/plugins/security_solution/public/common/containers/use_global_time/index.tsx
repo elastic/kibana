@@ -7,7 +7,7 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useShallowEqualSelector } from '../../hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { SetQuery, DeleteQuery } from './types';

@@ -20,7 +20,7 @@ import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps } from '../types';
 

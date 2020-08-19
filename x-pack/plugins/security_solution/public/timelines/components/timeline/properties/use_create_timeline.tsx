@@ -15,7 +15,7 @@ import {
   TimelineType,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 
 export const useCreateTimelineButton = ({

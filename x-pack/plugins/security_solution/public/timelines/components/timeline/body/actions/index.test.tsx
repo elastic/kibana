@@ -12,9 +12,9 @@ import * as i18n from '../translations';
 
 import { Actions } from '.';
 import { TimelineType } from '../../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
-jest.mock('../../../../../common/hooks/use_shallow_equal_selector', () => ({
+jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
 }));
 

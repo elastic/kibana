@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 
 import { Note } from '../../../../../common/lib/note';
 import { TimelineType } from '../../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
 import { TimelineModel } from '../../../../store/timeline/model';
 

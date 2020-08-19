@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 
 import { OnDataProviderEdited } from '../events';

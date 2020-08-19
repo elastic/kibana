@@ -27,7 +27,7 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
-jest.mock('../../../../common/hooks/use_shallow_equal_selector', () => ({
+jest.mock('../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
 }));
 

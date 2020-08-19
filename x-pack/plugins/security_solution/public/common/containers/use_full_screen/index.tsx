@@ -8,7 +8,7 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
-import { useShallowEqualSelector } from '../../hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 

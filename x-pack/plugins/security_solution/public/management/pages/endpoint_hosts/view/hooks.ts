@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { EndpointState } from '../types';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,

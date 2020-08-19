@@ -17,7 +17,7 @@ import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets
 import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import * as selectors from '../store/selectors';
 import { useResolverQueryParams } from './use_resolver_query_params';
 

@@ -18,7 +18,7 @@ import {
   StyledTime,
 } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';

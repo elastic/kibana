@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useShallowEqualSelector } from '../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import * as selectors from '../store/selectors';
 
 /**

@@ -22,7 +22,7 @@ import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/tr
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { State } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';

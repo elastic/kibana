@@ -19,7 +19,7 @@ import {
 } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';

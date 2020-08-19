@@ -19,7 +19,7 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
   processPath,

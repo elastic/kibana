@@ -24,7 +24,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { State } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_shallow_equal_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 import { renderers } from './catalog';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
