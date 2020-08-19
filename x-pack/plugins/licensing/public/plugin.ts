@@ -6,12 +6,12 @@
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-
 import { ILicense } from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
+import { FeatureUsageService } from './services';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -39,6 +39,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   private refresh?: () => Promise<ILicense>;
   private license$?: Observable<ILicense>;
+  private featureUsage = new FeatureUsageService();
 
   constructor(
     context: PluginInitializerContext,
@@ -116,6 +117,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return {
       refresh: refreshManually,
       license$,
+      featureUsage: this.featureUsage.setup({ http: core.http }),
     };
   }
 
@@ -127,6 +129,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return {
       refresh: this.refresh,
       license$: this.license$,
+      featureUsage: this.featureUsage.start({ http: core.http }),
     };
   }
 

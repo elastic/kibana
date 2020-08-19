@@ -6,6 +6,7 @@
 import { Observable } from 'rxjs';
 
 import { ILicense } from '../common/types';
+import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 /** @public */
 export interface LicensingPluginSetup {
@@ -19,6 +20,10 @@ export interface LicensingPluginSetup {
    * @deprecated in favour of the counterpart provided from start contract
    */
   refresh(): Promise<ILicense>;
+  /**
+   * APIs to register licensed feature usage.
+   */
+  featureUsage: FeatureUsageServiceSetup;
 }
 
 /** @public */
@@ -31,4 +36,8 @@ export interface LicensingPluginStart {
    * Triggers licensing information re-fetch.
    */
   refresh(): Promise<ILicense>;
+  /**
+   * APIs to manage licensed feature usage.
+   */
+  featureUsage: FeatureUsageServiceStart;
 }
