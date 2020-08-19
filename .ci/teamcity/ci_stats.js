@@ -4,8 +4,11 @@ const host = process.env.CI_STATS_HOST;
 
 const request = (url, options, data = null) => {
   const httpOptions = {
-    Authorization: `token ${token}`,
     ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `token ${token}`,
+    },
   };
 
   return new Promise((resolve, reject) => {
