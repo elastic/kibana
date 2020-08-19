@@ -43,6 +43,23 @@ export {
   valueClickTrigger,
   APPLY_FILTER_TRIGGER,
   applyFilterTrigger,
+  VISUALIZE_FIELD_TRIGGER,
+  visualizeFieldTrigger,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  visualizeGeoFieldTrigger,
 } from './triggers';
-export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
-export { ActionByType } from './actions';
+export {
+  TriggerContextMapping,
+  TriggerId,
+  ActionContextMapping,
+  ActionType,
+  VisualizeFieldContext,
+  ACTION_VISUALIZE_FIELD,
+  ACTION_VISUALIZE_GEO_FIELD,
+} from './types';
+export {
+  ActionByType,
+  ActionDefinitionByType,
+  ActionExecutionContext,
+  ActionExecutionMeta,
+} from './actions';

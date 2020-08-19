@@ -8,6 +8,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
 import { EndpointList } from './index';
+import '../../../../common/mock/match_media.ts';
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -72,7 +73,7 @@ describe('when on the list page', () => {
     beforeEach(async () => {
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
-        endpointPackageConfigs: mockPolicyResultList({ total: 3 }).items,
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
       });
     });
     afterEach(() => {
@@ -139,12 +140,12 @@ describe('when on the list page', () => {
           });
 
           // Make sure that the first policy id in the host result is not set as non-existent
-          const ingestPackageConfigs = mockPolicyResultList({ total: 1 }).items;
-          ingestPackageConfigs[0].id = firstPolicyID;
+          const ingestPackagePolicies = mockPolicyResultList({ total: 1 }).items;
+          ingestPackagePolicies[0].id = firstPolicyID;
 
           setEndpointListApiMockImplementation(coreStart.http, {
             endpointsResults: hostListData,
-            endpointPackageConfigs: ingestPackageConfigs,
+            endpointPackagePolicies: ingestPackagePolicies,
           });
         });
       });
@@ -331,12 +332,12 @@ describe('when on the list page', () => {
 
       agentId = hostDetails.metadata.elastic.agent.id;
 
-      const policy = docGenerator.generatePolicyPackageConfig();
+      const policy = docGenerator.generatePolicyPackagePolicy();
       policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [hostDetails],
-        endpointPackageConfigs: [policy],
+        endpointPackagePolicies: [policy],
       });
 
       reactTestingLibrary.act(() => {

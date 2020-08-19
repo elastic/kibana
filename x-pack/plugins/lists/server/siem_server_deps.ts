@@ -19,3 +19,5 @@ export {
   buildRouteValidation,
   readPrivileges,
 } from '../../security_solution/server';
+
+export { formatErrors } from '../../security_solution/common';

@@ -19,12 +19,12 @@ import {
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Agent, AgentConfig, AgentDetailsReassignConfigAction } from '../../../types';
+import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
-  useGetOneAgentConfig,
+  useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
   useCore,
@@ -56,15 +56,15 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     pollIntervalMs: 5000,
   });
   const {
-    isLoading: isAgentConfigLoading,
-    data: agentConfigData,
-    sendRequest: sendAgentConfigRequest,
-  } = useGetOneAgentConfig(agentData?.item?.config_id);
+    isLoading: isAgentPolicyLoading,
+    data: agentPolicyData,
+    sendRequest: sendAgentPolicyRequest,
+  } = useGetOneAgentPolicy(agentData?.item?.policy_id);
 
   const {
     application: { navigateToApp },
   } = useCore();
-  const routeState = useIntraAppState<AgentDetailsReassignConfigAction>();
+  const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
   const openReassignFlyoutOpenByDefault = queryParams.get('openReassignFlyout') === 'true';
 
@@ -127,20 +127,20 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.configurationLabel', {
-                defaultMessage: 'Configuration',
+              label: i18n.translate('xpack.ingestManager.agentDetails.policyLabel', {
+                defaultMessage: 'Policy',
               }),
-              content: isAgentConfigLoading ? (
+              content: isAgentPolicyLoading ? (
                 <Loading size="m" />
-              ) : agentConfigData?.item ? (
+              ) : agentPolicyData?.item ? (
                 <EuiLink
-                  href={getHref('configuration_details', { configId: agentData.item.config_id! })}
+                  href={getHref('policy_details', { policyId: agentData.item.policy_id! })}
                   className="eui-textBreakWord"
                 >
-                  {agentConfigData.item.name || agentData.item.config_id}
+                  {agentPolicyData.item.name || agentData.item.policy_id}
                 </EuiLink>
               ) : (
-                agentData.item.config_id || '-'
+                agentData.item.policy_id || '-'
               ),
             },
             { isDivider: true },
@@ -174,7 +174,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexGroup>
       ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentConfigData, agentData, getHref, isAgentConfigLoading]
+    [agentPolicyData, agentData, getHref, isAgentPolicyLoading]
   );
 
   const headerTabs = useMemo(() => {
@@ -203,7 +203,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       value={{
         refresh: () => {
           sendAgentRequest();
-          sendAgentConfigRequest();
+          sendAgentPolicyRequest();
         },
       }}
     >
@@ -225,7 +225,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             error={error}
           />
         ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentConfig={agentConfigData?.item} />
+          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
         ) : (
           <Error
             title={
@@ -252,8 +252,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
 const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
-  agentConfig?: AgentConfig;
-}> = ({ agent, agentConfig }) => {
+  agentPolicy?: AgentPolicy;
+}> = ({ agent, agentPolicy }) => {
   useBreadcrumbs('fleet_agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -266,7 +266,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentConfig={agentConfig} />;
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

@@ -15,6 +15,7 @@ import {
   UseField,
   Field,
 } from '../../../../../../shared_imports';
+import { TextEditor } from '../field_components';
 
 const { emptyField } = fieldValidators;
 
@@ -84,15 +85,25 @@ const ignoreMissingConfig: FieldConfig = {
 export const Gsub: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldConfig} component={Field} path="field" />
+      <UseField config={fieldConfig} component={Field} path="fields.field" />
 
-      <UseField config={patternConfig} component={Field} path="pattern" />
+      <UseField
+        config={patternConfig}
+        component={TextEditor}
+        componentProps={{
+          editorProps: {
+            height: 75,
+            options: { minimap: { enabled: false } },
+          },
+        }}
+        path="fields.pattern"
+      />
 
-      <UseField config={replacementConfig} component={Field} path="replacement" />
+      <UseField config={replacementConfig} component={Field} path="fields.replacement" />
 
-      <UseField config={targetConfig} component={Field} path="target_field" />
+      <UseField config={targetConfig} component={Field} path="fields.target_field" />
 
-      <UseField config={ignoreMissingConfig} component={ToggleField} path="ignore_missing" />
+      <UseField config={ignoreMissingConfig} component={ToggleField} path="fields.ignore_missing" />
     </>
   );
 };
