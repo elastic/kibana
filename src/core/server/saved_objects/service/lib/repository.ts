@@ -220,6 +220,7 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
+      version,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -259,6 +260,7 @@ export class SavedObjectsRepository {
       index: this.getIndexForType(type),
       refresh,
       body: raw._source,
+      ...(overwrite && version ? decodeRequestVersion(version) : {}),
     };
 
     const { body } =
@@ -345,7 +347,12 @@ export class SavedObjectsRepository {
 
       let savedObjectNamespace;
       let savedObjectNamespaces;
-      const { esRequestIndex, object, method } = expectedBulkGetResult.value;
+      let versionProperties;
+      const {
+        esRequestIndex,
+        object: { version, ...object },
+        method,
+      } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
@@ -362,12 +369,14 @@ export class SavedObjectsRepository {
           };
         }
         savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
+        versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = getSavedObjectNamespaces(namespace);
         }
+        versionProperties = getExpectedVersionProperties(version);
       }
 
       const expectedResult = {
@@ -392,6 +401,7 @@ export class SavedObjectsRepository {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
+            ...(overwrite && versionProperties),
           },
         },
         expectedResult.rawMigratedDoc._source

@@ -58,11 +58,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         <div>
           <Nav>
             <EuiFlexGroup gutterSize="l" alignItems="center">
-              {uiSettings.get('pageNavigation') === 'legacy' ? (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="savedObjectsApp" size="l" />
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem>
                 <EuiTabs display="condensed">
                   <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
@@ -77,13 +72,10 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       defaultMessage="Integrations"
                     />
                   </EuiTab>
-                  <EuiTab
-                    isSelected={section === 'agent_config'}
-                    href={getHref('configurations_list')}
-                  >
+                  <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.configurationsLinkText"
-                      defaultMessage="Configurations"
+                      id="xpack.ingestManager.appNavigation.policiesLinkText"
+                      defaultMessage="Policies"
                     />
                   </EuiTab>
                   <EuiTab

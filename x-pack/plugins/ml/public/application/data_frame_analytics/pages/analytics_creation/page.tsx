@@ -23,10 +23,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
 import { newJobCapsService } from '../../../services/new_job_capabilities_service';
 import { ml } from '../../../services/ml_api_service';
-import { DataFrameAnalyticsId } from '../../common/analytics';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
+import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
