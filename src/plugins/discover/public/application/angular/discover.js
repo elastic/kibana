@@ -256,7 +256,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort'].filter(
+        const changes = ['interval', 'sort', 'columns'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
