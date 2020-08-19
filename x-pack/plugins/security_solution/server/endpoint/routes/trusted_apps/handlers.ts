@@ -11,6 +11,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem } from './utils';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
@@ -21,11 +22,12 @@ export const getTrustedAppsListRouteHandler = (
   return async (context, req, res) => {
     const { page, per_page: perPage } = req.query;
 
-    // FIXME:PT call create list once PR merges
+    // Ensure list is created if it does not exist
+    await exceptionsListService?.createTrustedAppsList();
 
     try {
       const results = await exceptionsListService?.findExceptionListItem({
-        listId: 'trusted-apps', // FIXME:PT get value from const defined in pending PR
+        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         page,
         perPage,
         filter: '',
