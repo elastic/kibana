@@ -27,7 +27,7 @@ import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
 
-interface ProxyDependencies {
+export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
   pathFilters: RegExp[];
   proxyConfigCollection: ProxyConfigCollection;

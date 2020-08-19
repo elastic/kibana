@@ -36,7 +36,7 @@ describe('Console Proxy Route', () => {
       describe('no matches', () => {
         it('rejects with 403', async () => {
           handler = createHandler(
-            getProxyRouteHandlerDeps({ pathFilters: [/^\/foo\//, /^\/bar\//] })
+            getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//, /^\/bar\//] } })
           );
 
           const { status } = await handler(
