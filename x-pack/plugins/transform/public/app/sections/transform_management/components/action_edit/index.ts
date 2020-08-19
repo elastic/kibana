@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EditButton } from './edit_button';
 export { useEditAction } from './use_edit_action';

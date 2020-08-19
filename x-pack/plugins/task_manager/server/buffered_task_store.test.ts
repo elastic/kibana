@@ -58,6 +58,39 @@ describe('Buffered Task Store', () => {
       );
       expect(await results[2]).toMatchObject(tasks[2]);
     });
+
+    test('handles multiple items with the same id', async () => {
+      const taskStore = taskStoreMock.create({ maxAttempts: 10 });
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
+
+      const duplicateIdTask = mockTask();
+      const tasks = [
+        duplicateIdTask,
+        mockTask(),
+        mockTask(),
+        { ...mockTask(), id: duplicateIdTask.id },
+      ];
+
+      taskStore.bulkUpdate.mockResolvedValueOnce([
+        asOk(tasks[0]),
+        asErr({ entity: tasks[1], error: new Error('Oh no, something went terribly wrong') }),
+        asOk(tasks[2]),
+        asOk(tasks[3]),
+      ]);
+
+      const results = [
+        bufferedStore.update(tasks[0]),
+        bufferedStore.update(tasks[1]),
+        bufferedStore.update(tasks[2]),
+        bufferedStore.update(tasks[3]),
+      ];
+      expect(await results[0]).toMatchObject(tasks[0]);
+      expect(results[1]).rejects.toMatchInlineSnapshot(
+        `[Error: Oh no, something went terribly wrong]`
+      );
+      expect(await results[2]).toMatchObject(tasks[2]);
+      expect(await results[3]).toMatchObject(tasks[3]);
+    });
   });
 });
 

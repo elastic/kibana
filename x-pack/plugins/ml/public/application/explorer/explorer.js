@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   htmlIdGenerator,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -221,7 +222,7 @@ export class Explorer extends React.Component {
       selectedJobs,
       tableData,
     } = this.props.explorerState;
-    const { annotationsData, aggregations } = annotations;
+    const { annotationsData, aggregations, error: annotationsError } = annotations;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -302,9 +303,36 @@ export class Explorer extends React.Component {
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
+            {annotationsError !== undefined && (
+              <>
+                <EuiTitle
+                  className="panel-title"
+                  data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
+                >
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.annotationsErrorTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </h2>
+                </EuiTitle>
+                <EuiPanel>
+                  <EuiCallOut
+                    title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
+                      defaultMessage: 'An error occurred loading annotations:',
+                    })}
+                    color="danger"
+                    iconType="alert"
+                  >
+                    <p>{annotationsError}</p>
+                  </EuiCallOut>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+              </>
+            )}
             {annotationsData.length > 0 && (
               <>
-                <EuiPanel>
+                <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
