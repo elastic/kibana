@@ -262,9 +262,6 @@ Array [
       </h1>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
-    <div
       class="euiFlexItem euiFlexItem--flexGrowZero c0"
       style="flex-basis:485px"
     >
@@ -387,9 +384,6 @@ Array [
         TestingHeading
       </h1>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    />
   </div>,
   <div
     class="euiSpacer euiSpacer--s"

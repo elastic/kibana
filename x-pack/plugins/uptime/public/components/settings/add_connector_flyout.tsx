@@ -46,7 +46,10 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
         iconSide="left"
         onClick={() => setAddFlyoutVisibility(true)}
       >
-        <FormattedMessage id="emptyButton" defaultMessage="Create connector" />
+        <FormattedMessage
+          id="xpack.uptime.alerts.settings.createConnector"
+          defaultMessage="Create connector"
+        />
       </EuiButtonEmpty>
       <ActionsConnectorsContextProvider
         value={{

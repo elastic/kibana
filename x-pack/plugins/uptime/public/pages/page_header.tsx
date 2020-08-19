@@ -95,7 +95,7 @@ export const PageHeader = React.memo(
               <h1 className="eui-textNoWrap">{headingText}</h1>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>
+          {extraLinks && <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>}
           <DatePickerComponent />
         </EuiFlexGroup>
         <EuiSpacer size="s" />

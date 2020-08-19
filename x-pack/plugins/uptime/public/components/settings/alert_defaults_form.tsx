@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiDescribedFormGroup,
@@ -45,9 +45,8 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   useEffect(() => {
     if (focusConnectorField && inputRef.current && !loading) {
       inputRef.current.focus();
-      updateUrlParams({ focusConnector: undefined });
     }
-  }, [focusConnectorField, inputRef, loading, updateUrlParams]);
+  }, [focusConnectorField, inputRef, loading]);
 
   const { data = [] } = useSelector(connectorsSelector);
 
@@ -57,6 +56,9 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
     if (inputRef.current) {
       const { value } = inputRef.current;
       setError(value.length === 0 ? undefined : `"${value}" is not a valid option`);
+    }
+    if (inputRef.current && !loading && focusConnectorField) {
+      updateUrlParams({ focusConnectorField: undefined });
     }
   };
 
@@ -151,11 +153,11 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
         </EuiFormRow>
         <span>
           <AddConnectorFlyout
-            focusInput={() => {
+            focusInput={useCallback(() => {
               if (inputRef.current) {
                 inputRef.current.focus();
               }
-            }}
+            }, [])}
           />
         </span>
       </EuiDescribedFormGroup>

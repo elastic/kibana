@@ -76,7 +76,7 @@ export const getSupportedUrlParams = (params: {
     selectedPingStatus,
     statusFilter,
     pagination,
-    focusConnector,
+    focusConnectorField,
   } = filteredParams;
 
   return {
@@ -99,6 +99,6 @@ export const getSupportedUrlParams = (params: {
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     statusFilter: statusFilter || STATUS_FILTER,
     pagination,
-    focusConnectorField: !!focusConnector,
+    focusConnectorField: !!focusConnectorField,
   };
 };

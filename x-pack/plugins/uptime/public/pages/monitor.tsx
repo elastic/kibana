@@ -65,8 +65,8 @@ export const MonitorPage: React.FC = () => {
     <>
       <PageHeader
         headingText={
-          <EuiFlexGroup>
-            <EuiFlexItem>{nameOrId}</EuiFlexItem>
+          <EuiFlexGroup wrap={false}>
+            <EuiFlexItem grow={false}>{nameOrId}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EnableMonitorAlert
                 monitorId={monitorId}
