@@ -289,7 +289,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    *
    * @api {get} /api/ml/results/:jobId/categorizer_stats
    * @apiName GetCategorizerStats
-   * @apiDescription Returns the categorizer snapshots for the specified job ID
+   * @apiDescription Returns the categorizer stats for the specified job ID
    * @apiSchema (params) jobIdSchema
    * @apiSchema (query) getCategorizerStatsSchema
    */
@@ -321,7 +321,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    *
    * @api {get} /api/ml/results/category_stopped_partitions
    * @apiName GetCategoryStoppedPartitions
-   * @apiDescription Returns list of partitions we stopped categorizing whens status changed to warn
+   * @apiDescription Returns information on the partitions that have stopped being categorized due to the categorization status changing from ok to warn. Can return either the list of stopped partitions for each job, or just the list of job IDs.
    * @apiSchema (body) getCategorizerStoppedPartitionsSchema
    */
   router.post(
