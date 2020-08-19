@@ -142,7 +142,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         placeholder: 'Search for anything...',
         incremental: true,
         compressed: true,
-        inputRef: (ref: HTMLInputElement) => {
+        inputRef: (ref: HTMLInputElement | null) => {
           setSearchRef(ref);
         },
         'aria-label': i18n.translate('xpack.globalSearchBar.primaryNav.screenReaderLabel', {

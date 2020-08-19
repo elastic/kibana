@@ -22,18 +22,9 @@ interface Props {
   isLoading: boolean;
   reset: () => void;
   links: Links;
-  isNavDrawerLocked: boolean;
-  isNavLegacy: boolean;
 }
 
-export function MainControls({
-  toggleRequestFlyout,
-  isRequestFlyoutOpen,
-  reset,
-  links,
-  isNavDrawerLocked,
-  isNavLegacy,
-}: Props) {
+export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, links }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const items = [

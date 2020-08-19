@@ -42,7 +42,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const { fleet } = useConfig();
-  const { uiSettings } = useCore();
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   return (
