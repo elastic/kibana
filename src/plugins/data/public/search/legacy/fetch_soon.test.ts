@@ -21,8 +21,8 @@ import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
 import { IUiSettingsClient } from 'kibana/public';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchResponse } from '../index';
 import { UI_SETTINGS } from '../../../common';
+import { SearchResponse } from 'elasticsearch';
 
 function getConfigStub(config: any = {}) {
   return {
@@ -30,10 +30,19 @@ function getConfigStub(config: any = {}) {
   } as IUiSettingsClient;
 }
 
-const mockResponses: Record<string, SearchResponse> = {
-  foo: {},
-  bar: {},
-  baz: {},
+const mockResponses: Record<string, SearchResponse<any>> = {
+  foo: {
+    took: 1,
+    timed_out: false,
+  } as SearchResponse<any>,
+  bar: {
+    took: 2,
+    timed_out: false,
+  } as SearchResponse<any>,
+  baz: {
+    took: 3,
+    timed_out: false,
+  } as SearchResponse<any>,
 };
 
 jest.useFakeTimers();

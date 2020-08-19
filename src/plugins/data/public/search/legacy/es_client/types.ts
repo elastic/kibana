@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { SearchResponse } from '../../fetch';
+import { SearchResponse } from 'elasticsearch';
 
 export interface LegacyApiCaller {
   search: (searchRequest: Record<string, any>) => LegacyApiCallerResponse;
   msearch: (searchRequest: Record<string, any>) => LegacyApiCallerResponse;
 }
 
-interface LegacyApiCallerResponse extends Promise<SearchResponse> {
+interface LegacyApiCallerResponse extends Promise<SearchResponse<any>> {
   abort: () => void;
 }

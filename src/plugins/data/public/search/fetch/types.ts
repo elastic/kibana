@@ -20,8 +20,6 @@
 import { IUiSettingsClient } from '../../../../../core/public';
 import { ISearchStartLegacy } from '../types';
 
-export type SearchResponse = any;
-
 export interface FetchOptions {
   abortSignal?: AbortSignal;
   searchStrategyId?: string;

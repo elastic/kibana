@@ -190,7 +190,7 @@ export class ListControl extends Control<PhraseFilterManager> {
       return;
     }
 
-    this.partialResults = resp.terminated_early || resp.timed_out;
+    this.partialResults = resp.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';

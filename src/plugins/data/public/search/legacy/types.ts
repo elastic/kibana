@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { FetchHandlers } from '../fetch';
-import { SearchResponse } from '..';
 
 export interface SearchStrategySearchParams extends FetchHandlers {
   searchRequests: Array<Record<string, any>>;
@@ -31,6 +31,6 @@ export interface SearchStrategyProvider {
 }
 
 export interface SearchStrategyResponse {
-  searching: Promise<SearchResponse[]>;
+  searching: Promise<Array<SearchResponse<any>>>;
   abort: () => void;
 }

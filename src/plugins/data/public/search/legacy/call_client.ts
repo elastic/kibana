@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { FetchOptions, FetchHandlers, handleResponse } from '../fetch';
 import { defaultSearchStrategy } from './default_search_strategy';
 
@@ -31,7 +32,7 @@ export function callClient(
     FetchOptions
   ]> = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map<Record<any, any>, FetchOptions>(requestOptionEntries);
-  const requestResponseMap = new Map();
+  const requestResponseMap = new Map<Record<string, any>, Promise<SearchResponse<any>>>();
 
   const { searching, abort } = defaultSearchStrategy.search({
     searchRequests,
@@ -44,5 +45,5 @@ export function callClient(
     if (abortSignal) abortSignal.addEventListener('abort', abort);
     requestResponseMap.set(request, response);
   });
-  return searchRequests.map((request) => requestResponseMap.get(request));
+  return searchRequests.map((request) => requestResponseMap.get(request)!);
 }

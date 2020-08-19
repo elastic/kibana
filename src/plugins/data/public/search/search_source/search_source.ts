@@ -73,6 +73,7 @@ import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
+import { SearchResponse } from 'elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -249,14 +250,15 @@ export class SearchSource {
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
 
-    let response;
+    let response: SearchResponse<any> | undefined;
     if (uiSettings.get(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+      response = await this.fetch$(searchRequest, options.abortSignal).toPromise();
     }
 
-    if (response.error) {
+    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+    if ((response as any).error) {
       throw new RequestFailure(null, response);
     }
 
