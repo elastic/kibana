@@ -22,7 +22,6 @@ import { map, tap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
 import {
   getSearchParamsFromRequest,
-  SearchRequest,
   DataPublicPluginStart,
   IEsSearchResponse,
 } from '../../../data/public';
@@ -43,7 +42,7 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
 
-  search(searchRequests: SearchRequest[]) {
+  search(searchRequests: Array<Record<string, any>>) {
     const { search } = this.dependencies.search;
     const requestResponders: any = {};
 

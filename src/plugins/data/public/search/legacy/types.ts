@@ -18,10 +18,10 @@
  */
 
 import { FetchHandlers } from '../fetch';
-import { SearchRequest, SearchResponse } from '..';
+import { SearchResponse } from '..';
 
 export interface SearchStrategySearchParams extends FetchHandlers {
-  searchRequests: SearchRequest[];
+  searchRequests: Array<Record<string, any>>;
 }
 
 // @deprecated

@@ -19,7 +19,6 @@
 
 import { IUiSettingsClient, CoreStart } from 'kibana/public';
 import { UI_SETTINGS, ISearchRequestParams } from '../../../common';
-import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 
@@ -56,7 +55,7 @@ export function getTimeout(esShardTimeout: number) {
 }
 
 export function getSearchParamsFromRequest(
-  searchRequest: SearchRequest,
+  searchRequest: Record<string, any>,
   dependencies: { injectedMetadata: CoreStart['injectedMetadata']; uiSettings: IUiSettingsClient }
 ): ISearchRequestParams {
   const { injectedMetadata, uiSettings } = dependencies;

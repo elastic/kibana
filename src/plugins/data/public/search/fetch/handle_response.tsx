@@ -23,9 +23,9 @@ import { EuiSpacer } from '@elastic/eui';
 import { ShardFailureOpenModalButton, ShardFailureRequest, ShardFailureResponse } from '../../ui';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
-import { SearchRequest, SearchResponse } from '..';
+import { SearchResponse } from '..';
 
-export function handleResponse(request: SearchRequest, response: SearchResponse) {
+export function handleResponse(request: Record<string, any>, response: SearchResponse) {
   if (response.timed_out) {
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {

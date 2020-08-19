@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { SearchRequest, SearchResponse } from '../../fetch';
+import { SearchResponse } from '../../fetch';
 
 export interface LegacyApiCaller {
-  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
+  search: (searchRequest: Record<string, any>) => LegacyApiCallerResponse;
+  msearch: (searchRequest: Record<string, any>) => LegacyApiCallerResponse;
 }
 
 interface LegacyApiCallerResponse extends Promise<SearchResponse> {

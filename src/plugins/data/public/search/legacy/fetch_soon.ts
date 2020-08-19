@@ -19,7 +19,7 @@
 
 import { callClient } from './call_client';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
+import { SearchResponse } from '../index';
 import { UI_SETTINGS } from '../../../common';
 
 /**
@@ -27,7 +27,7 @@ import { UI_SETTINGS } from '../../../common';
  * up (e.g. when a dashboard is loading).
  */
 export async function fetchSoon(
-  request: SearchRequest,
+  request: Record<any, any>,
   options: FetchOptions,
   fetchHandlers: FetchHandlers
 ) {
@@ -49,7 +49,7 @@ function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
 }
 
 // The current batch/queue of requests to fetch
-let requestsToFetch: SearchRequest[] = [];
+let requestsToFetch: Array<Record<any, any>> = [];
 let requestOptions: FetchOptions[] = [];
 
 // The in-progress fetch (if there is one)
@@ -63,7 +63,7 @@ let fetchInProgress: Promise<SearchResponse> | null = null;
  * @return Promise<SearchResponse> The response for the given request
  */
 async function delayedFetch(
-  request: SearchRequest,
+  request: Record<any, any>,
   options: FetchOptions,
   fetchHandlers: FetchHandlers,
   ms: number

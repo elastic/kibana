@@ -19,19 +19,18 @@
 
 import { FetchOptions, FetchHandlers, handleResponse } from '../fetch';
 import { defaultSearchStrategy } from './default_search_strategy';
-import { SearchRequest } from '../index';
 
 export function callClient(
-  searchRequests: SearchRequest[],
+  searchRequests: Array<Record<any, any>>,
   requestsOptions: FetchOptions[] = [],
   fetchHandlers: FetchHandlers
 ) {
   // Correlate the options with the request that they're associated with
   const requestOptionEntries: Array<[
-    SearchRequest,
+    Record<any, any>,
     FetchOptions
   ]> = searchRequests.map((request, i) => [request, requestsOptions[i]]);
-  const requestOptionsMap = new Map<SearchRequest, FetchOptions>(requestOptionEntries);
+  const requestOptionsMap = new Map<Record<any, any>, FetchOptions>(requestOptionEntries);
   const requestResponseMap = new Map();
 
   const { searching, abort } = defaultSearchStrategy.search({

@@ -21,7 +21,7 @@ import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
 import { IUiSettingsClient } from 'kibana/public';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
+import { SearchResponse } from '../index';
 import { UI_SETTINGS } from '../../../common';
 
 function getConfigStub(config: any = {}) {
@@ -39,7 +39,7 @@ const mockResponses: Record<string, SearchResponse> = {
 jest.useFakeTimers();
 
 jest.mock('./call_client', () => ({
-  callClient: jest.fn((requests: SearchRequest[]) => {
+  callClient: jest.fn((requests: Array<Record<string, any>>) => {
     // Allow a request object to specify which mockResponse it wants to receive (_mockResponseId)
     // in addition to how long to simulate waiting before returning a response (_waitMs)
     const responses = requests.map((request) => {
