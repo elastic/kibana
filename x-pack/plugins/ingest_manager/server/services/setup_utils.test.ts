@@ -12,10 +12,10 @@ async function sleep(ms: number) {
 
 describe('awaitIfPending', () => {
   it('first promise called blocks others', async () => {
-    const fnA = jest.fn();
-    const fnB = jest.fn();
-    const fnC = jest.fn();
-    const fnD = jest.fn();
+    const fnA = jest.fn().mockImplementation(async () => {});
+    const fnB = jest.fn().mockImplementation(async () => {});
+    const fnC = jest.fn().mockImplementation(async () => {});
+    const fnD = jest.fn().mockImplementation(async () => {});
     const promises = [
       awaitIfPending(fnA),
       awaitIfPending(fnB),
@@ -92,12 +92,12 @@ describe('awaitIfPending', () => {
   it('does not block other calls after batch is fulfilled. can call again for a new result', async () => {
     const fnA = jest
       .fn()
-      .mockImplementationOnce(() => 'fnA first')
-      .mockImplementationOnce(() => 'fnA second')
-      .mockImplementation(() => 'fnA default/2+');
-    const fnB = jest.fn();
-    const fnC = jest.fn();
-    const fnD = jest.fn();
+      .mockImplementationOnce(async () => 'fnA first')
+      .mockImplementationOnce(async () => 'fnA second')
+      .mockImplementation(async () => 'fnA default/2+');
+    const fnB = jest.fn().mockImplementation(async () => {});
+    const fnC = jest.fn().mockImplementation(async () => {});
+    const fnD = jest.fn().mockImplementation(async () => {});
     let promises = [
       awaitIfPending(fnA),
       awaitIfPending(fnB),

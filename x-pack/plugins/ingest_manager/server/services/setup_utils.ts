@@ -5,36 +5,33 @@
  */
 
 // the promise which tracks the setup
-let status: Promise<unknown> | undefined;
+let status: Promise<any> | undefined;
+let isPending = false;
 // default resolve to guard against "undefined is not a function" errors
 let onResolve = (value?: unknown) => {};
 let onReject = (reason: any) => {};
 
-export async function awaitIfPending(asyncFunction: Function) {
+export async function awaitIfPending<T>(asyncFunction: Function): Promise<T> {
   // pending successful or failed attempt
-  if (status) {
+  if (isPending) {
     // don't run concurrent installs
+    // return a promise which will eventually resolve/reject
     return status;
   } else {
     // create the initial promise
     status = new Promise((res, rej) => {
+      isPending = true;
       onResolve = res;
       onReject = rej;
     });
   }
   try {
-    // if everything works, mark the tracking promise as resolved
-    const result = await asyncFunction();
+    const result = await asyncFunction().catch(onReject);
     onResolve(result);
-    // * reset the tracking promise to try again next time
-    status = undefined;
-    return result;
   } catch (error) {
     // if something fails
     onReject(error);
-    // * reset the tracking promise to try again next time
-    status = undefined;
-    // * return the rejection so it can be dealt with now
-    return Promise.reject(error);
   }
+  isPending = false;
+  return status;
 }
