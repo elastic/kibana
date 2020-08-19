@@ -7,9 +7,16 @@
 import { TypeOf } from '@kbn/config-schema';
 import { GetTrustedAppsRequestSchema } from '../schema/trusted_apps';
 import { ExceptionListItemSchema } from '../../../../lists/common';
+import { FoundExceptionListItemSchema } from '../../../../lists/common/schemas/response';
 
 /** API request params for retrieving a list of Trusted Apps */
-export type GetTrustedAppsRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
+export type GetTrustedListAppsResponse = Pick<
+  FoundExceptionListItemSchema,
+  'per_page' | 'page' | 'total'
+> & {
+  data: TrustedApp[];
+};
 
 /** Type for a new Trusted App Entry */
 export type NewTrustedApp = Pick<

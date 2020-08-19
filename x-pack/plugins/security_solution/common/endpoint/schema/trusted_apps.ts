@@ -9,6 +9,6 @@ import { schema } from '@kbn/config-schema';
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-    per_page: schema.maybe(schema.number({ defaultValue: 20 })),
+    per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
   }),
 };
