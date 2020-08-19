@@ -157,7 +157,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
-            data-test-subj={`cts-summary-overwrite-count`}
+            data-test-subj={`cts-summary-pending-count`}
             title={summarizedResults.pendingCount}
             titleSize="s"
             titleColor={summarizedResults.pendingCount > 0 ? 'primary' : 'subdued'}
@@ -173,7 +173,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
-            data-test-subj={`cts-summary-conflict-count`}
+            data-test-subj={`cts-summary-skipped-count`}
             title={summarizedResults.skippedCount}
             titleSize="s"
             titleColor={summarizedResults.skippedCount > 0 ? 'primary' : 'subdued'}
@@ -181,7 +181,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             textAlign="center"
             description={
               <FormattedMessage
-                id="xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount"
+                id="xpack.spaces.management.copyToSpaceFlyoutFooter.skippedCount"
                 defaultMessage="Skipped"
               />
             }

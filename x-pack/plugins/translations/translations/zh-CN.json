@@ -17941,7 +17941,6 @@
     "xpack.spaces.management.copyToSpace.overwriteLabel": "正在自动覆盖已保存对象",
     "xpack.spaces.management.copyToSpace.resolveCopyErrorTitle": "解决已保存对象冲突时出错",
     "xpack.spaces.management.copyToSpace.spacesLoadErrorTitle": "加载可用工作区时出错",
-    "xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount": "已跳过",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.errorCount": "错误",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount": "待处理",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.successCount": "已复制",

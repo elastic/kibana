@@ -17934,7 +17934,6 @@
     "xpack.spaces.management.copyToSpace.overwriteLabel": "保存されたオブジェクトを自動的に上書きしています",
     "xpack.spaces.management.copyToSpace.resolveCopyErrorTitle": "保存されたオブジェクトの矛盾の解決中にエラーが発生",
     "xpack.spaces.management.copyToSpace.spacesLoadErrorTitle": "利用可能なスペースを読み込み中にエラーが発生",
-    "xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount": "スキップ",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.errorCount": "エラー",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount": "保留中",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.successCount": "コピー完了",
