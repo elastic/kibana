@@ -73,7 +73,7 @@ export const enhancedEsSearchStrategyProvider = (
     logger.info(`cancel ${id}`);
     await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'DELETE',
-      path: `/_async_search/${id}`,
+      path: encodeURI(`/_async_search/${id}`),
     });
   };
 
