@@ -67,7 +67,6 @@ export const getFilterAndRuleBounds = (
 export const updateAlertStatusAction = async ({
   query,
   alertIds,
-  status,
   selectedStatus,
   setEventsLoading,
   setEventsDeleted,
