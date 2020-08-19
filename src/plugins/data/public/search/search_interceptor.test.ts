@@ -34,7 +34,6 @@ describe('SearchInterceptor', () => {
     mockCoreSetup = coreMock.createSetup();
     searchInterceptor = new SearchInterceptor(
       {
-        toasts: mockCoreSetup.notifications.toasts,
         startServices: mockCoreSetup.getStartServices(),
         uiSettings: mockCoreSetup.uiSettings,
         http: mockCoreSetup.http,
@@ -126,7 +125,7 @@ describe('SearchInterceptor', () => {
       await flushPromises();
     });
 
-    test('Immediatelly aborts if passed an aborted abort signal', async (done) => {
+    test('Immediately aborts if passed an aborted abort signal', async (done) => {
       const abort = new AbortController();
       const mockRequest: IEsSearchRequest = {
         params: {},
@@ -140,46 +139,6 @@ describe('SearchInterceptor', () => {
         done();
       };
       response.subscribe({ error });
-    });
-  });
-
-  describe('getPendingCount$', () => {
-    test('should observe the number of pending requests', () => {
-      const pendingCount$ = searchInterceptor.getPendingCount$();
-      const pendingNext = jest.fn();
-      pendingCount$.subscribe(pendingNext);
-
-      const mockResponse: any = { result: 200 };
-      mockCoreSetup.http.fetch.mockResolvedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      response.subscribe({
-        complete: () => {
-          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
-        },
-      });
-    });
-
-    test('should observe the number of pending requests on error', () => {
-      const pendingCount$ = searchInterceptor.getPendingCount$();
-      const pendingNext = jest.fn();
-      pendingCount$.subscribe(pendingNext);
-
-      const mockResponse: any = { result: 500 };
-      mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      response.subscribe({
-        complete: () => {
-          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
-        },
-      });
     });
   });
 });

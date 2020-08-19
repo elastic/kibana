@@ -64,7 +64,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      */
     this.searchInterceptor = new SearchInterceptor(
       {
-        toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
         startServices: core.getStartServices(),

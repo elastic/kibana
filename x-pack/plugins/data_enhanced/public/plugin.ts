@@ -34,7 +34,6 @@ export class DataEnhancedPlugin
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
       {
-        toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
         startServices: core.getStartServices(),

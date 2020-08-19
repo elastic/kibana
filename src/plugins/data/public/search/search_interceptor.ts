@@ -19,18 +19,15 @@
 
 import { trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter } from 'rxjs/operators';
-import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
+import { finalize } from 'rxjs/operators';
+import { CoreStart, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
 import { ISearchOptions } from './types';
-import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
 
-const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
 export interface SearchInterceptorDeps {
-  toasts: ToastsSetup;
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
@@ -57,12 +54,6 @@ export class SearchInterceptor {
   protected timeoutSubscriptions: Subscription = new Subscription();
 
   /**
-   * The current long-running toast (if there is one).
-   * @internal
-   */
-  protected longRunningToast?: Toast;
-
-  /**
    * @internal
    */
   protected application!: CoreStart['application'];
@@ -70,7 +61,6 @@ export class SearchInterceptor {
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
    * @param application  The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
@@ -83,20 +73,6 @@ export class SearchInterceptor {
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
     });
-
-    // When search requests go out, a notification is scheduled allowing users to continue the
-    // request past the timeout. When all search requests complete, we remove the notification.
-    this.getPendingCount$()
-      .pipe(filter((count) => count === 0))
-      .subscribe(this.hideToast);
-  }
-
-  /**
-   * Returns an `Observable` over the current number of pending searches. This could mean that one
-   * of the search requests is still in flight, or that it has only received partial responses.
-   */
-  public getPendingCount$() {
-    return this.pendingCount$.asObservable();
   }
 
   protected runSearch(
@@ -154,9 +130,6 @@ export class SearchInterceptor {
     });
     this.timeoutSubscriptions.add(subscription);
 
-    // Schedule the notification to allow users to cancel or wait beyond the timeout
-    const notificationSubscription = timer(LONG_QUERY_NOTIFICATION_DELAY).subscribe(this.showToast);
-
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
@@ -170,7 +143,6 @@ export class SearchInterceptor {
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
       this.timeoutSubscriptions.remove(subscription);
-      notificationSubscription.unsubscribe();
     };
 
     combinedSignal.addEventListener('abort', cleanup);
@@ -180,37 +152,6 @@ export class SearchInterceptor {
       cleanup,
     };
   }
-
-  /**
-   *  @internal
-   */
-  protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.deps.toasts.addInfo(
-      {
-        title: 'Your query is taking a while',
-        text: getLongQueryNotification({
-          application: this.application,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
-  };
-
-  /**
-   *  @internal
-   */
-  protected hideToast = () => {
-    if (this.longRunningToast) {
-      this.deps.toasts.remove(this.longRunningToast);
-      delete this.longRunningToast;
-      if (this.deps.usageCollector) {
-        this.deps.usageCollector.trackLongQueryDialogDismissed();
-      }
-    }
-  };
 }
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

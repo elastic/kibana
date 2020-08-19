@@ -6,7 +6,6 @@
 
 import { throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
-import { getLongQueryNotification } from './long_query_notification';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -31,36 +30,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
   public cancelPending = () => {
-    this.hideToast();
     this.abortController.abort();
     this.abortController = new AbortController();
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
-  };
-
-  /**
-   * Un-schedule timing out all of the searches intercepted.
-   */
-  public runBeyondTimeout = () => {
-    this.hideToast();
-    this.timeoutSubscriptions.unsubscribe();
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryRunBeyondTimeout();
-  };
-
-  protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.deps.toasts.addInfo(
-      {
-        title: 'Your query is taking a while',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryPopupShown();
   };
 
   public search(
