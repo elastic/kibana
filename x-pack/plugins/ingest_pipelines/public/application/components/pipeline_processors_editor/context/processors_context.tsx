@@ -128,8 +128,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       },
       getData: () =>
         serialize({
-          onFailure: onFailureProcessors,
-          processors,
+          pipeline: {
+            onFailure: onFailureProcessors,
+            processors,
+          },
         }),
     });
   }, [processors, onFailureProcessors, onUpdate, formState, mode]);

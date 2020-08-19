@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TestPipelineFlyout } from './test_pipeline_flyout';
-
-export { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
+export { TestPipelineActions } from './test_pipeline_actions';

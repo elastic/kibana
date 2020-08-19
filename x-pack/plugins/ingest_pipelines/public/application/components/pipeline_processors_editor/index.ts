@@ -17,9 +17,6 @@ export { SerializeResult } from './serialize';
 export {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
-  AddDocumentsButton,
-  TestOutputButton,
+  TestPipelineActions,
   DocumentsDropdown,
-  TestPipelineFlyout,
-  TestPipelineFlyoutTab,
 } from './components';

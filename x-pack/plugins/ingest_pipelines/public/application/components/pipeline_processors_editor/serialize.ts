@@ -5,10 +5,21 @@
  */
 import { Processor } from '../../../../common/types';
 
-import { DeserializeResult } from './deserialize';
 import { ProcessorInternal } from './types';
 
-type SerializeArgs = DeserializeResult;
+interface SerializeArgs {
+  /**
+   * The deserialized pipeline to convert
+   */
+  pipeline: {
+    processors: ProcessorInternal[];
+    onFailure?: ProcessorInternal[];
+  };
+  /**
+   * For simulation, we add the "tag" field equal to the internal processor id so that we can map the simulate results to each processor
+   */
+  copyIdToTag?: boolean;
+}
 
 export interface SerializeResult {
   processors: Processor[];
@@ -17,7 +28,7 @@ export interface SerializeResult {
 
 const convertProcessorInternalToProcessor = (
   processor: ProcessorInternal,
-  addTag?: boolean
+  copyIdToTag?: boolean
 ): Processor => {
   const { options, onFailure, type, id } = processor;
   const outProcessor = {
@@ -27,34 +38,32 @@ const convertProcessorInternalToProcessor = (
   };
 
   if (onFailure?.length) {
-    outProcessor[type].on_failure = convertProcessors(onFailure, addTag);
+    outProcessor[type].on_failure = convertProcessors(onFailure, copyIdToTag);
   }
 
-  // For simulation, we add the "tag" field equal to the internal processor id
-  // so that we can map the simulate results to each processor
-  if (addTag) {
+  if (copyIdToTag) {
     outProcessor[type].tag = id;
   }
 
   return outProcessor;
 };
 
-const convertProcessors = (processors: ProcessorInternal[], addTag?: boolean) => {
+const convertProcessors = (processors: ProcessorInternal[], copyIdToTag?: boolean) => {
   const convertedProcessors = [];
 
   for (const processor of processors) {
-    convertedProcessors.push(convertProcessorInternalToProcessor(processor, addTag));
+    convertedProcessors.push(convertProcessorInternalToProcessor(processor, copyIdToTag));
   }
 
   return convertedProcessors;
 };
 
-export const serialize = (
-  { processors, onFailure }: SerializeArgs,
-  addTag?: boolean
-): SerializeResult => {
+export const serialize = ({
+  pipeline: { processors, onFailure },
+  copyIdToTag = false,
+}: SerializeArgs): SerializeResult => {
   return {
-    processors: convertProcessors(processors, addTag),
-    on_failure: onFailure?.length ? convertProcessors(onFailure, addTag) : undefined,
+    processors: convertProcessors(processors, copyIdToTag),
+    on_failure: onFailure?.length ? convertProcessors(onFailure, copyIdToTag) : undefined,
   };
 };

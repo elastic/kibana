@@ -56,7 +56,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       <EuiFlexItem grow={false} className="documentsDropdown__selectContainer">
         <EuiSelect
           compressed
-          options={getDocumentOptions(documents!)}
+          options={getDocumentOptions(documents)}
           value={selectedDocumentIndex}
           onChange={(e) => {
             updateSelectedDocument(Number(e.target.value));

@@ -126,27 +126,23 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
   const [state, dispatch] = useReducer(reducer, DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData);
   const { services } = useKibana();
 
-  const setCurrentTestPipelineData = useCallback((data: Action): void => {
-    dispatch(data);
-  }, []);
-
   const updateTestOutputPerProcessor = useCallback(
     async (documents: Document[] | undefined, processors: DeserializeResult) => {
       if (!documents) {
         return;
       }
 
-      setCurrentTestPipelineData({
+      dispatch({
         type: 'updateIsExecutingPipeline',
         payload: {
           isExecutingPipeline: true,
         },
       });
 
-      const serializedProcessorsWithTag = serialize(
-        { processors: processors.processors, onFailure: processors.onFailure },
-        true
-      );
+      const serializedProcessorsWithTag = serialize({
+        pipeline: { processors: processors.processors, onFailure: processors.onFailure },
+        copyIdToTag: true,
+      });
 
       const { data: verboseResults, error } = await services.api.simulatePipeline({
         documents,
@@ -155,7 +151,7 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
       });
 
       if (error) {
-        setCurrentTestPipelineData({
+        dispatch({
           type: 'updateIsExecutingPipeline',
           payload: {
             isExecutingPipeline: false,
@@ -165,7 +161,7 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         return;
       }
 
-      setCurrentTestPipelineData({
+      dispatch({
         type: 'updateOutputPerProcessor',
         payload: {
           testOutputPerProcessor: deserializeVerboseTestOutput(verboseResults),
@@ -173,14 +169,14 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
         },
       });
     },
-    [services.api, setCurrentTestPipelineData]
+    [services.api]
   );
 
   return (
     <TestPipelineContext.Provider
       value={{
         testPipelineData: state,
-        setCurrentTestPipelineData,
+        setCurrentTestPipelineData: dispatch,
         updateTestOutputPerProcessor,
       }}
     >

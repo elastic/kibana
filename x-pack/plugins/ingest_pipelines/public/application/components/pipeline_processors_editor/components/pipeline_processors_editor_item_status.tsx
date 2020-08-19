@@ -15,7 +15,7 @@ interface ProcessorStatusIcon {
   label: string;
 }
 
-const mapProcessorStatusToIcon: Record<string, ProcessorStatusIcon> = {
+const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   success: {
     icon: 'checkInCircleFilled',
     iconColor: 'success',
@@ -60,12 +60,22 @@ const mapProcessorStatusToIcon: Record<string, ProcessorStatusIcon> = {
   },
 };
 
+// This is a fallback in case ES returns a status we do not support
+// This is not expected and likely means we need to modify the code to support a new status
+const unknownStatus = {
+  icon: 'dot',
+  iconColor: 'subdued',
+  label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.unknownStatusAriaLabel', {
+    defaultMessage: 'Unknown',
+  }),
+};
+
 interface Props {
   processorStatus: ProcessorStatus;
 }
 
 export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ processorStatus }) => {
-  const { icon, iconColor, label } = mapProcessorStatusToIcon[processorStatus];
+  const { icon, iconColor, label } = processorStatusToIconMap[processorStatus] || unknownStatus;
 
   return (
     <EuiToolTip position="top" content={<p>{label}</p>}>

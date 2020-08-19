@@ -62,7 +62,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
   const handleTestPipeline = useCallback(
     async ({ documents, verbose }: HandleTestPipelineArgs) => {
-      const serializedProcessors = serialize(processors);
+      const serializedProcessors = serialize({ pipeline: processors });
 
       setIsRunningTest(true);
       setTestingError(null);
