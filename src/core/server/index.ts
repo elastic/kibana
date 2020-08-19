@@ -298,6 +298,8 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  namespaceIdToString,
+  namespaceStringToId,
 } from './saved_objects';
 
 export {

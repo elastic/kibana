@@ -14,6 +14,7 @@ import { coreMock, savedObjectsTypeRegistryMock, httpServerMock } from 'src/core
 
 jest.mock('../../../../../../src/core/server', () => {
   return {
+    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
     exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
   };

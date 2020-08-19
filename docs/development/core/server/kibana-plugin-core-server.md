@@ -219,6 +219,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Variable | Description |
 |  --- | --- |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
+|  [namespaceIdToString](./kibana-plugin-core-server.namespaceidtostring.md) | Converts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with the exception of the <code>undefined</code> namespace ID (which has a namespace string of <code>'default'</code>). |
+|  [namespaceStringToId](./kibana-plugin-core-server.namespacestringtoid.md) | Converts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with the exception of the <code>'default'</code> namespace string (which has a namespace ID of <code>undefined</code>). |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |
 
