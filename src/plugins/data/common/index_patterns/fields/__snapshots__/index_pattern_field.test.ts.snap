@@ -50,7 +50,12 @@ Object {
   "esTypes": Array [
     "text",
   ],
-  "format": undefined,
+  "format": Object {
+    "id": "number",
+    "params": Object {
+      "pattern": "$0,0.[00]",
+    },
+  },
   "lang": "lang",
   "name": "name",
   "readFromDocValues": false,

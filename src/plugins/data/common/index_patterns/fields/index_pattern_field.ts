@@ -38,7 +38,7 @@ export class IndexPatternField implements IFieldType {
     if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
       const msg = i18n.translate('data.indexPatterns.unknownFieldHeader', {
         values: { type: spec.type, name: spec.name },
-        defaultMessage: `Field '{name}': Unknown field type '{type}'`,
+        defaultMessage: `Field \'{name}\': Unknown field type \'{type}\'`,
       });
       throw new FieldTypeUnknownError(msg, spec);
     }
