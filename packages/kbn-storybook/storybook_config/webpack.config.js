@@ -24,7 +24,7 @@ const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
 // eslint-disable-next-line import/no-unresolved
-const { currentConfig } = require('../../../built_assets/storybook/current.config');
+//const { currentConfig } = require('../../../built_assets/storybook/current.config');
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config: storybookConfig }) => {
@@ -139,10 +139,10 @@ module.exports = async ({ config: storybookConfig }) => {
   config = webpackMerge(storybookConfig, config);
 
   // Load custom Webpack config specified by a plugin.
-  if (currentConfig.webpackHook) {
-    // eslint-disable-next-line import/no-dynamic-require
-    return await require(currentConfig.webpackHook)({ config });
-  }
+  //if (currentConfig.webpackHook) {
+  // eslint-disable-next-line import/no-dynamic-require
+  // return await require(currentConfig.webpackHook)({ config });
+  //}
 
   return config;
 };

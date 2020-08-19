@@ -37,11 +37,8 @@ module.exports = {
   entry: [
     '@elastic/eui/dist/eui_theme_light.css',
     '@kbn/ui-framework/dist/kui_light.css',
-    '@storybook/addon-info',
     '@storybook/addon-knobs',
     '@storybook/addon-knobs/register',
-    '@storybook/addon-options',
-    '@storybook/addon-options/register',
     '@storybook/core',
     '@storybook/core/dist/server/common/polyfills.js',
     '@storybook/react',
