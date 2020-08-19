@@ -476,7 +476,7 @@ export function XYChart({
           const table = data.tables[layerId];
 
           const shouldShowValueLabel =
-            // !chartHasMoreThanOneSeries &&
+            !chartHasMoreThanOneSeries &&
             shouldRotate &&
             yConfig &&
             yConfig?.find(({ forAccessor }) => forAccessor === accessor)?.showValueLabels;
