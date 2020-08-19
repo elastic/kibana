@@ -57,6 +57,7 @@ export interface FlyoutDrilldownWizardProps<
 }
 
 function useWizardConfigState(
+  actionFactoryContext: BaseActionFactoryContext,
   initialDrilldownWizardConfig?: DrilldownWizardConfig
 ): [
   DrilldownWizardConfig,
@@ -102,7 +103,10 @@ function useWizardConfigState(
           setWizardConfig({
             ...wizardConfig,
             actionFactory,
-            actionConfig: actionConfigCache[actionFactory.id] ?? actionFactory.createConfig(),
+            actionConfig:
+              actionConfigCache[actionFactory.id] ??
+              actionFactory.createConfig(actionFactoryContext),
+            selectedTriggers: [],
           });
         } else {
           if (wizardConfig.actionFactory?.id) {
@@ -147,7 +151,18 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   const [
     wizardConfig,
     { setActionFactory, setActionConfig, setName, setSelectedTriggers },
-  ] = useWizardConfigState(initialDrilldownWizardConfig);
+  ] = useWizardConfigState(
+    { ...extraActionFactoryContext, triggers: supportedTriggers },
+    initialDrilldownWizardConfig
+  );
+
+  const actionFactoryContext: BaseActionFactoryContext = useMemo(
+    () => ({
+      ...extraActionFactoryContext,
+      triggers: wizardConfig.selectedTriggers ?? [],
+    }),
+    [extraActionFactoryContext, wizardConfig.selectedTriggers]
+  );
 
   const isActionValid = (
     config: DrilldownWizardConfig
@@ -157,16 +172,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     if (!wizardConfig.actionConfig) return false;
     if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0) return false;
 
-    return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
+    return wizardConfig.actionFactory.isConfigValid(
+      wizardConfig.actionConfig,
+      actionFactoryContext
+    );
   };
-
-  const actionFactoryContext: BaseActionFactoryContext = useMemo(
-    () => ({
-      ...extraActionFactoryContext,
-      triggers: wizardConfig.selectedTriggers ?? [],
-    }),
-    [extraActionFactoryContext, wizardConfig.selectedTriggers]
-  );
 
   const footer = (
     <EuiButton

@@ -160,6 +160,11 @@ export class TaskManager {
       getCapacity: () => this.pool.availableWorkers,
       pollRequests$: this.claimRequests$,
       work: this.pollForWork,
+      // Time out the `work` phase if it takes longer than a certain number of polling cycles
+      // The `work` phase includes the prework needed *before* executing a task
+      // (such as polling for new work, marking tasks as running etc.) but does not
+      // include the time of actually running the task
+      workTimeout: opts.config.poll_interval * opts.config.max_poll_inactivity_cycles,
     });
   }
 
