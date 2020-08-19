@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash';
+import { pick, cloneDeep } from 'lodash';
 
 import { PluginInitializerContext, Logger } from '../../../../../../core/server';
 
@@ -50,24 +50,10 @@ export class TelemetryEventsSender {
     }
   }
 
-  private async sendIfDue() {
-    if (this.isSending) {
-      return;
-    }
-
-    try {
-      this.isSending = true;
-      this.logger.debug(`Sending...`);
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
-    }
-    this.isSending = false;
-  }
-
   public queueTelemetryEvents(events: object[]) {
     const qlength = this.queue.length;
 
-    if (qlength > this.maxQueueSize) {
+    if (qlength >= this.maxQueueSize) {
       // we're full already
       return;
     }
@@ -75,9 +61,9 @@ export class TelemetryEventsSender {
     // TODO check that telemetry is opted-in
 
     if (events.length > this.maxQueueSize - qlength) {
-      this.queue.push(this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
+      this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
-      this.queue.push(this.processEvents(events));
+      this.queue.push(...this.processEvents(events));
     }
   }
 
@@ -99,5 +85,25 @@ export class TelemetryEventsSender {
 
       return newObj;
     });
+  }
+
+  private async sendIfDue() {
+    if (this.isSending) {
+      return;
+    }
+
+    try {
+      this.isSending = true;
+      const toSend: object[] = cloneDeep(this.queue);
+      this.queue = [];
+      this.sendEvents(toSend);
+    } catch (err) {
+      this.logger.warn(`Error sending telemetry events data: ${err}`);
+    }
+    this.isSending = false;
+  }
+
+  private async sendEvents(events: object[]) {
+    // TODO
   }
 }

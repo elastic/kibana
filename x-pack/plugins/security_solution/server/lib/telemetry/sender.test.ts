@@ -5,10 +5,11 @@
  */
 
 import { TelemetryEventsSender } from './sender.ts';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 describe('TelemetryEventsSender', () => {
   describe('processEvents', () => {
-    it('returns empty array when empty array is passed', async () => {
+    it('returns empty array when empty array is passed', () => {
       const sender = new TelemetryEventsSender();
       const result = sender.processEvents([]);
       expect(result).toStrictEqual([]);
@@ -69,6 +70,42 @@ describe('TelemetryEventsSender', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('queueTelemetryEvents', () => {
+    it('queues two events', () => {
+      const sender = new TelemetryEventsSender();
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      expect(sender.queue.length).toBe(2);
+    });
+
+    it('queues more than maxQueueSize events', () => {
+      const sender = new TelemetryEventsSender();
+      sender.maxQueueSize = 5;
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
+      sender.queueTelemetryEvents([{ 'event.kind': '5' }, { 'event.kind': '6' }]);
+      sender.queueTelemetryEvents([{ 'event.kind': '7' }, { 'event.kind': '8' }]);
+      expect(sender.queue.length).toBe(5);
+    });
+
+    it('empties the queue when sending', async () => {
+      const sender = new TelemetryEventsSender();
+      sender.logger = loggingSystemMock.create().get();
+      sender.sendEvents = jest.fn();
+
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      expect(sender.queue.length).toBe(2);
+      await sender.sendIfDue();
+      expect(sender.queue.length).toBe(0);
+      expect(sender.sendEvents).toBeCalledTimes(1);
+      sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
+      sender.queueTelemetryEvents([{ 'event.kind': '5' }, { 'event.kind': '6' }]);
+      expect(sender.queue.length).toBe(4);
+      await sender.sendIfDue();
+      expect(sender.queue.length).toBe(0);
+      expect(sender.sendEvents).toBeCalledTimes(2);
     });
   });
 });
