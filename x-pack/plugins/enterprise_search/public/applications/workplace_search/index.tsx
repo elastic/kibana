@@ -14,6 +14,7 @@ resetContext({ createStore: true });
 
 const store = getContext().store as Store;
 
+import { IInitialAppData } from '../../../common/types';
 import { KibanaContext, IKibanaContext } from '../index';
 import { Layout } from '../shared/layout';
 import { WorkplaceSearchNav } from './components/layout/nav';
@@ -23,7 +24,7 @@ import { SETUP_GUIDE_PATH } from './routes';
 import { SetupGuide } from './components/setup_guide';
 import { Overview } from './components/overview';
 
-export const WorkplaceSearch: React.FC = () => {
+export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
   if (!config.host)
     return (

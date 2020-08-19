@@ -9,8 +9,10 @@ import { Route, Redirect, Switch } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
-import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../index';
+import { IInitialAppData } from '../../../common/types';
+
+import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
 import {
@@ -25,7 +27,7 @@ import {
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
-export const AppSearch: React.FC = () => {
+export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
 
   if (!config.host)

@@ -20,6 +20,7 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
+import { IInitialAppData } from '../common/types';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../common/constants';
 import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
@@ -28,7 +29,7 @@ import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg
 export interface ClientConfigType {
   host?: string;
 }
-export interface ClientData {
+export interface ClientData extends IInitialAppData {
   externalUrl: IExternalUrl;
 }
 

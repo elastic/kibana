@@ -19,6 +19,7 @@ import {
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
 import { IExternalUrl } from './shared/enterprise_search_url';
+import { IInitialAppData } from '../../common/types';
 
 export interface IKibanaContext {
   config: { host?: string };
@@ -38,28 +39,28 @@ export const KibanaContext = React.createContext({});
  */
 
 export const renderApp = (
-  App: React.FC,
+  App: React.FC<IInitialAppData>,
   params: AppMountParameters,
   core: CoreStart,
   plugins: PluginsSetup,
   config: ClientConfigType,
-  data: ClientData
+  { externalUrl, ...initialData }: ClientData
 ) => {
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
         value={{
           config,
+          externalUrl,
           http: core.http,
           navigateToUrl: core.application.navigateToUrl,
-          externalUrl: data.externalUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
         }}
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Router history={params.history}>
-            <App />
+            <App {...initialData} />
           </Router>
         </LicenseProvider>
       </KibanaContext.Provider>
