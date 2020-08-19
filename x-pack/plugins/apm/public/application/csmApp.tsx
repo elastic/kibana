@@ -26,17 +26,11 @@ import { RumHome } from '../components/app/RumDashboard/RumHome';
 import { ConfigSchema } from '../index';
 import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
 import { RouteName } from '../components/app/Main/route_config/route_names';
-import {
-  renderAsRedirectTo,
-  routes,
-} from '../components/app/Main/route_config';
+import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ApmPluginContext } from '../context/ApmPluginContext';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-import { LocationProvider } from '../context/LocationContext';
-import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LicenseProvider } from '../context/LicenseContext';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 const CsmMainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -93,34 +87,17 @@ export function CsmAppRoot({
   };
   return (
     <ApmPluginContext.Provider value={apmPluginContextValue}>
-      <AlertsContextProvider
-        value={{
-          http: core.http,
-          docLinks: core.docLinks,
-          capabilities: core.application.capabilities,
-          toastNotifications: core.notifications.toasts,
-          actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
-        }}
-      >
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <i18nCore.Context>
-            <Router history={routerHistory}>
-              <LocationProvider>
-                <MatchedRouteProvider routes={routes}>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <CsmApp />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </MatchedRouteProvider>
-              </LocationProvider>
-            </Router>
-          </i18nCore.Context>
-        </KibanaContextProvider>
-      </AlertsContextProvider>
+      <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <i18nCore.Context>
+          <Router history={routerHistory}>
+            <UrlParamsProvider>
+              <LoadingIndicatorProvider>
+                <CsmApp />
+              </LoadingIndicatorProvider>
+            </UrlParamsProvider>
+          </Router>
+        </i18nCore.Context>
+      </KibanaContextProvider>
     </ApmPluginContext.Provider>
   );
 }
@@ -128,12 +105,15 @@ export function CsmAppRoot({
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
+
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
+  createCallApmApi(core.http);
+
   resetHistory();
   ReactDOM.render(
     <CsmAppRoot
