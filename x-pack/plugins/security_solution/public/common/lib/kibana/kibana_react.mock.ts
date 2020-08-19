@@ -8,6 +8,8 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { securityMock } from '../../../../../../plugins/security/public/mocks';
 
 import {
   DEFAULT_APP_TIME_RANGE,
@@ -25,7 +27,7 @@ import {
   DEFAULT_BYTES_FORMAT,
   DEFAULT_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from '../../mock/kibana_core';
+import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 
@@ -70,13 +72,15 @@ export const createUseUiSetting$Mock = () => {
 
 export const createStartServicesMock = (): StartServices => {
   const core = createKibanaCoreStartMock();
-  const plugins = createKibanaPluginsStartMock();
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
+  const data = dataPluginMock.createStartContract();
+  const security = securityMock.createSetup();
 
   const services = ({
     ...core,
-    ...plugins,
+    data,
+    security,
     storage,
   } as unknown) as StartServices;
 
