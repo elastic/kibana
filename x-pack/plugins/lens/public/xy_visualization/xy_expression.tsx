@@ -332,7 +332,18 @@ export function XYChart({
         }
         legendPosition={legend.position}
         showLegendExtra={false}
-        theme={chartTheme}
+        theme={{
+          ...chartTheme,
+          ...{
+            barSeriesStyle: {
+              displayValue: {
+                fill: 'white',
+                offsetX: 0,
+                offsetY: 0,
+              },
+            },
+          },
+        }}
         baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => xAxisFormatter.convert(d.value),
@@ -452,12 +463,19 @@ export function XYChart({
             yScaleType,
             xScaleType,
             isHistogram,
+            yConfig,
           } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
 
           const table = data.tables[layerId];
+
+          const shouldShowValueLabel =
+            // !chartHasMoreThanOneSeries &&
+            shouldRotate &&
+            yConfig &&
+            yConfig?.find(({ forAccessor }) => forAccessor === accessor)?.showValueLabels;
 
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
@@ -527,7 +545,18 @@ export function XYChart({
             case 'bar_stacked':
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
-              return <BarSeries key={index} {...seriesProps} />;
+              const valueLabelsSettings = {
+                displayValueSettings: {
+                  // TODO: workaround for elastic-charts issue with horizontal bar chart and isValueContainedInElement flag
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  valueFormatter: (d: any): string => xAxisFormatter.convert(d),
+                  showValueLabel: shouldShowValueLabel,
+                  isAlternatingValueLabel: false,
+                  isValueContainedInElement: true,
+                  hideClippedValue: true,
+                },
+              };
+              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
             case 'area_stacked':
               return <AreaSeries key={index} {...seriesProps} />;
             case 'area':

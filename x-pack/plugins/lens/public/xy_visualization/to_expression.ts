@@ -203,6 +203,9 @@ export const buildExpression = (
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
                                 color: yConfig.color ? [yConfig.color] : [],
+                                showValueLabels: yConfig.showValueLabels
+                                  ? [yConfig.showValueLabels]
+                                  : [],
                               },
                             },
                           ],

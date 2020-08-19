@@ -196,6 +196,11 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'The color of the series',
     },
+    showValueLabels: {
+      types: ['boolean'],
+      default: false,
+      help: 'Whether to show value labels on the chart bars (horizontal only)',
+    },
   },
   fn: function fn(input: unknown, args: YConfig) {
     return {
@@ -292,6 +297,7 @@ export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
   color?: string;
+  showValueLabels?: boolean;
 }
 
 export interface LayerConfig {

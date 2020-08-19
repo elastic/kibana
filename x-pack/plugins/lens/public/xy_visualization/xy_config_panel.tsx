@@ -34,7 +34,14 @@ import {
   VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
+import {
+  State,
+  SeriesType,
+  visualizationTypes,
+  YAxisMode,
+  AxesSettingsConfig,
+  YConfig,
+} from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
@@ -481,12 +488,40 @@ const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
   const { state, setState, layerId, accessor } = props;
+  const horizontalOnly = isHorizontalChart(state.layers);
+  const chartHasMoreThanOneSeries =
+    state.layers.length > 1 ||
+    state.layers.some(({ accessors }) => accessors.length > 1) ||
+    state.layers.some(({ splitAccessor }) => splitAccessor);
+
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  const axisMode =
-    (layer.yConfig &&
-      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
-    'auto';
+  const layerConfig = (layer.yConfig &&
+    layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)) || {
+    forAccessor: accessor,
+  };
+  const axisMode = layerConfig?.axisMode || 'auto';
+  const shouldShowValueLabels =
+    (horizontalOnly && !chartHasMoreThanOneSeries && layerConfig?.showValueLabels) ?? false;
+
+  const createNewYAxisConfigsWithValue = useCallback(
+    <K extends keyof YConfig, V extends YConfig[K]>(prop: K, newValue: V) => {
+      const newYAxisConfigs = [...(layer.yConfig || [])];
+      const existingIndex = newYAxisConfigs.findIndex(
+        (yAxisConfig) => yAxisConfig.forAccessor === accessor
+      );
+      if (existingIndex !== -1) {
+        newYAxisConfigs[existingIndex][prop] = newValue;
+      } else {
+        newYAxisConfigs.push({
+          forAccessor: accessor,
+          [prop]: newValue,
+        });
+      }
+      return newYAxisConfigs;
+    },
+    [accessor, layer]
+  );
 
   return (
     <EuiForm>
@@ -529,22 +564,37 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           idSelected={`${idPrefix}${axisMode}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as YAxisMode;
-            const newYAxisConfigs = [...(layer.yConfig || [])];
-            const existingIndex = newYAxisConfigs.findIndex(
-              (yAxisConfig) => yAxisConfig.forAccessor === accessor
-            );
-            if (existingIndex !== -1) {
-              newYAxisConfigs[existingIndex].axisMode = newMode;
-            } else {
-              newYAxisConfigs.push({
-                forAccessor: accessor,
-                axisMode: newMode,
-              });
-            }
+            const newYAxisConfigs = createNewYAxisConfigsWithValue('axisMode', newMode);
             setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
           }}
         />
       </EuiFormRow>
+      {horizontalOnly && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
+            defaultMessage: 'Show Value Labels',
+          })}
+        >
+          <EuiSwitch
+            className="eui-alignMiddle"
+            data-test-subj="lnsshowShowValueLabelsSwitch"
+            showLabel={false}
+            label={i18n.translate('xpack.lens.xyChart.showValueLabels', {
+              defaultMessage: 'Show Value Labels',
+            })}
+            onChange={({ target }) => {
+              const newYAxisConfigs = createNewYAxisConfigsWithValue(
+                'showValueLabels',
+                target.checked
+              );
+              setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+            }}
+            checked={shouldShowValueLabels}
+          />
+        </EuiFormRow>
+      )}
     </EuiForm>
   );
 }
