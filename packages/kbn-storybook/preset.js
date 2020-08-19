@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const webpackConfig = require('./storybook_config/webpack.config');
+const webpackConfig = require('./webpack.config');
 
 module.exports = {
   addons: ['@storybook/addon-essentials', '@storybook/addon-knobs'],

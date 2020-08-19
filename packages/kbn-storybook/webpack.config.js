@@ -18,17 +18,15 @@
  */
 
 const { resolve } = require('path');
-const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const { stringifyRequest } = require('loader-utils');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
-// eslint-disable-next-line import/no-unresolved
-//const { currentConfig } = require('../../../built_assets/storybook/current.config');
+const { externals } = require('@kbn/ui-shared-deps');
+const { REPO_ROOT } = require('./lib/constants');
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config: storybookConfig }) => {
   let config = {
+    externals,
     module: {
       rules: [
         // Include the React preset from Kibana for JS(X) and TS(X)
@@ -46,19 +44,6 @@ module.exports = async ({ config: storybookConfig }) => {
             loader: 'raw-loader',
           },
         },
-        // Parse props data for .tsx files
-        // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
-        // See: https://github.com/storybookjs/storybook/issues/7998
-        //
-        // {
-        //   test: /\.tsx$/,
-        //   // Exclude example files, as we don't display props info for them
-        //   exclude: /\.stories.tsx$/,
-        //   use: [
-        //     // Parse TS comments to create Props tables in the UI
-        //     require.resolve('react-docgen-typescript-loader'),
-        //   ],
-        // },
         {
           test: /\.scss$/,
           exclude: /\.module.(s(a|c)ss)$/,
@@ -91,28 +76,6 @@ module.exports = async ({ config: storybookConfig }) => {
         },
       ],
     },
-    plugins: [
-      // Reference the built DLL file of static(ish) dependencies, which are removed
-      // during kbn:bootstrap and rebuilt if missing.
-      new webpack.DllReferencePlugin({
-        manifest: resolve(DLL_DIST_DIR, 'manifest.json'),
-        context: REPO_ROOT,
-      }),
-      // Copy the DLL files to the Webpack build for use in the Storybook UI
-
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: resolve(DLL_DIST_DIR, 'dll.js'),
-            to: 'dll.js',
-          },
-          {
-            from: resolve(DLL_DIST_DIR, 'dll.css'),
-            to: 'dll.css',
-          },
-        ],
-      }),
-    ],
     resolve: {
       // Tell Webpack about the ts/x extensions
       extensions: ['.ts', '.tsx', '.scss'],
@@ -137,12 +100,6 @@ module.exports = async ({ config: storybookConfig }) => {
   });
 
   config = webpackMerge(storybookConfig, config);
-
-  // Load custom Webpack config specified by a plugin.
-  //if (currentConfig.webpackHook) {
-  // eslint-disable-next-line import/no-dynamic-require
-  // return await require(currentConfig.webpackHook)({ config });
-  //}
 
   return config;
 };
