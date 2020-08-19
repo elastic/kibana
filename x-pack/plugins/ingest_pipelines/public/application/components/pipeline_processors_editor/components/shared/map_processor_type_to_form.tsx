@@ -68,7 +68,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/date-index-name-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
-      defaultMessage: 'Date Index Name',
+      defaultMessage: 'Date index name',
     }),
   },
   dissect: {
@@ -82,7 +82,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/dot-expand-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dotExpander', {
-      defaultMessage: 'Dot Expander',
+      defaultMessage: 'Dot expander',
     }),
   },
   drop: {
@@ -131,7 +131,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/htmlstrip-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.htmlStrip', {
-      defaultMessage: 'HTML Strip',
+      defaultMessage: 'HTML strip',
     }),
   },
   inference: {
@@ -201,7 +201,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/ingest-node-set-security-user-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.setSecurityUser', {
-      defaultMessage: 'Set Security User',
+      defaultMessage: 'Set security user',
     }),
   },
   split: {
@@ -236,14 +236,14 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/urldecode-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
-      defaultMessage: 'URL Decode',
+      defaultMessage: 'URL decode',
     }),
   },
   user_agent: {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
-      defaultMessage: 'User Agent',
+      defaultMessage: 'User agent',
     }),
   },
 

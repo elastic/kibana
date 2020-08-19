@@ -3198,10 +3198,10 @@
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-types/-/geojson-types-1.0.2.tgz#9aecf642cb00eab1080a57c4f949a65b4a5846d6"
   integrity sha512-e9EBqHHv3EORHrSfbR9DqecPNn+AmuAoQxV6aL8Xu30bJMJR1o8PZLZzpk1Wq7/NfCbuhmakHTPYRhoqLsXRnw==
 
-"@mapbox/geojsonhint@^2.0.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@mapbox/geojsonhint/-/geojsonhint-2.2.0.tgz#75ca94706e9a56e6debf4e1c78fabdc67978b883"
-  integrity sha512-8qQYRB+/2z2JsN5s6D0WAnpo69+3V3nvJsSFLwMB1dsaWz1V4oZeuoje9srbYAxxL8PXCwIywfhYa3GxOkBv5Q==
+"@mapbox/geojsonhint@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@mapbox/geojsonhint/-/geojsonhint-3.0.0.tgz#42448232ce4236cb89c1b69c36b0cadeac99e02e"
+  integrity sha512-zHcyh1rDHYnEBd6NvOWoeHLuvazlDkIjvz9MJx4cKwcKTlfrqgxVnTv1QLnVJnsSU5neJnhQJcgscR/Zl4uYgw==
   dependencies:
     concat-stream "^1.6.1"
     jsonlint-lines "1.7.1"
@@ -3214,16 +3214,17 @@
   resolved "https://registry.yarnpkg.com/@mapbox/jsonlint-lines-primitives/-/jsonlint-lines-primitives-2.0.2.tgz#ce56e539f83552b58d10d672ea4d6fc9adc7b234"
   integrity sha1-zlblOfg1UrWNENZy6k1vya3HsjQ=
 
-"@mapbox/mapbox-gl-draw@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-draw/-/mapbox-gl-draw-1.1.2.tgz#247b3f0727db34c2641ab718df5eebeee69a2585"
-  integrity sha512-DWtATUAnJaGZYoH/y2O+QTRybxrp5y3w3eV5FXHFNVcKsCAojKEMB8ALKUG2IsiCKqV/JCAguK9AlPWR7Bjafw==
+"@mapbox/mapbox-gl-draw@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-draw/-/mapbox-gl-draw-1.2.0.tgz#b6e5278afef65bd5d7d92366034997768e478ad9"
+  integrity sha512-gMrP2zn8PzDtrs72FMJTPytCumX5vUn9R7IK38qBOVy9UfqbdWr56KYuNA/2X+jKn4FIOpmWf8CWkKpOaQkv7w==
   dependencies:
     "@mapbox/geojson-area" "^0.2.1"
     "@mapbox/geojson-extent" "^0.3.2"
     "@mapbox/geojson-normalize" "0.0.1"
-    "@mapbox/geojsonhint" "^2.0.0"
+    "@mapbox/geojsonhint" "3.0.0"
     "@mapbox/point-geometry" "0.1.0"
+    eslint-plugin-import "^2.19.1"
     hat "0.0.3"
     lodash.isequal "^4.2.0"
     xtend "^4.0.1"
@@ -5422,15 +5423,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.3.tgz#aaddec6a3c93bf03b402db3acf5d4c77bce8bdff"
   integrity sha512-b9zScBKmB/RJqETbxu3YRya61vJOik89/lR+NdxjZAFMDcMSjwX6IhQoP4terJkhsa9TE1C+l6XwxCkhhsaZXg==
 
-"@types/lodash@^4.14.116":
-  version "4.14.150"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.150.tgz#649fe44684c3f1fcb6164d943c5a61977e8cf0bd"
-  integrity sha512-kMNLM5JBcasgYscD9x/Gvr6lTAv2NVgsKtet/hm93qMyf/D1pt+7jeEZklKJKxMVmXjxbRVQQGfqDSfipYCO6w==
-
-"@types/lodash@^4.14.155":
-  version "4.14.156"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.156.tgz#cbe30909c89a1feeb7c60803e785344ea0ec82d1"
-  integrity sha512-l2AgHXcKUwx2DsvP19wtRPqZ4NkONjmorOdq4sMcxIjqdIuuV/ULo2ftuv4NUpevwfW7Ju/UKLqo0ZXuEt/8lQ==
+"@types/lodash@^4.14.116", "@types/lodash@^4.14.159":
+  version "4.14.159"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.159.tgz#61089719dc6fdd9c5cb46efc827f2571d1517065"
+  integrity sha512-gF7A72f7WQN33DpqOWw9geApQPh4M3PxluMtaHxWHXEGSN12/WbcEk/eNSqWNQcQhF66VSZ06vCF94CrHwXJDg==
 
 "@types/log-symbols@^2.0.0":
   version "2.0.0"
@@ -21197,15 +21193,10 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-lodash@4.17.11, lodash@4.17.19, lodash@>4.17.4, lodash@^4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.16, lodash@^4.17.19, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.15, lodash@~4.17.5:
-  version "4.17.19"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
-  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
-
-lodash@4.17.15:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+lodash@4.17.11, lodash@4.17.15, lodash@4.17.19, lodash@>4.17.4, lodash@^4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.16, lodash@^4.17.19, lodash@^4.17.2, lodash@^4.17.20, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.15, lodash@~4.17.5:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
 
 lodash@^3.10.1:
   version "3.10.1"
