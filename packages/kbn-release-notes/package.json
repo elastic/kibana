@@ -18,6 +18,6 @@
   },
   "devDependencies": {
     "markdown-it": "^10.0.0",
-    "typescript": "4.0.0-dev.20200730"
+    "typescript": "4.0.1-rc"
   }
 }
