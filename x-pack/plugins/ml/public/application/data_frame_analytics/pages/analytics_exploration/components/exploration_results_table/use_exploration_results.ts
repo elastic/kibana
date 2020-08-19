@@ -115,7 +115,7 @@ export const useExplorationResults = (
     jobConfig?.dest.index,
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
-  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  const predictionFieldName = jobConfig ? getPredictionFieldName(jobConfig.analysis) : undefined;
 
   const getAnalyticsBaseline = useCallback(async () => {
     try {

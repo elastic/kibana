@@ -100,7 +100,11 @@ export const DataGrid: FC<Props> = memo(
           const rowIndex = children?.props?.rowIndex;
           const row = data[rowIndex];
           let predictedValue;
-          if (row && predictionFieldName && row.ml[predictionFieldName] !== undefined) {
+          if (
+            predictionFieldName !== undefined &&
+            row &&
+            row.ml[predictionFieldName] !== undefined
+          ) {
             predictedValue = row.ml[predictionFieldName];
           }
           return (

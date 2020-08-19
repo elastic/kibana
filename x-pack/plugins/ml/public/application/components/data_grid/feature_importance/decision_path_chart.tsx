@@ -16,8 +16,9 @@ import {
   Position,
   LineAnnotationDatum,
   PartialTheme,
+  AxisConfig,
+  RecursivePartial,
 } from '@elastic/charts';
-import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 
 const baselineStyle = {
@@ -35,37 +36,54 @@ const baselineStyle = {
   },
 };
 
-const theme: PartialTheme = {
-  axes: {
-    tickLabel: {
-      fontSize: 30,
-    },
+const axes: RecursivePartial<AxisConfig> = {
+  tickLabelStyle: {
+    fontSize: 12,
   },
 };
+const theme: PartialTheme = {
+  axes,
+};
+
+export type DecisionPathPlotData = Array<[string, number, number]>;
 
 interface FeatureImportanceDecisionPathProps {
   baseline?: number;
-  decisionPlotData: LineAnnotationDatum[];
+  decisionPlotData: DecisionPathPlotData | undefined;
   predictedValue?: number | undefined;
 }
+
+const findMaxMin = (data: DecisionPathPlotData, getter: Function): { max: number; min: number } => {
+  let min = Infinity;
+  let max = -Infinity;
+  data.forEach((d) => {
+    const value = getter(d);
+    if (value > max) max = value;
+    if (value < min) min = value;
+  });
+  return { max, min };
+};
 
 export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProps> = ({
   baseline,
   decisionPlotData,
 }) => {
   if (!decisionPlotData) return <div />;
-
   const baselineData: LineAnnotationDatum[] = [{ dataValue: baseline, details: 'baseline' }];
-  let maxDomain = _.maxBy(decisionPlotData, (d) => d[2])[2];
-  let minDomain = _.minBy(decisionPlotData, (d) => d[2])[2];
-  // adjust domain so plot have some space on both sides
-  // and to account for baseline out of range
-  const buffer = Math.abs(maxDomain - minDomain) * 0.1;
-  maxDomain = Math.max(maxDomain, baseline) + buffer;
-  minDomain = Math.min(minDomain, baseline) - buffer;
+  let maxDomain;
+  let minDomain;
+  // if decisionPlotData has calculated cumulative path
+  if (Array.isArray(decisionPlotData) && decisionPlotData.length === 3) {
+    const { max, min } = findMaxMin(decisionPlotData, (d: [string, number, number]) => d[2]);
+    maxDomain = max;
+    minDomain = min;
+    const buffer = Math.abs(maxDomain - minDomain) * 0.1;
+    maxDomain = (typeof baseline === 'number' ? Math.max(maxDomain, baseline) : maxDomain) + buffer;
+    minDomain = (typeof baseline === 'number' ? Math.min(minDomain, baseline) : minDomain) - buffer;
+  }
 
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = decisionPlotData.length > 3 ? 25 : 75;
+  const heightMultiplier = Array.isArray(decisionPlotData) && decisionPlotData.length > 3 ? 25 : 75;
 
   return (
     <>
@@ -103,7 +121,7 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
           xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
-          yAccessors={[2]} // if baseline exist then shows the decision path else show in order of descending importance
+          yAccessors={[2]}
           data={decisionPlotData}
         />
       </Chart>

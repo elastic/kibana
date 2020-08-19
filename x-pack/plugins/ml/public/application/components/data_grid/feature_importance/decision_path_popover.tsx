@@ -7,7 +7,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiTabs, EuiTab, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FeatureImportanceDecisionPath } from './decision_path_chart';
+import { FeatureImportanceDecisionPath, DecisionPathPlotData } from './decision_path_chart';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { FeatureImportance } from '../../../../../common/types/feature_importance';
 
@@ -33,7 +33,7 @@ export const useDecisionPathData = ({
   featureImportance,
   predictedValue,
 }: DecisionPathPopoverProps) => {
-  const [decisionPlotData, setDecisionPlotData] = useState();
+  const [decisionPlotData, setDecisionPlotData] = useState<DecisionPathPlotData | undefined>();
 
   useEffect(() => {
     let mappedFeatureImportance: ExtendedFeatureImportance[] = featureImportance;
@@ -42,7 +42,7 @@ export const useDecisionPathData = ({
       absImportance: Math.abs(d[FEATURE_IMPORTANCE]),
     }));
 
-    if (baseline && Number.isFinite(predictedValue)) {
+    if (baseline && predictedValue !== undefined && Number.isFinite(predictedValue)) {
       // get the adjusted importance needed for when # of fields included in c++ analysis != max allowed
       // if num fields included = num features allowed exactly, adjustedImportance should be 0
       const adjustedImportance =
@@ -61,19 +61,19 @@ export const useDecisionPathData = ({
       });
     }
 
-    mappedFeatureImportance = mappedFeatureImportance
+    const finalResult: DecisionPathPlotData = mappedFeatureImportance
       // sort so absolute importance so it goes from bottom (baseline) to top
-      .sort((a, b) => b.absImportance - a.absImportance)
-      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
+      .sort((a, b) => b.absImportance! - a.absImportance!)
+      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE], NaN]);
 
     // start at the baseline and end at predicted value
     // for regression, cumulativeSum should add up to baseline
     let cumulativeSum = 0;
     for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
-      cumulativeSum += mappedFeatureImportance[i][1];
-      mappedFeatureImportance[i][2] = cumulativeSum;
+      cumulativeSum += finalResult[i][1];
+      finalResult[i][2] = cumulativeSum;
     }
-    setDecisionPlotData(mappedFeatureImportance);
+    setDecisionPlotData(finalResult);
   }, [baseline, featureImportance]);
 
   return { decisionPlotData };
@@ -150,7 +150,6 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
 
           <FeatureImportanceDecisionPath
             baseline={baseline}
-            featureImportance={featureImportance}
             decisionPlotData={decisionPlotData}
             predictedValue={predictedValue}
           />
