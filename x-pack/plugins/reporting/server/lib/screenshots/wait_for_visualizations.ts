@@ -50,6 +50,7 @@ export const waitForVisualizations = async (
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
+    logger.error(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntFinishRendering', {
         defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. You may need to increase '{configKey}'. {error}`,
