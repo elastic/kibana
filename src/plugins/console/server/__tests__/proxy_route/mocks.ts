@@ -39,7 +39,7 @@ const defaultProxyValue = Object.freeze({
 });
 
 interface MockDepsArgument extends Partial<Omit<RouteDependencies, 'proxy'>> {
-  proxy: Partial<ProxyDependencies>;
+  proxy?: Partial<ProxyDependencies>;
 }
 
 export const getProxyRouteHandlerDeps = ({
