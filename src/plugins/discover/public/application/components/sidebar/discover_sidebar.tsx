@@ -92,7 +92,6 @@ export function DiscoverSidebar({
   setIndexPattern,
   state,
 }: DiscoverSidebarProps) {
-  const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
@@ -103,19 +102,6 @@ export function DiscoverSidebar({
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
 
-  const onShowDetails = useCallback(
-    (show: boolean, field: IndexPatternField) => {
-      if (!show) {
-        setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
-      } else {
-        setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        if (services.capabilities.discover.save) {
-          selectedIndexPattern.popularizeField(field.name, 1);
-        }
-      }
-    },
-    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
-  );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
       const newState = setFieldFilterProp(fieldFilterState, field, value);
@@ -215,9 +201,7 @@ export function DiscoverSidebar({
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
                         selected={true}
                         useShortDots={useShortDots}
                       />
@@ -292,9 +276,7 @@ export function DiscoverSidebar({
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
                         useShortDots={useShortDots}
                       />
                     </li>
@@ -320,9 +302,7 @@ export function DiscoverSidebar({
                     onAddField={onAddField}
                     onRemoveField={onRemoveField}
                     onAddFilter={onAddFilter}
-                    onShowDetails={onShowDetails}
                     getDetails={getDetailsByField}
-                    showDetails={openFieldMap.get(field.name) || false}
                     useShortDots={useShortDots}
                   />
                 </li>
