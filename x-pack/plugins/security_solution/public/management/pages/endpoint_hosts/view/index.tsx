@@ -140,25 +140,6 @@ export const EndpointList = () => {
     }
   );
 
-  const onRefresh = useCallback(() => {
-    dispatch({
-      type: 'appRequestedEndpointList',
-    });
-  }, [dispatch]);
-
-  const onRefreshChange = useCallback(
-    (evt) => {
-      dispatch({
-        type: 'userUpdatedEndpointListRefreshOptions',
-        payload: {
-          isAutoRefreshEnabled: !evt.isPaused,
-          autoRefreshInterval: evt.refreshInterval,
-        },
-      });
-    },
-    [dispatch]
-  );
-
   const NOOP = useCallback(() => {}, []);
 
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<
@@ -403,25 +384,29 @@ export const EndpointList = () => {
           <EuiSuperDatePicker
             onTimeChange={NOOP}
             isDisabled={hasSelectedEndpoint}
-            onRefresh={onRefresh}
+            onRefresh={() => {
+              dispatch({
+                type: 'appRequestedEndpointList',
+              });
+            }}
             isPaused={!hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled}
             refreshInterval={!hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval}
-            onRefreshChange={onRefreshChange}
+            onRefreshChange={(evt) => {
+              dispatch({
+                type: 'userUpdatedEndpointListRefreshOptions',
+                payload: {
+                  isAutoRefreshEnabled: !evt.isPaused,
+                  autoRefreshInterval: evt.refreshInterval,
+                },
+              });
+            }}
             isAutoRefreshOnly={true}
           />
         </div>
         <EuiSpacer size="m" />
       </>
     );
-  }, [
-    hasListData,
-    hasSelectedEndpoint,
-    onRefresh,
-    isAutoRefreshEnabled,
-    autoRefreshInterval,
-    onRefreshChange,
-    NOOP,
-  ]);
+  }, [hasListData, hasSelectedEndpoint, isAutoRefreshEnabled, autoRefreshInterval, dispatch, NOOP]);
 
   return (
     <AdministrationListPage
