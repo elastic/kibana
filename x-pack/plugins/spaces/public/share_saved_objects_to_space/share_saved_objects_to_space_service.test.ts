@@ -28,10 +28,11 @@ describe('ShareSavedObjectsToSpaceService', () => {
         expect.any(ShareToSpaceSavedObjectsManagementAction)
       );
 
-      expect(deps.savedObjectsManagementSetup.columns.register).toHaveBeenCalledTimes(1);
-      expect(deps.savedObjectsManagementSetup.columns.register).toHaveBeenCalledWith(
-        expect.any(ShareToSpaceSavedObjectsManagementColumn)
-      );
+      // expect(deps.savedObjectsManagementSetup.columns.register).toHaveBeenCalledTimes(1);
+      // expect(deps.savedObjectsManagementSetup.columns.register).toHaveBeenCalledWith(
+      //   expect.any(ShareToSpaceSavedObjectsManagementColumn)
+      // );
+      expect(deps.savedObjectsManagementSetup.columns.register).not.toHaveBeenCalled(); // ensure this test fails after column code is uncommented
     });
   });
 });

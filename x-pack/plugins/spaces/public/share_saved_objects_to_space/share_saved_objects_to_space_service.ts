@@ -19,8 +19,9 @@ interface SetupDeps {
 export class ShareSavedObjectsToSpaceService {
   public setup({ spacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
     const action = new ShareToSpaceSavedObjectsManagementAction(spacesManager, notificationsSetup);
-    const column = new ShareToSpaceSavedObjectsManagementColumn(spacesManager);
     savedObjectsManagementSetup.actions.register(action);
-    savedObjectsManagementSetup.columns.register(column);
+    // Note: this column is hidden for now because no saved objects are shareable. It should be uncommented when at least one saved object type is multi-namespace.
+    // const column = new ShareToSpaceSavedObjectsManagementColumn(spacesManager);
+    // savedObjectsManagementSetup.columns.register(column);
   }
 }
