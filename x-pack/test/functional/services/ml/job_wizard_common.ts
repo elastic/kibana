@@ -219,11 +219,11 @@ export function MachineLearningJobWizardCommonProvider(
 
     async addCalendar(calendarId: string) {
       await this.ensureAdditionalSettingsSectionOpen();
-      await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
+      await comboBox.set('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
       const actualCalendarSelection = await this.getSelectedCalendars();
       expect(actualCalendarSelection).to.contain(
         calendarId,
-        `Expected calendar selection to conatin '${calendarId}' (got '${actualCalendarSelection}')`
+        `Expected calendar selection to contain '${calendarId}' (got '${actualCalendarSelection}')`
       );
     },
 
