@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should display policy view', async () => {
-        expect(await testSubjects.getVisibleText('pageViewHeaderLeftTitle')).to.equal(
+        expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
           policyInfo.packageConfig.name
         );
       });
