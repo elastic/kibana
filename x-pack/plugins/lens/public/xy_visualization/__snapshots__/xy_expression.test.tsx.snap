@@ -143,7 +143,17 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
-    theme={Object {}}
+    theme={
+      Object {
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "white",
+            "offsetX": 0,
+            "offsetY": 0,
+          },
+        },
+      }
+    }
     tooltip={
       Object {
         "headerFormatter": [Function],
@@ -189,6 +199,15 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
         },
       ]
     }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
     enableHistogramMode={false}
     groupId="left"
     id="d-a"
@@ -227,6 +246,15 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
           "d": "Bar",
         },
       ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
     }
     enableHistogramMode={false}
     groupId="left"
@@ -264,7 +292,17 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     rotation={90}
     showLegend={false}
     showLegendExtra={false}
-    theme={Object {}}
+    theme={
+      Object {
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "white",
+            "offsetX": 0,
+            "offsetY": 0,
+          },
+        },
+      }
+    }
     tooltip={
       Object {
         "headerFormatter": [Function],
@@ -310,6 +348,15 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
         },
       ]
     }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": undefined,
+        "valueFormatter": [Function],
+      }
+    }
     enableHistogramMode={false}
     groupId="left"
     id="d-a"
@@ -348,6 +395,15 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
           "d": "Bar",
         },
       ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": undefined,
+        "valueFormatter": [Function],
+      }
     }
     enableHistogramMode={false}
     groupId="left"
@@ -645,7 +701,17 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     rotation={0}
     showLegend={false}
     showLegendExtra={false}
-    theme={Object {}}
+    theme={
+      Object {
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "white",
+            "offsetX": 0,
+            "offsetY": 0,
+          },
+        },
+      }
+    }
     tooltip={
       Object {
         "headerFormatter": [Function],
@@ -691,6 +757,15 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
         },
       ]
     }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
     enableHistogramMode={false}
     groupId="left"
     id="d-a"
@@ -733,6 +808,15 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
           "d": "Bar",
         },
       ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
     }
     enableHistogramMode={false}
     groupId="left"
@@ -774,7 +858,17 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     rotation={90}
     showLegend={false}
     showLegendExtra={false}
-    theme={Object {}}
+    theme={
+      Object {
+        "barSeriesStyle": Object {
+          "displayValue": Object {
+            "fill": "white",
+            "offsetX": 0,
+            "offsetY": 0,
+          },
+        },
+      }
+    }
     tooltip={
       Object {
         "headerFormatter": [Function],
@@ -820,6 +914,15 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
         },
       ]
     }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": undefined,
+        "valueFormatter": [Function],
+      }
+    }
     enableHistogramMode={false}
     groupId="left"
     id="d-a"
@@ -862,6 +965,15 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
           "d": "Bar",
         },
       ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": undefined,
+        "valueFormatter": [Function],
+      }
     }
     enableHistogramMode={false}
     groupId="left"

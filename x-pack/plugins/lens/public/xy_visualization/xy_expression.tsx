@@ -322,6 +322,10 @@ export function XYChart({
     );
   };
 
+  const shouldEnrichThemeWithValueLabels = filteredLayers.some(({ seriesType }) =>
+    seriesType.includes('bar')
+  );
+
   return (
     <Chart>
       <Settings
@@ -334,7 +338,7 @@ export function XYChart({
         showLegendExtra={false}
         theme={{
           ...chartTheme,
-          ...{
+          ...(shouldEnrichThemeWithValueLabels && {
             barSeriesStyle: {
               displayValue: {
                 fill: 'white',
@@ -342,7 +346,7 @@ export function XYChart({
                 offsetY: 0,
               },
             },
-          },
+          }),
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
