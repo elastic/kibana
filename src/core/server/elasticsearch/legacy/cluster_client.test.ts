@@ -349,6 +349,20 @@ describe('#asScoped', () => {
     );
   });
 
+  test('passes x-opaque-id header with request id', () => {
+    clusterClient.asScoped(
+      httpServerMock.createKibanaRequest({ kibanaRequestState: { requestId: 'alpha' } })
+    );
+
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { 'x-opaque-id': 'alpha' },
+      expect.any(Object)
+    );
+  });
+
   test('both scoped and internal API caller fail if cluster client is closed', async () => {
     clusterClient.asScoped(
       httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
@@ -482,7 +496,7 @@ describe('#asScoped', () => {
       expect(MockScopedClusterClient).toHaveBeenCalledWith(
         expect.any(Function),
         expect.any(Function),
-        {},
+        expect.objectContaining({ 'x-opaque-id': expect.any(String) }),
         auditor
       );
     });

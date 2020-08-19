@@ -8,8 +8,8 @@ import React from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EnrollmentStepAgentConfig } from './config_selection';
-import { AgentConfig } from '../../../../types';
+import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
+import { AgentPolicy } from '../../../../types';
 
 export const DownloadStep = () => {
   return {
@@ -41,25 +41,25 @@ export const DownloadStep = () => {
   };
 };
 
-export const AgentConfigSelectionStep = ({
-  agentConfigs,
+export const AgentPolicySelectionStep = ({
+  agentPolicies,
   setSelectedAPIKeyId,
-  setSelectedConfigId,
+  setSelectedPolicyId,
 }: {
-  agentConfigs?: AgentConfig[];
+  agentPolicies?: AgentPolicy[];
   setSelectedAPIKeyId?: (key: string) => void;
-  setSelectedConfigId?: (configId: string) => void;
+  setSelectedPolicyId?: (policyId: string) => void;
 }) => {
   return {
-    title: i18n.translate('xpack.ingestManager.agentEnrollment.stepChooseAgentConfigTitle', {
-      defaultMessage: 'Choose an agent configuration',
+    title: i18n.translate('xpack.ingestManager.agentEnrollment.stepChooseAgentPolicyTitle', {
+      defaultMessage: 'Choose an agent policy',
     }),
     children: (
-      <EnrollmentStepAgentConfig
-        agentConfigs={agentConfigs}
+      <EnrollmentStepAgentPolicy
+        agentPolicies={agentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
-        onConfigChange={setSelectedConfigId}
+        onAgentPolicyChange={setSelectedPolicyId}
       />
     ),
   };

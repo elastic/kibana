@@ -85,7 +85,7 @@ export const PutAgentReassignRequestSchema = {
     agentId: schema.string(),
   }),
   body: schema.object({
-    config_id: schema.string(),
+    policy_id: schema.string(),
   }),
 };
 
@@ -117,6 +117,6 @@ export const UpdateAgentRequestSchema = {
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
-    configId: schema.maybe(schema.string()),
+    policyId: schema.maybe(schema.string()),
   }),
 };
