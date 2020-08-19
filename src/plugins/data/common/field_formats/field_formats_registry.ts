@@ -33,7 +33,7 @@ import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../types';
-import { UI_SETTINGS } from '../';
+import { UI_SETTINGS } from '../constants';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();

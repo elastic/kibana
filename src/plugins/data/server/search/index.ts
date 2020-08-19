@@ -22,3 +22,5 @@ export { ISearchStrategy, ISearchOptions, ISearchSetup, ISearchStart } from './t
 export { getDefaultSearchParams, getTotalLoaded } from './es_search';
 
 export { usageProvider, SearchUsage } from './collectors';
+
+export * from './aggs';

@@ -137,7 +137,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
-          exceptionItemsToAdd.length === 0
+          exceptionItemsToAdd.every((item) => item.entries.length === 0)
       );
     }
   }, [
@@ -259,7 +259,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection>
               <EuiFormRow fullWidth>
                 <EuiCheckbox
-                  id="close-alert-on-add-add-exception-checkbox"
+                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                  id="close-alert-on-add-edit-exception-checkbox"
                   label={
                     shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
                   }
@@ -271,7 +272,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               {exceptionListType === 'endpoint' && (
                 <>
                   <EuiSpacer />
-                  <EuiText color="subdued" size="s">
+                  <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>
                 </>
@@ -292,6 +293,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
           <EuiButton
+            data-test-subj="edit-exception-confirm-button"
             onClick={onEditExceptionConfirm}
             isLoading={addExceptionIsLoading}
             isDisabled={isSubmitButtonDisabled}
