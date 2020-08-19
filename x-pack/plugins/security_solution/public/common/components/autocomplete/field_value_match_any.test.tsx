@@ -43,6 +43,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue={['126.45.211.34']}
@@ -55,14 +56,13 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={true}
           onChange={jest.fn()}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );
 
     expect(
-      wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] input`)
-        .prop('disabled')
+      wrapper.find(`[data-test-subj="valuesAutocompleteMatchAny"] input`).prop('disabled')
     ).toBeTruthy();
   });
 
@@ -70,6 +70,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue={[]}
@@ -82,18 +83,14 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );
-    wrapper
-      .find(`[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] button`)
-      .at(0)
-      .simulate('click');
+    wrapper.find(`[data-test-subj="valuesAutocompleteMatchAny"] button`).at(0).simulate('click');
     expect(
       wrapper
-        .find(
-          `EuiComboBoxOptionsList[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox-optionsList"]`
-        )
+        .find(`EuiComboBoxOptionsList[data-test-subj="valuesAutocompleteMatchAny-optionsList"]`)
         .prop('isLoading')
     ).toBeTruthy();
   });
@@ -102,6 +99,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue={['126.45.211.34']}
@@ -114,6 +112,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={true}
           isDisabled={false}
           onChange={jest.fn()}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -129,6 +128,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue={['126.45.211.34']}
@@ -141,15 +141,13 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );
 
     expect(
-      wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"] EuiComboBoxPill`)
-        .at(0)
-        .text()
+      wrapper.find(`[data-test-subj="valuesAutocompleteMatchAny"] EuiComboBoxPill`).at(0).text()
     ).toEqual('126.45.211.34');
   });
 
@@ -158,6 +156,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('ip')}
           selectedValue={[]}
@@ -170,6 +169,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={false}
           onChange={mockOnChange}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -186,6 +186,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('machine.os.raw')}
           selectedValue={[]}
@@ -198,6 +199,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={false}
           onChange={mockOnChange}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -213,6 +215,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
+          rowLabel={'Row Label'}
           placeholder="Placeholder text"
           selectedField={getField('machine.os.raw')}
           selectedValue={[]}
@@ -225,6 +228,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
+          onError={jest.fn()}
         />
       </ThemeProvider>
     );

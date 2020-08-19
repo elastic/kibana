@@ -41,6 +41,7 @@ interface BuilderExceptionListItemProps {
   listType: ExceptionListType;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
+  setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
+    setErrorsExist,
     onlyShowListOperators = false,
   }) => {
     const handleEntryChange = useCallback(
@@ -118,6 +120,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                         }
                         onChange={handleEntryChange}
+                        setErrorsExist={setErrorsExist}
                         onlyShowListOperators={onlyShowListOperators}
                       />
                     </MyOverflowContainer>

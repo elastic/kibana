@@ -57,7 +57,6 @@ export const FieldComponent: React.FC<OperatorProps> = ({
         options: optionsMemo,
         selectedOptions: selectedOptionsMemo,
         getLabel,
-        selectedField: undefined,
       }),
     [optionsMemo, selectedOptionsMemo, getLabel]
   );

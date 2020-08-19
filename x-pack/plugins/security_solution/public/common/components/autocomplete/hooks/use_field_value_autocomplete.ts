@@ -58,15 +58,12 @@ export const useFieldValueAutocomplete = ({
               return;
             }
 
-            setIsLoading(true);
-
-            // Fields of type boolean should only display two options
             if (fieldSelected.type === 'boolean') {
-              setIsLoading(false);
               setIsSuggestingValues(false);
-              setSuggestions(['true', 'false']);
               return;
             }
+
+            setIsLoading(true);
 
             const field =
               fieldSelected.subType != null && fieldSelected.subType.nested != null

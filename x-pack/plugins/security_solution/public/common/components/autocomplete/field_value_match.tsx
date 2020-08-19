@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFieldNumber, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
+import {
+  EuiSuperSelect,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiComboBoxOptionOption,
+  EuiComboBox,
+} from '@elastic/eui';
 import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -16,6 +22,7 @@ import * as i18n from './translations';
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
+  rowLabel: string | undefined;
   selectedField: IFieldType | undefined;
   selectedValue: string | undefined;
   indexPattern: IIndexPattern | undefined;
@@ -25,10 +32,12 @@ interface AutocompleteFieldMatchProps {
   isRequired?: boolean;
   fieldInputWidth?: number;
   onChange: (arg: string) => void;
+  onError: (arg: boolean) => void;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
   placeholder,
+  rowLabel,
   selectedField,
   selectedValue,
   indexPattern,
@@ -38,9 +47,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   isRequired = false,
   fieldInputWidth,
   onChange,
+  onError,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
+  const [error, setError] = useState<string | null | undefined>(undefined);
   const [isLoadingSuggestions, isSuggestingValues, suggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH,
@@ -51,12 +62,29 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   const getLabel = useCallback((option: string): string => option, []);
   const optionsMemo = useMemo((): string[] => {
     const valueAsStr = String(selectedValue);
-    return selectedValue ? uniq([valueAsStr, ...suggestions]) : suggestions;
+    return selectedValue != null && selectedValue.trim() !== ''
+      ? uniq([valueAsStr, ...suggestions])
+      : suggestions;
   }, [suggestions, selectedValue]);
   const selectedOptionsMemo = useMemo((): string[] => {
     const valueAsStr = String(selectedValue);
     return selectedValue ? [valueAsStr] : [];
   }, [selectedValue]);
+
+  const handleError = useCallback(
+    (err: string | null | undefined): void => {
+      setError((existingErr): string | null | undefined => {
+        const oldErr = existingErr != null;
+        const newErr = err != null;
+        if (oldErr !== newErr) {
+          onError(newErr);
+        }
+
+        return err;
+      });
+    },
+    [setError, onError]
+  );
 
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     (): GetGenericComboBoxPropsReturn =>
@@ -64,112 +92,178 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         options: optionsMemo,
         selectedOptions: selectedOptionsMemo,
         getLabel,
-        selectedField,
       }),
-    [optionsMemo, selectedOptionsMemo, getLabel, selectedField]
+    [optionsMemo, selectedOptionsMemo, getLabel]
   );
 
-  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]): void => {
-    const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
-    onChange(newValue ?? '');
-  };
+  const handleValuesChange = useCallback(
+    (newOptions: EuiComboBoxOptionOption[]): void => {
+      const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+      handleError(undefined);
+      onChange(newValue ?? '');
+    },
+    [handleError, labels, onChange, optionsMemo]
+  );
 
-  const handleSearchChange = (searchVal: string): void => {
-    setSearchQuery(searchVal);
-  };
+  const handleSearchChange = useCallback(
+    (searchVal: string): void => {
+      if (searchVal !== '' && selectedField != null) {
+        const err = paramIsValid(searchVal, selectedField, isRequired, touched);
+        handleError(err);
+
+        setSearchQuery(searchVal);
+      }
+    },
+    [handleError, isRequired, selectedField, touched]
+  );
+
+  const handleCreateOption = useCallback(
+    (option: string): boolean | undefined => {
+      const err = paramIsValid(option, selectedField, isRequired, touched);
+      handleError(err);
+
+      if (err != null) {
+        // Explicitly reject the user's input
+        return false;
+      } else {
+        onChange(option);
+      }
+    },
+    [isRequired, onChange, selectedField, touched, handleError]
+  );
 
   const handleNonComboBoxInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const newValue = event.target.value;
     onChange(newValue);
   };
 
-  const handleBooleanInputChange = (newOptions: EuiComboBoxOptionOption[]): void => {
-    const [newValue] = newOptions;
-    onChange(newValue != null ? newValue.label : '');
+  const handleBooleanInputChange = (newOption: string): void => {
+    onChange(newOption);
   };
 
-  const isValid = useMemo(
-    (): boolean => paramIsValid(selectedValue, selectedField, isRequired, touched),
-    [selectedField, selectedValue, isRequired, touched]
-  );
+  const setIsTouchedValue = useCallback((): void => {
+    setIsTouched(true);
 
-  const setIsTouchedValue = useCallback((): void => setIsTouched(true), [setIsTouched]);
+    const err = paramIsValid(selectedValue, selectedField, isRequired, true);
+    handleError(err);
+  }, [setIsTouched, handleError, selectedValue, selectedField, isRequired]);
 
-  const inputPlaceholder = useMemo(
-    (): string => (isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder),
-    [isLoading, isLoadingSuggestions, placeholder]
-  );
+  const inputPlaceholder = useMemo((): string => {
+    if (isLoading || isLoadingSuggestions) {
+      return i18n.LOADING;
+    } else if (selectedField == null) {
+      return i18n.SELECT_FIELD_FIRST;
+    } else {
+      return placeholder;
+    }
+  }, [isLoading, selectedField, isLoadingSuggestions, placeholder]);
 
   const isLoadingState = useMemo((): boolean => isLoading || isLoadingSuggestions, [
     isLoading,
     isLoadingSuggestions,
   ]);
 
-  const getDefaultInput = (): JSX.Element => {
+  const defaultInput = useMemo((): JSX.Element => {
     return (
-      <EuiComboBox
-        placeholder={inputPlaceholder}
-        isDisabled={isDisabled}
-        isLoading={isLoadingState}
-        isClearable={isClearable}
-        options={comboOptions}
-        selectedOptions={selectedComboOptions}
-        onChange={handleValuesChange}
-        singleSelection={{ asPlainText: true }}
-        onSearchChange={handleSearchChange}
-        onCreateOption={onChange}
-        isInvalid={!isValid}
-        onFocus={setIsTouchedValue}
-        sortMatchesBy="startsWith"
-        data-test-subj="valuesAutocompleteComboBox matchComboxBox"
-        style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+      <EuiFormRow
+        label={rowLabel}
+        error={error}
+        isInvalid={selectedField != null && error != null}
+        data-test-subj="valuesAutocompleteMatchLabel"
         fullWidth
-        async
-      />
+      >
+        <EuiComboBox
+          placeholder={inputPlaceholder}
+          isDisabled={isDisabled || !selectedField}
+          isLoading={isLoadingState}
+          isClearable={isClearable}
+          options={comboOptions}
+          selectedOptions={selectedComboOptions}
+          onChange={handleValuesChange}
+          singleSelection={{ asPlainText: true }}
+          onSearchChange={handleSearchChange}
+          onCreateOption={handleCreateOption}
+          isInvalid={selectedField != null && error != null}
+          onBlur={setIsTouchedValue}
+          sortMatchesBy="startsWith"
+          data-test-subj="valuesAutocompleteMatch"
+          style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+          fullWidth
+          async
+        />
+      </EuiFormRow>
     );
-  };
+  }, [
+    comboOptions,
+    error,
+    fieldInputWidth,
+    handleCreateOption,
+    handleSearchChange,
+    handleValuesChange,
+    inputPlaceholder,
+    isClearable,
+    isDisabled,
+    isLoadingState,
+    rowLabel,
+    selectedComboOptions,
+    selectedField,
+    setIsTouchedValue,
+  ]);
 
   if (!isSuggestingValues && selectedField != null) {
     switch (selectedField.type) {
       case 'number':
         return (
-          <EuiFieldNumber
-            placeholder={inputPlaceholder}
-            onBlur={setIsTouchedValue}
-            value={
-              typeof selectedValue === 'string' && selectedValue.trim().length > 0
-                ? parseFloat(selectedValue)
-                : selectedValue ?? ''
-            }
-            onChange={handleNonComboBoxInputChange}
-            data-test-subj="valueAutocompleteFieldMatchNumber"
-            style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+          <EuiFormRow
+            label={rowLabel}
+            error={error}
+            isInvalid={selectedField != null && error != null}
+            data-test-subj="valuesAutocompleteMatchLabel"
             fullWidth
-          />
+          >
+            <EuiFieldNumber
+              placeholder={inputPlaceholder}
+              onBlur={setIsTouchedValue}
+              value={
+                typeof selectedValue === 'string' && selectedValue.trim().length > 0
+                  ? parseFloat(selectedValue)
+                  : selectedValue ?? ''
+              }
+              onChange={handleNonComboBoxInputChange}
+              data-test-subj="valueAutocompleteFieldMatchNumber"
+              style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+              fullWidth
+            />
+          </EuiFormRow>
         );
       case 'boolean':
         return (
-          <EuiComboBox
-            placeholder={inputPlaceholder}
-            isDisabled={isDisabled}
-            isLoading={isLoadingState}
-            isClearable={isClearable}
-            options={comboOptions}
-            selectedOptions={selectedComboOptions}
-            onChange={handleBooleanInputChange}
-            singleSelection={{ asPlainText: true }}
-            onFocus={setIsTouchedValue}
-            data-test-subj="valuesAutocompleteComboBox matchComboxBoxBoolean"
-            style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+          <EuiFormRow
+            label={rowLabel}
+            error={error}
+            isInvalid={selectedField != null && error != null}
+            data-test-subj="valuesAutocompleteMatchLabel"
             fullWidth
-            async
-          />
+          >
+            <EuiSuperSelect
+              isLoading={isLoadingState}
+              options={[
+                { value: 'true', inputDisplay: 'true' },
+                { value: 'false', inputDisplay: 'false' },
+              ]}
+              valueOfSelected={selectedValue ?? 'true'}
+              onChange={handleBooleanInputChange}
+              data-test-subj="valuesAutocompleteMatchBoolean"
+              style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+              fullWidth
+            />
+          </EuiFormRow>
         );
       default:
-        return getDefaultInput();
+        return defaultInput;
     }
   } else {
-    return getDefaultInput();
+    return defaultInput;
   }
 };
 

@@ -180,7 +180,7 @@ describe('useFieldValueAutocomplete', () => {
     });
   });
 
-  test('returns suggestions of "true" and "false" if field type is boolean and "isSuggestingValues" of false to note that autocomplete service is not in use', async () => {
+  test('returns "isSuggestingValues" of false if field type is boolean', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<
         UseFieldValueAutocompleteProps,
@@ -198,12 +198,7 @@ describe('useFieldValueAutocomplete', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [
-        false,
-        false,
-        ['true', 'false'],
-        result.current[3],
-      ];
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
       expect(getValueSuggestionsMock).not.toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);

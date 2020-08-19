@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { useFindLists, ListSchema } from '../../../lists_plugin_deps';
 import { useKibana } from '../../../common/lib/kibana';
-import { getGenericComboBoxProps, paramIsValid } from './helpers';
+import { getGenericComboBoxProps } from './helpers';
+import * as i18n from './translations';
 
 interface AutocompleteFieldListsProps {
   placeholder: string;
+  rowLabel: string | undefined;
   selectedField: IFieldType | undefined;
   selectedValue: string | undefined;
   isLoading: boolean;
@@ -24,6 +26,7 @@ interface AutocompleteFieldListsProps {
 
 export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsProps> = ({
   placeholder,
+  rowLabel,
   selectedField,
   selectedValue,
   isLoading = false,
@@ -32,7 +35,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   isRequired = false,
   onChange,
 }): JSX.Element => {
-  const [touched, setIsTouched] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
   const { http } = useKibana().services;
   const [lists, setLists] = useState<ListSchema[]>([]);
   const { loading, result, start } = useFindLists();
@@ -63,7 +66,6 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         options: optionsMemo,
         selectedOptions: selectedOptionsMemo,
         getLabel,
-        selectedField: undefined,
       }),
     [optionsMemo, selectedOptionsMemo, getLabel]
   );
@@ -76,7 +78,9 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     [labels, optionsMemo, onChange]
   );
 
-  const setIsTouchedValue = useCallback(() => setIsTouched(true), [setIsTouched]);
+  const setIsTouchedValue = useCallback((): void => {
+    setError(selectedValue == null ? i18n.FIELD_REQUIRED_ERR : undefined);
+  }, [selectedValue]);
 
   useEffect(() => {
     if (result != null) {
@@ -94,30 +98,27 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     }
   }, [selectedField, start, http]);
 
-  const isValid = useMemo(
-    (): boolean => paramIsValid(selectedValue, selectedField, isRequired, touched),
-    [selectedField, selectedValue, isRequired, touched]
-  );
-
   const isLoadingState = useMemo((): boolean => isLoading || loading, [isLoading, loading]);
 
   return (
-    <EuiComboBox
-      placeholder={placeholder}
-      isDisabled={isDisabled}
-      isLoading={isLoadingState}
-      isClearable={isClearable}
-      options={comboOptions}
-      selectedOptions={selectedComboOptions}
-      onChange={handleValuesChange}
-      isInvalid={!isValid}
-      onFocus={setIsTouchedValue}
-      singleSelection={{ asPlainText: true }}
-      sortMatchesBy="startsWith"
-      data-test-subj="valuesAutocompleteComboBox listsComboxBox"
-      fullWidth
-      async
-    />
+    <EuiFormRow label={rowLabel} error={error} isInvalid={error != null} fullWidth>
+      <EuiComboBox
+        placeholder={placeholder}
+        isDisabled={isDisabled}
+        isLoading={isLoadingState}
+        isClearable={isClearable}
+        options={comboOptions}
+        selectedOptions={selectedComboOptions}
+        onChange={handleValuesChange}
+        isInvalid={error != null}
+        onBlur={setIsTouchedValue}
+        singleSelection={{ asPlainText: true }}
+        sortMatchesBy="startsWith"
+        data-test-subj="valuesAutocompleteComboBox listsComboxBox"
+        fullWidth
+        async
+      />
+    </EuiFormRow>
   );
 };
 
