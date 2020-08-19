@@ -318,9 +318,10 @@ describe('IndexPattern', () => {
     });
 
     test('can restore from spec', async () => {
-      indexPattern.fieldFormatMap.bytes = {
+      const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
-      };
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
       const restoredPattern = await create(spec.id as string);
       restoredPattern.initFromSpec(spec);
