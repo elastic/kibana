@@ -71,7 +71,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
               <p>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPageSubtitle"
-                  defaultMessage="Manage Elastic Agents and their configurations in a central location."
+                  defaultMessage="Manage Elastic Agents and their policies in a central location."
                 />
               </p>
             </EuiText>
