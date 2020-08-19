@@ -20,8 +20,8 @@ describe('AppSearch', () => {
     expect(wrapper.find(Layout)).toHaveLength(1);
   });
 
-  it('redirects to Setup Guide when enterpriseSearchUrl is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
+  it('redirects to Setup Guide when config.host is not set', () => {
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(Redirect)).toHaveLength(1);
