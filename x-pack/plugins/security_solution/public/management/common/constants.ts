@@ -13,6 +13,7 @@ export const MANAGEMENT_ROUTING_ROOT_PATH = '';
 export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.endpoints})`;
 export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
+export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_ROUTING_ROOT_PATH}/:tabName(${AdministrationSubTab.trustedApps})`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */
