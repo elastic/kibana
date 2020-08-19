@@ -193,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('for the kql query: na, table shows an empty list', async () => {
         const submitButton = await testSubjects.find('querySubmitButton');
         await testSubjects.setValue('adminSearchBar', 'na');
-        submitButton.click();
+        await testSubjects.find('querySubmitButton').click();
         const expectedData = [
           [
             'Hostname',
@@ -213,13 +213,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('for the kql query: Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
-        await pageObjects.endpoint.navigateToEndpointList();
-        const submitButton = await testSubjects.find('querySubmitButton');
+        before(async () => {
+          // easy way to clear out any text in the kql bar
+          await pageObjects.endpoint.navigateToEndpointList();
+        });
         await testSubjects.setValue(
           'adminSearchBar',
           'Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
-        submitButton.click();
+        await testSubjects.find('querySubmitButton').click();
         const expectedData = [
           [
             'Hostname',

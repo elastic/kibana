@@ -55,7 +55,7 @@ export const endpointPackageVersion = createSelector(
 /**
  * Returns the index patterns for the SearchBar to use for autosuggest
  */
-export const patterns = (state: Immutable<HostState>) => state.patterns;
+export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
@@ -222,7 +222,7 @@ export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (sta
 /**
  * Returns query text from query bar
  */
-export const searchBarQuery: (state: Immutable<HostState>) => Query = createSelector(
+export const searchBarQuery: (state: Immutable<EndpointState>) => Query = createSelector(
   uiQueryParams,
   ({ admin_query: adminQuery }) => {
     return adminQuery
