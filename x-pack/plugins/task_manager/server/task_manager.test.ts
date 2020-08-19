@@ -27,9 +27,11 @@ import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 import { Middleware } from './lib/middleware';
+import { getTaskLogger } from './task_log';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
+const taskLogger = getTaskLogger();
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
@@ -41,6 +43,7 @@ describe('TaskManager', () => {
     max_attempts: 9,
     poll_interval: 6000000,
     request_capacity: 1000,
+    event_log_enabled: true,
   };
   const taskManagerOpts = {
     config,
@@ -49,6 +52,7 @@ describe('TaskManager', () => {
     callAsInternalUser: jest.fn(),
     logger: mockLogger(),
     taskManagerId: 'some-uuid',
+    taskLogger,
   };
 
   beforeEach(() => {
@@ -447,7 +451,7 @@ describe('TaskManager', () => {
 
       const availableWorkers = 1;
 
-      claimAvailableTasks([], claim, availableWorkers, logger);
+      claimAvailableTasks([], claim, availableWorkers, logger, taskLogger);
 
       expect(claim).toHaveBeenCalledTimes(1);
     });
@@ -458,7 +462,7 @@ describe('TaskManager', () => {
 
       const availableWorkers = 0;
 
-      claimAvailableTasks([], claim, availableWorkers, logger);
+      claimAvailableTasks([], claim, availableWorkers, logger, taskLogger);
 
       expect(claim).not.toHaveBeenCalled();
     });
@@ -487,7 +491,7 @@ describe('TaskManager', () => {
         });
       });
 
-      claimAvailableTasks([], claim, 10, logger);
+      claimAvailableTasks([], claim, 10, logger, taskLogger);
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(

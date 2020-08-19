@@ -11,6 +11,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "enabled": true,
+        "event_log_enabled": false,
         "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_workers": 10,

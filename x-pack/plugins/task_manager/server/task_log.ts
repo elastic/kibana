@@ -5,7 +5,12 @@
  */
 
 import { TaskLifecycleEvent } from './task_manager';
-import { isTaskMarkRunningEvent, isTaskRunEvent, isTaskRunRequestEvent } from './task_events';
+import {
+  isTaskMarkRunningEvent,
+  isTaskRunEvent,
+  isTaskRunRequestEvent,
+  TaskEventType,
+} from './task_events';
 import { isErr } from './lib/result_type';
 
 // some jq to view the event log
@@ -13,12 +18,16 @@ import { isErr } from './lib/result_type';
 
 const EVENT_LOG_PROVIDER = 'taskManager';
 export const EVENT_LOG_ACTIONS = {
-  pollError: 'poll-error',
-  pluginStart: 'plugin-start',
-  runNow: 'run-now',
-  runTask: 'run-task',
-  taskManagerEvent: 'taskmanager-event',
+  pollError: 'pollError',
+  pluginStart: 'pluginStart',
+  runNow: 'runNow',
+  runTask: 'runTask',
   claimAvailableTasks: 'claimAvailableTasks',
+  eventTaskClaim: 'eventTaskClaim',
+  eventTaskMarkRunninig: 'eventTaskMarkRunninig',
+  eventTaskRun: 'eventTaskRun',
+  eventTaskRunRequest: 'eventTaskRunRequest',
+  eventTaskUnknown: 'eventTaskUnknown',
 };
 
 import { IEvent, IEventLogger, IEventLogService } from '../../event_log/server';
@@ -104,8 +113,10 @@ export class TaskLogger {
   }
 
   logTaskManagerEvent(taskEvent: TaskLifecycleEvent) {
+    const action = eventActionFromTaskEventType(taskEvent.type);
+
     const event: IEvent = {
-      event: { action: EVENT_LOG_ACTIONS.taskManagerEvent, outcome: 'success' },
+      event: { action, outcome: 'success' },
       kibana: {
         saved_objects: [
           {
@@ -157,6 +168,15 @@ export class TaskLogger {
 
     this.eventLogger.logEvent(event);
   }
+}
+
+function eventActionFromTaskEventType(taskEventType: TaskEventType): string {
+  const { TASK_CLAIM, TASK_MARK_RUNNING, TASK_RUN, TASK_RUN_REQUEST } = TaskEventType;
+  if (taskEventType === TASK_CLAIM) return EVENT_LOG_ACTIONS.eventTaskClaim;
+  if (taskEventType === TASK_MARK_RUNNING) return EVENT_LOG_ACTIONS.eventTaskMarkRunninig;
+  if (taskEventType === TASK_RUN) return EVENT_LOG_ACTIONS.eventTaskRun;
+  if (taskEventType === TASK_RUN_REQUEST) return EVENT_LOG_ACTIONS.eventTaskRunRequest;
+  return EVENT_LOG_ACTIONS.eventTaskUnknown;
 }
 
 function getNoopEventLogger(): IEventLogger {

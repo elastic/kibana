@@ -14,6 +14,7 @@ import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
+import { getTaskLogger } from './task_log';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -956,6 +957,7 @@ describe('TaskManagerRunner', () => {
         },
       }) as TaskDictionary<TaskDefinition>,
       onTaskEvent: opts.onTaskEvent,
+      taskLogger: getTaskLogger(),
     });
 
     return {
