@@ -2,57 +2,52 @@
 
 exports[`SuggestionsComponent Passing the index should control which suggestion is selected 1`] = `
 <div
-  className="reactSuggestionTypeahead"
+  className="kbnTypeahead"
 >
   <div
-    className="kbnTypeahead"
+    className="kbnTypeahead__popover"
   >
     <div
-      className="kbnTypeahead__popover"
+      id="kbnTypeahead__items"
+      onScroll={[Function]}
+      role="listbox"
     >
-      <div
-        className="kbnTypeahead__items"
-        id="kbnTypeahead__items"
-        onScroll={[Function]}
-        role="listbox"
-      >
-        <SuggestionComponent
-          ariaId="suggestion-0"
-          innerRef={[Function]}
-          key="value - as promised, not helpful"
-          onClick={[Function]}
-          onMouseEnter={[Function]}
-          selected={false}
-          shouldDisplayDescription={false}
-          suggestion={
-            Object {
-              "description": "This is not a helpful suggestion",
-              "end": 0,
-              "start": 42,
-              "text": "as promised, not helpful",
-              "type": "value",
-            }
+      <SuggestionComponent
+        ariaId="suggestion-0"
+        innerRef={[Function]}
+        key="value - as promised, not helpful"
+        onClick={[Function]}
+        onMouseEnter={[Function]}
+        selected={false}
+        shouldDisplayDescription={false}
+        suggestion={
+          Object {
+            "description": "This is not a helpful suggestion",
+            "end": 0,
+            "start": 42,
+            "text": "as promised, not helpful",
+            "type": "value",
           }
-        />
-        <SuggestionComponent
-          ariaId="suggestion-1"
-          innerRef={[Function]}
-          key="field - yep"
-          onClick={[Function]}
-          onMouseEnter={[Function]}
-          selected={true}
-          shouldDisplayDescription={false}
-          suggestion={
-            Object {
-              "description": "This is another unhelpful suggestion",
-              "end": 0,
-              "start": 42,
-              "text": "yep",
-              "type": "field",
-            }
+        }
+      />
+      <SuggestionComponent
+        ariaId="suggestion-1"
+        innerRef={[Function]}
+        key="field - yep"
+        onClick={[Function]}
+        onMouseEnter={[Function]}
+        selected={true}
+        shouldDisplayDescription={false}
+        suggestion={
+          Object {
+            "description": "This is another unhelpful suggestion",
+            "end": 0,
+            "start": 42,
+            "text": "yep",
+            "type": "field",
           }
-        />
-      </div>
+        }
+      />
     </div>
   </div>
 </div>
@@ -60,57 +55,52 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
 
 exports[`SuggestionsComponent Should display given suggestions if the show prop is true 1`] = `
 <div
-  className="reactSuggestionTypeahead"
+  className="kbnTypeahead"
 >
   <div
-    className="kbnTypeahead"
+    className="kbnTypeahead__popover"
   >
     <div
-      className="kbnTypeahead__popover"
+      id="kbnTypeahead__items"
+      onScroll={[Function]}
+      role="listbox"
     >
-      <div
-        className="kbnTypeahead__items"
-        id="kbnTypeahead__items"
-        onScroll={[Function]}
-        role="listbox"
-      >
-        <SuggestionComponent
-          ariaId="suggestion-0"
-          innerRef={[Function]}
-          key="value - as promised, not helpful"
-          onClick={[Function]}
-          onMouseEnter={[Function]}
-          selected={true}
-          shouldDisplayDescription={false}
-          suggestion={
-            Object {
-              "description": "This is not a helpful suggestion",
-              "end": 0,
-              "start": 42,
-              "text": "as promised, not helpful",
-              "type": "value",
-            }
+      <SuggestionComponent
+        ariaId="suggestion-0"
+        innerRef={[Function]}
+        key="value - as promised, not helpful"
+        onClick={[Function]}
+        onMouseEnter={[Function]}
+        selected={true}
+        shouldDisplayDescription={false}
+        suggestion={
+          Object {
+            "description": "This is not a helpful suggestion",
+            "end": 0,
+            "start": 42,
+            "text": "as promised, not helpful",
+            "type": "value",
           }
-        />
-        <SuggestionComponent
-          ariaId="suggestion-1"
-          innerRef={[Function]}
-          key="field - yep"
-          onClick={[Function]}
-          onMouseEnter={[Function]}
-          selected={false}
-          shouldDisplayDescription={false}
-          suggestion={
-            Object {
-              "description": "This is another unhelpful suggestion",
-              "end": 0,
-              "start": 42,
-              "text": "yep",
-              "type": "field",
-            }
+        }
+      />
+      <SuggestionComponent
+        ariaId="suggestion-1"
+        innerRef={[Function]}
+        key="field - yep"
+        onClick={[Function]}
+        onMouseEnter={[Function]}
+        selected={false}
+        shouldDisplayDescription={false}
+        suggestion={
+          Object {
+            "description": "This is another unhelpful suggestion",
+            "end": 0,
+            "start": 42,
+            "text": "yep",
+            "type": "field",
           }
-        />
-      </div>
+        }
+      />
     </div>
   </div>
 </div>
