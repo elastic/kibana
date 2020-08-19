@@ -20,6 +20,7 @@
 package templates
 
 import DefaultRoot
+import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.v2019_2.Template
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
@@ -39,15 +40,19 @@ object DefaultTemplate : Template({
     // TODO remove these
     param("env.GCS_UPLOAD_PREFIX", "INVALID_PREFIX")
     param("env.CI_PARALLEL_PROCESS_NUMBER", "1")
-//
-//        // For now these are just to ensure compatibility with existing Jenkins-based configuration
-//        param("env.JENKINS_URL", "%teamcity.serverUrl%")
-//        param("env.BUILD_URL", "%teamcity.serverUrl%/build/%teamcity.build.id%")
-//        param("env.JOB_NAME", "%system.teamcity.buildType.id%")
 
-    param("env.BUILD_ID", "%build.number%")
+    param("env.TEAMCITY_URL", "%teamcity.serverUrl%")
+    param("env.TEAMCITY_BUILD_URL", "%teamcity.serverUrl%/build/%teamcity.build.id%")
+    param("env.TEAMCITY_JOB_ID", "%system.teamcity.buildType.id%")
+    param("env.TEAMCITY_BUILD_ID", "%build.number%")
+    param("env.TEAMCITY_BUILD_NUMBER", "%teamcity.build.id%")
+
     param("env.GIT_BRANCH", "%vcsroot.branch%")
+    param("env.GIT_COMMIT", "%build.vcs.number%")
     param("env.branch_specifier", "%vcsroot.branch%")
+
+    password("env.CI_STATS_TOKEN", "credentialsJSON:eead8e13-ba61-429c-9ed6-344de6260381", display = ParameterDisplay.HIDDEN)
+    password("env.CI_STATS_HOST", "credentialsJSON:f8462bff-1384-4c37-8ed7-914a6407f568", display = ParameterDisplay.HIDDEN)
   }
 
   steps {
@@ -64,6 +69,14 @@ object DefaultTemplate : Template({
       scriptContent = """
                 #!/bin/bash
                 ./.ci/teamcity/setup_node.sh
+          """.trimIndent()
+    }
+
+    script {
+      name = "Setup CI Stats"
+      scriptContent = """
+                #!/bin/bash
+                node .ci/teamcity/setup_ci_stats.js
           """.trimIndent()
     }
 
