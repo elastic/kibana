@@ -16,8 +16,8 @@ import {
   LON_INDEX,
   LAT_INDEX,
 } from '../common/constants';
-import { getEsSpatialRelationLabel } from '../common/i18n_getters';
-import { FILTERS } from '../../../../src/plugins/data/common/es_query/filters/types';
+import { getEsSpatialRelationLabel } from './i18n_getters';
+import { FILTERS } from '../../../../src/plugins/data/common';
 import turfCircle from '@turf/circle';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
