@@ -70,7 +70,8 @@ export class ActionFactory<
    */
   public isCompatibleLicence() {
     if (!this.minimalLicense) return true;
-    return this.getLicence().hasAtLeast(this.minimalLicense);
+    const licence = this.getLicence();
+    return licence.isAvailable && licence.isActive && licence.hasAtLeast(this.minimalLicense);
   }
 
   public create(
