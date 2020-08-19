@@ -17,11 +17,11 @@
  * under the License.
  */
 import { SavedObject } from '../types';
-import { SavedObjectsImportError } from './types';
+import { SavedObjectsImportError, CreatedObject } from './types';
 
 export function extractErrors(
   // TODO: define saved object type
-  savedObjectResults: Array<SavedObject<any>>,
+  savedObjectResults: Array<CreatedObject<unknown>>,
   savedObjectsToImport: Array<SavedObject<any>>
 ) {
   const errors: SavedObjectsImportError[] = [];
@@ -34,10 +34,8 @@ export function extractErrors(
       const originalSavedObject = originalSavedObjectsMap.get(
         `${savedObject.type}:${savedObject.id}`
       );
-      const title =
-        originalSavedObject &&
-        originalSavedObject.attributes &&
-        originalSavedObject.attributes.title;
+      const title = originalSavedObject?.attributes?.title;
+      const { destinationId } = savedObject;
       if (savedObject.error.statusCode === 409) {
         errors.push({
           id: savedObject.id,
@@ -45,6 +43,7 @@ export function extractErrors(
           title,
           error: {
             type: 'conflict',
+            ...(destinationId && { destinationId }),
           },
         });
         continue;

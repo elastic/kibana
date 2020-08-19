@@ -24,7 +24,8 @@ You can request to overwrite any objects that already exist in the target space 
 ==== {api-path-parms-title}
 
 `space_id`::
-(Optional, string) The ID of the space that contains the saved objects you want to copy. When `space_id` is unspecified in the URL, the default space is used.
+  (Optional, string) The ID of the space that contains the saved objects you want to copy. When `space_id` is unspecified in the URL, the
+  default space is used.
 
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-request-body]]
@@ -47,10 +48,12 @@ You can request to overwrite any objects that already exist in the target space 
 =====
 
 `includeReferences`::
-  (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target spaces. The default value is `false`.
+  (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target
+  spaces. The default value is `false`.
 
 `overwrite`::
-  (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id` exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
+  (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id`
+  exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
 
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]
@@ -63,7 +66,8 @@ You can request to overwrite any objects that already exist in the target space 
 [%collapsible%open]
 =====
   `success`:::
-    (boolean) The copy operation was successful. When set to `false`, some objects may have been copied. For additional information, refer to the `successCount` and `errors` properties.
+    (boolean) The copy operation was successful. When set to `false`, some objects may have been copied. For additional information, refer
+    to the `errors` and `successResults` properties.
 
   `successCount`:::
     (number) The number of objects that successfully copied.
@@ -84,15 +88,134 @@ You can request to overwrite any objects that already exist in the target space 
 .Properties of `error`
 [%collapsible%open]
 =======
-      `type`:::::
-        (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`. Errors marked as `conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>>.
+      `type`::::
+        (string) The type of error. For example, `conflict`, `ambiguous_conflict`, `missing_references`, `unsupported_type`, or `unknown`.
+        Errors marked as `conflict` or `ambiguous_conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts,
+        Resolve copy saved objects conflicts API>>.
+      `destinationId`::::
+        (Optional, string) The destination ID that was used during the copy attempt. This is only present on `conflict` error types.
+      `destinations`::::
+        (Optional, array) A list of possible object destinations with `id`, `title`, and `updatedAt` fields to describe each one. This is
+        only present on `ambiguous_conflict` error types.
 =======
 ======
+
+  `successResults`:::
+    (Optional, array) Indicates the objects that were copied successfully, with any metadata if applicable.
++
+NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors. See the examples below
+for how to resolve these errors.
+
 =====
 [[spaces-api-copy-saved-objects-example]]
 ==== {api-examples-title}
 
-Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` and `sales` spaces:
+[[spaces-api-copy-saved-objects-example-1]]
+===== 1. Successful copy (with `createNewCopies` enabled)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
+the dashboard has a reference to a visualization, and that has a reference to an index pattern:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_copy_saved_objects
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "spaces": ["marketing"],
+  "includeReferences": true,
+  "createNewcopies": true
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "marketing": {
+    "success": true,
+    "successCount": 3,
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "destinationId": "1e127098-5b80-417f-b0f1-c60c8395358f"
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "destinationId": "a610ed80-1c73-4507-9e13-d3af736c8e04"
+      },
+      {
+        "id": "my-index-pattern",
+        "type": "index-pattern",
+        "destinationId": "bc3c9c70-bf6f-4bec-b4ce-f4189aa9e26b"
+      }
+    ]
+  }
+}
+----
+
+This result indicates that the copy was successful, and all three objects were created. Since these objects were created as new copies, each
+entry in the `successResults` array includes a `destinationId` attribute.
+
+[[spaces-api-copy-saved-objects-example-2]]
+===== 2. Successful copy (with `createNewCopies` disabled)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
+the dashboard has a reference to a visualization, and that has a reference to an index pattern:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_copy_saved_objects
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "spaces": ["marketing"],
+  "includeReferences": true
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "marketing": {
+    "success": true,
+    "successCount": 3,
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard"
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization"
+      },
+      {
+        "id": "my-index-pattern",
+        "type": "index-pattern"
+      }
+    ]
+  }
+}
+----
+
+This result indicates that the import was successful, and all three objects were created.
+
+[[spaces-api-copy-saved-objects-example-3]]
+===== 3. Failed copy (with conflict errors)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` and `sales` spaces. In
+this example, the dashboard has a reference to a visualization and a canvas, and the visualization has a reference to an index pattern:
 
 [source,sh]
 ----
@@ -115,47 +238,93 @@ The API returns the following:
 {
   "marketing": {
     "success": true,
-    "successCount": 5
+    "successCount": 4,
+    "successResults": [
+      {
+        "id": "other-dashboard",
+        "type": "dashboard"
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization"
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad"
+      },
+      {
+        "id": "my-index-pattern",
+        "type": "index-pattern"
+      }
+    ]
   },
   "sales": {
     "success": false,
-    "successCount": 4,
-    "errors": [{
-      "id": "my-index-pattern",
-      "type": "index-pattern",
-      "error": {
-        "type": "conflict"
+    "successCount": 1,
+    "errors": [
+      {
+        "id": "my-pattern",
+        "type": "index-pattern",
+        "title": "my-pattern-*",
+        "error": {
+          "type": "conflict"
+        }
+      },
+      {
+        "id": "my-visualization",
+        "type": "my-vis",
+        "title": "Look at my visualization",
+        "error": {
+          "type": "conflict",
+          "destinationId": "another-vis"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "title": "Look at my canvas",
+        "error": {
+          "type": "ambiguous_conflict",
+          "destinations": [
+            {
+              "id": "another-canvas",
+              "title": "Look at another canvas",
+              "updatedAt": "2020-07-08T16:36:32.377Z"
+            },
+            {
+              "id": "yet-another-canvas",
+              "title": "Look at yet another canvas",
+              "updatedAt": "2020-07-05T12:29:54.849Z"
+            }
+          ]
+        }
       }
-    }]
+    ],
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard"
+      }
+    ]
   }
 }
 ----
 
-The `marketing` space succeeds, but the `sales` space fails due to a conflict in the index pattern.
+This result indicates that the copy was successful for the `marketing` space, but it was not successful for the `sales` space because the
+index pattern, visualization, and dashboard each resulted in a conflict error:
 
-Copy a visualization with the `my-viz` ID from the `marketing` space to the `default` space:
+* An index pattern with the same ID already exists, so this resulted in a conflict error. This can be resolved by overwriting the existing
+object, or skipping this object entirely.
 
-[source,sh]
-----
-$ curl -X POST s/marketing/api/spaces/_copy_saved_objects
-{
-  "objects": [{
-    "type": "visualization",
-    "id": "my-viz"
-  }],
-  "spaces": ["default"]
-}
-----
-// KIBANA
+* A visualization with a different ID but the same "origin" already exists, so this resulted in a conflict error as well. The
+`destinationId` field contains the `id` of the other visualization which caused this conflict. This behavior was added to ensure that new
+objects which can be shared between spaces behave in a similar way as legacy non-shareable objects. When a shareable object is copied into a
+new space, it retains its origin so that its conflicts will be encountered as expected. This can be resolved by overwriting the specified
+destination object, or skipping this object entirely.
 
-The API returns the following:
+* Two canvases with different IDs but the same "origin" already exist, so this resulted in an ambiguous conflict error. The `destinations`
+array describes to the other canvases which caused this conflict. When a shareable object is copied into a new space, and is _then_ shared
+to another space where an object of the same origin exists, this situation may occur. This can be resolved by picking one of the destination
+objects to overwrite, or skipping this object entirely.
 
-[source,sh]
-----
-{
-  "default": {
-    "success": true,
-    "successCount": 1
-  }
-}
-----
+These errors need to be addressed using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-1,Resolve copy conflicts API>>.

@@ -20,6 +20,7 @@
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
@@ -42,6 +43,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
@@ -55,6 +58,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
@@ -103,6 +108,27 @@ export interface SavedObjectsFindResponse<T = unknown> {
   total: number;
   per_page: number;
   page: number;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsResponse {
+  errors: Array<{
+    id: string;
+    type: string;
+    error: SavedObjectError;
+  }>;
 }
 
 /**
@@ -230,6 +256,20 @@ export class SavedObjectsClient {
     options?: SavedObjectsCreateOptions
   ) {
     return await this._repository.bulkCreate(objects, options);
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   *
+   * @param objects
+   * @param options
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    return await this._repository.checkConflicts(objects, options);
   }
 
   /**

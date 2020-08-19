@@ -36,7 +36,9 @@ export {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
@@ -49,5 +51,6 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
 } from '../../types';

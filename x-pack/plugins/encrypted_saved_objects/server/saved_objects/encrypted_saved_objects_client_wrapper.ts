@@ -13,6 +13,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -47,6 +48,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     private readonly options: EncryptedSavedObjectsClientOptions,
     public readonly errors = options.baseClient.errors
   ) {}
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options?: SavedObjectsBaseOptions
+  ) {
+    return await this.options.baseClient.checkConflicts(objects, options);
+  }
 
   public async create<T>(
     type: string,

@@ -4,7 +4,7 @@
 <titleabbrev>Resolve import errors</titleabbrev>
 ++++
 
-experimental[] Resolve errors from the import API.
+experimental[] Resolve errors from the <<saved-objects-api-import,Import objects API>>.
 
 To resolve errors, you can:
 
@@ -25,7 +25,14 @@ To resolve errors, you can:
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the <<xpack-spaces,space>>. If `space_id` is not provided in the URL, the default space is used.
+
+[[saved-objects-api-resolve-import-errors-query-params]]
+==== Query parameters
+
+`createNewCopies`::
+  (Optional, boolean) Creates new copies of saved objects, regenerating each object's ID and resetting its origin in the process. If this
+  option was enabled during the initial import, it should also be enabled when resolving import errors.
 
 [[saved-objects-api-resolve-import-errors-request-body]]
 ==== Request body
@@ -36,19 +43,42 @@ The request body must include the multipart/form-data type.
   The same file given to the import API.
 
 `retries`::
-  (array) A list of `type`, `id`, `replaceReferences`, and `overwrite` objects to retry. The property `replaceReferences` is a list of `type`, `from`, and `to` used to change the object references.
+  (Required, array) The retry operations to attempt, which can specify how to resolve different types of errors.
++
+.Properties of `<retries>`
+[%collapsible%open]
+=====
+    `type`:::
+    (Required, string) The saved object type.
+    `id`:::
+    (Required, string) The saved object ID.
+    `overwrite`:::
+    (Optional, boolean) When set to `true`, the source object overwrites the conflicting destination object. When set to `false`, this does
+    nothing.
+    `destinationId`:::
+    (Optional, string) Specifies which destination ID the imported object should have (if different from the current ID).
+    `replaceReferences`:::
+    (Optional, array) A list of `type`, `from`, and `to` used to change the object references.
+=====
 
 [[saved-objects-api-resolve-import-errors-response-body]]
 ==== Response body
 
 `success`::
-  Top-level property that indicates if the errors successfully resolved.
+  (boolean) Indicates if the import was completely successful. When set to `false`, some objects may have been copied. For additional
+  information, refer to the `errors` and `successResults` properties.
 
 `successCount`::
-  Indicates the number of successfully resolved records.
+  (number) Indicates the number of successfully resolved records.
 
 `errors`::
-  (array) Specifies the objects that failed to resolve.
+  (Optional, array) Specifies the objects that failed to resolve.
+
+`successResults`::
+  (Optional, array) Indicates the objects that were imported successfully, with any metadata if applicable.
++
+NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
+errors. See the examples below for how to resolve these errors.
 
 [[saved-objects-api-resolve-import-errors-codes]]
 ==== Response code
@@ -59,36 +89,16 @@ The request body must include the multipart/form-data type.
 [[saved-objects-api-resolve-import-errors-example]]
 ==== Examples
 
-Retry a dashboard import:
+[[saved-objects-api-resolve-import-errors-example-1]]
+===== 1. Resolve conflict errors
+
+This example builds upon the <<saved-objects-api-import-example-3,Import objects API example with conflict errors>>.
+
+Resolve conflict errors for an index pattern, visualization, and canvas by overwriting the existing saved objects:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard"}]'
---------------------------------------------------
-// KIBANA
-
-The `file.ndjson` file contains the following:
-
-[source,sh]
---------------------------------------------------
-{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---------------------------------------------------
-
-The API returns the following:
-
-[source,sh]
---------------------------------------------------
-{
-  "success": true,
-  "successCount": 1
-}
---------------------------------------------------
-
-Resolve errors for a dashboard and overwrite the existing saved object:
-
-[source,sh]
---------------------------------------------------
-$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard","overwrite":true}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"index-pattern","id":"my-pattern","overwrite":true},{"type":"visualization","id":"my-vis","overwrite":true,"destinationId":"another-vis"},{"type":"canvas","id":"my-canvas","overwrite":true,"destinationId":"yet-another-canvas"},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
 // KIBANA
 
@@ -97,6 +107,8 @@ The `file.ndjson` file contains the following:
 [source,sh]
 --------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}
+{"type":"canvas-workpad","id":"my-canvas","attributes":{"name":"Look at my canvas"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --------------------------------------------------
 
@@ -106,15 +118,45 @@ The API returns the following:
 --------------------------------------------------
 {
   "success": true,
-  "successCount": 1
+  "successCount": 4,
+  "successResults": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "my-vis",
+      "type": "visualization",
+      "destinationId": "another-vis"
+    },
+    {
+      "id": "my-canvas",
+      "type": "canvas-workpad",
+      "destinationId": "yet-another-canvas"
+    },
+    {
+      "id": "my-dashboard",
+      "type": "dashboard"
+    }
+  ]
 }
 --------------------------------------------------
 
-Resolve errors for a visualization by replacing the index pattern with another:
+This result indicates that the import was successful, and all four objects were created.
+
+TIP: If a prior import attempt resulted in resolvable errors, you must include a retry for each object you want to import, including any
+that were returned in the `successResults` array. In this example, we retried importing the dashboard accordingly.
+
+[[saved-objects-api-resolve-import-errors-example-2]]
+===== 2. Resolve missing reference errors
+
+This example builds upon the <<saved-objects-api-import-example-4,Import objects API example with missing reference errors>>.
+
+Resolve a missing reference error for a visualization by replacing the index pattern with another:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
 // KIBANA
 
@@ -122,7 +164,8 @@ The `file.ndjson` file contains the following:
 
 [source,sh]
 --------------------------------------------------
-{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
 --------------------------------------------------
 
 The API returns the following:
@@ -131,6 +174,21 @@ The API returns the following:
 --------------------------------------------------
 {
   "success": true,
-  "successCount": 1
+  "successCount": 2,
+  "successResults": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "my-dashboard",
+      "type": "dashboard"
+    }
+  ]
 }
 --------------------------------------------------
+
+This result indicates that the import was successful, and both objects were created.
+
+TIP: If a prior import attempt resulted in resolvable errors, you must include a retry for each object you want to import, including any
+that were described in the missing error object's `blocked` array. In this example, we retried importing the dashboard accordingly.

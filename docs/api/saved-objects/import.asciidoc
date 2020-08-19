@@ -17,13 +17,22 @@ experimental[] Create sets of {kib} saved objects from a file created by the exp
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the <<xpack-spaces,space>>. If `space_id` is not provided in the URL, the default space is used.
 
 [[saved-objects-api-import-query-params]]
 ==== Query parameters
 
+`createNewCopies`::
+  (Optional, boolean) Creates new copies of saved objects, regenerating each object's ID and resetting its origin in the process. If this
+  option is used, potential conflict errors will be avoided.
++
+NOTE: This cannot be used with the `overwrite` option.
+
 `overwrite`::
-  (Optional, boolean) Overwrites saved objects.
+  (Optional, boolean) Overwrites saved objects if they already exist. If this option is used, potential conflict errors will be
+  automatically resolved by overwriting the destination object.
++
+NOTE: This cannot be used with the `createNewCopies` option.
 
 [[saved-objects-api-import-request-body]]
 ==== Request body
@@ -37,13 +46,20 @@ The request body must include the multipart/form-data type.
 ==== Response body
 
 `success`::
-  Top-level property that indicates if the import was successful.
+  (boolean) Indicates if the import was completely successful. When set to `false`, some objects may have been copied. For additional
+  information, refer to the `errors` and `successResults` properties.
 
 `successCount`::
-  Indicates the number of successfully imported records.
+  (number) Indicates the number of successfully imported records.
 
 `errors`::
   (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
+
+`successResults`::
+  (array) Indicates the objects that were imported successfully, with any metadata if applicable.
++
+NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
+errors. See the <<saved-objects-api-resolve-import-errors,Resolve import errors API>> documentation for more information.
 
 [[saved-objects-api-import-codes]]
 ==== Response code
@@ -51,7 +67,55 @@ The request body must include the multipart/form-data type.
 `200`::
     Indicates a successful call.
 
+[[saved-objects-api-import-example]]
 ==== Examples
+
+[[saved-objects-api-import-example-1]]
+===== 1. Successful import (with `createNewCopies` enabled)
+
+Import an index pattern and dashboard:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/saved_objects/_import?createNewCopies=true -H "kbn-xsrf: true" --form file=@file.ndjson
+--------------------------------------------------
+// KIBANA
+
+The `file.ndjson` file contains the following:
+
+[source,sh]
+--------------------------------------------------
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "success": true,
+  "successCount": 2,
+  "successResults": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern",
+      "destinationId": "4aba3770-0d04-45e1-9e34-4cf0fd2165ae"
+    },
+    {
+      "id": "my-dashboard",
+      "type": "dashboard",
+      "destinationId": "c31d1eca-9bc0-4a81-b5f9-30c442824c48"
+    }
+  ]
+}
+--------------------------------------------------
+
+This result indicates that the import was successful, and both objects were created. Since these objects were created as new copies, each
+entry in the `successResults` array includes a `destinationId` attribute.
+
+[[saved-objects-api-import-example-2]]
+===== 2. Successful import (with `createNewCopies` disabled)
 
 Import an index pattern and dashboard:
 
@@ -75,11 +139,26 @@ The API returns the following:
 --------------------------------------------------
 {
   "success": true,
-  "successCount": 2
+  "successCount": 2,
+  "successResults": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "my-dashboard",
+      "type": "dashboard"
+    }
+  ]
 }
 --------------------------------------------------
 
-Import an index pattern and dashboard that includes a conflict on the index pattern:
+This result indicates that the import was successful, and both objects were created.
+
+[[saved-objects-api-import-example-3]]
+===== 3. Failed import (with conflict errors)
+
+Import an index pattern, visualization, canvas, and dashboard, where some objects already exists:
 
 [source,sh]
 --------------------------------------------------
@@ -92,6 +171,8 @@ The `file.ndjson` file contains the following:
 [source,sh]
 --------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}
+{"type":"canvas-workpad","id":"my-canvas","attributes":{"name":"Look at my canvas"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --------------------------------------------------
 
@@ -109,13 +190,71 @@ The API returns the following:
       "title": "my-pattern-*",
       "error": {
         "type": "conflict"
-      },
+      }
     },
+    {
+      "id": "my-visualization",
+      "type": "my-vis",
+      "title": "Look at my visualization",
+      "error": {
+        "type": "conflict",
+        "destinationId": "another-vis"
+      }
+    },
+    {
+      "id": "my-canvas",
+      "type": "canvas-workpad",
+      "title": "Look at my canvas",
+      "error": {
+        "type": "ambiguous_conflict",
+        "destinations": [
+          {
+            "id": "another-canvas",
+            "title": "Look at another canvas",
+            "updatedAt": "2020-07-08T16:36:32.377Z"
+          },
+          {
+            "id": "yet-another-canvas",
+            "title": "Look at yet another canvas",
+            "updatedAt": "2020-07-05T12:29:54.849Z"
+          }
+        ]
+      }
+    }
   ],
+  "successResults": [
+    {
+      "id": "my-dashboard",
+      "type": "dashboard"
+    }
+  ]
 }
 --------------------------------------------------
 
-Import a visualization and dashboard with an index pattern for the visualization reference that doesn't exist:
+This result indicates that the import was not successful because the index pattern, visualization, and dashboard each resulted in a conflict
+error:
+
+* An index pattern with the same ID already exists, so this resulted in a conflict error. This can be resolved by overwriting the existing
+object, or skipping this object entirely.
+
+* A visualization with a different ID but the same "origin" already exists, so this resulted in a conflict error as well. The
+`destinationId` field contains the `id` of the other visualization which caused this conflict. This behavior was added to ensure that new
+objects which can be shared between <<xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object
+is exported and then imported into a new space, it retains its origin so that its conflicts will be encountered as expected. This can be
+resolved by overwriting the specified destination object, or skipping this object entirely.
+
+* Two canvases with different IDs but the same "origin" already exist, so this resulted in an ambiguous conflict error. The `destinations`
+array describes to the other canvases which caused this conflict. When a shareable object is exported and then imported into a new space,
+and is _then_ shared to another space where an object of the same origin exists, this situation may occur. This can be resolved by picking
+one of the destination objects to overwrite, or skipping this object entirely.
+
+No objects will be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-1,Resolve import errors
+API>>.
+
+[[saved-objects-api-import-example-4]]
+===== 4. Failed import (with missing reference errors)
+
+Import a visualization and dashboard with an index pattern for the visualization reference that doesn\'t exist:
 
 [source,sh]
 --------------------------------------------------
@@ -127,7 +266,7 @@ The `file.ndjson` file contains the following:
 
 [source,sh]
 --------------------------------------------------
-{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
+{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
 --------------------------------------------------
 
@@ -141,7 +280,7 @@ The API returns the following:
     {
       "id": "my-vis",
       "type": "visualization",
-      "title": "my-vis",
+      "title": "Look at my visualization",
       "error": {
         "type": "missing_references",
         "references": [
@@ -160,3 +299,6 @@ The API returns the following:
     }
   ]
 --------------------------------------------------
+
+This result indicates that the import was not successful because the visualization resulted in a missing references error. No objects will
+be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.

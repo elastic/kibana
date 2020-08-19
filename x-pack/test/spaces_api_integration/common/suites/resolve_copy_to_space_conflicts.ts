@@ -20,12 +20,19 @@ interface ResolveCopyToSpaceTest {
   response: (resp: TestResponse) => Promise<void>;
 }
 
+interface ResolveCopyToSpaceMultiNamespaceTest extends ResolveCopyToSpaceTest {
+  testTitle: string;
+  objects: Array<Record<string, any>>;
+  retries: Record<string, any>;
+}
+
 interface ResolveCopyToSpaceTests {
   withReferencesNotOverwriting: ResolveCopyToSpaceTest;
   withReferencesOverwriting: ResolveCopyToSpaceTest;
   withoutReferencesOverwriting: ResolveCopyToSpaceTest;
   withoutReferencesNotOverwriting: ResolveCopyToSpaceTest;
   nonExistentSpace: ResolveCopyToSpaceTest;
+  multiNamespaceTestCases: () => ResolveCopyToSpaceMultiNamespaceTest[];
 }
 
 interface ResolveCopyToSpaceTestDefinition {
@@ -76,6 +83,7 @@ export function resolveCopyToSpaceConflictsSuite(
       [destination]: {
         success: true,
         successCount: 1,
+        successResults: [{ id: 'cts_vis_3', type: 'visualization' }],
       },
     });
     const [dashboard, visualization] = await getObjectsAtSpace(destination);
@@ -94,6 +102,7 @@ export function resolveCopyToSpaceConflictsSuite(
       [destinationSpaceId]: {
         success: true,
         successCount: 1,
+        successResults: [{ id: 'cts_dashboard', type: 'dashboard' }],
       },
     });
     const [dashboard, visualization] = await getObjectsAtSpace(destinationSpaceId);
@@ -119,9 +128,7 @@ export function resolveCopyToSpaceConflictsSuite(
         successCount: 0,
         errors: [
           {
-            error: {
-              type: 'conflict',
-            },
+            error: { type: 'conflict' },
             id: 'cts_vis_3',
             title: `CTS vis 3 from ${sourceSpaceId} space`,
             type: 'visualization',
@@ -149,9 +156,7 @@ export function resolveCopyToSpaceConflictsSuite(
         successCount: 0,
         errors: [
           {
-            error: {
-              type: 'conflict',
-            },
+            error: { type: 'conflict' },
             id: 'cts_dashboard',
             title: `This is the ${sourceSpaceId} test space CTS dashboard`,
             type: 'dashboard',
@@ -264,6 +269,106 @@ export function resolveCopyToSpaceConflictsSuite(
     }
   };
 
+  /**
+   * Creates test cases for multi-namespace saved object types.
+   * Note: these are written with the assumption that test data will only be reloaded between each group of test cases, *not* before every
+   * single test case. This saves time during test execution.
+   */
+  const createMultiNamespaceTestCases = (
+    spaceId: string,
+    outcome: 'authorized' | 'unauthorizedRead' | 'unauthorizedWrite' | 'noAccess' = 'authorized'
+  ) => (): ResolveCopyToSpaceMultiNamespaceTest[] => {
+    // the status code of the HTTP response differs depending on the error type
+    // a 403 error actually comes back as an HTTP 200 response
+    const statusCode = outcome === 'noAccess' ? 404 : 200;
+    const type = 'sharedtype';
+    const exactMatchId = 'all_spaces';
+    const inexactMatchId = `conflict_1_${spaceId}`;
+    const ambiguousConflictId = `conflict_2_${spaceId}`;
+
+    const createRetries = (overwriteRetry: Record<string, any>) => ({ space_2: [overwriteRetry] });
+    const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
+    const expectForbiddenResponse = (response: TestResponse) => {
+      expect(response.body).to.eql({
+        space_2: {
+          success: false,
+          successCount: 0,
+          errors: [
+            { statusCode: 403, error: 'Forbidden', message: `Unable to bulk_create sharedtype` },
+          ],
+        },
+      });
+    };
+    const expectSuccessResponse = (response: TestResponse, id: string, destinationId?: string) => {
+      const { success, successCount, successResults, errors } = getResult(response);
+      expect(success).to.eql(true);
+      expect(successCount).to.eql(1);
+      expect(errors).to.be(undefined);
+      expect(successResults).to.eql([{ type, id, ...(destinationId && { destinationId }) }]);
+    };
+
+    return [
+      {
+        testTitle: 'copying with an exact match conflict',
+        objects: [{ type, id: exactMatchId }],
+        retries: createRetries({ type, id: exactMatchId, overwrite: true }),
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized') {
+            expectSuccessResponse(response, exactMatchId);
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read/write
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+      {
+        testTitle: 'copying with an inexact match conflict',
+        objects: [{ type, id: inexactMatchId }],
+        retries: createRetries({
+          type,
+          id: inexactMatchId,
+          overwrite: true,
+          destinationId: 'conflict_1_space_2',
+        }),
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized') {
+            expectSuccessResponse(response, inexactMatchId, 'conflict_1_space_2');
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read/write
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+      {
+        testTitle: 'copying with an ambiguous conflict',
+        objects: [{ type, id: ambiguousConflictId }],
+        retries: createRetries({
+          type,
+          id: ambiguousConflictId,
+          overwrite: true,
+          destinationId: 'conflict_2_space_2',
+        }),
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized') {
+            expectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read/write
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+    ];
+  };
+
   const makeResolveCopyToSpaceConflictsTest = (describeFn: DescribeFn) => (
     description: string,
     { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: ResolveCopyToSpaceTestDefinition
@@ -274,147 +379,105 @@ export function resolveCopyToSpaceConflictsSuite(
         expect(['default', 'space_1']).to.contain(spaceId);
       });
 
-      beforeEach(() => esArchiver.load('saved_objects/spaces'));
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      describe('single-namespace types', () => {
+        beforeEach(() => esArchiver.load('saved_objects/spaces'));
+        afterEach(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.withReferencesNotOverwriting.statusCode} when not overwriting, with references`, async () => {
-        const destination = getDestinationSpace(spaceId);
+        const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
+        const visualizationObject = { type: 'visualization', id: 'cts_vis_3' };
 
-        return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-          .auth(user.username, user.password)
-          .send({
-            objects: [
-              {
-                type: 'dashboard',
-                id: 'cts_dashboard',
-              },
-            ],
-            includeReferences: true,
-            retries: {
-              [destination]: [
-                {
-                  type: 'visualization',
-                  id: 'cts_vis_3',
-                  overwrite: false,
-                },
-              ],
-            },
-          })
-          .expect(tests.withReferencesNotOverwriting.statusCode)
-          .then(tests.withReferencesNotOverwriting.response);
+        it(`should return ${tests.withReferencesNotOverwriting.statusCode} when not overwriting, with references`, async () => {
+          const destination = getDestinationSpace(spaceId);
+
+          return supertestWithoutAuth
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+            .auth(user.username, user.password)
+            .send({
+              objects: [dashboardObject],
+              includeReferences: true,
+              retries: { [destination]: [{ ...visualizationObject, overwrite: false }] },
+            })
+            .expect(tests.withReferencesNotOverwriting.statusCode)
+            .then(tests.withReferencesNotOverwriting.response);
+        });
+
+        it(`should return ${tests.withReferencesOverwriting.statusCode} when overwriting, with references`, async () => {
+          const destination = getDestinationSpace(spaceId);
+
+          return supertestWithoutAuth
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+            .auth(user.username, user.password)
+            .send({
+              objects: [dashboardObject],
+              includeReferences: true,
+              retries: { [destination]: [{ ...visualizationObject, overwrite: true }] },
+            })
+            .expect(tests.withReferencesOverwriting.statusCode)
+            .then(tests.withReferencesOverwriting.response);
+        });
+
+        it(`should return ${tests.withoutReferencesOverwriting.statusCode} when overwriting, without references`, async () => {
+          const destination = getDestinationSpace(spaceId);
+
+          return supertestWithoutAuth
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+            .auth(user.username, user.password)
+            .send({
+              objects: [dashboardObject],
+              includeReferences: false,
+              retries: { [destination]: [{ ...dashboardObject, overwrite: true }] },
+            })
+            .expect(tests.withoutReferencesOverwriting.statusCode)
+            .then(tests.withoutReferencesOverwriting.response);
+        });
+
+        it(`should return ${tests.withoutReferencesNotOverwriting.statusCode} when not overwriting, without references`, async () => {
+          const destination = getDestinationSpace(spaceId);
+
+          return supertestWithoutAuth
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+            .auth(user.username, user.password)
+            .send({
+              objects: [dashboardObject],
+              includeReferences: false,
+              retries: { [destination]: [{ ...dashboardObject, overwrite: false }] },
+            })
+            .expect(tests.withoutReferencesNotOverwriting.statusCode)
+            .then(tests.withoutReferencesNotOverwriting.response);
+        });
+
+        it(`should return ${tests.nonExistentSpace.statusCode} when resolving within a non-existent space`, async () => {
+          const destination = NON_EXISTENT_SPACE_ID;
+
+          return supertestWithoutAuth
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+            .auth(user.username, user.password)
+            .send({
+              objects: [dashboardObject],
+              includeReferences: false,
+              retries: { [destination]: [{ ...dashboardObject, overwrite: true }] },
+            })
+            .expect(tests.nonExistentSpace.statusCode)
+            .then(tests.nonExistentSpace.response);
+        });
       });
 
-      it(`should return ${tests.withReferencesOverwriting.statusCode} when overwriting, with references`, async () => {
-        const destination = getDestinationSpace(spaceId);
+      const includeReferences = false;
+      describe(`multi-namespace types with "overwrite" retry`, () => {
+        before(() => esArchiver.load('saved_objects/spaces'));
+        after(() => esArchiver.unload('saved_objects/spaces'));
 
-        return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-          .auth(user.username, user.password)
-          .send({
-            objects: [
-              {
-                type: 'dashboard',
-                id: 'cts_dashboard',
-              },
-            ],
-            includeReferences: true,
-            retries: {
-              [destination]: [
-                {
-                  type: 'visualization',
-                  id: 'cts_vis_3',
-                  overwrite: true,
-                },
-              ],
-            },
-          })
-          .expect(tests.withReferencesOverwriting.statusCode)
-          .then(tests.withReferencesOverwriting.response);
-      });
-
-      it(`should return ${tests.withoutReferencesOverwriting.statusCode} when overwriting, without references`, async () => {
-        const destination = getDestinationSpace(spaceId);
-
-        return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-          .auth(user.username, user.password)
-          .send({
-            objects: [
-              {
-                type: 'dashboard',
-                id: 'cts_dashboard',
-              },
-            ],
-            includeReferences: false,
-            retries: {
-              [destination]: [
-                {
-                  type: 'dashboard',
-                  id: 'cts_dashboard',
-                  overwrite: true,
-                },
-              ],
-            },
-          })
-          .expect(tests.withoutReferencesOverwriting.statusCode)
-          .then(tests.withoutReferencesOverwriting.response);
-      });
-
-      it(`should return ${tests.withoutReferencesNotOverwriting.statusCode} when not overwriting, without references`, async () => {
-        const destination = getDestinationSpace(spaceId);
-
-        return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-          .auth(user.username, user.password)
-          .send({
-            objects: [
-              {
-                type: 'dashboard',
-                id: 'cts_dashboard',
-              },
-            ],
-            includeReferences: false,
-            retries: {
-              [destination]: [
-                {
-                  type: 'dashboard',
-                  id: 'cts_dashboard',
-                  overwrite: false,
-                },
-              ],
-            },
-          })
-          .expect(tests.withoutReferencesNotOverwriting.statusCode)
-          .then(tests.withoutReferencesNotOverwriting.response);
-      });
-
-      it(`should return ${tests.nonExistentSpace.statusCode} when resolving within a non-existent space`, async () => {
-        const destination = NON_EXISTENT_SPACE_ID;
-
-        return supertestWithoutAuth
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
-          .auth(user.username, user.password)
-          .send({
-            objects: [
-              {
-                type: 'dashboard',
-                id: 'cts_dashboard',
-              },
-            ],
-            includeReferences: false,
-            retries: {
-              [destination]: [
-                {
-                  type: 'dashboard',
-                  id: 'cts_dashboard',
-                  overwrite: true,
-                },
-              ],
-            },
-          })
-          .expect(tests.nonExistentSpace.statusCode)
-          .then(tests.nonExistentSpace.response);
+        const testCases = tests.multiNamespaceTestCases();
+        testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {
+          it(`should return ${statusCode} when ${testTitle}`, async () => {
+            return supertestWithoutAuth
+              .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+              .auth(user.username, user.password)
+              .send({ objects, includeReferences, retries })
+              .expect(statusCode)
+              .then(response);
+          });
+        });
       });
     });
   };
@@ -433,6 +496,7 @@ export function resolveCopyToSpaceConflictsSuite(
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
+    createMultiNamespaceTestCases,
     originSpaces: ['default', 'space_1'],
     NON_EXISTENT_SPACE_ID,
   };

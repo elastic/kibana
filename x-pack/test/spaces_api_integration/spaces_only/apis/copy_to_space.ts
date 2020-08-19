@@ -20,6 +20,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
+    createMultiNamespaceTestCases,
     originSpaces,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
@@ -34,7 +35,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
           },
           noConflictsWithReferences: {
             statusCode: 200,
-            response: expectNoConflictsWithReferencesResult,
+            response: expectNoConflictsWithReferencesResult(spaceId),
           },
           withConflictsOverwriting: {
             statusCode: 200,
@@ -47,12 +48,13 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
           multipleSpaces: {
             statusCode: 200,
             withConflictsResponse: createExpectWithConflictsOverwritingResult(spaceId),
-            noConflictsResponse: expectNoConflictsWithReferencesResult,
+            noConflictsResponse: expectNoConflictsWithReferencesResult(spaceId),
           },
           nonExistentSpace: {
             statusCode: 200,
             response: expectNoConflictsForNonExistentSpaceResult,
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId),
         },
       });
     });
