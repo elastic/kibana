@@ -65,9 +65,9 @@ export const validatePackagePolicy = (
         defaultMessage: 'Namespace is required',
       }),
     ];
-  } else if (!isValidNamespace(packageConfig.namespace)) {
+  } else if (!isValidNamespace(packagePolicy.namespace)) {
     validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.packageConfigValidation.namespaceInvalidErrorMessage', {
+      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceInvalidErrorMessage', {
         defaultMessage: 'Namespace contains invalid characters',
       }),
     ];

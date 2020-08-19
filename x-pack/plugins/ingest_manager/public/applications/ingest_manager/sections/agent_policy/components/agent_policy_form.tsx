@@ -58,10 +58,10 @@ export const agentPolicyFormValidation = (
         defaultMessage="A namespace is required"
       />,
     ];
-  } else if (!isValidNamespace(agentConfig.namespace)) {
+  } else if (!isValidNamespace(agentPolicy.namespace)) {
     errors.namespace = [
       <FormattedMessage
-        id="xpack.ingestManager.agentConfigForm.namespaceInvalidErrorMessage"
+        id="xpack.ingestManager.agentPolicyForm.namespaceInvalidErrorMessage"
         defaultMessage="Namespace contains invalid characters"
       />,
     ];
