@@ -143,7 +143,7 @@ describe('helpers', () => {
         indexPatterns: {
           fields: [{ name: 'event.category', type: 'test type' }],
           title: 'test title',
-          getFormatterForField: () => ({ convert: (val) => val }),
+          getFormatterForField: () => ({ convert: (val: unknown) => val }),
         },
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);

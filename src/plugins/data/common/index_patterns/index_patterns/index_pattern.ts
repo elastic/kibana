@@ -22,7 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  FieldTypeUnknownError,
+} from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
@@ -150,6 +155,22 @@ export class IndexPattern implements IIndexPattern {
     this.formatField = this.formatHit.formatField;
   }
 
+  private unknownFieldErrorNotification(
+    fieldType: string,
+    fieldName: string,
+    indexPatternTitle: string
+  ) {
+    const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+      values: { type: fieldType },
+      defaultMessage: 'Unknown field type {type}',
+    });
+    const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
+      values: { name: fieldName, title: indexPatternTitle },
+      defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
+    });
+    this.onNotification({ title, text, color: 'danger', iconType: 'alert' });
+  }
+
   private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
     if (format && field) {
       flat[field] = format;
@@ -193,7 +214,15 @@ export class IndexPattern implements IIndexPattern {
       await this.refreshFields();
     } else {
       if (specs) {
-        this.fields.replaceAll(specs);
+        try {
+          this.fields.replaceAll(specs);
+        } catch (err) {
+          if (err instanceof FieldTypeUnknownError) {
+            this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+          } else {
+            throw err;
+          }
+        }
       }
     }
   }
@@ -215,7 +244,15 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    try {
+      this.fields.replaceAll(spec.fields || []);
+    } catch (err) {
+      if (err instanceof FieldTypeUnknownError) {
+        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+      } else {
+        throw err;
+      }
+    }
     this.typeMeta = spec.typeMeta;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -351,19 +388,27 @@ export class IndexPattern implements IIndexPattern {
       throw new DuplicateField(name);
     }
 
-    this.fields.add({
-      name,
-      script,
-      type: fieldType,
-      scripted: true,
-      lang,
-      aggregatable: true,
-      searchable: true,
-      count: 0,
-      readFromDocValues: false,
-    });
+    try {
+      this.fields.add({
+        name,
+        script,
+        type: fieldType,
+        scripted: true,
+        lang,
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
+    } catch (err) {
+      if (err instanceof FieldTypeUnknownError) {
+        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+      } else {
+        throw err;
+      }
 
-    await this.save();
+      await this.save();
+    }
   }
 
   removeScriptedField(fieldName: string) {
@@ -578,7 +623,15 @@ export class IndexPattern implements IIndexPattern {
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
-    this.fields.replaceAll([...fields, ...scripted]);
+    try {
+      this.fields.replaceAll([...fields, ...scripted]);
+    } catch (err) {
+      if (err instanceof FieldTypeUnknownError) {
+        this.unknownFieldErrorNotification(err.fieldSpec.name, err.fieldSpec.type, this.title);
+      } else {
+        throw err;
+      }
+    }
   }
 
   refreshFields() {

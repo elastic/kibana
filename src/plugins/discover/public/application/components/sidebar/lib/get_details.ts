@@ -19,12 +19,13 @@
 
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
-import { IndexPatternField } from '../../../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 
 export function getDetails(
   field: IndexPatternField,
   hits: Array<Record<string, unknown>>,
-  columns: string[]
+  columns: string[],
+  indexPattern: IndexPattern
 ) {
   const details = {
     ...fieldCalculator.getFieldValueCounts({
