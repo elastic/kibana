@@ -1,27 +1,210 @@
 [[whats-new]]
 == What's new in {minor-version}
+++++
+<titleabbrev>What's new in {minor-version}</titleabbrev>
+++++
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the {kibana-ref-all}/7.9/release-notes-7.9.0.html[release notes] and
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[breaking changes].
 
-//* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>. 
-
-coming[7.9.0]
+Other versions: {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
 
+[float]
+[[new-platform-7-9]]
+=== An improved {kib} platform
+
+As of 7.9,
+the new development platform
+for {kib} is complete. The most immediate difference is
+that pages load faster as you navigate {kib}. If you're a developer,
+the new platform enables you to build features faster and with greater efficiency.
+For details, check out
+https://www.elastic.co/blog/introducing-a-new-architecture-for-kibana[Introducing
+a new architecture for {kib}].
+
+[float]
+[[search-7-9]]
+=== Enterprise Search comes to {kib}
+
+In 7.8, we reorganized the {kib} side navigation to make our Observability
+and Security apps easier to find. In 7.9, we added Enterprise Search
+to the side navigation. If you're an existing user of App Search and
+Workplace Search, you can now launch directly into those environments in {kib}.
+Check out https://www.elastic.co/guide/en/app-search/current/index.html[our documentation]
+for more information.
+
+[role="screenshot"]
+image::images/7.9-whats_new_search.png[Enterprise Search is side navigation]
+
+[float]
+[[lens-7-9]]
+=== Multiple y-axes in Lens
+
+Show two metrics on the y-axis at the same time in {kibana-ref}/lens.html[Lens].
+This enables you to compare and contrast data of vastly different types and ranges.
+For example, you might track the total page views for your web site,
+which tallies in the millions. You're also interested
+in the percentage of the web site bounce rates,
+typically between 1 and 100. You can stack both metrics on top of one
+another to quickly spot the outliers.
+
+Also in 7.9, Lens debuts color pick, sort, and a fitting function.
+
+[float]
+[[canvas-7-9]]
+=== Canvas variables for easy reuse
+
+You can now can create variables to easily reuse the
+strings and patterns in your Canvas elements. This is especially useful if you
+frequently copy and paste your elements. For example, when you clone a large workpad and need
+to connect your elements to a new index, you can use variables to quickly update the elements,
+instead of changing the index for each individual element. For instructions, refer to the
+{kibana-ref}/canvas.html[Canvas documentation].
+
+
+[float]
+[[dashboard-7-9]]
+=== Dashboard to Discover explorations
+
+Navigating between dashboards was a highlight in 7.8, and 7.9 adds
+the ability to navigate from a dashboard to Discover.  The time range,
+filters, and other parameters remain the same, so you can continue your
+analysis from a new perspective. For example,
+your dashboard might have a visualization for overall HTTP responses.
+You can navigate to Discover to see the saved search
+for HTTP responses. The new {kibana-ref}/explore-underlying-data.html[*Explore underlying data*]
+action is available for visualizations
+backed by a single index pattern.
+
+[role="screenshot"]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+[float]
+[[maps-7-9-geo-shape]]
+=== geo_shape fields at scale in Maps
+
+Maps now allows you to create {kibana-ref}/maps-grid-aggregation.html[geo_shape fields with {es} aggregations].
+This means that you can plot your geo_shape fields at scale
+just like your geo_point fields.
+You can create a layer that clusters your lines and polygons until
+you zoom into an area with less than 10,000 discrete documents. Then,
+you’ll see individual lines and polygons.
+
+[float]
+[[maps-7-9-vector-tile]]
+=== Vector tile layers in Maps
+
+Maps also introduces a new {kibana-ref}//tile-layer.html[vector tile layer]&mdash;you can add
+layers to your map for data services that implement the
+Mapbox vector tile specification.
+
+[role="screenshot"]
+image::images/7.9-whats_new_maps.png[Vector tile layer with Mapbox vector tile specification]
+
+
+[float]
+[[alert-7-9]]
+=== ServiceNow action in Alerts
+
+Alerting introduces a ServiceNow action that creates incidents in ServiceNow.
+See the {kibana-ref}/servicenow-action-type.html[ServiceNow docs]
+for details.
+
+[role="screenshot"]
+image::images/alert-flyout-action-type-selection.png[UI for selecting an action type]
+
+
+[float]
+[[model-snapshots-7-9]]
+=== Model snapshot management in {ml-app}
+
+See the list of
+{ml-docs}/ml-model-snapshots.html[model snapshots] for each job in **Machine
+Learning > Anomaly Detection > Job Management**. This makes it easier to
+edit, delete, or revert to a specific snapshot. If there are periods of unusual
+activity that you want to ignore, you can also create
+{ml-docs}/ml-calendars.html[scheduled events] before you revert and replay the
+analysis.
+
+[role="screenshot"]
+image::images/revert-model-snapshot.png[UI for reverting model snapshot]
+
+
+[float]
+[[model-change-annotations-7-9]]
+=== Automatic annotations in {anomaly-jobs}
+
+You have been able to add annotations to your {anomaly-job} results for a long
+time. Starting in 7.9, {anomaly-job} annotations are automatically generated
+every time the model calculation significantly changes, for example, when the
+job detects periodicity, a trend, or a step-change. The table of annotations in
+the **Anomaly Explorer** and **Single Metric Viewer** is enhanced to support the
+new functionality, so you can filter and search the list of annotations for the
+various types of events.
+
+[role="screenshot"]
+image::images/model_change_annotations.png[Model change annotations]
+
+[float]
+[[swim-lane-embeddable-actions-filters-7-9]]
+=== Embeddable swim lanes with new actions and filters
+
+In 7.8, swim lanes became the first {ml} visual that you can embed in
+dashboards. As of 7.9, embeddable anomaly swim lanes are more powerful: when you
+navigate to the **Anomaly Explorer** page from the dashboard, swim lanes
+preserve pagination. You can also add filters with selected influencer values
+directly on the dashboard.
+
+[role="screenshot"]
+image::images/swim-lane-filter.png[Anomaly swim lane filter]
+
+[float]
+[[transform-data-frame-analytics-histogram-7-9]]
+=== Histogram charts in {transform} and {dfanalytics} wizards
+
+Whether you're transforming your data to get it ready for analysis or evaluating
+your data after running it through a {dfanalytics-job}, understanding the
+distribution and range of your fields is important. In 7.9, you can enable
+histogram charts in the {transform} and {dfanalytics} wizards, so that you can
+quickly understand the shape of your data columns. This same functionality is
+also available in the {dfanalytics} results grid. All of this is designed to
+give you richer visibility into your data so you can spot outliers faster and
+easily compare prediction results vs. actual values.
+
+[role="screenshot"]
+image::images/histogram-transforms.png[Histogram charts in transforms]
+
+
+[float]
+[[ml-access-kibana-spaces]]
+=== {kib} privileges for {ml-features} in spaces
+
+You can now grant {kibana-ref}/kibana-privileges.html[{kib} privileges]
+for {ml} features in {kib}. If {ml-features} are enabled in your space, you can
+grant read-write, read-only, or no access to all the {ml} objects in that space.
+For details, see {ml-docs}/setup.html[Set up machine learning features].
+
+[role="screenshot"]
+image::images/ml-space.png[{ml} features in {kib} spaces]
+
+
 // end::notable-highlights[]
+
+[float]
+=== Give {minor-version} a try
+
+Try {minor-version} now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].

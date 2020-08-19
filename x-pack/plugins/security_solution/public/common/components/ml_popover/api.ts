@@ -9,7 +9,6 @@ import {
   CloseJobsResponse,
   ErrorResponse,
   GetModulesProps,
-  JobSummary,
   MlSetupArgs,
   Module,
   RecognizerModule,
@@ -165,21 +164,3 @@ export const stopDatafeeds = async ({
 
   return [stopDatafeedsResponse, closeJobsResponse];
 };
-
-/**
- * Fetches a summary of all ML jobs currently installed
- *
- * NOTE: If not sending jobIds in the body, you must at least send an empty body or the server will
- * return a 500
- *
- * @param signal to cancel request
- *
- * @throws An error if response is not OK
- */
-export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> =>
-  KibanaServices.get().http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
-    method: 'POST',
-    body: JSON.stringify({}),
-    asSystemRequest: true,
-    signal,
-  });

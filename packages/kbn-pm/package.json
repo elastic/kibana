@@ -22,7 +22,7 @@
     "@types/glob": "^5.0.35",
     "@types/globby": "^6.1.0",
     "@types/has-ansi": "^3.0.0",
-    "@types/lodash": "^4.14.155",
+    "@types/lodash": "^4.14.159",
     "@types/log-symbols": "^2.0.0",
     "@types/ncp": "^2.0.1",
     "@types/node": ">=10.17.17 <10.20.0",
