@@ -20,13 +20,10 @@
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { SavedObjectsManagementRecord } from '.';
 
-export abstract class SavedObjectsManagementColumn<T> {
-  public abstract id: string;
-  public abstract euiColumn: Omit<
-    EuiTableFieldDataColumnType<SavedObjectsManagementRecord>,
-    'sortable'
-  >;
+export interface SavedObjectsManagementColumn<T> {
+  id: string;
+  euiColumn: Omit<EuiTableFieldDataColumnType<SavedObjectsManagementRecord>, 'sortable'>;
 
-  public data?: T;
-  public abstract loadData: () => Promise<T>;
+  data?: T;
+  loadData: () => Promise<T>;
 }

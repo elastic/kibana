@@ -11,6 +11,8 @@ import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
+type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
+
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
@@ -72,7 +74,7 @@ export class SpacesManager {
   }
 
   public async copySavedObjects(
-    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    objects: SavedObject[],
     spaces: string[],
     includeReferences: boolean,
     createNewCopies: boolean,
@@ -89,7 +91,7 @@ export class SpacesManager {
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    objects: SavedObject[],
     retries: unknown,
     includeReferences: boolean,
     createNewCopies: boolean
@@ -104,19 +106,13 @@ export class SpacesManager {
     });
   }
 
-  public async shareSavedObjectAdd(
-    object: Pick<SavedObjectsManagementRecord, 'type' | 'id'>,
-    spaces: string[]
-  ): Promise<void> {
+  public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_add`, {
       body: JSON.stringify({ object, spaces }),
     });
   }
 
-  public async shareSavedObjectRemove(
-    object: Pick<SavedObjectsManagementRecord, 'type' | 'id'>,
-    spaces: string[]
-  ): Promise<void> {
+  public async shareSavedObjectRemove(object: SavedObject, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_remove`, {
       body: JSON.stringify({ object, spaces }),
     });

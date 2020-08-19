@@ -130,7 +130,5 @@ export async function validateReferences(
     };
   });
 
-  return {
-    errors: Object.values(errorMap),
-  };
+  return Object.values(errorMap);
 }

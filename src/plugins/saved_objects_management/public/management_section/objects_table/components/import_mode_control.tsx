@@ -42,6 +42,61 @@ export interface ImportMode {
   overwrite: boolean;
 }
 
+const createNewCopiesDisabled = {
+  id: 'createNewCopiesDisabled',
+  text: i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledTitle',
+    { defaultMessage: 'Check for existing objects' }
+  ),
+  tooltip: i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
+    {
+      defaultMessage:
+        'Check if each object was previously copied or imported into the destination space.',
+    }
+  ),
+};
+const createNewCopiesEnabled = {
+  id: 'createNewCopiesEnabled',
+  text: i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledTitle',
+    { defaultMessage: 'Create new objects with random IDs' }
+  ),
+  tooltip: i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
+    { defaultMessage: 'All imported objects will be created with new random IDs.' }
+  ),
+};
+const overwriteEnabled = {
+  id: 'overwriteEnabled',
+  label: i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.overwrite.enabledLabel',
+    { defaultMessage: 'Automatically try to overwrite conflicts' }
+  ),
+};
+const overwriteDisabled = {
+  id: 'overwriteDisabled',
+  label: i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.overwrite.disabledLabel',
+    { defaultMessage: 'Request action when conflict occurs' }
+  ),
+};
+const importOptionsTitle = i18n.translate(
+  'savedObjectsManagement.objectsTable.importModeControl.importOptionsTitle',
+  { defaultMessage: 'Import options' }
+);
+
+const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiText>{text}</EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIconTip content={tooltip} position="left" type="iInCircle" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export const ImportModeControl = ({
   initialValues,
   isLegacyFile,
@@ -50,60 +105,6 @@ export const ImportModeControl = ({
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
-  const createNewCopiesDisabled = {
-    id: 'createNewCopiesDisabled',
-    text: i18n.translate(
-      'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledTitle',
-      { defaultMessage: 'Check for existing objects' }
-    ),
-    tooltip: i18n.translate(
-      'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
-      {
-        defaultMessage:
-          'Check if each object was previously copied or imported into the destination space.',
-      }
-    ),
-  };
-  const createNewCopiesEnabled = {
-    id: 'createNewCopiesEnabled',
-    text: i18n.translate(
-      'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledTitle',
-      { defaultMessage: 'Create new objects with random IDs' }
-    ),
-    tooltip: i18n.translate(
-      'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
-      { defaultMessage: 'All imported objects will be created with new random IDs.' }
-    ),
-  };
-  const overwriteEnabled = {
-    id: 'overwriteEnabled',
-    label: i18n.translate(
-      'savedObjectsManagement.objectsTable.importModeControl.overwrite.enabledLabel',
-      { defaultMessage: 'Automatically try to overwrite conflicts' }
-    ),
-  };
-  const overwriteDisabled = {
-    id: 'overwriteDisabled',
-    label: i18n.translate(
-      'savedObjectsManagement.objectsTable.importModeControl.overwrite.disabledLabel',
-      { defaultMessage: 'Request action when conflict occurs' }
-    ),
-  };
-  const importOptionsTitle = i18n.translate(
-    'savedObjectsManagement.objectsTable.importModeControl.importOptionsTitle',
-    { defaultMessage: 'Import options' }
-  );
-
-  const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText>{text}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip content={tooltip} position="left" type="iInCircle" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
   const onChange = (partial: Partial<ImportMode>) => {
     if (partial.createNewCopies !== undefined) {
       setCreateNewCopies(partial.createNewCopies);

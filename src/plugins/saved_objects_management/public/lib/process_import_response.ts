@@ -29,7 +29,7 @@ import {
 } from 'src/core/public';
 
 export interface FailedImport {
-  obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title' | 'meta' | 'overwrite'>;
+  obj: Omit<SavedObjectsImportError, 'error'>;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError

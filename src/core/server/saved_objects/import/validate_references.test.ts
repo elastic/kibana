@@ -254,11 +254,7 @@ describe('validateReferences()', () => {
 
   test('returns empty when no objects are passed in', async () => {
     const result = await validateReferences([], savedObjectsClient);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [],
-      }
-    `);
+    expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
@@ -357,52 +353,50 @@ describe('validateReferences()', () => {
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [
-          Object {
-            "error": Object {
-              "references": Array [
-                Object {
-                  "id": "3",
-                  "type": "index-pattern",
-                },
-              ],
-              "type": "missing_references",
-            },
-            "id": "2",
-            "meta": Object {
-              "title": "My Visualization 2",
-            },
+      Array [
+        Object {
+          "error": Object {
+            "references": Array [
+              Object {
+                "id": "3",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "missing_references",
+          },
+          "id": "2",
+          "meta": Object {
             "title": "My Visualization 2",
-            "type": "visualization",
           },
-          Object {
-            "error": Object {
-              "references": Array [
-                Object {
-                  "id": "5",
-                  "type": "index-pattern",
-                },
-                Object {
-                  "id": "6",
-                  "type": "index-pattern",
-                },
-                Object {
-                  "id": "7",
-                  "type": "search",
-                },
-              ],
-              "type": "missing_references",
-            },
-            "id": "4",
-            "meta": Object {
-              "title": "My Visualization 4",
-            },
+          "title": "My Visualization 2",
+          "type": "visualization",
+        },
+        Object {
+          "error": Object {
+            "references": Array [
+              Object {
+                "id": "5",
+                "type": "index-pattern",
+              },
+              Object {
+                "id": "6",
+                "type": "index-pattern",
+              },
+              Object {
+                "id": "7",
+                "type": "search",
+              },
+            ],
+            "type": "missing_references",
+          },
+          "id": "4",
+          "meta": Object {
             "title": "My Visualization 4",
-            "type": "visualization",
           },
-        ],
-      }
+          "title": "My Visualization 4",
+          "type": "visualization",
+        },
+      ]
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
       [MockFunction] {
@@ -479,7 +473,7 @@ describe('validateReferences()', () => {
       },
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient, undefined, retries);
-    expect(result.errors).toHaveLength(0);
+    expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
@@ -509,11 +503,7 @@ describe('validateReferences()', () => {
       },
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [],
-      }
-    `);
+    expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
   });
 
@@ -539,11 +529,7 @@ describe('validateReferences()', () => {
       },
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [],
-      }
-    `);
+    expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
@@ -568,11 +554,7 @@ describe('validateReferences()', () => {
       },
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient);
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [],
-      }
-    `);
+    expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 

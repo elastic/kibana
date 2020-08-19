@@ -32,10 +32,10 @@ import { getDefaultTitle } from '../../../lib';
 
 export interface OverwriteModalProps {
   conflict: FailedImportConflict;
-  finish: (overwrite: boolean, destinationId?: string) => void;
+  onFinish: (overwrite: boolean, destinationId?: string) => void;
 }
 
-export const OverwriteModal = ({ conflict, finish }: OverwriteModalProps) => {
+export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
   const { obj, error } = conflict;
   let initialDestinationId: string | undefined;
   let selectControl: ReactNode = null;
@@ -126,8 +126,8 @@ export const OverwriteModal = ({ conflict, finish }: OverwriteModalProps) => {
           { defaultMessage: 'Overwrite' }
         )}
         buttonColor="danger"
-        onCancel={() => finish(false)}
-        onConfirm={() => finish(true, destinationId)}
+        onCancel={() => onFinish(false)}
+        onConfirm={() => onFinish(true, destinationId)}
         defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         maxWidth="500px"
       >

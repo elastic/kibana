@@ -18,6 +18,7 @@
  */
 
 import './import_summary.scss';
+import _ from 'lodash';
 import React, { Fragment } from 'react';
 import {
   EuiText,
@@ -52,14 +53,16 @@ interface ImportItem {
   errorMessage?: string;
 }
 
+const unsupportedTypeErrorMessage = i18n.translate(
+  'savedObjectsManagement.objectsTable.importSummary.unsupportedTypeError',
+  { defaultMessage: 'Unsupported object type' }
+);
+
 const getErrorMessage = ({ error }: FailedImport) => {
   if (error.type === 'unknown') {
     return error.message;
   } else if (error.type === 'unsupported_type') {
-    return i18n.translate(
-      'savedObjectsManagement.objectsTable.importSummary.unsupportedTypeError',
-      { defaultMessage: 'Unsupported object type' }
-    );
+    return unsupportedTypeErrorMessage;
   }
 };
 
@@ -95,7 +98,7 @@ const getCountIndicators = (importItems: ImportItem[]) => {
 
   return (
     <EuiFlexGroup>
-      {createdCount ? (
+      {createdCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4 className="savedObjectsManagementImportSummary__createdCount">
@@ -107,8 +110,8 @@ const getCountIndicators = (importItems: ImportItem[]) => {
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-      ) : null}
-      {overwrittenCount ? (
+      )}
+      {overwrittenCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4 className="savedObjectsManagementImportSummary__overwrittenCount">
@@ -120,8 +123,8 @@ const getCountIndicators = (importItems: ImportItem[]) => {
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-      ) : null}
-      {errorCount ? (
+      )}
+      {errorCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4 className="savedObjectsManagementImportSummary__errorCount">
@@ -133,52 +136,54 @@ const getCountIndicators = (importItems: ImportItem[]) => {
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-      ) : null}
+      )}
     </EuiFlexGroup>
   );
 };
 
 const getStatusIndicator = ({ outcome, errorMessage }: ImportItem) => {
-  if (outcome === 'created') {
-    return (
-      <EuiIconTip
-        type={'check'}
-        color={'success'}
-        content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
-          defaultMessage: 'Created',
-        })}
-      />
-    );
-  } else if (outcome === 'overwritten') {
-    return (
-      <EuiIconTip
-        type={'check'}
-        color={'warning'}
-        content={i18n.translate('savedObjectsManagement.importSummary.overwrittenOutcomeLabel', {
-          defaultMessage: 'Overwritten',
-        })}
-      />
-    );
-  } else if (outcome === 'error') {
-    return (
-      <EuiIconTip
-        type={'cross'}
-        color={'danger'}
-        content={i18n.translate('savedObjectsManagement.importSummary.errorOutcomeLabel', {
-          defaultMessage: 'Error{message}',
-          values: { message: errorMessage ? `: ${errorMessage}` : '' },
-        })}
-      />
-    );
+  switch (outcome) {
+    case 'created':
+      return (
+        <EuiIconTip
+          type={'check'}
+          color={'success'}
+          content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
+            defaultMessage: 'Created',
+          })}
+        />
+      );
+    case 'overwritten':
+      return (
+        <EuiIconTip
+          type={'check'}
+          color={'warning'}
+          content={i18n.translate('savedObjectsManagement.importSummary.overwrittenOutcomeLabel', {
+            defaultMessage: 'Overwritten',
+          })}
+        />
+      );
+    case 'error':
+      return (
+        <EuiIconTip
+          type={'cross'}
+          color={'danger'}
+          content={i18n.translate('savedObjectsManagement.importSummary.errorOutcomeLabel', {
+            defaultMessage: 'Error{message}',
+            values: { message: errorMessage ? `: ${errorMessage}` : '' },
+          })}
+        />
+      );
   }
 };
 
 export const ImportSummary = ({ failedImports, successfulImports }: ImportSummaryProps) => {
-  const importItems: ImportItem[] = [
-    ...failedImports.map((x) => mapFailedImport(x)),
-    ...successfulImports.map((x) => mapImportSuccess(x)),
-  ].sort((a, b) =>
-    a.type > b.type ? 1 : a.type < b.type ? -1 : a.title > b.title ? 1 : a.title < b.title ? -1 : 0
+  const importItems: ImportItem[] = _.sortBy(
+    [
+      ...failedImports.map((x) => mapFailedImport(x)),
+      ...successfulImports.map((x) => mapImportSuccess(x)),
+    ],
+    ['type', 'title']
   );
 
   return (

@@ -99,7 +99,7 @@ export async function resolveSavedObjectsImportErrors({
     namespace,
     retries
   );
-  errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
+  errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well

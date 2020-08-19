@@ -26,7 +26,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('OverwriteModal', () => {
   const obj = { type: 'foo', id: 'bar', meta: { title: 'baz' } };
-  const finish = jest.fn();
+  const onFinish = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -35,7 +35,7 @@ describe('OverwriteModal', () => {
   describe('with a regular conflict', () => {
     const props: OverwriteModalProps = {
       conflict: { obj, error: { type: 'conflict', destinationId: 'qux' } },
-      finish,
+      onFinish,
     };
 
     it('should render as expected', async () => {
@@ -47,20 +47,20 @@ describe('OverwriteModal', () => {
       expect(wrapper.find('EuiSuperSelect')).toHaveLength(0);
     });
 
-    it('should call finish with expected args when Skip is clicked', async () => {
+    it('should call onFinish with expected args when Skip is clicked', async () => {
       const wrapper = mountWithIntl(<OverwriteModal {...props} />);
 
-      expect(finish).not.toHaveBeenCalled();
+      expect(onFinish).not.toHaveBeenCalled();
       findTestSubject(wrapper, 'confirmModalCancelButton').simulate('click');
-      expect(finish).toHaveBeenCalledWith(false);
+      expect(onFinish).toHaveBeenCalledWith(false);
     });
 
-    it('should call finish with expected args when Overwrite is clicked', async () => {
+    it('should call onFinish with expected args when Overwrite is clicked', async () => {
       const wrapper = mountWithIntl(<OverwriteModal {...props} />);
 
-      expect(finish).not.toHaveBeenCalled();
+      expect(onFinish).not.toHaveBeenCalled();
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
-      expect(finish).toHaveBeenCalledWith(true, 'qux');
+      expect(onFinish).toHaveBeenCalledWith(true, 'qux');
     });
   });
 
@@ -77,7 +77,7 @@ describe('OverwriteModal', () => {
           ],
         },
       },
-      finish,
+      onFinish,
     };
 
     it('should render as expected', async () => {
@@ -89,21 +89,21 @@ describe('OverwriteModal', () => {
       expect(wrapper.find('EuiSuperSelect')).toHaveLength(1);
     });
 
-    it('should call finish with expected args when Skip is clicked', async () => {
+    it('should call onFinish with expected args when Skip is clicked', async () => {
       const wrapper = mountWithIntl(<OverwriteModal {...props} />);
 
-      expect(finish).not.toHaveBeenCalled();
+      expect(onFinish).not.toHaveBeenCalled();
       findTestSubject(wrapper, 'confirmModalCancelButton').simulate('click');
-      expect(finish).toHaveBeenCalledWith(false);
+      expect(onFinish).toHaveBeenCalledWith(false);
     });
 
-    it('should call finish with expected args when Overwrite is clicked', async () => {
+    it('should call onFinish with expected args when Overwrite is clicked', async () => {
       const wrapper = mountWithIntl(<OverwriteModal {...props} />);
 
-      expect(finish).not.toHaveBeenCalled();
+      expect(onFinish).not.toHaveBeenCalled();
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
       // first destination is selected by default
-      expect(finish).toHaveBeenCalledWith(true, 'qux');
+      expect(onFinish).toHaveBeenCalledWith(true, 'qux');
     });
   });
 });

@@ -28,10 +28,6 @@ export interface SavedObjectsManagementColumnServiceSetup {
 
 export interface SavedObjectsManagementColumnServiceStart {
   /**
-   * return true if the registry contains given column, false otherwise.
-   */
-  has: (columnId: string) => boolean;
-  /**
    * return all {@link SavedObjectsManagementColumn | columns} currently registered.
    */
   getAll: () => Array<SavedObjectsManagementColumn<unknown>>;
@@ -53,7 +49,6 @@ export class SavedObjectsManagementColumnService {
 
   start(): SavedObjectsManagementColumnServiceStart {
     return {
-      has: (columnId) => this.columns.has(columnId),
       getAll: () => [...this.columns.values()],
     };
   }

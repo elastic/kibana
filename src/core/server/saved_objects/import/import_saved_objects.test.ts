@@ -57,7 +57,7 @@ describe('#importSavedObjectsFromStream', () => {
       importIdMap: new Map(),
     });
     getMockFn(regenerateIds).mockReturnValue(new Map());
-    getMockFn(validateReferences).mockResolvedValue({ errors: [] });
+    getMockFn(validateReferences).mockResolvedValue([]);
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
       filteredObjects: [],
@@ -228,9 +228,7 @@ describe('#importSavedObjectsFromStream', () => {
             ['baz', {}],
           ]),
         });
-        getMockFn(validateReferences).mockResolvedValue({
-          errors: [errors[1]],
-        });
+        getMockFn(validateReferences).mockResolvedValue([errors[1]]);
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
           filteredObjects,
@@ -277,7 +275,7 @@ describe('#importSavedObjectsFromStream', () => {
 
       test('does not check conflicts or check origin conflicts', async () => {
         const options = setupOptions(true);
-        getMockFn(validateReferences).mockResolvedValue({ errors: [] });
+        getMockFn(validateReferences).mockResolvedValue([]);
 
         await importSavedObjectsFromStream(options);
         expect(checkConflicts).not.toHaveBeenCalled();
@@ -296,7 +294,7 @@ describe('#importSavedObjectsFromStream', () => {
             ['bar', {}],
           ]),
         });
-        getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]] });
+        getMockFn(validateReferences).mockResolvedValue([errors[1]]);
         // this importIdMap is not composed with the one obtained from `collectSavedObjects`
         const importIdMap = new Map().set(`id1`, { id: `newId1` });
         getMockFn(regenerateIds).mockReturnValue(importIdMap);
@@ -429,7 +427,7 @@ describe('#importSavedObjectsFromStream', () => {
         collectedObjects: [],
         importIdMap: new Map(), // doesn't matter
       });
-      getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]] });
+      getMockFn(validateReferences).mockResolvedValue([errors[1]]);
       getMockFn(checkConflicts).mockResolvedValue({
         errors: [errors[2]],
         filteredObjects: [],

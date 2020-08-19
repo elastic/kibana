@@ -18,6 +18,7 @@
  */
 
 import { HttpStart, SavedObjectsImportError } from 'src/core/public';
+import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 interface ImportResponse {
   success: boolean;
@@ -28,8 +29,7 @@ interface ImportResponse {
 export async function importFile(
   http: HttpStart,
   file: File,
-  createNewCopies: boolean,
-  overwrite: boolean
+  { createNewCopies, overwrite }: ImportMode
 ) {
   const formData = new FormData();
   formData.append('file', file);

@@ -64,7 +64,7 @@ export async function importSavedObjectsFromStream({
     savedObjectsClient,
     namespace
   );
-  errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
+  errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);

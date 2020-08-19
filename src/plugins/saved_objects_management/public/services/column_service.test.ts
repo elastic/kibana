@@ -23,10 +23,8 @@ import {
 } from './column_service';
 import { SavedObjectsManagementColumn } from './types';
 
-class DummyColumn extends SavedObjectsManagementColumn<unknown> {
-  constructor(public id: string) {
-    super();
-  }
+class DummyColumn implements SavedObjectsManagementColumn<unknown> {
+  constructor(public id: string) {}
 
   public euiColumn = {
     field: 'id',
@@ -63,20 +61,6 @@ describe('SavedObjectsManagementColumnRegistry', () => {
       expect(() => setup.register(column)).toThrowErrorMatchingInlineSnapshot(
         `"Saved Objects Management Column with id 'my-column' already exists"`
       );
-    });
-  });
-
-  describe('#has', () => {
-    it('returns true when an column with a matching ID exists', () => {
-      const column = createColumn('existing-column');
-      setup.register(column);
-      const start = service.start();
-      expect(start.has('existing-column')).toEqual(true);
-    });
-
-    it(`returns false when an column doesn't exist`, () => {
-      const start = service.start();
-      expect(start.has('missing-column')).toEqual(false);
     });
   });
 });

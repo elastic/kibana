@@ -160,12 +160,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   import = async () => {
     const { http } = this.props;
     const { file, importMode } = this.state;
-    const { createNewCopies, overwrite } = importMode;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, createNewCopies, overwrite);
+      const response = await importFile(http, file!, importMode);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -912,9 +911,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     const { conflictingRecord } = this.state;
     if (conflictingRecord) {
       const { conflict } = conflictingRecord;
-      const finish = (overwrite: boolean, destinationId?: string) =>
+      const onFinish = (overwrite: boolean, destinationId?: string) =>
         conflictingRecord.done([overwrite, destinationId]);
-      confirmOverwriteModal = <OverwriteModal {...{ conflict, finish }} />;
+      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish }} />;
     }
 
     return (

@@ -70,17 +70,15 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
     ) : null;
 
   let button: ReactNode = null;
-  if (showButton && isExpanded) {
-    button = (
+  if (showButton) {
+    button = isExpanded ? (
       <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
         <FormattedMessage
           id="xpack.spaces.management.shareToSpace.showLessSpacesLink"
           defaultMessage="show less"
         />
       </EuiButtonEmpty>
-    );
-  } else if (showButton) {
-    button = (
+    ) : (
       <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
         <FormattedMessage
           id="xpack.spaces.management.shareToSpace.showMoreSpacesLink"
@@ -106,10 +104,10 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
   );
 };
 
-export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManagementColumn<
-  SpaceMap
-> {
+export class ShareToSpaceSavedObjectsManagementColumn
+  implements SavedObjectsManagementColumn<SpaceMap> {
   public id: string = 'share_saved_objects_to_space';
+  public data: Map<string, SpaceTarget> | undefined;
 
   public euiColumn = {
     field: 'namespaces',
@@ -124,9 +122,7 @@ export class ShareToSpaceSavedObjectsManagementColumn extends SavedObjectsManage
     ),
   };
 
-  constructor(private readonly spacesManager: SpacesManager) {
-    super();
-  }
+  constructor(private readonly spacesManager: SpacesManager) {}
 
   public loadData = () => {
     this.data = undefined;

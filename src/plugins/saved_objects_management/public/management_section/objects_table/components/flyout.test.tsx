@@ -178,7 +178,10 @@ describe('Flyout', () => {
       component.setState({ file: mockFile, isLegacyFile: false });
       await component.instance().import();
 
-      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, false, true);
+      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, {
+        createNewCopies: false,
+        overwrite: true,
+      });
       expect(component.state()).toMatchObject({
         conflictedIndexPatterns: undefined,
         conflictedSavedObjectsLinkedToSavedSearches: undefined,

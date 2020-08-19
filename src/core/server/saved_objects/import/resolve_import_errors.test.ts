@@ -66,7 +66,7 @@ describe('#importSavedObjectsFromStream', () => {
       importIdMap: new Map(),
     });
     getMockFn(regenerateIds).mockReturnValue(new Map());
-    getMockFn(validateReferences).mockResolvedValue({ errors: [] });
+    getMockFn(validateReferences).mockResolvedValue([]);
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
       filteredObjects: [],
@@ -303,9 +303,7 @@ describe('#importSavedObjectsFromStream', () => {
           collectedObjects: [], // doesn't matter
           importIdMap: new Map(), // doesn't matter
         });
-        getMockFn(validateReferences).mockResolvedValue({
-          errors: [errors[1]],
-        });
+        getMockFn(validateReferences).mockResolvedValue([errors[1]]);
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
@@ -371,9 +369,7 @@ describe('#importSavedObjectsFromStream', () => {
           collectedObjects: [], // doesn't matter
           importIdMap: new Map(), // doesn't matter
         });
-        getMockFn(validateReferences).mockResolvedValue({
-          errors: [errors[1]],
-        });
+        getMockFn(validateReferences).mockResolvedValue([errors[1]]);
         getMockFn(regenerateIds).mockReturnValue(
           new Map([
             ['foo', { id: 'randomId1' }],
@@ -503,7 +499,7 @@ describe('#importSavedObjectsFromStream', () => {
         collectedObjects: [],
         importIdMap: new Map(), // doesn't matter
       });
-      getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]] });
+      getMockFn(validateReferences).mockResolvedValue([errors[1]]);
       getMockFn(createSavedObjects).mockResolvedValueOnce({
         errors: [errors[2]],
         createdObjects: [],

@@ -28,82 +28,82 @@ export interface CopyMode {
   overwrite: boolean;
 }
 
+const createNewCopiesDisabled = {
+  id: 'createNewCopiesDisabled',
+  text: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledTitle',
+    { defaultMessage: 'Check for existing objects' }
+  ),
+  tooltip: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledText',
+    {
+      defaultMessage:
+        'Check if each object was previously copied or imported into the destination space.',
+    }
+  ),
+};
+const createNewCopiesEnabled = {
+  id: 'createNewCopiesEnabled',
+  text: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledTitle',
+    { defaultMessage: 'Create new objects with random IDs' }
+  ),
+  tooltip: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
+    { defaultMessage: 'All copied objects will be created with new random IDs.' }
+  ),
+};
+const overwriteEnabled = {
+  id: 'overwriteEnabled',
+  label: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.enabledLabel',
+    { defaultMessage: 'Automatically try to overwrite conflicts' }
+  ),
+};
+const overwriteDisabled = {
+  id: 'overwriteDisabled',
+  label: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.disabledLabel',
+    { defaultMessage: 'Request action when conflict occurs' }
+  ),
+};
+const includeRelated = {
+  id: 'includeRelated',
+  text: i18n.translate('xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.title', {
+    defaultMessage: 'Include related saved objects',
+  }),
+  tooltip: i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.text',
+    {
+      defaultMessage:
+        'This will copy any other objects this has references to -- for example, a dashboard may have references to multiple visualizations.',
+    }
+  ),
+};
+const copyOptionsTitle = i18n.translate(
+  'xpack.spaces.management.copyToSpace.copyModeControl.copyOptionsTitle',
+  { defaultMessage: 'Copy options' }
+);
+const relationshipOptionsTitle = i18n.translate(
+  'xpack.spaces.management.copyToSpace.copyModeControl.relationshipOptionsTitle',
+  { defaultMessage: 'Relationship options' }
+);
+
+const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiText>{text}</EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIconTip content={tooltip} position="left" type="iInCircle" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeControlProps) => {
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
-  const createNewCopiesDisabled = {
-    id: 'createNewCopiesDisabled',
-    text: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledTitle',
-      { defaultMessage: 'Check for existing objects' }
-    ),
-    tooltip: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledText',
-      {
-        defaultMessage:
-          'Check if each object was previously copied or imported into the destination space.',
-      }
-    ),
-  };
-  const createNewCopiesEnabled = {
-    id: 'createNewCopiesEnabled',
-    text: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledTitle',
-      { defaultMessage: 'Create new objects with random IDs' }
-    ),
-    tooltip: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
-      { defaultMessage: 'All copied objects will be created with new random IDs.' }
-    ),
-  };
-  const overwriteEnabled = {
-    id: 'overwriteEnabled',
-    label: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.enabledLabel',
-      { defaultMessage: 'Automatically try to overwrite conflicts' }
-    ),
-  };
-  const overwriteDisabled = {
-    id: 'overwriteDisabled',
-    label: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.disabledLabel',
-      { defaultMessage: 'Request action when conflict occurs' }
-    ),
-  };
-  const includeRelated = {
-    id: 'includeRelated',
-    text: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.title',
-      { defaultMessage: 'Include related saved objects' }
-    ),
-    tooltip: i18n.translate(
-      'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.text',
-      {
-        defaultMessage:
-          'This will copy any other objects this has references to -- for example, a dashboard may have references to multiple visualizations.',
-      }
-    ),
-  };
-  const copyOptionsTitle = i18n.translate(
-    'xpack.spaces.management.copyToSpace.copyModeControl.copyOptionsTitle',
-    { defaultMessage: 'Copy options' }
-  );
-  const relationshipOptionsTitle = i18n.translate(
-    'xpack.spaces.management.copyToSpace.copyModeControl.relationshipOptionsTitle',
-    { defaultMessage: 'Relationship options' }
-  );
-
-  const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText>{text}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip content={tooltip} position="left" type="iInCircle" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
   const onChange = (partial: Partial<CopyMode>) => {
     if (partial.createNewCopies !== undefined) {
       setCreateNewCopies(partial.createNewCopies);

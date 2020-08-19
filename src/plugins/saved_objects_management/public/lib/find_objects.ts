@@ -47,9 +47,7 @@ export async function findObject(
   type: string,
   id: string
 ): Promise<SavedObjectWithMetadata> {
-  const response = await http.get<Record<string, any>>(
+  return await http.get<SavedObjectWithMetadata>(
     `/api/kibana/management/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
   );
-
-  return response as SavedObjectWithMetadata;
 }
