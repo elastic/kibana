@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { VisualizeServerPlugin } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) =>
