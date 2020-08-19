@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiPanel, EuiLoadingContent } from '@elastic/eui';
+import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { FormattedMessage } from 'react-intl';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
@@ -58,7 +57,6 @@ import {
   AddExceptionModal,
   AddExceptionModalBaseProps,
 } from '../../../common/components/exceptions/add_exception_modal';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -124,9 +122,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const [lastUpdateRequest, setLastUpdateRequest] = useState<
-    Pick<UpdateAlertStatusActionProps, 'query' | 'alertIds' | 'selectedStatus'>
-  >(null);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -188,37 +183,29 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (updated: number, total: number, conflicts: number, status: Status) => {
+    (updated: number, conflicts: number, status: Status) => {
       let title: string;
       switch (status) {
         case 'closed':
-          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated, total);
+          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
           break;
         case 'open':
-          title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated, total);
+          title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
           break;
         case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated, total);
+          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
       }
 
       if (conflicts > 0) {
         addWarning({
-          title: i18n.UPDATE_ALERT_STATUS_FAILED,
-          text: toMountPoint(
-            <EuiButton fill onClick={async () => updateAlertStatusActionWrapper(lastUpdateRequest)}>
-              <FormattedMessage
-                id="xpack.securitySolution.detectionEngine.alerts.updateAlertStatusTryAgain"
-                defaultMessage="Try Again"
-              />
-            </EuiButton>
-          ),
-          toastLifeTimeMs: 9999999999,
+          title: i18n.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18n.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
         displaySuccessToast(title, dispatchToaster);
       }
     },
-    [addWarning, dispatchToaster, lastUpdateRequest, updateAlertStatusActionWrapper]
+    [addWarning, dispatchToaster]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
@@ -302,37 +289,25 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       { status, selectedStatus }: UpdateAlertsStatusProps
     ) => {
       const currentStatusFilter = buildAlertStatusFilter(status);
-      const updateRequest = {
+      await updateAlertStatusAction({
         query: showClearSelectionAction
           ? getGlobalQuery(currentStatusFilter)?.filterQuery
           : undefined,
         alertIds: Object.keys(selectedEventIds),
         selectedStatus,
-      };
-      await updateAlertStatusActionWrapper(updateRequest);
-      refetchQuery();
-    },
-    [getGlobalQuery, selectedEventIds, showClearSelectionAction, updateAlertStatusActionWrapper]
-  );
-
-  const updateAlertStatusActionWrapper: (
-    updateRequest: Pick<UpdateAlertStatusActionProps, 'query' | 'alertIds' | 'selectedStatus'>
-  ) => void = useCallback(
-    async (
-      updateRequest: Pick<UpdateAlertStatusActionProps, 'query' | 'alertIds' | 'selectedStatus'>
-    ) => {
-      await updateAlertStatusAction({
-        ...updateRequest,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         onAlertStatusUpdateSuccess,
         onAlertStatusUpdateFailure,
       });
-      setLastUpdateRequest(updateRequest);
+      refetchQuery();
     },
     [
+      getGlobalQuery,
+      selectedEventIds,
       setEventsDeletedCallback,
       setEventsLoadingCallback,
+      showClearSelectionAction,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
     ]

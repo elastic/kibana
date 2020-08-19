@@ -129,27 +129,27 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
-export const CLOSED_ALERT_SUCCESS_TOAST = (totalClosed: number, totalAlerts: number) =>
+export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
-    values: { totalClosed, totalAlerts },
+    values: { totalAlerts },
     defaultMessage:
-      'Successfully closed {totalClosed}/{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+      'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const OPENED_ALERT_SUCCESS_TOAST = (totalOpened: number, totalAlerts: number) =>
+export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage', {
-    values: { totalOpened, totalAlerts },
+    values: { totalAlerts },
     defaultMessage:
-      'Successfully opened {totalOpened}/{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+      'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalInProgress: number, totalAlerts: number) =>
+export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.alerts.inProgressAlertSuccessToastMessage',
     {
-      values: { totalInProgress, totalAlerts },
+      values: { totalAlerts },
       defaultMessage:
-        'Successfully marked {totalInProgress}/{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
+        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
     }
   );
 
@@ -174,9 +174,16 @@ export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const UPDATE_ALERT_STATUS_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailed',
-  {
-    defaultMessage: 'Failed to close 2 alerts',
-  }
-);
+export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailed', {
+    values: { conflicts },
+    defaultMessage:
+      'Failed to update { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedDetailed', {
+    values: { updated, conflicts },
+    defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
+         because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
+  });

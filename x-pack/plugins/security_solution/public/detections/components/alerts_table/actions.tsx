@@ -82,12 +82,7 @@ export const updateAlertStatusAction = async ({
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
-    onAlertStatusUpdateSuccess(
-      response.updated,
-      response.total,
-      response.version_conflicts,
-      selectedStatus
-    );
+    onAlertStatusUpdateSuccess(response.updated, response.version_conflicts, selectedStatus);
   } catch (error) {
     onAlertStatusUpdateFailure(selectedStatus, error);
   } finally {
