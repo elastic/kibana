@@ -60,7 +60,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentEnrollment.managedDescription"
-          defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy configuration updates and centrally manage the agent."
+          defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
         />
       </EuiText>
       <EuiSpacer size="l" />
