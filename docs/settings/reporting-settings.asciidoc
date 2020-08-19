@@ -129,7 +129,7 @@ control the capturing process.
   | Specify how long to allow the Reporting browser to wait for the "Loading..." screen
   to dismiss and find the initial data for the Kibana page.  If the time is
   exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
-  Defaults to `30000` (30 seconds).
+  Defaults to `60000` (1 minute).
 
 | `xpack.reporting.capture.timeouts.waitForElements`
   | Specify how long to allow the Reporting browser to wait for all visualization
