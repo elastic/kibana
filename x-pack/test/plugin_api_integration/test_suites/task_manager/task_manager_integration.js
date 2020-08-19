@@ -16,7 +16,11 @@ const {
 const {
   DEFAULT_MAX_WORKERS,
   DEFAULT_POLL_INTERVAL,
-} = require('../../../../plugins/task_manager/server/config.ts');
+} = require('../../../../plugins/task_manager/server/config');
+
+const {
+  CLAIM_AVAILABLE_TASKS_MULTIPLIER,
+} = require('../../../../plugins/task_manager/server/task_manager');
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -364,8 +368,11 @@ export default function ({ getService }) {
       // schedule multiple tasks that should force
       // Task Manager to use up its worker capacity
       // causing tasks to pile up
+      const queuedTasksCount =
+        DEFAULT_MAX_WORKERS * CLAIM_AVAILABLE_TASKS_MULTIPLIER + _.random(1, DEFAULT_MAX_WORKERS);
+
       await Promise.all(
-        _.times(DEFAULT_MAX_WORKERS + _.random(1, DEFAULT_MAX_WORKERS), () =>
+        _.times(queuedTasksCount, () =>
           scheduleTask({
             taskType: 'sampleTask',
             params: {

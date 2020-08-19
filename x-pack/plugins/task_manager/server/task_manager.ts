@@ -62,6 +62,10 @@ import { BufferedTaskStore } from './buffered_task_store';
 
 const VERSION_CONFLICT_STATUS = 409;
 
+// when claiming tasks, ask to claim this number * available workers, to have
+// some tasks ready to run when other tasks complete
+export const CLAIM_AVAILABLE_TASKS_MULTIPLIER = 2;
+
 export interface TaskManagerOpts {
   logger: Logger;
   config: TaskManagerConfig;
@@ -395,7 +399,7 @@ export async function claimAvailableTasks(
 
     try {
       const { docs, claimedTasks } = await claim({
-        size: availableWorkers * 2, // get more than we have capacity for
+        size: availableWorkers * CLAIM_AVAILABLE_TASKS_MULTIPLIER,
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
       });
