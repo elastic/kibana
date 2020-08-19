@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   htmlIdGenerator,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -204,7 +205,7 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity } = this.props;
+    const { showCharts, severity, stoppedPartitions } = this.props;
 
     const {
       annotations,
@@ -221,7 +222,7 @@ export class Explorer extends React.Component {
       selectedJobs,
       tableData,
     } = this.props.explorerState;
-    const { annotationsData, aggregations } = annotations;
+    const { annotationsData, aggregations, error: annotationsError } = annotations;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -297,14 +298,58 @@ export class Explorer extends React.Component {
 
           <div className={mainColumnClasses}>
             <EuiSpacer size="m" />
+
+            {stoppedPartitions && (
+              <EuiCallOut
+                size={'s'}
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.explorer.stoppedPartitionsExistCallout"
+                    defaultMessage="There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection have stopped for some partitions in {jobsWithStoppedPartitions, plural, one {job} other {jobs}} [{stoppedPartitions}] where the categorization status has changed to warn."
+                    values={{
+                      jobsWithStoppedPartitions: stoppedPartitions.length,
+                      stoppedPartitions: stoppedPartitions.join(', '),
+                    }}
+                  />
+                }
+              />
+            )}
+
             <AnomalyTimeline
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
+            {annotationsError !== undefined && (
+              <>
+                <EuiTitle
+                  className="panel-title"
+                  data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
+                >
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.annotationsErrorTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </h2>
+                </EuiTitle>
+                <EuiPanel>
+                  <EuiCallOut
+                    title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
+                      defaultMessage: 'An error occurred loading annotations:',
+                    })}
+                    color="danger"
+                    iconType="alert"
+                  >
+                    <p>{annotationsError}</p>
+                  </EuiCallOut>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+              </>
+            )}
             {annotationsData.length > 0 && (
               <>
-                <EuiPanel>
+                <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
