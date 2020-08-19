@@ -148,7 +148,7 @@ interface LoadEvaluateResult {
 }
 
 export const getAnalysisType = (analysis: AnalysisConfig): string => {
-  const keys = Object.keys(analysis);
+  const keys = Object.keys(analysis || {});
 
   if (keys.length === 1) {
     return keys[0];

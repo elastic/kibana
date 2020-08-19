@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analytics/pages/job_map/common'; // eslint-disable-line
+import { getAnalysisType } from '../../../public/application/data_frame_analytics/common/analytics'; // eslint-disable-line
 
 // interface NextLinkReturnType {
 //   isIndexPattern?: boolean;
@@ -25,6 +26,7 @@ import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analy
 //   id: string;
 //   label: string;
 //   type: string;
+//   analysisType?: string; (job types type)
 // }
 
 export class AnalyticsManager {
@@ -109,7 +111,12 @@ export class AnalyticsManager {
       const firstNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
       result.elements.push({
-        data: { id: firstNodeId, label: data.id, type: JOB_MAP_NODE_TYPES.ANALYTICS },
+        data: {
+          id: firstNodeId,
+          label: data.id,
+          type: JOB_MAP_NODE_TYPES.ANALYTICS,
+          analysisType: getAnalysisType(data?.analysis),
+        },
       });
       result.details[firstNodeId] = data;
       // Add a safeguard against infinite loops.
@@ -204,7 +211,12 @@ export class AnalyticsManager {
           ) {
             const nodeId = `${jobs[i].id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
             result.elements.push({
-              data: { id: nodeId, label: jobs[i].id, type: JOB_MAP_NODE_TYPES.ANALYTICS },
+              data: {
+                id: nodeId,
+                label: jobs[i].id,
+                type: JOB_MAP_NODE_TYPES.ANALYTICS,
+                analysisType: getAnalysisType(jobs[i]?.analysis),
+              },
             });
             result.details[nodeId] = jobs[i];
             const source = `${comparator}-${JOB_MAP_NODE_TYPES.INDEX_PATTERN}`;
@@ -221,7 +233,7 @@ export class AnalyticsManager {
 
       return result;
     } catch (error) {
-      result.error = error.message || 'Something went wrong';
+      result.error = error.message || 'An error occurred fetching map';
       return result;
     }
   }
@@ -267,7 +279,12 @@ export class AnalyticsManager {
           // Create node for associated job
           const nodeId = `${jobs[i].id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
           result.elements.push({
-            data: { id: nodeId, label: jobs[i].id, type: JOB_MAP_NODE_TYPES.ANALYTICS },
+            data: {
+              id: nodeId,
+              label: jobs[i].id,
+              type: JOB_MAP_NODE_TYPES.ANALYTICS,
+              analysisType: getAnalysisType(jobs[i]?.analysis),
+            },
           });
           result.details[nodeId] = jobs[i];
 
@@ -281,7 +298,7 @@ export class AnalyticsManager {
         }
       }
     } catch (error) {
-      result.error = error.message || 'Something went wrong';
+      result.error = error.message || 'An error occurred fetching map';
       return result;
     }
 

@@ -64,7 +64,6 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
   const fetchEvalData = async () => {
     try {
       const jobConfig = details[nodeId];
-      const isTraining = false; // We only care about test data here
       const index = Array.isArray(jobConfig?.dest?.index)
         ? jobConfig?.dest?.index[0]
         : jobConfig?.dest?.index;
@@ -74,7 +73,7 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
       const jobType = getAnalysisType(jobConfig?.analysis) as ANALYSIS_CONFIG_TYPE;
 
       const results = await loadEvalData({
-        isTraining,
+        isTraining: false,
         index,
         dependentVariable,
         resultsField,
@@ -154,8 +153,11 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
 
   useEffect(() => {
     setEvalData([]);
-    // TODO: only fetch eval data if it's an analytics job
-    if (selectedNode !== undefined) {
+    if (
+      selectedNode !== undefined &&
+      selectedNode.data().type === 'analytics' &&
+      selectedNode.data().analysisType !== 'outlier_detection'
+    ) {
       fetchEvalData();
     }
   }, [selectedNode]);
