@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon } from '../../../../../kibana_react/public';
+import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
+import './discover_field.scss';
 
 export interface DiscoverFieldProps {
   /**
@@ -49,14 +50,6 @@ export interface DiscoverFieldProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Callback to hide/show details, buckets of the field
-   */
-  onShowDetails: (show: boolean, field: IndexPatternField) => void;
-  /**
-   * Determines, whether details of the field are displayed
-   */
-  showDetails: boolean;
-  /**
    * Retrieve details data for the field
    */
   getDetails: (field: IndexPatternField) => FieldDetails;
@@ -76,21 +69,13 @@ export function DiscoverField({
   onAddField,
   onRemoveField,
   onAddFilter,
-  onShowDetails,
-  showDetails,
   getDetails,
   selected,
   useShortDots,
 }: DiscoverFieldProps) {
-  const addLabel = i18n.translate('discover.fieldChooser.discoverField.addButtonLabel', {
-    defaultMessage: 'Add',
-  });
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
     values: { field: field.name },
-  });
-  const removeLabel = i18n.translate('discover.fieldChooser.discoverField.removeButtonLabel', {
-    defaultMessage: 'Remove',
   });
   const removeLabelAria = i18n.translate(
     'discover.fieldChooser.discoverField.removeButtonAriaLabel',
@@ -100,6 +85,8 @@ export function DiscoverField({
     }
   );
 
+  const [infoIsOpen, setOpen] = useState(false);
+
   const toggleDisplay = (f: IndexPatternField) => {
     if (selected) {
       onRemoveField(f.name);
@@ -108,6 +95,10 @@ export function DiscoverField({
     }
   };
 
+  function togglePopover() {
+    setOpen(!infoIsOpen);
+  }
+
   function wrapOnDot(str?: string) {
     // u200B is a non-width white-space character, which allows
     // the browser to efficiently word-wrap right after the dot
@@ -115,64 +106,96 @@ export function DiscoverField({
     return str ? str.replace(/\./g, '.\u200B') : '';
   }
 
-  return (
-    <>
-      <div
-        className={`dscSidebarField dscSidebarItem ${showDetails ? 'dscSidebarItem--active' : ''}`}
-        tabIndex={0}
-        onClick={() => onShowDetails(!showDetails, field)}
-        onKeyPress={() => onShowDetails(!showDetails, field)}
-        data-test-subj={`field-${field.name}-showDetails`}
+  const dscFieldIcon = (
+    <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
+  );
+
+  const fieldName = (
+    <span
+      data-test-subj={`field-${field.name}`}
+      title={field.name}
+      className="dscSidebarField__name"
+    >
+      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+    </span>
+  );
+
+  let actionButton;
+  if (field.name !== '_source' && !selected) {
+    actionButton = (
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+          defaultMessage: 'Add field as column',
+        })}
       >
-        <span className="dscSidebarField__fieldIcon">
-          <FieldIcon
-            type={field.type}
-            label={getFieldTypeName(field.type)}
-            scripted={field.scripted}
-          />
-        </span>
-        <span
-          data-test-subj={`field-${field.name}`}
-          title={field.name}
-          className="dscSidebarField__name"
-        >
-          {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
-        </span>
-        <span>
-          {field.name !== '_source' && !selected && (
-            <EuiButton
-              fill
-              size="s"
-              className="dscSidebarItem__action"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                toggleDisplay(field);
-              }}
-              data-test-subj={`fieldToggle-${field.name}`}
-              arial-label={addLabelAria}
-            >
-              {addLabel}
-            </EuiButton>
-          )}
-          {field.name !== '_source' && selected && (
-            <EuiButton
-              color="danger"
-              className="dscSidebarItem__action"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                toggleDisplay(field);
-              }}
-              data-test-subj={`fieldToggle-${field.name}`}
-              arial-label={removeLabelAria}
-            >
-              {removeLabel}
-            </EuiButton>
-          )}
-        </span>
-      </div>
-      {showDetails && (
+        <EuiButtonIcon
+          iconType="plusInCircleFilled"
+          className="dscSidebarItem__action"
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field);
+          }}
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={addLabelAria}
+        />
+      </EuiToolTip>
+    );
+  } else if (field.name !== '_source' && selected) {
+    actionButton = (
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+          defaultMessage: 'Remove field from table',
+        })}
+      >
+        <EuiButtonIcon
+          color="danger"
+          iconType="cross"
+          className="dscSidebarItem__action"
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field);
+          }}
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={removeLabelAria}
+        />
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiPopover
+      ownFocus
+      display="block"
+      button={
+        <FieldButton
+          size="s"
+          className="dscSidebarItem"
+          isActive={infoIsOpen}
+          onClick={() => {
+            togglePopover();
+          }}
+          buttonProps={{ 'data-test-subj': `field-${field.name}-showDetails` }}
+          fieldIcon={dscFieldIcon}
+          fieldAction={actionButton}
+          fieldName={fieldName}
+        />
+      }
+      isOpen={infoIsOpen}
+      closePopover={() => setOpen(false)}
+      anchorPosition="rightUp"
+      panelClassName="dscSidebarItem__fieldPopoverPanel"
+    >
+      <EuiPopoverTitle>
+        {' '}
+        {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+          defaultMessage: 'Top 5 values',
+        })}
+      </EuiPopoverTitle>
+      {infoIsOpen && (
         <DiscoverFieldDetails
           indexPattern={indexPattern}
           field={field}
@@ -180,6 +203,6 @@ export function DiscoverField({
           onAddFilter={onAddFilter}
         />
       )}
-    </>
+    </EuiPopover>
   );
 }
