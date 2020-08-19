@@ -168,7 +168,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               'xpack.ingestManager.settings.integrationUpgradeEnabledFieldLabel',
               {
                 defaultMessage:
-                  'Automatically update integrations to the latest version to get the latest assets. You might need to update agent configurations to use new features.',
+                  'Automatically update integrations to the latest version to get the latest assets. You might need to update agent policies to use new features.',
               }
             ),
           },
@@ -211,7 +211,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.settings.globalOutputDescription"
-          defaultMessage="Specify where to send data. These settings are applied to all Elastic Agent configurations."
+          defaultMessage="Specify where to send data. These settings are applied to all Elastic Agent policies."
         />
       </EuiText>
       <EuiSpacer size="m" />
