@@ -34,9 +34,6 @@ export const setSignalsStatusRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
 
-      return response.ok({ body: { updated: 1, total: 2, version_conflicts: 1 } });
-
-      /*
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
@@ -83,7 +80,6 @@ export const setSignalsStatusRoute = (router: IRouter) => {
           statusCode: error.statusCode,
         });
       }
-      */
     }
   );
 };
