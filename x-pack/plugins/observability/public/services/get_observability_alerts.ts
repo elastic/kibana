@@ -11,15 +11,12 @@ const allowedConsumers = ['apm', 'uptime', 'logs', 'metrics', 'alerts'];
 
 export async function getObservabilityAlerts({ core }: { core: AppMountContext['core'] }) {
   try {
-    const { data = [] }: { data: Alert[] } = await core.http.get(
-      core.http.basePath.prepend('/api/alerts/_find'),
-      {
-        query: {
-          page: 1,
-          per_page: 20,
-        },
-      }
-    );
+    const { data = [] }: { data: Alert[] } = await core.http.get('/api/alerts/_find', {
+      query: {
+        page: 1,
+        per_page: 20,
+      },
+    });
 
     return data.filter(({ consumer }) => allowedConsumers.includes(consumer));
   } catch (e) {

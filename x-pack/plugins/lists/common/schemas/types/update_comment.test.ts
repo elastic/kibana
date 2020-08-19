@@ -111,7 +111,6 @@ describe('CommentsUpdate', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -142,7 +141,6 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
         'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});

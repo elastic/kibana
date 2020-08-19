@@ -29,12 +29,7 @@ import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
-import {
-  IIndexPatternFieldList,
-  IndexPatternField,
-  IndexPattern,
-  UI_SETTINGS,
-} from '../../../../../data/public';
+import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
@@ -97,30 +92,16 @@ export function DiscoverSidebar({
   setIndexPattern,
   state,
 }: DiscoverSidebarProps) {
-  const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
-  const [fields, setFields] = useState<IIndexPatternFieldList | null>(null);
+  const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
 
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, services);
+    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
 
-  const onShowDetails = useCallback(
-    (show: boolean, field: IndexPatternField) => {
-      if (!show) {
-        setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
-      } else {
-        setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-        if (services.capabilities.discover.save) {
-          selectedIndexPattern.popularizeField(field.name, 1);
-        }
-      }
-    },
-    [openFieldMap, selectedIndexPattern, services.capabilities.discover.save]
-  );
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
       const newState = setFieldFilterProp(fieldFilterState, field, value);
@@ -218,9 +199,7 @@ export function DiscoverSidebar({
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
                         selected={true}
                         useShortDots={useShortDots}
                       />
@@ -295,9 +274,7 @@ export function DiscoverSidebar({
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
                         getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
                         useShortDots={useShortDots}
                       />
                     </li>
@@ -323,9 +300,7 @@ export function DiscoverSidebar({
                     onAddField={onAddField}
                     onRemoveField={onRemoveField}
                     onAddFilter={onAddFilter}
-                    onShowDetails={onShowDetails}
                     getDetails={getDetailsByField}
-                    showDetails={openFieldMap.get(field.name) || false}
                     useShortDots={useShortDots}
                   />
                 </li>
