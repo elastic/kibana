@@ -11,16 +11,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { KibanaContext, IKibanaContext } from '../../../index';
+import { CREATE_ENGINES_PATH } from '../../routes';
 
 import { EngineOverviewHeader } from '../engine_overview_header';
 
 import './empty_states.scss';
 
 export const EmptyState: React.FC = () => {
-  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
+  const {
+    externalUrl: { getAppSearchUrl },
+    http,
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {
-    href: `${enterpriseSearchUrl}/as/engines/new`,
+    href: getAppSearchUrl(CREATE_ENGINES_PATH),
     target: '_blank',
     onClick: () =>
       sendTelemetry({

@@ -6,6 +6,7 @@
 
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
+import { mockLogger } from '../test_utils';
 
 interface TaskInstance extends Entity {
   attempts: number;
@@ -224,6 +225,39 @@ describe('Bulk Operation Buffer', () => {
           `),
       ]).then(() => {
         expect(bulkUpdate).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    test('logs unknown bulk operation results', async (done) => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+        ([task1, task2, task3]) => {
+          return Promise.resolve([
+            incrementAttempts(task1),
+            errorAttempts(createTask()),
+            incrementAttempts(createTask()),
+          ]);
+        }
+      );
+
+      const logger = mockLogger();
+
+      const bufferedUpdate = createBuffer(bulkUpdate, { logger });
+
+      const task1 = createTask();
+      const task2 = createTask();
+      const task3 = createTask();
+
+      return Promise.all([
+        expect(bufferedUpdate(task1)).resolves.toMatchObject(incrementAttempts(task1)),
+        expect(bufferedUpdate(task2)).rejects.toMatchObject(
+          asErr(new Error(`Unhandled buffered operation for entity: ${task2.id}`))
+        ),
+        expect(bufferedUpdate(task3)).rejects.toMatchObject(
+          asErr(new Error(`Unhandled buffered operation for entity: ${task3.id}`))
+        ),
+      ]).then(() => {
+        expect(logger.warn).toHaveBeenCalledTimes(2);
         done();
       });
     });
