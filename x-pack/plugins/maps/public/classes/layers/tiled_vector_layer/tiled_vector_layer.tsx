@@ -63,7 +63,7 @@ export class TiledVectorLayer extends VectorLayer {
     );
     const prevDataRequest = this.getSourceDataRequest();
 
-    const templateWithMeta = await this._source.getUrlTemplateWithMeta(dataFilters);
+    const templateWithMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
       if (data) {

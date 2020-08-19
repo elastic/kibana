@@ -23,7 +23,6 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           y: schema.number(),
           z: schema.number(),
           geometryFieldName: schema.string(),
-          fields: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
         }),

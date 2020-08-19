@@ -585,20 +585,30 @@ export class ESSearchSource extends AbstractESSource {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
-    const initialSearchContext = {};
+    const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
+      indexPattern,
+      searchFilters.fieldNames
+    );
+
+    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
 
     const searchSource = await this.makeSearchSource(
       searchFilters,
       indexSettings.maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('fields', searchFilters.fieldNames);
+    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    if (sourceOnlyFields.length === 0) {
+      searchSource.setField('source', false); // do not need anything from _source
+    } else {
+      searchSource.setField('source', sourceOnlyFields);
+    }
+    if (this._hasSort()) {
+      searchSource.setField('sort', this._buildEsSort());
+    }
 
     const indexPatternTitle = indexPattern.title;
     const geometryFieldName = this._descriptor.geoField;
-    const fields = ['_id']; // todo needs to include correct fields
-    const fieldsParam = fields.join(',');
-
     const dsl = await searchSource.getSearchRequestBody();
 
     const risonDsl = rison.encode(dsl);
@@ -607,7 +617,7 @@ export class ESSearchSource extends AbstractESSource {
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
     );
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldName}&index=${indexPatternTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldName}&index=${indexPatternTitle}&requestBody=${risonDsl}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
