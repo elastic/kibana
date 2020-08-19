@@ -152,9 +152,12 @@ export const TestPipelineContextProvider = ({ children }: { children: React.Reac
 
       if (error) {
         dispatch({
-          type: 'updateIsExecutingPipeline',
+          type: 'updateOutputPerProcessor',
           payload: {
             isExecutingPipeline: false,
+            // reset the output if there is an error
+            // this will result to the status changing to "inactive"
+            testOutputPerProcessor: undefined,
           },
         });
 
