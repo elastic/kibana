@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { parseNext } from '../../../common/parse_next';
-import { canRedirectRequest, OIDCLogin, SAMLLogin } from '../../authentication';
-import { wrapIntoCustomErrorResponse } from '../../errors';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
 import {
+  canRedirectRequest,
+  OIDCLogin,
+  SAMLLogin,
+  BasicAuthenticationProvider,
   OIDCAuthenticationProvider,
   SAMLAuthenticationProvider,
-} from '../../authentication/providers';
+  TokenAuthenticationProvider,
+} from '../../authentication';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
 /**
@@ -83,19 +87,29 @@ export function defineCommonRoutes({
     );
   }
 
-  function getLoginAttemptForProviderType(providerType: string, redirectURL: string) {
-    const [redirectURLPath] = redirectURL.split('#');
-    const redirectURLFragment =
-      redirectURL.length > redirectURLPath.length
-        ? redirectURL.substring(redirectURLPath.length)
-        : '';
+  const basicParamsSchema = schema.object({
+    username: schema.string({ minLength: 1 }),
+    password: schema.string({ minLength: 1 }),
+  });
 
+  function getLoginAttemptForProviderType<T extends string>(
+    providerType: T,
+    redirectURL: string,
+    params: T extends 'basic' | 'token' ? TypeOf<typeof basicParamsSchema> : {}
+  ) {
     if (providerType === SAMLAuthenticationProvider.type) {
-      return { type: SAMLLogin.LoginInitiatedByUser, redirectURLPath, redirectURLFragment };
+      return { type: SAMLLogin.LoginInitiatedByUser, redirectURL };
     }
 
     if (providerType === OIDCAuthenticationProvider.type) {
-      return { type: OIDCLogin.LoginInitiatedByUser, redirectURLPath };
+      return { type: OIDCLogin.LoginInitiatedByUser, redirectURL };
+    }
+
+    if (
+      providerType === BasicAuthenticationProvider.type ||
+      providerType === TokenAuthenticationProvider.type
+    ) {
+      return params;
     }
 
     return undefined;
@@ -103,25 +117,35 @@ export function defineCommonRoutes({
 
   router.post(
     {
-      path: '/internal/security/login_with',
+      path: '/internal/security/login',
       validate: {
         body: schema.object({
           providerType: schema.string(),
           providerName: schema.string(),
           currentURL: schema.string(),
+          params: schema.conditional(
+            schema.siblingRef('providerType'),
+            schema.oneOf([
+              schema.literal(BasicAuthenticationProvider.type),
+              schema.literal(TokenAuthenticationProvider.type),
+            ]),
+            basicParamsSchema,
+            schema.never()
+          ),
         }),
       },
       options: { authRequired: false },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const { providerType, providerName, currentURL } = request.body;
+      const { providerType, providerName, currentURL, params } = request.body;
       logger.info(`Logging in with provider "${providerName}" (${providerType})`);
 
       const redirectURL = parseNext(currentURL, basePath.serverBasePath);
       try {
         const authenticationResult = await authc.login(request, {
           provider: { name: providerName },
-          value: getLoginAttemptForProviderType(providerType, redirectURL),
+          redirectURL,
+          value: getLoginAttemptForProviderType(providerType, redirectURL, params),
         });
 
         if (authenticationResult.redirected() || authenticationResult.succeeded()) {
