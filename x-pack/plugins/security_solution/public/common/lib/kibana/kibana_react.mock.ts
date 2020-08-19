@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 import {
   DEFAULT_APP_TIME_RANGE,
@@ -24,10 +24,10 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_BYTES_FORMAT,
   DEFAULT_INDEX_PATTERN,
-} from '../../../common/constants';
-import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
-import { StartServices } from '../../types';
-import { createSecuritySolutionStorageMock } from './mock_local_storage';
+} from '../../../../common/constants';
+import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from '../../mock/kibana_core';
+import { StartServices } from '../../../types';
+import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },

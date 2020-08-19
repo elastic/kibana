@@ -19,7 +19,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react';
+import {
+  createKibanaContextProviderMock,
+  createStartServicesMock,
+} from '../lib/kibana/kibana_react.mock';
 import { FieldHook, useForm } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
