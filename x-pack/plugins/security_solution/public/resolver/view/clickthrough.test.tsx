@@ -72,6 +72,32 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       });
     });
 
+    it('should render 3 elements with "treeitem" roles, each owned by an element with a "tree" role', async () => {
+      await expect(
+        simulator.map(() => ({
+          nodesOwnedByTrees: simulator.testSubject('resolver:node').filterWhere((domNode) => {
+            /**
+             * This test verifies corectness w.r.t. the tree/treeitem roles
+             * From W3C: `Authors MUST ensure elements with role treeitem are contained in, or owned by, an element with the role group or tree.`
+             *
+             * https://www.w3.org/TR/wai-aria-1.1/#tree
+             * https://www.w3.org/TR/wai-aria-1.1/#treeitem
+             *
+             * w3c defines two ways for an element to be an "owned element"
+             *  1. Any DOM descendant
+             *  2. Any element specified as a child via aria-owns
+             *  (see: https://www.w3.org/TR/wai-aria-1.1/#dfn-owned-element)
+             *
+             * In the context of Resolver (as of this writing) nodes/treeitems are children of the tree,
+             * but they could be moved out of the tree, provided that the tree is given an `aria-owns`
+             * attribute referring to them (method 2 above).
+             */
+            return domNode.closest('[role="tree"]').length === 1;
+          }).length,
+        }))
+      ).toYieldEqualTo({ nodesOwnedByTrees: 3 });
+    });
+
     it(`should show links to the 3 nodes (with icons) in the node list.`, async () => {
       await expect(
         simulator.map(() => simulator.testSubject('resolver:node-list:node-link:title').length)
@@ -195,3 +221,68 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     });
   });
 });
+
+/**
+ * Get the integer in a CSS px unit string
+ * @param px a string with `px` preceded by numbers
+ */
+function pxNum(px: string): number {
+  return parseInt(px.match(/\d+/)![0], 10);
+}
+
+/**
+ * Get computed boundaries for process node elements
+ */
+function computedNodeBoundaries(entityID: string): AABB {
+  const { left, top, width, height } = getComputedStyle(
+    simulator.processNodeElements({ entityID }).getDOMNode()
+  );
+  return {
+    minimum: [pxNum(left), pxNum(top)],
+    maximum: [pxNum(left) + pxNum(width), pxNum(top) + pxNum(height)],
+  };
+}
+
+/**
+ * Coordinates for where the edgelines "start"
+ */
+function computedEdgeStartingCoordinates(): Vector2[] {
+  return simulator.testSubject('resolver:graph:edgeline').map((edge) => {
+    const { left, top } = getComputedStyle(edge.getDOMNode());
+    return [pxNum(left), pxNum(top)];
+  });
+}
+
+/**
+ * Coordinates for where edgelines "end" (after application of transform)
+ */
+function computedEdgeTerminalCoordinates(): Vector2[] {
+  return simulator.testSubject('resolver:graph:edgeline').map((edge) => {
+    const { left, top, width, transform } = getComputedStyle(edge.getDOMNode());
+    /**
+     * Without the transform in the rotation, edgelines lay flat across the x-axis.
+     * Plotting the x/y of the line's terminal point here takes the rotation into account.
+     * This could cause tests to break if/when certain adjustments are made to the view that might
+     * regress the alignment of nodes and edges.
+     */
+    const edgeLineRotationInRadians = parseFloat(transform.match(/rotateZ\((-?\d+\.?\d+)/i)![1]);
+    const rotateDownTo = Math.sin(edgeLineRotationInRadians) * pxNum(width);
+    const rotateLeftTo = Math.cos(edgeLineRotationInRadians) * pxNum(width);
+    return [pxNum(left) + rotateLeftTo, pxNum(top) + rotateDownTo];
+  });
+}
+
+/**
+ *
+ * @param bounds Get a function that filters x/y of edges to those contained in a certain bounding box
+ */
+function coordinateBoundaryFilter(bounds: AABB) {
+  return (coords: Vector2) => {
+    return (
+      coords[0] >= bounds.minimum[0] &&
+      coords[0] <= bounds.maximum[0] &&
+      coords[1] >= bounds.minimum[1] &&
+      coords[1] <= bounds.maximum[1]
+    );
+  };
+}
