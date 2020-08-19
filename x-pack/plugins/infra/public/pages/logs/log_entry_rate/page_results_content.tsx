@@ -287,7 +287,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           setFlyoutVisibility={setFlyoutVisibility}
           loading={isFlyoutLoading}
           setFilter={linkToLogStream}
-          setTarget={() => {}}
         />
       ) : null}
     </>

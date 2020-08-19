@@ -29,38 +29,31 @@ import { LogEntriesItem, LogEntriesItemField } from '../../../../common/http_api
 interface Props {
   flyoutItem: LogEntriesItem | null;
   setFlyoutVisibility: (visible: boolean) => void;
-  setFilter: (filter: string) => void;
-  setTarget: (timeKey: TimeKey, flyoutItemId: string) => void;
-
+  setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
   loading: boolean;
 }
 
-export const LogEntryFlyout = ({
-  flyoutItem,
-  loading,
-  setFlyoutVisibility,
-  setFilter,
-  setTarget,
-}: Props) => {
+export const LogEntryFlyout = ({ flyoutItem, loading, setFlyoutVisibility, setFilter }: Props) => {
   const createFilterHandler = useCallback(
     (field: LogEntriesItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;
-      setFilter(filter);
+      let target;
 
       if (flyoutItem && flyoutItem.key) {
         const timestampMoment = moment(flyoutItem.key.time);
         if (timestampMoment.isValid()) {
-          setTarget(
-            {
-              time: timestampMoment.valueOf(),
-              tiebreaker: flyoutItem.key.tiebreaker,
-            },
-            flyoutItem.id
-          );
+          target = {
+            time: timestampMoment.valueOf(),
+            tiebreaker: flyoutItem.key.tiebreaker,
+          };
         }
       }
+
+      // `setFilter` can only be called if there is a `flyoutItem`. We can
+      // safely assume here it won't me `undefined`
+      setFilter(filter, flyoutItem!.id, target);
     },
-    [flyoutItem, setFilter, setTarget]
+    [flyoutItem, setFilter]
   );
 
   const closeFlyout = useCallback(() => setFlyoutVisibility(false), [setFlyoutVisibility]);
