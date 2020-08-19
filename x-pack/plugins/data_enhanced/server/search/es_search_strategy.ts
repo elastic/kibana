@@ -119,12 +119,11 @@ async function asyncSearch(
     querystring,
   });
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, response, is_partial, is_running } = esResponse.body;
+  const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
   return {
     id,
-    isPartial: is_partial,
-    isRunning: is_running,
+    isPartial,
+    isRunning,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
   };
