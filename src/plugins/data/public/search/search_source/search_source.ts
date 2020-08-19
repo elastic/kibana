@@ -439,7 +439,7 @@ export class SearchSource {
 
       // request the remaining fields from both stored_fields and _source
       const remainingFields = difference(fields, keys(body.script_fields));
-      body.stored_fields = remainingFields;
+      body.fields = remainingFields;
       setWith(body, '_source.includes', remainingFields, (nsValue) =>
         isObject(nsValue) ? {} : nsValue
       );

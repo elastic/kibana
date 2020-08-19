@@ -950,6 +950,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const { indexPattern, searchSource } = $scope;
     searchSource
       .setField('index', $scope.indexPattern)
+      .setField('fields', $scope.state.columns)
       .setField('size', $scope.opts.sampleSize)
       .setField(
         'sort',
