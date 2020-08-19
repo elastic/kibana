@@ -5,7 +5,7 @@
  */
 
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
-import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
+// import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ShareSavedObjectsToSpaceService } from '.';
 import { notificationServiceMock } from 'src/core/public/mocks';
