@@ -59,7 +59,10 @@ function takeUntilDurationOfInactivity<T>(source$: Observable<T>, inactivityTime
     return source$.pipe(
       takeUntil(
         inactivityMonitor$.pipe(
+          // on each new emited value, start a new timer, discarding the old one
           switchMap(() => timer(inactivityTimeout)),
+          // every time a timer expires (meaning no new value came in on time to discard it)
+          // throw an error, forcing the monitor instantiate a new observable
           switchMapTo(
             throwError(
               new Error(
