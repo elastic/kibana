@@ -167,7 +167,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               'xpack.ingestManager.settings.integrationUpgradeEnabledFieldLabel',
               {
                 defaultMessage:
-                  'Automatically update integrations to the latest version to receive the latest assets. Agent configurations may need to be updated in order to use new features.',
+                  'Automatically update integrations to the latest version to receive the latest assets. Agent policies may need to be updated in order to use new features.',
               }
             ),
           },
@@ -210,7 +210,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.settings.globalOutputDescription"
-          defaultMessage="The global output is applied to all agent configurations and specifies where data is sent."
+          defaultMessage="The global output is applied to all agent policies and specifies where data is sent."
         />
       </EuiText>
       <EuiSpacer size="m" />
