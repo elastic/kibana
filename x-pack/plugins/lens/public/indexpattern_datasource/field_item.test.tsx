@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
@@ -16,6 +17,10 @@ import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+
+function clickField(wrapper: ReactWrapper, field: string) {
+  wrapper.find(`[data-test-subj="lnsFieldListPanelField-${field}"] button`).simulate('click');
+}
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
@@ -101,7 +106,7 @@ describe('IndexPattern Field Item', () => {
     const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
 
     await act(async () => {
-      wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+      clickField(wrapper, 'bytes');
     });
 
     expect(core.http.post).toHaveBeenCalledWith(
@@ -125,7 +130,7 @@ describe('IndexPattern Field Item', () => {
 
     const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
 
-    wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+    clickField(wrapper, 'bytes');
 
     expect(core.http.post).toHaveBeenCalledWith(
       `/api/lens/index_stats/my-fake-index-pattern/field`,
@@ -174,7 +179,7 @@ describe('IndexPattern Field Item', () => {
 
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
 
-    wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+    clickField(wrapper, 'bytes');
     expect(core.http.post).toHaveBeenCalledTimes(1);
 
     act(() => {
@@ -200,7 +205,7 @@ describe('IndexPattern Field Item', () => {
       });
     });
 
-    wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+    clickField(wrapper, 'bytes');
 
     expect(core.http.post).toHaveBeenCalledTimes(2);
     expect(core.http.post).toHaveBeenLastCalledWith(

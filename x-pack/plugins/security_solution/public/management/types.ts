@@ -27,6 +27,7 @@ export type ManagementState = CombinedState<{
 export enum AdministrationSubTab {
   endpoints = 'endpoints',
   policies = 'policy',
+  trustedApps = 'trusted_apps',
 }
 
 /**
