@@ -17,28 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
-import { fieldCalculator } from './field_calculator';
-import { IndexPatternField } from '../../../../../../data/public';
+import { Trigger } from '.';
 
-export function getDetails(
-  field: IndexPatternField,
-  hits: Array<Record<string, unknown>>,
-  columns: string[]
-) {
-  const details = {
-    ...fieldCalculator.getFieldValueCounts({
-      hits,
-      field,
-      count: 5,
-      grouped: false,
-    }),
-    columns,
-  };
-  if (details.buckets) {
-    for (const bucket of details.buckets) {
-      bucket.display = field.format.convert(bucket.value);
-    }
-  }
-  return details;
-}
+export const VISUALIZE_GEO_FIELD_TRIGGER = 'VISUALIZE_GEO_FIELD_TRIGGER';
+export const visualizeGeoFieldTrigger: Trigger<'VISUALIZE_GEO_FIELD_TRIGGER'> = {
+  id: VISUALIZE_GEO_FIELD_TRIGGER,
+  title: 'Visualize Geo field',
+  description: 'Triggered when user wants to visualize a geo field.',
+};
