@@ -313,6 +313,7 @@ export class HttpServer {
   private setupRequestStateAssignment(config: HttpConfig) {
     this.server!.ext('onRequest', (request, responseToolkit) => {
       request.app = {
+        ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
       } as KibanaRequestState;
       return responseToolkit.continue;

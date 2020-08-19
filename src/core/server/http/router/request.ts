@@ -299,7 +299,11 @@ export class KibanaRequest<
 export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
-function isKibanaRequest(request: unknown): request is KibanaRequest {
+/**
+ * Checks if an incoming request is a {@link KibanaRequest}
+ * @internal
+ */
+export function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 
