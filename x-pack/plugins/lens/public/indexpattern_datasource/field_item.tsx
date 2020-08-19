@@ -190,7 +190,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
               defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
             })
-          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
               defaultMessage: 'No data for this field. Drag and drop to visualize.',
             })
       }
