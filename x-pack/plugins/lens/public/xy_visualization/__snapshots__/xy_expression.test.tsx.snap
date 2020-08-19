@@ -353,7 +353,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
-        "showValueLabel": undefined,
+        "showValueLabel": false,
         "valueFormatter": [Function],
       }
     }
@@ -401,7 +401,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
-        "showValueLabel": undefined,
+        "showValueLabel": false,
         "valueFormatter": [Function],
       }
     }
@@ -919,7 +919,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
-        "showValueLabel": undefined,
+        "showValueLabel": false,
         "valueFormatter": [Function],
       }
     }
@@ -971,7 +971,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
         "hideClippedValue": true,
         "isAlternatingValueLabel": false,
         "isValueContainedInElement": true,
-        "showValueLabel": undefined,
+        "showValueLabel": false,
         "valueFormatter": [Function],
       }
     }
