@@ -46,8 +46,6 @@ export class EmbeddableStateTransfer {
 
   /**
    * Fetches an internationalized app title when given an appId.
-   * history's location state.
-   *
    * @param appId - The id of the app to fetch the title for
    */
   public getAppNameFromId = (appId: string): string | undefined => this.appList?.get(appId)?.title;
