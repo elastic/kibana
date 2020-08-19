@@ -18,7 +18,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import { isEqual } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal';
+
 import * as i18n from './translations';
 import { Form, FormDataProvider, useForm } from '../../../shared_imports';
 import { schema } from './schema';
@@ -134,7 +135,7 @@ export const TagList = React.memo(
                         }
                         return acc;
                       }, current);
-                      if (!isEqual(current, newOptions)) {
+                      if (!deepEqual(current, newOptions)) {
                         setOptions(
                           newOptions.map((label: string) => ({
                             label,

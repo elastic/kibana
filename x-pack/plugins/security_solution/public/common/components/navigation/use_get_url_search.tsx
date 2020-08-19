@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -14,7 +14,7 @@ import { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab: SearchNavTab) => {
   const mapState = makeMapStateToProps();
-  const { urlState } = useSelector(mapState, isEqual);
+  const { urlState } = useSelector(mapState, deepEqual);
   const urlSearch = useMemo(() => getSearch(tab, urlState), [tab, urlState]);
   return urlSearch;
 };

@@ -827,6 +827,13 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: [
+              {
+                name: 'lodash/fp',
+                importNames: ['isEqual'],
+                message: 'Please use more efficient "fast-deep-equal" instead',
+              },
+            ],
           },
         ],
       },

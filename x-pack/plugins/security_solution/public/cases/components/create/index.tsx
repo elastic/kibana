@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
 
-import { isEqual } from 'lodash/fp';
 import { CasePostRequest } from '../../../../../case/common/api';
 import {
   Field,
@@ -168,7 +168,7 @@ export const Create = React.memo(() => {
               }
               return acc;
             }, current);
-            if (!isEqual(current, newOptions)) {
+            if (!deepEqual(current, newOptions)) {
               setOptions(
                 newOptions.map((label: string) => ({
                   label,

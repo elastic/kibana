@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal';
 import * as i18n from '../../translations';
 
 import { FilterOptions } from '../../../../../containers/detection_engine/rules';
@@ -67,7 +67,7 @@ const RulesTableFiltersComponent = ({
 
   const handleSelectedTags = useCallback(
     (newTags) => {
-      if (!isEqual(newTags, selectedTags)) {
+      if (!deepEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
       }
     },

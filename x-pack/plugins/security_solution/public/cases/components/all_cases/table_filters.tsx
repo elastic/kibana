@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { isEqual } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal';
 import {
   EuiFieldSearch,
   EuiFilterButton,
@@ -78,7 +78,7 @@ const CasesTableFiltersComponent = ({
 
   const handleSelectedReporters = useCallback(
     (newReporters) => {
-      if (!isEqual(newReporters, selectedReporters)) {
+      if (!deepEqual(newReporters, selectedReporters)) {
         setSelectedReporters(newReporters);
         const reportersObj = respReporters.filter(
           (r) => newReporters.includes(r.username) || newReporters.includes(r.full_name)
@@ -92,7 +92,7 @@ const CasesTableFiltersComponent = ({
 
   const handleSelectedTags = useCallback(
     (newTags) => {
-      if (!isEqual(newTags, selectedTags)) {
+      if (!deepEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
         onFilterChanged({ tags: newTags });
       }
@@ -103,7 +103,7 @@ const CasesTableFiltersComponent = ({
   const handleOnSearch = useCallback(
     (newSearch) => {
       const trimSearch = newSearch.trim();
-      if (!isEqual(trimSearch, search)) {
+      if (!deepEqual(trimSearch, search)) {
         setSearch(trimSearch);
         onFilterChanged({ search: trimSearch });
       }
