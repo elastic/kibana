@@ -6,12 +6,17 @@ $kbnTypeaheadTypes: (
   conjunction: $euiColorVis3,
 );
 
+.kbnTypeahead.kbnTypeahead--small {
+  max-height: 20vh;
+}
+
 .kbnTypeahead {
-  position: relative;
-  opacity: 0;
+  position: absolute;
+  max-height: 60vh;
 
   .kbnTypeahead__popover {
     max-height: inherit;
+    @include euiScrollBar;
     @include euiBottomShadow($adjustBorders: true);
     border: 1px solid;
     border-color: $euiBorderColor;
@@ -23,10 +28,6 @@ $kbnTypeaheadTypes: (
     border-bottom-left-radius: $euiBorderRadius;
     border-bottom-right-radius: $euiBorderRadius;
     overflow-y: auto;
-
-    .kbnTypeahead__items {
-      @include euiScrollBar;
-    }
 
     .kbnTypeahead__item {
       height: $euiSizeXL;

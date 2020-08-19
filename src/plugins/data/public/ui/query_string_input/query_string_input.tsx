@@ -60,7 +60,7 @@ interface Props {
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
-  dropdownHeight?: string;
+  className?: string;
 }
 
 interface State {
@@ -645,7 +645,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onMouseEnter={this.onMouseEnterSuggestion}
                 loadMore={this.increaseLimit}
                 queryBarInputDivRef={this.queryBarInputDivRefInstance}
-                dropdownHeight={this.props.dropdownHeight}
+                className={this.props.className}
               />
             </EuiPortal>
           </div>

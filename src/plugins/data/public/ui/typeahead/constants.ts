@@ -18,5 +18,4 @@
  */
 
 export const suggestionsListOffsetBottom = 20;
-export const suggestionsListDefaultMaxHeight = '60vh';
 export const suggestionsListRequiredWidth = 600;

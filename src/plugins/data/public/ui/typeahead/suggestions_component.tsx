@@ -19,13 +19,10 @@
 
 import { isEmpty } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
+import classNames from 'classnames';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import {
-  suggestionsListDefaultMaxHeight,
-  suggestionsListOffsetBottom,
-  suggestionsListRequiredWidth,
-} from './constants';
+import { suggestionsListOffsetBottom, suggestionsListRequiredWidth } from './constants';
 
 interface Props {
   index: number | null;
@@ -35,7 +32,7 @@ interface Props {
   suggestions: QuerySuggestion[];
   loadMore: () => void;
   queryBarInputDivRef: RefObject<HTMLDivElement>;
-  dropdownHeight?: string;
+  className?: string;
 }
 
 export class SuggestionsComponent extends Component<Props> {
@@ -61,15 +58,11 @@ export class SuggestionsComponent extends Component<Props> {
             suggestionsListOffsetBottom) >
         0;
 
-      kbnTypeaheadDiv.style.position = 'absolute';
       kbnTypeaheadDiv.style.left = `${queryBarRect.left}px`;
       kbnTypeaheadDiv.style.width = `${queryBarRect.width}px`;
       kbnTypeaheadDiv.style.top = isSuggestionsListFittable
-        ? `${window.scrollY + queryBarRect.top + queryBarRect.height}px`
+        ? `${window.scrollY + queryBarRect.bottom}px`
         : `${window.scrollY + queryBarRect.top - suggestionsListHeight}px`;
-      kbnTypeaheadDiv.style.maxHeight =
-        this.props.dropdownHeight || suggestionsListDefaultMaxHeight;
-      kbnTypeaheadDiv.style.opacity = '1';
     }
   };
 
@@ -100,18 +93,18 @@ export class SuggestionsComponent extends Component<Props> {
     });
 
     return (
-      <div className="reactSuggestionTypeahead">
-        <div className="kbnTypeahead" ref={this.kbnTypeaheadDivRefInstance}>
-          <div className="kbnTypeahead__popover">
-            <div
-              id="kbnTypeahead__items"
-              className="kbnTypeahead__items"
-              role="listbox"
-              ref={(node) => (this.parentNode = node)}
-              onScroll={this.handleScroll}
-            >
-              {suggestions}
-            </div>
+      <div
+        className={classNames('kbnTypeahead', this.props.className)}
+        ref={this.kbnTypeaheadDivRefInstance}
+      >
+        <div className="kbnTypeahead__popover">
+          <div
+            id="kbnTypeahead__items"
+            role="listbox"
+            ref={(node) => (this.parentNode = node)}
+            onScroll={this.handleScroll}
+          >
+            {suggestions}
           </div>
         </div>
       </div>
@@ -163,7 +156,7 @@ export class SuggestionsComponent extends Component<Props> {
     }
   };
 
-  closeListOnScroll = (event: Event) => {
+  updateListPositionOnScroll = (event: Event) => {
     // Close the list when a scroll event happens, but not if the scroll happened in the suggestions list.
     // This mirrors Firefox's approach of auto-closing `select` elements onscroll.
     if (
@@ -180,7 +173,7 @@ export class SuggestionsComponent extends Component<Props> {
     window.addEventListener('resize', this.updatePosition);
 
     setTimeout(() => {
-      window.addEventListener('scroll', this.closeListOnScroll, {
+      window.addEventListener('scroll', this.updateListPositionOnScroll, {
         passive: true, // for better performance as we won't call preventDefault
         capture: true, // scroll events don't bubble, they must be captured instead
       });
@@ -189,7 +182,7 @@ export class SuggestionsComponent extends Component<Props> {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.updatePosition);
-    window.removeEventListener('scroll', this.closeListOnScroll, {
+    window.removeEventListener('scroll', this.updateListPositionOnScroll, {
       capture: true,
     });
   }

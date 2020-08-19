@@ -110,7 +110,7 @@ function FilterRow({
           dataTestSubj={dataTestSubj}
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
-          dropdownHeight="20vh"
+          className="kbnTypeahead--small"
         />
       </EuiFormRow>
       {showCustomLabel ? (
