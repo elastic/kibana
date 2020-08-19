@@ -9,7 +9,7 @@ import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
+import { AgentPolicy } from '../../../../types';
 import {
   useGetOneEnrollmentAPIKey,
   useCore,
@@ -18,13 +18,13 @@ import {
   useFleetStatus,
 } from '../../../../hooks';
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
-import { DownloadStep, AgentConfigSelectionStep } from './steps';
+import { DownloadStep, AgentPolicySelectionStep } from './steps';
 
 interface Props {
-  agentConfigs?: AgentConfig[];
+  agentPolicies?: AgentPolicy[];
 }
 
-export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfigs }) => {
+export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
   const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
@@ -40,7 +40,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
 
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
-    AgentConfigSelectionStep({ agentConfigs, setSelectedAPIKeyId }),
+    AgentPolicySelectionStep({ agentPolicies, setSelectedAPIKeyId }),
     {
       title: i18n.translate('xpack.ingestManager.agentEnrollment.stepEnrollAndRunAgentTitle', {
         defaultMessage: 'Enroll and start the Elastic Agent',
