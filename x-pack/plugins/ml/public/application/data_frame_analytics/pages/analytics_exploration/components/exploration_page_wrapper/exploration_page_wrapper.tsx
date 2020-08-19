@@ -27,15 +27,9 @@ interface Props {
   jobId: string;
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
-  FeatureImportanceSummaryPanel?: FC<EvaluatePanelProps>;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({
-  jobId,
-  title,
-  EvaluatePanel,
-  FeatureImportanceSummaryPanel,
-}) => {
+export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel }) => {
   const {
     indexPattern,
     isInitialized,
@@ -64,16 +58,6 @@ export const ExplorationPageWrapper: FC<Props> = ({
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
       <EuiSpacer />
-      {FeatureImportanceSummaryPanel !== undefined && (
-        <>
-          <FeatureImportanceSummaryPanel
-            jobConfig={jobConfig}
-            jobStatus={jobStatus}
-            searchQuery={searchQuery}
-          />
-          <EuiSpacer />
-        </>
-      )}
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&
         jobConfig !== undefined &&
