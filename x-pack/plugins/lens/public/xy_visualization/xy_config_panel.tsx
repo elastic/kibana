@@ -571,29 +571,28 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
       </EuiFormRow>
       {horizontalOnly && (
         <EuiFormRow
-          display="columnCompressed"
-          fullWidth
-          label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
+        display="columnCompressedSwitch"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
+          defaultMessage: 'Show Value Labels',
+        })}
+      >
+        <EuiSwitch
+          data-test-subj="lnsshowShowValueLabelsSwitch"
+          showLabel={false}
+          label={i18n.translate('xpack.lens.xyChart.showValueLabels', {
             defaultMessage: 'Show Value Labels',
           })}
-        >
-          <EuiSwitch
-            className="eui-alignMiddle"
-            data-test-subj="lnsshowShowValueLabelsSwitch"
-            showLabel={false}
-            label={i18n.translate('xpack.lens.xyChart.showValueLabels', {
-              defaultMessage: 'Show Value Labels',
-            })}
-            onChange={({ target }) => {
-              const newYAxisConfigs = createNewYAxisConfigsWithValue(
-                'showValueLabels',
-                target.checked
-              );
-              setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
-            }}
-            checked={shouldShowValueLabels}
-          />
-        </EuiFormRow>
+          onChange={({ target }) => {
+            const newYAxisConfigs = createNewYAxisConfigsWithValue(
+              'showValueLabels',
+              target.checked
+            );
+            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+          }}
+          checked={shouldShowValueLabels}
+        />
+      </EuiFormRow>
       )}
     </EuiForm>
   );
