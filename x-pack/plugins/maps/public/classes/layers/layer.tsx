@@ -538,7 +538,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  async isFittable(): boolean {
+  async isFittable(): Promise<boolean> {
     return false;
   }
 }

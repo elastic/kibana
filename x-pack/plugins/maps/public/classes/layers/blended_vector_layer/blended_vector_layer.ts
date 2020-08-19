@@ -328,7 +328,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     super._syncData(syncContext, activeSource, activeStyle);
   }
 
-  async isFittable(): boolean {
+  async isFittable(): Promise<boolean> {
     return true;
   }
 }

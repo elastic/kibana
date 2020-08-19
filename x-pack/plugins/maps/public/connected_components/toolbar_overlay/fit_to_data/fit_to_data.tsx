@@ -19,7 +19,7 @@ interface State {
   canFit: boolean;
 }
 
-export class FitToData extends React.Component<State, Props> {
+export class FitToData extends React.Component<Props, State> {
   _isMounted: boolean = false;
 
   state = { canFit: false };
