@@ -132,6 +132,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(
       core.application.navigateToApp,
+      undefined,
       this.appList
     );
     this.isRegistryReady = true;
@@ -163,7 +164,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEmbeddableFactories: this.getEmbeddableFactories,
       getStateTransfer: (history?: ScopedHistory) => {
         return history
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, this.appList, history)
+          ? new EmbeddableStateTransfer(core.application.navigateToApp, history, this.appList)
           : this.outgoingOnlyStateTransfer;
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),
