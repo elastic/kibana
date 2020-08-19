@@ -6,13 +6,6 @@
 
 import React, { useContext } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { Store } from 'redux';
-import { getContext, resetContext } from 'kea';
-
-resetContext({ createStore: true });
-
-const store = getContext().store as Store;
 
 import { IInitialAppData } from '../../../common/types';
 import { KibanaContext, IKibanaContext } from '../index';
@@ -39,25 +32,23 @@ export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
     );
 
   return (
-    <Provider store={store}>
-      <Switch>
-        <Route path={SETUP_GUIDE_PATH}>
-          <SetupGuide />
-        </Route>
-        <Route exact path="/">
-          <Overview />
-        </Route>
-        <Route>
-          <Layout navigation={<WorkplaceSearchNav />}>
-            <Switch>
-              <Route exact path="/groups">
-                {/* Will replace with groups component subsequent PR */}
-                <div />
-              </Route>
-            </Switch>
-          </Layout>
-        </Route>
-      </Switch>
-    </Provider>
+    <Switch>
+      <Route path={SETUP_GUIDE_PATH}>
+        <SetupGuide />
+      </Route>
+      <Route exact path="/">
+        <Overview />
+      </Route>
+      <Route>
+        <Layout navigation={<WorkplaceSearchNav />}>
+          <Switch>
+            <Route exact path="/groups">
+              {/* Will replace with groups component subsequent PR */}
+              <div />
+            </Route>
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 };

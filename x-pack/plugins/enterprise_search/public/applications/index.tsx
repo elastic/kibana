@@ -8,6 +8,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
+import { Provider } from 'react-redux';
+import { Store } from 'redux';
+import { getContext, resetContext } from 'kea';
+
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   AppMountParameters,
@@ -46,6 +50,9 @@ export const renderApp = (
   config: ClientConfigType,
   { externalUrl, ...initialData }: ClientData
 ) => {
+  resetContext({ createStore: true });
+  const store = getContext().store as Store;
+
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
@@ -59,13 +66,18 @@ export const renderApp = (
         }}
       >
         <LicenseProvider license$={plugins.licensing.license$}>
-          <Router history={params.history}>
-            <App {...initialData} />
-          </Router>
+          <Provider store={store}>
+            <Router history={params.history}>
+              <App {...initialData} />
+            </Router>
+          </Provider>
         </LicenseProvider>
       </KibanaContext.Provider>
     </I18nProvider>,
     params.element
   );
-  return () => ReactDOM.unmountComponentAtNode(params.element);
+  return () => {
+    resetContext({});
+    ReactDOM.unmountComponentAtNode(params.element);
+  };
 };
