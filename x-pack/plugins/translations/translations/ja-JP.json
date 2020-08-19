@@ -4838,7 +4838,6 @@
     "xpack.apm.header.badge.readOnly.tooltip": "を保存できませんでした",
     "xpack.apm.helpMenu.upgradeAssistantLink": "アップグレードアシスタント",
     "xpack.apm.histogram.plot.noDataLabel": "この時間範囲のデータがありません。",
-    "xpack.apm.home.rumOverview.title": "リアルユーザー監視",
     "xpack.apm.home.serviceMapTabLabel": "サービスマップ",
     "xpack.apm.home.servicesTabLabel": "サービス",
     "xpack.apm.home.tracesTabLabel": "トレース",
