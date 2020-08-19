@@ -8,6 +8,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common';
 import { USER } from '../../../functional/services/transform/security_common';
 
+import { generateTransformConfig } from './common';
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -23,21 +25,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   };
 
-  function generateDestIndex(transformId: string): string {
-    return `user-${transformId}`;
-  }
-
-  async function createTransform(transformId: string, destinationIndex: string) {
-    const config = {
-      id: transformId,
-      source: { index: ['farequote-*'] },
-      pivot: {
-        group_by: { airline: { terms: { field: 'airline' } } },
-        aggregations: { '@timestamp.value_count': { value_count: { field: '@timestamp' } } },
-      },
-      dest: { index: destinationIndex },
-    };
-
+  async function createTransform(transformId: string) {
+    const config = generateTransformConfig(transformId);
     await transform.api.createTransform(config);
   }
 
@@ -45,13 +34,12 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
-      await createTransform('the-transform-1', generateDestIndex('the-transform-1'));
-      await createTransform('the-transform-2', generateDestIndex('the-transform-2'));
+      await createTransform('the-transform-1');
+      await createTransform('the-transform-2');
     });
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.api.deleteIndices('user-the-transform-1,user-the-transform-2');
     });
 
     it('should return a list of transforms statistics', async () => {

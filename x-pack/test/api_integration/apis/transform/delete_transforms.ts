@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
+import { generateDestIndex, generateTransformConfig } from './common';
+
 async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -20,20 +22,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const transform = getService('transform');
 
-  function generateDestIndex(transformId: string): string {
-    return `user-${transformId}`;
-  }
-
-  async function createTransform(transformId: string, destinationIndex: string) {
-    const config = {
-      id: transformId,
-      source: { index: ['farequote-*'] },
-      pivot: {
-        group_by: { airline: { terms: { field: 'airline' } } },
-        aggregations: { '@timestamp.value_count': { value_count: { field: '@timestamp' } } },
-      },
-      dest: { index: destinationIndex },
-    };
+  async function createTransform(transformId: string) {
+    const config = generateTransformConfig(transformId);
 
     await transform.api.createTransform(config);
   }
@@ -53,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       beforeEach(async () => {
-        await createTransform(transformId, destinationIndex);
+        await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
       });
 
@@ -128,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await asyncForEach(transformsInfo, async ({ id }: { id: string }, idx: number) => {
-          await createTransform(id, destinationIndices[idx]);
+          await createTransform(id);
           await transform.api.createIndices(destinationIndices[idx]);
         });
       });
@@ -203,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       before(async () => {
-        await createTransform(transformId, destinationIndex);
+        await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
       });
 
@@ -239,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       before(async () => {
-        await createTransform(transformId, destinationIndex);
+        await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
         await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
       });
@@ -279,7 +269,7 @@ export default ({ getService }: FtrProviderContext) => {
       const destinationIndex = generateDestIndex(transformId);
 
       before(async () => {
-        await createTransform(transformId, destinationIndex);
+        await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
         await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
       });

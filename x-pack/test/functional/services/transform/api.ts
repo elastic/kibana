@@ -35,7 +35,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       await this.waitForIndicesToExist(indices, `expected ${indices} to be created`);
     },
 
-    async deleteIndices(indices: string) {
+    async deleteIndices(indices: string, skipWaitForIndicesNotToExist?: boolean) {
       log.debug(`Deleting indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
@@ -49,7 +49,13 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         .to.have.property('acknowledged')
         .eql(true, 'Response for delete request should be acknowledged');
 
-      await this.waitForIndicesNotToExist(indices, `expected indices '${indices}' to be deleted`);
+      // Check for the option to skip the check if the indices are deleted.
+      // For example, we might want to clear the .transform-* indices but they
+      // will be automatically regenerated making tests flaky without the option
+      // to skip this check.
+      if (!skipWaitForIndicesNotToExist) {
+        await this.waitForIndicesNotToExist(indices, `expected indices '${indices}' to be deleted`);
+      }
     },
 
     async waitForIndicesToExist(indices: string, errorMsg?: string) {
@@ -73,7 +79,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanTransformIndices() {
-      await this.deleteIndices('.transform-*');
+      await this.deleteIndices('.transform-*', true);
     },
 
     async getTransformStats(transformId: string): Promise<TransformStats> {

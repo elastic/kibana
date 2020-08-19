@@ -8,6 +8,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common';
 import { USER } from '../../../functional/services/transform/security_common';
 
+import { generateTransformConfig } from './common';
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -21,13 +23,10 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   function getTransformPreviewConfig() {
-    return {
-      source: { index: ['farequote-*'] },
-      pivot: {
-        group_by: { airline: { terms: { field: 'airline' } } },
-        aggregations: { '@timestamp.value_count': { value_count: { field: '@timestamp' } } },
-      },
-    };
+    const config = generateTransformConfig('the-dummy-id');
+    delete config.id;
+    delete config.dest;
+    return config;
   }
 
   describe('/api/transform/transforms/_preview', function () {
