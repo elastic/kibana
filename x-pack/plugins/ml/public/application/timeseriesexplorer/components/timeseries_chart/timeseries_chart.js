@@ -552,7 +552,7 @@ class TimeseriesChartIntl extends Component {
   renderFocusChart() {
     const {
       focusAggregationInterval,
-      focusAnnotationData,
+      focusAnnotationData: focusAnnotationDataOriginalPropValue,
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
@@ -564,6 +564,10 @@ class TimeseriesChartIntl extends Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
     } = this.props;
+
+    const focusAnnotationData = Array.isArray(focusAnnotationDataOriginalPropValue)
+      ? focusAnnotationDataOriginalPropValue
+      : [];
 
     if (focusChartData === undefined) {
       return;

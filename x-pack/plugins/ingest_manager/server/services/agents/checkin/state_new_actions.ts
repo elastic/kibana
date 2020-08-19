@@ -25,7 +25,12 @@ import {
 } from '../../../types';
 import { agentConfigService } from '../../agent_config';
 import * as APIKeysService from '../../api_keys';
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_UPDATE_ACTIONS_INTERVAL_MS } from '../../../constants';
+import {
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_UPDATE_ACTIONS_INTERVAL_MS,
+  AGENT_CONFIG_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_CONFIG_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+} from '../../../constants';
 import { createAgentAction, getNewActionsSince } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
@@ -135,8 +140,10 @@ export function agentCheckinStateNewActionsFactory() {
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
   const rateLimiter = createRateLimiter(
-    appContextService.getConfig()?.fleet.agentConfigRolloutRateLimitIntervalMs ?? 5000,
-    appContextService.getConfig()?.fleet.agentConfigRolloutRateLimitRequestPerInterval ?? 50
+    appContextService.getConfig()?.fleet.agentConfigRolloutRateLimitIntervalMs ??
+      AGENT_CONFIG_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+    appContextService.getConfig()?.fleet.agentConfigRolloutRateLimitRequestPerInterval ??
+      AGENT_CONFIG_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL
   );
 
   async function subscribeToNewActions(

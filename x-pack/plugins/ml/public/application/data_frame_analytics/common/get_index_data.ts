@@ -12,7 +12,8 @@ import { ml } from '../../services/ml_api_service';
 import { isKeywordAndTextType } from '../common/fields';
 import { SavedSearchQuery } from '../../contexts/ml';
 
-import { DataFrameAnalyticsConfig, INDEX_STATUS } from './analytics';
+import { INDEX_STATUS } from './analytics';
+import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
