@@ -9,7 +9,8 @@
     "navigation",
     "savedObjects",
     "visualizations",
-    "embeddable"
+    "embeddable",
+    "dashboard"
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [
