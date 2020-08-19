@@ -5,8 +5,10 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackageConfig, PackageConfig } from '../../../ingest_manager/common';
-import { ManifestSchema } from './schema/manifest';
+import { NewPackageConfig, PackageConfig } from '../../../../ingest_manager/common';
+import { ManifestSchema } from '../schema/manifest';
+
+export * from './trusted_apps';
 
 /**
  * Supported React-Router state for the Policy Details page
