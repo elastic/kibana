@@ -31,7 +31,6 @@ import {
   EuiPanel,
   EuiAccordion,
   EuiBadge,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
