@@ -41,7 +41,8 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
   try {
     const visId = vis.id as string;
 
-    const editPath = visId ? savedVisualizations.urlFor(visId) : '';
+    const editPath = visId ? savedVisualizations.urlFor(visId) : '#/edit_by_value';
+
     const editUrl = visId
       ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
       : '';

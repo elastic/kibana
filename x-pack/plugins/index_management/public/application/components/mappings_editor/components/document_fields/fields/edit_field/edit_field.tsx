@@ -98,15 +98,15 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {
               const linkDocumentation =
-                documentationService.getTypeDocLink(subType) ||
-                documentationService.getTypeDocLink(type);
+                documentationService.getTypeDocLink(subType?.[0].value) ||
+                documentationService.getTypeDocLink(type?.[0].value);
 
               if (!linkDocumentation) {
                 return null;
               }
 
-              const typeDefinition = TYPE_DEFINITION[type as MainType];
-              const subTypeDefinition = TYPE_DEFINITION[subType as SubType];
+              const typeDefinition = TYPE_DEFINITION[type[0].value as MainType];
+              const subTypeDefinition = TYPE_DEFINITION[subType?.[0].value as SubType];
 
               return (
                 <EuiFlexItem grow={false}>
@@ -148,7 +148,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
 
         <FormDataProvider pathsToWatch={['type', 'subType']}>
           {({ type, subType }) => {
-            const ParametersForm = getParametersFormForType(type, subType);
+            const ParametersForm = getParametersFormForType(type?.[0].value, subType?.[0].value);
 
             if (!ParametersForm) {
               return null;
