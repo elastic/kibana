@@ -25,6 +25,7 @@ import {
   asErr,
   promiseResult,
 } from './lib/result_type';
+import { timeoutPromiseAfter } from './lib/timeout_promise_after';
 
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
@@ -34,6 +35,7 @@ interface Opts<T, H> {
   getCapacity: () => number;
   pollRequests$: Observable<Option<T>>;
   work: WorkFn<T, H>;
+  workTimeout?: number;
 }
 
 /**
@@ -55,6 +57,7 @@ export function createTaskPoller<T, H>({
   pollRequests$,
   bufferCapacity,
   work,
+  workTimeout,
 }: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
 
@@ -89,11 +92,15 @@ export function createTaskPoller<T, H>({
     concatMap(async (set: Set<T>) => {
       closeSleepPerf();
       return mapResult<H, Error, Result<H, PollingError<T>>>(
-        await promiseResult<H, Error>(work(...pullFromSet(set, getCapacity()))),
+        await promiseResult<H, Error>(
+          timeoutPromiseAfter<H, Error>(
+            work(...pullFromSet(set, getCapacity())),
+            workTimeout ?? pollInterval,
+            () => new Error(`work has timed out`)
+          )
+        ),
         (workResult) => asOk(workResult),
-        (err: Error) => {
-          return asPollingError<T>(err, PollingErrorType.WorkError);
-        }
+        (err: Error) => asPollingError<T>(err, PollingErrorType.WorkError)
       );
     }),
     tap(openSleepPerf),
@@ -129,6 +136,7 @@ function pushOptionalIntoSet<T>(
 
 export enum PollingErrorType {
   WorkError,
+  WorkTimeout,
   RequestCapacityReached,
 }
 

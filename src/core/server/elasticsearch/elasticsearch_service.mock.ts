@@ -34,6 +34,7 @@ import { ServiceStatus, ServiceStatusLevels } from '../status';
 
 interface MockedElasticSearchServiceSetup {
   legacy: {
+    config$: BehaviorSubject<ElasticsearchConfig>;
     createClient: jest.Mock<ILegacyCustomClusterClient, any>;
     client: jest.Mocked<ILegacyClusterClient>;
   };
@@ -49,6 +50,7 @@ type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
     legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
@@ -65,6 +67,7 @@ const createStartContractMock = () => {
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn(),
     legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
@@ -99,7 +102,6 @@ const createInternalSetupContractMock = () => {
       summary: 'Elasticsearch is available',
     }),
     legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
       ...createSetupContractMock().legacy,
     },
   };
