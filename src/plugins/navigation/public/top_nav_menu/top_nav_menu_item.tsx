@@ -46,6 +46,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     iconType: props.iconType,
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
+    className: props.className,
   };
 
   const btn = props.emphasize ? (

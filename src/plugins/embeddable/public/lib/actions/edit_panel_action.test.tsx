@@ -56,12 +56,18 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
 test('redirects to app using state transfer', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-  const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
+  const input = { id: '123', viewMode: ViewMode.EDIT };
+  const embeddable = new EditableEmbeddable(input, true);
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',
-    state: { originatingApp: 'superCoolCurrentApp' },
+    state: {
+      originatingApp: 'superCoolCurrentApp',
+      byValueMode: true,
+      embeddableId: '123',
+      valueInput: input,
+    },
   });
 });
 

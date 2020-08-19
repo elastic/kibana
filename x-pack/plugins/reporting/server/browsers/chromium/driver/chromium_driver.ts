@@ -303,7 +303,7 @@ export class HeadlessChromiumDriver {
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
         logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
-        throw getDisallowedOutgoingUrlError(interceptedUrl);
+        return;
       }
     });
 
