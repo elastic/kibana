@@ -4,20 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { MlAnomalyDetectors, MlSystem } from '../../types';
-import { startTracingSpan } from '../../../common/performance_tracing';
 import { getJobId, logEntryCategoriesJobTypes } from '../../../common/log_analysis';
-import {
-  LogEntryCategoryStatsBucket,
-  CompositeDatasetKey,
-  createLatestLogEntryCategoriesStatsQuery,
-  latestLogEntryCategoriesStatsResponseRT,
-} from './queries/latest_log_entry_categories_stats';
+import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
+import type { MlAnomalyDetectors, MlSystem } from '../../types';
+import { COMPOSITE_AGGREGATION_BATCH_SIZE } from './common';
+import {
+  CompositeDatasetKey,
+  createLatestLogEntryCategoriesDatasetsStatsQuery,
+  latestLogEntryCategoriesDatasetsStatsResponseRT,
+  LogEntryCategoryDatasetStatsBucket,
+} from './queries/latest_log_entry_categories_datasets_stats';
 
-const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
-
-export async function getLogEntryCategoriesQuality(
+export async function getLatestLogEntriesCategoriesDatasetsStats(
   context: {
     infra: {
       mlAnomalyDetectors: MlAnomalyDetectors;
@@ -27,9 +26,10 @@ export async function getLogEntryCategoriesQuality(
   },
   sourceId: string,
   startTime: number,
-  endTime: number
+  endTime: number,
+  includeCategorizerStatuses: Array<'ok' | 'warn'> = []
 ) {
-  const finalizeLogEntryCategoriesQuality = startTracingSpan('get categories quality data');
+  const finalizeLogEntryCategoriesDatasetsStats = startTracingSpan('get categories datasets stats');
 
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
@@ -37,12 +37,12 @@ export async function getLogEntryCategoriesQuality(
     logEntryCategoriesJobTypes[0]
   );
 
-  let latestWarnedLogEntryCategoriesStatsBuckets: LogEntryCategoryStatsBucket[] = [];
+  let latestLogEntryCategoriesDatasetsStatsBuckets: LogEntryCategoryDatasetStatsBucket[] = [];
   let afterLatestBatchKey: CompositeDatasetKey | undefined;
 
   while (true) {
-    const latestLogEntryCategoriesStatsResponse = await context.infra.mlSystem.mlAnomalySearch(
-      createLatestLogEntryCategoriesStatsQuery(
+    const latestLogEntryCategoriesDatasetsStatsResponse = await context.infra.mlSystem.mlAnomalySearch(
+      createLatestLogEntryCategoriesDatasetsStatsQuery(
         logEntryCategoriesCountJobId,
         startTime,
         endTime,
@@ -52,29 +52,34 @@ export async function getLogEntryCategoriesQuality(
     );
 
     const { after_key: afterKey, buckets: latestBatchBuckets = [] } =
-      decodeOrThrow(latestLogEntryCategoriesStatsResponseRT)(latestLogEntryCategoriesStatsResponse)
-        .aggregations?.dataset_composite_terms ?? {};
+      decodeOrThrow(latestLogEntryCategoriesDatasetsStatsResponseRT)(
+        latestLogEntryCategoriesDatasetsStatsResponse
+      ).aggregations?.dataset_composite_terms ?? {};
 
-    const latestWarnedBatchBuckets = latestBatchBuckets.filter((bucket) =>
-      bucket.categorizer_stats_top_hits.hits.hits.some(
-        (hit) => hit._source.categorization_status === 'warn'
-      )
-    );
+    const latestIncludedBatchBuckets =
+      includeCategorizerStatuses.length > 0
+        ? latestBatchBuckets.filter((bucket) =>
+            bucket.categorizer_stats_top_hits.hits.hits.some((hit) =>
+              includeCategorizerStatuses.includes(hit._source.categorization_status)
+            )
+          )
+        : latestBatchBuckets;
 
-    latestWarnedLogEntryCategoriesStatsBuckets = [
-      ...latestWarnedLogEntryCategoriesStatsBuckets,
-      ...latestWarnedBatchBuckets,
+    latestLogEntryCategoriesDatasetsStatsBuckets = [
+      ...latestLogEntryCategoriesDatasetsStatsBuckets,
+      ...latestIncludedBatchBuckets,
     ];
+
     afterLatestBatchKey = afterKey;
     if (afterKey == null || latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
       break;
     }
   }
 
-  const logEntryCategoriesQualitySpan = finalizeLogEntryCategoriesQuality();
+  const logEntryCategoriesDatasetsStatsSpan = finalizeLogEntryCategoriesDatasetsStats();
 
   return {
-    data: latestWarnedLogEntryCategoriesStatsBuckets.map((bucket) => {
+    data: latestLogEntryCategoriesDatasetsStatsBuckets.map((bucket) => {
       const latestHitSource = bucket.categorizer_stats_top_hits.hits.hits[0]._source;
 
       return {
@@ -90,7 +95,7 @@ export async function getLogEntryCategoriesQuality(
       };
     }),
     timing: {
-      spans: [logEntryCategoriesQualitySpan],
+      spans: [logEntryCategoriesDatasetsStatsSpan],
     },
   };
 }

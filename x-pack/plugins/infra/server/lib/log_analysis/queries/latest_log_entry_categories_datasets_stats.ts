@@ -13,7 +13,7 @@ import {
   createTimeRangeFilters,
 } from './common';
 
-export const createLatestLogEntryCategoriesStatsQuery = (
+export const createLatestLogEntryCategoriesDatasetsStatsQuery = (
   logEntryCategoriesJobId: string,
   startTime: number,
   endTime: number,
@@ -101,7 +101,7 @@ const compositeDatasetKeyRT = rt.type({
 
 export type CompositeDatasetKey = rt.TypeOf<typeof compositeDatasetKeyRT>;
 
-const logEntryCategoryStatsBucketRT = rt.type({
+const logEntryCategoryDatasetStatsBucketRT = rt.type({
   key: compositeDatasetKeyRT,
   categorizer_stats_top_hits: rt.type({
     hits: rt.type({
@@ -110,20 +110,22 @@ const logEntryCategoryStatsBucketRT = rt.type({
   }),
 });
 
-export type LogEntryCategoryStatsBucket = rt.TypeOf<typeof logEntryCategoryStatsBucketRT>;
+export type LogEntryCategoryDatasetStatsBucket = rt.TypeOf<
+  typeof logEntryCategoryDatasetStatsBucketRT
+>;
 
-export const latestLogEntryCategoriesStatsResponseRT = rt.intersection([
+export const latestLogEntryCategoriesDatasetsStatsResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.partial({
     aggregations: rt.type({
       dataset_composite_terms: rt.type({
         after_key: compositeDatasetKeyRT,
-        buckets: rt.array(logEntryCategoryStatsBucketRT),
+        buckets: rt.array(logEntryCategoryDatasetStatsBucketRT),
       }),
     }),
   }),
 ]);
 
-export type LatestLogEntryCategoriesStatsResponse = rt.TypeOf<
-  typeof latestLogEntryCategoriesStatsResponseRT
+export type LatestLogEntryCategoriesDatasetsStatsResponse = rt.TypeOf<
+  typeof latestLogEntryCategoriesDatasetsStatsResponseRT
 >;
