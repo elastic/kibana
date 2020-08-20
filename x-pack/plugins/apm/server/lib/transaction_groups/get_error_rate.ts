@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mean } from 'lodash';
+import { EventOutcome } from '../../../common/event_outcome';
 import {
-  HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
   SERVICE_NAME,
+  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
@@ -42,10 +43,18 @@ export async function getErrorRate({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
+    { exists: { field: EVENT_OUTCOME } },
     ...transactionNamefilter,
     ...transactionTypefilter,
     ...uiFiltersES,
+  ];
+
+  const mustNot = [
+    {
+      term: {
+        [EVENT_OUTCOME]: EventOutcome.unknown,
+      },
+    },
   ];
 
   const params = {
@@ -54,13 +63,13 @@ export async function getErrorRate({
     },
     body: {
       size: 0,
-      query: { bool: { filter } },
+      query: { bool: { filter, mustNot } },
       aggs: {
         total_transactions: {
           date_histogram: getMetricsDateHistogramParams(start, end),
           aggs: {
             erroneous_transactions: {
-              filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
+              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
             },
           },
         },
