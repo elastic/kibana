@@ -33,14 +33,14 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsHelpText', {
       defaultMessage:
-        'An ordered list of grok expressions to match and extract named captures with. Returns on the first expression in the list that matches.',
+        'Grok expressions used to match and extract named capture groups. Uses the first matching expression.',
     }),
     validations: [
       {
         validator: emptyField(
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
-            { defaultMessage: 'A value for patterns is required.' }
+            { defaultMessage: 'A value is required.' }
           )
         ),
       },
@@ -87,34 +87,9 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.grokForm.traceMatchFieldHelpText',
       {
-        defaultMessage: 'Whether to insert pattern match metadata.',
+        defaultMessage: 'If true, include metadata about the matching expression in the document.',
       }
     ),
-  },
-
-  properties: {
-    type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.propertiesFieldLabel', {
-      defaultMessage: 'Properties (optional)',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.grokForm.propertiesFieldHelpText',
-      {
-        defaultMessage:
-          'Controls what properties are added to the target field. Values depend on what is available from the database file.',
-      }
-    ),
-  },
-
-  first_only: {
-    type: FIELD_TYPES.TOGGLE,
-    defaultValue: true,
-    deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(true),
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.firstOnlyFieldLabel', {
-      defaultMessage: 'First only',
-    }),
   },
 };
 

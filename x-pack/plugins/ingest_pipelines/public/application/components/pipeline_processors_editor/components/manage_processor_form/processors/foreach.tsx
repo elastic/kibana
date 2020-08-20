@@ -26,7 +26,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Processor',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.foreachForm.processorHelpText', {
-      defaultMessage: 'The processor to execute against each field value.',
+      defaultMessage: 'Ingest processor to run on each array value.',
     }),
     validations: [
       {
@@ -41,7 +41,7 @@ const fieldsConfig: FieldsConfig = {
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.failForm.processorInvalidJsonError',
             {
-              defaultMessage: 'Invalid JSON.',
+              defaultMessage: 'Invalid JSON',
             }
           )
         ),
@@ -56,7 +56,7 @@ export const Foreach: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.failForm.fieldNameHelpText',
-          { defaultMessage: 'The array field.' }
+          { defaultMessage: 'Field containing array values.' }
         )}
       />
 

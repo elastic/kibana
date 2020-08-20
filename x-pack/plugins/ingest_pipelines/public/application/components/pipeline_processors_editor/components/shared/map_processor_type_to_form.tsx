@@ -117,7 +117,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   },
   enrich: {
     FieldsComponent: Enrich,
-    docLinkPath: '/enrich-processor.html',
+    docLinkPath: '/ingest-enriching-data.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),

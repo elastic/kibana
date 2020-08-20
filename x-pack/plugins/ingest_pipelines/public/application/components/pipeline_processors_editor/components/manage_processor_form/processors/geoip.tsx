@@ -33,8 +33,11 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.geoIPForm.databaseFileHelpText"
-        defaultMessage="The database filename in the geoip config directory. The default value is {databaseFile}."
-        values={{ databaseFile: <EuiCode inline>{'GeoLite2-City.mmdb'}</EuiCode> }}
+        defaultMessage="GeoIP2 database file in the {ingestGeoIP} configuration directory. Defaults to {databaseFile}."
+        values={{
+          databaseFile: <EuiCode inline>{'GeoLite2-City.mmdb'}</EuiCode>,
+          ingestGeoIP: <EuiCode inline>{'ingest-geoip'}</EuiCode>,
+        }}
       />
     ),
   },
@@ -49,7 +52,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.geoIPForm.propertiesFieldHelpText',
       {
         defaultMessage:
-          'Controls what properties are added to the target field. Values depend on what is available from the database file.',
+          'Properties added to the target field. Valid properties depend on the database file used.',
       }
     ),
   },
@@ -62,6 +65,13 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.firstOnlyFieldLabel', {
       defaultMessage: 'First only',
     }),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.geoIPForm.firstOnlyFieldHelpText',
+      {
+        defaultMessage:
+          'If true, the first matching geo data is used, even if the field contains an array.',
+      }
+    ),
   },
 };
 
@@ -70,8 +80,8 @@ export const GeoIP: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.grokForm.fieldNameHelpText',
-          { defaultMessage: 'The array field.' }
+          'xpack.ingestPipelines.pipelineEditor.geoIPForm.fieldNameHelpText',
+          { defaultMessage: 'Field containing an IP address for the geographical lookup.' }
         )}
       />
 
@@ -79,8 +89,7 @@ export const GeoIP: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.geoIPForm.targetFieldHelpText',
           {
-            defaultMessage:
-              'The field that will hold the geographical information looked up from the Maxmind database.',
+            defaultMessage: 'Field used to contain geo data properties',
           }
         )}
       />

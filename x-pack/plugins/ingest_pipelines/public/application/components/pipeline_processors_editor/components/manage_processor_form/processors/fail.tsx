@@ -21,7 +21,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Message',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.failForm.messageHelpText', {
-      defaultMessage: 'The error message thrown by the processor.',
+      defaultMessage: 'Error message returned by the processor.',
     }),
     validations: [
       {

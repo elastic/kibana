@@ -55,25 +55,6 @@ const targetFieldValidator: ValidationConfig = {
   ),
 };
 
-const getEnrichPolicyNameFieldHelpText = (esDocUrl: string) => {
-  return (
-    <FormattedMessage
-      id="xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText"
-      defaultMessage="Name of the {enrichPolicyLink}."
-      values={{
-        enrichPolicyLink: (
-          <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
-            {i18n.translate(
-              'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText.enrichPolicyLink',
-              { defaultMessage: 'enrich policy' }
-            )}
-          </EuiLink>
-        ),
-      }}
-    />
-  );
-};
-
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   policy_name: {
@@ -90,7 +71,7 @@ const fieldsConfig: FieldsConfig = {
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameRequiredError',
             {
-              defaultMessage: 'A policy name value is required.',
+              defaultMessage: 'A value is required.',
             }
           )
         ),
@@ -110,8 +91,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.enrichForm.overrideFieldHelpText',
       {
-        defaultMessage:
-          'Whether this processor will update fields with a pre-existing non-null-valued field. When set to false, such fields will not be overridden.',
+        defaultMessage: 'If true, the processor can overwrite pre-existing field values.',
       }
     ),
   },
@@ -125,13 +105,13 @@ const fieldsConfig: FieldsConfig = {
       return n === 1 ? undefined : n;
     },
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.maxMatchesFieldLabel', {
-      defaultMessage: 'Max matches (optional)',
+      defaultMessage: 'Maximum matches (optional)',
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.enrichForm.maxMatchesFieldHelpText',
       {
         defaultMessage:
-          'The maximum number of matched documents to include under the configured target field. The target_field will be turned into a json array if max_matches is higher than 1, otherwise target_field will become a json object. Accepts numbers 1 up to 128.',
+          'Number of matching enrich documents to include in the target field. Accepts 1–128.',
       }
     ),
     validations: [
@@ -156,13 +136,6 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage: 'Shape relation (optional)',
       }
     ),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldHelpText',
-      {
-        defaultMessage:
-          'A spatial relation operator used to match the geo_shape of incoming documents to documents in the enrich index. This option is only used for geo_match enrich policy types.',
-      }
-    ),
   },
 };
 
@@ -176,7 +149,7 @@ export const Enrich: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.enrichForm.fieldNameHelpText',
           {
             defaultMessage:
-              'The field in the input document that matches the policy field used to retrieve the enrichment data.',
+              'Field used to match incoming documents to enrich documents. Field values are compared to the match field set in the enrich policy.',
           }
         )}
       />
@@ -184,7 +157,22 @@ export const Enrich: FunctionComponent = () => {
       <UseField
         config={{
           ...fieldsConfig.policy_name,
-          helpText: getEnrichPolicyNameFieldHelpText(esDocUrl),
+          helpText: (
+            <FormattedMessage
+              id="xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText"
+              defaultMessage="Name of the {enrichPolicyLink}."
+              values={{
+                enrichPolicyLink: (
+                  <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
+                    {i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText.enrichPolicyLink',
+                      { defaultMessage: 'enrich policy' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          ),
         }}
         component={Field}
         path="fields.policy_name"
@@ -197,7 +185,7 @@ export const Enrich: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldHelpText',
           {
-            defaultMessage: 'Field added to incoming documents to contain enrich data.',
+            defaultMessage: 'Field used to contain enrich data.',
           }
         )}
         validations={[targetFieldValidator]}
@@ -212,7 +200,29 @@ export const Enrich: FunctionComponent = () => {
       />
 
       <UseField
-        config={fieldsConfig.shape_relation}
+        config={{
+          ...fieldsConfig.shape_relation,
+          helpText: (
+            <FormattedMessage
+              id="xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldHelpText"
+              defaultMessage="Operator used to match the geo-shape of incoming documents to enrich documents. Only used for {geoMatchPolicyLink}"
+              values={{
+                geoMatchPolicyLink: (
+                  <EuiLink
+                    external
+                    target="_blank"
+                    href={esDocUrl + '/enrich-policy-definition.html'}
+                  >
+                    {i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldHelpText.geoMatchPoliciesLink',
+                      { defaultMessage: 'geo-match enrich policies' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          ),
+        }}
         component={SelectField}
         componentProps={{
           euiFieldProps: {

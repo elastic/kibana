@@ -82,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.modelIDFieldHelpText',
       {
-        defaultMessage: 'The ID of the model to load and infer against.',
+        defaultMessage: 'ID of the model to infer against.',
       }
     ),
     validations: [
@@ -111,7 +111,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.fieldMapHelpText',
       {
         defaultMessage:
-          'Maps the document field names to the known field names of the model. This mapping takes precedence over any default mappings provided in the model configuration.',
+          'Maps document field names to the known field names of the model. Takes precedence over any mappings in the model.',
       }
     ),
     validations: [
@@ -166,7 +166,7 @@ export const Inference: FunctionComponent = () => {
         helpText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldHelpText"
-            defaultMessage="Field added to incoming documents that will contain inference processor results. Default value is {targetField}."
+            defaultMessage="Field used to contain inference processor results. Defaults to {targetField}."
             values={{ targetField: <EuiCode inline>{'ml.inference.<processor_tag>'}</EuiCode> }}
           />
         }

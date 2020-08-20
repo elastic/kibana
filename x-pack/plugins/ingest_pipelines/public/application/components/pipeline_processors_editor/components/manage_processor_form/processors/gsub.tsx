@@ -6,6 +6,8 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
@@ -27,13 +29,13 @@ const fieldsConfig: FieldsConfig = {
     }),
     deserializer: String,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternFieldHelpText', {
-      defaultMessage: 'The pattern to be replaced.',
+      defaultMessage: 'Regular expression used to match text.',
     }),
     validations: [
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternRequiredError', {
-            defaultMessage: 'A pattern value is required.',
+            defaultMessage: 'A value is required.',
           })
         ),
       },
@@ -47,13 +49,13 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText',
-      { defaultMessage: 'The string to replace the matching patterns with.' }
+      { defaultMessage: 'Replacement text for matches.' }
     ),
     validations: [
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.replacementRequiredError', {
-            defaultMessage: 'A replacement value is required.',
+            defaultMessage: 'A value is required.',
           })
         ),
       },
@@ -67,7 +69,7 @@ export const Gsub: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.gsubForm.fieldNameHelpText',
-          { defaultMessage: 'The field to apply the replacement to.' }
+          { defaultMessage: 'Field to search for matches.' }
         )}
       />
 
@@ -86,12 +88,15 @@ export const Gsub: FunctionComponent = () => {
       <UseField config={fieldsConfig.replacement} component={Field} path="fields.replacement" />
 
       <TargetField
-        helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText',
-          {
-            defaultMessage: 'The field to assign the converted value to.',
-          }
-        )}
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText"
+            defaultMessage="Field used to contain updated text. Defaults to {field}."
+            values={{
+              field: <EuiCode>{'field'}</EuiCode>,
+            }}
+          />
+        }
       />
 
       <IgnoreMissingField />

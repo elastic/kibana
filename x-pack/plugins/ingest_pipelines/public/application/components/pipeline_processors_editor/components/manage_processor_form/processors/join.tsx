@@ -6,6 +6,8 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
@@ -26,7 +28,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.joinForm.separatorFieldHelpText',
       {
-        defaultMessage: 'The separator character.',
+        defaultMessage: 'Separator character.',
       }
     ),
     validations: [
@@ -47,20 +49,22 @@ export const Join: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.joinForm.fieldNameHelpText',
-          { defaultMessage: 'The field to be separated.' }
+          { defaultMessage: 'Field containing array values to join.' }
         )}
       />
 
       <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
 
       <TargetField
-        helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldHelpText',
-          {
-            defaultMessage:
-              'The field to assign the joined value to. If empty, the field is updated in-place.',
-          }
-        )}
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldHelpText"
+            defaultMessage="Field used to contain the joined value. Defaults to {field}."
+            values={{
+              field: <EuiCode>{'field'}</EuiCode>,
+            }}
+          />
+        }
       />
     </>
   );
