@@ -24,7 +24,7 @@ const { distDir } = require('@kbn/ui-shared-deps');
 const { ASSET_DIR } = require('./lib/constants');
 
 exports.defaultConfig = {
-  addons: ['@kbn/storybook/preset'],
+  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx'],
   typescript: {
     reactDocgen: 'none',

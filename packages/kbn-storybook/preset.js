@@ -20,7 +20,6 @@
 const webpackConfig = require('./webpack.config');
 
 module.exports = {
-  addons: ['@storybook/addon-essentials', '@storybook/addon-knobs'],
   managerEntries: (entry = []) => {
     return [...entry, require.resolve('./lib/register')];
   },

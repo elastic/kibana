@@ -26,18 +26,24 @@ const { REPO_ROOT } = require('./lib/constants');
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config: storybookConfig }) => {
   const config = {
+    devServer: {
+      stats: {
+        preset: 'minimal',
+        warningsFilter: /export .* was not found in/,
+      },
+    },
     externals,
     module: {
       rules: [
-        // Include the React preset from Kibana for JS(X) and TS(X)
-        {
-          test: /\.(j|t)sx?$/,
-          exclude: /node_modules/,
-          loaders: 'babel-loader',
-          options: {
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-          },
-        },
+        // // Include the React preset from Kibana for JS(X) and TS(X)
+        // {
+        //   test: /\.(j|t)sx?$/,
+        //   exclude: /node_modules/,
+        //   loaders: 'babel-loader',
+        //   options: {
+        //     presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        //   },
+        // },
         {
           test: /\.(html|md|txt|tmpl)$/,
           use: {

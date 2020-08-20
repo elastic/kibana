@@ -41,15 +41,14 @@ run(
     }
 
     if (!alias) {
-      throw createFlagError('missing alias');
+      throw createFlagError('Missing alias');
     }
 
     if (!storybookAliases.hasOwnProperty(alias)) {
-      throw createFlagError(`unknown alias [${alias}]`);
+      throw createFlagError(`Unknown alias [${alias}]`);
     }
 
-    const relative = (storybookAliases as any)[alias];
-    const configDir = join(REPO_ROOT, relative);
+    const configDir = (storybookAliases as any)[alias];
 
     log.verbose('Loading Storybook:', configDir);
 
