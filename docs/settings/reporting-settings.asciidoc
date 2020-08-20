@@ -104,15 +104,13 @@ security is enabled, `xpack.security.encryptionKey`.
 [cols="2*<"]
 |===
 | `xpack.reporting.queue.pollInterval`
-  | (time value) Specifies the time that the reporting poller waits between polling the
-  index for any pending Reporting jobs. Defaults to `3s`.
+  | ({ref}/common-options.html#time-units[time value]) Specifies the time that the reporting poller waits between polling the index for any
+  pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
 
 | [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout`
-  | (time value) How long each worker has to produce a report. If your machine is slow or under
-  heavy load, you might need to increase this timeout.
-  If a Reporting job execution time goes over this time limit, the job will be
-  marked as a failure and there will not be a download available.
-  Defaults to `2m`.
+| ({ref}/common-options.html#time-units[time value]) How long each worker has to produce a report. If your machine is slow or under heavy
+load, you might need to increase this timeout. If a Reporting job execution time goes over this time limit, the job will be marked as a
+failure and there will not be a download available. Can be specified as number of milliseconds. Defaults to `2m`.
 
 |===
 
@@ -126,21 +124,19 @@ control the capturing process.
 [cols="2*<"]
 |===
 | `xpack.reporting.capture.timeouts.openUrl`
-  | (time value) Specify how long to allow the Reporting browser to wait for the "Loading..." screen
-  to dismiss and find the initial data for the Kibana page.  If the time is
-  exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
-  Defaults to `1m`.
+  | ({ref}/common-options.html#time-units[time value]) Specify how long to allow the Reporting browser to wait for the "Loading..." screen
+  to dismiss and find the initial data for the Kibana page. If the time is exceeded, a page screenshot is captured showing the current
+  state, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 | `xpack.reporting.capture.timeouts.waitForElements`
-  | Specify how long to allow the Reporting browser to wait for all visualization
-  panels to load on the Kibana page. If the time is exceeded, a page screenshot
-  is captured showing the current state, and the download link shows a warning message. Defaults to `30s`.
+  | ({ref}/common-options.html#time-units[time value]) Specify how long to allow the Reporting browser to wait for all visualization panels
+  to load on the Kibana page. If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows
+  a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
 | `xpack.reporting.capture.timeouts.renderComplete`
-  | Specify how long to allow the Reporting browser to wait for all visualizations to
-  fetch and render the data. If the time is exceeded, a
-  page screenshot is captured showing the current state, and the download link shows a warning message. Defaults to
-  `30s`.
+  | ({ref}/common-options.html#time-units[time value]) Specify how long to allow the Reporting browser to wait for all visualizations to
+  fetch and render the data. If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a
+  warning message. Can be specified as number of milliseconds. Defaults to `30s`.
 
 |===
 
@@ -159,11 +155,9 @@ available, but there will likely be errors in the visualizations in the report.
   job, as many times as this setting. Defaults to `3`.
 
 | `xpack.reporting.capture.loadDelay`
-  | (time value) When visualizations are not evented, this is the amount of time before
-  taking a screenshot. All visualizations that ship with {kib} are evented, so this
-  setting should not have much effect. If you are seeing empty images instead of
-  visualizations, try increasing this value.
-  Defaults to `3s`.
+  | ({ref}/common-options.html#time-units[time value]) When visualizations are not evented, this is the amount of time before taking a
+  screenshot. All visualizations that ship with {kib} are evented, so this setting should not have much effect. If you are seeing empty
+  images instead of visualizations, try increasing this value. Defaults to `3s`.
 
 | [[xpack-reporting-browser]] `xpack.reporting.capture.browser.type`
   | Specifies the browser to use to capture screenshots. This setting exists for
@@ -205,9 +199,8 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
 [cols="2*<"]
 |===
 | [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes`
-  | The maximum size of a CSV file before being truncated. This setting exists to prevent
-  large exports from causing performance and storage issues.
-  Defaults to `10485760` (10mB).
+  | ({ref}/common-options.html#byte-units[bytes value]) The maximum size of a CSV file before being truncated. This setting exists to
+  prevent large exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `10mb`.
 
 | `xpack.reporting.csv.scroll.size`
   | Number of documents retrieved from {es} for each scroll iteration during a CSV 
@@ -215,7 +208,7 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
   Defaults to `500`.
 
 | `xpack.reporting.csv.scroll.duration`
-  | (time value) Amount of time allowed before {kib} cleans the scroll context during a CSV export.
+  | ({ref}/common-options.html#time-units[time value]) Amount of time allowed before {kib} cleans the scroll context during a CSV export.
   Defaults to `30s`.
   
 | `xpack.reporting.csv.checkForFormulas`
