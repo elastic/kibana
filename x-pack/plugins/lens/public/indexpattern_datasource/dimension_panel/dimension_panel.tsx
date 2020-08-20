@@ -21,7 +21,7 @@ import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { changeColumn } from '../state_helpers';
-import { isDraggedField, hasField } from '../utils';
+import { isDraggedField, isDraggedOperation, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { DateRange } from '../../../common';
@@ -99,21 +99,56 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
   }
 
-  return (
-    isDraggedField(dragging) &&
-    layerIndexPatternId === dragging.indexPatternId &&
-    Boolean(hasOperationForField(dragging.field))
-  );
+  if (isDraggedField(dragging)) {
+    return (
+      layerIndexPatternId === dragging.indexPatternId &&
+      Boolean(hasOperationForField(dragging.field))
+    );
+  }
+
+  if (
+    isDraggedOperation(dragging) &&
+    dragging.layerId === props.layerId &&
+    props.columnId !== dragging.columnId
+  ) {
+    const op = props.state.layers[props.layerId].columns[dragging.columnId];
+    return props.filterOperations(op);
+  }
+  return false;
 }
 
-export function onDrop(
-  props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>
-): boolean {
+export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
   const droppedItem = props.droppedItem;
 
   function hasOperationForField(field: IndexPatternField) {
     return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+  }
+
+  if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
+    const layer = props.state.layers[props.layerId];
+    const op = layer.columns[droppedItem.columnId];
+    if (!props.filterOperations(op)) {
+      return false;
+    }
+
+    const newColumns = { ...layer.columns };
+    delete newColumns[droppedItem.columnId];
+    newColumns[props.columnId] = op;
+
+    // Time to replace
+    props.setState({
+      ...props.state,
+      layers: {
+        ...props.state.layers,
+        [props.layerId]: {
+          ...layer,
+          columnOrder: layer.columnOrder.filter((id) => id !== droppedItem.columnId),
+          columns: newColumns,
+        },
+      },
+    });
+    return { deleted: droppedItem.columnId };
   }
 
   if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {

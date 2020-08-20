@@ -55,6 +55,11 @@ export interface DraggedField {
   indexPatternId: string;
 }
 
+export interface DraggedOperation {
+  columnId: string;
+  layerId: string;
+}
+
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {

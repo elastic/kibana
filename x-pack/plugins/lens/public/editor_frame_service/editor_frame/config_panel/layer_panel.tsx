@@ -9,6 +9,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiButtonIcon,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
@@ -218,6 +219,8 @@ export function LayerPanel(
                       key={accessor}
                       className="lnsLayerPanel__dimension"
                       data-test-subj={group.dataTestSubj}
+                      draggable={true}
+                      value={{ columnId: accessor, layerId }}
                       droppable={
                         dragDropContext.dragging &&
                         layerDatasource.canHandleDrop({
@@ -227,12 +230,22 @@ export function LayerPanel(
                         })
                       }
                       onDrop={(droppedItem) => {
-                        layerDatasource.onDrop({
+                        const dropResult = layerDatasource.onDrop({
                           ...layerDatasourceDropProps,
                           droppedItem,
                           columnId: accessor,
                           filterOperations: group.filterOperations,
                         });
+                        if (typeof dropResult === 'object') {
+                          // When a column is moved, we delete the reference to the old
+                          props.updateVisualization(
+                            activeVisualization.removeDimension({
+                              layerId,
+                              columnId: dropResult.deleted,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                       }}
                     >
                       <DimensionPopover
@@ -317,6 +330,7 @@ export function LayerPanel(
                     data-test-subj={group.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
+                      !('columnId' in dragDropContext.dragging) &&
                       layerDatasource.canHandleDrop({
                         ...layerDatasourceDropProps,
                         columnId: newId,

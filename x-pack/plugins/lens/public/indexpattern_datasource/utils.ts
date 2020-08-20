@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DraggedField } from './indexpattern';
+import { DraggedField, DraggedOperation } from './indexpattern';
 import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -38,5 +38,15 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
     fieldCandidate !== null &&
     'field' in fieldCandidate &&
     'indexPatternId' in fieldCandidate
+  );
+}
+
+export function isDraggedOperation(
+  operationCandidate: unknown
+): operationCandidate is DraggedOperation {
+  return (
+    typeof operationCandidate === 'object' &&
+    operationCandidate !== null &&
+    'columnId' in operationCandidate
   );
 }
