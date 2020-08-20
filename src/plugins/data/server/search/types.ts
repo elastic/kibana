@@ -39,6 +39,8 @@ export interface ISearchSetup {
    */
   registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
 
+  setDefaultSearchStrategy: (name: string) => void;
+
   /**
    * Used internally for telemetry
    */

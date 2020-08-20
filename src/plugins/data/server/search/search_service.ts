@@ -57,6 +57,7 @@ export interface SearchServiceStartDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private searchStrategies: StrategyMap = {};
+  private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
 
   constructor(
     private initializerContext: PluginInitializerContext,
@@ -88,6 +89,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs: this.aggsService.setup({ registerFunction }),
       registerSearchStrategy: this.registerSearchStrategy,
+      setDefaultSearchStrategy: (name: string) => {
+        if (this.searchStrategies.hasOwnProperty(name)) {
+          this.defaultSearchStrategyName = name;
+        }
+      },
       usage,
     };
   }
@@ -97,11 +103,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     searchRequest: IEsSearchRequest,
     options: Record<string, any>
   ) {
-    return this.getSearchStrategy(options.strategy || ES_SEARCH_STRATEGY).search(
-      context,
-      searchRequest,
-      { signal: options.signal }
-    );
+    return this.getSearchStrategy(
+      options.strategy || this.defaultSearchStrategyName
+    ).search(context, searchRequest, { signal: options.signal });
   }
 
   public start(
