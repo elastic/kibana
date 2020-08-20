@@ -17,10 +17,13 @@
  * under the License.
  */
 
+import { take } from 'rxjs/operators';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
+import { PathConfigType, config as pathConfigDef } from '../path';
+import { HttpConfigType, config as httpConfigDef } from '../http';
 
 /**
  * APIs to access the application's instance uuid.
@@ -46,8 +49,14 @@ export class EnvironmentService {
   }
 
   public async setup() {
+    const [pathConfig, serverConfig] = await Promise.all([
+      this.configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
+      this.configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),
+    ]);
+
     this.uuid = await resolveInstanceUuid({
-      configService: this.configService,
+      pathConfig,
+      serverConfig,
       logger: this.log,
     });
 
