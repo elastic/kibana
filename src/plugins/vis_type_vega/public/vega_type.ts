@@ -58,7 +58,6 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
     },
-    stage: 'experimental',
     inspectorAdapters: createInspectorAdapters,
   };
 };
