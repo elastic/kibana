@@ -70,7 +70,6 @@ export function ApmAppRoot({
   deps,
   routerHistory,
   config,
-  app,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
