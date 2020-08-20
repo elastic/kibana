@@ -6,7 +6,10 @@
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
-import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
+import {
+  DiscoverUrlGeneratorState,
+  SearchInput,
+} from '../../../../../../src/plugins/discover/public';
 import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
@@ -40,7 +43,7 @@ export class ExploreDataContextMenuAction extends AbstractExploreDataAction<Embe
     if (embeddable) {
       state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
-      const input = embeddable.getInput();
+      const input = embeddable.getInput() as Readonly<SearchInput>;
 
       if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
       if (isQuery(input.query)) state.query = input.query;

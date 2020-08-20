@@ -5,7 +5,10 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
+import {
+  DiscoverUrlGeneratorState,
+  SearchInput,
+} from '../../../../../../src/plugins/discover/public';
 import {
   isTimeRange,
   isQuery,
@@ -62,7 +65,7 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     if (embeddable) {
       state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
-      const input = embeddable.getInput();
+      const input = embeddable.getInput() as Readonly<SearchInput>;
 
       if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
       if (isQuery(input.query)) state.query = input.query;
