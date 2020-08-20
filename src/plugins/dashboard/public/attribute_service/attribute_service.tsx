@@ -55,7 +55,7 @@ export class AttributeService<
   ValType extends EmbeddableInput & { attributes: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput
 > {
-  private embeddableFactory: EmbeddableFactory;
+  private embeddableFactory?: EmbeddableFactory;
 
   constructor(
     private type: string,
@@ -63,17 +63,19 @@ export class AttributeService<
     private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
+    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
     private customSaveMethod?: (
       attributes: SavedObjectAttributes,
       savedObjectId?: string
     ) => Promise<{ id: string }>
   ) {
-    const factory = getEmbeddableFactory(this.type);
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(this.type);
+    if (getEmbeddableFactory) {
+      const factory = getEmbeddableFactory(this.type);
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(this.type);
+      }
+      this.embeddableFactory = factory;
     }
-    this.embeddableFactory = factory;
   }
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
@@ -165,7 +167,7 @@ export class AttributeService<
             copyOnSave: false,
             lastSavedTitle: '',
             getEsType: () => this.type,
-            getDisplayName: this.embeddableFactory.getDisplayName,
+            getDisplayName: this.embeddableFactory?.getDisplayName || (() => this.type),
           },
           props.isTitleDuplicateConfirmed,
           props.onTitleDuplicate,
