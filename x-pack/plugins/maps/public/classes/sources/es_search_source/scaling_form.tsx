@@ -191,11 +191,10 @@ export class ScalingForm extends Component<Props, State> {
     const labelText = i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
       defaultMessage: 'Use vector tiles',
     });
-    const label = <>{labelText}</>;
     const mvtRadio = (
       <EuiRadio
         id={SCALING_TYPES.MVT}
-        label={label}
+        label={labelText}
         checked={this.props.scalingType === SCALING_TYPES.MVT}
         onChange={() => this._onScalingTypeChange(SCALING_TYPES.MVT)}
         disabled={!this.props.supportsMvt}
@@ -207,8 +206,7 @@ export class ScalingForm extends Component<Props, State> {
         <EuiBetaBadge label={'beta'} />
         <EuiHorizontalRule margin="xs" />
         {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-          defaultMessage:
-            'Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.',
+          defaultMessage: 'Use vector tiles for faster display of large datasets.',
         })}
       </>
     );
