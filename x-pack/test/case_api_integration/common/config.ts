@@ -21,10 +21,11 @@ interface CreateTestConfigOptions {
 const enabledActionTypes = [
   '.email',
   '.index',
+  '.jira',
   '.pagerduty',
+  '.resilient',
   '.server-log',
   '.servicenow',
-  '.jira',
   '.slack',
   '.webhook',
   'test.authorization',

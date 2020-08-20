@@ -77,7 +77,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   let proxyServer: any;
   let proxyHaveBeenCalled = false;
 
-  describe('ServiceNow', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/75522
+  describe.skip('ServiceNow', () => {
     before(() => {
       servicenowSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
