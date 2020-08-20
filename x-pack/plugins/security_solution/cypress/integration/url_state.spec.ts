@@ -36,6 +36,7 @@ import {
   addNameToTimeline,
   closeTimeline,
   executeTimelineKQL,
+  waitForTimelineChanges,
 } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
@@ -233,8 +234,11 @@ describe('url state', () => {
     cy.route('PATCH', '**/api/timeline').as('timeline');
 
     const timelineName = 'Security';
+    const timelineDescription = 'This is the best timeline of the world';
     addNameToTimeline(timelineName);
-    addDescriptionToTimeline('This is the best timeline of the world');
+    waitForTimelineChanges();
+    addDescriptionToTimeline(timelineDescription);
+    waitForTimelineChanges();
 
     cy.wait('@timeline').then((response) => {
       closeTimeline();
