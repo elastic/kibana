@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const { resolve, dirname } = require('path');
+const { resolve } = require('path');
+const { REPO_ROOT } = require('@kbn/dev-utils');
 
-exports.REPO_ROOT = dirname(require.resolve('../../../package.json'));
-exports.ASSET_DIR = resolve(exports.REPO_ROOT, 'built_assets/storybook');
+exports.REPO_ROOT = REPO_ROOT;
+exports.ASSET_DIR = resolve(REPO_ROOT, 'built_assets/storybook');
