@@ -24,7 +24,8 @@ import {
   Plugin,
   PluginInitializerContext,
   RequestHandlerContext,
-} from '../../../../core/server';
+  StartServicesAccessor,
+} from 'src/core/server';
 import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
@@ -55,6 +56,11 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
+/** @internal */
+export interface SearchRouteDependencies {
+  getStartServices: StartServicesAccessor<{}, DataPluginStart>;
+}
+
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
@@ -66,10 +72,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ) {}
 
   public setup(
-    core: CoreSetup<object, DataPluginStart>,
+    core: CoreSetup<{}, DataPluginStart>,
     { registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
+
+    const router = core.http.createRouter();
+    registerSearchRoute(router, { getStartServices: core.getStartServices });
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
@@ -84,8 +93,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     if (usageCollection) {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
-
-    registerSearchRoute(core);
 
     return {
       __enhance: (enhancements: SearchEnhancements) => {

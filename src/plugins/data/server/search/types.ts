@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from '../../../../core/server';
+import { RequestHandlerContext } from 'src/core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
