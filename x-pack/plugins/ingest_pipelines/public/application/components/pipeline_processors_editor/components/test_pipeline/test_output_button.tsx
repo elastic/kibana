@@ -37,7 +37,7 @@ export const TestOutputButton: FunctionComponent<Props> = ({
         <EuiButton
           size="s"
           onClick={openTestPipelineFlyout}
-          data-test-subj="outputButton"
+          data-test-subj="viewOutputButton"
           iconType="crossInACircleFilled"
           isDisabled={isDisabled}
         >
@@ -51,7 +51,7 @@ export const TestOutputButton: FunctionComponent<Props> = ({
     <EuiButton
       size="s"
       onClick={openTestPipelineFlyout}
-      data-test-subj="outputButton"
+      data-test-subj="viewOutputButton"
       iconType="checkInCircleFilled"
     >
       {i18nTexts.buttonLabel}

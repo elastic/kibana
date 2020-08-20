@@ -62,6 +62,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
             updateSelectedDocument(Number(e.target.value));
           }}
           aria-label={i18nTexts.ariaLabel}
+          data-test-subj="documentsDropdown"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -72,7 +72,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   });
 
   return (
-    <>
+    <div data-test-subj="documentsTabContent">
       <EuiText>
         <p>
           <FormattedMessage
@@ -112,8 +112,8 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
           path="documents"
           component={JsonEditorField}
           componentProps={{
-            ['data-test-subj']: 'documentsField',
             euiCodeEditorProps: {
+              'data-test-subj': 'documentsEditor',
               height: '300px',
               'aria-label': i18n.translate(
                 'xpack.ingestPipelines.testPipelineFlyout.documentsTab.editorFieldAriaLabel',
@@ -128,6 +128,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
 
         <EuiButton
+          data-test-subj="runPipelineButton"
           onClick={testPipeline}
           size="s"
           isLoading={isRunningTest}
@@ -146,6 +147,6 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
           )}
         </EuiButton>
       </Form>
-    </>
+    </div>
   );
 };
