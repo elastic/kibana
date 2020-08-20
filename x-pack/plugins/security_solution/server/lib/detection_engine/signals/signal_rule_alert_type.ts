@@ -185,7 +185,6 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const scopedClusterClient = services.getLegacyScopedClusterClient(ml.mlClient);
           // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
           // currently unused by the jobsSummary function.
           const fakeRequest = { headers: {}, params: 'DummyKibanaRequest' } as KibanaRequest;
@@ -208,7 +207,6 @@ export const signalRulesAlertType = ({
 
           const anomalyResults = await findMlSignals({
             ml,
-            clusterClient: scopedClusterClient,
             // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
