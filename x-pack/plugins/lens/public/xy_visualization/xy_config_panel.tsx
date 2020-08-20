@@ -501,8 +501,9 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
     forAccessor: accessor,
   };
   const axisMode = layerConfig?.axisMode || 'auto';
-  const shouldShowValueLabels =
-    (horizontalOnly && !chartHasMoreThanOneSeries && layerConfig?.showValueLabels) ?? false;
+  const shouldShowValueLabels = horizontalOnly && !chartHasMoreThanOneSeries;
+
+  const showValueLabels = (shouldShowValueLabels && layerConfig?.showValueLabels) ?? false;
 
   const createNewYAxisConfigsWithValue = useCallback(
     <K extends keyof YConfig, V extends YConfig[K]>(prop: K, newValue: V) => {
@@ -569,7 +570,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           }}
         />
       </EuiFormRow>
-      {horizontalOnly && (
+      {shouldShowValueLabels && (
         <EuiFormRow
           display="columnCompressedSwitch"
           fullWidth
@@ -590,7 +591,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
               );
               setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
             }}
-            checked={shouldShowValueLabels}
+            checked={showValueLabels}
           />
         </EuiFormRow>
       )}

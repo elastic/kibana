@@ -6,10 +6,16 @@
 
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
-import { LayerContextMenu, XyToolbar } from './xy_config_panel';
+import {
+  EuiButtonGroupProps,
+  EuiSuperSelect,
+  EuiButtonGroup,
+  EuiSwitch,
+  EuiSwitchProps,
+} from '@elastic/eui';
+import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { FramePublicAPI } from '../types';
-import { State } from './types';
+import { State, SeriesType } from './types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
 
@@ -193,6 +199,78 @@ describe('XY Config panels', () => {
         .prop('idToSelectedMap');
 
       expect(selections!).toEqual({ x: true, y: true });
+    });
+  });
+
+  describe('Dimension Editor', () => {
+    test('should show the value labels option for the bar chart', () => {
+      const state = testState();
+      const testAccessor = state.layers[0].accessors[0];
+
+      const component = mount(
+        <DimensionEditor
+          layerId={state.layers[0].layerId}
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [
+              {
+                ...state.layers[0],
+                splitAccessor: undefined,
+                seriesType: 'bar_horizontal',
+                yConfig: [{ forAccessor: testAccessor, showValueLabels: true }],
+              },
+            ],
+          }}
+          groupId=""
+          accessor={testAccessor}
+        />
+      );
+
+      const valueLabelsCheck = component
+        .find(EuiSwitch)
+        .first()
+        .prop('checked') as EuiSwitchProps['checked'];
+
+      expect(valueLabelsCheck).toBe(true);
+    });
+
+    test('should not show the value labels switch for the other types of charts', () => {
+      const state = testState();
+      const testAccessor = state.layers[0].accessors[0];
+
+      const componentsConfig = [
+        { type: 'bar_horizontal' as SeriesType, multiseries: true },
+        { type: 'bar' as SeriesType, multiseries: true },
+        { type: 'line' as SeriesType, multiseries: false },
+        { type: 'area' as SeriesType, multiseries: false },
+      ];
+
+      for (const { type, multiseries } of componentsConfig) {
+        const component = mount(
+          <DimensionEditor
+            layerId={state.layers[0].layerId}
+            frame={frame}
+            setState={jest.fn()}
+            state={{
+              ...state,
+              layers: [
+                {
+                  ...state.layers[0],
+                  ...(!multiseries && { splitAccessor: undefined }),
+                  seriesType: type,
+                  yConfig: [{ forAccessor: testAccessor, showValueLabels: true }],
+                },
+              ],
+            }}
+            groupId=""
+            accessor={testAccessor}
+          />
+        );
+
+        expect(component.find(EuiSwitch).length).toBe(0);
+      }
     });
   });
 });
