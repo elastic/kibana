@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function normalizeType(type) {
-  const normalTypes = {
+export function normalizeType(type: string) {
+  const normalTypes: Record<string, string[]> = {
     string: ['string', 'text', 'keyword', '_type', '_id', '_index', 'geo_point'],
     number: [
       'float',
