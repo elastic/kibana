@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { URL_MAX_LENGTH } from '../../../../../../../src/core/public';
-import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
+import { createSpatialFilterWithGeometry } from '../../../../common/elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 

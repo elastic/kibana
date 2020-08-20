@@ -14,6 +14,7 @@ import {
   buildNoDataAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { createFormatter } from '../../../../common/formatters';
 import { AlertStates } from './types';
 import { evaluateAlert } from './lib/evaluate_alert';
 
@@ -60,7 +61,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults.map((result) => buildFiredAlertReason(result[group])).join('\n');
+        reason = alertResults
+          .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
+          .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
@@ -83,8 +86,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           alertState: stateToAlertMessage[nextState],
           reason,
           timestamp,
-          value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          value: mapToConditionsLookup(
+            alertResults,
+            (result) => formatAlertResult(result[group]).currentValue
+          ),
+          threshold: mapToConditionsLookup(
+            alertResults,
+            (result) => formatAlertResult(result[group]).threshold
+          ),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
@@ -113,3 +122,18 @@ const mapToConditionsLookup = (
       (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
       {}
     );
+
+const formatAlertResult = (alertResult: {
+  metric: string;
+  currentValue: number;
+  threshold: number[];
+}) => {
+  const { metric, currentValue, threshold } = alertResult;
+  if (!metric.endsWith('.pct')) return alertResult;
+  const formatter = createFormatter('percent');
+  return {
+    ...alertResult,
+    currentValue: formatter(currentValue),
+    threshold: Array.isArray(threshold) ? threshold.map((v: number) => formatter(v)) : threshold,
+  };
+};
