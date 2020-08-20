@@ -45,7 +45,7 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
-import { isAdvancedConfig } from '../../components/action_clone/clone_button';
+import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '

@@ -1059,6 +1059,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal
     static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
+    readonly id: string;
     readonly isSystemRequest: boolean;
     // (undocumented)
     readonly params: Params;
@@ -2044,6 +2045,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     references?: SavedObjectReference[];
     // (undocumented)
     type: string;
+    // (undocumented)
+    version?: string;
 }
 
 // @public (undocumented)
@@ -2178,6 +2181,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    version?: string;
 }
 
 // @public (undocumented)
