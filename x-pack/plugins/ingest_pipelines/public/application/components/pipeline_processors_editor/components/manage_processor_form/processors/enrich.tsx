@@ -90,7 +90,7 @@ const fieldsConfig: FieldsConfig = {
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameRequiredError',
             {
-              defaultMessage: 'A field value is required.',
+              defaultMessage: 'A policy name value is required.',
             }
           )
         ),
