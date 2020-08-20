@@ -52,9 +52,9 @@ it('generates a plugin', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/foo/.eslintrc.js,
       <absolute path>/plugins/foo/.gitignore,
       <absolute path>/plugins/foo/common/index.ts,
-      <absolute path>/plugins/foo/eslintrc.js,
       <absolute path>/plugins/foo/i18nrc.json,
       <absolute path>/plugins/foo/kibana.json,
       <absolute path>/plugins/foo/package.json,
@@ -91,9 +91,9 @@ it('generates a plugin without UI', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/bar/.eslintrc.js,
       <absolute path>/plugins/bar/.gitignore,
       <absolute path>/plugins/bar/common/index.ts,
-      <absolute path>/plugins/bar/eslintrc.js,
       <absolute path>/plugins/bar/kibana.json,
       <absolute path>/plugins/bar/package.json,
       <absolute path>/plugins/bar/README.md,
@@ -122,9 +122,9 @@ it('generates a plugin without server plugin', async () => {
 
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/plugins/baz/.eslintrc.js,
       <absolute path>/plugins/baz/.gitignore,
       <absolute path>/plugins/baz/common/index.ts,
-      <absolute path>/plugins/baz/eslintrc.js,
       <absolute path>/plugins/baz/i18nrc.json,
       <absolute path>/plugins/baz/kibana.json,
       <absolute path>/plugins/baz/package.json,
