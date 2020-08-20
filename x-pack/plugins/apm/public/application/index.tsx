@@ -20,6 +20,7 @@ import { LocationProvider } from '../context/LocationContext';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
+import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import {
   KibanaContextProvider,
   useUiSetting$,
@@ -29,6 +30,9 @@ import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
 import { history, resetHistory } from '../utils/history';
+import { setHelpExtension } from '../setHelpExtension';
+import { setReadonlyBadge } from '../updateBadge';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
@@ -61,7 +65,7 @@ function App() {
   );
 }
 
-function ApmAppRoot({
+export function ApmAppRoot({
   core,
   deps,
   routerHistory,
@@ -116,13 +120,27 @@ function ApmAppRoot({
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
+
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
+  // render APM feedback link in global help menu
+  setHelpExtension(core);
+  setReadonlyBadge(core);
+
+  createCallApmApi(core.http);
+
   resetHistory();
+
+  // Automatically creates static index pattern and stores as saved object
+  createStaticIndexPattern().catch((e) => {
+    // eslint-disable-next-line no-console
+    console.log('Error creating static index pattern', e);
+  });
+
   ReactDOM.render(
     <ApmAppRoot
       core={core}
