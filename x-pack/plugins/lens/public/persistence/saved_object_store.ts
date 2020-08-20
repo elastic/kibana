@@ -19,9 +19,6 @@ export interface Document {
   title: string;
   description?: string;
   state: {
-    datasourceMetaData: {
-      numberFilterableIndexPatterns: number;
-    };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;

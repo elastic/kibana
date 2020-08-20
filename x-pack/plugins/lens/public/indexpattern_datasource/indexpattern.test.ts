@@ -514,34 +514,6 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#getMetadata', () => {
-    it('should return the title of the index patterns', () => {
-      expect(
-        indexPatternDatasource.getMetaData({
-          indexPatternRefs: [],
-          existingFields: {},
-          isFirstExistenceFetch: false,
-          indexPatterns: expectedIndexPatterns,
-          layers: {
-            first: {
-              indexPatternId: '1',
-              columnOrder: [],
-              columns: {},
-            },
-            second: {
-              indexPatternId: '2',
-              columnOrder: [],
-              columns: {},
-            },
-          },
-          currentIndexPatternId: '1',
-        })
-      ).toEqual({
-        filterableIndexPatterns: ['1', '2'],
-      });
-    });
-  });
-
   describe('#getPublicAPI', () => {
     let publicAPI: DatasourcePublicAPI;
 

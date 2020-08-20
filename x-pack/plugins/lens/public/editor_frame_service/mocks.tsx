@@ -80,7 +80,6 @@ export function createMockDatasource(id: string): DatasourceMock {
     removeLayer: jest.fn((_state, _layerId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
-    getMetaData: jest.fn((_state) => ({ filterableIndexPatterns: [] })),
 
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),

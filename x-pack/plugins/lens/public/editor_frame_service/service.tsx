@@ -21,12 +21,14 @@ import {
   EditorFrameInstance,
   EditorFrameStart,
 } from '../types';
+import { Document } from '../persistence/saved_object_store';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { persistedStateToExpression } from './editor_frame/state_helpers';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -59,6 +61,21 @@ export class EditorFrameService {
   private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
   private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
 
+  private async documentToExpression(doc: Document) {
+    const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+      collectAsyncDefinitions(this.datasources),
+      collectAsyncDefinitions(this.visualizations),
+    ]);
+
+    return await persistedStateToExpression(
+      resolvedVisualizations[doc.visualizationType!],
+      doc.state.visualization,
+      resolvedDatasources,
+      doc.state.datasourceStates,
+      doc.references
+    );
+  }
+
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
     plugins: EditorFrameSetupPlugins
@@ -78,6 +95,7 @@ export class EditorFrameService {
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
+        documentToExpression: this.documentToExpression,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
         datasources: resolvedDatasources,

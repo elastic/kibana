@@ -176,9 +176,6 @@ describe('editor_frame', () => {
                   testDatasource2: datasource2State,
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  numberFilterableIndexPatterns: 0,
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
@@ -505,9 +502,6 @@ describe('editor_frame', () => {
                   testDatasource2: {},
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  numberFilterableIndexPatterns: 0,
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
@@ -753,9 +747,6 @@ describe('editor_frame', () => {
                   testDatasource2: {},
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  numberFilterableIndexPatterns: 0,
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
@@ -808,9 +799,6 @@ describe('editor_frame', () => {
                   testDatasource2: datasource2State,
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  numberFilterableIndexPatterns: 0,
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
@@ -1457,9 +1445,10 @@ describe('editor_frame', () => {
         })
       );
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource.getMetaData.mockReturnValue({
-        filterableIndexPatterns: ['1'],
-      });
+      mockDatasource.getPersistableState = jest.fn((x) => ({
+        state: x,
+        savedObjectReferences: [{ type: 'index-pattern', id: '1', name: '' }],
+      }));
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
       await act(async () => {
@@ -1491,13 +1480,12 @@ describe('editor_frame', () => {
           references: [
             {
               id: '1',
-              name: 'filterable-index-pattern-0',
+              name: 'index-pattern-0',
               type: 'index-pattern',
             },
           ],
           state: {
             visualization: null, // Not yet loaded
-            datasourceMetaData: { numberFilterableIndexPatterns: 1 },
             datasourceStates: { testDatasource: {} },
             query: { query: '', language: 'lucene' },
             filters: [],
@@ -1514,7 +1502,7 @@ describe('editor_frame', () => {
           references: [
             {
               id: '1',
-              name: 'filterable-index-pattern-0',
+              name: 'index-pattern-0',
               type: 'index-pattern',
             },
           ],
@@ -1522,7 +1510,6 @@ describe('editor_frame', () => {
           id: undefined,
           state: {
             visualization: { initialState: true }, // Now loaded
-            datasourceMetaData: { numberFilterableIndexPatterns: 1 },
             datasourceStates: { testDatasource: {} },
             query: { query: '', language: 'lucene' },
             filters: [],
@@ -1576,7 +1563,6 @@ describe('editor_frame', () => {
           id: undefined,
           references: [],
           state: {
-            datasourceMetaData: { numberFilterableIndexPatterns: 0 },
             datasourceStates: { testDatasource: { datasource: '' } },
             visualization: { initialState: true },
             query: { query: 'new query', language: 'lucene' },
@@ -1595,9 +1581,10 @@ describe('editor_frame', () => {
 
       mockDatasource.initialize.mockResolvedValue({});
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource.getMetaData.mockReturnValue({
-        filterableIndexPatterns: ['1'],
-      });
+      mockDatasource.getPersistableState = jest.fn((x) => ({
+        state: x,
+        savedObjectReferences: [{ type: 'index-pattern', id: '1', name: '' }],
+      }));
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
       await act(async () => {

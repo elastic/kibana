@@ -27,12 +27,7 @@ import {
   OnSaveProps,
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
-import {
-  Document,
-  SavedObjectStore,
-  injectFilterReferences,
-  getFilterableIndexPatternIds,
-} from '../persistence';
+import { Document, SavedObjectStore, injectFilterReferences } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -256,7 +251,9 @@ export function App({
           .load(docId)
           .then((doc) => {
             getAllIndexPatterns(
-              getFilterableIndexPatternIds(doc),
+              _.uniq(
+                doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+              ),
               data.indexPatterns,
               core.notifications
             )

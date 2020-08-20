@@ -6,23 +6,7 @@
 
 import { Filter } from 'src/plugins/data/public';
 import { SavedObjectReference } from 'kibana/public';
-import { Document } from './saved_object_store';
 import { PersistableFilter } from '../../common';
-
-export function getFilterableIndexPatternIds(doc: Document) {
-  return new Array(doc.state.datasourceMetaData.numberFilterableIndexPatterns)
-    .fill(undefined)
-    .map((_, index) => {
-      return doc.references.find(({ name }) => name === `filterable-index-pattern-${index}`)?.id;
-    })
-    .filter(Boolean) as string[];
-}
-
-export function filterableIndexPatternIdsToReferences(filterableIndexPatternIds: string[]) {
-  return filterableIndexPatternIds.map((id, index) => {
-    return { type: 'index-pattern', id, name: `filterable-index-pattern-${index}` };
-  });
-}
 
 export function extractFilterReferences(
   filters: Filter[]

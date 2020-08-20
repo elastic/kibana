@@ -7,13 +7,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import {
-  Datasource,
-  DatasourcePublicAPI,
-  FramePublicAPI,
-  Visualization,
-  DatasourceMetaData,
-} from '../../types';
+import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -26,6 +20,7 @@ import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { EditorFrameStartPlugins } from '../service';
+import { initializeDatasources, createDatasourceLayers } from './state_helpers';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -45,7 +40,7 @@ export interface EditorFrameProps {
   filters: Filter[];
   savedQuery?: SavedQuery;
   onChange: (arg: {
-    filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+    filterableIndexPatterns: string[];
     doc: Document;
     isSaveable: boolean;
   }) => void;
@@ -68,28 +63,20 @@ export function EditorFrame(props: EditorFrameProps) {
       // prevents executing dispatch on unmounted component
       let isUnmounted = false;
       if (!allLoaded) {
-        Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
-          if (
-            state.datasourceStates[datasourceId] &&
-            state.datasourceStates[datasourceId].isLoading
-          ) {
-            datasource
-              .initialize(
-                state.datasourceStates[datasourceId].state || undefined,
-                props.doc?.references
-              )
-              .then((datasourceState) => {
-                if (!isUnmounted) {
-                  dispatch({
-                    type: 'UPDATE_DATASOURCE_STATE',
-                    updater: datasourceState,
-                    datasourceId,
-                  });
-                }
-              })
-              .catch(onError);
-          }
-        });
+        initializeDatasources(
+          props.datasourceMap,
+          state.datasourceStates,
+          (datasourceId, datasourceState) => {
+            if (!isUnmounted) {
+              dispatch({
+                type: 'UPDATE_DATASOURCE_STATE',
+                updater: datasourceState,
+                datasourceId,
+              });
+            }
+          },
+          onError
+        );
       }
       return () => {
         isUnmounted = true;
@@ -99,21 +86,7 @@ export function EditorFrame(props: EditorFrameProps) {
     [allLoaded, onError]
   );
 
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
-  Object.keys(props.datasourceMap)
-    .filter((id) => state.datasourceStates[id] && !state.datasourceStates[id].isLoading)
-    .forEach((id) => {
-      const datasourceState = state.datasourceStates[id].state;
-      const datasource = props.datasourceMap[id];
-
-      const layers = datasource.getLayers(datasourceState);
-      layers.forEach((layer) => {
-        datasourceLayers[layer] = props.datasourceMap[id].getPublicAPI({
-          state: datasourceState,
-          layerId: layer,
-        });
-      });
-    });
+  const datasourceLayers = createDatasourceLayers(props.datasourceMap, state.datasourceStates);
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
@@ -220,20 +193,20 @@ export function EditorFrame(props: EditorFrameProps) {
         return;
       }
 
-      const { filterableIndexPatterns, doc, isSaveable } = getSavedObjectFormat({
-        activeDatasources: Object.keys(state.datasourceStates).reduce(
-          (datasourceMap, datasourceId) => ({
-            ...datasourceMap,
-            [datasourceId]: props.datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        visualization: activeVisualization,
-        state,
-        framePublicAPI,
-      });
-
-      props.onChange({ filterableIndexPatterns, doc, isSaveable });
+      props.onChange(
+        getSavedObjectFormat({
+          activeDatasources: Object.keys(state.datasourceStates).reduce(
+            (datasourceMap, datasourceId) => ({
+              ...datasourceMap,
+              [datasourceId]: props.datasourceMap[datasourceId],
+            }),
+            {}
+          ),
+          visualization: activeVisualization,
+          state,
+          framePublicAPI,
+        })
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

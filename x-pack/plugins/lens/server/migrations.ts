@@ -49,9 +49,6 @@ interface LensDocShape<VisualizationState = unknown> {
   visualizationType: string | null;
   title: string;
   state: {
-    datasourceMetaData: {
-      numberFilterableIndexPatterns: number;
-    };
     datasourceStates: {
       // This is hardcoded as our only datasource
       indexpattern: {
@@ -269,17 +266,6 @@ const extractReferences: SavedObjectMigrationFn<LensDocShapePre710, LensDocShape
     }
   );
 
-  // add unique filterable index patterns to reference list
-  const uniqueFilterableIndexPatterns = uniqBy(
-    attributes.state.datasourceMetaData.filterableIndexPatterns,
-    'id'
-  );
-  savedObjectReferences.push(
-    ...uniqueFilterableIndexPatterns.map(({ id }, index) => {
-      return { type: 'index-pattern', id, name: `filterable-index-pattern-${index}` };
-    })
-  );
-
   // add filter index patterns to reference list and remove index pattern ids from filter definitions
   const persistableFilters = attributes.state.filters.map((filterRow, i) => {
     if (!filterRow.meta || !filterRow.meta.index) {
@@ -309,9 +295,6 @@ const extractReferences: SavedObjectMigrationFn<LensDocShapePre710, LensDocShape
       visualizationType: attributes.visualizationType,
       title: attributes.title,
       state: {
-        datasourceMetaData: {
-          numberFilterableIndexPatterns: uniqueFilterableIndexPatterns.length,
-        },
         datasourceStates: {
           indexpattern: {
             layers: persistableLayers,

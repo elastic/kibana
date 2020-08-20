@@ -21,9 +21,6 @@ const savedVis: Document = {
   state: {
     visualization: {},
     datasourceStates: {},
-    datasourceMetaData: {
-      numberFilterableIndexPatterns: 0,
-    },
     query: { query: '', language: 'lucene' },
     filters: [],
   },

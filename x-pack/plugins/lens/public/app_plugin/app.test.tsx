@@ -285,7 +285,6 @@ describe('Lens App', () => {
       state: {
         query: 'fake query',
         filters: [],
-        datasourceMetaData: { numberFilterableIndexPatterns: 0 },
       },
     });
     await act(async () => {
@@ -315,9 +314,8 @@ describe('Lens App', () => {
         state: {
           query: 'fake query',
           filters: [{ query: { match_phrase: { src: 'test' } } }],
-          datasourceMetaData: { numberFilterableIndexPatterns: 1 },
         },
-        references: [{ type: 'index-pattern', id: '1', name: 'filterable-index-pattern-0' }],
+        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       });
 
       instance = mount(<App {...args} />);
@@ -346,7 +344,6 @@ describe('Lens App', () => {
             state: expect.objectContaining({
               query: 'fake query',
               filters: [{ query: { match_phrase: { src: 'test' } } }],
-              datasourceMetaData: { numberFilterableIndexPatterns: 1 },
             }),
           }),
         })
@@ -409,7 +406,6 @@ describe('Lens App', () => {
           expression: 'valid expression',
           state: {
             query: 'kuery',
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
           },
         } as jest.ResolvedValue<Document>);
       });
@@ -436,9 +432,6 @@ describe('Lens App', () => {
           references: [],
           state: {
             filters: [],
-            datasourceMetaData: {
-              numberFilterableIndexPatterns: 0,
-            },
           },
         },
         initialDocId,
@@ -457,7 +450,6 @@ describe('Lens App', () => {
           references: [],
           state: {
             query: 'fake query',
-            datasourceMetaData: { numberFilterableIndexPatterns: 0 },
             filters: [],
           },
         });
@@ -761,7 +753,6 @@ describe('Lens App', () => {
         expression: 'valid expression',
         state: {
           query: 'kuery',
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
       } as jest.ResolvedValue<Document>);
     });
@@ -1065,7 +1056,6 @@ describe('Lens App', () => {
         state: {
           query: 'kuery',
           filters: [],
-          datasourceMetaData: { numberFilterableIndexPatterns: 0 },
         },
       } as jest.ResolvedValue<Document>);
     });
@@ -1176,7 +1166,6 @@ describe('Lens App', () => {
             state: {
               query: 'kuery',
               filters: [],
-              datasourceMetaData: { numberFilterableIndexPatterns: 0 },
             },
           } as unknown) as Document,
           isSaveable: true,

@@ -32,9 +32,6 @@ describe('LensStore', () => {
         visualizationType: 'bar',
         references: [],
         state: {
-          datasourceMetaData: {
-            numberFilterableIndexPatterns: 0,
-          },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
@@ -51,9 +48,6 @@ describe('LensStore', () => {
         visualizationType: 'bar',
         references: [],
         state: {
-          datasourceMetaData: {
-            numberFilterableIndexPatterns: 0,
-          },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
@@ -71,9 +65,6 @@ describe('LensStore', () => {
           description: 'My doc',
           visualizationType: 'bar',
           state: {
-            datasourceMetaData: {
-              numberFilterableIndexPatterns: 0,
-            },
             datasourceStates: {
               indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
             },
@@ -96,7 +87,6 @@ describe('LensStore', () => {
         visualizationType: 'line',
         references: [],
         state: {
-          datasourceMetaData: { numberFilterableIndexPatterns: 0 },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
@@ -110,7 +100,6 @@ describe('LensStore', () => {
         visualizationType: 'line',
         references: [],
         state: {
-          datasourceMetaData: { numberFilterableIndexPatterns: 0 },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
@@ -138,7 +127,6 @@ describe('LensStore', () => {
             title: 'Even the very wise cannot see all ends.',
             visualizationType: 'line',
             state: {
-              datasourceMetaData: { numberFilterableIndexPatterns: 0 },
               datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
               visualization: { gear: ['staff', 'pointy hat'] },
               query: { query: '', language: 'lucene' },

@@ -21,6 +21,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -215,12 +216,24 @@ export function SuggestionPanel({
     visualizationMap,
   ]);
 
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: frame.query,
+      timeRange: {
+        from: frame.dateRange.fromDate,
+        to: frame.dateRange.toDate,
+      },
+      filters: frame.filters,
+    }),
+    [frame.query, frame.dateRange.fromDate, frame.dateRange.toDate, frame.filters]
+  );
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
     const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
     return (props: ReactExpressionRendererProps) => (
-      <ExpressionRendererComponent {...props} reload$={autoRefreshFetch$} />
+      <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
     );
-  }, [plugins.data.query.timefilter.timefilter]);
+  }, [plugins.data.query.timefilter.timefilter, context]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 

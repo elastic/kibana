@@ -8,8 +8,8 @@ import _ from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
-import { Datasource, Visualization, FramePublicAPI, DatasourceMetaData } from '../../types';
-import { extractFilterReferences, filterableIndexPatternIdsToReferences } from '../../persistence';
+import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import { extractFilterReferences } from '../../persistence';
 import { buildExpression } from './expression_helpers';
 
 export interface Props {
@@ -26,7 +26,7 @@ export function getSavedObjectFormat({
   framePublicAPI,
 }: Props): {
   doc: Document;
-  filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+  filterableIndexPatterns: string[];
   isSaveable: boolean;
 } {
   const datasourceStates: Record<string, unknown> = {};
@@ -39,16 +39,9 @@ export function getSavedObjectFormat({
     references.push(...savedObjectReferences);
   });
 
-  const filterableIndexPatterns: string[] = [];
-  Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    filterableIndexPatterns.push(
-      ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
-    );
-  });
-
-  const uniqueFilterableIndexPatternIds = _.uniq(filterableIndexPatterns);
-
-  references.push(...filterableIndexPatternIdsToReferences(uniqueFilterableIndexPatternIds));
+  const uniqueFilterableIndexPatternIds = _.uniq(
+    references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+  );
 
   const { persistableFilters, references: filterReferences } = extractFilterReferences(
     framePublicAPI.filters
@@ -74,16 +67,13 @@ export function getSavedObjectFormat({
       visualizationType: state.visualization.activeId,
       state: {
         datasourceStates,
-        datasourceMetaData: {
-          numberFilterableIndexPatterns: uniqueFilterableIndexPatternIds.length,
-        },
         visualization: state.visualization.state,
         query: framePublicAPI.query,
         filters: persistableFilters,
       },
       references,
     },
-    filterableIndexPatterns,
+    filterableIndexPatterns: uniqueFilterableIndexPatternIds,
     isSaveable: expression !== null,
   };
 }

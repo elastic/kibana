@@ -18,6 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -173,6 +174,23 @@ export function InnerWorkspacePanel({
     [plugins.data.query.timefilter.timefilter]
   );
 
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: framePublicAPI.query,
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      filters: framePublicAPI.filters,
+    }),
+    [
+      framePublicAPI.query,
+      framePublicAPI.dateRange.fromDate,
+      framePublicAPI.dateRange.toDate,
+      framePublicAPI.filters,
+    ]
+  );
+
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expression && localState.expressionBuildError) {
@@ -264,6 +282,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          searchContext={context}
           reload$={autoRefreshFetch$}
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {

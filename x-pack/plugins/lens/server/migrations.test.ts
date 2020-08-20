@@ -457,20 +457,9 @@ describe('Lens migrations', () => {
       ).toBeUndefined();
     });
 
-    it('should list references for filterable index pattern ids', () => {
+    it('should remove datsource meta data', () => {
       const result = migrations['7.10.0'](example, context);
-      expect(
-        result.references?.find((ref) => ref.name === 'filterable-index-pattern-0')?.id
-      ).toEqual('90943e30-9a47-11e8-b64d-95841ca0b247');
-      expect(
-        result.references?.find((ref) => ref.name === 'filterable-index-pattern-1')?.id
-      ).toEqual('ff959d40-b880-11e8-a6d9-e546fe2bba5f');
-    });
-
-    it('should remove filterable index patterns', () => {
-      const result = migrations['7.10.0'](example, context);
-      expect(result.attributes.state.datasourceMetaData.filterableIndexPatterns).toBeUndefined();
-      expect(result.attributes.state.datasourceMetaData.numberFilterableIndexPatterns).toEqual(2);
+      expect(result.attributes.state.datasourceMetaData).toBeUndefined();
     });
 
     it('should list references for filters', () => {

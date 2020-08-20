@@ -85,9 +85,6 @@ describe('save editor frame state', () => {
     expect(doc).toEqual({
       id: undefined,
       state: {
-        datasourceMetaData: {
-          numberFilterableIndexPatterns: 0,
-        },
         datasourceStates: {
           indexpattern: {
             stuff: '2_datasource_persisted',

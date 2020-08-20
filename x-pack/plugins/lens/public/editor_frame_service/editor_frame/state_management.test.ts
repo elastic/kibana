@@ -63,9 +63,6 @@ describe('editor_frame state management', () => {
               testDatasource2: { internalState2: '' },
             },
             visualization: {},
-            datasourceMetaData: {
-              numberFilterableIndexPatterns: 0,
-            },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
@@ -381,7 +378,6 @@ describe('editor_frame state management', () => {
           doc: {
             id: 'b',
             state: {
-              datasourceMetaData: { numberFilterableIndexPatterns: 0 },
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
               query: { query: '', language: 'lucene' },
