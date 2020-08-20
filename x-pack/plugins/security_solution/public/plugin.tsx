@@ -43,7 +43,7 @@ import {
   APP_CASES_PATH,
   APP_PATH,
 } from '../common/constants';
-import { ConfigureEndpointPackageConfig } from './management/pages/policy/view/ingest_manager_integration/configure_package_config';
+import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
@@ -325,9 +325,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     if (plugins.ingestManager) {
-      plugins.ingestManager.registerPackageConfigComponent(
+      plugins.ingestManager.registerPackagePolicyComponent(
         'endpoint',
-        ConfigureEndpointPackageConfig
+        ConfigureEndpointPackagePolicy
       );
     }
 

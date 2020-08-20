@@ -47,7 +47,7 @@ export interface DeleteEnrollmentAPIKeyResponse {
 export interface PostEnrollmentAPIKeyRequest {
   body: {
     name?: string;
-    config_id: string;
+    policy_id: string;
     expiration?: string;
   };
 }

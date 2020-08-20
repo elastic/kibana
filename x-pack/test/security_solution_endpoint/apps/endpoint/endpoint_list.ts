@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
 import {
   deleteMetadataCurrentStream,
   deleteMetadataStream,
@@ -21,9 +22,72 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const transformId = 'endpoint_metadata_transform';
 
+  const expectedData = [
+    [
+      'Hostname',
+      'Agent Status',
+      'Integration',
+      'Configuration Status',
+      'Operating System',
+      'IP Address',
+      'Version',
+      'Last Active',
+    ],
+    [
+      'rezzani-7.example.com',
+      'Error',
+      'Default',
+      'Failure',
+      'windows 10.0',
+      '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
+      '6.8.0',
+      'Jan 24, 2020 @ 16:06:09.541',
+    ],
+    [
+      'cadmann-4.example.com',
+      'Error',
+      'Default',
+      'Failure',
+      'windows 10.0',
+      '10.192.213.130, 10.70.28.129',
+      '6.6.1',
+      'Jan 24, 2020 @ 16:06:09.541',
+    ],
+    [
+      'thurlow-9.example.com',
+      'Error',
+      'Default',
+      'Success',
+      'windows 10.0',
+      '10.46.229.234',
+      '6.0.0',
+      'Jan 24, 2020 @ 16:06:09.541',
+    ],
+  ];
+
   describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    describe('when initially navigating to page', () => {
+      before(async () => {
+        await pageObjects.endpoint.navigateToEndpointList();
+      });
+      after(async () => {
+        await deleteMetadataStream(getService);
+      });
+
+      it('finds no data in list and prompts onboarding to add policy', async () => {
+        await testSubjects.exists('emptyPolicyTable');
+      });
+
+      it('finds data after load and polling', async () => {
+        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 10000);
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedData);
+      });
+    });
 
     describe('when there is data,', () => {
       before(async () => {
@@ -39,53 +103,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds page title', async () => {
-        const title = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
-        expect(title).to.equal('Endpoints');
+        const title = await testSubjects.getVisibleText('header-page-title');
+        expect(title).to.equal('Endpoints BETA');
       });
 
       it('displays table data', async () => {
-        const expectedData = [
-          [
-            'Hostname',
-            'Agent Status',
-            'Integration',
-            'Configuration Status',
-            'Operating System',
-            'IP Address',
-            'Version',
-            'Last Active',
-          ],
-          [
-            'rezzani-7.example.com',
-            'Error',
-            'Default',
-            'Failure',
-            'windows 10.0',
-            '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
-            '6.8.0',
-            'Jan 24, 2020 @ 16:06:09.541',
-          ],
-          [
-            'cadmann-4.example.com',
-            'Error',
-            'Default',
-            'Failure',
-            'windows 10.0',
-            '10.192.213.130, 10.70.28.129',
-            '6.6.1',
-            'Jan 24, 2020 @ 16:06:09.541',
-          ],
-          [
-            'thurlow-9.example.com',
-            'Error',
-            'Default',
-            'Success',
-            'windows 10.0',
-            '10.46.229.234',
-            '6.0.0',
-            'Jan 24, 2020 @ 16:06:09.541',
-          ],
-        ];
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
@@ -137,7 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Configuration link is clicked', async () => {
+        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
           await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
           await testSubjects.existOrFail('fleetAgentListTable');
@@ -159,7 +181,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('displays details row headers', async () => {
-          const expectedData = [
+          const expectedHeaders = [
             'OS',
             'Last Seen',
             'Alerts',
@@ -172,7 +194,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const keys = await pageObjects.endpoint.endpointFlyoutDescriptionKeys(
             'endpointDetailsFlyout'
           );
-          expect(keys).to.eql(expectedData);
+          expect(keys).to.eql(expectedHeaders);
         });
 
         it('displays details row descriptions', async () => {

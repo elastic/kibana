@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiKeyboardAccessible,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
@@ -40,6 +39,7 @@ import {
   esQuery,
   IIndexPattern,
 } from '../../../../../src/plugins/data/public';
+import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
@@ -177,8 +177,27 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     field,
     indexPattern.id,
   ]);
+  const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
+  const lensInfoIcon = (
+    <EuiIconTip
+      anchorClassName="lnsFieldItem__infoIcon"
+      content={
+        hideDetails
+          ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
+              defaultMessage: 'Drag and drop to visualize.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            })
+      }
+      type="iInCircle"
+      color="subdued"
+      size="s"
+    />
+  );
   return (
     <EuiPopover
+      ownFocus
       id="lnsFieldListPanel__field"
       className="lnsFieldItem__popoverAnchor"
       display="block"
@@ -193,47 +212,27 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             exists ? 'exists' : 'missing'
           }`}
         >
-          <EuiKeyboardAccessible>
-            <div
-              className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
-              data-test-subj={`lnsFieldListPanelField-${field.name}`}
-              onClick={() => {
-                if (exists) {
-                  togglePopover();
-                }
-              }}
-              onKeyPress={(event) => {
-                if (exists && event.key === 'ENTER') {
-                  togglePopover();
-                }
-              }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-              })}
-            >
-              <LensFieldIcon type={field.type as DataType} />
-
-              <span className="lnsFieldItem__name" title={field.name}>
-                {wrappableHighlightableFieldName}
-              </span>
-
-              <EuiIconTip
-                anchorClassName="lnsFieldItem__infoIcon"
-                content={
-                  hideDetails
-                    ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
-                        defaultMessage: 'Drag and drop to visualize.',
-                      })
-                    : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                        defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-                      })
-                }
-                type="iInCircle"
-                color="subdued"
-                size="s"
-              />
-            </div>
-          </EuiKeyboardAccessible>
+          <FieldButton
+            className="lnsFieldItem__info"
+            isDraggable
+            isActive={infoIsOpen}
+            data-test-subj={`lnsFieldListPanelField-${field.name}`}
+            onClick={() => {
+              if (exists) {
+                togglePopover();
+              }
+            }}
+            aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
+              defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+              values: {
+                fieldName: field.name,
+                fieldType: field.type,
+              },
+            })}
+            fieldIcon={lensFieldIcon}
+            fieldName={wrappableHighlightableFieldName}
+            fieldInfoIcon={lensInfoIcon}
+          />
         </DragDrop>
       }
       isOpen={infoIsOpen}
