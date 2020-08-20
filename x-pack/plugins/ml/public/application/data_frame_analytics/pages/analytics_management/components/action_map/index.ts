@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getMapAction } from './get_map_action';
 export { MapButton } from './map_button';
+export { useMapAction } from './use_map_action';

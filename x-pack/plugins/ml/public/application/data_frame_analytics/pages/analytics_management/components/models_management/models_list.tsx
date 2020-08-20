@@ -31,7 +31,7 @@ import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
-import { getResultsUrl } from '../analytics_list/common';
+import { getResultsUrl, getJobMapUrl } from '../analytics_list/common';
 import {
   ModelConfigResponse,
   ModelPipelines,
@@ -286,6 +286,26 @@ export const ModelsList: FC = () => {
         );
       },
       isPrimary: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
+        defaultMessage: 'Analytics map',
+      }),
+      description: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
+        defaultMessage: 'Analytics map',
+      }),
+      icon: 'graphApp',
+      type: 'icon',
+      isPrimary: true,
+      available: (item) => item.metadata?.analytics_config?.id,
+      onClick: async (item) => {
+        await navigateToUrl(
+          getJobMapUrl(
+            item.metadata?.analytics_config.id,
+            Object.keys(item.metadata?.analytics_config.analysis)[0]
+          )
+        );
+      },
     },
     {
       name: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {

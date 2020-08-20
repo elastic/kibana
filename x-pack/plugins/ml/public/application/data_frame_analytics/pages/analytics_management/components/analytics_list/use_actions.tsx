@@ -16,7 +16,7 @@ import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../a
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction, StopActionModal } from '../action_stop';
 import { useViewAction } from '../action_view';
-import { getMapAction } from '../action_map';
+import { useMapAction } from '../action_map';
 
 import { DataFrameAnalyticsListRow } from './common';
 
@@ -31,6 +31,7 @@ export const useActions = (
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   const viewAction = useViewAction();
+  const mapAction = useMapAction();
   const cloneAction = useCloneAction(canCreateDataFrameAnalytics);
   const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
   const editAction = useEditAction(canStartStopDataFrameAnalytics);
@@ -41,7 +42,7 @@ export const useActions = (
 
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
     viewAction.action,
-    getMapAction(),
+    mapAction.action,
   ];
 
   // isManagementTable will be the same for the lifecycle of the component

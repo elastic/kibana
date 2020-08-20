@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import {
   getAnalysisType,
@@ -18,36 +18,35 @@ import { useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { getJobMapUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
+export const mapActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.mapActionName',
+  {
+    defaultMessage: 'Map',
+  }
+);
 interface MapButtonProps {
   item: DataFrameAnalyticsListRow;
 }
 
 export const MapButton: FC<MapButtonProps> = ({ item }) => {
-  const navigateToPath = useNavigateToPath();
-  const isDisabled =
+  const toolTipContent = i18n.translate(
+    'xpack.ml.dataframe.analyticsList.mapActionDisabledTooltipContent',
+    {
+      defaultMessage: 'Unknown analysis type.',
+    }
+  );
+  const disabled =
     !isRegressionAnalysis(item.config.analysis) &&
     !isOutlierAnalysis(item.config.analysis) &&
     !isClassificationAnalysis(item.config.analysis);
-  const analysisType = getAnalysisType(item.config.analysis);
 
-  const onClickHandler = () => navigateToPath(getJobMapUrl(item.id, analysisType));
+  if (disabled) {
+    return (
+      <EuiToolTip position="top" content={tooltipContent}>
+        <>{mapActionButtonText}</>
+      </EuiToolTip>
+    );
+  }
 
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.mapActionName', {
-    defaultMessage: 'Map',
-  });
-
-  return (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="mlAnalyticsJobMapButton"
-      flush="left"
-      iconType="graphApp"
-      isDisabled={isDisabled}
-      onClick={onClickHandler}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
+  return <>{mapActionButtonText}</>;
 };
