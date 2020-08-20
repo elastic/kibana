@@ -5,7 +5,7 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiCallOut, EuiListGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiListGroup, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
@@ -49,14 +49,16 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
   return (
     <>
       <EuiSpacer />
-      <EuiText size="xs">
-        <h3>
-          {i18n.translate('xpack.uptime.monitorList.enabledAlerts.title', {
-            defaultMessage: 'Enabled alerts:',
-            description: 'Alerts enabled for this monitor',
-          })}
-        </h3>
-      </EuiText>
+      <span>
+        <EuiText size="xs">
+          <h3>
+            {i18n.translate('xpack.uptime.monitorList.enabledAlerts.title', {
+              defaultMessage: 'Enabled alerts:',
+              description: 'Alerts enabled for this monitor',
+            })}
+          </h3>
+        </EuiText>
+      </span>
       {listItems.length === 0 && !loading && (
         <EuiCallOut
           size="s"
@@ -65,7 +67,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
           })}
         />
       )}
-      <EuiListGroup listItems={listItems} />
+      {loading ? <EuiLoadingSpinner /> : <EuiListGroup listItems={listItems} />}
     </>
   );
 };

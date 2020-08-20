@@ -6,14 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
@@ -67,7 +60,6 @@ export function MonitorListDrawerComponent({
       </EuiFlexGroup>
       <MonitorStatusList summaryPings={summary.state.summaryPings} />
       <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts as Alert[]} />
-      {loading && <EuiLoadingSpinner />}
       {monitorDetails && monitorDetails.error && (
         <MostRecentError
           error={monitorDetails.error}

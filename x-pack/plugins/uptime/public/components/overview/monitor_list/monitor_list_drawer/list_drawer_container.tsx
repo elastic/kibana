@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../../../state';
 import { monitorDetailsLoadingSelector, monitorDetailsSelector } from '../../../../state/selectors';
@@ -12,12 +12,16 @@ import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
 import { MonitorSummary } from '../../../../../common/runtime_types';
+import { alertsSelector } from '../../../../state/alerts/alerts';
+import { UptimeRefreshContext } from '../../../../contexts';
 
 interface ContainerProps {
   summary: MonitorSummary;
 }
 
 export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+
   const monitorId = summary?.monitor_id;
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
@@ -28,6 +32,10 @@ export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
 
   const dispatch = useDispatch();
 
+  const { data: alerts } = useSelector(alertsSelector);
+
+  const hasAlert = (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
+
   useEffect(() => {
     dispatch(
       getMonitorDetailsAction.get({
@@ -36,7 +44,7 @@ export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
         monitorId,
       })
     );
-  }, [dateStart, dateEnd, monitorId, dispatch]);
+  }, [dateStart, dateEnd, monitorId, dispatch, hasAlert, lastRefresh]);
   return (
     <MonitorListDrawerComponent
       monitorDetails={monitorDetails}
