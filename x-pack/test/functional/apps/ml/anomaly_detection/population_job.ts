@@ -100,57 +100,54 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('job creation loads the job management page', async () => {
+    it('job creation loads the population wizard for the source data', async () => {
+      await ml.testExecution.logTestStep('job creation loads the job management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
-    });
 
-    it('job creation loads the new job source selection page', async () => {
+      await ml.testExecution.logTestStep('job creation loads the new job source selection page');
       await ml.jobManagement.navigateToNewJobSourceSelection();
-    });
 
-    it('job creation loads the job type selection page', async () => {
+      await ml.testExecution.logTestStep('job creation loads the job type selection page');
       await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
-    });
 
-    it('job creation loads the population job wizard page', async () => {
+      await ml.testExecution.logTestStep('job creation loads the population job wizard page');
       await ml.jobTypeSelection.selectPopulationJob();
     });
 
-    it('job creation displays the time range step', async () => {
+    it('job creation navigates through the population wizard and sets all needed fields', async () => {
+      await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
-    });
 
-    it('job creation sets the timerange', async () => {
+      await ml.testExecution.logTestStep('job creation sets the timerange');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Jun 12, 2019 @ 00:04:19.000',
         'Jul 12, 2019 @ 23:45:36.000'
       );
-    });
 
-    it('job creation displays the event rate chart', async () => {
+      await ml.testExecution.logTestStep('job creation displays the event rate chart');
       await ml.jobWizardCommon.assertEventRateChartExists();
       await ml.jobWizardCommon.assertEventRateChartHasData();
-    });
 
-    it('job creation displays the pick fields step', async () => {
+      await ml.testExecution.logTestStep('job creation displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
-    });
 
-    it('job creation selects the population field', async () => {
+      await ml.testExecution.logTestStep('job creation selects the population field');
       await ml.jobWizardPopulation.assertPopulationFieldInputExists();
       await ml.jobWizardPopulation.selectPopulationField(populationField);
-    });
 
-    it('job creation selects detectors and displays detector previews', async () => {
+      await ml.testExecution.logTestStep(
+        'job creation selects detectors and displays detector previews'
+      );
       for (const [index, detector] of detectors.entries()) {
         await ml.jobWizardCommon.assertAggAndFieldInputExists();
         await ml.jobWizardCommon.selectAggAndField(detector.identifier, false);
         await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
       }
-    });
 
-    it('job creation inputs detector split fields and displays split cards', async () => {
+      await ml.testExecution.logTestStep(
+        'job creation inputs detector split fields and displays split cards'
+      );
       for (const [index, detector] of detectors.entries()) {
         await ml.jobWizardPopulation.assertDetectorSplitFieldInputExists(index);
         await ml.jobWizardPopulation.selectDetectorSplitField(index, detector.splitField);
@@ -165,86 +162,71 @@ export default function ({ getService }: FtrProviderContext) {
           detector.numberOfBackCards
         );
       }
-    });
 
-    it('job creation displays the influencer field', async () => {
+      await ml.testExecution.logTestStep('job creation displays the influencer field');
       await ml.jobWizardCommon.assertInfluencerInputExists();
       await ml.jobWizardCommon.assertInfluencerSelection(
         [populationField].concat(detectors.map((detector) => detector.splitField))
       );
-    });
 
-    it('job creation inputs the bucket span', async () => {
+      await ml.testExecution.logTestStep('job creation inputs the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.setBucketSpan(bucketSpan);
-    });
 
-    it('job creation displays the job details step', async () => {
+      await ml.testExecution.logTestStep('job creation displays the job details step');
       await ml.jobWizardCommon.advanceToJobDetailsSection();
-    });
 
-    it('job creation inputs the job id', async () => {
+      await ml.testExecution.logTestStep('job creation inputs the job id');
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.setJobId(jobId);
-    });
 
-    it('job creation inputs the job description', async () => {
+      await ml.testExecution.logTestStep('job creation inputs the job description');
       await ml.jobWizardCommon.assertJobDescriptionInputExists();
       await ml.jobWizardCommon.setJobDescription(jobDescription);
-    });
 
-    it('job creation inputs job groups', async () => {
+      await ml.testExecution.logTestStep('job creation inputs job groups');
       await ml.jobWizardCommon.assertJobGroupInputExists();
       for (const jobGroup of jobGroups) {
         await ml.jobWizardCommon.addJobGroup(jobGroup);
       }
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
-    });
 
-    it('job creation opens the additional settings section', async () => {
+      await ml.testExecution.logTestStep('job creation opens the additional settings section');
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
-    });
 
-    it('job creation adds a new custom url', async () => {
+      await ml.testExecution.logTestStep('job creation adds a new custom url');
       await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
-    });
 
-    it('job creation assigns calendars', async () => {
+      await ml.testExecution.logTestStep('job creation assigns calendars');
       await ml.jobWizardCommon.addCalendar(calendarId);
-    });
 
-    it('job creation opens the advanced section', async () => {
+      await ml.testExecution.logTestStep('job creation opens the advanced section');
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
-    });
 
-    it('job creation displays the model plot switch', async () => {
+      await ml.testExecution.logTestStep('job creation displays the model plot switch');
       await ml.jobWizardCommon.assertModelPlotSwitchExists();
-    });
 
-    it('job creation enables the dedicated index switch', async () => {
+      await ml.testExecution.logTestStep('job creation enables the dedicated index switch');
       await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
       await ml.jobWizardCommon.activateDedicatedIndexSwitch();
-    });
 
-    it('job creation inputs the model memory limit', async () => {
+      await ml.testExecution.logTestStep('job creation inputs the model memory limit');
       await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
       await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
-    });
 
-    it('job creation displays the validation step', async () => {
+      await ml.testExecution.logTestStep('job creation displays the validation step');
       await ml.jobWizardCommon.advanceToValidationSection();
-    });
 
-    it('job creation displays the summary step', async () => {
+      await ml.testExecution.logTestStep('job creation displays the summary step');
       await ml.jobWizardCommon.advanceToSummarySection();
     });
 
-    it('job creation creates the job and finishes processing', async () => {
+    it('job creation runs the job and displays it correctly in the job list', async () => {
+      await ml.testExecution.logTestStep('job creation creates the job and finishes processing');
       await ml.jobWizardCommon.assertCreateJobButtonExists();
       await ml.jobWizardCommon.createJobAndWaitForCompletion();
-    });
 
-    it('job creation displays the created job in the job list', async () => {
+      await ml.testExecution.logTestStep('job creation displays the created job in the job list');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
@@ -252,9 +234,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.filterWithSearchString(jobId);
       const rows = await ml.jobTable.parseJobTable();
       expect(rows.filter((row) => row.id === jobId)).to.have.length(1);
-    });
 
-    it('job creation displays details for the created job in the job list', async () => {
+      await ml.testExecution.logTestStep(
+        'job creation displays details for the created job in the job list'
+      );
       await ml.jobTable.assertJobRowFields(jobId, getExpectedRow(jobId, jobGroups));
 
       await ml.jobTable.assertJobRowDetailsCounts(
@@ -262,45 +245,45 @@ export default function ({ getService }: FtrProviderContext) {
         getExpectedCounts(jobId),
         getExpectedModelSizeStats(jobId)
       );
-    });
 
-    it('job creation has detector results', async () => {
+      await ml.testExecution.logTestStep('job creation has detector results');
       for (let i = 0; i < detectors.length; i++) {
         await ml.api.assertDetectorResultsExist(jobId, i);
       }
     });
 
-    it('job cloning clicks the clone action and loads the population wizard', async () => {
+    it('job cloning opens the existing job in the population wizard', async () => {
+      await ml.testExecution.logTestStep(
+        'job cloning clicks the clone action and loads the population wizard'
+      );
       await ml.jobTable.clickCloneJobAction(jobId);
       await ml.jobTypeSelection.assertPopulationJobWizardOpen();
     });
 
-    it('job cloning displays the time range step', async () => {
+    it('job cloning navigates through the population wizard, checks and sets all needed fields', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
-    });
 
-    it('job cloning sets the timerange', async () => {
+      await ml.testExecution.logTestStep('job cloning sets the timerange');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Jun 12, 2019 @ 00:04:19.000',
         'Jul 12, 2019 @ 23:45:36.000'
       );
-    });
 
-    it('job cloning displays the event rate chart', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the event rate chart');
       await ml.jobWizardCommon.assertEventRateChartExists();
       await ml.jobWizardCommon.assertEventRateChartHasData();
-    });
 
-    it('job cloning displays the pick fields step', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
-    });
 
-    it('job cloning pre-fills the population field', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills the population field');
       await ml.jobWizardPopulation.assertPopulationFieldInputExists();
       await ml.jobWizardPopulation.assertPopulationFieldSelection([populationField]);
-    });
 
-    it('job cloning pre-fills detectors and shows preview with split cards', async () => {
+      await ml.testExecution.logTestStep(
+        'job cloning pre-fills detectors and shows preview with split cards'
+      );
       for (const [index, detector] of detectors.entries()) {
         await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
 
@@ -317,96 +300,79 @@ export default function ({ getService }: FtrProviderContext) {
           detector.numberOfBackCards
         );
       }
-    });
 
-    it('job cloning pre-fills influencers', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills influencers');
       await ml.jobWizardCommon.assertInfluencerInputExists();
       await ml.jobWizardCommon.assertInfluencerSelection(
         [populationField].concat(detectors.map((detector) => detector.splitField))
       );
-    });
 
-    it('job cloning pre-fills the bucket span', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
-    });
 
-    it('job cloning displays the job details step', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the job details step');
       await ml.jobWizardCommon.advanceToJobDetailsSection();
-    });
 
-    it('job cloning does not pre-fill the job id', async () => {
+      await ml.testExecution.logTestStep('job cloning does not pre-fill the job id');
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.assertJobIdValue('');
-    });
 
-    it('job cloning inputs the clone job id', async () => {
+      await ml.testExecution.logTestStep('job cloning inputs the clone job id');
       await ml.jobWizardCommon.setJobId(jobIdClone);
-    });
 
-    it('job cloning pre-fills the job description', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills the job description');
       await ml.jobWizardCommon.assertJobDescriptionInputExists();
       await ml.jobWizardCommon.assertJobDescriptionValue(jobDescription);
-    });
 
-    it('job cloning pre-fills job groups', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills job groups');
       await ml.jobWizardCommon.assertJobGroupInputExists();
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
-    });
 
-    it('job cloning inputs the clone job group', async () => {
+      await ml.testExecution.logTestStep('job cloning inputs the clone job group');
       await ml.jobWizardCommon.assertJobGroupInputExists();
       await ml.jobWizardCommon.addJobGroup('clone');
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroupsClone);
-    });
 
-    it('job cloning opens the additional settings section', async () => {
+      await ml.testExecution.logTestStep('job cloning opens the additional settings section');
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
-    });
 
-    it('job cloning persists custom urls', async () => {
+      await ml.testExecution.logTestStep('job cloning persists custom urls');
       await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
-    });
 
-    it('job cloning persists assigned calendars', async () => {
+      await ml.testExecution.logTestStep('job cloning persists assigned calendars');
       await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
-    });
 
-    it('job cloning opens the advanced section', async () => {
+      await ml.testExecution.logTestStep('job cloning opens the advanced section');
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
-    });
 
-    it('job cloning pre-fills the model plot switch', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills the model plot switch');
       await ml.jobWizardCommon.assertModelPlotSwitchExists();
       await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
-    });
 
-    it('job cloning pre-fills the dedicated index switch', async () => {
+      await ml.testExecution.logTestStep('job cloning pre-fills the dedicated index switch');
       await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
       await ml.jobWizardCommon.assertDedicatedIndexSwitchCheckedState(true);
-    });
 
-    // MML during clone has changed in #61589
-    // TODO: adjust test code to reflect the new behavior
-    it.skip('job cloning pre-fills the model memory limit', async () => {
-      await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
-      await ml.jobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
-    });
+      // MML during clone has changed in #61589
+      // TODO: adjust test code to reflect the new behavior
+      // await ml.testExecution.logTestStep('job cloning pre-fills the model memory limit');
+      // await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
+      // await ml.jobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
 
-    it('job cloning displays the validation step', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the validation step');
       await ml.jobWizardCommon.advanceToValidationSection();
-    });
 
-    it('job cloning displays the summary step', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the summary step');
       await ml.jobWizardCommon.advanceToSummarySection();
     });
 
-    it('job cloning creates the job and finishes processing', async () => {
+    it('job cloning runs the clone job and displays it correctly in the job list', async () => {
+      await ml.testExecution.logTestStep('job cloning creates the job and finishes processing');
       await ml.jobWizardCommon.assertCreateJobButtonExists();
       await ml.jobWizardCommon.createJobAndWaitForCompletion();
-    });
 
-    it('job cloning displays the created job in the job list', async () => {
+      await ml.testExecution.logTestStep('job cloning displays the created job in the job list');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
@@ -414,9 +380,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.filterWithSearchString(jobIdClone);
       const rows = await ml.jobTable.parseJobTable();
       expect(rows.filter((row) => row.id === jobIdClone)).to.have.length(1);
-    });
 
-    it('job cloning displays details for the created job in the job list', async () => {
+      await ml.testExecution.logTestStep(
+        'job cloning displays details for the created job in the job list'
+      );
       await ml.jobTable.assertJobRowFields(jobIdClone, getExpectedRow(jobIdClone, jobGroupsClone));
 
       await ml.jobTable.assertJobRowDetailsCounts(
@@ -424,9 +391,8 @@ export default function ({ getService }: FtrProviderContext) {
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)
       );
-    });
 
-    it('job cloning has detector results', async () => {
+      await ml.testExecution.logTestStep('job cloning has detector results');
       for (let i = 0; i < detectors.length; i++) {
         await ml.api.assertDetectorResultsExist(jobId, i);
       }
