@@ -9,8 +9,8 @@ import { Subject } from 'rxjs';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { sleep, resolvable, Resolvable } from './test_utils';
-import { asOk, asErr } from './lib/result_type';
+import { sleep, resolvable, Resolvable } from '../test_utils';
+import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {
   beforeEach(() => jest.useFakeTimers());
