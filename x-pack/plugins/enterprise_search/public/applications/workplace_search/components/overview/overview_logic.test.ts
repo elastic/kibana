@@ -109,13 +109,14 @@ describe('OverviewLogic', () => {
       const mockApi = jest.fn(() => mockLogicValues as any);
       const setServerDataSpy = jest.spyOn(OverviewLogic.actions, 'setServerData');
 
-      await act(async () =>
-        OverviewLogic.actions.initializeOverview({
-          http: {
-            ...mockHttp,
-            get: mockApi,
-          },
-        })
+      await act(
+        async () =>
+          OverviewLogic.actions.initializeOverview({
+            http: {
+              ...mockHttp,
+              get: mockApi,
+            },
+          }) as any
       );
 
       expect(mockApi).toHaveBeenCalledWith('/api/workplace_search/overview');
@@ -126,13 +127,14 @@ describe('OverviewLogic', () => {
       const mockHttp = mockKibanaContext.http;
       const setHasErrorConnectingSpy = jest.spyOn(OverviewLogic.actions, 'setHasErrorConnecting');
 
-      await act(async () =>
-        OverviewLogic.actions.initializeOverview({
-          http: {
-            ...mockHttp,
-            get: () => Promise.reject(),
-          },
-        })
+      await act(
+        async () =>
+          OverviewLogic.actions.initializeOverview({
+            http: {
+              ...mockHttp,
+              get: () => Promise.reject(),
+            },
+          }) as any
       );
 
       expect(setHasErrorConnectingSpy).toHaveBeenCalled();
