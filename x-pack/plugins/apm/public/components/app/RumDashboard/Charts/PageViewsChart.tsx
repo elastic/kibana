@@ -41,12 +41,12 @@ export function PageViewsChart({ data, loading }: Props) {
   const { urlParams } = useUrlParams();
 
   const { start, end } = urlParams;
-  const diffIndays = moment(new Date(end as string)).diff(
+  const diffInDays = moment(new Date(end as string)).diff(
     moment(new Date(start as string)),
     'day'
   );
 
-  const formatter = timeFormatter(niceTimeFormatByDay(diffIndays > 1 ? 2 : 1));
+  const formatter = timeFormatter(niceTimeFormatByDay(diffInDays > 1 ? 2 : 1));
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -114,7 +114,7 @@ export function PageViewsChart({ data, loading }: Props) {
             id="page_views"
             title={I18LABELS.pageViews}
             position={Position.Left}
-            tickFormat={(d) => numeral(d).format('0.0 a')}
+            tickFormat={(d) => numeral(d).format('0a')}
           />
           <BarSeries
             id={I18LABELS.pageViews}
