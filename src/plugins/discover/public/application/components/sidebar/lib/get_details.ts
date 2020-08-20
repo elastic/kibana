@@ -16,32 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getVisualizeUrl, isFieldVisualizable } from './visualize_url_utils';
-import { AppState } from '../../../angular/discover_state';
+
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
-import { DiscoverServices } from '../../../../build_services';
+import { IndexPatternField } from '../../../../../../data/public';
 
 export function getDetails(
   field: IndexPatternField,
-  indexPattern: IndexPattern,
-  state: AppState,
-  columns: string[],
   hits: Array<Record<string, unknown>>,
-  services: DiscoverServices
+  columns: string[]
 ) {
   const details = {
-    visualizeUrl:
-      services.capabilities.visualize.show && isFieldVisualizable(field, services.visualizations)
-        ? getVisualizeUrl(field, indexPattern, state, columns, services)
-        : null,
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,
       count: 5,
       grouped: false,
     }),
+    columns,
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {

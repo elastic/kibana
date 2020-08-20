@@ -10,7 +10,7 @@ import rison from 'rison-node';
 
 import { AbstractESSource } from '../es_source';
 import { getSearchService, getHttp } from '../../../kibana_services';
-import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
+import { hitsToGeoJson } from '../../../../common/elasticsearch_geo_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,

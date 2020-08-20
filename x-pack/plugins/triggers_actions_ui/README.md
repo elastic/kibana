@@ -1265,7 +1265,7 @@ Then this dependencies will be used to embed Actions form or register your own a
  ];
 
  export const ComponentWithActionsForm: () => {
-   const { http, triggers_actions_ui, toastNotifications } = useKibana().services;
+   const { http, triggers_actions_ui, notifications } = useKibana().services;
    const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
    const initialAlert = ({
         name: 'test',
@@ -1307,7 +1307,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
-          toastNotifications={toastNotifications}
+          toastNotifications={notifications.toasts}
           consumer={initialAlert.consumer}
         />
    );
@@ -1409,7 +1409,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities, docLinks } = useKibana().services;
+const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1438,9 +1438,9 @@ const connector = {
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
+          toastNotifications: notifications.toasts,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          capabilities: application.capabilities,
           docLinks,
         }}
       >
@@ -1526,7 +1526,7 @@ import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggers_actions_ui, notifications, application } = useKibana().services;
 
 // UI control item for open flyout
 <EuiButton
@@ -1545,9 +1545,9 @@ const { http, triggers_actions_ui, toastNotifications, capabilities } = useKiban
 <ActionsConnectorsContextProvider
         value={{
           http: http,
-          toastNotifications: toastNotifications,
+          toastNotifications: notifications.toasts,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
+          capabilities: application.capabilities,
         }}
       >
         <ConnectorEditFlyout
