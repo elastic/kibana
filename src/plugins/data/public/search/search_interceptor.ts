@@ -18,14 +18,22 @@
  */
 
 import { trimEnd } from 'lodash';
-import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  throwError,
+  timer,
+  Subscription,
+  defer,
+  from,
+  Observable,
+  NEVER,
+} from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
 import { ISearchOptions } from './types';
 import { SearchUsageCollector } from './collectors';
-
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -124,7 +132,8 @@ export class SearchInterceptor {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = timer(this.requestTimeout);
+    const timeout$ =
+      this.requestTimeout != null && this.requestTimeout > 0 ? timer(this.requestTimeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
     });

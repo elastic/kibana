@@ -97,6 +97,38 @@ describe('SearchInterceptor', () => {
       await flushPromises();
     });
 
+    test('Should not timeout if requestTimeout is undefined', async () => {
+      searchInterceptor = new SearchInterceptor({
+        startServices: mockCoreSetup.getStartServices(),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+      });
+      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
+        return new Promise((resolve, reject) => {
+          options.signal.addEventListener('abort', () => {
+            reject(new AbortError());
+          });
+
+          setTimeout(resolve, 5000);
+        });
+      });
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
+
+      expect.assertions(1);
+      const next = jest.fn();
+      const complete = () => {
+        expect(next).toBeCalled();
+      };
+      response.subscribe({ next, complete });
+
+      jest.advanceTimersByTime(5000);
+
+      await flushPromises();
+    });
+
     test('Observable should fail if user aborts (test merged signal)', async () => {
       const abortController = new AbortController();
       mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
