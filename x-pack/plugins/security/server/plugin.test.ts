@@ -7,10 +7,11 @@
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ILegacyCustomClusterClient } from '../../../../src/core/server';
-import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
+import { ConfigSchema } from './config';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
@@ -19,20 +20,15 @@ describe('Security Plugin', () => {
   let mockDependencies: PluginSetupDependencies;
   beforeEach(() => {
     plugin = new Plugin(
-      coreMock.createPluginInitializerContext({
-        cookieName: 'sid',
-        session: {
-          idleTimeout: 1500,
-          lifespan: null,
-        },
-        audit: { enabled: false },
-        authc: {
-          selector: { enabled: false },
-          providers: ['saml', 'token'],
-          saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
-          http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
-        },
-      })
+      coreMock.createPluginInitializerContext(
+        ConfigSchema.validate({
+          session: { idleTimeout: 1500 },
+          authc: {
+            providers: ['saml', 'token'],
+            saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+          },
+        })
+      )
     );
 
     mockCoreSetup = coreMock.createSetup();
@@ -48,6 +44,7 @@ describe('Security Plugin', () => {
 
     mockDependencies = ({
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      taskManager: taskManagerMock.createSetup(),
     } as unknown) as PluginSetupDependencies;
   });
 
@@ -116,26 +113,13 @@ describe('Security Plugin', () => {
               }
             `);
     });
-
-    it('properly creates cluster client instance', async () => {
-      await plugin.setup(mockCoreSetup, mockDependencies);
-
-      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
-        plugins: [elasticsearchClientPlugin],
-      });
-    });
   });
 
   describe('stop()', () => {
     beforeEach(async () => await plugin.setup(mockCoreSetup, mockDependencies));
 
-    it('properly closes cluster client instance', async () => {
-      expect(mockClusterClient.close).not.toHaveBeenCalled();
-
+    it('close does not throw', async () => {
       await plugin.stop();
-
-      expect(mockClusterClient.close).toHaveBeenCalledTimes(1);
     });
   });
 });

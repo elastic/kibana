@@ -13,13 +13,13 @@ import {
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
-  DataFrameAnalyticsConfig,
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
+import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
