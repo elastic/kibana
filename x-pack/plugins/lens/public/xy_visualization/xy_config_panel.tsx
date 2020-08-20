@@ -581,7 +581,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           <EuiSwitch
             data-test-subj="lnsshowShowValueLabelsSwitch"
             showLabel={false}
-            label={i18n.translate('xpack.lens.xyChart.showValueLabels', {
+            label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
               defaultMessage: 'Show Value Labels',
             })}
             onChange={({ target }) => {
