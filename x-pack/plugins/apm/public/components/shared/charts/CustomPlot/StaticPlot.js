@@ -112,7 +112,6 @@ class StaticPlot extends PureComponent {
             xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
-            stroke={'rgba(0,0,0,0)'}
             color={serie.color}
             stack={true}
             cluster="line"
@@ -130,7 +129,7 @@ class StaticPlot extends PureComponent {
             }}
             stack={true}
             cluster="line-mark"
-            size={0.5}
+            size={1}
           />,
         ];
       }
@@ -165,7 +164,7 @@ class StaticPlot extends PureComponent {
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
-            size={0.5}
+            size={1}
           />
         );
       default:
