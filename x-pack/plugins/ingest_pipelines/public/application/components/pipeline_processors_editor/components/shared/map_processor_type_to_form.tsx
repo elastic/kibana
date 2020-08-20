@@ -29,6 +29,7 @@ import {
   Join,
   Json,
   Kv,
+  Lowercase,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -194,7 +195,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   lowercase: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Lowercase,
     docLinkPath: '/lowercase-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.lowercase', {
       defaultMessage: 'Lowercase',
