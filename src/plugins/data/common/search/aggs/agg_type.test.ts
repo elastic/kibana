@@ -99,6 +99,17 @@ describe('AggType Class', () => {
           expect(aggType.params[1].name).toBe('customLabel');
         });
 
+        test('disables json param', () => {
+          const aggType = new AggType({
+            name: 'name',
+            title: 'title',
+            json: false,
+          });
+
+          expect(aggType.params.length).toBe(1);
+          expect(aggType.params[0].name).toBe('customLabel');
+        });
+
         test('can disable customLabel', () => {
           const aggType = new AggType({
             name: 'smart agg',

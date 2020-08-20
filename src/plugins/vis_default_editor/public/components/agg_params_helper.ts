@@ -26,7 +26,6 @@ import {
   IAggType,
   IndexPattern,
   IndexPatternField,
-  METRIC_TYPES,
 } from '../../../data/public';
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
@@ -116,7 +115,6 @@ function getAggParamsToRender({
     }
 
     if (!paramEditor) {
-      if (agg.type.name === METRIC_TYPES.COUNT && param.type === 'json') return;
       paramEditor = get(aggParamsMap, ['common', param.type]);
     }
 

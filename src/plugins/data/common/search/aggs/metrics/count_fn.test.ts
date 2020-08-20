@@ -42,18 +42,5 @@ describe('agg_expression_functions', () => {
         }
       `);
     });
-
-    test('correctly parses json string argument', () => {
-      const actual = fn({
-        json: '{ "foo": true }',
-      });
-
-      expect(actual.value.params.json).toEqual({ foo: true });
-      expect(() => {
-        fn({
-          json: '/// intentionally malformed json ///',
-        });
-      }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
-    });
   });
 });

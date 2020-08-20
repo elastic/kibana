@@ -47,6 +47,7 @@ export interface AggTypeConfig<
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
+  json?: boolean;
   decorateAggConfig?: () => any;
   postFlightRequest?: (
     resp: any,
@@ -235,13 +236,17 @@ export class AggType<
     if (config.params && config.params.length && config.params[0] instanceof BaseParamType) {
       this.params = config.params as TParam[];
     } else {
-      // always append the raw JSON param
+      // always append the raw JSON param unless it is configured to false
       const params: any[] = config.params ? [...config.params] : [];
-      params.push({
-        name: 'json',
-        type: 'json',
-        advanced: true,
-      });
+
+      if (config.json !== false) {
+        params.push({
+          name: 'json',
+          type: 'json',
+          advanced: true,
+        });
+      }
+
       // always append custom label
 
       if (config.customLabels !== false) {
