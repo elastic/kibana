@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with an invalid namespace', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_configs`)
+          .post(`/api/ingest_manager/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
