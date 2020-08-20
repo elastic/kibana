@@ -8,6 +8,10 @@
 
 ```typescript
 attributes?: {
-        [key: string;]: unknown;
+        fields: {
+            [key: string;]: {
+                string;
+            }
+        }
     }
 ```

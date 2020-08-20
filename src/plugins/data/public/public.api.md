@@ -1046,7 +1046,11 @@ export type IndexPatternAggRestrictions = Record<string, {
 export interface IndexPatternAttributes {
     // (undocumented)
     attributes?: {
-        [key: string]: unknown;
+        fields: {
+            [key: string]: {
+                displayName: string;
+            };
+        };
     };
     // (undocumented)
     fieldFormatMap?: string;

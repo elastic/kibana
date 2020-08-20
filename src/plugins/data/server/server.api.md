@@ -607,7 +607,11 @@ export type IMetricAggType = MetricAggType;
 export interface IndexPatternAttributes {
     // (undocumented)
     attributes?: {
-        [key: string]: unknown;
+        fields: {
+            [key: string]: {
+                displayName: string;
+            };
+        };
     };
     // (undocumented)
     fieldFormatMap?: string;
