@@ -25,6 +25,9 @@ import {
   EmbeddableStateTransfer,
   IEmbeddable,
   EmbeddablePanel,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
@@ -35,7 +38,6 @@ import { dataPluginMock } from '../../data/public/mocks';
 
 import { inspectorPluginMock } from '../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
-import { SavedObjectEmbeddableInput, ReferenceOrValueEmbeddable, EmbeddableInput } from './lib';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
