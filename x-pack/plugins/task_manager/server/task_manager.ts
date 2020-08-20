@@ -187,7 +187,7 @@ export class TaskManager {
         // operation than just timing out the `work` internally)
         inactivityTimeout: pollInterval * (maxPollInactivityCycles + 1),
         onError: (error) => {
-          this.logger.error(error.message);
+          this.logger.error(`[Task Poller Monitor]: ${error.message}`);
         },
       }
     );
