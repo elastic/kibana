@@ -9,12 +9,16 @@ import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
 import { Logger } from 'src/core/server';
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Polygon } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Polygon } from 'geojson';
 import {
+  ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
-  MVT_SOURCE_LAYER_NAME,
   KBN_TOO_MANY_FEATURES_PROPERTY,
+  MVT_SOURCE_LAYER_NAME,
 } from '../../common/constants';
+
+import { hitsToGeoJson } from '../../common/elasticsearch_geo_utils';
+import { flattenHit } from './util';
 
 interface ESBounds {
   top_left: {
@@ -116,70 +120,28 @@ export async function getTile({
         // Perform actual search
         result = await callElasticsearch('search', esSearchQuery);
 
-        // @ts-expect-error
-        const hitsFeatures: Array<Feature | null> = result.hits.hits.map(
-          (hit: any): Feature | null => {
-            let geomType:
-              | 'Point'
-              | 'MultiPoint'
-              | 'LineString'
-              | 'MultiLineString'
-              | 'Polygon'
-              | 'MultiPolygon';
-            const geometry = hit._source[geometryFieldName];
-            if (geometry.type === 'polygon' || geometry.type === 'Polygon') {
-              geomType = 'Polygon';
-            } else if (geometry.type === 'multipolygon' || geometry.type === 'MultiPolygon') {
-              geomType = 'MultiPolygon';
-            } else if (geometry.type === 'linestring' || geometry.type === 'LineString') {
-              geomType = 'LineString';
-            } else if (geometry.type === 'multilinestring' || geometry.type === 'MultiLineString') {
-              geomType = 'MultiLineString';
-            } else if (geometry.type === 'point' || geometry.type === 'Point') {
-              geomType = 'Point';
-            } else if (geometry.type === 'MultiPoint' || geometry.type === 'multipoint') {
-              geomType = 'MultiPoint';
-            } else {
-              return null;
-            }
-            const geometryGeoJson: Geometry = {
-              type: geomType,
-              coordinates: geometry.coordinates,
-            };
-
-            const firstFields: GeoJsonProperties = {};
-            if (hit.fields) {
-              const fields = hit.fields;
-              Object.keys(fields).forEach((key) => {
-                const value = fields[key];
-                if (Array.isArray(value)) {
-                  firstFields[key] = value[0];
-                } else {
-                  firstFields[key] = value;
-                }
-              });
-            }
-
-            const properties = {
-              ...hit._source,
-              ...firstFields,
-              _id: hit._id,
-              _index: hit._index,
-              [FEATURE_ID_PROPERTY_NAME]: hit._id,
-              [KBN_TOO_MANY_FEATURES_PROPERTY]: false,
-            };
-            delete properties[geometryFieldName];
-
-            return {
-              type: 'Feature',
-              id: hit._id,
-              geometry: geometryGeoJson,
-              properties,
-            };
-          }
+        // Todo: pass in epochMillies-fields
+        const featureCollection = hitsToGeoJson(
+          // @ts-expect-error
+          result.hits.hits,
+          (hit: GeoJsonProperties) => {
+            return flattenHit(geometryFieldName, hit);
+          },
+          geometryFieldName,
+          ES_GEO_FIELD_TYPE.GEO_SHAPE,
+          []
         );
 
-        resultFeatures = hitsFeatures.filter((f) => !!f) as Feature[];
+        resultFeatures = featureCollection.features;
+
+        // Correct system-fields.
+        for (let i = 0; i < resultFeatures.length; i++) {
+          const props = resultFeatures[i].properties;
+          if (props !== null) {
+            props[FEATURE_ID_PROPERTY_NAME] = resultFeatures[i].id;
+            props[KBN_TOO_MANY_FEATURES_PROPERTY] = false;
+          }
+        }
       }
     } catch (e) {
       logger.warn(e.message);
