@@ -23,7 +23,7 @@ module.exports = {
   managerEntries: (entry = []) => {
     return [...entry, require.resolve('./lib/register')];
   },
-  webpack: (config) => {
+  webpackFinal: (config) => {
     return webpackConfig({ config });
   },
 };

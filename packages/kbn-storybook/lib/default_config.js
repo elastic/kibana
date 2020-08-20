@@ -17,5 +17,10 @@
  * under the License.
  */
 
-exports.defaultConfig = require('./lib/default_config').defaultConfig;
-exports.runStorybookCli = require('./lib/run_storybook_cli').runStorybookCli;
+exports.defaultConfig = {
+  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
+  stories: ['../**/*.stories.tsx'],
+  typescript: {
+    reactDocgen: 'none',
+  },
+};

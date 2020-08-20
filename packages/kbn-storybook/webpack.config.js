@@ -18,32 +18,30 @@
  */
 
 const { resolve } = require('path');
-const webpackMerge = require('webpack-merge');
 const { stringifyRequest } = require('loader-utils');
+const { Stats } = require('webpack');
+const webpackMerge = require('webpack-merge');
 const { externals } = require('@kbn/ui-shared-deps');
 const { REPO_ROOT } = require('./lib/constants');
+
+const stats = {
+  ...Stats.presetToOptions('minimal'),
+  colors: true,
+  errorDetails: true,
+  errors: true,
+  moduleTrace: true,
+  warningsFilter: /(export .* was not found in)|(entrypoint size limit)/,
+};
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config: storybookConfig }) => {
   const config = {
     devServer: {
-      stats: {
-        preset: 'minimal',
-        warningsFilter: /export .* was not found in/,
-      },
+      stats,
     },
     externals,
     module: {
       rules: [
-        // // Include the React preset from Kibana for JS(X) and TS(X)
-        // {
-        //   test: /\.(j|t)sx?$/,
-        //   exclude: /node_modules/,
-        //   loaders: 'babel-loader',
-        //   options: {
-        //     presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-        //   },
-        // },
         {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
@@ -89,6 +87,7 @@ module.exports = async ({ config: storybookConfig }) => {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
       },
     },
+    stats,
   };
 
   // This is the hacky part. We find something that looks like the

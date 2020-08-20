@@ -52,7 +52,7 @@ run(
 
     log.verbose('Loading Storybook:', configDir);
 
-    runStorybookCli({ configDir, name: alias });
+    runStorybookCli({ configDir, flags, name: alias });
   },
   {
     usage: `node scripts/storybook <alias>`,

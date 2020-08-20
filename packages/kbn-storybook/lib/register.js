@@ -20,6 +20,8 @@
 const { addons } = require('@storybook/addons');
 const { create } = require('@storybook/theming');
 
+// This configures the "Manager", or main outer view of Storybook. It is an
+// addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
 addons.setConfig({
   theme: create({
     base: 'light',
