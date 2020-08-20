@@ -44,8 +44,12 @@ export interface Props {
 }
 
 export function ShardFailureModal({ request, response, title, onClose }: Props) {
-  const failures = (response._shards as any).failures;
-  if (!response || !response._shards || !Array.isArray(failures) || !request) {
+  if (
+    !response ||
+    !response._shards ||
+    !Array.isArray((response._shards as any).failures) ||
+    !request
+  ) {
     // this should never ever happen, but just in case
     return (
       <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
@@ -53,7 +57,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
       </EuiCallOut>
     );
   }
-
+  const failures = (response._shards as any).failures;
   const requestJSON = JSON.stringify(request, null, 2);
   const responseJSON = JSON.stringify(response, null, 2);
 
