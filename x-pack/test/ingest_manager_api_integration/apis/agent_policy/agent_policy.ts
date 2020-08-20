@@ -26,13 +26,24 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.success).to.be(true);
       });
 
-      it('should return a 400 with an invalid namespace', async () => {
+      it('should return a 400 with an empty namespace', async () => {
         await supertest
           .post(`/api/ingest_manager/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
             namespace: '',
+          })
+          .expect(400);
+      });
+
+      it('should return a 400 with an invalid namespace', async () => {
+        await supertest
+          .post(`/api/ingest_manager/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'InvalidNamespace',
           })
           .expect(400);
       });

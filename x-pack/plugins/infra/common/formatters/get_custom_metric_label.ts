@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
+import { SnapshotCustomMetricInput } from '../http_api/snapshot_api';
 
 export const getCustomMetricLabel = (metric: SnapshotCustomMetricInput) => {
   const METRIC_LABELS = {
