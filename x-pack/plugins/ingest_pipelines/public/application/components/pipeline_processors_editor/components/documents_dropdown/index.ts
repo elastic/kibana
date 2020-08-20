@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Tabs, Tab } from './pipeline_test_tabs';
-
-export { DocumentsTab } from './tab_documents';
-
-export { OutputTab } from './tab_output';
+export { DocumentsDropdown } from './documents_dropdown';
