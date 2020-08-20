@@ -6,11 +6,11 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
-import { PackageConfigConfigRecord } from '../../../../common';
+import { PackagePolicyConfigRecord } from '../../../../common';
 
 const handlebars = Handlebars.create();
 
-export function createStream(variables: PackageConfigConfigRecord, streamTemplate: string) {
+export function createStream(variables: PackagePolicyConfigRecord, streamTemplate: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, streamTemplate);
 
   const template = handlebars.compile(streamTemplate, { noEscape: true });
@@ -54,7 +54,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: PackageConfigConfigRecord, streamTemplate: string) {
+function buildTemplateVariables(variables: PackagePolicyConfigRecord, streamTemplate: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
