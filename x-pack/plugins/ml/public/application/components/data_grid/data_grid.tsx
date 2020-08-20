@@ -121,6 +121,9 @@ export const DataGrid: FC<Props> = memo(
                   baseline={baseline}
                   featureImportance={parsedFIArray}
                   topClasses={topClasses}
+                  predictionFieldName={
+                    predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
+                  }
                 />
               );
             },

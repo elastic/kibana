@@ -7,7 +7,7 @@
 import React, { FC, useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RegressionDecisionPath } from './decision_path_chart';
+import { RegressionDecisionPath } from './decision_path_regression';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
@@ -16,6 +16,7 @@ import { ClassificationDecisionPath } from './decision_path_classification';
 interface DecisionPathPopoverProps {
   featureImportance: FeatureImportance[];
   analysisType: ANALYSIS_CONFIG_TYPE;
+  predictionFieldName?: string;
   baseline?: number;
   predictedValue?: number | string | undefined;
   topClasses?: TopClasses;
@@ -36,6 +37,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   predictedValue,
   topClasses,
   analysisType,
+  predictionFieldName,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
 
@@ -84,8 +86,9 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
           <EuiText size={'xs'} color="subdued" style={{ paddingTop: 5 }}>
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotHelpText"
-              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted values."
+              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted at the predicted value for '{predictionFieldName}'."
               values={{
+                predictionFieldName,
                 linkedFeatureImportanceValues: (
                   <EuiLink
                     href="https://www.elastic.co/guide/en/machine-learning/7.8/ml-feature-importance.html"
@@ -105,6 +108,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               featureImportance={featureImportance}
               topClasses={topClasses as TopClasses}
               predictedValue={predictedValue as string}
+              predictionFieldName={predictionFieldName}
             />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
@@ -112,6 +116,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               featureImportance={featureImportance}
               baseline={baseline}
               predictedValue={predictedValue as number}
+              predictionFieldName={predictionFieldName}
             />
           )}
         </>

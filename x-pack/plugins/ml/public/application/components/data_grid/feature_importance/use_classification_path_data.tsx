@@ -103,14 +103,19 @@ export const buildRegressionDecisionPathData = ({
       absImportance: -1,
     });
 
-    // get the absolute absImportance of the importance value to the baseline for sorting
-    mappedFeatureImportance.push({
-      [FEATURE_NAME]: i18n.translate('xpack.ml.dataframe.analytics.decisionPathFeatureOtherTitle', {
-        defaultMessage: 'other',
-      }),
-      [FEATURE_IMPORTANCE]: baseline + adjustedImportance,
-      absImportance: 0, // arbitrary importance so this will be of higher importance than baseline
-    });
+    // if the difference is small enough then no need to plot the residual feature importance
+    if (adjustedImportance > 1e-5) {
+      mappedFeatureImportance.push({
+        [FEATURE_NAME]: i18n.translate(
+          'xpack.ml.dataframe.analytics.decisionPathFeatureOtherTitle',
+          {
+            defaultMessage: 'other',
+          }
+        ),
+        [FEATURE_IMPORTANCE]: adjustedImportance,
+        absImportance: 0, // arbitrary importance so this will be of higher importance than baseline
+      });
+    }
   }
   const filteredFeatureImportance = mappedFeatureImportance.filter(
     (f) => f !== undefined

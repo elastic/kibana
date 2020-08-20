@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+// adjust the height so it's compact for items with more features
 import {
-  Chart,
-  Settings,
-  LineAnnotation,
   AnnotationDomainTypes,
-  LineSeries,
   Axis,
-  ScaleType,
-  Position,
-  LineAnnotationDatum,
-  PartialTheme,
   AxisConfig,
+  Chart,
+  LineAnnotation,
+  LineAnnotationDatum,
+  LineSeries,
+  PartialTheme,
+  Position,
   RecursivePartial,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
+
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
-import { findMaxMin, useDecisionPathData } from './use_classification_path_data';
+import { DecisionPathPlotData } from './use_classification_path_data';
 
 const baselineStyle = {
   line: {
@@ -48,29 +49,27 @@ const theme: PartialTheme = {
   axes,
 };
 
-interface RegressionDecisionPathProps {
+interface DecisionPathChartProps {
+  decisionPathData: DecisionPathPlotData;
+  predictionFieldName?: string;
   baseline?: number;
-  predictedValue?: number | undefined;
-  featureImportance: FeatureImportance[];
-  topClasses?: TopClasses;
+  minDomain: number | undefined;
+  maxDomain: number | undefined;
 }
 
-export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
+export const DecisionPathChart = ({
+  decisionPathData,
+  predictionFieldName,
+  minDomain,
+  maxDomain,
   baseline,
-  featureImportance,
-  predictedValue,
-}) => {
-  const { decisionPathData } = useDecisionPathData({
-    baseline,
-    featureImportance,
-    predictedValue,
-  });
-  if (!decisionPathData) return <div />;
+}: DecisionPathChartProps) => {
+  const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 4 ? 30 : 75;
   const baselineData: LineAnnotationDatum[] = [
     {
-      dataValue: baseline,
+      dataValue: baseline ? parseFloat(baseline.toPrecision(3)) : undefined,
       details: i18n.translate(
-        'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathBaselineText',
+        'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
         {
           defaultMessage:
             'baseline (average of predictions for all data points in the training data set)',
@@ -78,72 +77,57 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
       ),
     },
   ];
-  let maxDomain;
-  let minDomain;
-  // if decisionPathData has calculated cumulative path
-  if (Array.isArray(decisionPathData) && decisionPathData.length === 3) {
-    const { max, min } = findMaxMin(decisionPathData, (d: [string, number, number]) => d[2]);
-    maxDomain = max;
-    minDomain = min;
-    const buffer = Math.abs(maxDomain - minDomain) * 0.1;
-    maxDomain = (typeof baseline === 'number' ? Math.max(maxDomain, baseline) : maxDomain) + buffer;
-    minDomain = (typeof baseline === 'number' ? Math.min(minDomain, baseline) : minDomain) - buffer;
-  }
-
-  // adjust the height so it's compact for items with more features
-  const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 3 ? 40 : 75;
 
   return (
-    <>
-      <Chart size={{ height: decisionPathData.length * heightMultiplier }}>
-        <Settings theme={theme} rotation={90} />
-        {baseline && (
-          <LineAnnotation
-            id="xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathBaseline"
-            domainType={AnnotationDomainTypes.YDomain}
-            dataValues={baselineData}
-            style={baselineStyle}
-            marker={<EuiIcon type={'annotation'} />}
-          />
-        )}
+    <Chart size={{ height: decisionPathData.length * heightMultiplier }}>
+      <Settings theme={theme} rotation={90} />
+      {baseline && (
+        <LineAnnotation
+          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
+          domainType={AnnotationDomainTypes.YDomain}
+          dataValues={baselineData}
+          style={baselineStyle}
+          marker={<EuiIcon type={'annotation'} />}
+        />
+      )}
 
-        <Axis
-          id={'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathXAxis'}
-          tickFormat={(d) => `${Number(d).toPrecision(3)}`}
-          title={i18n.translate(
-            'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathXAxisTitle',
-            {
-              defaultMessage: 'Prediction',
-            }
-          )}
-          showGridLines={true}
-          position={Position.Bottom}
-          showOverlappingTicks
-          domain={
-            minDomain && maxDomain
-              ? {
-                  min: minDomain,
-                  max: maxDomain,
-                }
-              : undefined
+      <Axis
+        id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxis'}
+        tickFormat={(d) => `${Number(d).toPrecision(3)}`}
+        title={i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
+          {
+            defaultMessage: "Prediction for '{predictionFieldName}'",
+            values: { predictionFieldName },
           }
-        />
-        <Axis showGridLines={true} id="left" position={Position.Left} />
-        <LineSeries
-          id="xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathLine"
-          name={i18n.translate(
-            'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathLineTitle',
-            {
-              defaultMessage: 'Prediction',
-            }
-          )}
-          xScaleType={ScaleType.Ordinal}
-          yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[2]}
-          data={decisionPathData}
-        />
-      </Chart>
-    </>
+        )}
+        showGridLines={true}
+        position={Position.Bottom}
+        showOverlappingTicks
+        domain={
+          minDomain && maxDomain
+            ? {
+                min: minDomain,
+                max: maxDomain,
+              }
+            : undefined
+        }
+      />
+      <Axis showGridLines={true} id="left" position={Position.Left} />
+      <LineSeries
+        id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
+        name={i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.decisionPathLineTitle',
+          {
+            defaultMessage: 'Prediction',
+          }
+        )}
+        xScaleType={ScaleType.Ordinal}
+        yScaleType={ScaleType.Linear}
+        xAccessor={0}
+        yAccessors={[2]}
+        data={decisionPathData}
+      />
+    </Chart>
   );
 };
