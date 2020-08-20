@@ -220,18 +220,9 @@ export const useSourceManager = (): UseSourceManager => {
     async function fetchTitles() {
       try {
         const result = await indexPatternsService.getTitles();
-
-        const makeIt = await indexPatternsService.make('winlogbeat-*');
-        const saveIt = await indexPatternsService.save('winlogbeat-*');
-        console.log('makeIt and saveIt', {
-          makeIt,
-          saveIt,
-        });
-        debugger;
         setAvailableIndexPatterns(result);
         setIsIndexPatternsLoading(false);
       } catch (error) {
-        console.log('ERRRRRR', error);
         setIsIndexPatternsLoading(false);
       }
     }

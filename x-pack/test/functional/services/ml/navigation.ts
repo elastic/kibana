@@ -103,5 +103,23 @@ export function MachineLearningNavigationProvider({
         await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
       });
     },
+
+    async navigateToAnomalyExplorerViaSingleMetricViewer() {
+      // clicks the `Anomaly Explorer` icon on the button group to switch result views
+      await testSubjects.click('mlAnomalyResultsViewSelectorExplorer');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the anomaly explorer page is visible
+        await testSubjects.existOrFail('mlPageAnomalyExplorer');
+      });
+    },
+
+    async navigateToSingleMetricViewerViaAnomalyExplorer() {
+      // clicks the `Single Metric Viewere` icon on the button group to switch result views
+      await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the single metric viewer page is visible
+        await testSubjects.existOrFail('mlPageSingleMetricViewer');
+      });
+    },
   };
 }

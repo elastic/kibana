@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Container } from 'unstated';
-import { CMBeat } from '../../../../legacy/plugins/beats_management/common/domain_types';
-import { BeatsTagAssignment } from '../../../../legacy/plugins/beats_management/server/lib/adapters/beats/adapter_types';
+import { CMBeat } from '../../common/domain_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { BeatsTagAssignment } from '../../server/lib/adapters/beats/adapter_types';
 import { FrontendLibs } from './../lib/types';
 
 interface ContainerState {

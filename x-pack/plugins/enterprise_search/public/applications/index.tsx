@@ -9,13 +9,22 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart, AppMountParameters, HttpSetup, ChromeBreadcrumb } from 'src/core/public';
-import { ClientConfigType, PluginsSetup } from '../plugin';
+import {
+  AppMountParameters,
+  CoreStart,
+  ApplicationStart,
+  HttpSetup,
+  ChromeBreadcrumb,
+} from 'src/core/public';
+import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
+import { IExternalUrl } from './shared/enterprise_search_url';
 
 export interface IKibanaContext {
-  enterpriseSearchUrl?: string;
+  config: { host?: string };
+  externalUrl: IExternalUrl;
   http: HttpSetup;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
 }
@@ -30,17 +39,20 @@ export const KibanaContext = React.createContext({});
 
 export const renderApp = (
   App: React.FC,
-  core: CoreStart,
   params: AppMountParameters,
+  core: CoreStart,
+  plugins: PluginsSetup,
   config: ClientConfigType,
-  plugins: PluginsSetup
+  data: ClientData
 ) => {
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
         value={{
+          config,
           http: core.http,
-          enterpriseSearchUrl: config.host,
+          navigateToUrl: core.application.navigateToUrl,
+          externalUrl: data.externalUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
         }}

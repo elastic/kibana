@@ -8,9 +8,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
+import { MlSummaryJob } from '../../../../../../ml/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SiemJob } from '../../../../common/components/ml_popover/types';
 import { ListItems } from './types';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
 
@@ -21,7 +21,7 @@ enum MessageLevels {
 }
 
 const AuditIconComponent: React.FC<{
-  message: SiemJob['auditMessage'];
+  message: MlSummaryJob['auditMessage'];
 }> = ({ message }) => {
   if (!message) {
     return null;
@@ -47,7 +47,7 @@ const AuditIconComponent: React.FC<{
 
 export const AuditIcon = React.memo(AuditIconComponent);
 
-const JobStatusBadgeComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
+const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
   const color = isStarted ? 'secondary' : 'danger';
   const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
@@ -69,7 +69,7 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobDescriptionComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
+const MlJobDescriptionComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
   const jobUrl = useKibana().services.application.getUrlForApp(
     `ml#/jobs?mlManagement=(jobId:${encodeURI(job.id)})`
   );
@@ -92,12 +92,12 @@ export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 export const buildMlJobDescription = (
   jobId: string,
   label: string,
-  siemJobs: SiemJob[]
+  jobs: MlSummaryJob[]
 ): ListItems => {
-  const siemJob = siemJobs.find((job) => job.id === jobId);
+  const job = jobs.find(({ id }) => id === jobId);
 
   return {
     title: label,
-    description: siemJob ? <MlJobDescription job={siemJob} /> : jobId,
+    description: job ? <MlJobDescription job={job} /> : jobId,
   };
 };

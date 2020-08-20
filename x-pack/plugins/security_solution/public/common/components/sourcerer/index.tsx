@@ -47,7 +47,7 @@ export const MaybeSourcerer = React.memo(() => {
   );
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const setPopoverIsOpenCb = useCallback((isOpen) => setPopoverIsOpen(isOpen), []);
+  const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
   const trigger = useMemo(
     () => (
       <EuiButtonEmpty
@@ -56,14 +56,14 @@ export const MaybeSourcerer = React.memo(() => {
         flush="left"
         iconSide="right"
         iconType="indexSettings"
-        onClick={() => setPopoverIsOpenCb(!isPopoverOpen)}
+        onClick={setPopoverIsOpenCb}
         size="l"
         title={i18n.SOURCERER}
       >
         {i18n.SOURCERER}
       </EuiButtonEmpty>
     ),
-    [isPopoverOpen, setPopoverIsOpenCb]
+    [setPopoverIsOpenCb]
   );
   const options: EuiSelectableOption[] = useMemo(
     () =>

@@ -110,7 +110,6 @@ export function initializeInnerAngularModule(
     createLocalPromiseModule();
     createLocalTopNavModule(navigation);
     createLocalStorageModule();
-    createElasticSearchModule(data);
     createPagerFactoryModule();
     createDocTableModule();
     initialized = true;
@@ -145,7 +144,6 @@ export function initializeInnerAngularModule(
       'discoverPromise',
       'discoverTopNav',
       'discoverLocalStorageProvider',
-      'discoverEs',
       'discoverDocTable',
       'discoverPagerFactory',
     ])
@@ -200,16 +198,6 @@ const createLocalStorageService = function (type: string) {
     return new Storage($window[type]);
   };
 };
-
-function createElasticSearchModule(data: DataPublicPluginStart) {
-  angular
-    .module('discoverEs', [])
-    // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
-    // have to be written as function expression, because it's not compiled in dev mode
-    .service('es', function () {
-      return data.search.__LEGACY.esClient;
-    });
-}
 
 function createPagerFactoryModule() {
   angular.module('discoverPagerFactory', []).factory('pagerFactory', createPagerFactory);

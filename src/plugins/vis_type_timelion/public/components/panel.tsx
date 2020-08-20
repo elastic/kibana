@@ -33,10 +33,12 @@ import {
   colors,
   Axis,
 } from '../helpers/panel_utils';
+
 import { Series, Sheet } from '../helpers/timelion_request_handler';
 import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
+import { ExprVisAPIEvents } from '../../../visualizations/public';
 
 interface CrosshairPlot extends jquery.flot.plot {
   setCrosshair: (pos: Position) => void;
@@ -44,6 +46,7 @@ interface CrosshairPlot extends jquery.flot.plot {
 }
 
 interface PanelProps {
+  applyFilter: ExprVisAPIEvents['applyFilter'];
   interval: string;
   seriesList: Sheet;
   renderComplete(): void;
@@ -72,7 +75,7 @@ const DEBOUNCE_DELAY = 50;
 // ensure legend is the same height with or without a caption so legend items do not move around
 const emptyCaption = '<br>';
 
-function Panel({ interval, seriesList, renderComplete }: PanelProps) {
+function Panel({ interval, seriesList, renderComplete, applyFilter }: PanelProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState<HTMLDivElement>();
@@ -346,12 +349,21 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   const plotSelectedHandler = useCallback(
     (event: JQuery.TriggeredEvent, ranges: Ranges) => {
-      kibana.services.timefilter.setTime({
-        from: moment(ranges.xaxis.from),
-        to: moment(ranges.xaxis.to),
+      applyFilter({
+        timeFieldName: '*',
+        filters: [
+          {
+            range: {
+              '*': {
+                gte: ranges.xaxis.from,
+                lte: ranges.xaxis.to,
+              },
+            },
+          },
+        ],
       });
     },
-    [kibana.services.timefilter]
+    [applyFilter]
   );
 
   useEffect(() => {
