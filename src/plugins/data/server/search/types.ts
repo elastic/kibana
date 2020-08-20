@@ -52,7 +52,7 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart<
-  SearchStrategyRequest = any,
+  SearchStrategyRequest = IEsSearchRequest,
   SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
 > {
   aggs: AggsStart;
