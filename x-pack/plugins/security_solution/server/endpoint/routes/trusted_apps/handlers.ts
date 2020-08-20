@@ -16,21 +16,20 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/const
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<undefined, GetTrustedAppsListRequest> => {
-  const exceptionsListService = endpointAppContext.service.getExceptionsList();
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
+    const exceptionsListService = endpointAppContext.service.getExceptionsList();
     const { page, per_page: perPage } = req.query;
 
-    // Ensure list is created if it does not exist
-    await exceptionsListService?.createTrustedAppsList();
-
     try {
+      // Ensure list is created if it does not exist
+      await exceptionsListService?.createTrustedAppsList();
       const results = await exceptionsListService?.findExceptionListItem({
         listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         page,
         perPage,
-        filter: '',
+        filter: undefined,
         namespaceType: 'agnostic',
         sortField: 'name',
         sortOrder: 'asc',
