@@ -690,6 +690,8 @@ export interface ISearchSetup {
     // (undocumented)
     aggs: AggsSetup;
     registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
+    // (undocumented)
+    setDefaultSearchStrategy: (name: string) => void;
     usage?: SearchUsage;
 }
 
