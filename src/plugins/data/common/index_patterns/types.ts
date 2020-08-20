@@ -156,7 +156,7 @@ export interface FieldSpec {
   lang?: string;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
-
+  displayName?: string;
   name: string;
   type: string;
   esTypes?: string[];

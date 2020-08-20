@@ -59,10 +59,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   };
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
   private calcDisplayName = (name: string) => {
-    const displayNameMap = this.indexPattern.attributes?.fields;
-    if (displayNameMap && displayNameMap[name] && displayNameMap[name].displayName) {
-      return displayNameMap[name].displayName;
-    }
     return this.shortDotsEnable ? shortenDottedString(name) : name;
   };
 
@@ -86,6 +82,12 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     ...(this.groups.get(type) || new Map()).values(),
   ];
   public readonly add = (field: FieldSpec) => {
+    const displayNameMap = this.indexPattern.attributes?.fields;
+    field.displayName =
+      displayNameMap && displayNameMap[field.name] && displayNameMap[field.name].displayName
+        ? displayNameMap[field.name].displayName
+        : '';
+
     const newField = new IndexPatternField(
       this.indexPattern,
       field,

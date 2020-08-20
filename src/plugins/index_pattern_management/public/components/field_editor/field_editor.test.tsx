@@ -177,8 +177,7 @@ describe('FieldEditor', () => {
       };
       return flds[name] as IndexPatternField;
     };
-    indexPattern.fields.add = jest.fn();
-    indexPattern.fields.update = jest.fn();
+    indexPattern.fields = { ...indexPattern.fields, ...{ update: jest.fn(), add: jest.fn() } };
     indexPattern.fieldFormatMap = { test: field };
     indexPattern.attributes = { fields: { test: { displayName: 'Test' } } };
 
