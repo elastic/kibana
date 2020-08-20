@@ -16,9 +16,9 @@ import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../a
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction, StopActionModal } from '../action_stop';
 import { useViewAction } from '../action_view';
+import { getMapAction } from '../action_map';
 
 import { DataFrameAnalyticsListRow } from './common';
-import { getMapAction } from '../action_map';
 
 export const useActions = (
   isManagementTable: boolean

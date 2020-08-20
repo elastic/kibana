@@ -164,7 +164,12 @@ export class AnalyticsManager {
           const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
           result.elements.unshift({
-            data: { id: nodeId, label: data.id, type: JOB_MAP_NODE_TYPES.ANALYTICS },
+            data: {
+              id: nodeId,
+              label: data.id,
+              type: JOB_MAP_NODE_TYPES.ANALYTICS,
+              analysisType: getAnalysisType(data?.analysis),
+            },
           });
           result.details[nodeId] = data;
           nextLinkId = data?.source?.index[0];

@@ -7,7 +7,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 
 import { Cytoscape, Controls, JobMapLegend } from './components';
@@ -110,18 +110,21 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
   const { ref, width, height } = useRefDimensions();
 
   return (
-    <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <JobMapTitle analyticsId={analyticsId} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <JobMapLegend />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <Cytoscape height={height} elements={elements} width={width} style={cytoscapeDivStyle}>
-        <Controls details={nodeDetails} getNodeData={getData} analyticsId={analyticsId} />
-      </Cytoscape>
-    </div>
+    <>
+      <EuiSpacer size="m" />
+      <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <JobMapTitle analyticsId={analyticsId} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <JobMapLegend />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <Cytoscape height={height} elements={elements} width={width} style={cytoscapeDivStyle}>
+          <Controls details={nodeDetails} getNodeData={getData} analyticsId={analyticsId} />
+        </Cytoscape>
+      </div>
+    </>
   );
 };

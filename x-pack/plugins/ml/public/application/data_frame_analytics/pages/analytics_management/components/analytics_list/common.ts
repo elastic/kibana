@@ -141,6 +141,10 @@ export function getResultsUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE 
   return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }
 
+export function getJobMapUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE | string) {
+  return `#/data_frame_analytics/map?_g=(ml:(jobId:${jobId}))`;
+}
+
 // The single Action type is not exported as is
 // from EUI so we use that code to get the single
 // Action type from the array of actions.
@@ -148,6 +152,3 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType[number];
 export type DataFrameAnalyticsListAction = ArrayElement<
   EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions']
 >;
-export function getJobMapUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE | string) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType},isMap:true))`;
-}
