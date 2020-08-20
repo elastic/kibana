@@ -123,11 +123,13 @@ const mapToConditionsLookup = (
       {}
     );
 
-const formatAlertResult = (alertResult: {
-  metric: string;
-  currentValue: number;
-  threshold: number[];
-}) => {
+const formatAlertResult = <AlertResult>(
+  alertResult: {
+    metric: string;
+    currentValue: number;
+    threshold: number[];
+  } & AlertResult
+) => {
   const { metric, currentValue, threshold } = alertResult;
   if (!metric.endsWith('.pct')) return alertResult;
   const formatter = createFormatter('percent');
