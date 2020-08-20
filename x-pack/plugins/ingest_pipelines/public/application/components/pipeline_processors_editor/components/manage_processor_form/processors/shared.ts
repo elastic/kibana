@@ -31,7 +31,8 @@ export function isArrayOfStrings(v: unknown): v is string[] {
  */
 export const to = {
   booleanOrUndef: (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined),
-  arrayOfStrings: (v: unknown): string[] => (isArrayOfStrings(v) ? v : []),
+  arrayOfStrings: (v: unknown): string[] =>
+    isArrayOfStrings(v) ? v : typeof v === 'string' && v.length ? [v] : [],
   jsonString: (v: unknown) => (v ? JSON.stringify(v, null, 2) : '{}'),
 };
 

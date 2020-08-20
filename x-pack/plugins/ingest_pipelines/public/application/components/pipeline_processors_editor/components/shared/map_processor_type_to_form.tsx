@@ -31,10 +31,8 @@ import {
   Kv,
   Lowercase,
   Pipeline,
+  Remove,
 } from '../manage_processor_form/processors';
-
-// import { SetProcessor } from './processors/set';
-// import { Gsub } from './processors/gsub';
 
 interface FieldDescriptor {
   FieldsComponent?: FunctionComponent;
@@ -210,7 +208,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   remove: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Remove,
     docLinkPath: '/remove-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.remove', {
       defaultMessage: 'Remove',
