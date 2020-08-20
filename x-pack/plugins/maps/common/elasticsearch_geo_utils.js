@@ -16,9 +16,11 @@ import {
   LON_INDEX,
   LAT_INDEX,
 } from '../common/constants';
-import { getEsSpatialRelationLabel } from '../common/i18n_getters';
-import { SPATIAL_FILTER_TYPE } from './kibana_services';
+import { getEsSpatialRelationLabel } from './i18n_getters';
+import { FILTERS } from '../../../../src/plugins/data/common';
 import turfCircle from '@turf/circle';
+
+const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
