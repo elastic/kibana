@@ -116,15 +116,16 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       },
     };
 
-    if (filters?.bool) {
-      if (filters.bool.filter) {
-        if (Array.isArray(filters.bool.filter)) {
-          esParams.body.query.bool.filter.push(...filters.bool.filter);
-        } else {
-          esParams.body.query.bool.filter.push(filters.bool.filter);
-        }
-        delete filters.bool.filter;
+    if (filters?.bool?.filter) {
+      if (Array.isArray(filters.bool.filter)) {
+        esParams.body.query.bool.filter.push(...filters.bool.filter);
+      } else {
+        esParams.body.query.bool.filter.push(filters.bool.filter);
       }
+      delete filters.bool.filter;
+    }
+
+    if (filters?.bool) {
       esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, filters.bool);
     }
 
