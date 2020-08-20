@@ -5,10 +5,12 @@
   "configPath": ["ui_actions_enhanced_examples"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "uiActionsEnhanced", "data", "discover", "developerExamples"],
+  "requiredPlugins": ["uiActions", "uiActionsEnhanced", "data", "discover", "dashboard", "developerExamples"],
   "optionalPlugins": [],
   "requiredBundles": [
+    "dashboardEnhanced",
     "kibanaUtils",
-    "kibanaReact"
+    "kibanaReact",
+    "share"
   ]
 }

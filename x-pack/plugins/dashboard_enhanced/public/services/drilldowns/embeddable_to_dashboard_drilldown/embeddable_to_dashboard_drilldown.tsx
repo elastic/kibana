@@ -25,8 +25,7 @@ import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 
 type Trigger = typeof APPLY_FILTER_TRIGGER;
 type Context = TriggerContextMapping[Trigger];
-
-export type Params = Omit<AbstractDashboardDrilldownParams<Trigger>, 'triggers'>;
+export type Params = AbstractDashboardDrilldownParams;
 
 /**
  * This drilldown is the "Go to Dashboard" you can find in Dashboard app panles.
@@ -38,9 +37,7 @@ export type Params = Omit<AbstractDashboardDrilldownParams<Trigger>, 'triggers'>
 export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Trigger> {
   public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
 
-  constructor(params: Params) {
-    super({ ...params, triggers: [APPLY_FILTER_TRIGGER] as Trigger[] });
-  }
+  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER] as Trigger[];
 
   protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
     const state: DashboardUrlGeneratorState = {
@@ -78,7 +75,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<T
       state.timeRange = timeRangeFromEvent;
     }
 
-    const path = await this.params.getDashboardUrlGenerator().createUrl(state);
+    const path = await this.urlGenerator.createUrl(state);
     const url = new KibanaURL(path);
 
     return url;

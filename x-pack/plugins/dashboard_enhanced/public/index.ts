@@ -14,6 +14,12 @@ export {
   StartDependencies as DashboardEnhancedStartDependencies,
 } from './plugin';
 
+export {
+  AbstractDashboardDrilldown as DashboardEnhancedAbstractDashboardDrilldown,
+  AbstractDashboardDrilldownConfig as DashboardEnhancedAbstractDashboardDrilldownConfig,
+  AbstractDashboardDrilldownParams as DashboardEnhancedAbstractDashboardDrilldownParams,
+} from './services/drilldowns/abstract_dashboard_drilldown';
+
 export function plugin(context: PluginInitializerContext) {
   return new DashboardEnhancedPlugin(context);
 }

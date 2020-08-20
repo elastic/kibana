@@ -31,9 +31,9 @@ type Context = SampleMlJobClickContext;
 
 export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: Trigger[] }>;
 
-const SAMPLE_ML_TO_URL_DRILLDOWN = 'SAMPLE_ML_TO_URL_DRILLDOWN';
+export const SAMPLE_ML_TO_URL_DRILLDOWN = 'SAMPLE_ML_TO_URL_DRILLDOWN';
 
-export class MlToUrlDrilldown implements Drilldown<Config, Trigger> {
+export class SampleMlToUrlDrilldown implements Drilldown<Config, Trigger> {
   public readonly id = SAMPLE_ML_TO_URL_DRILLDOWN;
 
   public readonly order = 8;

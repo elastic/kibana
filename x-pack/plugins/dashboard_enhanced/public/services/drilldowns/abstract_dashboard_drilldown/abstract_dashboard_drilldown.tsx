@@ -5,16 +5,18 @@
  */
 
 import React from 'react';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   TriggerId,
   TriggerContextMapping,
 } from '../../../../../../../src/plugins/ui_actions/public';
-import { DashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public';
 import { CollectConfigContainer } from './components';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+  AdvancedUiActionsStart,
 } from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
 import {
@@ -22,20 +24,23 @@ import {
   CollectConfigProps,
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
-import { StartDependencies } from '../../../plugin';
 import { Config } from './types';
 
-export interface Params<T extends TriggerId> {
-  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
-  getDashboardUrlGenerator: () => DashboardUrlGenerator;
-  triggers: T[];
+export interface Params {
+  start: StartServicesGetter<{
+    uiActionsEnhanced: AdvancedUiActionsStart;
+    data: DataPublicPluginStart;
+    dashboard: DashboardStart;
+  }>;
 }
 
 export abstract class AbstractDashboardDrilldown<T extends TriggerId>
   implements Drilldown<Config, T, BaseActionFactoryContext<T>> {
-  constructor(protected readonly params: Params<T>) {}
+  constructor(protected readonly params: Params) {}
 
   public abstract readonly id: string;
+
+  public abstract readonly supportedTriggers: () => T[];
 
   protected abstract getURL(config: Config, context: TriggerContextMapping[T]): Promise<KibanaURL>;
 
@@ -62,10 +67,6 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
     return true;
   };
 
-  public readonly supportedTriggers = (): T[] => {
-    return this.params.triggers;
-  };
-
   public readonly getHref = async (
     config: Config,
     context: TriggerContextMapping[T]
@@ -78,4 +79,11 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
     const url = await this.getURL(config, context);
     await this.params.start().core.application.navigateToApp(url.appName, { path: url.appPath });
   };
+
+  protected get urlGenerator() {
+    const urlGenerator = this.params.start().plugins.dashboard.dashboardUrlGenerator;
+    if (!urlGenerator)
+      throw new Error('Dashboard URL generator is required for dashboard drilldown.');
+    return urlGenerator;
+  }
 }
