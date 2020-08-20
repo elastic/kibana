@@ -93,19 +93,19 @@ object DefaultTemplate : Template({
     placeholder {}
 
     script {
-      name = "CI Stats Complete - Success"
+      name = "Set Build Status Success"
       scriptContent = """
                 #!/bin/bash
-                node .ci/teamcity/ci_stats_complete.js SUCCESS
+                echo "##teamcity[setParameter name='env.BUILD_STATUS' value='SUCCESS']"
           """.trimIndent()
       executionMode = BuildStep.ExecutionMode.RUN_ON_SUCCESS
     }
 
     script {
-      name = "CI Stats Complete - Failure"
+      name = "CI Stats Complete"
       scriptContent = """
                 #!/bin/bash
-                node .ci/teamcity/ci_stats_complete.js FAILURE
+                node .ci/teamcity/ci_stats_complete.js
           """.trimIndent()
       executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
     }

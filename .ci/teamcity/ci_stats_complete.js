@@ -1,6 +1,6 @@
 const ciStats = require('./ci_stats');
 
-const BUILD_STATUS = process.argv[2].trim(); // currently SUCCESS or FAILURE
+const BUILD_STATUS = env.BUILD_STATUS === 'SUCCESS' ? 'SUCCESS' : 'FAILURE';
 
 (async () => {
   try {
