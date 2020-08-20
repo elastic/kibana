@@ -131,6 +131,7 @@ import { RequestStatistics } from 'src/plugins/inspector/common';
 import { SavedObject } from 'src/core/server';
 import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'src/core/server';
 import { ScrollParams } from 'elasticsearch';
+import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
