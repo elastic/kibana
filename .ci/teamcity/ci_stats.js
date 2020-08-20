@@ -26,9 +26,16 @@ const request = (url, options, data = null) => {
 
       res.on('end', () => {
         try {
-          const json = Buffer.concat(data).toString();
-          const resp = JSON.parse(json);
-          console.log(resp);
+          let resp = Buffer.concat(data).toString();
+
+          try {
+            if (resp.trim()) {
+              resp = JSON.parse(resp);
+            }
+          } catch (ex) {
+            console.error(ex);
+          }
+
           resolve(resp);
         } catch (ex) {
           reject(ex);
