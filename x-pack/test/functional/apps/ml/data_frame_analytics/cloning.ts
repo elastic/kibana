@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // failing test due to backend issue, see #75095
-  describe.skip('jobs cloning supported by UI form', function () {
+  describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
