@@ -60,6 +60,7 @@ export function registerCspCollector(
   usageCollection: UsageCollectionSetup,
   http: HttpServiceSetup
 ): void {
-  const collector = usageCollection.makeUsageCollector(createCspCollector(http));
+  const collectorOptions = createCspCollector(http);
+  const collector = usageCollection.makeUsageCollector<Usage>(collectorOptions);
   usageCollection.registerCollector(collector);
 }
