@@ -77,7 +77,7 @@ export const getTopNavConfig = (
     toastNotifications,
     visualizeCapabilities,
     i18n: { Context: I18nContext },
-    featureFlagConfig,
+    dashboard,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -214,7 +214,7 @@ export const getTopNavConfig = (
               };
               if (
                 originatingApp === 'dashboards' &&
-                featureFlagConfig.showNewVisualizeFlow &&
+                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
                 !savedVis
               ) {
                 return createVisReference();
@@ -295,7 +295,7 @@ export const getTopNavConfig = (
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
               if (
                 originatingApp === 'dashboards' &&
-                featureFlagConfig.showNewVisualizeFlow &&
+                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
                 !isSaveAsButton
               ) {
                 createVisReference();

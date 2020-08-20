@@ -19,7 +19,7 @@
 
 import { coreMock, scopedHistoryMock } from '../../../../../core/public/mocks';
 import { EmbeddableStateTransfer } from '.';
-import { ApplicationStart } from '../../../../../core/public';
+import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 
 function mockHistoryState(state: unknown) {
   return scopedHistoryMock.create({ state });
@@ -35,6 +35,29 @@ describe('embeddable state transfer', () => {
     const core = coreMock.createStart();
     application = core.application;
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp);
+  });
+
+  it('cannot fetch app name when given no app list', async () => {
+    expect(stateTransfer.getAppNameFromId('test')).toBeUndefined();
+  });
+
+  it('cannot fetch app name when app id is not in given app list', async () => {
+    const appsList = new Map<string, PublicAppInfo>([
+      ['testId', { title: 'State Transfer Test App Hello' } as PublicAppInfo],
+      ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
+    ]);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, undefined, appsList);
+    expect(stateTransfer.getAppNameFromId('kibanana')).toBeUndefined();
+  });
+
+  it('can fetch app titles when given app list', async () => {
+    const appsList = new Map<string, PublicAppInfo>([
+      ['testId', { title: 'State Transfer Test App Hello' } as PublicAppInfo],
+      ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
+    ]);
+    stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, undefined, appsList);
+    expect(stateTransfer.getAppNameFromId('testId')).toBe('State Transfer Test App Hello');
+    expect(stateTransfer.getAppNameFromId('testId2')).toBe('State Transfer Test App Goodbye');
   });
 
   it('can send an outgoing originating app state', async () => {
