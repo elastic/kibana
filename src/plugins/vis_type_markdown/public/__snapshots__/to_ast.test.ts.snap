@@ -11,7 +11,7 @@ Object {
               Object {
                 "arguments": Object {
                   "size": Array [
-                    "undefined",
+                    15,
                   ],
                 },
                 "function": "font",

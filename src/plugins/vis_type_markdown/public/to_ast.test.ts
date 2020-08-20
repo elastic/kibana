@@ -47,7 +47,7 @@ describe('markdown vis toExpressionAst function', () => {
   });
 
   it('with params', () => {
-    vis.params = { markdown: '### my markdown', font: 15, openLinksInNewTab: true };
+    vis.params = { markdown: '### my markdown', fontSize: 15, openLinksInNewTab: true };
     const actual = toExpressionAst(vis);
     expect(actual).toMatchSnapshot();
   });
