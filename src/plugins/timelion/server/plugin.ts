@@ -24,9 +24,8 @@ import { TimelionConfigType } from './config';
 import { timelionSheetSavedObjectType } from './saved_objects';
 
 /**
- * The timelion application was deprecated since 7.0 and will be removed in 8.0.
- * You still have saved timelion application worksheets, which you need to migrate manually to dashboards if you want to keep them after 8.0.
- *
+ * Deprecated since 7.0, the Timelion app will be removed in 8.0.
+ * To continue using your Timelion worksheets, migrate them to a dashboard.
  *
  *  @link https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation
  **/
@@ -43,7 +42,7 @@ const showWarningMessageIfTimelionSheetWasFound = (core: CoreStart, logger: Logg
       ({ total }) =>
         total &&
         logger.warn(
-          'The timelion application was deprecated since 7.0 and will be removed in 8.0. You still have saved timelion application worksheets, which you need to migrate manually to dashboards if you want to keep them after 8.0. See https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation for more details.'
+          'Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation.'
         )
     );
 };
