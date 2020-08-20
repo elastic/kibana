@@ -17,9 +17,24 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
+import { mkdir } from './fs';
+import { Logger } from '../logging';
+import { PathConfigType } from '../path';
 
-export const readFile = promisify(Fs.readFile);
-export const writeFile = promisify(Fs.writeFile);
-export const mkdir = promisify(Fs.mkdir);
+export async function createDataFolder({
+  pathConfig,
+  logger,
+}: {
+  pathConfig: PathConfigType;
+  logger: Logger;
+}): Promise<void> {
+  const dataFolder = pathConfig.data;
+  try {
+    // Create the data directory (recursively, if the a parent dir doesn't exist).
+    // If it already exists, does nothing.
+    await mkdir(dataFolder, { recursive: true });
+  } catch (e) {
+    logger.error(`Error trying to create data folder at ${dataFolder}: ${e}`);
+    throw e;
+  }
+}

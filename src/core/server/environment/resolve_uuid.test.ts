@@ -73,7 +73,7 @@ const createServerConfig = (serverUuid: string | undefined) => {
 };
 
 describe('resolveInstanceUuid', () => {
-  let logger: jest.Mocked<Logger>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let pathConfig: PathConfigType;
   let serverConfig: HttpConfigType;
 
@@ -87,7 +87,7 @@ describe('resolveInstanceUuid', () => {
     };
     serverConfig = createServerConfig(DEFAULT_CONFIG_UUID);
 
-    logger = loggingSystemMock.create().get() as any;
+    logger = loggingSystemMock.createLogger();
   });
 
   describe('when file is present and config property is set', () => {
