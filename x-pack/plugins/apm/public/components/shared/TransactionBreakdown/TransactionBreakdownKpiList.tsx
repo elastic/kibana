@@ -53,7 +53,7 @@ function KpiDescription({ name, color }: { name: string; color: string }) {
 
 function TransactionBreakdownKpiList({ kpis }: Props) {
   return (
-    <EuiFlexGrid>
+    <EuiFlexGrid style={{ height: 82 }}>
       {kpis.map((kpi) => (
         <EuiFlexItem key={kpi.name} grow={false}>
           <EuiFlexGroup direction="column" gutterSize="s">
