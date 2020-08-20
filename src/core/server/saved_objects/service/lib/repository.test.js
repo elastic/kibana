@@ -393,14 +393,14 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      it(`returns an empty object on success`, async () => {
+      it(`returns all existing and new namespaces on success`, async () => {
         const result = await addToNamespacesSuccess(type, id, [newNs1, newNs2]);
-        expect(result).toEqual({});
+        expect(result).toEqual({ namespaces: [currentNs1, currentNs2, newNs1, newNs2] });
       });
 
       it(`succeeds when adding existing namespaces`, async () => {
         const result = await addToNamespacesSuccess(type, id, [currentNs1]);
-        expect(result).toEqual({});
+        expect(result).toEqual({ namespaces: [currentNs1, currentNs2] });
       });
     });
   });
@@ -3102,17 +3102,17 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      it(`returns an empty object on success (delete)`, async () => {
+      it(`returns an empty namespaces array on success (delete)`, async () => {
         const test = async (namespaces) => {
           const result = await deleteFromNamespacesSuccess(type, id, namespaces, namespaces);
-          expect(result).toEqual({});
+          expect(result).toEqual({ namespaces: [] });
           client.delete.mockClear();
         };
         await test([namespace1]);
         await test([namespace1, namespace2]);
       });
 
-      it(`returns an empty object on success (update)`, async () => {
+      it(`returns remaining namespaces on success (update)`, async () => {
         const test = async (remaining) => {
           const currentNamespaces = [namespace1].concat(remaining);
           const result = await deleteFromNamespacesSuccess(
@@ -3121,7 +3121,7 @@ describe('SavedObjectsRepository', () => {
             [namespace1],
             currentNamespaces
           );
-          expect(result).toEqual({});
+          expect(result).toEqual({ namespaces: remaining });
           client.delete.mockClear();
         };
         await test([namespace2]);
@@ -3132,7 +3132,7 @@ describe('SavedObjectsRepository', () => {
         const namespaces = [namespace2];
         const currentNamespaces = [namespace1];
         const result = await deleteFromNamespacesSuccess(type, id, namespaces, currentNamespaces);
-        expect(result).toEqual({});
+        expect(result).toEqual({ namespaces: currentNamespaces });
       });
     });
   });
