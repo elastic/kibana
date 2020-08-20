@@ -37,6 +37,10 @@ export const EditFieldHeaderForm = React.memo(
           {/* Field subType (if any) */}
           <FormDataProvider pathsToWatch="type">
             {({ type }) => {
+              if (type === undefined) {
+                return null;
+              }
+
               const [fieldType] = type;
               return (
                 <SubTypeParameter

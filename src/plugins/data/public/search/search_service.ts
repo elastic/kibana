@@ -51,11 +51,22 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private usageCollector?: SearchUsageCollector;
 
   public setup(
-    core: CoreSetup,
-    { packageInfo, usageCollection, expressions }: SearchServiceSetupDependencies
+    { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
+    { expressions, packageInfo, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    this.usageCollector = createUsageCollector(core, usageCollection);
-    this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
+    const esApiVersion = injectedMetadata.getInjectedVar('esApiVersion') as string;
+    const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
+    const packageVersion = packageInfo.version;
+
+    this.usageCollector = createUsageCollector(getStartServices, usageCollection);
+
+    this.esClient = getEsClient({
+      esRequestTimeout,
+      esApiVersion,
+      http,
+      packageVersion,
+    });
+
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -64,12 +75,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      */
     this.searchInterceptor = new SearchInterceptor(
       {
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
+        http,
+        uiSettings,
+        startServices: getStartServices(),
         usageCollector: this.usageCollector!,
       },
-      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
+      esRequestTimeout
     );
 
     expressions.registerFunction(esdsl);
@@ -78,7 +89,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs: this.aggsService.setup({
         registerFunction: expressions.registerFunction,
-        uiSettings: core.uiSettings,
+        uiSettings,
       }),
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
@@ -100,8 +111,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
-      uiSettings,
-      injectedMetadata,
+      getConfig: uiSettings.get.bind(uiSettings),
+      esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
       legacySearch,
     };

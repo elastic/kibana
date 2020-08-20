@@ -42,7 +42,7 @@ describe('Search Usage Collector', () => {
       {} as any,
     ]);
     mockUsageCollectionSetup = usageCollectionPluginMock.createSetupContract();
-    usageCollector = createUsageCollector(mockCoreSetup, mockUsageCollectionSetup);
+    usageCollector = createUsageCollector(mockCoreSetup.getStartServices, mockUsageCollectionSetup);
   });
 
   test('tracks query timeouts', async () => {
