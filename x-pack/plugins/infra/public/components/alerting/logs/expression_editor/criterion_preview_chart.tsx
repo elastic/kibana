@@ -320,7 +320,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.logs.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel} for Everything"
+              defaultMessage="Last {lookback} {timeLabel} of data"
               values={{ timeLabel, lookback }}
             />
           </EuiText>
