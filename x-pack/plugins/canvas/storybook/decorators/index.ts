@@ -5,12 +5,6 @@
  */
 
 import { addDecorator } from '@storybook/react';
-import { Provider as ReduxProvider } from 'react-redux';
-
-import { ServicesProvider } from '../../public/services';
-import { RouterContext } from '../../public/components/router';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-
 import { routerContextDecorator } from './router_decorator';
 import { kibanaContextDecorator } from './kibana_decorator';
 import { servicesContextDecorator } from './services_decorator';
