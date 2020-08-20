@@ -165,6 +165,27 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      //add a test to sort numeric scripted field
+      it('should sort scripted field value in Discover', async function () {
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
+        // after the first click on the scripted field, it becomes secondary sort after time.
+        // click on the timestamp twice to make it be the secondary sort key.
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async function () {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594\n20');
+        });
+
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async function () {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n-1');
+        });
+      });
+
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await log.debug('filter by the first value (14) in the expanded scripted field list');
@@ -252,6 +273,27 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      //add a test to sort string scripted field
+      it('should sort scripted field value in Discover', async function () {
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        // after the first click on the scripted field, it becomes secondary sort after time.
+        // click on the timestamp twice to make it be the secondary sort key.
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async function () {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594\nbad');
+        });
+
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async function () {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\ngood');
+        });
+      });
+
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
@@ -328,6 +370,28 @@ export default function ({ getService, getPageObjects }) {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
         await filterBar.removeAllFilters();
+      });
+
+      //add a test to sort boolean
+      //existing bug: https://github.com/elastic/kibana/issues/75519 hence the issue is skipped.
+      it.skip('should sort scripted field value in Discover', async function () {
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        // after the first click on the scripted field, it becomes secondary sort after time.
+        // click on the timestamp twice to make it be the secondary sort key.
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async function () {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
+        });
+
+        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async function () {
+          const rowData = await PageObjects.discover.getDocTableIndex(1);
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\nfalse');
+        });
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
