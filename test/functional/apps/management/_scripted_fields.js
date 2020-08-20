@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('scripted fields', function () {
+  describe.only('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -175,14 +175,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594\n20');
+          expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181\n-1');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n-1');
+          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n20');
         });
       });
 
