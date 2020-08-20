@@ -43,18 +43,12 @@ export async function getErrorRate({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    { exists: { field: EVENT_OUTCOME } },
+    {
+      terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
+    },
     ...transactionNamefilter,
     ...transactionTypefilter,
     ...uiFiltersES,
-  ];
-
-  const mustNot = [
-    {
-      term: {
-        [EVENT_OUTCOME]: EventOutcome.unknown,
-      },
-    },
   ];
 
   const params = {
@@ -63,7 +57,7 @@ export async function getErrorRate({
     },
     body: {
       size: 0,
-      query: { bool: { filter, mustNot } },
+      query: { bool: { filter } },
       aggs: {
         total_transactions: {
           date_histogram: getMetricsDateHistogramParams(start, end),
