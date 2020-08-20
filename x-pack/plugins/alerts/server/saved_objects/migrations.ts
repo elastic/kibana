@@ -17,25 +17,30 @@ export function getMigrations(
   return {
     /**
      * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
-     * prior to that we were using `alerting` and we need to keep these in sync
-     */
-    '7.9.0': changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts'),
-    /**
+     * prior to that we were using `alerting` and we need to keep these in sync for RBAC to work in 7.10.
      * In v7.10.0 we changed the Matrics plugin so it uses the `consumer` value of `infrastructure`
-     * prior to that we were using `metrics` and we need to keep these in sync
+     * prior to that we were using `metrics` and we need to keep these in sync for RBAC to work in 7.10.
      */
-    '7.10.0': changeAlertingConsumer(encryptedSavedObjects, 'metrics', 'infrastructure'),
+    '7.10.0': changeAlertingConsumer(
+      encryptedSavedObjects,
+      new Map(
+        Object.entries({
+          alerting: 'alerts',
+          metrics: 'infrastructure',
+        })
+      )
+    ),
   };
 }
 
 function changeAlertingConsumer(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  from: string,
-  to: string
+  mapping: Map<string, string>
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      return doc.attributes.consumer === from;
+      // migrate all documents in 7.10 in order to add the "meta" RBAC field
+      return true;
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
       const {
@@ -45,7 +50,11 @@ function changeAlertingConsumer(
         ...doc,
         attributes: {
           ...doc.attributes,
-          consumer: consumer === from ? to : consumer,
+          consumer: mapping.get(consumer) ?? consumer,
+          // mark any alert predating 7.10 as a legacy alert in terms of RBAC support
+          meta: {
+            rbac: 'legacy',
+          },
         },
       };
     }

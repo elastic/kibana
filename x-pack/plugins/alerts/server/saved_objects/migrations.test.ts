@@ -13,40 +13,6 @@ import { migrationMocks } from 'src/core/server/mocks';
 const { log } = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
-describe('7.9.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
-  test('changes nothing on alerts by other plugins', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.9.0'];
-    const alert = getMockData({});
-    expect(migration790(alert, { log })).toMatchObject(alert);
-
-    expect(encryptedSavedObjectsSetup.createMigration).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function)
-    );
-  });
-
-  test('migrates the consumer for alerting', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.9.0'];
-    const alert = getMockData({
-      consumer: 'alerting',
-    });
-    expect(migration790(alert, { log })).toMatchObject({
-      ...alert,
-      attributes: {
-        ...alert.attributes,
-        consumer: 'alerts',
-      },
-    });
-  });
-});
-
 describe('7.10.0', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -64,6 +30,20 @@ describe('7.10.0', () => {
       expect.any(Function),
       expect.any(Function)
     );
+  });
+
+  test('migrates the consumer for alerting', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      consumer: 'alerting',
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        consumer: 'alerts',
+      },
+    });
   });
 
   test('migrates the consumer for metrics', () => {

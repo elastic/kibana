@@ -25,6 +25,7 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertStatus,
+  AlertMeta,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -266,6 +267,20 @@ export class AlertsClient {
       ReadOperations.Get
     );
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
+  }
+
+  // public for now, but we won't want to expose this
+  public async getMeta({ id }: { id: string }): Promise<[SanitizedAlert, AlertMeta | undefined]> {
+    const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+    await this.authorization.ensureAuthorized(
+      result.attributes.alertTypeId,
+      result.attributes.consumer,
+      ReadOperations.Get
+    );
+    return [
+      this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references),
+      result.attributes.meta,
+    ];
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -860,7 +875,7 @@ export class AlertsClient {
 
   private getPartialAlertFromRaw(
     id: string,
-    { createdAt, ...rawAlert }: Partial<RawAlert>,
+    { createdAt, meta, ...rawAlert }: Partial<RawAlert>,
     updatedAt: SavedObject['updated_at'] = createdAt,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {

@@ -111,6 +111,10 @@ export interface RawAlertAction extends SavedObjectAttributes {
   params: AlertActionParams;
 }
 
+export interface AlertMeta extends SavedObjectAttributes {
+  rbac?: string;
+}
+
 export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -131,6 +135,7 @@ export interface RawAlert extends SavedObjectAttributes {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  meta?: AlertMeta;
 }
 
 export type AlertInfoParams = Pick<
