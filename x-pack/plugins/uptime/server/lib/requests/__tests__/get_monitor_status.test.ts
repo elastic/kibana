@@ -296,11 +296,6 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      dynamicSettings: {
-        heartbeatIndices: 'heartbeat-8*',
-        certAgeThreshold: 730,
-        certExpirationThreshold: 30,
-      },
       timerange: {
         from: 'now-15m',
         to: 'now',
@@ -486,11 +481,6 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      dynamicSettings: {
-        heartbeatIndices: 'heartbeat-8*',
-        certAgeThreshold: 730,
-        certExpirationThreshold: 30,
-      },
       timerange: {
         from: 'now-15m',
         to: 'now',
