@@ -58,8 +58,8 @@ export async function setupIngestManager(
       // packages installed by default
       ensureInstalledDefaultPackages(soClient, callCluster),
       outputService.ensureDefaultOutput(soClient),
-      ensurePackagesCompletedInstall(soClient, callCluster),
       agentPolicyService.ensureDefaultAgentPolicy(soClient),
+      ensurePackagesCompletedInstall(soClient, callCluster),
       ensureDefaultIndices(callCluster),
       settingsService.getSettings(soClient).catch((e: any) => {
         if (e.isBoom && e.output.statusCode === 404) {
