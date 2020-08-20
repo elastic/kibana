@@ -277,11 +277,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     });
   };
 
-  getFilterActionContext = (filters) => {
+  getFilterActionContext = (filters: Filter[]) => {
     return {
       embeddable: this,
       filters,
-      trigger: { id: 'FILTER_TRIGGER' },
     };
   };
 

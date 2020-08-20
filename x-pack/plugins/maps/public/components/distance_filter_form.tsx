@@ -25,10 +25,12 @@ interface Props {
   geoFields: GeoFieldWithIndex[];
   getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
   onSubmit: ({
+    actionId,
     filterLabel,
     indexPatternId,
     geoFieldName,
   }: {
+    actionId: string;
     filterLabel: string;
     indexPatternId: string;
     geoFieldName: string;
@@ -58,7 +60,7 @@ export class DistanceFilterForm extends Component<Props, State> {
     });
   };
 
-  _onActionIdChange = (value) => {
+  _onActionIdChange = (value: string) => {
     this.setState({ actionId: value });
   };
 

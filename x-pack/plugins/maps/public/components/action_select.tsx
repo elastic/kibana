@@ -22,7 +22,7 @@ interface State {
   actions: UiActionsActionDefinition[];
 }
 
-export class ActionSelect extends Component<State, Props> {
+export class ActionSelect extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
     actions: [],
@@ -63,11 +63,12 @@ export class ActionSelect extends Component<State, Props> {
         ),
       },
       ...this.state.actions.map((action) => {
+        const iconType = action.getIconType();
         return {
           value: action.id,
           inputDisplay: (
             <div>
-              <EuiIcon className="mapActionSelectIcon" type={action.getIconType()} />
+              {iconType ? <EuiIcon className="mapActionSelectIcon" type={iconType} /> : null}
               {action.getDisplayName()}
             </div>
           ),
