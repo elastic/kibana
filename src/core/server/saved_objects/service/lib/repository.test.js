@@ -154,26 +154,35 @@ describe('SavedObjectsRepository', () => {
     validateDoc: jest.fn(),
   });
 
-  const getMockGetResponse = ({ type, id, references, namespace }) => ({
-    // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
-    found: true,
-    _id: `${registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''}${type}:${id}`,
-    ...mockVersionProps,
-    _source: {
-      ...(registry.isSingleNamespace(type) && { namespace }),
-      ...(registry.isMultiNamespace(type) && { namespaces: [namespace ?? 'default'] }),
-      type,
-      [type]: { title: 'Testing' },
-      references,
-      specialProperty: 'specialValue',
-      ...mockTimestampFields,
-    },
-  });
+  const getMockGetResponse = ({ type, id, references, namespace: objectNamespace }, namespace) => {
+    const namespaceId =
+      // eslint-disable-next-line no-nested-ternary
+      objectNamespace !== undefined
+        ? objectNamespace !== 'default'
+          ? objectNamespace
+          : undefined
+        : namespace;
+    return {
+      // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
+      found: true,
+      _id: `${
+        registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''
+      }${type}:${id}`,
+      ...mockVersionProps,
+      _source: {
+        ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
+        ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
+        type,
+        [type]: { title: 'Testing' },
+        references,
+        specialProperty: 'specialValue',
+        ...mockTimestampFields,
+      },
+    };
+  };
 
   const getMockMgetResponse = (objects, namespace) => ({
-    docs: objects.map((obj) =>
-      obj.found === false ? obj : getMockGetResponse({ ...obj, namespace })
-    ),
+    docs: objects.map((obj) => (obj.found === false ? obj : getMockGetResponse(obj, namespace))),
   });
 
   expect.extend({
@@ -1311,29 +1320,57 @@ describe('SavedObjectsRepository', () => {
         const getId = (type, id) => `${namespace}:${type}:${id}`;
         await bulkUpdateSuccess([obj1, obj2], { namespace });
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+
+        jest.clearAllMocks();
+        // test again with object namespace string that supersedes the operation's namespace ID
+        await bulkUpdateSuccess([
+          { ...obj1, namespace },
+          { ...obj2, namespace },
+        ]);
+        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`;
         await bulkUpdateSuccess([obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+
+        jest.clearAllMocks();
+        // test again with object namespace string that supersedes the operation's namespace ID
+        await bulkUpdateSuccess(
+          [
+            { ...obj1, namespace: 'default' },
+            { ...obj2, namespace: 'default' },
+          ],
+          { namespace }
+        );
+        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`;
-        const objects1 = [{ ...obj1, type: NAMESPACE_AGNOSTIC_TYPE }];
-        await bulkUpdateSuccess(objects1, { namespace });
-        expectClientCallArgsAction(objects1, { method: 'update', getId });
-        client.bulk.mockClear();
         const overrides = {
           // bulkUpdate uses a preflight `get` request for multi-namespace saved objects, and specifies that version on `update`
           // we aren't testing for this here, but we need to include Jest assertions so this test doesn't fail
           if_primary_term: expect.any(Number),
           if_seq_no: expect.any(Number),
         };
-        const objects2 = [{ ...obj2, type: MULTI_NAMESPACE_TYPE }];
-        await bulkUpdateSuccess(objects2, { namespace });
-        expectClientCallArgsAction(objects2, { method: 'update', getId, overrides }, 2);
+        const _obj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
+        const _obj2 = { ...obj2, type: MULTI_NAMESPACE_TYPE };
+
+        await bulkUpdateSuccess([_obj1], { namespace });
+        expectClientCallArgsAction([_obj1], { method: 'update', getId });
+        client.bulk.mockClear();
+        await bulkUpdateSuccess([_obj2], { namespace });
+        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides }, 2);
+
+        jest.clearAllMocks();
+        // test again with object namespace string that supersedes the operation's namespace ID
+        await bulkUpdateSuccess([{ ..._obj1, namespace }]);
+        expectClientCallArgsAction([_obj1], { method: 'update', getId });
+        client.bulk.mockClear();
+        await bulkUpdateSuccess([{ ..._obj2, namespace }]);
+        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides }, 2);
       });
     });
 
@@ -1684,11 +1721,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
-        const response = getMockGetResponse({
-          type: MULTI_NAMESPACE_TYPE,
-          id,
-          namespace: 'bar-namespace',
-        });
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id }, 'bar-namespace');
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -1785,7 +1818,7 @@ describe('SavedObjectsRepository', () => {
 
     const deleteSuccess = async (type, id, options) => {
       if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id, namespace: options?.namespace });
+        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
         );
@@ -1911,7 +1944,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when the type is multi-namespace and the document exists, but not in this namespace`, async () => {
-        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id }, namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -2440,7 +2473,7 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
 
     const getSuccess = async (type, id, options) => {
-      const response = getMockGetResponse({ type, id, namespace: options?.namespace });
+      const response = getMockGetResponse({ type, id }, options?.namespace);
       client.get.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(response)
       );
@@ -2529,7 +2562,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
-        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id }, namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -2579,7 +2612,7 @@ describe('SavedObjectsRepository', () => {
     const incrementCounterSuccess = async (type, id, field, options) => {
       const isMultiNamespace = registry.isMultiNamespace(type);
       if (isMultiNamespace) {
-        const response = getMockGetResponse({ type, id, namespace: options?.namespace });
+        const response = getMockGetResponse({ type, id }, options?.namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -2716,11 +2749,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
-        const response = getMockGetResponse({
-          type: MULTI_NAMESPACE_TYPE,
-          id,
-          namespace: 'bar-namespace',
-        });
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id }, 'bar-namespace');
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
@@ -3152,7 +3181,7 @@ describe('SavedObjectsRepository', () => {
 
     const updateSuccess = async (type, id, attributes, options) => {
       if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id, namespace: options?.namespace });
+        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
         );
@@ -3349,7 +3378,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
-        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id }, namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );

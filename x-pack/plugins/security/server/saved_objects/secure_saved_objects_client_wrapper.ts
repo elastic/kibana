@@ -15,6 +15,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  namespaceIdToString,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
@@ -184,12 +185,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    await this.ensureAuthorized(
-      this.getUniqueObjectTypes(objects),
-      'bulk_update',
-      options && options.namespace,
-      { objects, options }
-    );
+    const objectNamespaces = objects
+      .filter(({ namespace }) => namespace !== undefined)
+      .map(({ namespace }) => namespace!);
+    const namespaces = uniq([namespaceIdToString(options?.namespace), ...objectNamespaces]);
+    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
+      objects,
+      options,
+    });
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
     return await this.redactSavedObjectsNamespaces(response);

@@ -63,7 +63,7 @@ import {
 } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { namespaceIdToString } from './namespace';
+import { namespaceIdToString, namespaceStringToId } from './namespace';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -1131,7 +1131,9 @@ export class SavedObjectsRepository {
         };
       }
 
-      const { attributes, references, version } = object;
+      const { attributes, references, version, namespace: objectNamespace } = object;
+      // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
+      // The object namespace string, if defined, will supersede the operation's namespace ID.
 
       const documentToSave = {
         [type]: attributes,
@@ -1148,16 +1150,22 @@ export class SavedObjectsRepository {
           id,
           version,
           documentToSave,
+          objectNamespace,
           ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
 
+    const getNamespaceId = (objectNamespace?: string) =>
+      objectNamespace !== undefined ? namespaceStringToId(objectNamespace) : namespace;
+    const getNamespaceString = (objectNamespace?: string) =>
+      objectNamespace ?? namespaceIdToString(namespace);
+
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
       .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { type, id } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
+      .map(({ value: { type, id, objectNamespace } }) => ({
+        _id: this._serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
         _index: this.getIndexForType(type),
         _source: ['type', 'namespaces'],
       }));
@@ -1182,14 +1190,25 @@ export class SavedObjectsRepository {
           return expectedBulkGetResult;
         }
 
-        const { esRequestIndex, id, type, version, documentToSave } = expectedBulkGetResult.value;
+        const {
+          esRequestIndex,
+          id,
+          type,
+          version,
+          documentToSave,
+          objectNamespace,
+        } = expectedBulkGetResult.value;
+
         let namespaces;
         let versionProperties;
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
-          if (!docFound || !this.rawDocExistsInNamespace(actualResult, namespace)) {
+          if (
+            !docFound ||
+            !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
+          ) {
             return {
               tag: 'Left' as 'Left',
               error: {
@@ -1205,7 +1224,7 @@ export class SavedObjectsRepository {
           versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
           if (this._registry.isSingleNamespace(type)) {
-            namespaces = [namespaceIdToString(namespace)];
+            namespaces = [getNamespaceString(objectNamespace)];
           }
           versionProperties = getExpectedVersionProperties(version);
         }
@@ -1221,7 +1240,7 @@ export class SavedObjectsRepository {
         bulkUpdateParams.push(
           {
             update: {
-              _id: this._serializer.generateRawId(namespace, type, id),
+              _id: this._serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
               _index: this.getIndexForType(type),
               ...versionProperties,
             },

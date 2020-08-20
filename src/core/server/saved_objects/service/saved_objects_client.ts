@@ -75,6 +75,13 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
   type: string;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: Partial<T>;
+  /**
+   * Optional namespace string to use for this document. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsUpdateOptions}.
+   *
+   * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
+   **/
+  namespace?: string;
 }
 
 /**
