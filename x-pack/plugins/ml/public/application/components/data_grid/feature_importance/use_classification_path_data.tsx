@@ -112,7 +112,7 @@ export const buildRegressionDecisionPathData = ({
       absImportance: 0, // arbitrary importance so this will be of higher importance than baseline
     });
   }
-  const filteredFeatureImportance = featureImportance.filter(
+  const filteredFeatureImportance = mappedFeatureImportance.filter(
     (f) => f !== undefined
   ) as ExtendedFeatureImportance[];
 
