@@ -14,13 +14,16 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 import { GeoFieldWithIndex } from './geo_field_with_index';
+import { ActionSelect, ADD_FILTER_MAPS_ACTION } from './action_select';
 
 interface Props {
   className?: string;
   buttonLabel: string;
   geoFields: GeoFieldWithIndex[];
+  getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
   onSubmit: ({
     filterLabel,
     indexPatternId,
@@ -33,12 +36,14 @@ interface Props {
 }
 
 interface State {
+  actionId: string;
   selectedField: GeoFieldWithIndex | undefined;
   filterLabel: string;
 }
 
 export class DistanceFilterForm extends Component<Props, State> {
-  state = {
+  state: State = {
+    actionId: ADD_FILTER_MAPS_ACTION,
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     filterLabel: '',
   };
@@ -53,11 +58,16 @@ export class DistanceFilterForm extends Component<Props, State> {
     });
   };
 
+  _onActionIdChange = (value) => {
+    this.setState({ actionId: value });
+  };
+
   _onSubmit = () => {
     if (!this.state.selectedField) {
       return;
     }
     this.props.onSubmit({
+      actionId: this.state.actionId,
       filterLabel: this.state.filterLabel,
       indexPatternId: this.state.selectedField.indexPatternId,
       geoFieldName: this.state.selectedField.geoFieldName,
@@ -84,6 +94,12 @@ export class DistanceFilterForm extends Component<Props, State> {
           selectedField={this.state.selectedField}
           fields={this.props.geoFields}
           onChange={this._onGeoFieldChange}
+        />
+
+        <ActionSelect
+          getFilterActions={this.props.getFilterActions}
+          value={this.state.actionId}
+          onChange={this._onActionIdChange}
         />
 
         <EuiSpacer size="m" />

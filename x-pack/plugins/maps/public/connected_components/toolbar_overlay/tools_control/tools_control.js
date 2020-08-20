@@ -123,6 +123,7 @@ export class ToolsControl extends Component {
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_SHAPE_LABEL_SHORT}
             geoFields={this.props.geoFields}
+            getFilterActions={this.props.getFilterActions}
             intitialGeometryLabel={i18n.translate(
               'xpack.maps.toolbarOverlay.drawShape.initialGeometryLabel',
               {
@@ -141,6 +142,7 @@ export class ToolsControl extends Component {
             className="mapDrawControl__geometryFilterForm"
             buttonLabel={DRAW_BOUNDS_LABEL_SHORT}
             geoFields={this.props.geoFields}
+            getFilterActions={this.props.getFilterActions}
             intitialGeometryLabel={i18n.translate(
               'xpack.maps.toolbarOverlay.drawBounds.initialGeometryLabel',
               {
@@ -161,6 +163,7 @@ export class ToolsControl extends Component {
             geoFields={this.props.geoFields.filter(({ geoFieldType }) => {
               return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
             })}
+            getFilterActions={this.props.getFilterActions}
             onSubmit={this._initiateDistanceDraw}
           />
         ),

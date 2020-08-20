@@ -5,12 +5,19 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiTextAlign, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiTextAlign,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export class FeatureProperties extends React.Component {
   state = {
     properties: null,
+    actions: [],
     loadPropertiesErrorMsg: null,
     prevWidth: null,
     prevHeight: null,
@@ -21,6 +28,7 @@ export class FeatureProperties extends React.Component {
     this.prevLayerId = undefined;
     this.prevFeatureId = undefined;
     this._loadProperties();
+    this._loadActions();
   }
 
   componentDidUpdate() {
@@ -29,6 +37,16 @@ export class FeatureProperties extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  async _loadActions() {
+    if (!this.props.getFilterActions) {
+      return;
+    }
+    const actions = await this.props.getFilterActions();
+    if (this._isMounted) {
+      this.setState({ actions });
+    }
   }
 
   _loadProperties = async () => {
@@ -83,9 +101,7 @@ export class FeatureProperties extends React.Component {
     }
 
     if (this._isMounted) {
-      this.setState({
-        properties,
-      });
+      this.setState({ properties });
     }
   };
 
@@ -94,26 +110,48 @@ export class FeatureProperties extends React.Component {
       return null;
     }
 
-    return (
-      <td>
-        <EuiButtonIcon
-          className="mapFeatureTooltip__filterButton"
-          iconType="plusInCircle"
-          title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
-            defaultMessage: 'Filter on property',
-          })}
-          onClick={async () => {
-            this.props.onCloseTooltip();
-            const filters = await tooltipProperty.getESFilters();
-            this.props.addFilters(filters);
-          }}
-          aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
-            defaultMessage: 'Filter on property',
-          })}
-          data-test-subj="mapTooltipCreateFilterButton"
-        />
-      </td>
-    );
+    const actionButtons = [
+      <EuiButtonIcon
+        key="addFilter"
+        className="mapFeatureTooltip__filterButton"
+        iconType="filter"
+        title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
+          defaultMessage: 'Filter on property',
+        })}
+        onClick={async () => {
+          this.props.onCloseTooltip();
+          const filters = await tooltipProperty.getESFilters();
+          this.props.addFilters(filters);
+        }}
+        aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
+          defaultMessage: 'Filter on property',
+        })}
+        data-test-subj="mapTooltipCreateFilterButton"
+      />,
+    ];
+
+    if (this.state.actions.length) {
+      this.state.actions.forEach((action) => {
+        actionButtons.push(
+          <div>
+            <EuiButtonEmpty
+              key={action.id}
+              iconType={action.getIconType()}
+              onClick={async () => {
+                this.props.onCloseTooltip();
+                const filters = await tooltipProperty.getESFilters();
+                this.props.addFilters(filters, action.id);
+              }}
+              data-test-subj={`mapTooltipAddFilterButton_${action.id}`}
+            >
+              {action.getDisplayName()}
+            </EuiButtonEmpty>
+          </div>
+        );
+      });
+    }
+
+    return <td>{actionButtons}</td>;
   }
 
   render() {

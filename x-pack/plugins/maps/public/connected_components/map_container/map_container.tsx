@@ -183,6 +183,7 @@ export class MapContainer extends Component<Props, State> {
   render() {
     const {
       addFilters,
+      getFilterActions,
       flyoutDisplay,
       isFullScreen,
       exitFullScreen,
@@ -230,11 +231,16 @@ export class MapContainer extends Component<Props, State> {
         <EuiFlexItem className="mapMapWrapper">
           <MBMap
             addFilters={addFilters}
+            getFilterActions={getFilterActions}
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
           {!this.props.hideToolbarOverlay && (
-            <ToolbarOverlay addFilters={addFilters} geoFields={this.state.geoFields} />
+            <ToolbarOverlay
+              addFilters={addFilters}
+              geoFields={this.state.geoFields}
+              getFilterActions={getFilterActions}
+            />
           )}
           <WidgetOverlay />
         </EuiFlexItem>

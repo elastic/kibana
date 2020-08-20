@@ -115,6 +115,7 @@ export class FeaturesTooltip extends React.Component {
           geometry={currentFeatureGeometry}
           geoFields={geoFields}
           addFilters={this.props.addFilters}
+          getFilterActions={this.props.getFilterActions}
           loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
         />
       );
@@ -137,6 +138,7 @@ export class FeaturesTooltip extends React.Component {
           showFilterButtons={!!this.props.addFilters && this.props.isLocked}
           onCloseTooltip={this.props.closeTooltip}
           addFilters={this.props.addFilters}
+          getFilterActions={this.props.getFilterActions}
         />
         {this._renderActions(geoFields)}
       </Fragment>
