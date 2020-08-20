@@ -34,7 +34,7 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, FactoryContext> {
+export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
   params: Params;
 }
 

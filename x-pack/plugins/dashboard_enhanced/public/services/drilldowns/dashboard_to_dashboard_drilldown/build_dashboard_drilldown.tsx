@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  TriggerId,
+  TriggerContextMapping,
+} from '../../../../../../../src/plugins/ui_actions/public';
+import { DashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public';
+import { CollectConfigContainer } from './components';
+import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
+import {
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
+  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+} from '../../../../../ui_actions_enhanced/public';
+import { txtGoToDashboard } from './i18n';
+import {
+  StartServicesGetter,
+  CollectConfigProps,
+} from '../../../../../../../src/plugins/kibana_utils/public';
+import { KibanaURL } from '../../../../../../../src/plugins/share/public';
+import { StartDependencies } from '../../../plugin';
+import { Config } from './types';
+
+export interface Params<T extends TriggerId> {
+  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
+  getDashboardUrlGenerator: () => DashboardUrlGenerator;
+  triggers: T[];
+  getURL: (config: Config, context: TriggerContextMapping[T]) => Promise<KibanaURL>;
+}
+
+export abstract class AbstractDashboardDrilldown<T extends TriggerId>
+  implements Drilldown<Config, T, BaseActionFactoryContext<T>> {
+  constructor(protected readonly params: Params<T>) {}
+
+  public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
+
+  public readonly order = 100;
+
+  public readonly getDisplayName = () => txtGoToDashboard;
+
+  public readonly euiIcon = 'dashboardApp';
+
+  private readonly ReactCollectConfig: React.FC<
+    CollectConfigProps<Config, BaseActionFactoryContext<T>>
+  > = (props) => <CollectConfigContainer {...props} params={this.params} />;
+
+  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+
+  public readonly createConfig = () => ({
+    dashboardId: '',
+    useCurrentFilters: true,
+    useCurrentDateRange: true,
+  });
+
+  public readonly isConfigValid = (config: Config): config is Config => {
+    if (!config.dashboardId) return false;
+    return true;
+  };
+
+  public supportedTriggers(): T[] {
+    return this.params.triggers;
+  }
+
+  public readonly getHref = async (
+    config: Config,
+    context: TriggerContextMapping[T]
+  ): Promise<string> => {
+    const url = await this.params.getURL(config, context);
+    return url.path;
+  };
+
+  public readonly execute = async (config: Config, context: TriggerContextMapping[T]) => {
+    const url = await this.params.getURL(config, context);
+    await this.params.start().core.application.navigateToApp(url.appName, { path: url.appPath });
+  };
+}

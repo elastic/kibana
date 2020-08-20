@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CollectConfigContainer } from './collect_config_container';
+export {
+  CollectConfigContainer,
+  DashboardDrilldownCollectConfigProps,
+} from './collect_config_container';
