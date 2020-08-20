@@ -26,7 +26,7 @@ interface SelectedOption {
 }
 
 export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = false }: Props) => {
-  const colors = Object.keys(Color) as Color[];
+  const colors = Object.keys(Color) as Array<keyof typeof Color>;
   const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
   // the EuiCombobox forwards the ref to an input element

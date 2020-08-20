@@ -19,18 +19,9 @@ export enum Color {
   color9 = 'color9',
 }
 
-export interface Palette {
-  [Color.color0]: string;
-  [Color.color1]: string;
-  [Color.color2]: string;
-  [Color.color3]: string;
-  [Color.color4]: string;
-  [Color.color5]: string;
-  [Color.color6]: string;
-  [Color.color7]: string;
-  [Color.color8]: string;
-  [Color.color9]: string;
-}
+export type Palette = {
+  [K in keyof typeof Color]: string;
+};
 
 const euiPalette = euiPaletteColorBlind();
 
