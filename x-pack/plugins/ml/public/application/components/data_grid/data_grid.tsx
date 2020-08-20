@@ -25,11 +25,12 @@ import {
 import { CoreSetup } from 'src/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
-import { INDEX_STATUS } from '../../data_frame_analytics/common';
+import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+import { TopClasses } from '../../../../common/types/feature_importance';
 
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
@@ -42,6 +43,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   baseline?: number;
+  analysisType?: ANALYSIS_CONFIG_TYPE;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
 }
@@ -83,6 +85,7 @@ export const DataGrid: FC<Props> = memo(
       toggleChartVisibility,
       visibleColumns,
       predictionFieldName,
+      analysisType,
     } = props;
     // TODO Fix row hovering + bar highlighting
     // const getRowProps = (item: any) => {
@@ -93,35 +96,36 @@ export const DataGrid: FC<Props> = memo(
     // };
 
     const popOverContent = useMemo(() => {
-      return {
-        featureImportance: ({
-          cellContentsElement,
-          children,
-        }: {
-          cellContentsElement: any;
-          children: any;
-        }) => {
-          const stringContents = cellContentsElement.textContent;
-          const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
-          const rowIndex = children?.props?.rowIndex;
-          const row = data[rowIndex];
-          let predictedValue;
-          if (
-            predictionFieldName !== undefined &&
-            row &&
-            row.ml[predictionFieldName] !== undefined
-          ) {
-            predictedValue = row.ml[predictionFieldName];
+      return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+        ? {
+            featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
+              const rowIndex = children?.props?.rowIndex;
+              const row = data[rowIndex];
+              const parsedFIArray = row.ml.feature_importance;
+              let predictedValue: string | number | undefined;
+              let topClasses: TopClasses = [];
+              if (
+                predictionFieldName !== undefined &&
+                row &&
+                row.ml[predictionFieldName] !== undefined
+              ) {
+                predictedValue = row.ml[predictionFieldName];
+                topClasses = row.ml.top_classes;
+              }
+
+              return (
+                <DecisionPathPopover
+                  analysisType={analysisType}
+                  predictedValue={predictedValue}
+                  baseline={baseline}
+                  featureImportance={parsedFIArray}
+                  topClasses={topClasses}
+                />
+              );
+            },
           }
-          return (
-            <DecisionPathPopover
-              predictedValue={predictedValue}
-              baseline={baseline}
-              featureImportance={parsedFIArray}
-            />
-          );
-        },
-      };
+        : undefined;
     }, [baseline, data]);
 
     useEffect(() => {

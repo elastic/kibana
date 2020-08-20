@@ -4,40 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import {
   Chart,
   Settings,
-  LineAnnotation,
-  AnnotationDomainTypes,
   LineSeries,
   Axis,
   ScaleType,
   Position,
-  LineAnnotationDatum,
   PartialTheme,
   AxisConfig,
   RecursivePartial,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 import { findMaxMin, useDecisionPathData } from './use_classification_path_data';
-
-const baselineStyle = {
-  line: {
-    strokeWidth: 1,
-    stroke: 'gray',
-    opacity: 1,
-  },
-  details: {
-    fontSize: 12,
-    fontFamily: 'Arial',
-    fontStyle: 'bold',
-    fill: 'gray',
-    padding: 0,
-  },
-};
+import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 
 const axes: RecursivePartial<AxisConfig> = {
   tickLabelStyle: {
@@ -47,71 +29,81 @@ const axes: RecursivePartial<AxisConfig> = {
 const theme: PartialTheme = {
   axes,
 };
-
-interface RegressionDecisionPathProps {
-  baseline?: number;
-  predictedValue?: number | undefined;
+interface ClassificationDecisionPathProps {
+  predictedValue: string | undefined;
   featureImportance: FeatureImportance[];
-  topClasses?: TopClasses;
+  topClasses: TopClasses;
 }
 
-export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
-  baseline,
+export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = ({
   featureImportance,
   predictedValue,
+  topClasses,
 }) => {
+  const [currentClass, setCurrentClass] = useState<string>(topClasses[0].class_name);
   const { decisionPathData } = useDecisionPathData({
-    baseline,
     featureImportance,
-    predictedValue,
+    predictedValue: currentClass,
   });
+  const options = useMemo(
+    () =>
+      Array.isArray(topClasses) && typeof predictedValue === 'string'
+        ? topClasses.map((c) => ({
+            value: c.class_name,
+            inputDisplay:
+              c.class_name === predictedValue ? (
+                <EuiHealth color="success" style={{ lineHeight: 'inherit' }}>
+                  {c.class_name}
+                </EuiHealth>
+              ) : (
+                c.class_name
+              ),
+          }))
+        : undefined,
+    [topClasses, predictedValue]
+  );
+
   if (!decisionPathData) return <div />;
-  const baselineData: LineAnnotationDatum[] = [
-    {
-      dataValue: baseline,
-      details: i18n.translate(
-        'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathBaselineText',
-        {
-          defaultMessage:
-            'baseline (average of predictions for all data points in the training data set)',
-        }
-      ),
-    },
-  ];
   let maxDomain;
   let minDomain;
   // if decisionPathData has calculated cumulative path
   if (Array.isArray(decisionPathData) && decisionPathData.length === 3) {
     const { max, min } = findMaxMin(decisionPathData, (d: [string, number, number]) => d[2]);
-    maxDomain = max;
-    minDomain = min;
-    const buffer = Math.abs(maxDomain - minDomain) * 0.1;
-    maxDomain = (typeof baseline === 'number' ? Math.max(maxDomain, baseline) : maxDomain) + buffer;
-    minDomain = (typeof baseline === 'number' ? Math.min(minDomain, baseline) : minDomain) - buffer;
+    const buffer = Math.abs(max - min) * 0.1;
+    maxDomain = max + buffer;
+    minDomain = min - buffer;
   }
 
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 3 ? 40 : 75;
-
+  const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 3 ? 35 : 75;
   return (
     <>
+      <EuiSpacer size={'xs'} />
+      <EuiTitle size={'xxxs'}>
+        <span>
+          {i18n.translate(
+            'xpack.ml.dataframe.analytics.explorationResults.classificationDecisionPathClassNameTitle',
+            {
+              defaultMessage: 'Class name',
+            }
+          )}
+        </span>
+      </EuiTitle>
+      {options !== undefined && (
+        <EuiSuperSelect
+          compressed={true}
+          options={options}
+          valueOfSelected={currentClass}
+          onChange={setCurrentClass}
+        />
+      )}
       <Chart size={{ height: decisionPathData.length * heightMultiplier }}>
         <Settings theme={theme} rotation={90} />
-        {baseline && (
-          <LineAnnotation
-            id="xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathBaseline"
-            domainType={AnnotationDomainTypes.YDomain}
-            dataValues={baselineData}
-            style={baselineStyle}
-            marker={<EuiIcon type={'annotation'} />}
-          />
-        )}
-
         <Axis
-          id={'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathXAxis'}
+          id={'xpack.ml.dataframe.analytics.explorationResults.classificationDecisionPathXAxis'}
           tickFormat={(d) => `${Number(d).toPrecision(3)}`}
           title={i18n.translate(
-            'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathXAxisTitle',
+            'xpack.ml.dataframe.analytics.explorationResults.classificationDecisionPathXAxisTitle',
             {
               defaultMessage: 'Prediction',
             }
@@ -130,9 +122,9 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
         />
         <Axis showGridLines={true} id="left" position={Position.Left} />
         <LineSeries
-          id="xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathLine"
+          id={'xpack.ml.dataframe.analytics.explorationResults.classificationDecisionPathLine'}
           name={i18n.translate(
-            'xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathLineTitle',
+            'xpack.ml.dataframe.analytics.explorationResults.classificationDecisionPathLineTitle',
             {
               defaultMessage: 'Prediction',
             }

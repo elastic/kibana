@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import { EuiTabs, EuiTab, EuiText, EuiLink } from '@elastic/eui';
+import React, { FC, useState } from 'react';
+import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FeatureImportanceDecisionPath, DecisionPathPlotData } from './decision_path_chart';
+import { RegressionDecisionPath } from './decision_path_chart';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
-import { FeatureImportance } from '../../../../../common/types/feature_importance';
+import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
+import { ClassificationDecisionPath } from './decision_path_classification';
 
 interface DecisionPathPopoverProps {
-  baseline?: number;
   featureImportance: FeatureImportance[];
-  predictedValue?: number | undefined;
+  analysisType: ANALYSIS_CONFIG_TYPE;
+  baseline?: number;
+  predictedValue?: number | string | undefined;
+  topClasses?: TopClasses;
 }
 
 enum DECISION_PATH_TABS {
@@ -22,69 +26,18 @@ enum DECISION_PATH_TABS {
   JSON = 'decision_path_json',
 }
 
-const FEATURE_NAME = 'feature_name';
-const FEATURE_IMPORTANCE = 'importance';
-
 export interface ExtendedFeatureImportance extends FeatureImportance {
   absImportance?: number;
 }
-export const useDecisionPathData = ({
-  baseline,
-  featureImportance,
-  predictedValue,
-}: DecisionPathPopoverProps) => {
-  const [decisionPlotData, setDecisionPlotData] = useState<DecisionPathPlotData | undefined>();
 
-  useEffect(() => {
-    let mappedFeatureImportance: ExtendedFeatureImportance[] = featureImportance;
-    mappedFeatureImportance = mappedFeatureImportance.map((d) => ({
-      ...d,
-      absImportance: Math.abs(d[FEATURE_IMPORTANCE]),
-    }));
-
-    if (baseline && predictedValue !== undefined && Number.isFinite(predictedValue)) {
-      // get the adjusted importance needed for when # of fields included in c++ analysis != max allowed
-      // if num fields included = num features allowed exactly, adjustedImportance should be 0
-      const adjustedImportance =
-        predictedValue -
-        mappedFeatureImportance.reduce(
-          (accumulator, currentValue) => accumulator + currentValue.importance,
-          0
-        ) -
-        baseline;
-
-      // get the absolute absImportance of the importance value to the baseline for sorting
-      mappedFeatureImportance.push({
-        [FEATURE_NAME]: 'other',
-        [FEATURE_IMPORTANCE]: baseline + adjustedImportance,
-        absImportance: 0,
-      });
-    }
-
-    const finalResult: DecisionPathPlotData = mappedFeatureImportance
-      // sort so absolute importance so it goes from bottom (baseline) to top
-      .sort((a, b) => b.absImportance! - a.absImportance!)
-      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE], NaN]);
-
-    // start at the baseline and end at predicted value
-    // for regression, cumulativeSum should add up to baseline
-    let cumulativeSum = 0;
-    for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
-      cumulativeSum += finalResult[i][1];
-      finalResult[i][2] = cumulativeSum;
-    }
-    setDecisionPlotData(finalResult);
-  }, [baseline, featureImportance]);
-
-  return { decisionPlotData };
-};
 export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   baseline,
   featureImportance,
   predictedValue,
+  topClasses,
+  analysisType,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
-  const { decisionPlotData } = useDecisionPathData({ baseline, featureImportance, predictedValue });
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -147,12 +100,20 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               }}
             />
           </EuiText>
-
-          <FeatureImportanceDecisionPath
-            baseline={baseline}
-            decisionPlotData={decisionPlotData}
-            predictedValue={predictedValue}
-          />
+          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
+            <ClassificationDecisionPath
+              featureImportance={featureImportance}
+              topClasses={topClasses as TopClasses}
+              predictedValue={predictedValue as string}
+            />
+          )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
+            <RegressionDecisionPath
+              featureImportance={featureImportance}
+              baseline={baseline}
+              predictedValue={predictedValue as number}
+            />
+          )}
         </>
       )}
       {selectedTabId === DECISION_PATH_TABS.JSON && (

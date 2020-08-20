@@ -28,6 +28,8 @@ import {
   INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
+  getAnalysisType,
+  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -81,6 +83,8 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
+
+    const analysisType = getAnalysisType(jobConfig.analysis);
 
     const classificationData = useExplorationResults(
       indexPattern,
@@ -191,6 +195,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
+                analysisType={(analysisType as unknown) as ANALYSIS_CONFIG_TYPE}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
