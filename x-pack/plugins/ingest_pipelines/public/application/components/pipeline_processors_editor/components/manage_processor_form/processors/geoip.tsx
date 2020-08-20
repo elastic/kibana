@@ -68,8 +68,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.geoIPForm.firstOnlyFieldHelpText',
       {
-        defaultMessage:
-          'If true, the first matching geo data is used, even if the field contains an array.',
+        defaultMessage: 'Use the first matching geo data, even if the field contains an array.',
       }
     ),
   },
@@ -81,7 +80,7 @@ export const GeoIP: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.geoIPForm.fieldNameHelpText',
-          { defaultMessage: 'Field containing an IP address for the geographical lookup.' }
+          { defaultMessage: 'Field containing an IP address for the geographical lookup' }
         )}
       />
 

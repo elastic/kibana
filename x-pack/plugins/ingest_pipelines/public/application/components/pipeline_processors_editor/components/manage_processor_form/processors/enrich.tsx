@@ -88,7 +88,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.enrichForm.overrideFieldHelpText',
       {
-        defaultMessage: 'If true, the processor can overwrite pre-existing field values.',
+        defaultMessage: 'If enabled, the processor can overwrite pre-existing field values.',
       }
     ),
   },
@@ -157,7 +157,7 @@ export const Enrich: FunctionComponent = () => {
           helpText: (
             <FormattedMessage
               id="xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText"
-              defaultMessage="Name of the {enrichPolicyLink}."
+              defaultMessage="Name of the {enrichPolicyLink}"
               values={{
                 enrichPolicyLink: (
                   <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
@@ -182,7 +182,7 @@ export const Enrich: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldHelpText',
           {
-            defaultMessage: 'Field used to contain enrich data.',
+            defaultMessage: 'Field used to contain enrich data',
           }
         )}
         validations={[targetFieldValidator]}

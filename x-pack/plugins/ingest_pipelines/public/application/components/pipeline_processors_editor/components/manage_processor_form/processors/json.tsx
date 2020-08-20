@@ -34,7 +34,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.jsonForm.addToRootFieldHelpText',
       {
         defaultMessage:
-          'If true, add the JSON object to the top level of the document. Cannot be combined with a target field.',
+          'Add the JSON object to the top level of the document. Cannot be combined with a target field.',
       }
     ),
   },
@@ -61,11 +61,16 @@ export const Json: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.jsonForm.fieldNameHelpText',
-          { defaultMessage: 'Field to be parsed.' }
+          { defaultMessage: 'Field to be parsed' }
         )}
       />
 
-      <TargetField />
+      <TargetField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.jsonForm.targetFieldHelpText',
+          { defaultMessage: 'Field used to contain the JSON object.' }
+        )}
+      />
 
       <UseField
         config={fieldsConfig.add_to_root}
