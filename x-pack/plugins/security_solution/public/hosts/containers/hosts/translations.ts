@@ -14,7 +14,7 @@ export const ERROR_ALL_HOST = i18n.translate(
 );
 
 export const FAIL_ALL_HOST = i18n.translate(
-  'xpack.securitySolution.allHost.errorSearchDescription',
+  'xpack.securitySolution.allHost.failSearchDescription',
   {
     defaultMessage: `Failed to run search on all hosts`,
   }
