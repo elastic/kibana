@@ -241,10 +241,10 @@ export function systemRoutes(
         body: schema.object({ index: schema.string() }),
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { index } = request.body;
 
