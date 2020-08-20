@@ -6,6 +6,7 @@
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
@@ -77,27 +78,19 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     let reason;
     if (nextState === AlertStates.ALERT) {
       reason = results
-        .map((result) => {
-          if (!result[item]) return '';
-          const resultWithVerboseMetricName = {
-            ...result[item],
-            metric: toMetricOpt(result[item].metric)?.text || result[item].metric,
-            currentValue: formatMetric(result[item].metric, result[item].currentValue),
-          };
-          return buildFiredAlertReason(resultWithVerboseMetricName);
-        })
+        .map((result) => buildReasonWithVerboseMetricName(result[item], buildFiredAlertReason))
         .join('\n');
     }
     if (alertOnNoData) {
       if (nextState === AlertStates.NO_DATA) {
         reason = results
           .filter((result) => result[item].isNoData)
-          .map((result) => buildNoDataAlertReason(result[item]))
+          .map((result) => buildReasonWithVerboseMetricName(result[item], buildNoDataAlertReason))
           .join('\n');
       } else if (nextState === AlertStates.ERROR) {
         reason = results
           .filter((result) => result[item].isError)
-          .map((result) => buildErrorAlertReason(result[item].metric))
+          .map((result) => buildReasonWithVerboseMetricName(result[item], buildErrorAlertReason))
           .join('\n');
       }
     }
@@ -121,6 +114,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   }
 };
 
+const buildReasonWithVerboseMetricName = (resultItem: any, buildReason: (r: any) => string) => {
+  if (!resultItem) return '';
+  const resultWithVerboseMetricName = {
+    ...resultItem,
+    metric:
+      toMetricOpt(resultItem.metric)?.text ||
+      (resultItem.metric === 'custom'
+        ? getCustomMetricLabel(resultItem.customMetric)
+        : resultItem.metric),
+    currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
+  };
+  return buildReason(resultWithVerboseMetricName);
+};
+
 const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
@@ -140,10 +147,6 @@ export const FIRED_ACTIONS = {
 };
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {
-  // if (SnapshotCustomMetricInputRT.is(metric)) {
-  //   const formatter = createFormatterForMetric(metric);
-  //   return formatter(val);
-  // }
   const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
   if (value == null) {
     return '';

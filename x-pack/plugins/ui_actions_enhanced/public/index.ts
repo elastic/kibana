@@ -28,6 +28,7 @@ export {
   DynamicActionManagerParams as UiActionsEnhancedDynamicActionManagerParams,
   DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
   MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
+  BaseActionFactoryContext as UiActionsEnhancedBaseActionFactoryContext,
 } from './dynamic_actions';
 
 export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';

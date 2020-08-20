@@ -19,15 +19,12 @@
 
 import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
-import { IUiSettingsClient } from 'kibana/public';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
 import { SearchRequest, SearchResponse } from '../index';
-import { UI_SETTINGS } from '../../../common';
+import { GetConfigFn, UI_SETTINGS } from '../../../common';
 
-function getConfigStub(config: any = {}) {
-  return {
-    get: (key) => config[key],
-  } as IUiSettingsClient;
+function getConfigStub(config: any = {}): GetConfigFn {
+  return (key) => config[key];
 }
 
 const mockResponses: Record<string, SearchResponse> = {
@@ -60,9 +57,9 @@ describe('fetchSoon', () => {
   });
 
   test('should execute asap if config is set to not batch searches', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: false,
-    });
+    const config = {
+      get: getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: false }),
+    };
     const request = {};
     const options = {};
 
@@ -72,9 +69,9 @@ describe('fetchSoon', () => {
   });
 
   test('should delay by 50ms if config is set to batch searches', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const config = {
+      get: getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true }),
+    };
     const request = {};
     const options = {};
 
@@ -88,9 +85,9 @@ describe('fetchSoon', () => {
   });
 
   test('should send a batch of requests to callClient', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const config = {
+      get: getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true }),
+    };
     const requests = [{ foo: 1 }, { foo: 2 }];
     const options = [{ bar: 1 }, { bar: 2 }];
 
@@ -105,9 +102,9 @@ describe('fetchSoon', () => {
   });
 
   test('should return the response to the corresponding call for multiple batched requests', async () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const config = {
+      get: getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true }),
+    };
     const requests = [{ _mockResponseId: 'foo' }, { _mockResponseId: 'bar' }];
 
     const promises = requests.map((request) => {
@@ -120,9 +117,9 @@ describe('fetchSoon', () => {
   });
 
   test('should wait for the previous batch to start before starting a new batch', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const config = {
+      get: getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true }),
+    };
     const firstBatch = [{ foo: 1 }, { foo: 2 }];
     const secondBatch = [{ bar: 1 }, { bar: 2 }];
 

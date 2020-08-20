@@ -49,6 +49,8 @@
     "GetCategoryExamples",
     "GetPartitionFieldsValues",
     "AnomalySearch",
+    "GetCategorizerStats",
+    "GetCategoryStoppedPartitions",
 
     "Modules",
     "DataRecognizer",

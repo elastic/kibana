@@ -8,7 +8,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, ReportingConfigType } from './config';
-import { createQueueFactory, enqueueJobFactory, LevelLogger, ReportingStore } from './lib';
+import { createQueueFactory, LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
@@ -87,14 +87,12 @@ export class ReportingPlugin
       const browserDriverFactory = await initializeBrowserDriverFactory(config, logger);
       const store = new ReportingStore(reportingCore, logger);
       const esqueue = await createQueueFactory(reportingCore, store, logger); // starts polling for pending jobs
-      const enqueueJob = enqueueJobFactory(reportingCore, store, logger); // called from generation routes
 
       reportingCore.pluginStart({
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         esqueue,
-        enqueueJob,
         store,
       });
 

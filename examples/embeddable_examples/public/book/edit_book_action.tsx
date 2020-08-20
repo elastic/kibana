@@ -22,11 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { createAction } from '../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import {
-  ViewMode,
-  EmbeddableStart,
-  SavedObjectEmbeddableInput,
-} from '../../../../src/plugins/embeddable/public';
+import { ViewMode, SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
@@ -34,10 +30,11 @@ import {
   BookByValueInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
-  getAttributeService: EmbeddableStart['getAttributeService'];
+  getAttributeService: DashboardStart['getAttributeService'];
 }
 
 interface ActionContext {
