@@ -17,6 +17,7 @@ import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
+import { sampleMlJobClickTrigger } from './triggers';
 import { mount } from './mount';
 
 export interface SetupDependencies {
@@ -44,6 +45,8 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new DashboardHelloWorldOnlyRangeSelectDrilldown());
     uiActions.registerDrilldown(new DashboardToUrlDrilldown());
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
+
+    uiActions.registerTrigger(sampleMlJobClickTrigger);
 
     core.application.register({
       id: 'ui_actions_enhanced-explorer',
