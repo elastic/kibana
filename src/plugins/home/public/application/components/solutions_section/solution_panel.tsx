@@ -46,11 +46,11 @@ const getDescriptions = (descriptions: string[]) =>
   descriptions.map(getDescriptionText).reduce<JSX.Element[]>(addSpacersBetweenElementsReducer, []);
 
 interface Props {
+  addBasePath: (path: string) => string;
   solution: FeatureCatalogueSolution;
-  apps?: FeatureCatalogueEntry[];
 }
 
-export const SolutionPanel: FC<Props> = ({ solution }) => (
+export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => (
   <EuiFlexItem
     key={solution.id}
     className={`${
@@ -58,24 +58,22 @@ export const SolutionPanel: FC<Props> = ({ solution }) => (
     } homSolutions__item`}
     grow={1}
   >
-    <EuiPanel
-      paddingSize="none"
-      className={`homSolutionPanel homSolutionPanel--${solution.id}`}
-      onClick={createAppNavigationHandler(solution.path)}
-    >
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={1} className={`homSolutionPanel__header`}>
-          <SolutionTitle
-            iconType={solution.icon}
-            title={solution.title}
-            subtitle={solution.subtitle}
-          />
-        </EuiFlexItem>
+    <a href={addBasePath(solution.path)} onClick={createAppNavigationHandler(solution.path)}>
+      <EuiPanel paddingSize="none" className={`homSolutionPanel homSolutionPanel--${solution.id}`}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={1} className={`homSolutionPanel__header`}>
+            <SolutionTitle
+              iconType={solution.icon}
+              title={solution.title}
+              subtitle={solution.subtitle}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={1} className="homSolutionPanel__content">
-          {getDescriptions(solution.descriptions)}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          <EuiFlexItem grow={1} className="homSolutionPanel__content">
+            {getDescriptions(solution.descriptions)}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </a>
   </EuiFlexItem>
 );

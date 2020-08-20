@@ -6,38 +6,42 @@ exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
   grow={1}
   key="kibana"
 >
-  <EuiPanel
-    className="homSolutionPanel homSolutionPanel--kibana"
+  <a
+    href="kibana_landing_page"
     onClick={[Function]}
-    paddingSize="none"
   >
-    <EuiFlexGroup
-      gutterSize="none"
+    <EuiPanel
+      className="homSolutionPanel homSolutionPanel--kibana"
+      paddingSize="none"
     >
-      <EuiFlexItem
-        className="homSolutionPanel__header"
-        grow={1}
+      <EuiFlexGroup
+        gutterSize="none"
       >
-        <SolutionTitle
-          iconType="logoKibana"
-          subtitle="Visualize & analyze"
-          title="Kibana"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homSolutionPanel__content"
-        grow={1}
-      >
-        <EuiText
-          key="Analyze data in dashboards"
-          size="s"
+        <EuiFlexItem
+          className="homSolutionPanel__header"
+          grow={1}
         >
-          <p>
-            Analyze data in dashboards
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
+          <SolutionTitle
+            iconType="logoKibana"
+            subtitle="Visualize & analyze"
+            title="Kibana"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          className="homSolutionPanel__content"
+          grow={1}
+        >
+          <EuiText
+            key="Analyze data in dashboards"
+            size="s"
+          >
+            <p>
+              Analyze data in dashboards
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  </a>
 </EuiFlexItem>
 `;

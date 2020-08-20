@@ -24,9 +24,7 @@ exports[`SolutionsSection only renders a spacer if no solutions are available 1`
     <EuiFlexGroup
       className="homSolutions__content"
       justifyContent="spaceAround"
-    >
-      0
-    </EuiFlexGroup>
+    />
   </section>
   <EuiHorizontalRule
     aria-hidden="true"
@@ -60,8 +58,8 @@ exports[`SolutionsSection renders a single solution 1`] = `
       className="homSolutions__content"
       justifyContent="spaceAround"
     >
-      0
       <SolutionPanel
+        addBasePath={[Function]}
         solution={
           Object {
             "descriptions": Array [
@@ -118,6 +116,7 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
           direction="column"
         >
           <SolutionPanel
+            addBasePath={[Function]}
             key="solution-2"
             solution={
               Object {
@@ -134,6 +133,7 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
             }
           />
           <SolutionPanel
+            addBasePath={[Function]}
             key="solution-3"
             solution={
               Object {
@@ -150,6 +150,7 @@ exports[`SolutionsSection renders multiple solutions in a single column when Kib
             }
           />
           <SolutionPanel
+            addBasePath={[Function]}
             key="solution-4"
             solution={
               Object {
@@ -209,6 +210,7 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
           direction="column"
         >
           <SolutionPanel
+            addBasePath={[Function]}
             key="solution-2"
             solution={
               Object {
@@ -225,6 +227,7 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
             }
           />
           <SolutionPanel
+            addBasePath={[Function]}
             key="solution-3"
             solution={
               Object {
@@ -241,6 +244,7 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
             }
           />
           <SolutionPanel
+            addBasePath={[Function]}
             key="solution-4"
             solution={
               Object {
@@ -259,6 +263,7 @@ exports[`SolutionsSection renders multiple solutions in two columns with Kibana 
         </EuiFlexGroup>
       </EuiFlexItem>
       <SolutionPanel
+        addBasePath={[Function]}
         solution={
           Object {
             "descriptions": Array [

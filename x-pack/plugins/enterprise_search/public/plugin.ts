@@ -113,7 +113,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             defaultMessage: 'Unify your team content.',
           }),
         ],
-        path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        path: APP_SEARCH_PLUGIN.URL, // TODO: Change this to enterprise search overview page once available
       });
 
       plugins.home.featureCatalogue.register({

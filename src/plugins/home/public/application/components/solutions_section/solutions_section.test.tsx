@@ -58,6 +58,8 @@ const solutionEntry4 = {
   order: 4,
 };
 
+const addBasePathMock = (path: string) => (path ? path : 'path');
+
 describe('SolutionsSection', () => {
   test('only renders a spacer if no solutions are available', () => {
     const component = shallow(<SolutionsSection solutions={[]} />);
@@ -65,13 +67,16 @@ describe('SolutionsSection', () => {
   });
 
   test('renders a single solution', () => {
-    const component = shallow(<SolutionsSection solutions={[solutionEntry1]} />);
+    const component = shallow(
+      <SolutionsSection addBasePath={addBasePathMock} solutions={[solutionEntry1]} />
+    );
     expect(component).toMatchSnapshot();
   });
 
   test('renders multiple solutions in two columns with Kibana in its own column', () => {
     const component = shallow(
       <SolutionsSection
+        addBasePath={addBasePathMock}
         solutions={[solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4]}
       />
     );
@@ -79,7 +84,10 @@ describe('SolutionsSection', () => {
   });
   test('renders multiple solutions in a single column when Kibana apps are not enabled', () => {
     const component = shallow(
-      <SolutionsSection solutions={[solutionEntry2, solutionEntry3, solutionEntry4]} />
+      <SolutionsSection
+        addBasePath={addBasePathMock}
+        solutions={[solutionEntry2, solutionEntry3, solutionEntry4]}
+      />
     );
     expect(component).toMatchSnapshot();
   });

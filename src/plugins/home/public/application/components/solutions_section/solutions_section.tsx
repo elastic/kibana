@@ -36,10 +36,11 @@ const sortByOrder = (
 ) => orderA - orderB;
 
 interface Props {
+  addBasePath: (path: string) => string;
   solutions: FeatureCatalogueSolution[];
 }
 
-export const SolutionsSection: FC<Props> = ({ solutions }) => {
+export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
   // Separate Kibana from other solutions
   const kibana = solutions.find(({ id }) => id === 'kibana');
   solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
@@ -59,16 +60,16 @@ export const SolutionsSection: FC<Props> = ({ solutions }) => {
         </EuiScreenReaderOnly>
 
         <EuiFlexGroup className="homSolutions__content" justifyContent="spaceAround">
-          {solutions.length && (
+          {solutions.length ? (
             <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
               <EuiFlexGroup direction="column">
                 {solutions.map((solution) => (
-                  <SolutionPanel key={solution.id} solution={solution} />
+                  <SolutionPanel key={solution.id} solution={solution} addBasePath={addBasePath} />
                 ))}
               </EuiFlexGroup>
             </EuiFlexItem>
-          )}
-          {kibana && <SolutionPanel solution={kibana} />}
+          ) : null}
+          {kibana ? <SolutionPanel solution={kibana} addBasePath={addBasePath} /> : null}
         </EuiFlexGroup>
       </section>
 

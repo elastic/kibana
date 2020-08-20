@@ -31,9 +31,13 @@ const solutionEntry = {
   order: 1,
 };
 
+const addBasePathMock = (path: string) => (path ? path : 'path');
+
 describe('SolutionPanel', () => {
   test('renders the solution panel for the given solution', () => {
-    const component = shallow(<SolutionPanel solution={solutionEntry} />);
+    const component = shallow(
+      <SolutionPanel addBasePath={addBasePathMock} solution={solutionEntry} />
+    );
     expect(component).toMatchSnapshot();
   });
 });
