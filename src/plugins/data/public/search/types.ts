@@ -44,7 +44,7 @@ export type ISearch = (
 ) => Observable<IKibanaSearchResponse>;
 
 export type ISearchGeneric = <
-  SearchStrategyRequest = IEsSearchRequest,
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
 >(
   request: SearchStrategyRequest,

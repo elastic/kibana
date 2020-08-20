@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
-  HostDetailsStrategyResponse,
+  HostOverviewStrategyResponse,
   HostOverviewRequestOptions,
   HostsQueries,
   HostsRequestOptions,
@@ -77,7 +78,7 @@ export interface DocValueFields {
   format: string;
 }
 
-export interface RequestBasicOptions {
+export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
@@ -95,14 +96,14 @@ export interface RequestOptionsPaginated extends RequestBasicOptions {
   sortField?: SortField;
 }
 
-export type StrategyResponseType<T extends FactoryQueryTypes> = T extends 'host_all'
+export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
-  : T extends 'host_details'
-  ? HostDetailsStrategyResponse
+  : T extends HostsQueries.hostOverview
+  ? HostOverviewStrategyResponse
   : never;
 
-export type StrategyRequestType<T extends FactoryQueryTypes> = T extends 'host_all'
+export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends 'host_details'
+  : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
   : never;

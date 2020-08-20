@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { cloudFieldsMap, hostFieldsMap } from '../../../../../lib/ecs_fields';
 import { buildFieldsTermAggregation } from '../../../../../lib/hosts/helpers';
@@ -14,7 +15,7 @@ export const buildHostOverviewQuery = ({
   hostName,
   defaultIndex,
   timerange: { from, to },
-}: HostOverviewRequestOptions) => {
+}: HostOverviewRequestOptions): ISearchRequestParams => {
   const esFields = reduceFields(fields, { ...hostFieldsMap, ...cloudFieldsMap });
 
   const filter = [

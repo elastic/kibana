@@ -1241,7 +1241,7 @@ export type ISearch = (request: IKibanaSearchRequest, options?: ISearchOptions) 
 // Warning: (ae-missing-release-tag) "ISearchGeneric" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ISearchGeneric = <SearchStrategyRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(request: SearchStrategyRequest, options?: ISearchOptions) => Observable<SearchStrategyResponse>;
+export type ISearchGeneric = <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(request: SearchStrategyRequest, options?: ISearchOptions) => Observable<SearchStrategyResponse>;
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

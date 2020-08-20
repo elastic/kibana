@@ -8,7 +8,7 @@
 
 ```typescript
 start(core: CoreStart): {
-        search: ISearchStart<any, import(".").IEsSearchResponse<any>>;
+        search: ISearchStart<import(".").IEsSearchRequest, import(".").IEsSearchResponse<any>>;
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
@@ -27,7 +27,7 @@ start(core: CoreStart): {
 <b>Returns:</b>
 
 `{
-        search: ISearchStart<any, import(".").IEsSearchResponse<any>>;
+        search: ISearchStart<import(".").IEsSearchRequest, import(".").IEsSearchResponse<any>>;
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };

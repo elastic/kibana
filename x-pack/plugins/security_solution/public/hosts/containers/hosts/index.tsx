@@ -18,6 +18,7 @@ import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
   DocValueFields,
+  HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution';
@@ -68,7 +69,7 @@ export const useAllHost = ({
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions>({
     defaultIndex,
     docValueFields: docValueFields ?? [],
-    factoryQueryType: 'host_all',
+    factoryQueryType: HostsQueries.hosts,
     filterQuery: createFilter(filterQuery),
     pagination: generateTablePaginationOptions(activePage, limit),
     timerange: {

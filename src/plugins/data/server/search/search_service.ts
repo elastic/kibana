@@ -40,7 +40,7 @@ import { searchTelemetry } from '../saved_objects';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common';
 
 type StrategyMap<
-  SearchStrategyRequest = IEsSearchRequest,
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
 > = Record<string, ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>>;
 
@@ -127,7 +127,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   private registerSearchStrategy = <
-    SearchStrategyRequest = IEsSearchRequest,
+    SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
   >(
     name: string,

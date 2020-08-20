@@ -688,14 +688,14 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
-    registerSearchStrategy: <SearchStrategyRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
+    registerSearchStrategy: <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
     usage?: SearchUsage;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface ISearchStart<SearchStrategyRequest = any, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
+export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
     // Warning: (ae-forgotten-export) The symbol "AggsStart" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -710,7 +710,7 @@ export interface ISearchStart<SearchStrategyRequest = any, SearchStrategyRespons
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ISearchStrategy<SearchStrategyRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
+export interface ISearchStrategy<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
     // (undocumented)
     cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
     // (undocumented)
@@ -861,7 +861,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
     };
     // (undocumented)
     start(core: CoreStart): {
-        search: ISearchStart<any, import(".").IEsSearchResponse<any>>;
+        search: ISearchStart<import(".").IEsSearchRequest, import(".").IEsSearchResponse<any>>;
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };

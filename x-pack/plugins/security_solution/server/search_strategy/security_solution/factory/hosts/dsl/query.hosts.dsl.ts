@@ -5,6 +5,7 @@
  */
 
 import { isEmpty, isString } from 'lodash/fp';
+import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   HostsRequestOptions,
@@ -19,7 +20,7 @@ export const buildHostsQuery = ({
   pagination: { querySize },
   sort,
   timerange: { from, to },
-}: HostsRequestOptions) => {
+}: HostsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery),
     {

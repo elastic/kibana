@@ -18,7 +18,10 @@ import {
   TimerangeInput,
 } from '..';
 
-export type HostsQueries = 'host_all' | 'host_details';
+export enum HostsQueries {
+  hosts = 'hosts',
+  hostOverview = 'hostOverview',
+}
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -62,7 +65,7 @@ export interface HostsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface HostDetailsStrategyResponse extends IEsSearchResponse, HostItem {
+export interface HostOverviewStrategyResponse extends IEsSearchResponse, HostItem {
   inspect?: Maybe<Inspect>;
 }
 

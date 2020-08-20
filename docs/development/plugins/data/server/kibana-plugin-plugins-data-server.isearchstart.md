@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ISearchStart<SearchStrategyRequest = any, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> 
+export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> 
 ```
 
 ## Properties

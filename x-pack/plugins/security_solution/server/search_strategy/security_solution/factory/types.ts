@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import {
+  IEsSearchResponse,
+  ISearchRequestParams,
+} from '../../../../../../../src/plugins/data/common';
 import {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -12,7 +15,7 @@ import {
 } from '../../../../common/search_strategy/security_solution';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
-  buildDsl: (options: StrategyRequestType<T>) => unknown;
+  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse

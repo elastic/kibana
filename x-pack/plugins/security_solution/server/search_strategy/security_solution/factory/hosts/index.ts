@@ -12,7 +12,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import {
   HostsStrategyResponse,
-  HostDetailsStrategyResponse,
+  HostOverviewStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
   HostOverviewRequestOptions,
@@ -27,7 +27,7 @@ import { buildHostOverviewQuery } from './dsl/query.detail_host.dsl';
 import { buildHostsQuery } from './dsl/query.hosts.dsl';
 import { formatHostEdgesData, formatHostItem } from './helpers';
 
-export const allHost: SecuritySolutionFactory<'host_all'> = {
+export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
@@ -68,14 +68,14 @@ export const allHost: SecuritySolutionFactory<'host_all'> = {
   },
 };
 
-export const detailsHost: SecuritySolutionFactory<'host_details'> = {
+export const overviewHost: SecuritySolutionFactory<HostsQueries.hostOverview> = {
   buildDsl: (options: HostOverviewRequestOptions) => {
     return buildHostOverviewQuery(options);
   },
   parse: async (
     options: HostOverviewRequestOptions,
     response: IEsSearchResponse<HostAggEsData>
-  ): Promise<HostDetailsStrategyResponse> => {
+  ): Promise<HostOverviewStrategyResponse> => {
     const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildHostOverviewQuery(options))],
@@ -87,6 +87,6 @@ export const detailsHost: SecuritySolutionFactory<'host_details'> = {
 };
 
 export const hostsFactory: Record<HostsQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
-  host_all: allHost,
-  host_details: detailsHost,
+  [HostsQueries.hosts]: allHosts,
+  [HostsQueries.hostOverview]: overviewHost,
 };

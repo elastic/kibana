@@ -38,7 +38,7 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategy: <
-    SearchStrategyRequest = IEsSearchRequest,
+    SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
   >(
     name: string,
@@ -52,7 +52,7 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart<
-  SearchStrategyRequest = IEsSearchRequest,
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
 > {
   aggs: AggsStart;
@@ -75,7 +75,7 @@ export interface ISearchStart<
  * that resolves to a response.
  */
 export interface ISearchStrategy<
-  SearchStrategyRequest = IEsSearchRequest,
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
 > {
   search: (
