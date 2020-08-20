@@ -21,6 +21,6 @@
   "devDependencies": {
     "@types/ejs": "^3.0.4",
     "@types/prettier": "^2.0.2",
-    "@types/inquirer": "^7.3.0"
+    "@types/inquirer": "^7.3.1"
   }
 }

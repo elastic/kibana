@@ -89,11 +89,7 @@ export const QUESTIONS = [
 ] as const;
 
 export async function askQuestions(overrides: Partial<Answers>) {
-  return await inquirer.prompt<Answers>(
-    QUESTIONS,
-    // @ts-expect-error See https://github.com/DefinitelyTyped/DefinitelyTyped/pull/46913
-    overrides
-  );
+  return await inquirer.prompt<Answers>(QUESTIONS, overrides);
 }
 
 export function getDefaultAnswers(overrides: Partial<Answers>) {
