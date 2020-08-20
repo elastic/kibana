@@ -76,6 +76,9 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     input: LensEmbeddableInput,
     parent?: IContainer
   ) => {
+    if (!input.savedObjectId) {
+      input.savedObjectId = savedObjectId;
+    }
     return this.create(input, parent);
   };
 

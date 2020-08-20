@@ -476,7 +476,7 @@ export function App({
                   testId: 'lnsApp_saveButton',
                   disableButton: !isSaveable,
                 },
-                ...(editFromContainerMode || state.byValueMode
+                ...(state.originatingApp
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.cancel', {
