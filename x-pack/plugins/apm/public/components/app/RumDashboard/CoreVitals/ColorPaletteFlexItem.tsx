@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -19,7 +19,7 @@ import { PaletteLegends } from './PaletteLegends';
 
 const ColoredSpan = styled.div`
   height: 16px;
-  width: 100px;
+  width: 100%;
   cursor: pointer;
 `;
 
@@ -29,18 +29,21 @@ export function ColorPaletteFlexItem({
   first,
   last,
   inFocus,
+  percentage,
 }: {
   hexCode: string;
   className: string;
   first: boolean;
   last: boolean;
   inFocus: boolean;
+  percentage: number;
 }) {
   return (
     <EuiFlexItem
       key={hexCode}
       grow={false}
       className={classNames('guideColorPalette__swatch', className)}
+      style={{ width: percentage + '%' }}
     >
       <EuiToolTip content={'you dont believe me?'}>
         <ColoredSpan
@@ -65,13 +68,13 @@ interface Props {
   ranks: number[];
 }
 
-export function CoreVitalItem({ title, value, ranks }: Props) {
+export function CoreVitalItem({ title, value, ranks = [100, 0, 0] }: Props) {
   const palette = euiPaletteForStatus(3);
 
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
 
   return (
-    <Fragment>
+    <>
       <EuiStat
         titleSize="s"
         title={value}
@@ -79,11 +82,11 @@ export function CoreVitalItem({ title, value, ranks }: Props) {
         titleColor={palette[0]}
       />
       <EuiSpacer size="s" />
-
       <EuiFlexGroup
         className="guideColorPalette__swatchHolder"
         gutterSize="none"
         alignItems="flexStart"
+        style={{ width: 340 }}
       >
         {palette.map((hexCode, ind) => (
           <ColorPaletteFlexItem
@@ -93,6 +96,7 @@ export function CoreVitalItem({ title, value, ranks }: Props) {
             first={ind === 0}
             last={ind === 2}
             inFocus={inFocusInd !== ind && inFocusInd !== null}
+            percentage={ranks[ind]}
           />
         ))}
       </EuiFlexGroup>
@@ -104,6 +108,6 @@ export function CoreVitalItem({ title, value, ranks }: Props) {
         }}
       />
       <EuiSpacer size="xl" />
-    </Fragment>
+    </>
   );
 }

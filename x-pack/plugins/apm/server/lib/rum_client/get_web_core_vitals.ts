@@ -11,6 +11,13 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import {
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  TBT_FIELD,
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getWebCoreVitals({
   setup,
@@ -39,25 +46,61 @@ export async function getWebCoreVitals({
       aggs: {
         fcp: {
           avg: {
-            field: 'transaction.marks.agent.firstContentfulPaint',
+            field: FCP_FIELD,
           },
         },
         fcpRanks: {
           percentile_ranks: {
-            field: 'transaction.marks.agent.firstContentfulPaint',
+            field: FCP_FIELD,
             values: [1000, 2000],
             keyed: false,
           },
         },
         lcp: {
           avg: {
-            field: 'transaction.marks.agent.largestContentfulPaint',
+            field: LCP_FIELD,
           },
         },
         lcpRanks: {
           percentile_ranks: {
-            field: 'transaction.marks.agent.largestContentfulPaint',
+            field: LCP_FIELD,
             values: [2500, 4000],
+            keyed: false,
+          },
+        },
+        tbt: {
+          avg: {
+            field: TBT_FIELD,
+          },
+        },
+        cls: {
+          avg: {
+            field: CLS_FIELD,
+          },
+        },
+        fid: {
+          avg: {
+            field: FID_FIELD,
+          },
+        },
+        fidRanks: {
+          percentile_ranks: {
+            field: FID_FIELD,
+            values: [100, 300],
+            keyed: false,
+          },
+        },
+        clsRanks: {
+          percentile_ranks: {
+            field: CLS_FIELD,
+            values: [0.1, 0.25],
+            keyed: false,
+          },
+        },
+        tbtRanks: {
+          percentile_ranks: {
+            field: TBT_FIELD,
+            values: [0.1, 0.25],
             keyed: false,
           },
         },
@@ -68,19 +111,40 @@ export async function getWebCoreVitals({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { fcp, lcp, fcpRanks, lcpRanks } = response.aggregations!;
+  const {
+    fcp,
+    lcp,
+    tbt,
+    cls,
+    fid,
+    lcpRanks,
+    fcpRanks,
+    fidRanks,
+    clsRanks,
+    tbtRanks,
+  } = response.aggregations!;
+
+  const getRanksPercentages = (
+    ranks: Array<{ key: number; value: number }>
+  ) => {
+    const ranksVal = (ranks ?? [0, 0]).map(
+      ({ value }) => value?.toFixed(0) ?? 0
+    );
+    return [+ranksVal?.[0], ranksVal?.[1] - ranksVal?.[0], 100 - ranksVal?.[1]];
+  };
 
   // Divide by 1000 to convert ms into seconds
   return {
-    fcpRanks: fcpRanks.values.map(({ key, value }) => ({
-      key: key / 1000,
-      value: value?.toFixed(0) ?? 0,
-    })),
-    lcpRanks: lcpRanks.values.map(({ key, value }) => ({
-      key: key / 1000,
-      value: value?.toFixed(0) ?? 0,
-    })),
-    fcp: (fcp?.value ?? 0) / 1000,
-    lcp: (lcp?.value ?? 0) / 1000,
+    cls: cls?.value,
+    fid: fid?.value,
+    tbt: ((tbt?.value ?? 0) / 1000).toFixed(2),
+    fcp: ((fcp?.value ?? 0) / 1000).toFixed(2),
+    lcp: ((lcp?.value ?? 0) / 1000).toFixed(2),
+
+    lcpRanks: getRanksPercentages(lcpRanks.values),
+    tbtRanks: getRanksPercentages(tbtRanks.values),
+    fcpRanks: getRanksPercentages(fcpRanks.values),
+    fidRanks: getRanksPercentages(fidRanks.values),
+    clsRanks: getRanksPercentages(clsRanks.values),
   };
 }

@@ -9,6 +9,13 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { CoreVitalItem } from './ColorPaletteFlexItem';
+import {
+  CLS_LABEL,
+  FCP_LABEL,
+  FID_LABEL,
+  LCP_LABEL,
+  TBT_LABEL,
+} from './translations';
 
 export function CoreVitals() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -30,52 +37,41 @@ export function CoreVitals() {
     [start, end, serviceName, uiFilters]
   );
 
-  const lcpRanks = (data?.lcpRanks ?? [0, 0]).map(({ value }) => value);
-  const fcpRanks = (data?.fcpRanks ?? [0, 0]).map(({ value }) => value);
-
   return (
     <EuiFlexGrid gutterSize="xl">
       <EuiFlexItem>
         <CoreVitalItem
-          title={'Largest Contentful Paint'}
-          value={(data?.lcp?.toFixed(2) ?? 0) + 's'}
-          ranks={[
-            lcpRanks?.[0],
-            lcpRanks?.[1] - lcpRanks?.[0],
-            100 - lcpRanks?.[1],
-          ]}
+          title={LCP_LABEL}
+          value={data?.lcp + 's'}
+          ranks={data?.lcpRanks}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <CoreVitalItem
-          title="First Input Delay"
-          value={'0.14'}
-          ranks={[0, 0, 0]}
+          title={FID_LABEL}
+          value={data?.fid ?? 'N/A'}
+          ranks={data?.fidRanks}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <CoreVitalItem
-          title={'Cumulative Layout Shift'}
-          value={'3.6s'}
-          ranks={[0, 0, 0]}
+          title={CLS_LABEL}
+          value={data?.cls ?? 'N/A'}
+          ranks={data?.clsRanks}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <CoreVitalItem
-          title={'First Contentful Paint'}
-          value={(data?.fcp?.toFixed(2) ?? 0) + 's'}
-          ranks={[
-            fcpRanks?.[0],
-            fcpRanks?.[1] - fcpRanks?.[0],
-            100 - fcpRanks?.[1],
-          ]}
+          title={FCP_LABEL}
+          value={data?.fcp + 's'}
+          ranks={data?.fcpRanks}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <CoreVitalItem
-          title={'Total Blocking Time'}
-          value={'3.6s'}
-          ranks={[0, 0, 0]}
+          title={TBT_LABEL}
+          value={data?.tbt ?? 'N/A'}
+          ranks={data?.tbtRanks}
         />
       </EuiFlexItem>
     </EuiFlexGrid>
