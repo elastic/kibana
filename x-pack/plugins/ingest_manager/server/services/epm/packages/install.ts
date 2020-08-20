@@ -306,24 +306,23 @@ export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
-  const installedSavedObjects = await getPackageSavedObjects(savedObjectsClient);
-  const installingPackages = installedSavedObjects.saved_objects.filter(
-    (pkg) => pkg.attributes.install_status === 'installing'
-  );
-  const installingPromises = installingPackages.reduce<Array<Promise<AssetReference[]>>>(
-    (acc, pkg) => {
-      const startDate = pkg.attributes.install_started_at;
-      const nowDate = new Date().toISOString();
-      const elapsedTime = Date.parse(nowDate) - Date.parse(startDate);
-      const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
-      // reinstall package
-      if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
-        acc.push(installPackage({ savedObjectsClient, pkgkey, callCluster }));
-      }
-      return acc;
-    },
-    []
-  );
+  const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
+    searchFields: ['install_status'],
+    search: 'installing',
+  });
+  const installingPromises = installingPackages.saved_objects.reduce<
+    Array<Promise<AssetReference[]>>
+  >((acc, pkg) => {
+    const startDate = pkg.attributes.install_started_at;
+    const nowDate = new Date().toISOString();
+    const elapsedTime = Date.parse(nowDate) - Date.parse(startDate);
+    const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
+    // reinstall package
+    if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
+      acc.push(installPackage({ savedObjectsClient, pkgkey, callCluster }));
+    }
+    return acc;
+  }, []);
   await Promise.all(installingPromises);
   return installingPackages;
 }

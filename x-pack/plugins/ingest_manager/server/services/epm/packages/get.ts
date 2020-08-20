@@ -74,7 +74,7 @@ export async function getLimitedPackages(options: {
 
 export async function getPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
-  options?: SavedObjectsFindOptions
+  options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
   return savedObjectsClient.find<Installation>({
     ...(options || {}),
