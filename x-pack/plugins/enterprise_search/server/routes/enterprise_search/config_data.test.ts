@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { MockRouter, mockDependencies } from '../__mocks__';
 
 jest.mock('../../lib/enterprise_search_config_api', () => ({
@@ -33,43 +34,7 @@ describe('Enterprise Search Config Data API', () => {
           hasWorkplaceSearchAccess: true,
         },
         publicUrl: 'http://localhost:3002',
-        readOnlyMode: false,
-        ilmEnabled: true,
-        configuredLimits: {
-          maxDocumentByteSize: 102400,
-          maxEnginesPerMetaEngine: 15,
-        },
-        appSearch: {
-          accountId: 'some-id-string',
-          onBoardingComplete: true,
-          role: {
-            id: 'account_id:somestring|user_oid:somestring',
-            roleType: 'owner',
-            ability: {
-              accessAllEngines: true,
-              destroy: ['session'],
-              manage: ['account_credentials', 'account_engines'], // etc
-              edit: ['LocoMoco::Account'], // etc
-              view: ['Engine'], // etc
-              credentialTypes: ['admin', 'private', 'search'],
-              availableRoleTypes: ['owner', 'admin'],
-            },
-          },
-        },
-        workplaceSearch: {
-          organization: {
-            name: 'ACME Donuts',
-            defaultOrgName: 'My Organization',
-          },
-          fpAccount: {
-            id: 'some-id-string',
-            groups: ['Default', 'Cats'],
-            isAdmin: true,
-            canCreatePersonalSources: true,
-            isCurated: false,
-            viewedOnboardingPage: true,
-          },
-        },
+        ...DEFAULT_INITIAL_APP_DATA,
       };
 
       (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => {

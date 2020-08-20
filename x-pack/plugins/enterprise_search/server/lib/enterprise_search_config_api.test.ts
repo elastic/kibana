@@ -11,6 +11,7 @@ const { Response } = jest.requireActual('node-fetch');
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 describe('callEnterpriseSearchConfigAPI', () => {
@@ -54,9 +55,9 @@ describe('callEnterpriseSearchConfigAPI', () => {
           id: 'some-id-string',
           groups: ['Default', 'Cats'],
           is_admin: true,
-          can_create_personal_sources: false,
+          can_create_personal_sources: true,
           is_curated: false,
-          viewed_onboarding_page: false,
+          viewed_onboarding_page: true,
         },
       },
     },
@@ -98,43 +99,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: 'http://some.vanity.url',
-      readOnlyMode: false,
-      ilmEnabled: true,
-      configuredLimits: {
-        maxDocumentByteSize: 102400,
-        maxEnginesPerMetaEngine: 15,
-      },
-      appSearch: {
-        accountId: 'some-id-string',
-        onBoardingComplete: true,
-        role: {
-          id: 'account_id:somestring|user_oid:somestring',
-          roleType: 'owner',
-          ability: {
-            accessAllEngines: true,
-            destroy: ['session'],
-            manage: ['account_credentials', 'account_engines'], // etc
-            edit: ['LocoMoco::Account'], // etc
-            view: ['Engine'], // etc
-            credentialTypes: ['admin', 'private', 'search'],
-            availableRoleTypes: ['owner', 'admin'],
-          },
-        },
-      },
-      workplaceSearch: {
-        organization: {
-          name: 'ACME Donuts',
-          defaultOrgName: 'My Organization',
-        },
-        fpAccount: {
-          id: 'some-id-string',
-          groups: ['Default', 'Cats'],
-          isAdmin: true,
-          canCreatePersonalSources: false,
-          isCurated: false,
-          viewedOnboardingPage: false,
-        },
-      },
+      ...DEFAULT_INITIAL_APP_DATA,
     });
   });
 

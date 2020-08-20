@@ -6,6 +6,7 @@
 
 import { resetContext } from 'kea';
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { AppLogic } from './app_logic';
 
 describe('AppLogic', () => {
@@ -24,7 +25,7 @@ describe('AppLogic', () => {
 
   describe('initializeAppData()', () => {
     it('sets values based on passed props', () => {
-      AppLogic.actions.initializeAppData({}); // TODO: args
+      AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
 
       expect(AppLogic.values).toEqual({
         hasInitialized: true,
