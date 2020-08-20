@@ -33,7 +33,6 @@ export function VegaChartPageProvider({
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const { common } = getPageObjects(['common']);
   const retry = getService('retry');
 
   class VegaChartPage {
@@ -47,6 +46,15 @@ export function VegaChartPageProvider({
 
     public getControlContainer() {
       return find.byCssSelector('div.vgaVis__controls');
+    }
+
+    public getYAxisContainer() {
+      return find.byCssSelector('[aria-label^="Y-axis"]');
+    }
+
+    public async getAceGutterContainer() {
+      const editor = await this.getEditor();
+      return editor.findByClassName('ace_gutter');
     }
 
     public async getRawSpec() {
@@ -83,20 +91,16 @@ export function VegaChartPageProvider({
     }
 
     public async typeInSpec(text: string) {
-      await this.focusEditor();
+      const aceGutter = await this.getAceGutterContainer();
 
-      let repeats = 20;
-      while (--repeats > 0) {
-        await browser.pressKeys(Key.ARROW_UP);
-        await common.sleep(50);
-      }
-      await browser.pressKeys(Key.ARROW_RIGHT);
+      await aceGutter.doubleClick();
+      await browser.pressKeys(Key.LEFT);
+      await browser.pressKeys(Key.RIGHT);
       await browser.pressKeys(text);
     }
 
     public async cleanSpec() {
-      const editor = await this.getEditor();
-      const aceGutter = await editor.findByClassName('ace_gutter');
+      const aceGutter = await this.getAceGutterContainer();
 
       await retry.try(async () => {
         await aceGutter.doubleClick();
@@ -107,11 +111,11 @@ export function VegaChartPageProvider({
     }
 
     public async getYAxisLabels() {
-      const chart = await testSubjects.find('visualizationLoader');
-      const yAxis = await chart.findByCssSelector('[aria-label^="Y-axis"]');
+      const yAxis = await this.getYAxisContainer();
       const tickGroup = await yAxis.findByClassName('role-axis-label');
       const labels = await tickGroup.findAllByCssSelector('text');
       const labelTexts: string[] = [];
+
       for (const label of labels) {
         labelTexts.push(await label.getVisibleText());
       }
