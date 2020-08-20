@@ -134,7 +134,7 @@ export const SetupPage: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <FormattedMessage
             id="xpack.ingestManager.setupPage.missingRequirementsElasticsearchTitle"
-            defaultMessage="In your Elasticsearch configuration, enable:"
+            defaultMessage="In your Elasticsearch policy, enable:"
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={false}>
@@ -190,7 +190,7 @@ xpack.security.authc.api_key.enabled: true`}
           <EuiSpacer size="l" />
           <FormattedMessage
             id="xpack.ingestManager.setupPage.missingRequirementsKibanaTitle"
-            defaultMessage="In your Kibana configuration, enable:"
+            defaultMessage="In your Kibana policy, enable:"
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={missingRequirements.includes('tls_required')}>
