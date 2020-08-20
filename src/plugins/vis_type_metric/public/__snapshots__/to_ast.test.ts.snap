@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric vis toExpressionAst function with percentage mode should have percentage format 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "percentageMode": Array [
+          true,
+        ],
+      },
+      "function": "metricVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`metric vis toExpressionAst function without params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {},
+      "function": "metricVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

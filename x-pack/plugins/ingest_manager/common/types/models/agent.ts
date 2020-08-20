@@ -64,7 +64,7 @@ export interface NewAgentEvent {
   payload?: any;
   agent_id: string;
   action_id?: string;
-  config_id?: string;
+  policy_id?: string;
   stream_id?: string;
 }
 
@@ -89,8 +89,8 @@ interface AgentBase {
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
-  config_id?: string;
-  config_revision?: number | null;
+  policy_id?: string;
+  policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded';
   user_provided_metadata: AgentMetadata;
