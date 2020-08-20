@@ -152,6 +152,11 @@ describe('isFittable', () => {
       fitToBounds: true,
       canFit: false,
     },
+    {
+      isVisible: false,
+      fitToBounds: false,
+      canFit: false,
+    },
   ].forEach((test) => {
     it(`Should take into account layer visibility and bounds-retrieval: ${JSON.stringify(
       test
