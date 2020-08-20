@@ -66,7 +66,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
         const newInput = await attributeService.wrapAttributes(attributes, useRefType, embeddable);
         if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
           // Remove the savedObejctId when un-linking
-          newInput.savedObjectId = null;
+          delete (newInput as SavedObjectEmbeddableInput).savedObjectId;
         }
         embeddable.updateInput(newInput);
         if (useRefType) {
