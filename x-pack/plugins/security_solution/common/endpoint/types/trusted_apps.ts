@@ -19,14 +19,12 @@ export type GetTrustedListAppsResponse = Pick<
 };
 
 /** Type for a new Trusted App Entry */
-export type NewTrustedApp = Pick<
-  ExceptionListItemSchema,
-  'created_at' | 'created_by' | 'name' | 'description' | 'entries'
-> & {
+export type NewTrustedApp = Pick<ExceptionListItemSchema, 'name' | 'description' | 'entries'> & {
   os: string;
 };
 
 /** A trusted app entry */
-export type TrustedApp = NewTrustedApp & {
-  id: string;
-};
+export type TrustedApp = NewTrustedApp &
+  Pick<ExceptionListItemSchema, 'created_at' | 'created_by'> & {
+    id: string;
+  };

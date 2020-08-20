@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { v4 as generateUUID } from 'uuid';
+// @ts-ignore
+import minimist from 'minimist';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../lists/common/constants';
 import { TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
@@ -13,11 +15,25 @@ interface RunOptions {
   count?: number;
 }
 
+const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
+const separator = '----------------------------------------';
+
+export const cli = async () => {
+  const options: RunOptions = minimist(process.argv.slice(2), {
+    default: {
+      count: 10,
+    },
+  });
+  logger.write(`${separator}
+Loading ${options.count} Trusted App Entries`);
+  await run(options);
+  logger.write(`Done!
+${separator}`);
+};
+
 export const run: (options?: RunOptions) => Promise<ExceptionListItemSchema[]> = async ({
   count = 10,
 }: RunOptions = {}) => {
-  const logger = new ToolingLog();
-  // FIXME:PT use CLI param for kibana-url
   const kbnClient = new KbnClient(logger, { url: 'http://elastic:changeme@localhost:5601' });
 
   // touch the Trusted Apps List so it can be created
