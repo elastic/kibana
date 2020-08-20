@@ -38,9 +38,13 @@ import {
   Comparator,
 } from '../../../../../common/alerting/logs/types';
 import { Color, colorTransformer } from '../../../../../common/color_palette';
-import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../common/http_api/log_alerts/';
+import {
+  GetLogAlertsChartPreviewDataAlertParamsSubset,
+  getLogAlertsChartPreviewDataAlertParamsSubsetRT,
+} from '../../../../../common/http_api/log_alerts/';
 import { AlertsContext } from './editor';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface Props {
   alertParams: Partial<LogDocumentCountAlertParams>;
@@ -55,22 +59,25 @@ export const CriterionPreview: React.FC<Props> = ({
   chartCriterion,
   sourceId,
 }) => {
-  const chartAlertParams: Partial<GetLogAlertsChartPreviewDataAlertParamsSubset> = useMemo(() => {
+  const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
     const criteria = field && comparator && value ? [{ field, comparator, value }] : [];
-
-    return {
+    const params = {
       criteria,
       timeSize: alertParams.timeSize,
       timeUnit: alertParams.timeUnit,
       groupBy: alertParams.groupBy,
     };
+
+    try {
+      return decodeOrThrow(getLogAlertsChartPreviewDataAlertParamsSubsetRT)(params);
+    } catch (error) {
+      return null;
+    }
   }, [alertParams.timeSize, alertParams.timeUnit, alertParams.groupBy, chartCriterion]);
 
-  const { timeSize, timeUnit, criteria } = chartAlertParams;
-
   // Check for the existence of properties that are necessary for a meaningful chart.
-  if (!timeSize || !timeUnit || !criteria || criteria.length === 0) return null;
+  if (chartAlertParams === null || chartAlertParams.criteria.length === 0) return null;
 
   return (
     <CriterionPreviewChart
@@ -78,7 +85,7 @@ export const CriterionPreview: React.FC<Props> = ({
       context={context}
       sourceId={sourceId}
       threshold={alertParams.count}
-      chartAlertParams={chartAlertParams as GetLogAlertsChartPreviewDataAlertParamsSubset} // TODO: Try to remove casting here
+      chartAlertParams={chartAlertParams}
     />
   );
 };
