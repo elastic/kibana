@@ -18,11 +18,11 @@
  */
 
 const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
   [
     'agent',
     'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
   ],
+  ['extension', 'jpg'],
 ];
 
 export default function ({ getService, getPageObjects }) {

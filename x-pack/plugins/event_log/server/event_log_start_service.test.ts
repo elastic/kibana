@@ -28,6 +28,14 @@ describe('EventLogClientService', () => {
 
       eventLogStartService.getClient(request);
 
+      const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request);
+      expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
+        esContext,
+        request,
+        savedObjectGetter,
+        spacesService: undefined,
+      });
+
       expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request);
     });
   });

@@ -13,7 +13,6 @@ import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@ela
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ContentSection } from '../shared/content_section';
-import { useRoutes } from '../shared/use_routes';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { getSourcePath } from '../../routes';
@@ -92,8 +91,10 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   timestamp,
   sourceId,
 }) => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { getWSRoute } = useRoutes();
+  const {
+    http,
+    externalUrl: { getWorkplaceSearchUrl },
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({
@@ -106,7 +107,7 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   const linkProps = {
     onClick,
     target: '_blank',
-    href: getWSRoute(getSourcePath(sourceId)),
+    href: getWorkplaceSearchUrl(getSourcePath(sourceId)),
     external: true,
     color: status === 'error' ? 'danger' : 'primary',
     'data-test-subj': 'viewSourceDetailsLink',

@@ -47,40 +47,34 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(testData.indexName);
         });
 
-        it('loads the data visualizer selector page', async () => {
+        it('displays and imports a file', async () => {
+          await ml.testExecution.logTestStep('loads the data visualizer selector page');
           await ml.navigation.navigateToDataVisualizer();
-        });
 
-        it('loads the file upload page', async () => {
+          await ml.testExecution.logTestStep('loads the file upload page');
           await ml.dataVisualizer.navigateToFileUpload();
-        });
 
-        it('selects a file and loads visualizer results', async () => {
+          await ml.testExecution.logTestStep('selects a file and loads visualizer results');
           await ml.dataVisualizerFileBased.selectFile(testData.filePath);
-        });
 
-        it('displays the components of the file details page', async () => {
+          await ml.testExecution.logTestStep('displays the components of the file details page');
           await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title);
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
-        });
 
-        it('loads the import settings page', async () => {
+          await ml.testExecution.logTestStep('loads the import settings page');
           await ml.dataVisualizerFileBased.navigateToFileImport();
-        });
 
-        it('sets the index name', async () => {
+          await ml.testExecution.logTestStep('sets the index name');
           await ml.dataVisualizerFileBased.setIndexName(testData.indexName);
-        });
 
-        it('sets the create index pattern checkbox', async () => {
+          await ml.testExecution.logTestStep('sets the create index pattern checkbox');
           await ml.dataVisualizerFileBased.setCreateIndexPatternCheckboxState(
             testData.createIndexPattern
           );
-        });
 
-        it('imports the file', async () => {
+          await ml.testExecution.logTestStep('imports the file');
           await ml.dataVisualizerFileBased.startImportAndWaitForProcessing();
         });
       });
@@ -88,15 +82,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     for (const testData of testDataListNegative) {
       describe(testData.suiteSuffix, function () {
-        it('loads the data visualizer selector page', async () => {
+        it('does not import an invalid file', async () => {
+          await ml.testExecution.logTestStep('loads the data visualizer selector page');
           await ml.navigation.navigateToDataVisualizer();
-        });
 
-        it('loads the file upload page', async () => {
+          await ml.testExecution.logTestStep('loads the file upload page');
           await ml.dataVisualizer.navigateToFileUpload();
-        });
 
-        it('selects a file and displays an error', async () => {
+          await ml.testExecution.logTestStep('selects a file and displays an error');
           await ml.dataVisualizerFileBased.selectFile(testData.filePath, true);
         });
       });

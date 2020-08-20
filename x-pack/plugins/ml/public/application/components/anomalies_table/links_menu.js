@@ -415,7 +415,7 @@ class LinksMenuUI extends Component {
       items.push(
         <EuiContextMenuItem
           key="view_series"
-          icon="stats"
+          icon="visLine"
           onClick={() => {
             this.closePopover();
             this.viewSeries();

@@ -9,6 +9,9 @@ import axios from 'axios';
 import { createExternalService } from './service';
 import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
 jest.mock('../lib/axios_utils', () => {
@@ -28,10 +31,13 @@ describe('ServiceNow service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
-    service = createExternalService({
-      config: { apiUrl: 'https://dev102283.service-now.com' },
-      secrets: { username: 'admin', password: 'admin' },
-    });
+    service = createExternalService(
+      {
+        config: { apiUrl: 'https://dev102283.service-now.com' },
+        secrets: { username: 'admin', password: 'admin' },
+      },
+      logger
+    );
   });
 
   beforeEach(() => {
@@ -41,28 +47,37 @@ describe('ServiceNow service', () => {
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: null },
-          secrets: { username: 'admin', password: 'admin' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: null },
+            secrets: { username: 'admin', password: 'admin' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without username', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com' },
-          secrets: { username: '', password: 'admin' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com' },
+            secrets: { username: '', password: 'admin' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without password', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com' },
-          secrets: { username: '', password: undefined },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com' },
+            secrets: { username: '', password: undefined },
+          },
+          logger
+        )
       ).toThrow();
     });
   });
@@ -84,6 +99,7 @@ describe('ServiceNow service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
       });
     });
@@ -127,6 +143,7 @@ describe('ServiceNow service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
         method: 'post',
         data: { short_description: 'title', description: 'desc' },
@@ -179,6 +196,7 @@ describe('ServiceNow service', () => {
 
       expect(patchMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
         data: { short_description: 'title', description: 'desc' },
       });
