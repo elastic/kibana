@@ -18,16 +18,16 @@
  */
 
 import { first } from 'rxjs/operators';
-import { CoreSetup } from '../../../../../core/public';
+import { StartServicesAccessor } from '../../../../../core/public';
 import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 
 export const createUsageCollector = (
-  core: CoreSetup,
+  getStartServices: StartServicesAccessor,
   usageCollection?: UsageCollectionSetup
 ): SearchUsageCollector => {
   const getCurrentApp = async () => {
-    const [{ application }] = await core.getStartServices();
+    const [{ application }] = await getStartServices();
     return application.currentAppId$.pipe(first()).toPromise();
   };
 

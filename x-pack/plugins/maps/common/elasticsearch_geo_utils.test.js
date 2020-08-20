@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/new_platform');
-
-jest.mock('./kibana_services', () => {
-  return {
-    SPATIAL_FILTER_TYPE: 'spatial_filter',
-  };
-});
-
 import {
   hitsToGeoJson,
   geoPointToGeometry,
@@ -22,7 +14,7 @@ import {
   makeESBbox,
   scaleBounds,
 } from './elasticsearch_geo_utils';
-import { indexPatterns } from '../../../../src/plugins/data/public';
+import _ from 'lodash';
 
 const geoFieldName = 'location';
 
@@ -173,19 +165,14 @@ describe('hitsToGeoJson', () => {
   });
 
   describe('dot in geoFieldName', () => {
-    const indexPatternMock = {
-      fields: {
-        getByName: (name) => {
-          const fields = {
-            ['my.location']: {
-              type: 'geo_point',
-            },
-          };
-          return fields[name];
-        },
-      },
+    // This essentially should test the implmentation of index-pattern.flattenHit, rather than anything in geo_utils.
+    // Leaving this here for reference.
+    const geoFieldName = 'my.location';
+    const indexPatternFlattenHit = (hit) => {
+      return {
+        [geoFieldName]: _.get(hit._source, geoFieldName),
+      };
     };
-    const indexPatternFlattenHit = indexPatterns.flattenHitWrapper(indexPatternMock);
 
     it('Should handle geoField being an object', () => {
       const hits = [
