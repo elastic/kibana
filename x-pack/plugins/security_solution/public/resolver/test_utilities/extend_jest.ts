@@ -52,8 +52,12 @@ expect.extend({
       received.push(next);
       // Use deep equals to compare the value to the expected value
       if (this.equals(next, expected)) {
-        // If the value is equal, break
+        // If the value is equal, set pass to true
         pass = true;
+      }
+      if (pass && !this.equals(next, expected)) {
+        // If the value stops being true for any remaining iterations, there is an error
+        pass = false;
         break;
       }
     }
