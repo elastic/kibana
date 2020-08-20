@@ -95,7 +95,7 @@ export class EditorFrameService {
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
-        documentToExpression: this.documentToExpression,
+        documentToExpression: this.documentToExpression.bind(this),
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
         datasources: resolvedDatasources,

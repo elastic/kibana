@@ -54,8 +54,7 @@ export function getSavedObjectFormat({
     visualizationState: state.visualization.state,
     datasourceMap: activeDatasources,
     datasourceStates: state.datasourceStates,
-    framePublicAPI,
-    removeDateRange: true,
+    datasourceLayers: framePublicAPI.datasourceLayers,
   });
 
   return {

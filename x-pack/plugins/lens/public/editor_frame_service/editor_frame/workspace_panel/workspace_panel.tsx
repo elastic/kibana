@@ -130,7 +130,7 @@ export function InnerWorkspacePanel({
           visualizationState,
           datasourceMap,
           datasourceStates,
-          framePublicAPI,
+          datasourceLayers: framePublicAPI.datasourceLayers,
         });
       } catch (e) {
         // Most likely an error in the expression provided by a datasource or visualization

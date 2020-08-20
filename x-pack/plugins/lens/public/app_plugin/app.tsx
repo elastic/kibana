@@ -271,7 +271,7 @@ export function App({
                   indexPatternsForTopNav: indexPatterns,
                 }));
               })
-              .catch(() => {
+              .catch((e) => {
                 setState((s) => ({ ...s, isLoading: false }));
 
                 redirectTo();

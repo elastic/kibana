@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, uniqBy } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import {
   SavedObjectMigrationMap,

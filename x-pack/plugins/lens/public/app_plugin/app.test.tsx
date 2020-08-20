@@ -286,6 +286,7 @@ describe('Lens App', () => {
         query: 'fake query',
         filters: [],
       },
+      references: [],
     });
     await act(async () => {
       instance.setProps({ docId: '1234' });
@@ -1057,6 +1058,7 @@ describe('Lens App', () => {
           query: 'kuery',
           filters: [],
         },
+        references: [],
       } as jest.ResolvedValue<Document>);
     });
 
@@ -1088,7 +1090,11 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: undefined } as unknown) as Document,
+          doc: ({
+            id: undefined,
+
+            references: [],
+          } as unknown) as Document,
           isSaveable: true,
         })
       );
@@ -1135,7 +1141,11 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234' } as unknown) as Document,
+          doc: ({
+            id: '1234',
+
+            references: [],
+          } as unknown) as Document,
           isSaveable: true,
         })
       );
@@ -1163,6 +1173,7 @@ describe('Lens App', () => {
           doc: ({
             id: '1234',
             title: 'My cool doc',
+            references: [],
             state: {
               query: 'kuery',
               filters: [],
@@ -1192,7 +1203,7 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234' } as unknown) as Document,
+          doc: ({ id: '1234', references: [] } as unknown) as Document,
           isSaveable: true,
         })
       );

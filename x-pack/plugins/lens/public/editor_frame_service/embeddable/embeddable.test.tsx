@@ -117,7 +117,7 @@ describe('embeddable', () => {
 
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
       timeRange,
-      query,
+      query: [query, savedVis.state.query],
       filters,
     });
   });

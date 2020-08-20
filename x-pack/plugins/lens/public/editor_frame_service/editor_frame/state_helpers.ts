@@ -9,24 +9,24 @@ import { Ast } from '@kbn/interpreter/common';
 import { Datasource, DatasourcePublicAPI, Visualization } from '../../types';
 import { buildExpression } from './expression_helpers';
 
-export function initializeDatasources(
+export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  // TODO turn this into a single return value via promise
-  onInit: (id: string, state: unknown) => void,
-  onError: (e: { message: string }) => void,
   references?: SavedObjectReference[]
-) {
-  Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
-    if (datasourceStates[datasourceId] && datasourceStates[datasourceId].isLoading) {
-      datasource
-        .initialize(datasourceStates[datasourceId].state || undefined, references)
-        .then((datasourceState) => {
-          onInit(datasourceId, datasourceState);
-        })
-        .catch(onError);
-    }
-  });
+): Promise<Record<string, { isLoading: boolean; state: unknown }>> {
+  const states: Record<string, { isLoading: boolean; state: unknown }> = {};
+  await Promise.all(
+    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
+      if (datasourceStates[datasourceId]) {
+        return datasource
+          .initialize(datasourceStates[datasourceId].state || undefined, references)
+          .then((datasourceState) => {
+            states[datasourceId] = { isLoading: false, state: datasourceState };
+          });
+      }
+    })
+  );
+  return states;
 }
 
 export function createDatasourceLayers(
@@ -58,18 +58,15 @@ export async function persistedStateToExpression(
   persistedDatasourceStates: Record<string, unknown>,
   references?: SavedObjectReference[]
 ): Promise<Ast> {
-  const datasourceStates: Record<string, { isLoading: boolean; state: unknown }> = {};
-
-  await Promise.all(
-    Object.entries(datasources).map(([datasourceId, datasource]) => {
-      if (persistedDatasourceStates[datasourceId]) {
-        return datasource
-          .initialize(persistedDatasourceStates[datasourceId], references)
-          .then((datasourceState) => {
-            datasourceStates[datasourceId] = { isLoading: false, state: datasourceState };
-          });
-      }
-    })
+  const datasourceStates = await initializeDatasources(
+    datasources,
+    Object.fromEntries(
+      Object.entries(persistedDatasourceStates).map(([id, state]) => [
+        id,
+        { isLoading: false, state },
+      ])
+    ),
+    references
   );
 
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
@@ -80,5 +77,5 @@ export async function persistedStateToExpression(
     datasourceMap: datasources,
     datasourceStates,
     datasourceLayers,
-  });
+  })!;
 }

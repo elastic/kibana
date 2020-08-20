@@ -7,7 +7,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
+import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -63,20 +63,19 @@ export function EditorFrame(props: EditorFrameProps) {
       // prevents executing dispatch on unmounted component
       let isUnmounted = false;
       if (!allLoaded) {
-        initializeDatasources(
-          props.datasourceMap,
-          state.datasourceStates,
-          (datasourceId, datasourceState) => {
+        initializeDatasources(props.datasourceMap, state.datasourceStates, props.doc?.references)
+          .then((result) => {
             if (!isUnmounted) {
-              dispatch({
-                type: 'UPDATE_DATASOURCE_STATE',
-                updater: datasourceState,
-                datasourceId,
+              Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
+                dispatch({
+                  type: 'UPDATE_DATASOURCE_STATE',
+                  updater: datasourceState,
+                  datasourceId,
+                });
               });
             }
-          },
-          onError
-        );
+          })
+          .catch(onError);
       }
       return () => {
         isUnmounted = true;

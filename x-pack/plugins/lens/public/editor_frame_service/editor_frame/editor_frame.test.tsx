@@ -424,21 +424,6 @@ describe('editor_frame', () => {
             },
             Object {
               "arguments": Object {
-                "filters": Array [
-                  "[]",
-                ],
-                "query": Array [
-                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                ],
-                "timeRange": Array [
-                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                ],
-              },
-              "function": "kibana_context",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
                 "layerIds": Array [
                   "first",
                 ],
@@ -527,21 +512,6 @@ describe('editor_frame', () => {
             Object {
               "arguments": Object {},
               "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "filters": Array [
-                  "[]",
-                ],
-                "query": Array [
-                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                ],
-                "timeRange": Array [
-                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                ],
-              },
-              "function": "kibana_context",
               "type": "function",
             },
             Object {
@@ -1447,7 +1417,7 @@ describe('editor_frame', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       mockDatasource.getPersistableState = jest.fn((x) => ({
         state: x,
-        savedObjectReferences: [{ type: 'index-pattern', id: '1', name: '' }],
+        savedObjectReferences: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       }));
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 

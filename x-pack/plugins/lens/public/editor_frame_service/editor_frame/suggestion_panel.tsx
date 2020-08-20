@@ -29,7 +29,7 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
-import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
+import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
@@ -265,15 +265,6 @@ export function SuggestionPanel({
     }
   }
 
-  const expressionContext = {
-    query: frame.query,
-    filters: frame.filters,
-    timeRange: {
-      from: frame.dateRange.fromDate,
-      to: frame.dateRange.toDate,
-    },
-  };
-
   return (
     <div className="lnsSuggestionPanel">
       <EuiFlexGroup alignItems="center">
@@ -318,9 +309,7 @@ export function SuggestionPanel({
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
-              expression: currentStateExpression
-                ? prependKibanaContext(currentStateExpression, expressionContext)
-                : undefined,
+              expression: currentStateExpression!,
               icon:
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
                   .icon || 'empty',
@@ -338,9 +327,7 @@ export function SuggestionPanel({
           return (
             <SuggestionPreview
               preview={{
-                expression: suggestion.previewExpression
-                  ? prependKibanaContext(suggestion.previewExpression, expressionContext)
-                  : undefined,
+                expression: suggestion.previewExpression!,
                 icon: suggestion.previewIcon,
                 title: suggestion.title,
               }}
