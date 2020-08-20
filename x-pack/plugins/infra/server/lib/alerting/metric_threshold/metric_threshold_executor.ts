@@ -21,6 +21,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   async function (options: AlertExecutorOptions) {
     const { services, params } = options;
     const { criteria } = params;
+    if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
       alertOnNoData: boolean;

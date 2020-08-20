@@ -84,11 +84,16 @@ export const ExpressionChart: React.FC<Props> = ({
   };
   const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
-    const firstSeries = data ? first(data.series) : null;
-    return firstSeries && firstSeries.rows.length > 0
-      ? niceTimeFormatter([first(firstSeries.rows)!.timestamp, last(firstSeries.rows)!.timestamp])
-      : (value: number) => `${value}`;
-  }, [data]);
+    const firstSeries = first(data?.series);
+    const firstTimestamp = first(firstSeries?.rows)?.timestamp;
+    const lastTimestamp = last(firstSeries?.rows)?.timestamp;
+
+    if (firstTimestamp == null || lastTimestamp == null) {
+      return (value: number) => `${value}`;
+    }
+
+    return niceTimeFormatter([firstTimestamp, lastTimestamp]);
+  }, [data?.series]);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);

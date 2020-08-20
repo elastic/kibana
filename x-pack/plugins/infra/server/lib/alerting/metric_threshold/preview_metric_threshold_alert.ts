@@ -49,6 +49,8 @@ export const previewMetricThresholdAlert: (
   iterations = 0,
   precalculatedNumberOfGroups
 ) => {
+  if (params.criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
   // There are three different "intervals" we're dealing with here, so to disambiguate:
   // - The lookback interval, which is how long of a period of time we want to examine to count
   //   how many times the alert fired
@@ -151,14 +153,16 @@ export const previewMetricThresholdAlert: (
           // `undefined` values occur if there is no data at all in a certain slice, and that slice
           // returns an empty array. This is different from an error or no data state,
           // so filter these results out entirely and only regard the resultA portion
-          .filter((value) => typeof value !== 'undefined')
+          .filter(
+            <Value>(value: Value): value is NonNullable<Value> => typeof value !== 'undefined'
+          )
           .reduce((a, b) => {
             if (!a) return b;
             if (!b) return a;
             return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
           })
       );
-      return zippedResult as number[][];
+      return zippedResult;
     } else throw e;
   }
 };

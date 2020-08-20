@@ -128,6 +128,7 @@ export const getNodeMetrics = (
     }));
   }
   const lastBucket = findLastFullBucket(nodeBuckets, options);
+  if (!lastBucket) return [];
   return options.metrics.map((metric, index) => {
     const metricResult: SnapshotNodeMetric = {
       name: metric.type,
@@ -155,7 +156,7 @@ const findLastFullBucket = (
       return item;
     }
     return current;
-  }, last(buckets)!);
+  }, last(buckets));
 };
 
 export const getMetricValueFromBucket = (

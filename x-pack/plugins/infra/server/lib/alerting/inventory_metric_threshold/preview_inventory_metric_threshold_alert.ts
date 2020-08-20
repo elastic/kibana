@@ -40,6 +40,8 @@ export const previewInventoryMetricThresholdAlert = async ({
 }: PreviewInventoryMetricThresholdAlertParams) => {
   const { criteria, filterQuery, nodeType } = params as InventoryMetricThresholdParams;
 
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
   const { timeSize, timeUnit } = criteria[0];
   const bucketInterval = `${timeSize}${timeUnit}`;
   const bucketIntervalInSeconds = getIntervalInSeconds(bucketInterval);
