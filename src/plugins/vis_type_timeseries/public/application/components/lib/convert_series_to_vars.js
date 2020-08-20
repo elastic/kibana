@@ -54,6 +54,14 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
         };
         set(variables, varName, data);
         set(variables, `${_.snakeCase(row.label)}.label`, row.label);
+
+        if (row.labelFormatted) {
+          set(
+            variables,
+            `${_.snakeCase(row.label)}.formatted`,
+            moment(row.labelFormatted).format(dateFormat)
+          );
+        }
       });
   });
   return variables;
