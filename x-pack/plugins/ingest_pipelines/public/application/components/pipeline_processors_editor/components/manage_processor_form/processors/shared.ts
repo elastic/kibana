@@ -62,6 +62,7 @@ export const from = {
       }
     }
   },
+  optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
   defaultBoolToUndef: (defaultBool: boolean) => (v: boolean) => (v === defaultBool ? undefined : v),
 };
 

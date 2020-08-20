@@ -28,6 +28,7 @@ import {
   Inference,
   Join,
   Json,
+  Kv,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -186,7 +187,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   kv: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Kv,
     docLinkPath: '/kv-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.kv', {
       defaultMessage: 'KV',

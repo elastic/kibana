@@ -24,3 +24,4 @@ export { HtmlStrip } from './html_strip';
 export { Inference } from './inference';
 export { Join } from './join';
 export { Json } from './json';
+export { Kv } from './kv';
