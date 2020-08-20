@@ -419,10 +419,11 @@ export const fieldFormats: {
     TruncateFormat: typeof TruncateFormat;
 };
 
+// Warning: (ae-forgotten-export) The symbol "GetConfigFn" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "FieldFormatsGetConfigFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn = GetConfigFn;
 
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
