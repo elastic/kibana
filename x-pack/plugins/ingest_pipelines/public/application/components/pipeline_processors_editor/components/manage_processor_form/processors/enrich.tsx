@@ -6,6 +6,8 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
 import {
   FIELD_TYPES,
   fieldValidators,
@@ -15,6 +17,7 @@ import {
   NumericField,
   SelectField,
   ValidationConfig,
+  useKibana,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
@@ -52,6 +55,25 @@ const targetFieldValidator: ValidationConfig = {
   ),
 };
 
+const getEnrichPolicyNameFieldHelpText = (esDocUrl: string) => {
+  return (
+    <FormattedMessage
+      id="xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText"
+      defaultMessage="Name of the {enrichPolicyLink}."
+      values={{
+        enrichPolicyLink: (
+          <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
+            {i18n.translate(
+              'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText.enrichPolicyLink',
+              { defaultMessage: 'enrich policy' }
+            )}
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+};
+
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   policy_name: {
@@ -60,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Policy name',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText', {
-      defaultMessage: 'The name of the enrich policy to use.',
+      defaultMessage: 'Name of the enrich policy.',
     }),
     validations: [
       {
@@ -145,6 +167,8 @@ const fieldsConfig: FieldsConfig = {
 };
 
 export const Enrich: FunctionComponent = () => {
+  const { services } = useKibana();
+  const esDocUrl = services.documentation.getEsDocsBasePath();
   return (
     <>
       <FieldNameField
@@ -157,7 +181,14 @@ export const Enrich: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.policy_name} component={Field} path="fields.policy_name" />
+      <UseField
+        config={{
+          ...fieldsConfig.policy_name,
+          helpText: getEnrichPolicyNameFieldHelpText(esDocUrl),
+        }}
+        component={Field}
+        path="fields.policy_name"
+      />
 
       <TargetField
         label={i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldLabel', {
