@@ -27,7 +27,7 @@ import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 
 /**
- * APIs to access the application's instance uuid.
+ * APIs to access the application's environment information.
  *
  * @public
  */

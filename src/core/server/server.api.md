@@ -486,6 +486,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
+    environment: EnvironmentServiceSetup;
+    // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup & {
@@ -499,8 +501,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     status: StatusServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
-    // (undocumented)
-    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -750,6 +750,11 @@ export interface EnvironmentMode {
     name: 'development' | 'production';
     // (undocumented)
     prod: boolean;
+}
+
+// @public
+export interface EnvironmentServiceSetup {
+    getInstanceUuid(): string;
 }
 
 // @public
@@ -2864,11 +2869,6 @@ export interface UserProvidedValues<T = any> {
     isOverridden?: boolean;
     // (undocumented)
     userValue?: T;
-}
-
-// @public
-export interface UuidServiceSetup {
-    getInstanceUuid(): string;
 }
 
 // @public

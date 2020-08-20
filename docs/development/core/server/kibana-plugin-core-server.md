@@ -86,6 +86,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
 |  [ElasticsearchStatusMeta](./kibana-plugin-core-server.elasticsearchstatusmeta.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-server.environmentmode.md) |  |
+|  [EnvironmentServiceSetup](./kibana-plugin-core-server.environmentservicesetup.md) | APIs to access the application's environment information. |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
 |  [Explanation](./kibana-plugin-core-server.explanation.md) |  |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
@@ -212,7 +213,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
 |  [URLMeaningfulParts](./kibana-plugin-core-server.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
-|  [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
 
 ## Variables
 
