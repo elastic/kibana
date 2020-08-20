@@ -32,6 +32,7 @@ import {
   Lowercase,
   Pipeline,
   Remove,
+  Rename,
 } from '../manage_processor_form/processors';
 
 interface FieldDescriptor {
@@ -215,7 +216,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   rename: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Rename,
     docLinkPath: '/rename-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.rename', {
       defaultMessage: 'Rename',

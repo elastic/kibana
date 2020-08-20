@@ -28,3 +28,4 @@ export { Kv } from './kv';
 export { Lowercase } from './lowercase';
 export { Pipeline } from './pipeline';
 export { Remove } from './remove';
+export { Rename } from './rename';
