@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapExtent } from '../common/descriptor_types';
+export { Tabs, TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
-export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent;
+export { DocumentsTab } from './tab_documents';
 
-export function turfBboxToBounds(turfBbox: unknown): MapExtent;
+export { OutputTab } from './tab_output';
