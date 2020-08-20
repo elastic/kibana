@@ -20,7 +20,6 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
-
 /**
  * Routes for the anomaly detectors
  */
