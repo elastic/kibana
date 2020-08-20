@@ -57,6 +57,10 @@ export interface EndpointState {
   endpointsExist: boolean;
   /** index patterns for query bar */
   patterns: IIndexPattern[];
+  /** Is auto-refresh enabled */
+  isAutoRefreshEnabled: boolean;
+  /** The current auto refresh interval for data in ms */
+  autoRefreshInterval: number;
 }
 
 /**

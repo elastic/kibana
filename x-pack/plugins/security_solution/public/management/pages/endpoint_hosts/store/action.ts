@@ -96,6 +96,17 @@ interface ServerFailedToReturnMetadataPatterns {
   type: 'serverFailedToReturnMetadataPatterns';
   payload: ServerApiError;
 }
+interface UserUpdatedEndpointListRefreshOptions {
+  type: 'userUpdatedEndpointListRefreshOptions';
+  payload: {
+    isAutoRefreshEnabled?: boolean;
+    autoRefreshInterval?: number;
+  };
+}
+
+interface AppRequestedEndpointList {
+  type: 'appRequestedEndpointList';
+}
 
 export type EndpointAction =
   | ServerReturnedEndpointList
@@ -111,6 +122,8 @@ export type EndpointAction =
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | ServerReturnedEndpointNonExistingPolicies
   | ServerReturnedMetadataPatterns
-  | ServerFailedToReturnMetadataPatterns;
+  | ServerFailedToReturnMetadataPatterns
+  | AppRequestedEndpointList
+  | ServerReturnedEndpointNonExistingPolicies
+  | UserUpdatedEndpointListRefreshOptions;

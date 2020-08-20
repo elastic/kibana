@@ -9,6 +9,7 @@ import { EndpointState } from '../types';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
 export const initialEndpointListState: Immutable<EndpointState> = {
   hosts: [],
@@ -31,6 +32,8 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   nonExistingPolicies: {},
   endpointsExist: true,
   patterns: [],
+  isAutoRefreshEnabled: true,
+  autoRefreshInterval: DEFAULT_POLL_INTERVAL,
 };
 
 /* eslint-disable-next-line complexity */
@@ -137,6 +140,12 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     return {
       ...state,
       endpointsExist: action.payload,
+    };
+  } else if (action.type === 'userUpdatedEndpointListRefreshOptions') {
+    return {
+      ...state,
+      isAutoRefreshEnabled: action.payload.isAutoRefreshEnabled ?? state.isAutoRefreshEnabled,
+      autoRefreshInterval: action.payload.autoRefreshInterval ?? state.autoRefreshInterval,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<EndpointState> = {

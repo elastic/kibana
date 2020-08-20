@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';
