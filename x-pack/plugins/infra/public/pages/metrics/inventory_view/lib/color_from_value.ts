@@ -68,8 +68,9 @@ export const calculateSteppedGradientColor = (
 
   // Since the stepped legend matches a range we need to ensure anything outside
   // the max bounds get's the maximum color.
-  if (gte(normalizedValue, last(rules)!.value)) {
-    return last(rules)!.color;
+  const lastRule = last(rules);
+  if (lastRule && gte(normalizedValue, lastRule.value)) {
+    return lastRule.color;
   }
 
   return rules.reduce((color: string, rule) => {
@@ -79,7 +80,7 @@ export const calculateSteppedGradientColor = (
       return rule.color;
     }
     return color;
-  }, first(rules)!.color || defaultColor);
+  }, first(rules)?.color ?? defaultColor);
 };
 
 export const calculateStepColor = (
