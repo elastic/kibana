@@ -23,6 +23,8 @@ import {
 } from '../../../../common/search_strategy/security_solution';
 import { ESTermQuery } from '../../../../common/typed_json';
 
+import * as i18n from './translations';
+
 const ID = 'hostsQuery';
 
 type LoadPage = (newActivePage: number) => void;
@@ -145,12 +147,14 @@ export const useAllHost = ({
                   setLoading(false);
                 }
                 // TODO: Make response error status clearer
-                notifications.toasts.addWarning('An error has occurred');
+                notifications.toasts.addWarning(i18n.ERROR_ALL_HOST);
                 searchSubscription$.unsubscribe();
               }
             },
-            error: () => {
-              notifications.toasts.addDanger('Failed to run search');
+            error: (msg) => {
+              if (msg.message !== 'Aborted') {
+                notifications.toasts.addDanger({ title: i18n.FAIL_ALL_HOST, text: msg.message });
+              }
             },
           });
       };
