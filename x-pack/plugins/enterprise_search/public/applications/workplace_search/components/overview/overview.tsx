@@ -15,7 +15,7 @@ import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kiban
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
-import { OverviewLogic, IOverviewActions, IOverviewValues } from './overview_logic';
+import { OverviewLogic } from './overview_logic';
 
 import { ErrorState } from '../error_state';
 
@@ -49,7 +49,7 @@ const HEADER_DESCRIPTION = i18n.translate(
 export const Overview: React.FC = () => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
 
-  const { initializeOverview } = useActions(OverviewLogic) as IOverviewActions;
+  const { initializeOverview } = useActions(OverviewLogic);
 
   const {
     dataLoading,
@@ -58,7 +58,7 @@ export const Overview: React.FC = () => {
     hasOrgSources,
     isOldAccount,
     organization: { name: orgName, defaultOrgName },
-  } = useValues(OverviewLogic) as IOverviewValues;
+  } = useValues(OverviewLogic);
 
   useEffect(() => {
     initializeOverview({ http });
