@@ -53,7 +53,8 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('scripted fields', function () {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
