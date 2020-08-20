@@ -109,7 +109,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.enrichForm.maxMatchesFieldHelpText',
       {
         defaultMessage:
-          'The maximum number of matched documents to include under the configured target field. The target_field will be turned into a json array if max_matches is higher than 1, otherwise target_field will become a json object. Accepts numbers are 1 up to 128.',
+          'The maximum number of matched documents to include under the configured target field. The target_field will be turned into a json array if max_matches is higher than 1, otherwise target_field will become a json object. Accepts numbers 1 up to 128.',
       }
     ),
     validations: [
