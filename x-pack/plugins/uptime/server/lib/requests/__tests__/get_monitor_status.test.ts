@@ -286,6 +286,296 @@ describe('getMonitorStatus', () => {
     `);
   });
 
+  it('properly assigns filters for complex kuery filters', async () => {
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [{ bucketCriteria: [] }],
+      genBucketItem
+    );
+    const clientParameters = {
+      dynamicSettings: {
+        heartbeatIndices: 'heartbeat-8*',
+        certAgeThreshold: 730,
+        certExpirationThreshold: 30,
+      },
+      timerange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      numTimes: 5,
+      locations: [],
+      filters: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      tags: 'org:google',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            'monitor.type': 'http',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            'monitor.type': 'tcp',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    };
+    await getMonitorStatus({
+      callES,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      ...clientParameters,
+    });
+    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
+    const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-15m",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "tags": "org:google",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.type": "http",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.type": "tcp",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-8*",
+      }
+    `);
+  });
+
+  it('properly assigns filters for complex kuery filters object', async () => {
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [{ bucketCriteria: [] }],
+      genBucketItem
+    );
+    const clientParameters = {
+      dynamicSettings: {
+        heartbeatIndices: 'heartbeat-8*',
+        certAgeThreshold: 730,
+        certExpirationThreshold: 30,
+      },
+      timerange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      numTimes: 5,
+      locations: [],
+      filters: {
+        bool: {
+          filter: {
+            exists: {
+              field: 'monitor.status',
+            },
+          },
+        },
+      },
+    };
+    await getMonitorStatus({
+      callES,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      ...clientParameters,
+    });
+    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
+    const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-15m",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "monitor.status",
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-8*",
+      }
+    `);
+  });
+
   it('fetches single page of results', async () => {
     const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [
