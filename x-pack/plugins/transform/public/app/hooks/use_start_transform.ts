@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
+import type { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
 
 import { useToastNotifications } from '../app_dependencies';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';

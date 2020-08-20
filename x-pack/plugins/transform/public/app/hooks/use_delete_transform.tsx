@@ -7,11 +7,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import {
+import type {
   DeleteTransformStatus,
   DeleteTransformsRequestSchema,
 } from '../../../common/api_schemas/delete_transforms';
-import {} from '../../../common/api_schemas/common';
 import { extractErrorMessage, getErrorMessage } from '../../shared_imports';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';

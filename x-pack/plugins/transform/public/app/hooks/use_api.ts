@@ -8,15 +8,15 @@ import { useMemo } from 'react';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
-import {
+import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
-import {
+import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
 } from '../../../common/api_schemas/start_transforms';
-import {
+import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';

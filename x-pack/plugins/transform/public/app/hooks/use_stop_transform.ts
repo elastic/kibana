@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { StopTransformsRequestSchema } from '../../../common/api_schemas/stop_transforms';
+import type { StopTransformsRequestSchema } from '../../../common/api_schemas/stop_transforms';
 
 import { useToastNotifications } from '../app_dependencies';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
