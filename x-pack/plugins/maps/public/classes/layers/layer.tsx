@@ -234,6 +234,10 @@ export class AbstractLayer implements ILayer {
     return await this.getSource().supportsFitToBounds();
   }
 
+  async isFittable(): Promise<boolean> {
+    return (await this.supportsFitToBounds()) && this.isVisible();
+  }
+
   async getDisplayName(source?: ISource): Promise<string> {
     if (this._descriptor.label) {
       return this._descriptor.label;
@@ -535,10 +539,6 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
-    return false;
-  }
-
-  async isFittable(): Promise<boolean> {
     return false;
   }
 }

@@ -38,12 +38,10 @@ export class FitToData extends React.Component<Props, State> {
   }
 
   async _loadCanFit() {
-    const fittableLayersPromises = this.props.layerList.map(async (layer) => {
-      return layer.isVisible() && (await layer.isFittable());
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFittable();
     });
-    const isFittables = (await Promise.all(fittableLayersPromises)).filter((l) => l === true);
-
-    const canFit = !!isFittables.length;
+    const canFit = (await Promise.all(promises)).some((isFittable) => isFittable);
     if (this._isMounted && this.state.canFit !== canFit) {
       this.setState({
         canFit,

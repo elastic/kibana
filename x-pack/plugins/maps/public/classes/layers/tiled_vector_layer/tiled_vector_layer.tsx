@@ -201,8 +201,4 @@ export class TiledVectorLayer extends VectorLayer {
   getFeatureById(id: string | number): Feature | null {
     return null;
   }
-
-  async isFittable() {
-    return await this._source.supportsFitToBounds();
-  }
 }

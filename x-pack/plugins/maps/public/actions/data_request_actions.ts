@@ -327,7 +327,7 @@ export function fitToDataBounds(onNoBounds?: () => void) {
     }
 
     const boundsPromises = layerList.map(async (layer: ILayer) => {
-      if (!layer.isVisible() || !(await layer.isFittable())) {
+      if (!(await layer.isFittable())) {
         return null;
       }
       return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
