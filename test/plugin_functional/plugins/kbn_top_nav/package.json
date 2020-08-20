@@ -12,7 +12,7 @@
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {
-    "typescript": "4.0.1-rc"
+    "typescript": "4.0.2"
   }
 }
 
