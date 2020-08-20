@@ -408,7 +408,7 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
-    const { body, index, fields = [], query = [], filters = [], highlightAll } = searchRequest;
+    const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};

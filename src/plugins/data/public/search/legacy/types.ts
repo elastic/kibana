@@ -31,7 +31,7 @@ export interface SearchStrategyProvider {
   search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
 }
 
-export interface SearchStrategyResponse {
-  searching: Promise<Array<SearchResponse<any>>>;
+export interface SearchStrategyResponse<T = any> {
+  searching: Promise<Array<SearchResponse<T>>>;
   abort: () => void;
 }
