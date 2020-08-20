@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe.only('scripted fields', function () {
+  describe('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
