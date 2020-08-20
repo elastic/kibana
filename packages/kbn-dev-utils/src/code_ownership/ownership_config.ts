@@ -23,6 +23,7 @@ NOTE: Rule stanzas contain n rules.
       They may feel like duplicates, but they are not.
       We chose to sorta mimic eslintrc.js
  */
+
 export interface OwnershipRule {
   files: string[]; // Files listed in CODEOWNERS and Code Coverage
   excludeFiles: string[]; // Files in CODEOWNERS, with a ! prepended
@@ -203,7 +204,7 @@ export const rules: OwnershipRule[] = [
     files: [
       '/x-pack/plugins/canvas/',
       '/x-pack/test/functional/apps/canvas/',
-      '/src/plugins/kibana_react/public/code_editor'
+      '/src/plugins/kibana_react/public/code_editor',
     ],
     excludeFiles: [],
     codeOwner: '@elastic/kibana-canvas',
@@ -242,7 +243,7 @@ export const rules: OwnershipRule[] = [
       '/src/plugins/dashboard/**/*.scss',
       '/x-pack/plugins/canvas/**/*.scss',
       '/src/legacy/core_plugins/kibana/public/home/**/*.scss',
-  ],
+    ],
     excludeFiles: [],
     codeOwner: '@elastic/kibana-core-ui-designers',
     coverageOwner: 'kibana-core-ui-designers',
@@ -252,7 +253,7 @@ export const rules: OwnershipRule[] = [
       '/x-pack/plugins/apm/**/*.scss',
       '/x-pack/plugins/infra/**/*.scss',
       '/x-pack/plugins/ingest_manager/**/*.scss',
-  ],
+    ],
     excludeFiles: [],
     codeOwner: '@elastic/observability-design',
     coverageOwner: 'observability-design',
