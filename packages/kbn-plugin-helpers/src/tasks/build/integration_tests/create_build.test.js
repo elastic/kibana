@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { readdirSync, existsSync, unlinkSync } from 'fs';
+import { readdirSync } from 'fs';
 import del from 'del';
 import { createBuild } from '../create_build';
 import { pluginConfig } from '../../../lib';
@@ -82,30 +82,6 @@ describe('creating the build', () => {
       await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
       expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).not.toContain('node_modules');
-    });
-  });
-
-  describe('with styleSheetToCompile', () => {
-    const sassPath = 'public/styles.scss';
-    const cssPath = resolve(PLUGIN_BUILD_TARGET, 'public/styles.css');
-
-    beforeEach(() => {
-      PLUGIN.skipInstallDependencies = true;
-      PLUGIN.styleSheetToCompile = sassPath;
-    });
-
-    afterEach(() => {
-      PLUGIN.skipInstallDependencies = false;
-      PLUGIN.styleSheetToCompile = undefined;
-      unlinkSync(cssPath);
-    });
-
-    it('produces CSS', async () => {
-      expect(PLUGIN.styleSheetToCompile).toBe(sassPath);
-
-      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
-
-      expect(existsSync(cssPath)).toBe(true);
     });
   });
 });

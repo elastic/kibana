@@ -37,7 +37,7 @@ interface RouteParams {
   serviceName: string;
 }
 
-const renderAsRedirectTo = (to: string) => {
+export const renderAsRedirectTo = (to: string) => {
   return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{

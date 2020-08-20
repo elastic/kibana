@@ -54,6 +54,10 @@ export interface EndpointState {
   nonExistingPolicies: Record<string, boolean>;
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
+  /** Is auto-refresh enabled */
+  isAutoRefreshEnabled: boolean;
+  /** The current auto refresh interval for data in ms */
+  autoRefreshInterval: number;
 }
 
 /**

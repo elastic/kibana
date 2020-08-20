@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _, { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -122,30 +122,32 @@ const SuggestionPreview = ({
 }) => {
   return (
     <EuiToolTip content={preview.title}>
-      <EuiPanelFixed
-        className={classNames('lnsSuggestionPanel__button', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'lnsSuggestionPanel__button-isSelected': selected,
-        })}
-        paddingSize="none"
-        data-test-subj="lnsSuggestion"
-        onClick={onSelect}
-      >
-        {preview.expression ? (
-          <DebouncedPreviewRenderer
-            ExpressionRendererComponent={ExpressionRendererComponent}
-            expression={toExpression(preview.expression)}
-            withLabel={Boolean(showTitleAsLabel)}
-          />
-        ) : (
-          <span className="lnsSuggestionPanel__suggestionIcon">
-            <EuiIcon size="xxl" type={preview.icon} />
-          </span>
-        )}
-        {showTitleAsLabel && (
-          <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
-        )}
-      </EuiPanelFixed>
+      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+        <EuiPanelFixed
+          className={classNames('lnsSuggestionPanel__button', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'lnsSuggestionPanel__button-isSelected': selected,
+          })}
+          paddingSize="none"
+          data-test-subj="lnsSuggestion"
+          onClick={onSelect}
+        >
+          {preview.expression ? (
+            <DebouncedPreviewRenderer
+              ExpressionRendererComponent={ExpressionRendererComponent}
+              expression={toExpression(preview.expression)}
+              withLabel={Boolean(showTitleAsLabel)}
+            />
+          ) : (
+            <span className="lnsSuggestionPanel__suggestionIcon">
+              <EuiIcon size="xxl" type={preview.icon} />
+            </span>
+          )}
+          {showTitleAsLabel && (
+            <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
+          )}
+        </EuiPanelFixed>
+      </div>
     </EuiToolTip>
   );
 };
@@ -204,8 +206,8 @@ export function SuggestionPanel({
         : undefined;
 
     return { suggestions: newSuggestions, currentStateExpression: newStateExpression };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    frame,
     currentDatasourceStates,
     currentVisualizationState,
     currentVisualizationId,

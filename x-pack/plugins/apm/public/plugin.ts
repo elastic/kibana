@@ -74,9 +74,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     if (plugins.observability) {
       const getApmDataHelper = async () => {
-        const { fetchOverviewPageData, hasData } = await import(
-          './services/rest/apm_overview_fetchers'
-        );
+        const {
+          fetchOverviewPageData,
+          hasData,
+          createCallApmApi,
+        } = await import('./services/rest/apm_overview_fetchers');
+        // have to do this here as well in case app isn't mounted yet
+        createCallApmApi(core.http);
 
         return { fetchOverviewPageData, hasData };
       };
@@ -93,20 +97,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       });
     }
 
-    const setupLazyStuff = async (coreStart: CoreStart) => {
-      const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
-      );
-
-      createCallApmApi(core.http);
-
-      // render APM feedback link in global help menu
-      const { setHelpExtension } = await import('./setHelpExtension');
-      const { setReadonlyBadge } = await import('./updateBadge');
-      setHelpExtension(coreStart);
-      setReadonlyBadge(coreStart);
-    };
-
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -117,39 +107,28 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Get start services
-        const [coreStart] = await core.getStartServices();
-        await setupLazyStuff(coreStart);
-
-        const { createStaticIndexPattern } = await import(
-          './services/rest/index_pattern'
-        );
-        // Automatically creates static index pattern and stores as saved object
-        createStaticIndexPattern().catch((e) => {
-          // eslint-disable-next-line no-console
-          console.log('Error creating static index pattern', e);
-        });
+        // Load application bundle and Get start services
+        const [{ renderApp }, [coreStart]] = await Promise.all([
+          import('./application'),
+          core.getStartServices(),
+        ]);
 
         return renderApp(coreStart, pluginSetupDeps, params, config);
       },
     });
 
     core.application.register({
-      id: 'clientSideMonitoring',
+      id: 'csm',
       title: 'Client Side Monitoring',
       order: 8500,
-      euiIconType: 'apmApp',
-      icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
-        // Load application bundle
-        const { renderApp } = await import('./application/rumApp');
-        // Get start services
-        const [coreStart] = await core.getStartServices();
-        await setupLazyStuff(coreStart);
+        // Load application bundle and Get start service
+        const [{ renderApp }, [coreStart]] = await Promise.all([
+          import('./application/csmApp'),
+          core.getStartServices(),
+        ]);
 
         return renderApp(coreStart, pluginSetupDeps, params, config);
       },
