@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import search000json = require('./json/0_0_0_search.json'); // Prefer require() over setting the compiler options, which affect production modules as well
+// @ts-expect-error
+const search000json = await import('./json/0_0_0_search.json'); // Prefer require() over setting the compiler options, which affect production modules as well
 
 export const TILE_SEARCHES = {
   '0.0.0': {
     countResponse: {
-      count: 250,
+      count: 1,
       _shards: {
         total: 1,
         successful: 1,
