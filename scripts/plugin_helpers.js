@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env/prebuilt_dev_only_entry');
-require('@kbn/plugin-generator').runCli();
+require('@kbn/plugin-helpers').runCli();

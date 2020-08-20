@@ -49,7 +49,7 @@ yarn kbn bootstrap
 
 ## Plugin Development Scripts
 
-Generated plugins receive a handful of scripts that can be used during development. Those scripts are detailed in the [README.md](sao_template/template/README.md) file in each newly generated plugin, and expose the scripts provided by the [Kibana plugin helpers](../kbn-plugin-helpers), but here is a quick reference in case you need it:
+Generated plugins receive a handful of scripts that can be used during development. Those scripts are detailed in the [README.md](template/README.md) file in each newly generated plugin, and expose the scripts provided by the [Kibana plugin helpers](../kbn-plugin-helpers), but here is a quick reference in case you need it:
 
 > ***NOTE:*** All of these scripts should be run from the generated plugin.
 
