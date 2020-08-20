@@ -19,10 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export enum EpmPackageInstallStatus {
-  installed = 'installed',
-  installing = 'installing',
-}
+export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';

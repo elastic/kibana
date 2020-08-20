@@ -10,7 +10,6 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
-  EpmPackageInstallStatus,
 } from '../../../../plugins/ingest_manager/common';
 
 export default function (providerContext: FtrProviderContext) {
@@ -93,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'multiple_versions',
         type: PACKAGES_SAVED_OBJECT_TYPE,
         attributes: {
-          install_status: EpmPackageInstallStatus.installing,
+          install_status: 'installing',
           install_started_at: previousInstallDate,
           install_version: '0.2.0',
           version: '0.1.0',
