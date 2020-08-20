@@ -27,13 +27,13 @@ import { KibanaDatatable } from '../../../expressions/public';
 import { getHeatmapColors } from '../../../charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
-import { SchemaConfig, ExprVis } from '../../../visualizations/public';
+import { SchemaConfig } from '../../../visualizations/public';
 import { Range } from '../../../expressions/public';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
   visData: Input;
-  vis: ExprVis;
+  fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
 
@@ -166,10 +166,17 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.filter({
-      table,
-      column: dimensions.bucket.accessor,
-      row: metric.rowIndex,
+    this.props.fireEvent({
+      name: 'filterBucket',
+      data: {
+        data: [
+          {
+            table,
+            column: dimensions.bucket.accessor,
+            row: metric.rowIndex,
+          },
+        ],
+      },
     });
   };
 
@@ -199,6 +206,6 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       const metrics = this.processTableGroups(this.props.visData);
       metricsHtml = metrics.map(this.renderMetric);
     }
-    return <div className="mtrVis">{metricsHtml}</div>;
+    return metricsHtml;
   }
 }
