@@ -83,7 +83,7 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
       const latestHitSource = bucket.categorizer_stats_top_hits.hits.hits[0]._source;
 
       return {
-        dataset: bucket.key,
+        dataset: bucket.key.dataset ?? '',
         categorization_status: latestHitSource.categorization_status,
         categorized_doc_count: latestHitSource.categorized_doc_count,
         dead_category_count: latestHitSource.dead_category_count,
