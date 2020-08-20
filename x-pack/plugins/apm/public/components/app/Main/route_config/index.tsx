@@ -275,6 +275,6 @@ export const rumRoutes: BreadcrumbRoute[] = [
     path: '/',
     render: renderAsRedirectTo('/client-side-monitoring'),
     breadcrumb: 'Client Side Monitoring',
-    name: RouteName.CLIENT_SIDE_MONITORING,
+    name: RouteName.CSM,
   },
 ];

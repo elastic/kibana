@@ -4911,7 +4911,6 @@
     "xpack.apm.registerTransactionDurationAlertType.variables.serviceName": "服务名称",
     "xpack.apm.registerTransactionDurationAlertType.variables.transactionType": "事务类型",
     "xpack.apm.rum.dashboard.backend": "后端",
-    "xpack.apm.rum.dashboard.dateTime.label": "日期 / 时间",
     "xpack.apm.rum.dashboard.frontend": "前端",
     "xpack.apm.rum.dashboard.overall.label": "总体",
     "xpack.apm.rum.dashboard.pageLoadDistribution.label": "页面加载分布",
