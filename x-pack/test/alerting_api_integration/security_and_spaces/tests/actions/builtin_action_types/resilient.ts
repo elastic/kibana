@@ -195,7 +195,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not present in the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });

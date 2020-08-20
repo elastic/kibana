@@ -34,7 +34,7 @@ describe('ensureUriAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('https://github.com/elastic/kibana')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target url \\"https://github.com/elastic/kibana\\" is not present in the Kibana config xpack.actions.allowedHosts"`
+      `"target url \\"https://github.com/elastic/kibana\\" is not added to the Kibana config xpack.actions.allowedHosts"`
     );
   });
 
@@ -43,7 +43,7 @@ describe('ensureUriAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('github.com/elastic')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target url \\"github.com/elastic\\" is not present in the Kibana config xpack.actions.allowedHosts"`
+      `"target url \\"github.com/elastic\\" is not added to the Kibana config xpack.actions.allowedHosts"`
     );
   });
 
@@ -76,7 +76,7 @@ describe('ensureHostnameAllowed', () => {
     expect(() =>
       getActionsConfigurationUtilities(config).ensureHostnameAllowed('github.com')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"target hostname \\"github.com\\" is not present in the Kibana config xpack.actions.allowedHosts"`
+      `"target hostname \\"github.com\\" is not added to the Kibana config xpack.actions.allowedHosts"`
     );
   });
 

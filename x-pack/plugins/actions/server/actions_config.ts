@@ -38,7 +38,7 @@ export interface ActionsConfigurationUtilities {
 function allowingErrorMessage(field: AllowingField, value: string) {
   return i18n.translate('xpack.actions.urlallowedHostsConfigurationError', {
     defaultMessage:
-      'target {field} "{value}" is not present in the Kibana config xpack.actions.allowedHosts',
+      'target {field} "{value}" is not added to the Kibana config xpack.actions.allowedHosts',
     values: {
       value,
       field,

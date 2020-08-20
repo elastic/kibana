@@ -121,7 +121,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not present in the Kibana config xpack.actions.allowedHosts',
+              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });

@@ -111,7 +111,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not present in the Kibana config xpack.actions.allowedHosts',
+              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });
