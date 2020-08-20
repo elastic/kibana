@@ -30,6 +30,7 @@ import {
   Json,
   Kv,
   Lowercase,
+  Pipeline,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -202,7 +203,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   pipeline: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Pipeline,
     docLinkPath: '/pipeline-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.pipeline', {
       defaultMessage: 'Pipeline',

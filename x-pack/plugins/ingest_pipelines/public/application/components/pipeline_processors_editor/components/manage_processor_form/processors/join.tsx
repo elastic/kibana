@@ -35,7 +35,7 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.separatorRequiredError', {
-            defaultMessage: 'A separator value is required.',
+            defaultMessage: 'A value is required.',
           })
         ),
       },
