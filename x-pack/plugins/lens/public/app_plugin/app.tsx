@@ -80,6 +80,7 @@ interface LensAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
   featureFlagConfig: DashboardFeatureFlagConfig;
+  getAppNameFromId?: (appId: string) => string | undefined;
 }
 
 export function App({
@@ -95,6 +96,7 @@ export function App({
   onAppLeave,
   history,
   featureFlagConfig,
+  getAppNameFromId,
 }: LensAppProps) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -599,6 +601,7 @@ export function App({
             originatingApp={state.originatingApp}
             onSave={(props) => runSave(props, true)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
+            getAppNameFromId={getAppNameFromId}
             documentInfo={{
               id: state.byValueMode ? undefined : lastKnownDoc.savedObjectId,
               title: lastKnownDoc.title || '',

@@ -175,6 +175,7 @@ export function getTopNavConfig({
         const saveModal = (
           <SavedObjectSaveModalOrigin
             originatingApp={originatingApp}
+            getAppNameFromId={stateTransfer?.getAppNameFromId}
             onSave={onSave}
             onClose={() => {}}
             documentInfo={{
