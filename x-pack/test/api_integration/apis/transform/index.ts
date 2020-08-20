@@ -27,11 +27,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    // loadTestFile(require.resolve('./delete_transforms'));
+    loadTestFile(require.resolve('./delete_transforms'));
     loadTestFile(require.resolve('./start_transforms'));
-    // loadTestFile(require.resolve('./transforms'));
-    // loadTestFile(require.resolve('./transforms_preview'));
-    // loadTestFile(require.resolve('./transforms_stats'));
-    // loadTestFile(require.resolve('./transforms_update'));
+    loadTestFile(require.resolve('./transforms'));
+    loadTestFile(require.resolve('./transforms_preview'));
+    loadTestFile(require.resolve('./transforms_stats'));
+    loadTestFile(require.resolve('./transforms_update'));
   });
 }

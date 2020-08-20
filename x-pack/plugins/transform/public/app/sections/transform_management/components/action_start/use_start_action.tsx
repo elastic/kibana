@@ -27,7 +27,7 @@ export const useStartAction = (forceDisable: boolean) => {
 
   const startAndCloseModal = () => {
     setModalVisible(false);
-    startTransforms(items);
+    startTransforms(items.map((i) => ({ id: i.id })));
   };
 
   const openModal = (newItems: TransformListRow[]) => {

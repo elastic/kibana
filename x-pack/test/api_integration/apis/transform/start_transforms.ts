@@ -31,10 +31,6 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.testResources.setKibanaTimeZoneToUTC();
     });
 
-    after(async () => {
-      await transform.api.cleanTransformIndices();
-    });
-
     describe('single transform start', function () {
       const transformId = 'test1';
       const destinationIndex = generateDestIndex(transformId);
@@ -44,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
+        await transform.api.cleanTransformIndices();
         await transform.api.deleteIndices(destinationIndex);
       });
 
@@ -60,26 +57,29 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body[transformId].success).to.eql(true);
+        expect(typeof body[transformId].error).to.eql('undefined');
         await transform.api.waitForBatchTransformToComplete(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
 
-      // it('should return 403 for unauthorized user', async () => {
-      //   const transformsInfo: TransformEndpointRequest[] = [{ id: transformId }];
-      //   await supertest
-      //     .post(`/api/transform/start_transforms`)
-      //     .auth(
-      //       USER.TRANSFORM_VIEWER,
-      //       transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
-      //     )
-      //     .set(COMMON_REQUEST_HEADERS)
-      //     .send({
-      //       transformsInfo,
-      //     })
-      //     .expect(403);
-      //   await transform.api.waitForTransformToExist(transformId);
-      //   await transform.api.waitForIndicesToExist(destinationIndex);
-      // });
+      it('should return 200 with success:false for unauthorized user', async () => {
+        const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
+        const { body } = await supertest
+          .post(`/api/transform/start_transforms`)
+          .auth(
+            USER.TRANSFORM_VIEWER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send(reqBody)
+          .expect(200);
+
+        expect(body[transformId].success).to.eql(false);
+        expect(typeof body[transformId].error).to.eql('string');
+
+        await transform.api.waitForTransformState(transformId, 'stopped');
+        await transform.api.waitForIndicesNotToExist(destinationIndex);
+      });
     });
 
     // describe('single transform start with invalid transformId', function () {
