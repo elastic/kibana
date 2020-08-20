@@ -24,12 +24,13 @@ import { TimelionConfigType } from './config';
 import { timelionSheetSavedObjectType } from './saved_objects';
 
 /**
- * Timelion plugin was deprecated since 7.0, the Timelion app will be removed in 8.0.
- * To continue using your Timelion worksheets, migrate them to a dashboard.
+ * The timelion application was deprecated since 7.0 and will be removed in 8.0.
+ * You still have saved timelion application worksheets, which you need to migrate manually to dashboards if you want to keep them after 8.0.
+ *
  *
  *  @link https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation
  **/
-const showWarningMessageIfTimelionSteetWasFound = (core: CoreStart, logger: Logger) => {
+const showWarningMessageIfTimelionSheetWasFound = (core: CoreStart, logger: Logger) => {
   const { savedObjects } = core;
   const savedObjectsClient = savedObjects.createInternalRepository();
 
@@ -42,7 +43,7 @@ const showWarningMessageIfTimelionSteetWasFound = (core: CoreStart, logger: Logg
       ({ total }) =>
         total &&
         logger.warn(
-          'Timelion plugin was deprecated since 7.0, the Timelion app will be removed in 8.0.'
+          'The timelion application was deprecated since 7.0 and will be removed in 8.0. You still have saved timelion application worksheets, which you need to migrate manually to dashboards if you want to keep them after 8.0. See https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation for more details.'
         )
     );
 };
@@ -99,7 +100,7 @@ export class TimelionPlugin implements Plugin {
     });
   }
   start(core: CoreStart) {
-    showWarningMessageIfTimelionSteetWasFound(core, this.logger);
+    showWarningMessageIfTimelionSheetWasFound(core, this.logger);
   }
   stop() {}
 }
