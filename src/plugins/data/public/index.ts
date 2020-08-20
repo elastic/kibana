@@ -359,6 +359,7 @@ export {
   SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
+  SearchRequest,
   SearchSourceFields,
   SortDirection,
   // expression functions and types

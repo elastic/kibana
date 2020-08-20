@@ -77,9 +77,15 @@ import { SearchResponse } from 'elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
+import { IIndexPattern, ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
+import {
+  FetchOptions,
+  RequestFailure,
+  handleResponse,
+  getSearchParamsFromRequest,
+  SearchRequest,
+} from '../fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
@@ -390,7 +396,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index: IIndexPattern) {
+  private getIndexType(index?: IIndexPattern) {
     if (this.searchStrategyId) {
       return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
     } else {
@@ -402,7 +408,7 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
-    const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    const { body, index, fields = [], query = [], filters = [], highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
