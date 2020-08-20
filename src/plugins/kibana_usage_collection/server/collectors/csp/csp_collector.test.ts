@@ -17,35 +17,24 @@
  * under the License.
  */
 
-import { CspConfig, ICspConfig } from '../../../../../../core/server';
+import { CspConfig, ICspConfig } from '../../../../../core/server';
 import { createCspCollector } from './csp_collector';
-
-const createMockKbnServer = () => ({
-  newPlatform: {
-    setup: {
-      core: {
-        http: {
-          csp: new CspConfig(),
-        },
-      },
-    },
-  },
-});
+import { httpServiceMock } from '../../../../../core/server/mocks';
 
 describe('csp collector', () => {
-  let kbnServer: ReturnType<typeof createMockKbnServer>;
+  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
   const mockCallCluster = null as any;
 
   function updateCsp(config: Partial<ICspConfig>) {
-    kbnServer.newPlatform.setup.core.http.csp = new CspConfig(config);
+    httpMock.csp = new CspConfig(config);
   }
 
   beforeEach(() => {
-    kbnServer = createMockKbnServer();
+    httpMock = httpServiceMock.createSetupContract();
   });
 
   test('fetches whether strict mode is enabled', async () => {
-    const collector = createCspCollector(kbnServer as any);
+    const collector = createCspCollector(httpMock);
 
     expect((await collector.fetch(mockCallCluster)).strict).toEqual(true);
 
@@ -54,7 +43,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
-    const collector = createCspCollector(kbnServer as any);
+    const collector = createCspCollector(httpMock);
 
     expect((await collector.fetch(mockCallCluster)).warnLegacyBrowsers).toEqual(true);
 
@@ -63,7 +52,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether the csp rules have been changed or not', async () => {
-    const collector = createCspCollector(kbnServer as any);
+    const collector = createCspCollector(httpMock);
 
     expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(false);
 
@@ -72,7 +61,7 @@ describe('csp collector', () => {
   });
 
   test('does not include raw csp rules under any property names', async () => {
-    const collector = createCspCollector(kbnServer as any);
+    const collector = createCspCollector(httpMock);
 
     // It's important that we do not send the value of csp.rules here as it
     // can be customized with values that can be identifiable to given
