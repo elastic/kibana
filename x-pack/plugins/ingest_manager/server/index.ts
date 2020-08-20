@@ -25,7 +25,7 @@ export const config = {
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
-      pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
+      pollingRequestTimeout: schema.number({ defaultValue: 300000 }),
       maxConcurrentConnections: schema.number({ defaultValue: 0 }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),

@@ -41,8 +41,9 @@ import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentsUnenrollHandler } from './unenroll_handler';
+import { IngestManagerConfigType } from '../..';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
   // Get one
   router.get(
     {
@@ -81,11 +82,21 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   // Agent checkin
+  const pollingRequestTimeout = config.fleet.pollingRequestTimeout;
   router.post(
     {
       path: AGENT_API_ROUTES.CHECKIN_PATTERN,
       validate: PostAgentCheckinRequestSchema,
-      options: { tags: [] },
+      options: {
+        tags: [],
+        ...(pollingRequestTimeout
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
     },
     postAgentCheckinHandler
   );

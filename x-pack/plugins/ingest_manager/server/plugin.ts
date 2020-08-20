@@ -235,7 +235,7 @@ export class IngestManagerPlugin
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router);
+          registerAgentRoutes(router, config);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
             router,
