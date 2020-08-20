@@ -24,8 +24,9 @@ import { SearchResponse } from 'elasticsearch';
 import { ShardFailureOpenModalButton } from '../../ui';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
+import { SearchRequest } from '..';
 
-export function handleResponse(request: Record<string, any>, response: SearchResponse<any>) {
+export function handleResponse(request: SearchRequest, response: SearchResponse<any>) {
   if (response.timed_out) {
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {

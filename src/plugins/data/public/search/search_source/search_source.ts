@@ -77,7 +77,7 @@ import { SearchResponse } from 'elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric } from '../..';
+import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
 
@@ -103,7 +103,7 @@ export class SearchSource {
     (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
-  public history: Array<Record<string, any>> = [];
+  public history: SearchRequest[] = [];
   private fields: SearchSourceFields;
   private readonly dependencies: SearchSourceDependencies;
 
@@ -204,7 +204,7 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Observable<SearchResponse<unknown>>}
    */
-  private fetch$(searchRequest: Record<string, any>, signal?: AbortSignal) {
+  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
     const { search, injectedMetadata, uiSettings } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -221,7 +221,7 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
-  private async legacyFetch(searchRequest: Record<string, any>, options: FetchOptions) {
+  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
     const { injectedMetadata, legacySearch, uiSettings } = this.dependencies;
     const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
 
@@ -323,7 +323,7 @@ export class SearchSource {
    * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
-    data: Record<string, any>,
+    data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
   ) {
@@ -380,7 +380,7 @@ export class SearchSource {
    * @returns {Promise}
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: Record<string, any> = { body: {} }) {
+  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });

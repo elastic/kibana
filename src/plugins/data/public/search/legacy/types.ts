@@ -19,9 +19,10 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { FetchHandlers } from '../fetch';
+import { SearchRequest } from '..';
 
 export interface SearchStrategySearchParams extends FetchHandlers {
-  searchRequests: Array<Record<string, any>>;
+  searchRequests: SearchRequest[];
 }
 
 // @deprecated

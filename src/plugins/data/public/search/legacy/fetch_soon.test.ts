@@ -21,6 +21,7 @@ import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
 import { IUiSettingsClient } from 'kibana/public';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
+import { SearchRequest } from '../index';
 import { UI_SETTINGS } from '../../../common';
 import { SearchResponse } from 'elasticsearch';
 
@@ -48,7 +49,7 @@ const mockResponses: Record<string, SearchResponse<any>> = {
 jest.useFakeTimers();
 
 jest.mock('./call_client', () => ({
-  callClient: jest.fn((requests: Array<Record<string, any>>) => {
+  callClient: jest.fn((requests: SearchRequest[]) => {
     // Allow a request object to specify which mockResponse it wants to receive (_mockResponseId)
     // in addition to how long to simulate waiting before returning a response (_waitMs)
     const responses = requests.map((request) => {
