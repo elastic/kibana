@@ -6,7 +6,7 @@
 
 import { IEsSearchRequest, ISearchRequestParams } from '../../../../../src/plugins/data/common';
 
-export const ENHANCED_ES_SEARCH_STRATEGY = 'es_enhanced';
+export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
 
 export interface EnhancedSearchParams extends ISearchRequestParams {
   ignoreThrottled: boolean;
