@@ -5,13 +5,10 @@
  */
 
 import _ from 'lodash';
-import { esFilters } from '../../../../src/plugins/data/public';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { CoreStart } from '../../../../src/core/public';
-
-export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 
 let licenseId: string | undefined;
 export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
@@ -45,6 +42,7 @@ export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
+export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
@@ -81,3 +79,5 @@ export const getProxyElasticMapsServiceInMaps = () =>
   getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
+
+export const getShareService = () => pluginsStart.share;
