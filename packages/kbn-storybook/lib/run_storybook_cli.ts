@@ -17,15 +17,15 @@
  * under the License.
  */
 
-const { join } = require('path');
-const storybook = require('@storybook/react/standalone');
-const { run } = require('@kbn/dev-utils');
-const { distDir } = require('@kbn/ui-shared-deps');
-const { ASSET_DIR } = require('./constants');
-const { logger } = require('@storybook/node-logger');
+import { join } from 'path';
+import { logger } from '@storybook/node-logger';
+import buildStandalone from '@storybook/react/standalone';
+import { Flags, run } from '@kbn/dev-utils';
+import { distDir } from '@kbn/ui-shared-deps';
+import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
-function getLogLevelFromFlags(flags) {
+function getLogLevelFromFlags(flags: Flags) {
   if (flags.debug) {
     return 'silly';
   }
@@ -41,24 +41,24 @@ function getLogLevelFromFlags(flags) {
   return 'info';
 }
 
-exports.runStorybookCli = ({ configDir, name }) => {
+export function runStorybookCli({ configDir, name }: { configDir: string; name: string }) {
   run(
     async ({ flags, log }) => {
-      log.debug('Global config:\n', require('./constants'));
+      log.debug('Global config:\n', constants);
 
       const staticDir = [distDir];
-      const config = {
+      const config: Record<string, any> = {
         configDir,
         mode: flags.site ? 'static' : 'dev',
         port: 9001,
         staticDir,
       };
       if (flags.site) {
-        config.outputDir = join(ASSET_DIR, name);
+        config.outputDir = join(constants.ASSET_DIR, name);
       }
 
       logger.setLevel(getLogLevelFromFlags(flags));
-      await storybook(config);
+      await buildStandalone(config);
 
       // Line is only reached when building the static version
       if (flags.site) process.exit();
@@ -72,4 +72,4 @@ exports.runStorybookCli = ({ configDir, name }) => {
       `,
     }
   );
-};
+}

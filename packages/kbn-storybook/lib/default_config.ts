@@ -17,8 +17,12 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const { REPO_ROOT } = require('@kbn/dev-utils');
+import { StorybookConfig } from '@storybook/core/types';
 
-exports.REPO_ROOT = REPO_ROOT;
-exports.ASSET_DIR = resolve(REPO_ROOT, 'built_assets/storybook');
+export const defaultConfig: StorybookConfig = {
+  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
+  stories: ['../**/*.stories.tsx'],
+  typescript: {
+    reactDocgen: false,
+  },
+};

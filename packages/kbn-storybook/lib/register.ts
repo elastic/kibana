@@ -17,7 +17,19 @@
  * under the License.
  */
 
-import { StorybookConfig } from '@storybook/core';
+import { addons } from '@storybook/addons';
+import { create } from '@storybook/theming';
 
-export const defaultConfig: StorybookConfig;
-export function runStorybookCli({ configDir: string, name: string }): void;
+// This configures the "Manager", or main outer view of Storybook. It is an
+// addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Kibana Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/kbn-storybook',
+  }),
+  showPanel: false,
+  isFullscreen: false,
+  panelPosition: 'bottom',
+  isToolshown: true,
+});

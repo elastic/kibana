@@ -17,12 +17,12 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const { stringifyRequest } = require('loader-utils');
-const { Stats } = require('webpack');
-const webpackMerge = require('webpack-merge');
-const { externals } = require('@kbn/ui-shared-deps');
-const { REPO_ROOT } = require('./lib/constants');
+import { resolve } from 'path';
+import { stringifyRequest } from 'loader-utils';
+import { Configuration, Stats } from 'webpack';
+import webpackMerge from 'webpack-merge';
+import { externals } from '@kbn/ui-shared-deps';
+import { REPO_ROOT } from './lib/constants';
 
 const stats = {
   ...Stats.presetToOptions('minimal'),
@@ -34,7 +34,8 @@ const stats = {
 };
 
 // Extend the Storybook Webpack config with some customizations
-module.exports = async ({ config: storybookConfig }) => {
+/* eslint-disable import/no-default-export */
+export default function ({ config: storybookConfig }: { config: Configuration }) {
   const config = {
     devServer: {
       stats,
@@ -65,7 +66,7 @@ module.exports = async ({ config: storybookConfig }) => {
             {
               loader: 'sass-loader',
               options: {
-                prependData(loaderContext) {
+                prependData(loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
                     resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
@@ -93,12 +94,15 @@ module.exports = async ({ config: storybookConfig }) => {
   // This is the hacky part. We find something that looks like the
   // HtmlWebpackPlugin and mutate its `options.template` to point at our
   // revised template.
-  const htmlWebpackPlugin = storybookConfig.plugins.find((plugin) => {
+  const htmlWebpackPlugin: any = (storybookConfig.plugins || []).find((plugin: any) => {
     return plugin.options && typeof plugin.options.template === 'string';
   });
   if (htmlWebpackPlugin) {
-    htmlWebpackPlugin.options.template = require.resolve('./lib/templates/index.ejs');
+    htmlWebpackPlugin.options.template = require.resolve('../lib/templates/index.ejs');
   }
 
+  // @ts-expect-error There's a long error here about the types of the
+  // incompatibility of Configuration, but it looks like it just may be Webpack
+  // type definition related.
   return webpackMerge(storybookConfig, config);
-};
+}

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-exports.defaultConfig = require('./lib/default_config').defaultConfig;
-exports.runStorybookCli = require('./lib/run_storybook_cli').runStorybookCli;
+export { defaultConfig } from './lib/default_config';
+export { runStorybookCli } from './lib/run_storybook_cli';

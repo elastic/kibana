@@ -17,10 +17,8 @@
  * under the License.
  */
 
-exports.defaultConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
-  stories: ['../**/*.stories.tsx'],
-  typescript: {
-    reactDocgen: 'none',
-  },
-};
+import { resolve } from 'path';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/dev-utils';
+
+export const REPO_ROOT = KIBANA_ROOT;
+export const ASSET_DIR = resolve(KIBANA_ROOT, 'built_assets/storybook');
