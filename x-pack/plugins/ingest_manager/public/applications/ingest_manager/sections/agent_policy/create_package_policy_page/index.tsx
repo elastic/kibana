@@ -65,7 +65,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   } = useConfig();
   const {
     params: { policyId, pkgkey },
-  } = useRouteMatch<{ policyId?: string; pkgkey: string }>();
+  } = useRouteMatch<{ policyId: string; pkgkey: string }>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
