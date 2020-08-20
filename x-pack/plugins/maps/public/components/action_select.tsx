@@ -7,8 +7,8 @@
 import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
+import { getApplyFilterLabel } from '../../common/i18n_getters';
 
 export const ADD_FILTER_MAPS_ACTION = 'ADD_FILTER_MAPS_ACTION';
 
@@ -58,10 +58,7 @@ export class ActionSelect extends Component<State, Props> {
         inputDisplay: (
           <div>
             <EuiIcon className="mapActionSelectIcon" type="filter" />
-            <FormattedMessage
-              id="xpack.maps.actionSelect.addFilterLabel"
-              defaultMessage="Apply filter to current view"
-            />
+            {getApplyFilterLabel()}
           </div>
         ),
       },
