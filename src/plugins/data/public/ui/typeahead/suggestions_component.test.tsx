@@ -54,7 +54,7 @@ describe('SuggestionsComponent', () => {
         show={false}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
+        queryBarRect={{} as DOMRect}
       />
     );
 
@@ -70,7 +70,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={[]}
         loadMore={noop}
-        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
+        queryBarRect={{} as DOMRect}
       />
     );
 
@@ -86,7 +86,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
+        queryBarRect={{} as DOMRect}
       />
     );
 
@@ -103,7 +103,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
+        queryBarRect={{} as DOMRect}
       />
     );
 
@@ -120,7 +120,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
+        queryBarRect={{} as DOMRect}
       />
     );
 
@@ -139,7 +139,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarInputDivRef={{} as React.RefObject<HTMLDivElement>}
+        queryBarRect={{} as DOMRect}
       />
     );
 
