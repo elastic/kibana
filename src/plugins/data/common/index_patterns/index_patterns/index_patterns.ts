@@ -25,7 +25,6 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
-import { IndexPatternField } from '../fields';
 import {
   OnNotification,
   OnError,
@@ -84,10 +83,6 @@ export class IndexPatternsService {
       uiSettings,
       onRedirectNoIndexPattern
     );
-  }
-
-  public createField(spec: IndexPatternField['spec'], displayName: string) {
-    return new IndexPatternField(spec, displayName);
   }
 
   private async refreshSavedObjectsCache() {

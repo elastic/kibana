@@ -63,6 +63,7 @@ export const getIndexFields = memoizeOne(
             pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
           ),
           title,
+          getFormatterForField: () => ({ convert: (val: unknown) => val }),
         }
       : { fields: [], title },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
