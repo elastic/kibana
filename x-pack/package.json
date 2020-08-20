@@ -298,7 +298,7 @@
     "json-stable-stringify": "^1.0.1",
     "jsonwebtoken": "^8.5.1",
     "jsts": "^1.6.2",
-    "kea": "^2.0.1",
+    "kea": "2.2.0-rc.2",
     "lodash": "^4.17.15",
     "lz-string": "^1.4.4",
     "mapbox-gl": "^1.10.0",
