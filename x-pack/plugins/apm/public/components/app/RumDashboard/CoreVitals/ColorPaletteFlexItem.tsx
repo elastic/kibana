@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { PaletteLegends } from './PaletteLegends';
+import { AVERAGE_LABEL, GOOD_LABEL, LESS_LABEL, MORE_LABEL, POOR_LABEL } from './translations';
 
 const ColoredSpan = styled.div`
   height: 16px;
@@ -48,11 +49,15 @@ export function ColorPaletteFlexItem({
     >
       <EuiToolTip
         content={i18n.translate(
-          'xpack.apm.csm.dashboard.webVitals.pallette.tooltip',
+          'xpack.apm.csm.dashboard.webVitals.palette.tooltip',
           {
             defaultMessage:
-              '{percentage} % of users have a poor experience because the first input delay takes more than XXms.',
-            values: { percentage },
+              '{percentage} % of users have a {exp} experience because the first input delay takes {moreOrLess} than XXms.',
+            values: {
+              percentage,
+              exp: first ? GOOD_LABEL : last ? POOR_LABEL : AVERAGE_LABEL,
+              moreOrLess: first ? LESS_LABEL : last ? MORE_LABEL
+            },
           }
         )}
       >

@@ -25,3 +25,26 @@ export const FCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
 export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
   defaultMessage: 'Total blocking time',
 });
+
+export const POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
+  defaultMessage: 'poor',
+});
+
+export const GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
+  defaultMessage: 'good',
+});
+
+export const AVERAGE_LABEL = i18n.translate(
+  'xpack.apm.rum.coreVitals.average',
+  {
+    defaultMessage: 'average',
+  }
+);
+
+export const MORE_LABEL = i18n.translate('xpack.apm.rum.coreVitals.more', {
+  defaultMessage: 'more',
+});
+
+export const LESS_LABEL = i18n.translate('xpack.apm.rum.coreVitals.less', {
+  defaultMessage: 'less',
+});
