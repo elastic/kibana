@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import http from 'http';
-import getPort from 'get-port';
 import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -20,28 +19,24 @@ export default function slackTest({ getService }: FtrProviderContext) {
   describe('slack action', () => {
     let simulatedActionId = '';
 
-    let slackSimulatorURL: string = '';
+    const slackSimulatorURL: string = 'http://localhost:9000';
     let slackServer: http.Server;
-    let proxyServer: any;
     let proxyHaveBeenCalled = false;
+
+    const proxyServer = getHttpProxyServer(slackSimulatorURL, () => {
+      proxyHaveBeenCalled = true;
+    });
+    const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
+    proxyServer.listen(Number(proxyUrl.port));
+
     // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
-      let availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      // let availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       if (!slackServer.listening) {
-        slackServer.listen(availablePort);
-      } else {
-        availablePort = await getPort({ port: getPort.makeRange(9100, 9200) });
+        slackServer.listen('9000');
       }
-      slackSimulatorURL = `http://localhost:${availablePort}`;
-
-      proxyServer = getHttpProxyServer(slackSimulatorURL, () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      if (!proxyServer.listening) {
-        proxyServer.listen(Number(proxyUrl.port));
-      }
+      // slackSimulatorURL = `http://localhost:${availablePort}`;
     });
 
     it('should return 200 when creating a slack action successfully', async () => {

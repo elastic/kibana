@@ -5,7 +5,6 @@
  */
 
 import http from 'http';
-import getPort from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
@@ -68,25 +67,22 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   }
 
   describe('webhook action', () => {
-    let webhookSimulatorURL: string = '';
+    const webhookSimulatorURL: string = 'http://localhost:9001';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
-    let proxyServer: any;
     let proxyHaveBeenCalled = false;
+
+    const proxyServer = getHttpProxyServer(webhookSimulatorURL, () => {
+      proxyHaveBeenCalled = true;
+    });
+    const proxyUrl = getProxyUrl(configService.get('kbnTestServer.serverArgs'));
+    proxyServer.listen(Number(proxyUrl.port));
     // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
-      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
-      webhookServer.listen(availablePort);
-      webhookSimulatorURL = `http://localhost:${availablePort}`;
-
-      proxyServer = getHttpProxyServer(webhookSimulatorURL, () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(configService.get('kbnTestServer.serverArgs'));
-      if (!proxyServer.listening) {
-        proxyServer.listen(Number(proxyUrl.port));
-      }
+      // const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      webhookServer.listen('9001');
+      // webhookSimulatorURL = `http://localhost:${availablePort}`;
 
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
