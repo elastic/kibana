@@ -7,14 +7,28 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TransactionLineChart } from './TransactionLineChart';
+import { getMaxY } from '.';
 import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-  getResponseTimeTooltipFormatter,
-} from '.';
-import { getDurationFormatter } from '../../../../utils/formatters';
+  getDurationFormatter,
+  TimeFormatter,
+} from '../../../../utils/formatters';
 import { useAvgDurationByBrowser } from '../../../../hooks/useAvgDurationByBrowser';
+import { Coordinate } from '../../../../../typings/timeseries';
+
+function getResponseTimeTickFormatter(formatter: TimeFormatter) {
+  return (t: number) => formatter(t).formatted;
+}
+
+function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
+  return (p: Coordinate) => {
+    return isValidCoordinateValue(p.y)
+      ? formatter(p.y).formatted
+      : NOT_AVAILABLE_LABEL;
+  };
+}
 
 export function BrowserLineChart() {
   const { data } = useAvgDurationByBrowser();

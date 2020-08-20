@@ -29,12 +29,7 @@ import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import {
-  asDecimal,
-  asDuration,
-  TimeFormatter,
-  tpmUnit,
-} from '../../../../utils/formatters';
+import { asDecimal, asDuration, tpmUnit } from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { BrowserLineChart } from './BrowserLineChart';
@@ -59,21 +54,10 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-export function getResponseTimeTickFormatter(formatter?: TimeFormatter) {
-  return (t: number) => {
-    return formatter ? formatter(t).formatted : asDuration(t);
-  };
-}
+const getResponseTimeTickFormatter = (t: number) => asDuration(t);
 
-export function getResponseTimeTooltipFormatter(formatter?: TimeFormatter) {
-  return (p: Coordinate) => {
-    return isValidCoordinateValue(p.y)
-      ? formatter
-        ? formatter(p.y).formatted
-        : asDuration(p.y)
-      : NOT_AVAILABLE_LABEL;
-  };
-}
+const getResponseTimeTooltipFormatter = (p: Coordinate) =>
+  isValidCoordinateValue(p.y) ? asDuration(p.y) : NOT_AVAILABLE_LABEL;
 
 export function getMaxY(responseTimeSeries: TimeSeries[]) {
   const coordinates = flatten(
@@ -180,8 +164,8 @@ export function TransactionCharts({
               </EuiFlexGroup>
               <TransactionLineChart
                 series={responseTimeSeries}
-                tickFormatY={getResponseTimeTickFormatter()}
-                formatTooltipValue={getResponseTimeTooltipFormatter()}
+                tickFormatY={getResponseTimeTickFormatter}
+                formatTooltipValue={getResponseTimeTooltipFormatter}
               />
             </React.Fragment>
           </EuiPanel>
