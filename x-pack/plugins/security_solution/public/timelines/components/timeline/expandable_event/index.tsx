@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -51,27 +51,43 @@ export const ExpandableEvent = React.memo<Props>(
     toggleColumn,
     onEventToggled,
     onUpdateColumns,
-  }) => (
-    <ExpandableDetails hideExpandButton={true}>
-      <LazyAccordion
-        id={`timeline-${timelineId}-row-${id}`}
-        renderExpandedContent={() => (
-          <StatefulEventDetails
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            data={event}
-            id={id}
-            onEventToggled={onEventToggled}
-            onUpdateColumns={onUpdateColumns}
-            timelineId={timelineId}
-            toggleColumn={toggleColumn}
-          />
-        )}
-        forceExpand={forceExpand}
-        paddingSize="none"
-      />
-    </ExpandableDetails>
-  )
+  }) => {
+    const handleRenderExpandedContent = useCallback(
+      () => (
+        <StatefulEventDetails
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
+          data={event}
+          id={id}
+          onEventToggled={onEventToggled}
+          onUpdateColumns={onUpdateColumns}
+          timelineId={timelineId}
+          toggleColumn={toggleColumn}
+        />
+      ),
+      [
+        browserFields,
+        columnHeaders,
+        event,
+        id,
+        onEventToggled,
+        onUpdateColumns,
+        timelineId,
+        toggleColumn,
+      ]
+    );
+
+    return (
+      <ExpandableDetails hideExpandButton={true}>
+        <LazyAccordion
+          id={`timeline-${timelineId}-row-${id}`}
+          renderExpandedContent={handleRenderExpandedContent}
+          forceExpand={forceExpand}
+          paddingSize="none"
+        />
+      </ExpandableDetails>
+    );
+  }
 );
 
 ExpandableEvent.displayName = 'ExpandableEvent';
