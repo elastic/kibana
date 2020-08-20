@@ -57,3 +57,20 @@ export interface AnomaliesTableRecord {
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];
+
+export interface AnomalyCategorizerStatsDoc {
+  [key: string]: any;
+  job_id: string;
+  result_type: 'categorizer_stats';
+  partition_field_name?: string;
+  partition_field_value?: string;
+  categorized_doc_count: number;
+  total_category_count: number;
+  frequent_category_count: number;
+  rare_category_count: number;
+  dead_category_count: number;
+  failed_category_count: number;
+  categorization_status: 'ok' | 'warn';
+  log_time: number;
+  timestamp: number;
+}

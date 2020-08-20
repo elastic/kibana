@@ -622,6 +622,36 @@ export class JobCreator {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
 
+  private _initPerPartitionCategorization() {
+    if (this._job_config.analysis_config.per_partition_categorization === undefined) {
+      this._job_config.analysis_config.per_partition_categorization = {};
+    }
+    if (this._job_config.analysis_config.per_partition_categorization?.enabled === undefined) {
+      this._job_config.analysis_config.per_partition_categorization!.enabled = false;
+    }
+    if (this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === undefined) {
+      this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = false;
+    }
+  }
+
+  public get perPartitionCategorization() {
+    return this._job_config.analysis_config.per_partition_categorization?.enabled === true;
+  }
+
+  public set perPartitionCategorization(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.enabled = enabled;
+  }
+
+  public get perPartitionStopOnWarn() {
+    return this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === true;
+  }
+
+  public set perPartitionStopOnWarn(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
+  }
+
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {
     this._job_config = job;
     this._datafeed_config = datafeed;

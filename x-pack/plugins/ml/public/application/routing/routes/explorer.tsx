@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,7 @@ import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
+import { JOB_ID } from '../../../../common/constants/anomalies';
 
 export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/explorer',
@@ -70,6 +71,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
+
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -109,9 +112,31 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
+  const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
+    try {
+      const fetchedStoppedPartitions = await ml.results.getCategoryStoppedPartitions(
+        selectedJobIds,
+        JOB_ID
+      );
+      if (
+        fetchedStoppedPartitions &&
+        Array.isArray(fetchedStoppedPartitions.jobs) &&
+        fetchedStoppedPartitions.jobs.length > 0
+      ) {
+        setStoppedPartitions(fetchedStoppedPartitions.jobs);
+      } else {
+        setStoppedPartitions(undefined);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }, []);
+
   useEffect(() => {
     if (jobIds.length > 0) {
       explorerService.updateJobSelection(jobIds);
+      getJobsWithStoppedPartitions(jobIds);
     } else {
       explorerService.clearJobs();
     }
@@ -209,6 +234,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           setSelectedCells,
           showCharts,
           severity: tableSeverity.val,
+          stoppedPartitions,
         }}
       />
     </div>

@@ -68,8 +68,6 @@ export const dragAndDropColumn = ({
     .eq(column)
     .then((header) => drag(header));
 
-  cy.wait(5000); // wait for DOM updates before moving
-
   cy.get(DRAGGABLE_HEADER)
     .eq(newPosition)
     .then((targetPosition) => {
