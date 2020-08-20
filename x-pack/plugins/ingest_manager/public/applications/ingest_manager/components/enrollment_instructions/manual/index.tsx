@@ -44,7 +44,7 @@ systemctl start elastic-agent`;
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent’s directory, run the appropriate commands to enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine. Be sure to run the enrollment steps as a user with Administrator privilege on the system."
+          defaultMessage="From the agent directory, run these commands to enroll and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -83,19 +83,19 @@ systemctl start elastic-agent`;
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <CommandCode>{macOsLinuxTarCommand}</CommandCode>
+      </EuiCodeBlock>
+      <EuiSpacer size="s" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
-          defaultMessage="You will need to run {command} if the agent’s system reboots."
+          defaultMessage="The {command} command runs the agent in the foreground. If the agent's host reboots, you'll need to run the command again."
           values={{
             command: <EuiCode>./elastic-agent run</EuiCode>,
           }}
         />
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-        <CommandCode>{macOsLinuxTarCommand}</CommandCode>
-      </EuiCodeBlock>
     </>
   );
 };

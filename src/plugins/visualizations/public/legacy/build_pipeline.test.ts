@@ -29,6 +29,7 @@ import {
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
 import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
+import { parseExpression } from '../../../expressions/common';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -217,42 +218,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
     });
 
-    describe('handles metric function', () => {
-      it('without buckets', () => {
-        const params = { metric: {} };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-        };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with buckets', () => {
-        const params = { metric: {} };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-          group: [{ accessor: 2 }],
-        };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with percentage mode should have percentage format', () => {
-        const params = { metric: { percentageMode: true } };
-        const schemas = { ...schemasDef };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-    });
-
     describe('handles tagcloud function', () => {
       it('without buckets', () => {
         const actual = buildPipelineVisFunction.tagcloud({}, schemasDef, uiState);
@@ -331,7 +296,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         },
         // @ts-ignore
         type: {
-          toExpression: () => 'testing custom expressions',
+          toExpressionAst: () => parseExpression('test'),
         },
       } as unknown) as Vis;
       const expression = await buildPipeline(vis, {

@@ -3,21 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageInfo, AgentConfig, PackageConfig } from '../types';
+import { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
 
 // Assume packages only ever include 1 config template for now
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
   return packageInfo.config_templates?.[0]?.multiple === false;
 };
 
-export const doesAgentConfigAlreadyIncludePackage = (
-  agentConfig: AgentConfig,
+export const doesAgentPolicyAlreadyIncludePackage = (
+  agentPolicy: AgentPolicy,
   packageName: string
 ): boolean => {
-  if (agentConfig.package_configs.length && typeof agentConfig.package_configs[0] === 'string') {
-    throw new Error('Unable to read full package config information');
+  if (agentPolicy.package_policies.length && typeof agentPolicy.package_policies[0] === 'string') {
+    throw new Error('Unable to read full package policy information');
   }
-  return (agentConfig.package_configs as PackageConfig[])
-    .map((packageConfig) => packageConfig.package?.name || '')
+  return (agentPolicy.package_policies as PackagePolicy[])
+    .map((packagePolicy) => packagePolicy.package?.name || '')
     .includes(packageName);
 };

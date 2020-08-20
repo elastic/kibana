@@ -131,6 +131,7 @@ import { RequestStatistics } from 'src/plugins/inspector/common';
 import { SavedObject } from 'src/core/server';
 import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'src/core/server';
 import { ScrollParams } from 'elasticsearch';
+import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
@@ -418,10 +419,11 @@ export const fieldFormats: {
     TruncateFormat: typeof TruncateFormat;
 };
 
+// Warning: (ae-forgotten-export) The symbol "GetConfigFn" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "FieldFormatsGetConfigFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn = GetConfigFn;
 
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
