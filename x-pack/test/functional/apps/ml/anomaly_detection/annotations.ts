@@ -56,7 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('loads from job list row link', async () => {
+    it('displays error on broken annotation index and recovers after fix', async () => {
+      await ml.testExecution.logTestStep('loads from job list row link');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
@@ -66,43 +67,35 @@ export default function ({ getService }: FtrProviderContext) {
       expect(rows.filter((row) => row.id === JOB_CONFIG.job_id)).to.have.length(1);
 
       await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
-      await ml.common.waitForMlLoadingIndicatorToDisappear();
-    });
+      await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
-    it('pre-fills the job selection', async () => {
+      await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-    });
 
-    it('pre-fills the detector input', async () => {
+      await ml.testExecution.logTestStep('pre-fills the detector input');
       await ml.singleMetricViewer.assertDetectorInputExsist();
       await ml.singleMetricViewer.assertDetectorInputValue('0');
-    });
 
-    it('should display the annotations section showing an error', async () => {
+      await ml.testExecution.logTestStep('should display the annotations section showing an error');
       await ml.singleMetricViewer.assertAnnotationsExists('error');
-    });
 
-    it('should navigate to anomaly explorer', async () => {
+      await ml.testExecution.logTestStep('should navigate to anomaly explorer');
       await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
-    });
 
-    it('should display the annotations section showing an error', async () => {
+      await ml.testExecution.logTestStep('should display the annotations section showing an error');
       await ml.anomalyExplorer.assertAnnotationsPanelExists('error');
-    });
 
-    it('should display the annotations section without an error', async () => {
+      await ml.testExecution.logTestStep('should display the annotations section without an error');
       // restores the aliases to point to the original working annotations index
       // so we can run tests against successfully loaded annotations sections.
       await ml.testResources.restoreAnnotationsIndexState();
       await ml.anomalyExplorer.refreshPage();
       await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
-    });
 
-    it('should navigate to single metric viewer', async () => {
+      await ml.testExecution.logTestStep('should navigate to single metric viewer');
       await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
-    });
 
-    it('should display the annotations section without an error', async () => {
+      await ml.testExecution.logTestStep('should display the annotations section without an error');
       await ml.singleMetricViewer.assertAnnotationsExists('loaded');
     });
   });

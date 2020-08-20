@@ -10,11 +10,19 @@ import get from 'lodash/get';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
+import Boom from 'boom';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
-import { AnomaliesTableRecord, AnomalyRecordDoc } from '../../../common/types/anomalies';
+import {
+  AnomaliesTableRecord,
+  AnomalyCategorizerStatsDoc,
+  AnomalyRecordDoc,
+} from '../../../common/types/anomalies';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
+import { GetStoppedPartitionResult } from '../../../common/types/results';
+import { MlJobsResponse } from '../job_service/jobs';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -432,6 +440,154 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     return definition;
   }
 
+  async function getCategorizerStats(jobId: string, partitionByValue?: string) {
+    const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
+      {
+        match: {
+          result_type: 'categorizer_stats',
+        },
+      },
+    ];
+
+    if (typeof partitionByValue === 'string') {
+      mustMatchClauses.push({
+        match: {
+          partition_by_value: partitionByValue,
+        },
+      });
+    }
+    const results: SearchResponse<AnomalyCategorizerStatsDoc> = await callAsInternalUser('search', {
+      index: ML_RESULTS_INDEX_PATTERN,
+      body: {
+        query: {
+          bool: {
+            must: mustMatchClauses,
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    return results ? results.hits.hits.map((r) => r._source) : [];
+  }
+
+  async function getCategoryStoppedPartitions(
+    jobIds: string[],
+    fieldToBucket: typeof JOB_ID | typeof PARTITION_FIELD_VALUE = PARTITION_FIELD_VALUE
+  ): Promise<GetStoppedPartitionResult> {
+    let finalResults: GetStoppedPartitionResult = {
+      jobs: {},
+    };
+    // first determine from job config if stop_on_warn is true
+    // if false return []
+    const jobConfigResponse: MlJobsResponse = await callAsInternalUser('ml.jobs', {
+      jobId: jobIds,
+    });
+
+    if (!jobConfigResponse || jobConfigResponse.jobs.length < 1) {
+      throw Boom.notFound(`Unable to find anomaly detector jobs ${jobIds.join(', ')}`);
+    }
+
+    const jobIdsWithStopOnWarnSet = jobConfigResponse.jobs
+      .filter(
+        (jobConfig) =>
+          jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true
+      )
+      .map((j) => j.job_id);
+
+    let aggs: any;
+    if (fieldToBucket === JOB_ID) {
+      // if bucketing by job_id, then return list of job_ids with at least one stopped_partitions
+      aggs = {
+        unique_terms: {
+          terms: {
+            field: JOB_ID,
+          },
+        },
+      };
+    } else {
+      // if bucketing by partition field value, then return list of unique stopped_partitions for each job
+      aggs = {
+        jobs: {
+          terms: {
+            field: JOB_ID,
+          },
+          aggs: {
+            unique_stopped_partitions: {
+              terms: {
+                field: PARTITION_FIELD_VALUE,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (jobIdsWithStopOnWarnSet.length > 0) {
+      // search for categorizer_stats documents for the current job where the categorization_status is warn
+      // Return all the partition_field_value values from the documents found
+      const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
+        {
+          match: {
+            result_type: 'categorizer_stats',
+          },
+        },
+        {
+          match: {
+            categorization_status: 'warn',
+          },
+        },
+      ];
+      const results: SearchResponse<any> = await callAsInternalUser('search', {
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              must: mustMatchClauses,
+              filter: [
+                {
+                  terms: {
+                    job_id: jobIdsWithStopOnWarnSet,
+                  },
+                },
+              ],
+            },
+          },
+          aggs,
+        },
+      });
+      if (fieldToBucket === JOB_ID) {
+        finalResults = {
+          jobs: results.aggregations?.unique_terms?.buckets.map(
+            (b: { key: string; doc_count: number }) => b.key
+          ),
+        };
+      } else if (fieldToBucket === PARTITION_FIELD_VALUE) {
+        const jobs: Record<string, string[]> = jobIdsWithStopOnWarnSet.reduce(
+          (obj: Record<string, string[]>, jobId: string) => {
+            obj[jobId] = [];
+            return obj;
+          },
+          {}
+        );
+        results.aggregations.jobs.buckets.forEach(
+          (bucket: { key: string | number; unique_stopped_partitions: { buckets: any[] } }) => {
+            jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key);
+          }
+        );
+        finalResults.jobs = jobs;
+      }
+    }
+
+    return finalResults;
+  }
+
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
@@ -439,5 +595,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
     getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClusterClient),
+    getCategorizerStats,
+    getCategoryStoppedPartitions,
   };
 }
