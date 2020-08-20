@@ -246,7 +246,6 @@ export function systemRoutes(
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        // test comment
         const { index } = request.body;
 
         const options = {

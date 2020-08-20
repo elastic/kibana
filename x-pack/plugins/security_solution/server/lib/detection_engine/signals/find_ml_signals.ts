@@ -27,7 +27,7 @@ export const findMlSignals = async ({
   from: string;
   to: string;
 }) => {
-  const { mlAnomalySearch } = ml.mlSystemProvider(clusterClient, request);
+  const { mlAnomalySearch } = ml.mlSystemProvider(request);
   const params = {
     jobIds: [jobId],
     threshold: anomalyThreshold,

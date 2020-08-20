@@ -15,6 +15,7 @@ import {
   PluginInitializerContext,
   ILegacyCustomClusterClient,
   CapabilitiesStart,
+  IClusterClient,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
@@ -67,6 +68,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private version: string;
   private mlLicense: MlServerLicense;
   private capabilities: CapabilitiesStart | null = null;
+  private clusterClient: IClusterClient | null = null;
+
+  getClusterClient(): IClusterClient {
+    if (this.clusterClient === null) {
+      throw Error('????');
+    }
+    return this.clusterClient;
+  }
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -173,13 +182,20 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
     return {
-      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud, resolveMlCapabilities),
+      ...createSharedServices(
+        this.mlLicense,
+        plugins.spaces,
+        plugins.cloud,
+        resolveMlCapabilities,
+        () => this.getClusterClient()
+      ),
       mlClient,
     };
   }
 
   public start(coreStart: CoreStart): MlPluginStart {
     this.capabilities = coreStart.capabilities;
+    this.clusterClient = coreStart.elasticsearch.client;
   }
 
   public stop() {

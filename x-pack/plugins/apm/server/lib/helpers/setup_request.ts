@@ -118,13 +118,9 @@ function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
   const ml = context.plugins.ml;
   const client = context.core.elasticsearch.client;
   return {
-    mlSystem: ml.mlSystemProvider(client, request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(client, request),
-    modules: ml.modulesProvider(
-      client,
-      request,
-      context.core.savedObjects.client
-    ),
+    mlSystem: ml.mlSystemProvider(request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    modules: ml.modulesProvider(request, context.core.savedObjects.client),
     client,
   };
 }

@@ -4,38 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { jobServiceProvider } from '../../models/job_service';
-import { SharedServicesChecks } from '../shared_services';
+import { GetGuards } from '../shared_services';
 
 type OrigJobServiceProvider = ReturnType<typeof jobServiceProvider>;
 
 export interface JobServiceProvider {
   jobServiceProvider(
-    client: IScopedClusterClient,
     request: KibanaRequest
   ): {
     jobsSummary: OrigJobServiceProvider['jobsSummary'];
   };
 }
 
-export function getJobServiceProvider({
-  isFullLicense,
-  getHasMlCapabilities,
-}: SharedServicesChecks): JobServiceProvider {
+export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider {
   return {
-    jobServiceProvider(client: IScopedClusterClient, request: KibanaRequest) {
-      // const hasMlCapabilities = getHasMlCapabilities(request);
-      const { jobsSummary } = jobServiceProvider(client);
+    jobServiceProvider(request: KibanaRequest) {
       return {
-        async jobsSummary(...args) {
-          isFullLicense();
+        jobsSummary: async (...args) => {
           // Removed while https://github.com/elastic/kibana/issues/64588 exists.
           // SIEM are calling this endpoint with a dummy request object from their alerting
           // integration and currently alerting does not supply a request object.
           // await hasMlCapabilities(['canGetJobs']);
 
-          return jobsSummary(...args);
+          return await getGuards(request)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ scopedClient }) => {
+              const { jobsSummary } = jobServiceProvider(scopedClient);
+              jobsSummary(...args);
+            });
         },
       };
     },

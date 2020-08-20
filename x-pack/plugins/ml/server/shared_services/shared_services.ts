@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, IClusterClient, IScopedClusterClient } from 'kibana/server';
 import { MlServerLicense } from '../lib/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
@@ -18,7 +18,7 @@ import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
-import { ResolveMlCapabilities } from '../../common/types/capabilities';
+import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 
 export type SharedServices = JobServiceProvider &
@@ -27,31 +27,88 @@ export type SharedServices = JobServiceProvider &
   ModulesProvider &
   ResultsServiceProvider;
 
-export interface SharedServicesChecks {
-  isFullLicense(): void;
-  isMinimumLicense(): void;
-  getHasMlCapabilities(request: KibanaRequest): HasMlCapabilities;
+interface Guards {
+  isMinimumLicense(): Guards;
+  isFullLicense(): Guards;
+  hasMlCapabilities: (caps: MlCapabilitiesKey[]) => Guards;
+  ok(callback: OkCallback): any;
 }
+
+export type GetGuards = (request: KibanaRequest) => Guards;
+
+export interface SharedServicesChecks {
+  getGuards(request: KibanaRequest): Guards;
+}
+
+interface OkParams {
+  scopedClient: IScopedClusterClient;
+}
+
+type OkCallback = (okParams: OkParams) => any;
 
 export function createSharedServices(
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup,
-  resolveMlCapabilities: ResolveMlCapabilities
+  resolveMlCapabilities: ResolveMlCapabilities,
+  getClusterClient: () => IClusterClient
 ): SharedServices {
+  const getRequestItems = getRequestItemsProvider(resolveMlCapabilities, getClusterClient);
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
-  const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
-  const checks: SharedServicesChecks = {
-    isFullLicense,
-    isMinimumLicense,
-    getHasMlCapabilities,
-  };
+
+  function getGuards(request: KibanaRequest): Guards {
+    const { hasMlCapabilities, scopedClient } = getRequestItems(request);
+    const asyncGuards: Array<Promise<void>> = [];
+
+    const guards: Guards = {
+      isMinimumLicense: () => {
+        isMinimumLicense();
+        return guards;
+      },
+      isFullLicense: () => {
+        isFullLicense();
+        return guards;
+      },
+      hasMlCapabilities: (caps: MlCapabilitiesKey[]) => {
+        asyncGuards.push(hasMlCapabilities(caps));
+        return guards;
+      },
+      async ok(callback: OkCallback) {
+        await Promise.all(asyncGuards);
+        return callback({ scopedClient });
+      },
+    };
+    return guards;
+  }
 
   return {
-    ...getJobServiceProvider(checks),
-    ...getAnomalyDetectorsProvider(checks),
-    ...getModulesProvider(checks),
-    ...getResultsServiceProvider(checks),
-    ...getMlSystemProvider(checks, mlLicense, spaces, cloud, resolveMlCapabilities),
+    ...getJobServiceProvider(getGuards),
+    ...getAnomalyDetectorsProvider(getGuards),
+    ...getModulesProvider(getGuards),
+    ...getResultsServiceProvider(getGuards),
+    ...getMlSystemProvider(getGuards, mlLicense, spaces, cloud, resolveMlCapabilities),
+  };
+}
+
+function getRequestItemsProvider(
+  resolveMlCapabilities: ResolveMlCapabilities,
+  getClusterClient: () => IClusterClient
+) {
+  return (request: KibanaRequest) => {
+    const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
+    let hasMlCapabilities: HasMlCapabilities;
+    let scopedClient: IScopedClusterClient;
+    if (request.params === 'DummyKibanaRequest') {
+      hasMlCapabilities = () => Promise.resolve();
+      const { asInternalUser } = getClusterClient();
+      scopedClient = {
+        asInternalUser,
+        asCurrentUser: asInternalUser,
+      };
+    } else {
+      hasMlCapabilities = getHasMlCapabilities(request);
+      scopedClient = getClusterClient().asScoped(request);
+    }
+    return { hasMlCapabilities, scopedClient };
   };
 }

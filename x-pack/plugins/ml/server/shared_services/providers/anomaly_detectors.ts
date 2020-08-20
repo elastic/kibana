@@ -4,34 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { SharedServicesChecks } from '../shared_services';
+import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
-    client: IScopedClusterClient,
     request: KibanaRequest
   ): {
     jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
   };
 }
 
-export function getAnomalyDetectorsProvider({
-  isFullLicense,
-  getHasMlCapabilities,
-}: SharedServicesChecks): AnomalyDetectorsProvider {
+export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetectorsProvider {
   return {
-    anomalyDetectorsProvider(client: IScopedClusterClient, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+    anomalyDetectorsProvider(request: KibanaRequest) {
       return {
         async jobs(jobId?: string) {
-          isFullLicense();
-          await hasMlCapabilities(['canGetJobs']);
-          const { body } = await client.asInternalUser.ml.getJobs<{ count: number; jobs: Job[] }>(
-            jobId !== undefined ? { job_id: jobId } : undefined
-          );
-          return body;
+          return await getGuards(request)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ scopedClient }) => {
+              const { body } = await scopedClient.asInternalUser.ml.getJobs<{
+                count: number;
+                jobs: Job[];
+              }>(jobId !== undefined ? { job_id: jobId } : undefined);
+              return body;
+            });
         },
       };
     },
