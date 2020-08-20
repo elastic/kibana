@@ -20,6 +20,7 @@
 package templates
 
 import DefaultRoot
+import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.v2019_2.Template
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
@@ -51,6 +52,7 @@ object DefaultTemplate : Template({
     param("env.GIT_COMMIT", "%build.vcs.number%")
     param("env.branch_specifier", "%vcsroot.branch%")
 
+    password("env.KIBANA_CI_STATS_CONFIG", "", display = ParameterDisplay.HIDDEN)
     password("env.CI_STATS_TOKEN", "credentialsJSON:eead8e13-ba61-429c-9ed6-344de6260381", display = ParameterDisplay.HIDDEN)
     password("env.CI_STATS_HOST", "credentialsJSON:f8462bff-1384-4c37-8ed7-914a6407f568", display = ParameterDisplay.HIDDEN)
   }
@@ -89,5 +91,23 @@ object DefaultTemplate : Template({
     }
 
     placeholder {}
+
+    script {
+      name = "CI Stats Complete - Success"
+      scriptContent = """
+                #!/bin/bash
+                node .ci/teamcity/ci_stats_complete.js SUCCESS
+          """.trimIndent()
+      executionMode = BuildStep.ExecutionMode.RUN_ON_SUCCESS
+    }
+
+    script {
+      name = "CI Stats Complete - Failure"
+      scriptContent = """
+                #!/bin/bash
+                node .ci/teamcity/ci_stats_complete.js FAILURE
+          """.trimIndent()
+      executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
+    }
   }
 })

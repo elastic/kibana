@@ -6,7 +6,7 @@ const ciStats = require('./ci_stats');
       jenkinsJobName: process.env.TEAMCITY_BUILDCONF_NAME,
       jenkinsJobId: process.env.TEAMCITY_BUILD_ID,
       jenkinsUrl: process.env.TEAMCITY_BUILD_URL,
-      prId: null,
+      prId: null, // TODO once we have PR support
     });
 
     const config = {
@@ -17,12 +17,17 @@ const ciStats = require('./ci_stats');
 
     const configJson = JSON.stringify(config);
     process.env.KIBANA_CI_STATS_CONFIG = configJson;
-    console.log(`\n##teamcity[setParameter name='env.KIBANA_CI_STATS_CONFIG' value='${configJson}' display='hidden' password='true']\n`);
+    console.log(`\n##teamcity[setParameter name='env.KIBANA_CI_STATS_CONFIG' display='hidden' password='true' value='${configJson}']\n`);
+    console.log(`\n##teamcity[setParameter name='env.CI_STATS_BUILD_ID' value='${build.id}']\n`);
+
+    await ciStats.post(`v1/git_info?buildId=${build.id}`, {
+      branch: env.GIT_BRANCH.replace(/^(refs\/heads\/|origin\/)/, ''),
+      commit: env.GIT_COMMIT,
+      targetBranch: null, // TODO once we have PR support
+      mergeBase: null, // TODO once we have PR support
+    });
   } catch (ex) {
     console.error(ex);
     process.exit(1);
   }
 })();
-
-// TODO add git info
-// then add end build script
