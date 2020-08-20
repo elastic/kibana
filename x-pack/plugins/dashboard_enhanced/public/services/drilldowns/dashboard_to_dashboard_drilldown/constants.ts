@@ -5,9 +5,9 @@
  */
 
 /**
- * note:
- * don't change this string without carefull consideration,
- * because it is stored in saved objects.
+ * NOTE: DO NOT CHANGE THIS STRING WITHOUT CAREFUL CONSIDERATOIN, BECAUSE IT IS
+ * STORED IN SAVED OBJECTS.
+ *
  * Also temporary dashboard drilldown migration code inside embeddable plugin relies on it
  * x-pack/plugins/embeddable_enhanced/public/embeddables/embeddable_action_storage.ts
  */

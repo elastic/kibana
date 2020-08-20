@@ -7,12 +7,13 @@
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
+import { TriggerId } from 'src/plugins/ui_actions/public';
 import { SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
 import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { Config, FactoryContext } from '../types';
-import { Params } from '../drilldown';
+import { Config } from '../types';
+import { Params } from '../abstract_dashboard_drilldown';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -35,7 +36,7 @@ const dashboardSavedObjectToMenuItem = (
 });
 
 export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
-  params: Params;
+  params: Params<TriggerId>;
 }
 
 interface CollectConfigContainerState {

@@ -4,86 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
 import {
-  DashboardUrlGenerator,
-  DashboardUrlGeneratorState,
-} from '../../../../../../../src/plugins/dashboard/public';
-import { CollectConfigContainer } from './components';
-import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../ui_actions_enhanced/public';
-import { txtGoToDashboard } from './i18n';
+  TriggerContextMapping,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../../src/plugins/ui_actions/public';
+import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
 import {
-  ApplyGlobalFilterActionContext,
   esFilters,
   isFilters,
   isQuery,
   isTimeRange,
 } from '../../../../../../../src/plugins/data/public';
-import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public';
-import { StartDependencies } from '../../../plugin';
-import { Config, FactoryContext } from './types';
+import { Config } from './types';
+import { AbstractDashboardDrilldown, Params } from './abstract_dashboard_drilldown';
+import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 
-export interface Params {
-  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
-  getDashboardUrlGenerator: () => DashboardUrlGenerator;
-}
+type Trigger = typeof APPLY_FILTER_TRIGGER;
+type Context = TriggerContextMapping[Trigger];
 
-export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, typeof APPLY_FILTER_TRIGGER, FactoryContext> {
-  constructor(protected readonly params: Params) {}
-
-  public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
-
-  public readonly order = 100;
-
-  public readonly getDisplayName = () => txtGoToDashboard;
-
-  public readonly euiIcon = 'dashboardApp';
-
-  private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = (props) => (
-    <CollectConfigContainer {...props} params={this.params} />
-  );
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
-
-  public readonly createConfig = () => ({
-    dashboardId: '',
-    useCurrentFilters: true,
-    useCurrentDateRange: true,
-  });
-
-  public readonly isConfigValid = (config: Config): config is Config => {
-    if (!config.dashboardId) return false;
-    return true;
-  };
-
-  public supportedTriggers(): Array<typeof APPLY_FILTER_TRIGGER> {
-    return [APPLY_FILTER_TRIGGER];
+export class DashboardToDashboardDrilldown extends AbstractDashboardDrilldown<Trigger> {
+  constructor(params: Omit<Params<Trigger>, 'triggers'>) {
+    super({ ...params, triggers: [APPLY_FILTER_TRIGGER] as Trigger[] });
   }
 
-  public readonly getHref = async (
-    config: Config,
-    context: ApplyGlobalFilterActionContext
-  ): Promise<string> => {
-    return this.getDestinationUrl(config, context);
-  };
-
-  public readonly execute = async (config: Config, context: ApplyGlobalFilterActionContext) => {
-    const dashboardPath = await this.getDestinationUrl(config, context);
-    const dashboardHash = dashboardPath.split('#')[1];
-
-    await this.params.start().core.application.navigateToApp('dashboards', {
-      path: `#${dashboardHash}`,
-    });
-  };
-
-  private getDestinationUrl = async (
-    config: Config,
-    context: ApplyGlobalFilterActionContext
-  ): Promise<string> => {
+  protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
     const state: DashboardUrlGeneratorState = {
       dashboardId: config.dashboardId,
     };
@@ -119,6 +63,9 @@ export class DashboardToDashboardDrilldown
       state.timeRange = timeRangeFromEvent;
     }
 
-    return this.params.getDashboardUrlGenerator().createUrl(state);
-  };
+    const path = await this.params.getDashboardUrlGenerator().createUrl(state);
+    const url = new KibanaURL(path);
+
+    return url;
+  }
 }

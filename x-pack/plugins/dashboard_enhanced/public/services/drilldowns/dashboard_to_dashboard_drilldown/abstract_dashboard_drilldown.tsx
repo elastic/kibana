@@ -30,12 +30,13 @@ export interface Params<T extends TriggerId> {
   start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
   getDashboardUrlGenerator: () => DashboardUrlGenerator;
   triggers: T[];
-  getURL: (config: Config, context: TriggerContextMapping[T]) => Promise<KibanaURL>;
 }
 
 export abstract class AbstractDashboardDrilldown<T extends TriggerId>
   implements Drilldown<Config, T, BaseActionFactoryContext<T>> {
   constructor(protected readonly params: Params<T>) {}
+
+  protected abstract getURL(config: Config, context: TriggerContextMapping[T]): Promise<KibanaURL>;
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
@@ -62,20 +63,20 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
     return true;
   };
 
-  public supportedTriggers(): T[] {
+  public readonly supportedTriggers = (): T[] => {
     return this.params.triggers;
-  }
+  };
 
   public readonly getHref = async (
     config: Config,
     context: TriggerContextMapping[T]
   ): Promise<string> => {
-    const url = await this.params.getURL(config, context);
+    const url = await this.getURL(config, context);
     return url.path;
   };
 
   public readonly execute = async (config: Config, context: TriggerContextMapping[T]) => {
-    const url = await this.params.getURL(config, context);
+    const url = await this.getURL(config, context);
     await this.params.start().core.application.navigateToApp(url.appName, { path: url.appPath });
   };
 }
