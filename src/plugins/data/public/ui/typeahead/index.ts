@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SuggestionsComponent } from './suggestions_component';
+export { StyledSuggestionsComponent } from './suggestions_component';

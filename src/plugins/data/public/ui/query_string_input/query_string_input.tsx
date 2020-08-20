@@ -42,7 +42,7 @@ import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../k
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
-import { SuggestionsComponent } from '..';
+import { StyledSuggestionsComponent } from '..';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -71,6 +71,7 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
+  queryBarRect: DOMRect | undefined;
 }
 
 const KEY_CODES = {
@@ -94,6 +95,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     selectionStart: null,
     selectionEnd: null,
     indexPatterns: [],
+    queryBarRect: undefined,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -498,6 +500,12 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.fetchIndexPatterns().then(this.updateSuggestions);
 
     window.addEventListener('resize', this.handleAutoHeight);
+    setTimeout(() => {
+      window.addEventListener('scroll', this.handleListUpdate, {
+        passive: true, // for better performance as we won't call preventDefault
+        capture: true, // scroll events don't bubble, they must be captured instead
+      });
+    }, 500);
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -535,12 +543,19 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
+    window.removeEventListener('scroll', this.handleListUpdate);
   }
+
+  handleListUpdate = () =>
+    this.setState({
+      queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
+    });
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
       this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
     }
+    this.handleListUpdate();
   };
 
   handleRemoveHeight = () => {
@@ -637,14 +652,14 @@ export class QueryStringInputUI extends Component<Props, State> {
               </EuiTextArea>
             </div>
             <EuiPortal>
-              <SuggestionsComponent
+              <StyledSuggestionsComponent
                 show={this.state.isSuggestionsVisible}
                 suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
                 index={this.state.index}
                 onClick={this.onClickSuggestion}
                 onMouseEnter={this.onMouseEnterSuggestion}
                 loadMore={this.increaseLimit}
-                queryBarInputDivRef={this.queryBarInputDivRefInstance}
+                queryBarRect={this.state.queryBarRect}
                 className={this.props.className}
               />
             </EuiPortal>

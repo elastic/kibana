@@ -18,11 +18,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { Component, createRef, RefObject } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
+import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import { suggestionsListOffsetBottom, suggestionsListRequiredWidth } from './constants';
 
 interface Props {
   index: number | null;
@@ -31,40 +31,14 @@ interface Props {
   show: boolean;
   suggestions: QuerySuggestion[];
   loadMore: () => void;
-  queryBarInputDivRef: RefObject<HTMLDivElement>;
+  queryBarRect?: DOMRect;
   className?: string;
 }
 
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
-
-  kbnTypeaheadDivRefInstance: RefObject<HTMLDivElement> = createRef();
-
-  updatePosition = () => {
-    const kbnTypeaheadDiv = this.kbnTypeaheadDivRefInstance.current;
-    const queryBarRect = this.props.queryBarInputDivRef.current?.getBoundingClientRect();
-
-    if (queryBarRect && kbnTypeaheadDiv) {
-      const documentHeight = document.documentElement.clientHeight || window.innerHeight;
-      const suggestionsListHeight = kbnTypeaheadDiv.clientHeight;
-
-      // reflects if the suggestions list has enough space below to be opened down
-      const isSuggestionsListFittable =
-        documentHeight -
-          (suggestionsListHeight +
-            queryBarRect.top +
-            queryBarRect.height +
-            suggestionsListOffsetBottom) >
-        0;
-
-      kbnTypeaheadDiv.style.left = `${queryBarRect.left}px`;
-      kbnTypeaheadDiv.style.width = `${queryBarRect.width}px`;
-      kbnTypeaheadDiv.style.top = isSuggestionsListFittable
-        ? `${window.scrollY + queryBarRect.bottom}px`
-        : `${window.scrollY + queryBarRect.top - suggestionsListHeight}px`;
-    }
-  };
+  private suggestionsListRequiredWidth = 600;
 
   public render() {
     if (!this.props.show || isEmpty(this.props.suggestions)) {
@@ -72,12 +46,10 @@ export class SuggestionsComponent extends Component<Props> {
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const queryBarInputDiv = this.props.queryBarInputDivRef.current;
       const isDescriptionFittable = Boolean(
-        queryBarInputDiv &&
-          queryBarInputDiv.getBoundingClientRect().width >= suggestionsListRequiredWidth
+        this.props.queryBarRect &&
+          this.props.queryBarRect.width >= this.suggestionsListRequiredWidth
       );
-
       return (
         <SuggestionComponent
           innerRef={(node) => (this.childNodes[index] = node)}
@@ -93,10 +65,7 @@ export class SuggestionsComponent extends Component<Props> {
     });
 
     return (
-      <div
-        className={classNames('kbnTypeahead', this.props.className)}
-        ref={this.kbnTypeaheadDivRefInstance}
-      >
+      <div className={classNames('kbnTypeahead', this.props.className)}>
         <div className="kbnTypeahead__popover">
           <div
             id="kbnTypeahead__items"
@@ -112,8 +81,6 @@ export class SuggestionsComponent extends Component<Props> {
   }
 
   public componentDidUpdate(prevProps: Props) {
-    this.updatePosition();
-
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
     }
@@ -155,35 +122,16 @@ export class SuggestionsComponent extends Component<Props> {
       this.props.loadMore();
     }
   };
-
-  updateListPositionOnScroll = (event: Event) => {
-    // Close the list when a scroll event happens, but not if the scroll happened in the suggestions list.
-    // This mirrors Firefox's approach of auto-closing `select` elements onscroll.
-    if (
-      this.kbnTypeaheadDivRefInstance.current &&
-      event.target &&
-      this.kbnTypeaheadDivRefInstance.current.contains(event.target as Node) === false
-    ) {
-      this.updatePosition();
-    }
-  };
-
-  componentDidMount() {
-    this.updatePosition();
-    window.addEventListener('resize', this.updatePosition);
-
-    setTimeout(() => {
-      window.addEventListener('scroll', this.updateListPositionOnScroll, {
-        passive: true, // for better performance as we won't call preventDefault
-        capture: true, // scroll events don't bubble, they must be captured instead
-      });
-    }, 500);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.updatePosition);
-    window.removeEventListener('scroll', this.updateListPositionOnScroll, {
-      capture: true,
-    });
-  }
 }
+
+export const StyledSuggestionsComponent = styled(SuggestionsComponent)`
+  ${(props) => {
+    const { queryBarRect } = props;
+
+    return queryBarRect
+      ? `left: ${queryBarRect.left}px;
+      width: ${queryBarRect.width}px;
+      top: ${window.scrollY + queryBarRect.bottom}px;`
+      : '';
+  }}
+`;
