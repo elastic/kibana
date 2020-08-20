@@ -192,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       it('for the kql query: na, table shows an empty list', async () => {
         await testSubjects.setValue('adminSearchBar', 'na');
-        await testSubjects.find('querySubmitButton').click();
+        await (await testSubjects.find('querySubmitButton')).click();
         const expectedData = [
           [
             'Hostname',
@@ -220,7 +220,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'adminSearchBar',
           'Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
-        await testSubjects.find('querySubmitButton').click();
+        await (await testSubjects.find('querySubmitButton')).click();
         const expectedData = [
           [
             'Hostname',
