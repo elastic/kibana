@@ -20,6 +20,7 @@
 import { Plugin, CoreSetup } from 'kibana/public';
 
 import { ThemeService, LegacyColorsService } from './services';
+import { PaletteService } from './services/palettes/service';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<LegacyColorsService, 'init'>;
@@ -37,10 +38,12 @@ export type ChartsPluginStart = ChartsPluginSetup;
 export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart> {
   private readonly themeService = new ThemeService();
   private readonly legacyColorsService = new LegacyColorsService();
+  private readonly paletteService = new PaletteService();
 
   public setup({ uiSettings }: CoreSetup): ChartsPluginSetup {
     this.themeService.init(uiSettings);
     this.legacyColorsService.init(uiSettings);
+    this.paletteService.setup();
 
     return {
       legacyColors: this.legacyColorsService,
