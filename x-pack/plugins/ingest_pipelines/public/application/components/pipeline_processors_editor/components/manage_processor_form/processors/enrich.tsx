@@ -62,9 +62,6 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameFieldLabel', {
       defaultMessage: 'Policy name',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText', {
-      defaultMessage: 'Name of the enrich policy.',
-    }),
     validations: [
       {
         validator: emptyField(
