@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
 import { AppMountContext } from 'kibana/public';
@@ -11,14 +12,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
-import { fetchLogsData, emptyResponse as emptyLogsResponse } from './mock/logs.mock';
-import { fetchMetricsData, emptyResponse as emptyMetricsResponse } from './mock/metrics.mock';
-import { fetchUptimeData, emptyResponse as emptyUptimeResponse } from './mock/uptime.mock';
 import { EuiThemeProvider } from '../../typings';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
+import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
+import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
+import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
+import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -35,7 +36,7 @@ const withCore = makeDecorator({
 
     return (
       <MemoryRouter>
-        <PluginContext.Provider value={{ core: options }}>
+        <PluginContext.Provider value={{ core: options as AppMountContext['core'] }}>
           <EuiThemeProvider>{storyFn(context)}</EuiThemeProvider>
         </PluginContext.Provider>
       </MemoryRouter>
@@ -43,10 +44,10 @@ const withCore = makeDecorator({
   },
 });
 
-const core = {
+const core = ({
   http: {
     basePath: {
-      prepend: (link) => `http://localhost:5601${link}`,
+      prepend: (link: string) => `http://localhost:5601${link}`,
     },
     get: () => Promise.resolve({ data: [] }),
   },
@@ -118,7 +119,7 @@ const core = {
       return euiSettings[key];
     },
   },
-} as AppMountContext['core'];
+} as unknown) as AppMountContext['core'];
 
 const coreWithAlerts = ({
   ...core,
