@@ -62,7 +62,7 @@ const addBasePathMock = (path: string) => (path ? path : 'path');
 
 describe('SolutionsSection', () => {
   test('only renders a spacer if no solutions are available', () => {
-    const component = shallow(<SolutionsSection solutions={[]} />);
+    const component = shallow(<SolutionsSection addBasePath={addBasePathMock} solutions={[]} />);
     expect(component).toMatchSnapshot();
   });
 

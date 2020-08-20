@@ -19,7 +19,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
+import { FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { SolutionTitle } from './solution_title';
 
