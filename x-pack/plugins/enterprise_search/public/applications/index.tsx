@@ -9,7 +9,13 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart, AppMountParameters, HttpSetup, ChromeBreadcrumb } from 'src/core/public';
+import {
+  AppMountParameters,
+  CoreStart,
+  ApplicationStart,
+  HttpSetup,
+  ChromeBreadcrumb,
+} from 'src/core/public';
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
 import { IExternalUrl } from './shared/enterprise_search_url';
@@ -18,6 +24,7 @@ export interface IKibanaContext {
   config: { host?: string };
   externalUrl: IExternalUrl;
   http: HttpSetup;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
 }
@@ -44,6 +51,7 @@ export const renderApp = (
         value={{
           config,
           http: core.http,
+          navigateToUrl: core.application.navigateToUrl,
           externalUrl: data.externalUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,
