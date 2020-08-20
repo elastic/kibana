@@ -6,8 +6,8 @@
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
-  PACKAGE_CONFIG_API_ROUTES,
-  AGENT_CONFIG_API_ROUTES,
+  PACKAGE_POLICY_API_ROUTES,
+  AGENT_POLICY_API_ROUTES,
   DATA_STREAM_API_ROUTES,
   FLEET_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
@@ -48,61 +48,61 @@ export const epmRouteService = {
   },
 };
 
-export const packageConfigRouteService = {
+export const packagePolicyRouteService = {
   getListPath: () => {
-    return PACKAGE_CONFIG_API_ROUTES.LIST_PATTERN;
+    return PACKAGE_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (packageConfigId: string) => {
-    return PACKAGE_CONFIG_API_ROUTES.INFO_PATTERN.replace('{packageConfigId}', packageConfigId);
+  getInfoPath: (packagePolicyId: string) => {
+    return PACKAGE_POLICY_API_ROUTES.INFO_PATTERN.replace('{packagePolicyId}', packagePolicyId);
   },
 
   getCreatePath: () => {
-    return PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN;
+    return PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (packageConfigId: string) => {
-    return PACKAGE_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{packageConfigId}', packageConfigId);
+  getUpdatePath: (packagePolicyId: string) => {
+    return PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN.replace('{packagePolicyId}', packagePolicyId);
   },
 
   getDeletePath: () => {
-    return PACKAGE_CONFIG_API_ROUTES.DELETE_PATTERN;
+    return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
   },
 };
 
-export const agentConfigRouteService = {
+export const agentPolicyRouteService = {
   getListPath: () => {
-    return AGENT_CONFIG_API_ROUTES.LIST_PATTERN;
+    return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getInfoPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
   getCreatePath: () => {
-    return AGENT_CONFIG_API_ROUTES.CREATE_PATTERN;
+    return AGENT_POLICY_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getUpdatePath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.UPDATE_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
-  getCopyPath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.COPY_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getCopyPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.COPY_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
   getDeletePath: () => {
-    return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
+    return AGENT_POLICY_API_ROUTES.DELETE_PATTERN;
   },
 
-  getInfoFullPath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  getInfoFullPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
-  getInfoFullDownloadPath: (agentConfigId: string) => {
-    return AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN.replace(
-      '{agentConfigId}',
-      agentConfigId
+  getInfoFullDownloadPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN.replace(
+      '{agentPolicyId}',
+      agentPolicyId
     );
   },
 };

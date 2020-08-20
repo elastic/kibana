@@ -66,7 +66,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   // Fetch data streams
   const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
 
-  // Some configs retrieved, set up table props
+  // Some policies retrieved, set up table props
   const columns = useMemo(() => {
     const cols: Array<
       EuiTableFieldDataColumnType<DataStream> | EuiTableActionsColumnType<DataStream>
