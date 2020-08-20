@@ -149,7 +149,7 @@ describe('getMonitorStatus', () => {
                   },
                 },
               ],
-              "should": Object {
+              "must": Object {
                 "bool": Object {
                   "minimum_should_match": 1,
                   "should": Array [
@@ -417,7 +417,7 @@ describe('getMonitorStatus', () => {
                   },
                 },
               ],
-              "should": Object {
+              "must": Object {
                 "bool": Object {
                   "filter": Array [
                     Object {
@@ -562,7 +562,7 @@ describe('getMonitorStatus', () => {
                   },
                 },
               ],
-              "should": Object {
+              "must": Object {
                 "bool": Object {
                   "filter": Object {
                     "exists": Object {
