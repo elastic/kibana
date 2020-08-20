@@ -148,7 +148,7 @@ const coreAlertsThrowsError = ({
 
 storiesOf('app/Overview', module)
   .addDecorator(withCore(core))
-  .add('Empty state', () => {
+  .add('Empty State', () => {
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
@@ -172,7 +172,7 @@ storiesOf('app/Overview', module)
 
     return <OverviewPage routeParams={{ query: {} }} />;
   })
-  .add('single panel', () => {
+  .add('Single Panel', () => {
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
@@ -187,7 +187,7 @@ storiesOf('app/Overview', module)
       />
     );
   })
-  .add('logs and metrics', () => {
+  .add('Logs and Metrics', () => {
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
@@ -208,7 +208,7 @@ storiesOf('app/Overview', module)
     );
   })
   .add(
-    'logs, metrics and alerts',
+    'Logs, Metrics, and Alerts',
     () => {
       registerDataHandler({
         appName: 'infra_logs',
@@ -232,7 +232,7 @@ storiesOf('app/Overview', module)
     { core: coreWithAlerts }
   )
   .add(
-    'logs, metrics, APM  and alerts',
+    'Logs, Metrics, APM, and Alerts',
     () => {
       registerDataHandler({
         appName: 'infra_logs',
@@ -260,7 +260,7 @@ storiesOf('app/Overview', module)
     },
     { core: coreWithAlerts }
   )
-  .add('logs, metrics, APM and Uptime', () => {
+  .add('Logs, Metrics, APM, and Uptime', () => {
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
@@ -291,7 +291,7 @@ storiesOf('app/Overview', module)
     );
   })
   .add(
-    'logs, metrics, APM, Uptime and Alerts',
+    'Logs, Metrics, APM, Uptime, and Alerts',
     () => {
       registerDataHandler({
         appName: 'apm',
@@ -325,7 +325,7 @@ storiesOf('app/Overview', module)
     { core: coreWithAlerts }
   )
   .add(
-    'logs, metrics, APM, Uptime and News feed',
+    'Logs, Metrics, APM, Uptime, and News Feed',
     () => {
       registerDataHandler({
         appName: 'apm',
@@ -357,7 +357,7 @@ storiesOf('app/Overview', module)
     },
     { core: coreWithNewsFeed }
   )
-  .add('no data', () => {
+  .add('No Data', () => {
     registerDataHandler({
       appName: 'apm',
       fetchData: async () => emptyAPMResponse,
@@ -388,7 +388,7 @@ storiesOf('app/Overview', module)
     );
   })
   .add(
-    'fetch data with error',
+    'Fetch Data with Error',
     () => {
       registerDataHandler({
         appName: 'apm',
@@ -429,7 +429,7 @@ storiesOf('app/Overview', module)
     { core: coreAlertsThrowsError }
   )
   .add(
-    'hasData with error and alerts',
+    'hasData with Error and Alerts',
     () => {
       registerDataHandler({
         appName: 'apm',
@@ -473,7 +473,7 @@ storiesOf('app/Overview', module)
     },
     { core: coreWithAlerts }
   )
-  .add('hasData with error', () => {
+  .add('hasData with Error', () => {
     registerDataHandler({
       appName: 'apm',
       fetchData: fetchApmData,
