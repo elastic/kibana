@@ -13,9 +13,12 @@ import {
   Series,
   Point,
 } from '../../../../common/http_api/log_alerts';
-import { getGroupedESQuery, getUngroupedESQuery } from './log_threshold_executor';
 import {
-  TimeUnit,
+  getGroupedESQuery,
+  getUngroupedESQuery,
+  buildFiltersFromCriteria,
+} from './log_threshold_executor';
+import {
   UngroupedSearchQueryResponseRT,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
@@ -44,6 +47,8 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
+  const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
+
   const query = isGrouped
     ? getGroupedESQuery(expandedAlertParams, sourceConfiguration.configuration, indexPattern)
     : getUngroupedESQuery(expandedAlertParams, sourceConfiguration.configuration, indexPattern);
@@ -54,8 +59,8 @@ export async function getChartPreviewData(
 
   const expandedQuery = addHistogramAggregationToQuery(
     query,
-    timeSize,
-    timeUnit,
+    rangeFilter,
+    `${timeSize}${timeUnit}`,
     timestampField,
     isGrouped
   );
@@ -72,8 +77,8 @@ export async function getChartPreviewData(
 // Expand the same query that powers the executor with a date histogram aggregation
 const addHistogramAggregationToQuery = (
   query: any,
-  timeSize: number,
-  timeUnit: TimeUnit,
+  rangeFilter: any,
+  interval: string,
   timestampField: string,
   isGrouped: boolean
 ) => {
@@ -81,7 +86,13 @@ const addHistogramAggregationToQuery = (
     histogramBuckets: {
       date_histogram: {
         field: timestampField,
-        fixed_interval: `${timeSize}${timeUnit}`,
+        fixed_interval: interval,
+        // Utilise extended bounds to make sure we get a full set of buckets even if there are empty buckets
+        // at the start and / or end of the range.
+        extended_bounds: {
+          min: rangeFilter.range[timestampField].gte,
+          max: rangeFilter.range[timestampField].lte,
+        },
       },
     },
   };
@@ -170,6 +181,6 @@ const processUngroupedResults = (results: UngroupedSearchQueryResponse): Series 
 const everythingSeriesName = i18n.translate(
   'xpack.infra.logs.alerting.threshold.everythingSeriesName',
   {
-    defaultMessage: 'Everything',
+    defaultMessage: 'Log entries',
   }
 );

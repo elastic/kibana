@@ -145,7 +145,7 @@ const processGroupByResults = (
   });
 };
 
-const buildFiltersFromCriteria = (
+export const buildFiltersFromCriteria = (
   params: Omit<LogDocumentCountAlertParams, 'count'>,
   timestampField: string
 ) => {

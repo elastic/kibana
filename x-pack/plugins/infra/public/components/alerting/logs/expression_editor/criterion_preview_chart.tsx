@@ -41,10 +41,13 @@ import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
+  Series,
 } from '../../../../../common/http_api/log_alerts/';
 import { AlertsContext } from './editor';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+
+const GROUP_LIMIT = 5;
 
 interface Props {
   alertParams: Partial<LogDocumentCountAlertParams>;
@@ -81,7 +84,11 @@ export const CriterionPreview: React.FC<Props> = ({
 
   return (
     <CriterionPreviewChart
-      buckets={NUM_BUCKETS}
+      buckets={
+        !chartAlertParams.groupBy || chartAlertParams.groupBy.length === 0
+          ? NUM_BUCKETS
+          : NUM_BUCKETS / 4
+      } // Display less data for groups due to space limitations
       context={context}
       sourceId={sourceId}
       threshold={alertParams.count}
@@ -131,9 +138,40 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     [getChartPreviewData]
   );
 
-  const isStacked = true;
+  const isStacked = false;
+
+  const { timeSize, timeUnit, groupBy } = chartAlertParams;
+
+  const isGrouped = groupBy && groupBy.length > 0 ? true : false;
+
+  const isAbove =
+    threshold && threshold.comparator
+      ? [Comparator.GT, Comparator.GT_OR_EQ].includes(threshold.comparator)
+      : false;
+
+  const isBelow =
+    threshold && threshold.comparator
+      ? [Comparator.LT, Comparator.LT_OR_EQ].includes(threshold?.comparator)
+      : false;
+
+  // For grouped scenarios we want to limit the groups displayed, for "isAbove" thresholds we'll show
+  // groups with the highest doc counts. And for "isBelow" thresholds we'll show groups with the lowest doc counts.
+  const filteredSeries = useMemo(() => {
+    if (!isGrouped) {
+      return series;
+    }
+
+    const sortedByMax = series.sort((a, b) => {
+      const aMax = Math.max(...a.points.map((point) => point.value));
+      const bMax = Math.max(...b.points.map((point) => point.value));
+      return bMax - aMax;
+    });
+    const sortedSeries = (!isAbove && !isBelow) || isAbove ? sortedByMax : sortedByMax.reverse();
+    return sortedSeries.slice(0, GROUP_LIMIT);
+  }, [series, isGrouped, isAbove, isBelow]);
+
   const barSeries = useMemo(() => {
-    return series.reduce<Array<{ timestamp: number; value: number; groupBy: string }>>(
+    return filteredSeries.reduce<Array<{ timestamp: number; value: number; groupBy: string }>>(
       (acc, serie) => {
         const barPoints = serie.points.reduce<
           Array<{ timestamp: number; value: number; groupBy: string }>
@@ -144,13 +182,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
       },
       []
     );
-  }, [series]);
+  }, [filteredSeries]);
 
-  const { timeSize, timeUnit, groupBy } = chartAlertParams;
-  const isGrouped = groupBy && groupBy.length > 0 ? true : false;
   const lookback = timeSize * buckets;
   const hasData = series.length > 0;
-  const { yMin, yMax, xMin, xMax } = getDomain(series, isStacked);
+  const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries, isStacked);
   const chartDomain = {
     max: threshold && threshold.value ? Math.max(yMax, threshold.value) * 1.1 : yMax * 1.1, // Add 10% headroom.
     min: threshold && threshold.value ? Math.min(yMin, threshold.value) : yMin,
@@ -160,14 +196,6 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
   }
 
-  const isAbove =
-    threshold && threshold.comparator
-      ? [Comparator.GT, Comparator.GT_OR_EQ].includes(threshold.comparator)
-      : false;
-  const isBelow =
-    threshold && threshold.comparator
-      ? [Comparator.LT, Comparator.LT_OR_EQ].includes(threshold?.comparator)
-      : false;
   const opacity = 0.3;
   const groupByLabel = groupBy && groupBy.length > 0 ? groupBy.join(', ') : null;
   const dateFormatter = useDateFormatter(xMin, xMax);
@@ -278,8 +306,14 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel}"
-              values={{ groupByLabel, timeLabel, lookback }}
+              defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
+              values={{
+                groupByLabel,
+                timeLabel,
+                lookback,
+                displayedGroups: filteredSeries.length,
+                totalGroups: series.length,
+              }}
             />
           </EuiText>
         ) : (
