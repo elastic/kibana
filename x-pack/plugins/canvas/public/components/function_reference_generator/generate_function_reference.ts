@@ -6,11 +6,10 @@
 
 // @ts-expect-error untyped lib
 import pluralize from 'pluralize';
-import { AnyExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { ExpressionFunction, ExpressionFunctionParameter } from 'src/plugins/expressions';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';
 import { isValidDataUrl, DATATABLE_COLUMN_TYPES } from '../../../common/lib';
-import { ArgumentType } from '../../../types';
 import { getFunctionExamples, FunctionExample } from './function_examples';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
@@ -33,6 +32,10 @@ const fnList = [
   'var_set',
   // ignore unsupported embeddables functions for now
 ].filter((fn) => !['savedSearch'].includes(fn));
+
+interface FunctionDictionary {
+  [key: string]: ExpressionFunction[];
+}
 
 const wrapInBackTicks = (str: string) => `\`${str}\``;
 const wrapInDoubleQuotes = (str: string) => (str.includes('"') ? str : `"${str}"`);
@@ -65,14 +68,12 @@ const addFunctionLinks = (help: string, options?: { ignoreList?: string[] }) => 
   return help;
 };
 
-export const generateFunctionReference = (
-  functionDefinitions: AnyExpressionFunctionDefinition[]
-) => {
-  const functionDefs = functionDefinitions.filter((fn: AnyExpressionFunctionDefinition) =>
+export const generateFunctionReference = (functionDefinitions: ExpressionFunction[]) => {
+  const functionDefs = functionDefinitions.filter((fn: ExpressionFunction) =>
     fnList.includes(fn.name)
   );
   const functionDictionary: FunctionDictionary = {};
-  functionDefs.forEach((fn: AnyExpressionFunctionDefinition) => {
+  functionDefs.forEach((fn: ExpressionFunction) => {
     const firstLetter = fn.name[0];
 
     if (!functionDictionary[firstLetter]) {
@@ -123,7 +124,7 @@ ${functionDictionary[letter]
     .join('');
 };
 
-const getDocBlock = (fn: AnyExpressionFunctionDefinition) => {
+const getDocBlock = (fn: ExpressionFunction) => {
   const header = `[float]
 [[${fn.name}_fn]]
 === \`${fn.name}\``;
@@ -153,7 +154,7 @@ ${examplesBlock}
 *Returns:* ${output ? wrapInBackTicks(output) : 'Depends on your input and arguments'}\n\n`;
 };
 
-const getArgsTable = (args: { [key: string]: ArgumentType<any> }) => {
+const getArgsTable = (args: { [key: string]: ExpressionFunctionParameter }) => {
   if (!args || Object.keys(args).length === 0) {
     return 'None';
   }

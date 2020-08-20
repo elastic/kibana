@@ -5,18 +5,14 @@
  */
 
 import React, { FC } from 'react';
-import { AnyExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { ExpressionFunction } from 'src/plugins/expressions';
 import { EuiButtonEmpty } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import { notifyService } from '../../services';
 import { generateFunctionReference } from './generate_function_reference';
 
-interface FunctionDictionary {
-  [key: string]: AnyExpressionFunctionDefinition[];
-}
-
 interface Props {
-  functionRegistry: Record<string, AnyExpressionFunctionDefinition>;
+  functionRegistry: Record<string, ExpressionFunction>;
 }
 
 export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {

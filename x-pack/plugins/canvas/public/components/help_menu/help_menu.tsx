@@ -6,6 +6,7 @@
 
 import React, { FC, useState, lazy, Suspense } from 'react';
 import { EuiButtonEmpty, EuiPortal, EuiSpacer } from '@elastic/eui';
+import { ExpressionFunction } from 'src/plugins/expressions';
 import { ComponentStrings } from '../../../i18n';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 
@@ -21,7 +22,7 @@ if (process.env.NODE_ENV === 'development') {
 const { HelpMenu: strings } = ComponentStrings;
 
 interface Props {
-  functionRegistry: Record<string, AnyExpressionFunctionDefinition>;
+  functionRegistry: Record<string, ExpressionFunction>;
 }
 
 export const HelpMenu: FC<Props> = ({ functionRegistry }) => {
