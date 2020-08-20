@@ -20,7 +20,11 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../common/constants';
+import {
+  ENTERPRISE_SEARCH_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+} from '../common/constants';
 import {
   getPublicUrl,
   ExternalUrl,
@@ -55,6 +59,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: APP_SEARCH_PLUGIN.ID,
       title: APP_SEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -74,6 +79,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: WORKPLACE_SEARCH_PLUGIN.ID,
       title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {

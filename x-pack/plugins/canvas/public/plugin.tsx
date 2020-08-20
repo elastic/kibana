@@ -88,7 +88,7 @@ export class CanvasPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'canvas',
       title: 'Canvas',
-      euiIconType: 'canvasApp',
+      euiIconType: 'logoKibana',
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {

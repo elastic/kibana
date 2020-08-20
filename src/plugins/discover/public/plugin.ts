@@ -237,7 +237,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
-      euiIconType: 'discoverApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {

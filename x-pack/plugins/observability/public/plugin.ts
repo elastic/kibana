@@ -28,6 +28,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
       id: 'observability-overview',
       title: 'Overview',
       order: 8000,
+      euiIconType: 'logoObservability',
       appRoute: '/app/observability',
       category: DEFAULT_APP_CATEGORIES.observability,
 

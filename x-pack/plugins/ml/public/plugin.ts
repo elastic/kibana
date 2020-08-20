@@ -29,7 +29,7 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { registerManagementSection } from './application/management';
 import { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import { setDependencyCache } from './application/util/dependency_cache';
-import { PLUGIN_ICON, PLUGIN_ID } from '../common/constants/app';
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
@@ -72,7 +72,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         defaultMessage: 'Machine Learning',
       }),
       order: 5000,
-      euiIconType: PLUGIN_ICON,
+      euiIconType: PLUGIN_ICON_SOLUTION,
       appRoute: '/app/ml',
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appUpdater,

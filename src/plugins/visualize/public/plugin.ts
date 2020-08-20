@@ -142,7 +142,7 @@ export class VisualizePlugin
       id: 'visualize',
       title: 'Visualize',
       order: 8000,
-      euiIconType: 'visualizeApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appStateUpdater.asObservable(),
