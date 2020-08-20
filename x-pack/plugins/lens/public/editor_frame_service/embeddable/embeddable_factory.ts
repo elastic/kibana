@@ -23,7 +23,7 @@ import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from './embeddable';
-import { DOC_TYPE } from '../../persistence';
+import { DOC_TYPE, SavedObjectIndexStore } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { AttributeService, DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 
@@ -48,7 +48,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     getIconForSavedObject: () => 'lensApp',
   };
 
-  attributeService?: AttributeService<
+  private attributeService?: AttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
@@ -85,16 +85,26 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       expressionRenderer,
       uiActions,
       coreHttp,
+      savedObjectsClient,
       indexPatternService,
       dashboard,
     } = await this.getStartServices();
     if (!this.attributeService) {
+      const savedObjectStore = new SavedObjectIndexStore(savedObjectsClient);
       this.attributeService = dashboard!.getAttributeService<
         LensSavedObjectAttributes,
         LensByValueInput,
         LensByReferenceInput
-      >(this.type);
+      >(this.type, async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
+        const savedDoc = await savedObjectStore.save({
+          ...attributes,
+          savedObjectId,
+          type: this.type,
+        });
+        return { id: savedDoc.savedObjectId };
+      });
     }
+
     return new Embeddable(
       {
         attributeService: this.attributeService!,

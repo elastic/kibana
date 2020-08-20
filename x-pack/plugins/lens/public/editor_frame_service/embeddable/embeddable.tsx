@@ -262,7 +262,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
     const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsRefType(input);
+    return this.deps.attributeService.getInputAsRefType(input, this, { showSaveModal: true });
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {

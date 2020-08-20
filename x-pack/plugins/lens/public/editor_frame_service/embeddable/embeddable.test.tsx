@@ -55,7 +55,14 @@ const attributeServiceMockFromSavedVis = (
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
-  >('lens', core.savedObjects.client, core.i18n.Context, core.notifications.toasts);
+  >(
+    'lens',
+    core.savedObjects.client,
+    core.overlays,
+    core.i18n.Context,
+    core.notifications.toasts,
+    jest.fn()
+  );
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({ ...document } as LensSavedObjectAttributes);
   });

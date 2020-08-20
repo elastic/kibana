@@ -151,7 +151,8 @@ export interface DashboardStart {
     V extends EmbeddableInput & { attributes: A },
     R extends SavedObjectEmbeddableInput
   >(
-    type: string
+    type: string,
+    customSaveMethod?: (attributes: A, savedObjectId?: string) => Promise<{ id: string }>
   ) => AttributeService<A, V, R>;
 }
 
@@ -458,14 +459,15 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type: string) =>
+      getAttributeService: (type, customSaveMethod) =>
         new AttributeService(
           type,
           core.savedObjects.client,
           core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory
+          embeddable.getEmbeddableFactory,
+          customSaveMethod
         ),
     };
   }

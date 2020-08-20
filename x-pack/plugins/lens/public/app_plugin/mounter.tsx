@@ -99,7 +99,7 @@ export async function mountApp(
           redirectTo(routeProps, savedObjectId, documentByValue, returnToOrigin, newlyCreated)
         }
         embeddableEditorIncomingState={embeddableEditorIncomingState}
-        getAppNameFromId={stateTransfer.getAppNameFromId}
+        getAppNameFromId={stateTransfer?.getAppNameFromId}
         onAppLeave={params.onAppLeave}
         history={routeProps.history}
       />

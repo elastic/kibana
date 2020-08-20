@@ -25,6 +25,9 @@ import {
   isSavedObjectEmbeddableInput,
   IEmbeddable,
   Container,
+  EmbeddableStart,
+  EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
 } from '../embeddable_plugin';
 import {
   SavedObjectsClientContract,
@@ -40,12 +43,6 @@ import {
   SaveResult,
   checkForDuplicateTitle,
 } from '../../../saved_objects/public';
-import {
-  EmbeddableStart,
-  EmbeddableFactory,
-  EmbeddableFactoryNotFoundError,
-  Container,
-} from '../../../embeddable/public';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -66,7 +63,11 @@ export class AttributeService<
     private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
+    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
+    private customSaveMethod?: (
+      attributes: SavedObjectAttributes,
+      savedObjectId?: string
+    ) => Promise<{ id: string }>
   ) {
     const factory = getEmbeddableFactory(this.type);
     if (!factory) {
@@ -99,10 +100,13 @@ export class AttributeService<
     } else {
       try {
         if (savedObjectId) {
-          await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+          if (this.customSaveMethod) await this.customSaveMethod(newAttributes);
+          else await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
           return { savedObjectId } as RefType;
         } else {
-          const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
+          const savedItem = this.customSaveMethod
+            ? await this.customSaveMethod(newAttributes, savedObjectId)
+            : await this.savedObjectsClient.create(this.type, newAttributes);
           return { savedObjectId: savedItem.id } as RefType;
         }
       } catch (error) {
@@ -147,6 +151,7 @@ export class AttributeService<
 
   getInputAsRefType = async (
     input: ValType | RefType,
+    embeddable: IEmbeddable,
     saveOptions?: { showSaveModal: boolean } | { title: string }
   ): Promise<RefType> => {
     if (this.inputIsRefType(input)) {
@@ -186,7 +191,7 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={input.attributes.title}
+            title={embeddable.getTitle() || input.attributes.title}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}

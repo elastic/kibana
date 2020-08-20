@@ -44,7 +44,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     this.client = client;
   }
 
-  async save(vis: Document) {
+  save = async (vis: Document) => {
     const { savedObjectId, type, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
@@ -55,7 +55,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       : this.client.create(DOC_TYPE, attributes));
 
     return { ...vis, savedObjectId: result.id };
-  }
+  };
 
   // As Lens is using an object to store its attributes, using the update API
   // will merge the new attribute object with the old one, not overwriting deleted
