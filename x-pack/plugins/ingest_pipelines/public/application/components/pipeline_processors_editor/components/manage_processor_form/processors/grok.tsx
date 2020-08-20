@@ -112,7 +112,7 @@ export const Grok: FunctionComponent = () => {
           editorProps: {
             height: 200,
             'aria-label': i18n.translate(
-              'xpack.ingestPipelines.pipelineEditor.grokForm.patternDefintionsAriaLabel',
+              'xpack.ingestPipelines.pipelineEditor.grokForm.patternDefinitionsAriaLabel',
               {
                 defaultMessage: 'Pattern definitions editor',
               }
