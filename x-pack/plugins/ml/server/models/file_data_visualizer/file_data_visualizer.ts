@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import {
   AnalysisResult,
   FormattedOverrides,
   InputOverrides,
+  FindFileStructureResponse,
 } from '../../../common/types/file_datavisualizer';
 
 export type InputData = any[];
 
-export function fileDataVisualizerProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
+export function fileDataVisualizerProvider({ asInternalUser }: IScopedClusterClient) {
   async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
-    const results = await callAsInternalUser('ml.fileStructure', {
+    const { body } = await asInternalUser.ml.findFileStructure<FindFileStructureResponse>({
       body: data,
       ...overrides,
     });
@@ -24,7 +25,7 @@ export function fileDataVisualizerProvider({ callAsInternalUser }: ILegacyScoped
 
     return {
       ...(hasOverrides && { overrides: reducedOverrides }),
-      results,
+      results: body,
     };
   }
 

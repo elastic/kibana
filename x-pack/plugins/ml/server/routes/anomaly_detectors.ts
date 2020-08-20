@@ -286,7 +286,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
           options.force = force;
         }
         const { body } = await client.asInternalUser.ml.closeJob(options);
-        // const results = await legacyClient.callAsInternalUser('ml.closeJob', options);
         return response.ok({
           body,
         });
