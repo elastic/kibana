@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import querystring from 'querystring';
+
 import { Subscription, Observable } from 'rxjs';
 import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
 import {
@@ -43,6 +45,7 @@ import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
 import { CheckPrivilegesWithRequest } from './types';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { canRedirectRequest } from '../authentication';
 import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';
@@ -153,6 +156,16 @@ export class AuthorizationService {
 
     initAPIAuthorization(http, authz, loggers.get('api-authorization'));
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
+
+    http.registerOnPreResponse((request, preResponse, toolkit) => {
+      if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
+        const next = `${http.basePath.get(request)}${request.url.path}`;
+        return toolkit.redirect(
+          http.basePath.prepend(`/security/reset_session?${querystring.stringify({ next })}`)
+        );
+      }
+      return toolkit.next();
+    });
 
     return authz;
   }

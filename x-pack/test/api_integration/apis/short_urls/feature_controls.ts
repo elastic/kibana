@@ -156,8 +156,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
               expect(resp.status).to.eql(302);
               expect(resp.headers.location).to.eql('/app/kibana#foo/bar/baz');
             } else {
-              expect(resp.status).to.eql(403);
-              expect(resp.headers.location).to.eql(undefined);
+              expect(resp.status).to.eql(302);
+              expect(resp.headers.location).to.eql(
+                `/security/reset_session?next=%2Fgoto%2F${urlId}`
+              );
             }
           });
       });

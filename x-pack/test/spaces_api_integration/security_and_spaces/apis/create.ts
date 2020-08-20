@@ -56,15 +56,15 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         user: scenario.users.noAccess,
         tests: {
           newSpace: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           alreadyExists: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
         },
@@ -132,15 +132,15 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           newSpace: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           alreadyExists: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
         },
@@ -151,15 +151,15 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         user: scenario.users.readGlobally,
         tests: {
           newSpace: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           alreadyExists: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
         },
@@ -170,15 +170,15 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         user: scenario.users.dualRead,
         tests: {
           newSpace: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           alreadyExists: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
         },
@@ -189,15 +189,15 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         user: scenario.users.allAtSpace,
         tests: {
           newSpace: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           alreadyExists: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
           reservedSpecified: {
-            statusCode: 403,
+            statusCode: 302,
             response: expectRbacForbiddenResponse,
           },
         },

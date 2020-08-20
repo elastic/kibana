@@ -118,11 +118,9 @@ export const expectResponses = {
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const uniqueSorted = uniq(types).sort();
-    expect(response.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to ${action} ${uniqueSorted.join()}`,
-    });
+    expect(response.statusCode).to.eql(302);
+    expect(response.headers.location).to.match(new RegExp('^/security/reset_session\\?next='));
+    expect(response.body).to.eql({});
   },
   forbiddenSpaces: (response: Record<string, any>) => {
     expect(response.body).to.eql({

@@ -24,7 +24,13 @@ import { Logger } from '../../logging';
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
 
 enum ResultType {
+  redirect = 'redirect',
   next = 'next',
+}
+
+interface Redirect {
+  type: ResultType.redirect;
+  uri?: string | undefined;
 }
 
 interface Next {
@@ -35,7 +41,7 @@ interface Next {
 /**
  * @internal
  */
-type OnPreResponseResult = Next;
+type OnPreResponseResult = Redirect | Next;
 
 /**
  * Additional data to extend a response.
@@ -55,6 +61,12 @@ export interface OnPreResponseInfo {
 }
 
 const preResponseResult = {
+  redirect(uri?: string | undefined): OnPreResponseResult {
+    return { type: ResultType.redirect, uri };
+  },
+  isRedirect(result: OnPreResponseResult): result is Redirect {
+    return result && result.type === ResultType.redirect;
+  },
   next(responseExtensions?: OnPreResponseExtensions): OnPreResponseResult {
     return { type: ResultType.next, headers: responseExtensions?.headers };
   },
@@ -68,11 +80,13 @@ const preResponseResult = {
  * @public
  */
 export interface OnPreResponseToolkit {
+  redirect: (uri?: string | undefined) => OnPreResponseResult;
   /** To pass request to the next handler */
   next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
 }
 
 const toolkit: OnPreResponseToolkit = {
+  redirect: preResponseResult.redirect,
   next: preResponseResult.next,
 };
 
@@ -106,25 +120,29 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           : response.statusCode;
 
         const result = await fn(KibanaRequest.from(request), { statusCode }, toolkit);
-        if (!preResponseResult.isNext(result)) {
+
+        if (preResponseResult.isNext(result)) {
+          if (result.headers) {
+            if (isBoom(response)) {
+              findHeadersIntersection(response.output.headers, result.headers, log);
+              // hapi wraps all error response in Boom object internally
+              response.output.headers = {
+                ...response.output.headers,
+                ...(result.headers as any), // hapi types don't specify string[] as valid value
+              };
+            } else {
+              findHeadersIntersection(response.headers, result.headers, log);
+              for (const [headerName, headerValue] of Object.entries(result.headers)) {
+                response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
+              }
+            }
+          }
+        } else if (preResponseResult.isRedirect(result)) {
+          return responseToolkit.redirect(result.uri);
+        } else {
           throw new Error(
             `Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: ${result}.`
           );
-        }
-        if (result.headers) {
-          if (isBoom(response)) {
-            findHeadersIntersection(response.output.headers, result.headers, log);
-            // hapi wraps all error response in Boom object internally
-            response.output.headers = {
-              ...response.output.headers,
-              ...(result.headers as any), // hapi types don't specify string[] as valid value
-            };
-          } else {
-            findHeadersIntersection(response.headers, result.headers, log);
-            for (const [headerName, headerValue] of Object.entries(result.headers)) {
-              response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
-            }
-          }
         }
       }
     } catch (error) {

@@ -198,6 +198,7 @@ const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
 });
 
 const createOnPreResponseToolkitMock = (): jest.Mocked<OnPreResponseToolkit> => ({
+  redirect: jest.fn(),
   next: jest.fn(),
 });
 

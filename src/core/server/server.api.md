@@ -1423,6 +1423,8 @@ export interface OnPreResponseInfo {
 // @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+    // (undocumented)
+    redirect: (uri?: string | undefined) => OnPreResponseResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "OnPreRoutingResult" needs to be exported by the entry point index.d.ts

@@ -25,6 +25,7 @@ describe('View routes', () => {
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
+        "/security/reset_session",
         "/internal/security/capture-url",
       ]
     `);
