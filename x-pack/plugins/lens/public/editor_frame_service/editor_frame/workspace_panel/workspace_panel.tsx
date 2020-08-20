@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiImage,
   EuiText,
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
@@ -192,10 +191,6 @@ export function InnerWorkspacePanel({
   }
 
   function renderEmptyWorkspace() {
-    const tooltipContent = i18n.translate('xpack.lens.editorFrame.tooltipContent', {
-      defaultMessage:
-        'Lens is in beta and is subject to change.  The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
-    });
     return (
       <div className="eui-textCenter">
         <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
@@ -214,8 +209,7 @@ export function InnerWorkspacePanel({
             <FormattedMessage
               id="xpack.lens.editorFrame.emptyWorkspaceHeading"
               defaultMessage="Lens is a new tool for creating visualizations"
-            />{' '}
-            <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
+            />
           </p>
           <p>
             <small>
