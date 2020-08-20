@@ -54,8 +54,6 @@ export interface EmbeddableInput {
    * Whether this embeddable should not execute triggers.
    */
   disableTriggers?: boolean;
-
-  [key: string]: unknown;
 }
 
 export interface EmbeddableOutput {
