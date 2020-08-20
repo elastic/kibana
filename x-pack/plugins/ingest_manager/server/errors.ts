@@ -6,7 +6,12 @@
 
 /* eslint-disable max-classes-per-file */
 import Boom from 'boom';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import {
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'src/core/server';
 import { appContextService } from './services';
 
 export class IngestManagerError extends Error {
@@ -27,7 +32,7 @@ export const getHTTPResponseCode = (error: IngestManagerError): number => {
   return 400; // Bad Request
 };
 
-interface IngestErrorHandler {
+interface IngestErrorHandlerParams {
   error: IngestManagerError | Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
@@ -39,7 +44,7 @@ export const defaultIngestErrorHandler = async ({
   request,
   response,
   context,
-}: IngestErrorHandler) => {
+}: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
   const logger = appContextService.getLogger();
   if (error instanceof IngestManagerError) {
     logger.error(error.message);
