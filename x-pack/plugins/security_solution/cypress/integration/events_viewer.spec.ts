@@ -10,6 +10,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
 } from '../screens/fields_browser';
 import {
+  EVENTS_PAGE,
   HEADER_SUBTITLE,
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
@@ -153,7 +154,7 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
@@ -171,6 +172,7 @@ describe('Events Viewer', () => {
       const expectedOrderAfterDragAndDrop =
         'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
+      cy.get(EVENTS_PAGE).scrollTo('bottom');
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
       dragAndDropColumn({ column: 0, newPosition: 1 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);

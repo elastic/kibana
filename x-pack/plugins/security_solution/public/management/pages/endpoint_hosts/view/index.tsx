@@ -14,6 +14,8 @@ import {
   EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
+  EuiSuperDatePicker,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -31,12 +33,13 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import {
-  CreatePackageConfigRouteState,
-  AgentConfigDetailsDeployAgentAction,
+  CreatePackagePolicyRouteState,
+  AgentPolicyDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
@@ -84,6 +87,8 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     endpointsExist,
+    autoRefreshInterval,
+    isAutoRefreshEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -115,7 +120,7 @@ export const EndpointList = () => {
     [history, queryParams]
   );
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'ingestManager',
     {
       path: `#/integrations${
@@ -135,10 +140,31 @@ export const EndpointList = () => {
     }
   );
 
+  const onRefresh = useCallback(() => {
+    dispatch({
+      type: 'appRequestedEndpointList',
+    });
+  }, [dispatch]);
+
+  const onRefreshChange = useCallback(
+    (evt) => {
+      dispatch({
+        type: 'userUpdatedEndpointListRefreshOptions',
+        payload: {
+          isAutoRefreshEnabled: !evt.isPaused,
+          autoRefreshInterval: evt.refreshInterval,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const NOOP = useCallback(() => {}, []);
+
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<
-    AgentConfigDetailsDeployAgentAction
+    AgentPolicyDetailsDeployAgentAction
   >('ingestManager', {
-    path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
+    path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
       onDoneNavigateTo: [
         'securitySolution:administration',
@@ -150,9 +176,9 @@ export const EndpointList = () => {
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
       return {
-        key: item.config_id,
+        key: item.policy_id,
         label: item.name,
-        checked: selectedPolicyId === item.config_id ? 'on' : undefined,
+        checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
       };
     });
   }, [policyItems, selectedPolicyId]);
@@ -368,6 +394,20 @@ export const EndpointList = () => {
     handleCreatePolicyClick,
   ]);
 
+  const hasListData = listData && listData.length > 0;
+
+  const refreshStyle = useMemo(() => {
+    return { display: hasListData ? 'flex' : 'none', maxWidth: 200 };
+  }, [hasListData]);
+
+  const refreshIsPaused = useMemo(() => {
+    return !hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
+  }, [hasListData, hasSelectedEndpoint, isAutoRefreshEnabled]);
+
+  const refreshInterval = useMemo(() => {
+    return !hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
+  }, [hasListData, autoRefreshInterval]);
+
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
@@ -386,7 +426,23 @@ export const EndpointList = () => {
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {listData && listData.length > 0 && (
+      {
+        <>
+          <div style={refreshStyle}>
+            <EuiSuperDatePicker
+              onTimeChange={NOOP}
+              isDisabled={hasSelectedEndpoint}
+              onRefresh={onRefresh}
+              isPaused={refreshIsPaused}
+              refreshInterval={refreshInterval}
+              onRefreshChange={onRefreshChange}
+              isAutoRefreshOnly={true}
+            />
+          </div>
+          <EuiSpacer size="m" />
+        </>
+      }
+      {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage
