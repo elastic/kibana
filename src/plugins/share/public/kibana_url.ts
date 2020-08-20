@@ -17,29 +17,28 @@
  * under the License.
  */
 
-export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
+// TODO: Replace this logic with KibanaURL once it is available.
+// https://github.com/elastic/kibana/issues/64497
+export class KibanaURL {
+  public readonly path: string;
+  public readonly appName: string;
+  public readonly appPath: string;
 
-export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+  constructor(path: string) {
+    const match = path.match(/^.*\/app\/([^\/#]+)(.+)$/);
 
-export { SharePluginSetup, SharePluginStart } from './plugin';
-export {
-  ShareContext,
-  ShareMenuProvider,
-  ShareMenuItem,
-  ShowShareMenuOptions,
-  ShareContextMenuPanelItem,
-} from './types';
+    if (!match) {
+      throw new Error('Unexpected Discover URL path.');
+    }
 
-export {
-  UrlGeneratorId,
-  UrlGeneratorState,
-  UrlGeneratorsDefinition,
-  UrlGeneratorContract,
-  UrlGeneratorsService,
-} from './url_generators';
+    const [, appName, appPath] = match;
 
-import { SharePlugin } from './plugin';
+    if (!appName || !appPath) {
+      throw new Error('Could not parse Discover URL path.');
+    }
 
-export { KibanaURL } from './kibana_url';
-
-export const plugin = () => new SharePlugin();
+    this.path = path;
+    this.appName = appName;
+    this.appPath = appPath;
+  }
+}
