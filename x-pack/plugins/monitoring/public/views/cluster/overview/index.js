@@ -25,6 +25,7 @@ uiRoutes.when('/overview', {
       return routeInit({ codePaths: CODE_PATHS });
     },
   },
+  controllerAs: 'monitoringClusterOverview',
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const monitoringClusters = $injector.get('monitoringClusters');
@@ -51,6 +52,8 @@ uiRoutes.when('/overview', {
           shouldFetch: true,
         },
       });
+
+      this.init = () => this.renderReact(null);
 
       $scope.$watch(
         () => this.data,
