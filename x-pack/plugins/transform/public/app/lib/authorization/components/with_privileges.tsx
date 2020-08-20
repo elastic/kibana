@@ -10,7 +10,7 @@ import { EuiPageContent } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { MissingPrivileges } from '../../../../../common';
+import { MissingPrivileges } from '../../../../../common/types/privileges';
 
 import { SectionLoading } from '../../../components';
 

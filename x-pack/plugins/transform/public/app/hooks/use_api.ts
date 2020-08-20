@@ -9,11 +9,18 @@ import { useMemo } from 'react';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
 import {
-  TransformId,
-  TransformEndpointRequest,
-  TransformEndpointResult,
-  DeleteTransformEndpointResult,
-} from '../../../common';
+  DeleteTransformsRequestSchema,
+  DeleteTransformsResponseSchema,
+} from '../../../common/api_schemas/delete_transforms';
+import {
+  StartTransformsRequestSchema,
+  StartTransformsResponseSchema,
+} from '../../../common/api_schemas/start_transforms';
+import {
+  StopTransformsRequestSchema,
+  StopTransformsResponseSchema,
+} from '../../../common/api_schemas/stop_transforms';
+import { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -57,18 +64,10 @@ export const useApi = () => {
         });
       },
       deleteTransforms(
-        transformsInfo: TransformEndpointRequest[],
-        deleteDestIndex: boolean | undefined,
-        deleteDestIndexPattern: boolean | undefined,
-        forceDelete: boolean
-      ): Promise<DeleteTransformEndpointResult> {
+        reqBody: DeleteTransformsRequestSchema
+      ): Promise<DeleteTransformsResponseSchema> {
         return http.post(`${API_BASE_PATH}delete_transforms`, {
-          body: JSON.stringify({
-            transformsInfo,
-            deleteDestIndex,
-            deleteDestIndexPattern,
-            forceDelete,
-          }),
+          body: JSON.stringify(reqBody),
         });
       },
       getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
@@ -77,13 +76,15 @@ export const useApi = () => {
         });
       },
       startTransforms(
-        transformsInfo: TransformEndpointRequest[]
-      ): Promise<TransformEndpointResult> {
+        reqBody: StartTransformsRequestSchema
+      ): Promise<StartTransformsResponseSchema> {
         return http.post(`${API_BASE_PATH}start_transforms`, {
-          body: JSON.stringify(transformsInfo),
+          body: JSON.stringify(reqBody),
         });
       },
-      stopTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {
+      stopTransforms(
+        transformsInfo: StopTransformsRequestSchema
+      ): Promise<StopTransformsResponseSchema> {
         return http.post(`${API_BASE_PATH}stop_transforms`, {
           body: JSON.stringify(transformsInfo),
         });

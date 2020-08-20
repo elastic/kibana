@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import mockTransformListRow from '../../../../common/__mocks__/transform_list_row.json';
 

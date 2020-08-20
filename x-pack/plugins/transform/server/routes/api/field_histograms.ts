@@ -11,13 +11,17 @@
 
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
+import {
+  indexPatternTitleSchema,
+  IndexPatternTitleSchema,
+} from '../../../common/api_schemas/common';
+import { fieldHistogramsSchema } from '../../../common/api_schemas/field_histograms';
 import { getHistogramsForFields } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
 import { wrapError } from './error_utils';
-import { fieldHistogramsSchema, indexPatternTitleSchema, IndexPatternTitleSchema } from './schema';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
   router.post(

@@ -7,7 +7,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common';
+import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 import {
   TransformPivotConfig,
   TransformStats,
@@ -96,12 +96,12 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       return statsResponse.transforms[0];
     },
 
-    async getTransformState(transformId: string): Promise<TRANSFORM_STATE> {
+    async getTransformState(transformId: string): Promise<TransformState> {
       const stats = await this.getTransformStats(transformId);
       return stats.state;
     },
 
-    async waitForTransformState(transformId: string, expectedState: TRANSFORM_STATE) {
+    async waitForTransformState(transformId: string, expectedState: TransformState) {
       await retry.waitForWithTimeout(
         `transform state to be ${expectedState}`,
         2 * 60 * 1000,

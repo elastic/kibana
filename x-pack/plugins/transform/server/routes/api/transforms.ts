@@ -14,22 +14,34 @@ import {
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
+import { TRANSFORM_STATE } from '../../../common/constants';
+import { TransformId } from '../../../common/types/transform';
 import {
-  TransformEndpointRequest,
-  TransformEndpointResult,
-  TransformId,
-  TRANSFORM_STATE,
-  DeleteTransformEndpointRequest,
-  DeleteTransformStatus,
-  ResultData,
-} from '../../../common';
+  transformIdParamSchema,
+  ResponseStatus,
+  TransformIdParamSchema,
+} from '../../../common/api_schemas/common';
+import {
+  deleteTransformsRequestSchema,
+  DeleteTransformsRequestSchema,
+  DeleteTransformsResponseSchema,
+} from '../../../common/api_schemas/delete_transforms';
+import {
+  startTransformsRequestSchema,
+  StartTransformsRequestSchema,
+  StartTransformsResponseSchema,
+} from '../../../common/api_schemas/start_transforms';
+import {
+  stopTransformsRequestSchema,
+  StopTransformsRequestSchema,
+  StopTransformsResponseSchema,
+} from '../../../common/api_schemas/stop_transforms';
 
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError } from './error_utils';
-import { deleteTransformSchema, schemaTransformId, SchemaTransformId } from './schema';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
@@ -65,10 +77,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: addBasePath('transforms/{transformId}'),
-      validate: schemaTransformId,
+      validate: { params: transformIdParamSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+      const { transformId } = req.params as TransformIdParamSchema;
       const options = {
         ...(transformId !== undefined ? { transformId } : {}),
       };
@@ -101,10 +113,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: addBasePath('transforms/{transformId}/_stats'),
-      validate: schemaTransformId,
+      validate: { params: transformIdParamSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+      const { transformId } = req.params as TransformIdParamSchema;
       const options = {
         ...(transformId !== undefined ? { transformId } : {}),
       };
@@ -124,12 +136,12 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     {
       path: addBasePath('transforms/{transformId}'),
       validate: {
-        ...schemaTransformId,
+        params: transformIdParamSchema,
         body: schema.maybe(schema.any()),
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+      const { transformId } = req.params as TransformIdParamSchema;
 
       const response: {
         transformsCreated: Array<{ transform: string }>;
@@ -159,12 +171,12 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     {
       path: addBasePath('transforms/{transformId}/_update'),
       validate: {
-        ...schemaTransformId,
+        params: transformIdParamSchema,
         body: schema.maybe(schema.any()),
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+      const { transformId } = req.params as TransformIdParamSchema;
 
       try {
         return res.ok({
@@ -182,23 +194,13 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     {
       path: addBasePath('delete_transforms'),
       validate: {
-        body: deleteTransformSchema,
+        body: deleteTransformsRequestSchema,
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const {
-        transformsInfo,
-        deleteDestIndex,
-        deleteDestIndexPattern,
-        forceDelete,
-      } = req.body as DeleteTransformEndpointRequest;
-
       try {
         const body = await deleteTransforms(
-          transformsInfo,
-          deleteDestIndex,
-          deleteDestIndexPattern,
-          forceDelete,
+          req.body as DeleteTransformsRequestSchema,
           ctx,
           license,
           res
@@ -234,7 +236,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     {
       path: addBasePath('start_transforms'),
       validate: {
-        body: schema.maybe(schema.any()),
+        body: startTransformsRequestSchema,
       },
     },
     license.guardApiRoute(startTransformsHandler)
@@ -243,7 +245,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     {
       path: addBasePath('stop_transforms'),
       validate: {
-        body: schema.maybe(schema.any()),
+        body: stopTransformsRequestSchema,
       },
     },
     license.guardApiRoute(stopTransformsHandler)
@@ -294,22 +296,26 @@ async function deleteDestIndexPatternById(
 }
 
 async function deleteTransforms(
-  transformsInfo: TransformEndpointRequest[],
-  deleteDestIndex: boolean | undefined,
-  deleteDestIndexPattern: boolean | undefined,
-  shouldForceDelete: boolean = false,
+  reqBody: DeleteTransformsRequestSchema,
   ctx: RequestHandlerContext,
   license: RouteDependencies['license'],
   response: KibanaResponseFactory
 ) {
-  const results: Record<string, DeleteTransformStatus> = {};
+  const {
+    transformsInfo,
+    deleteDestIndex,
+    deleteDestIndexPattern,
+    forceDelete: shouldForceDelete,
+  } = reqBody;
+
+  const results: DeleteTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     let destinationIndex: string | undefined;
 
-    const transformDeleted: ResultData = { success: false };
-    const destIndexDeleted: ResultData = { success: false };
-    const destIndexPatternDeleted: ResultData = {
+    const transformDeleted: ResponseStatus = { success: false };
+    const destIndexDeleted: ResponseStatus = { success: false };
+    const destIndexPatternDeleted: ResponseStatus = {
       success: false,
     };
     const transformId = transformInfo.id;
@@ -418,7 +424,7 @@ const previewTransformHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 const startTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const transformsInfo = req.body as TransformEndpointRequest[];
+  const transformsInfo = req.body as StartTransformsRequestSchema;
 
   try {
     return res.ok({
@@ -430,15 +436,15 @@ const startTransformsHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 async function startTransforms(
-  transformsInfo: TransformEndpointRequest[],
+  transformsInfo: StartTransformsRequestSchema,
   callAsCurrentUser: CallCluster
 ) {
-  const results: TransformEndpointResult = {};
+  const results: StartTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await callAsCurrentUser('transform.startTransform', { transformId } as SchemaTransformId);
+      await callAsCurrentUser('transform.startTransform', { transformId });
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -456,7 +462,7 @@ async function startTransforms(
 }
 
 const stopTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const transformsInfo = req.body as TransformEndpointRequest[];
+  const transformsInfo = req.body as StopTransformsRequestSchema;
 
   try {
     return res.ok({
@@ -468,10 +474,10 @@ const stopTransformsHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 async function stopTransforms(
-  transformsInfo: TransformEndpointRequest[],
+  transformsInfo: StopTransformsRequestSchema,
   callAsCurrentUser: CallCluster
 ) {
-  const results: TransformEndpointResult = {};
+  const results: StopTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;

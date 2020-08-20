@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformId, TRANSFORM_STATE } from '../../../common';
+import { TransformId } from '../../../common/types/transform';
+import { TransformState, TRANSFORM_STATE } from '../../../common/constants';
 
 import { TransformListRow } from './transform_list';
 
@@ -50,7 +51,7 @@ export interface TransformStats {
     trigger_count: number;
   };
   reason?: string;
-  state: TRANSFORM_STATE;
+  state: TransformState;
 }
 
 export function isTransformStats(arg: any): arg is TransformStats {

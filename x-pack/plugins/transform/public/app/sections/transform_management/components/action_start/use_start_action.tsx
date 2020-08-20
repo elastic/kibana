@@ -6,7 +6,7 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';

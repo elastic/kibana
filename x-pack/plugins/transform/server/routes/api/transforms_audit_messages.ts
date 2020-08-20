@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
 import { AuditMessage } from '../../../common/types/messages';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
@@ -12,7 +13,6 @@ import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
 
 import { wrapError } from './error_utils';
-import { schemaTransformId, SchemaTransformId } from './schema';
 
 const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
 const SIZE = 500;
@@ -23,9 +23,12 @@ interface BoolQuery {
 
 export function registerTransformsAuditMessagesRoutes({ router, license }: RouteDependencies) {
   router.get(
-    { path: addBasePath('transforms/{transformId}/messages'), validate: schemaTransformId },
+    {
+      path: addBasePath('transforms/{transformId}/messages'),
+      validate: { params: transformIdParamSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+      const { transformId } = req.params as TransformIdParamSchema;
 
       // search for audit messages,
       // transformId is optional. without it, all transforms will be listed.

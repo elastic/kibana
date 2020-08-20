@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { TransformId } from '../../../common';
+import { TransformId } from '../../../common/types/transform';
 
 import { PivotAggDict } from './pivot_aggs';
 import { PivotGroupByDict } from './pivot_group_by';

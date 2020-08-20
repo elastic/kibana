@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export async function asyncForEach(array: any[], callback: Function) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
 export function generateDestIndex(transformId: string): string {
   return `user-${transformId}`;
 }

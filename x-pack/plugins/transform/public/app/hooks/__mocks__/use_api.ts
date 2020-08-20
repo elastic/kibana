@@ -4,7 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformId, TransformEndpointRequest } from '../../../../common';
+import { TransformId } from '../../../../common/types/transform';
+import {
+  DeleteTransformsRequestSchema,
+  DeleteTransformsResponseSchema,
+} from '../../../../common/api_schemas/delete_transforms';
+import {
+  StartTransformsRequestSchema,
+  StartTransformsResponseSchema,
+} from '../../../../common/api_schemas/start_transforms';
+import {
+  StopTransformsRequestSchema,
+  StopTransformsResponseSchema,
+} from '../../../../common/api_schemas/stop_transforms';
 
 import { PreviewRequestBody } from '../../common';
 
@@ -30,9 +42,11 @@ const apiFactory = () => ({
       resolve([]);
     });
   },
-  deleteTransforms(transformsInfo: TransformEndpointRequest[]) {
+  deleteTransforms(
+    reqBody: DeleteTransformsRequestSchema
+  ): Promise<DeleteTransformsResponseSchema> {
     return new Promise((resolve, reject) => {
-      resolve([]);
+      resolve({});
     });
   },
   getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
@@ -40,14 +54,16 @@ const apiFactory = () => ({
       resolve([]);
     });
   },
-  startTransforms(transformsInfo: TransformEndpointRequest[]) {
+  startTransforms(reqBody: StartTransformsRequestSchema): Promise<StartTransformsResponseSchema> {
     return new Promise((resolve, reject) => {
-      resolve([]);
+      resolve({});
     });
   },
-  stopTransforms(transformsInfo: TransformEndpointRequest[]) {
+  stopTransforms(
+    transformsInfo: StopTransformsRequestSchema
+  ): Promise<StopTransformsResponseSchema> {
     return new Promise((resolve, reject) => {
-      resolve([]);
+      resolve({});
     });
   },
   getTransformAuditMessages(transformId: TransformId): Promise<any> {

@@ -6,7 +6,7 @@
 
 import React, { createContext } from 'react';
 
-import { Privileges } from '../../../../../common';
+import { Privileges } from '../../../../../common/types/privileges';
 
 import { useRequest } from '../../../hooks';
 

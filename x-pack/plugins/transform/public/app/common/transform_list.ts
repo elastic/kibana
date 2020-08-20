@@ -6,7 +6,7 @@
 
 import { EuiTableActionsColumnType } from '@elastic/eui';
 
-import { TransformId } from '../../../common';
+import { TransformId } from '../../../common/types/transform';
 import { TransformPivotConfig } from './transform';
 import { TransformStats } from './transform_stats';
 

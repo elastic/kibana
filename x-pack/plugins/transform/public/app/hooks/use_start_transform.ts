@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TransformEndpointRequest, TransformEndpointResult } from '../../../common';
+import { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
 
 import { useToastNotifications } from '../app_dependencies';
-import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 
 import { useApi } from './use_api';
 
@@ -17,12 +17,8 @@ export const useStartTransforms = () => {
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
-  return async (transforms: TransformListRow[]) => {
-    const transformsInfo: TransformEndpointRequest[] = transforms.map((tf) => ({
-      id: tf.config.id,
-      state: tf.stats.state,
-    }));
-    const results: TransformEndpointResult = await api.startTransforms(transformsInfo);
+  return async (transformsInfo: StartTransformsRequestSchema) => {
+    const results = await api.startTransforms(transformsInfo);
 
     for (const transformId in results) {
       // hasOwnProperty check to ensure only properties on object itself, and not its prototypes

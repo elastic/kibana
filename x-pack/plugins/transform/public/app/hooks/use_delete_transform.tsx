@@ -8,10 +8,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import {
-  DeleteTransformEndpointResult,
   DeleteTransformStatus,
-  TransformEndpointRequest,
-} from '../../../common';
+  DeleteTransformsRequestSchema,
+} from '../../../common/api_schemas/delete_transforms';
+import {} from '../../../common/api_schemas/common';
 import { extractErrorMessage, getErrorMessage } from '../../shared_imports';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
@@ -108,24 +108,9 @@ export const useDeleteTransforms = () => {
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
-  return async (
-    transforms: TransformListRow[],
-    shouldDeleteDestIndex: boolean,
-    shouldDeleteDestIndexPattern: boolean,
-    shouldForceDelete = false
-  ) => {
-    const transformsInfo: TransformEndpointRequest[] = transforms.map((tf) => ({
-      id: tf.config.id,
-      state: tf.stats.state,
-    }));
-
+  return async (reqBody: DeleteTransformsRequestSchema) => {
     try {
-      const results: DeleteTransformEndpointResult = await api.deleteTransforms(
-        transformsInfo,
-        shouldDeleteDestIndex,
-        shouldDeleteDestIndexPattern,
-        shouldForceDelete
-      );
+      const results = await api.deleteTransforms(reqBody);
       const isBulk = Object.keys(results).length > 1;
       const successCount: Record<SuccessCountField, number> = {
         transformDeleted: 0,

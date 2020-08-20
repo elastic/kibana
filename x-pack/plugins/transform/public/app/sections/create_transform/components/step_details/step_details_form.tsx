@@ -13,7 +13,7 @@ import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { TransformId } from '../../../../../../common';
+import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../shared_imports';
