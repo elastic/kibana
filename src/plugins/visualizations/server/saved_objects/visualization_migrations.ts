@@ -116,10 +116,10 @@ const migrateFilterRatioQuery: SavedObjectMigrationFn<any, any> = (doc) => {
       series.forEach((part) => {
         (part.metrics || []).forEach((metric: any) => {
           if (metric.type === 'filter_ratio') {
-            if (metric.numerator && typeof metric.numerator === 'string') {
+            if (typeof metric.numerator === 'string') {
               metric.numerator = { query: metric.numerator, language: 'lucene' };
             }
-            if (metric.denominator && typeof metric.denominator === 'string') {
+            if (typeof metric.denominator === 'string') {
               metric.denominator = { query: metric.denominator, language: 'lucene' };
             }
           }

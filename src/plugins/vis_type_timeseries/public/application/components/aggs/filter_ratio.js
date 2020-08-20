@@ -51,7 +51,7 @@ export const FilterRatioAgg = (props) => {
 
   const handleChange = createChangeHandler(props.onChange, props.model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleQueryChange = (name, value) => handleChange?.({ [name]: value });
+  const handleQueryChange = (name, value) => handleChange({ [name]: value });
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
@@ -102,10 +102,7 @@ export const FilterRatioAgg = (props) => {
             }
           >
             <QueryBarWrapper
-              query={{
-                language: model.numerator.language,
-                query: model.numerator.query,
-              }}
+              query={model.numerator}
               onChange={(query) => handleQueryChange('numerator', query)}
               indexPatterns={[indexPattern]}
             />
@@ -123,10 +120,7 @@ export const FilterRatioAgg = (props) => {
             }
           >
             <QueryBarWrapper
-              query={{
-                language: model.denominator.language,
-                query: model.denominator.query,
-              }}
+              query={model.denominator}
               onChange={(query) => handleQueryChange('denominator', query)}
               indexPatterns={[indexPattern]}
             />
