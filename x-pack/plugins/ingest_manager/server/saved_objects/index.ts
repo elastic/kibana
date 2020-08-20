@@ -84,6 +84,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     mappings: {
       properties: {
         agent_id: { type: 'keyword' },
+        config_id: { type: 'keyword' },
+        config_revision: { type: 'integer' },
         type: { type: 'keyword' },
         data: { type: 'binary' },
         sent_at: { type: 'date' },
@@ -277,6 +279,7 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
+  return;
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
     type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
