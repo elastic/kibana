@@ -229,7 +229,11 @@
               {
                 "name": "pageInfo",
                 "description": "",
-                "type": { "kind": "INPUT_OBJECT", "name": "PageInfoTimeline", "ofType": null },
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "PageInfoTimeline", "ofType": null }
+                },
                 "defaultValue": null
               },
               {
@@ -10905,13 +10909,21 @@
           {
             "name": "pageIndex",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           },
           {
             "name": "pageSize",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
@@ -13141,24 +13153,6 @@
         ],
         "interfaces": null,
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "TemplateTimelineType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "elastic",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
         "possibleTypes": null
       }
     ],

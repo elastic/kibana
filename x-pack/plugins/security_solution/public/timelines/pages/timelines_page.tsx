@@ -33,7 +33,7 @@ const TimelinesContainer = styled.div`
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPageComponent: React.FC = () => {
-  const { tabName } = useParams();
+  const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);

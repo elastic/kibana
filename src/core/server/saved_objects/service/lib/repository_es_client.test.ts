@@ -23,11 +23,11 @@ import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { SavedObjectsErrorHelpers } from './errors';
 
 describe('RepositoryEsClient', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repositoryClient: RepositoryEsClient;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
     repositoryClient = createRepositoryEsClient(client);
     retryCallClusterMock.mockClear();
   });

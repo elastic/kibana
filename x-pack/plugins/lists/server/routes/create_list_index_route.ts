@@ -7,7 +7,7 @@
 import { IRouter } from 'kibana/server';
 
 import { buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { LIST_INDEX } from '../../common/constants';
 import { acknowledgeSchema } from '../../common/schemas';
 

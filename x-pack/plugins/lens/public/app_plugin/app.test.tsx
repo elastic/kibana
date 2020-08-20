@@ -32,7 +32,7 @@ const dataStartMock = dataPluginMock.createStartContract();
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
-import { FeatureFlagConfig } from '../plugin';
+import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
@@ -143,7 +143,7 @@ describe('Lens App', () => {
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
     history: History;
-    featureFlagConfig: FeatureFlagConfig;
+    featureFlagConfig: DashboardFeatureFlagConfig;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -208,7 +208,7 @@ describe('Lens App', () => {
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
       history: History;
-      featureFlagConfig: FeatureFlagConfig;
+      featureFlagConfig: DashboardFeatureFlagConfig;
     }>;
   }
 
@@ -218,7 +218,7 @@ describe('Lens App', () => {
 
     core.uiSettings.get.mockImplementation(
       jest.fn((type) => {
-        if (type === 'timepicker:timeDefaults') {
+        if (type === UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS) {
           return { from: 'now-7d', to: 'now' };
         } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
@@ -269,6 +269,27 @@ describe('Lens App', () => {
     mount(<App {...defaultArgs} />);
 
     expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+  });
+
+  it('passes global filters to frame', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    args.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [pinnedFilter];
+    });
+    const component = mount(<App {...args} />);
+    component.update();
+    expect(frame.mount).toHaveBeenCalledWith(
+      expect.any(Element),
+      expect.objectContaining({
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'kuery' },
+        filters: [pinnedFilter],
+      })
+    );
   });
 
   it('sets breadcrumbs when the document title changes', async () => {

@@ -29,7 +29,7 @@ import {
   updateExceptionListItemSchema,
   updateExceptionListSchema,
 } from '../../common/schemas';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 
 import {
   AddEndpointExceptionListProps,

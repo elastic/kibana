@@ -182,7 +182,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       await retry.tryForTime(20000, async () => {
         // newItemButton button is only visible when there are items in the listing table is displayed.
         const isnNewItemButtonPresent = await testSubjects.exists('newItemButton', {
-          timeout: 5000,
+          timeout: 10000,
         });
         if (isnNewItemButtonPresent) {
           await testSubjects.click('newItemButton');

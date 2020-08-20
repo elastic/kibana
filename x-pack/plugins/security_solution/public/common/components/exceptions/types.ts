@@ -62,6 +62,7 @@ export interface FormattedBuilderEntry {
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
   parent: { parent: EntryNested; parentIndex: number } | undefined;
+  correspondingKeywordField: IFieldType | undefined;
 }
 
 export interface EmptyEntry {

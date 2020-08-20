@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line
 const autoprefixer = require('autoprefixer');
 const prefixer = require('postcss-prefix-selector');
 

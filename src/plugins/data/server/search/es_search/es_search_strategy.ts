@@ -20,15 +20,18 @@ import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchUsage } from '../collectors/usage';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
-  logger: Logger
+  logger: Logger,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
-      logger.info(`search ${JSON.stringify(request.params)}`);
+      logger.info(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 
@@ -43,15 +46,26 @@ export const esSearchStrategyProvider = (
         ...request.params,
       };
 
-      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        params,
-        options
-      )) as SearchResponse<any>;
+      try {
+        const esResponse = (await context.core.elasticsearch.client.asCurrentUser.search(
+          params
+        )) as ApiResponse<SearchResponse<any>>;
+        const rawResponse = esResponse.body;
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+        if (usage) usage.trackSuccess(rawResponse.took);
+
+        // The above query will either complete or timeout and throw an error.
+        // There is no progress indication on this api.
+        return {
+          isPartial: false,
+          isRunning: false,
+          rawResponse,
+          ...getTotalLoaded(rawResponse._shards),
+        };
+      } catch (e) {
+        if (usage) usage.trackError();
+        throw e;
+      }
     },
   };
 };

@@ -30,10 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
-  // skipped due to a recent change in ES that caused search_after queries with data containing
-  // custom timestamp formats like in the testdata to fail
-  // https://github.com/elastic/kibana/issues/58815
-  describe.skip('context view for date_nanos with custom timestamp', () => {
+  describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
       await esArchiver.loadIfNeeded('date_nanos_custom');

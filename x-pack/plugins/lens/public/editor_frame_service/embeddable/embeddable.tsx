@@ -29,7 +29,7 @@ import {
   EmbeddableOutput,
   IContainer,
   SavedObjectEmbeddableInput,
-  AttributeService,
+  ReferenceOrValueEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { DOC_TYPE, Document } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
@@ -39,6 +39,7 @@ import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
+import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
 
@@ -71,7 +72,8 @@ export interface LensEmbeddableDeps {
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
 }
 
-export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
+export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
   type = DOC_TYPE;
 
   private expressionRenderer: ReactExpressionRendererType;
@@ -201,17 +203,6 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     }
   };
 
-  destroy() {
-    super.destroy();
-    if (this.domNode) {
-      unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    this.autoRefreshFetchSubscription.unsubscribe();
-  }
-
   async reload() {
     const currentTime = Date.now();
     if (this.currentContext.lastReloadRequestTime !== currentTime) {
@@ -261,5 +252,32 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns,
     });
+  }
+
+  public inputIsRefType = (
+    input: LensByValueInput | LensByReferenceInput
+  ): input is LensByReferenceInput => {
+    return this.deps.attributeService.inputIsRefType(input);
+  };
+
+  public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
+    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.deps.attributeService.getInputAsRefType(input);
+  };
+
+  public getInputAsValueType = async (): Promise<LensByValueInput> => {
+    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.deps.attributeService.getInputAsValueType(input);
+  };
+
+  destroy() {
+    super.destroy();
+    if (this.domNode) {
+      unmountComponentAtNode(this.domNode);
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 }

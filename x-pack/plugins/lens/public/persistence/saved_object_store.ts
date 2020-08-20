@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
 
 export interface Document {
@@ -28,20 +27,6 @@ export interface Document {
 
 export const DOC_TYPE = 'lens';
 
-interface SavedObjectClient {
-  create: (type: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
-  update: (type: string, id: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
-  get: (
-    type: string,
-    id: string
-  ) => Promise<{
-    id: string;
-    type: string;
-    attributes: SavedObjectAttributes;
-    error?: { statusCode: number; message: string };
-  }>;
-}
-
 export interface DocumentSaver {
   save: (vis: Document) => Promise<{ savedObjectId: string }>;
 }
@@ -53,9 +38,9 @@ export interface DocumentLoader {
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  private client: SavedObjectClient;
+  private client: SavedObjectsClientContract;
 
-  constructor(client: SavedObjectClient) {
+  constructor(client: SavedObjectsClientContract) {
     this.client = client;
   }
 
@@ -64,11 +49,31 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = (rest as unknown) as SavedObjectAttributes;
+
     const result = await (savedObjectId
-      ? this.client.update(DOC_TYPE, savedObjectId, attributes)
+      ? this.safeUpdate(savedObjectId, attributes)
       : this.client.create(DOC_TYPE, attributes));
 
     return { ...vis, savedObjectId: result.id };
+  }
+
+  // As Lens is using an object to store its attributes, using the update API
+  // will merge the new attribute object with the old one, not overwriting deleted
+  // keys. As Lens is using objects as maps in various places, this is a problem because
+  // deleted subtrees make it back into the object after a load.
+  // This function fixes this by doing two updates - one to empty out the document setting
+  // every key to null, and a second one to load the new content.
+  private async safeUpdate(savedObjectId: string, attributes: SavedObjectAttributes) {
+    const resetAttributes: SavedObjectAttributes = {};
+    Object.keys(attributes).forEach((key) => {
+      resetAttributes[key] = null;
+    });
+    return (
+      await this.client.bulkUpdate([
+        { type: DOC_TYPE, id: savedObjectId, attributes: resetAttributes },
+        { type: DOC_TYPE, id: savedObjectId, attributes },
+      ])
+    ).savedObjects[1];
   }
 
   async load(savedObjectId: string): Promise<Document> {
@@ -79,7 +84,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     }
 
     return {
-      ...attributes,
+      ...(attributes as SavedObjectAttributes),
       savedObjectId,
       type,
     } as Document;

@@ -24,8 +24,12 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable, EmbeddableStateTransfer, EmbeddableEditorState } from '../..';
-import { SavedObjectEmbeddableInput } from '..';
+import {
+  IEmbeddable,
+  EmbeddableEditorState,
+  EmbeddableStateTransfer,
+  SavedObjectEmbeddableInput,
+} from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -115,7 +119,7 @@ export class EditPanelAction implements Action<ActionContext> {
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,
           valueInput: byValueMode ? embeddable.getInput() : undefined,
-          embeddableId: embeddable.getInput().id,
+          embeddableId: embeddable.id,
         };
         return { app, path, state };
       }

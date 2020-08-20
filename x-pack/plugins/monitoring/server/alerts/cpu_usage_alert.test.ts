@@ -116,7 +116,8 @@ describe('CpuUsageAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -214,7 +215,8 @@ describe('CpuUsageAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -286,7 +288,8 @@ describe('CpuUsageAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -352,7 +355,8 @@ describe('CpuUsageAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -436,7 +440,8 @@ describe('CpuUsageAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -563,6 +568,35 @@ describe('CpuUsageAlert', () => {
           state: 'firing',
         },
       ]);
+    });
+
+    it('should fire with different messaging for cloud', async () => {
+      const alert = new CpuUsageAlert();
+      alert.initializeAlertType(
+        getUiSettingsService as any,
+        monitoringCluster as any,
+        getLogger as any,
+        config as any,
+        kibanaUrl,
+        true
+      );
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.defaultParams,
+      } as any);
+      const count = 1;
+      expect(scheduleActions).toHaveBeenCalledWith('default', {
+        internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
+        internalShortMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
+        action: `[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:${clusterUuid}))`,
+        actionPlain: 'Verify CPU levels across affected nodes.',
+        clusterName,
+        count,
+        nodes: `${nodeName}:${cpuUsage.toFixed(2)}`,
+        state: 'firing',
+      });
     });
   });
 });

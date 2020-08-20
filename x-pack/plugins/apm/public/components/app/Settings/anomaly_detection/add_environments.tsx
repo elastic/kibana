@@ -20,7 +20,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MLErrorMessages } from '../../../../../common/anomaly_detection';
+import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { createJobs } from './create_jobs';
@@ -64,8 +64,8 @@ export function AddEnvironments({
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="warning"
-          body={<>{MLErrorMessages.MISSING_WRITE_PRIVILEGES}</>}
+          iconType="alert"
+          body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
         />
       </EuiPanel>
     );

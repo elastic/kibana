@@ -63,7 +63,7 @@ export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart>
         return core.application.navigateToApp(appId);
       },
     };
-    window.__coreAppStatus = startContract;
+    window._coreAppStatus = startContract;
     return startContract;
   }
   public stop() {}

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -48,13 +49,9 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
+  dashboard: DashboardStart;
   embeddable?: EmbeddableStart;
 }
-
-export interface FeatureFlagConfig {
-  showNewLensFlow: boolean;
-}
-
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
@@ -64,7 +61,7 @@ export class LensPlugin {
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor() {
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
@@ -110,18 +107,18 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
+    const getByValueFeatureFlag = async () => {
+      const [, deps] = await core.getStartServices();
+      return deps.dashboard.dashboardFeatureFlagConfig;
+    };
+
     core.application.register({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const { mountApp } = await import('./app_plugin/mounter');
-        return mountApp(
-          core,
-          params,
-          this.createEditorFrame!,
-          this.initializerContext.config.get<FeatureFlagConfig>()
-        );
+        return mountApp(core, params, this.createEditorFrame!, getByValueFeatureFlag);
       },
     });
 

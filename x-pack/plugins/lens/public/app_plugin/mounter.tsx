@@ -11,6 +11,7 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
+import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -19,14 +20,14 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { Document, SavedObjectIndexStore } from '../persistence';
-import { LensPluginStartDependencies, FeatureFlagConfig } from '../plugin';
+import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
   params: AppMountParameters,
   createEditorFrame: EditorFrameStart['createInstance'],
-  featureFlagConfig: FeatureFlagConfig
+  getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>
 ) {
   const [coreStart, startDependencies] = await core.getStartServices();
   const { data: dataStart, navigation, embeddable } = startDependencies;
@@ -81,6 +82,7 @@ export async function mountApp(
     }
   };
 
+  const featureFlagConfig = await getByValueFeatureFlag();
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
     return (

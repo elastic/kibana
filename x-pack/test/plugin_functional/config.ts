@@ -13,7 +13,6 @@ import { pageObjects } from './page_objects';
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 
-/* eslint-disable import/no-default-export */
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../security_solution_endpoint/config.ts')

@@ -23,6 +23,8 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export class Listing extends PureComponent {
   getColumns() {
@@ -36,7 +38,7 @@ export class Listing extends PureComponent {
         field: 'name',
         render: (name, beat) => {
           let setupModeStatus = null;
-          if (setupMode && setupMode.enabled) {
+          if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
             const list = get(setupMode, 'data.byUuid', {});
             const status = list[beat.uuid] || {};
             const instance = {
@@ -122,7 +124,7 @@ export class Listing extends PureComponent {
     const { stats, data, sorting, pagination, onTableChange, setupMode } = this.props;
 
     let setupModeCallOut = null;
-    if (setupMode.enabled && setupMode.data) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       setupModeCallOut = (
         <ListingCallOut
           setupModeData={setupMode.data}

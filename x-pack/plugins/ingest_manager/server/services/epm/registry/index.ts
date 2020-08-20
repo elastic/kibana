@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
 import {
@@ -22,6 +23,7 @@ import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
+import { PackageNotFoundError } from '../../../errors';
 
 export { ArchiveEntry } from './extract';
 
@@ -32,6 +34,26 @@ export interface SearchParams {
 
 export interface CategoriesParams {
   experimental?: boolean;
+}
+
+/**
+ * Extract the package name and package version from a string.
+ *
+ * @param pkgkey a string containing the package name delimited by the package version
+ */
+export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
+  // this will return an empty string if `indexOf` returns -1
+  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  if (pkgName === '') {
+    throw new Error('Package key parsing failed: package name was empty');
+  }
+
+  // this will return the entire string if `indexOf` return -1
+  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
+  if (!semver.valid(pkgVersion)) {
+    throw new Error('Package key parsing failed: package version was not a valid semver');
+  }
+  return { pkgName, pkgVersion };
 }
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
@@ -76,7 +98,7 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   if (searchResults.length) {
     return searchResults[0];
   } else {
-    throw new Error('package not found');
+    throw new PackageNotFoundError(`${packageName} not found`);
   }
 }
 

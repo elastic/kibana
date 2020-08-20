@@ -15,7 +15,6 @@ import { ReactExpressionRendererType } from '../../../../../../src/plugins/expre
 import {
   EmbeddableFactoryDefinition,
   IContainer,
-  EmbeddableStart,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   Embeddable,
@@ -26,6 +25,7 @@ import {
 } from './embeddable';
 import { DOC_TYPE } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { AttributeService, DashboardStart } from '../../../../../../src/plugins/dashboard/public';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -34,7 +34,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
-  embeddable?: EmbeddableStart;
+  dashboard?: DashboardStart;
   uiActions?: UiActionsStart;
 }
 
@@ -47,6 +47,12 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     type: DOC_TYPE,
     getIconForSavedObject: () => 'lensApp',
   };
+
+  attributeService?: AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  >;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -80,15 +86,18 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       uiActions,
       coreHttp,
       indexPatternService,
-      embeddable,
+      dashboard,
     } = await this.getStartServices();
+    if (!this.attributeService) {
+      this.attributeService = dashboard!.getAttributeService<
+        LensSavedObjectAttributes,
+        LensByValueInput,
+        LensByReferenceInput
+      >(this.type);
+    }
     return new Embeddable(
       {
-        attributeService: embeddable!.getAttributeService<
-          LensSavedObjectAttributes,
-          LensByValueInput,
-          LensByReferenceInput
-        >(this.type),
+        attributeService: this.attributeService!,
         indexPatternService,
         timefilter,
         expressionRenderer,

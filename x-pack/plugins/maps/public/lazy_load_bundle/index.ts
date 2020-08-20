@@ -6,8 +6,9 @@
 
 import { AnyAction } from 'redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
 import { ReactElement } from 'react';
+import { IndexPattern } from 'src/plugins/data/public';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapStore, MapStoreState } from '../reducers/store';
@@ -28,7 +29,7 @@ interface LazyLoadedMapModules {
     renderTooltipContent?: RenderToolTipContent,
     eventHandlers?: EventHandlers
   ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
-  getIndexPatternService: () => IndexPatternsService;
+  getIndexPatternService: () => IndexPatternsContract;
   getHttp: () => any;
   getMapsCapabilities: () => any;
   createMapStore: () => MapStore;
@@ -44,8 +45,9 @@ interface LazyLoadedMapModules {
     indexPatternId: string,
     indexPatternTitle: string
   ) => LayerDescriptor[];
-  registerLayerWizard(layerWizard: LayerWizard): void;
+  registerLayerWizard: (layerWizard: LayerWizard) => void;
   registerSource(entry: SourceRegistryEntry): void;
+  getIndexPatternsFromIds: (indexPatternIds: string[]) => Promise<IndexPattern[]>;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -71,6 +73,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createSecurityLayerDescriptors,
       registerLayerWizard,
       registerSource,
+      getIndexPatternsFromIds,
     } = await import('./lazy');
 
     resolve({
@@ -88,6 +91,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createSecurityLayerDescriptors,
       registerLayerWizard,
       registerSource,
+      getIndexPatternsFromIds,
     });
   });
   return loadModulesPromise;
