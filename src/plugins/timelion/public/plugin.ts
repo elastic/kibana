@@ -91,7 +91,7 @@ export class TimelionPlugin implements Plugin<void, void> {
       title: 'Timelion',
       order: 8000,
       defaultPath: '#/',
-      euiIconType: 'timelionApp',
+      euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appStateUpdater.asObservable(),
       mount: async (params: AppMountParameters) => {

@@ -12,6 +12,7 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
     defaultMessage: 'Enterprise Search',
   }),
   URL: '/app/enterprise_search',
+  LOGO: 'logoEnterpriseSearch',
 };
 
 export const APP_SEARCH_PLUGIN = {
