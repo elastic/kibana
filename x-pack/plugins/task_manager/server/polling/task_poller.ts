@@ -15,7 +15,7 @@ import { mapTo, filter, scan, concatMap, tap, catchError } from 'rxjs/operators'
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
-import { pullFromSet } from './lib/pull_from_set';
+import { pullFromSet } from '../lib/pull_from_set';
 import {
   Result,
   Err,
@@ -24,8 +24,8 @@ import {
   asOk,
   asErr,
   promiseResult,
-} from './lib/result_type';
-import { timeoutPromiseAfter } from './lib/timeout_promise_after';
+} from '../lib/result_type';
+import { timeoutPromiseAfter } from './timeout_promise_after';
 
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
