@@ -73,7 +73,6 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _settings?: MapSettings;
-  private _actionContext: unknown;
 
   constructor(
     config: MapEmbeddableConfig,
@@ -102,9 +101,6 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
-    this._actionContext = {
-      embeddable: this,
-    };
   }
 
   supportedTriggers(): Array<keyof TriggerContextMapping> {

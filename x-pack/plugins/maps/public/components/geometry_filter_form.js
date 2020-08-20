@@ -44,14 +44,6 @@ export class GeometryFilterForm extends Component {
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
   _onGeoFieldChange = (selectedField) => {
     this.setState({ selectedField });
   };
