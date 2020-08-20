@@ -50,7 +50,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       id: DECISION_PATH_TABS.CHART,
       name: (
         <FormattedMessage
-          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlot"
+          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotTab"
           defaultMessage="Decision plot"
         />
       ),
@@ -59,7 +59,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       id: DECISION_PATH_TABS.JSON,
       name: (
         <FormattedMessage
-          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathJSON"
+          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathJSONTab"
           defaultMessage="JSON"
         />
       ),

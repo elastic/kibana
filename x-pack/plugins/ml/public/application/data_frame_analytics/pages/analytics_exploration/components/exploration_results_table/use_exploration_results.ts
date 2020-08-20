@@ -10,6 +10,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
+import { i18n } from '@kbn/i18n';
 import { MlApiServices } from '../../../../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -37,6 +38,7 @@ import {
 } from '../../../../common/constants';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 import { isRegressionAnalysis } from '../../../../common/analytics';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -124,18 +126,23 @@ export const useExplorationResults = (
         jobConfig.analysis !== undefined &&
         isRegressionAnalysis(jobConfig.analysis)
       ) {
-        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(
-          jobConfig.id,
-          jobConfig.dest.index,
-          predictionFieldName
-        );
+        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(jobConfig.id);
         if (result?.baseline) {
           setBaseLine(result.baseline);
         }
       }
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
+      const error = extractErrorMessage(e);
+
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.baselineErrorMessageToast',
+          {
+            defaultMessage: 'An error occurred getting feature importance baseline',
+          }
+        ),
+        text: error,
+      });
     }
   }, [mlApiServices, jobConfig]);
 

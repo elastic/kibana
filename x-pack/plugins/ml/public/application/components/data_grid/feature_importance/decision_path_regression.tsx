@@ -5,6 +5,8 @@
  */
 
 import React, { FC, useMemo } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 import { findMaxMin, useDecisionPathData } from './use_classification_path_data';
 import { DecisionPathChart } from './decision_path_chart';
@@ -48,12 +50,28 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
   if (!decisionPathData) return <div />;
 
   return (
-    <DecisionPathChart
-      decisionPathData={decisionPathData}
-      predictionFieldName={predictionFieldName}
-      minDomain={domain.minDomain}
-      maxDomain={domain.maxDomain}
-      baseline={baseline}
-    />
+    <>
+      {baseline === undefined && (
+        <EuiCallOut
+          size={'s'}
+          heading={'p'}
+          title={
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.explorationResults.missingBaselineCallout"
+              defaultMessage="Unable to calculate baseline value, which might result in a shifted decision path."
+            />
+          }
+          color="warning"
+          iconType="alert"
+        />
+      )}
+      <DecisionPathChart
+        decisionPathData={decisionPathData}
+        predictionFieldName={predictionFieldName}
+        minDomain={domain.minDomain}
+        maxDomain={domain.maxDomain}
+        baseline={baseline}
+      />
+    </>
   );
 };

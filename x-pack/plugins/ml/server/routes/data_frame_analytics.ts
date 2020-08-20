@@ -6,7 +6,7 @@
 
 import { RequestHandlerContext, ILegacyScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
+import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics';
 import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
@@ -21,6 +21,7 @@ import {
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
+import { analyticsFeatureImportanceProvider } from '../models/data_frame_analytics/feature_importance';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -138,7 +139,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, response }) => {
       try {
         const results = await legacyClient.callAsInternalUser('ml.getDataFrameAnalyticsStats');
         return response.ok({
@@ -548,12 +549,13 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsBaseline
    * @apiDescription Returns the baseline for data frame analytics job.
    *
-   * @apiSchema (params) getDataFrameAnalyticsBaselineSchema
+   * @apiSchema (params) analyticsIdSchema
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/baseline',
+      path: '/api/ml/data_frame/analytics/{analyticsId}/baseline',
       validate: {
+        params: analyticsIdSchema,
         body: getDataFrameAnalyticsBaselineSchema,
       },
       options: {
@@ -562,36 +564,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     },
     mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const { destinationIndex, predictionField } = request.body;
-        const params = {
-          index: destinationIndex,
-          size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'ml.is_training': true,
-                    },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              featureImportanceBaseline: {
-                avg: {
-                  field: `ml.${predictionField}`,
-                },
-              },
-            },
-          },
-        };
-        let baseline;
-        const aggregationResult = await legacyClient.callAsCurrentUser('search', params);
-        if (aggregationResult) {
-          baseline = aggregationResult.aggregations.featureImportanceBaseline.value;
-        }
+        const { analyticsId } = request.params;
+        const { getRegressionAnalyticsBaseline } = analyticsFeatureImportanceProvider(legacyClient);
+        const baseline = await getRegressionAnalyticsBaseline(analyticsId);
+
         return response.ok({
           body: { baseline },
         });

@@ -21,7 +21,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DecisionPathPlotData } from './use_classification_path_data';
 
@@ -65,18 +65,22 @@ export const DecisionPathChart = ({
   baseline,
 }: DecisionPathChartProps) => {
   const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 4 ? 30 : 75;
-  const baselineData: LineAnnotationDatum[] = [
-    {
-      dataValue: baseline ? parseFloat(baseline.toPrecision(3)) : undefined,
-      details: i18n.translate(
-        'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
-        {
-          defaultMessage:
-            'baseline (average of predictions for all data points in the training data set)',
-        }
-      ),
-    },
-  ];
+  const baselineData: LineAnnotationDatum[] = useMemo(
+    () => [
+      {
+        dataValue: baseline ? parseFloat(baseline.toPrecision(3)) : undefined,
+        details: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
+          {
+            defaultMessage:
+              'baseline (average of predictions for all data points in the training data set)',
+          }
+        ),
+      },
+    ],
+    [baseline]
+  );
+  const tickFormatter = useCallback((d) => `${Number(d).toPrecision(3)}`, []);
 
   return (
     <Chart size={{ height: decisionPathData.length * heightMultiplier }}>
@@ -93,7 +97,7 @@ export const DecisionPathChart = ({
 
       <Axis
         id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxis'}
-        tickFormat={(d) => `${Number(d).toPrecision(3)}`}
+        tickFormat={tickFormatter}
         title={i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
           {
