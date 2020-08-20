@@ -15,15 +15,30 @@ import {
   isQuery,
   isTimeRange,
 } from '../../../../../../../src/plugins/data/public';
-import { Config } from './types';
-import { AbstractDashboardDrilldown, Params } from './abstract_dashboard_drilldown';
+import {
+  AbstractDashboardDrilldown,
+  AbstractDashboardDrilldownParams,
+  AbstractDashboardDrilldownConfig as Config,
+} from '../abstract_dashboard_drilldown';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
+import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 
 type Trigger = typeof APPLY_FILTER_TRIGGER;
 type Context = TriggerContextMapping[Trigger];
 
-export class DashboardToDashboardDrilldown extends AbstractDashboardDrilldown<Trigger> {
-  constructor(params: Omit<Params<Trigger>, 'triggers'>) {
+export type Params = Omit<AbstractDashboardDrilldownParams<Trigger>, 'triggers'>;
+
+/**
+ * This drilldown is the "Go to Dashboard" you can find in Dashboard app panles.
+ * This drilldown can be used on any embeddable and it is tied to embeddables
+ * in two ways: (1) it works with APPLY_FILTER_TRIGGER, which is usually executed
+ * by embeddables (but not necessarily); (2) its `getURL` method depends on
+ * `embeddable` field being present in `context`.
+ */
+export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Trigger> {
+  public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
+
+  constructor(params: Params) {
     super({ ...params, triggers: [APPLY_FILTER_TRIGGER] as Trigger[] });
   }
 

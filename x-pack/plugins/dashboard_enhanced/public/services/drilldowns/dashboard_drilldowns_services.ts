@@ -14,7 +14,7 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
-import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
+import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
@@ -57,7 +57,7 @@ export class DashboardDrilldownsService {
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
-    const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
+    const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({
       start,
       getDashboardUrlGenerator,
     });

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 export {
-  DashboardToDashboardDrilldown,
-  Params as DashboardToDashboardDrilldownParams,
-} from './drilldown';
-export { Config } from './types';
+  AbstractDashboardDrilldown,
+  Params as AbstractDashboardDrilldownParams,
+} from './abstract_dashboard_drilldown';
+export { Config as AbstractDashboardDrilldownConfig } from './types';

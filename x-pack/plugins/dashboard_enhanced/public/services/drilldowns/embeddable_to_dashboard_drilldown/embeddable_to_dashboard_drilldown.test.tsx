@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DashboardToDashboardDrilldown } from './drilldown';
-import { Config } from './types';
+import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
+import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { coreMock, savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
 import {
   Filter,
@@ -18,7 +18,6 @@ import {
   ApplyGlobalFilterActionContext,
   esFilters,
 } from '../../../../../../../src/plugins/data/public';
-// convenient to use real implementation here.
 import { createDashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
 import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/public/url_generators';
 import { StartDependencies } from '../../../plugin';
@@ -26,7 +25,7 @@ import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_object
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
 
 describe('.isConfigValid()', () => {
-  const drilldown = new DashboardToDashboardDrilldown({} as any);
+  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
 
   test('returns false for invalid config with missing dashboard id', () => {
     expect(
@@ -50,19 +49,19 @@ describe('.isConfigValid()', () => {
 });
 
 test('config component exist', () => {
-  const drilldown = new DashboardToDashboardDrilldown({} as any);
+  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
   expect(drilldown.CollectConfig).toEqual(expect.any(Function));
 });
 
 test('initial config: switches are ON', () => {
-  const drilldown = new DashboardToDashboardDrilldown({} as any);
+  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
   const { useCurrentDateRange, useCurrentFilters } = drilldown.createConfig();
   expect(useCurrentDateRange).toBe(true);
   expect(useCurrentFilters).toBe(true);
 });
 
 test('getHref is defined', () => {
-  const drilldown = new DashboardToDashboardDrilldown({} as any);
+  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
   expect(drilldown.getHref).toBeDefined();
 });
 
@@ -84,7 +83,7 @@ describe('.execute() & getHref', () => {
     const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
 
-    const drilldown = new DashboardToDashboardDrilldown({
+    const drilldown = new EmbeddableToDashboardDrilldown({
       start: ((() => ({
         core: {
           application: {

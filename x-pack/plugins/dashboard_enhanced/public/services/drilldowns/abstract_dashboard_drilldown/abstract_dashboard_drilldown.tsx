@@ -12,7 +12,6 @@ import {
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { DashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public';
 import { CollectConfigContainer } from './components';
-import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
@@ -36,9 +35,9 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
   implements Drilldown<Config, T, BaseActionFactoryContext<T>> {
   constructor(protected readonly params: Params<T>) {}
 
-  protected abstract getURL(config: Config, context: TriggerContextMapping[T]): Promise<KibanaURL>;
+  public abstract readonly id: string;
 
-  public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
+  protected abstract getURL(config: Config, context: TriggerContextMapping[T]): Promise<KibanaURL>;
 
   public readonly order = 100;
 
