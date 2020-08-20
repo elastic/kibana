@@ -35,7 +35,6 @@ describe('SearchInterceptor', () => {
     searchInterceptor = new SearchInterceptor(
       {
         toasts: mockCoreSetup.notifications.toasts,
-        application: mockCoreSetup.application,
         startServices: mockCoreSetup.getStartServices(),
         uiSettings: mockCoreSetup.uiSettings,
         http: mockCoreSetup.http,

@@ -47,7 +47,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   };
 
   protected showToast = () => {
-    if (!this.deps.application.capabilities.backgroundSearch.runBeyondTimeout) return;
+    if (!this.application.capabilities.backgroundSearch.runBeyondTimeout) return;
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {

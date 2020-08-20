@@ -67,7 +67,6 @@ describe('EnhancedSearchInterceptor', () => {
     searchInterceptor = new EnhancedSearchInterceptor(
       {
         toasts: mockCoreSetup.notifications.toasts,
-        application: mockCoreSetup.application,
         startServices: mockPromise as any,
         http: mockCoreSetup.http,
         uiSettings: mockCoreSetup.uiSettings,
