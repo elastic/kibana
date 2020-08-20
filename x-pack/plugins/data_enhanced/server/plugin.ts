@@ -20,7 +20,6 @@ import {
 import { enhancedEsSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { ApiResponse } from '@elastic/elasticsearch';
 
 interface SetupDependencies {
   data: DataPluginSetup;

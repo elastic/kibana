@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
             ingestManager: ['all', 'read'],
             builtInAlerts: ['all', 'read'],
             actions: ['all', 'read'],
+            backgroundSearch: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],

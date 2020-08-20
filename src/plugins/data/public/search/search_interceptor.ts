@@ -33,6 +33,7 @@ export interface SearchInterceptorDeps {
   toasts: ToastsSetup;
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
+  application: CoreSetup['application'];
   startServices: Promise<[CoreStart, any, unknown]>;
   usageCollector?: SearchUsageCollector;
 }

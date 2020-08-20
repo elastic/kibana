@@ -51,7 +51,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private usageCollector?: SearchUsageCollector;
 
   public setup(
-    { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
+    { http, getStartServices, injectedMetadata, notifications, uiSettings, application }: CoreSetup,
     { expressions, packageInfo, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const esApiVersion = injectedMetadata.getInjectedVar('esApiVersion') as string;
@@ -78,6 +78,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         toasts: notifications.toasts,
         http,
         uiSettings,
+        application,
         startServices: getStartServices(),
         usageCollector: this.usageCollector!,
       },
