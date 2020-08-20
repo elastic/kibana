@@ -112,6 +112,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
       {/* Field subType (if any) */}
       <FormDataProvider pathsToWatch="type">
         {({ type }) => {
+          if (type === undefined) {
+            return null;
+          }
+
           const [fieldType] = type;
           return (
             <SubTypeParameter

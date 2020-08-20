@@ -14,7 +14,8 @@
     "visualizations",
     "embeddable",
     "mapsLegacy",
-    "usageCollection"
+    "usageCollection",
+    "share"
   ],
   "optionalPlugins": ["home"],
   "ui": true,
