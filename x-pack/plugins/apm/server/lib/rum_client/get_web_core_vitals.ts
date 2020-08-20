@@ -13,10 +13,8 @@ import {
 } from '../helpers/setup_request';
 import {
   CLS_FIELD,
-  FCP_FIELD,
   FID_FIELD,
   LCP_FIELD,
-  TBT_FIELD,
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getWebCoreVitals({
@@ -44,21 +42,22 @@ export async function getWebCoreVitals({
         },
       },
       aggs: {
-        fcp: {
-          avg: {
-            field: FCP_FIELD,
-          },
-        },
-        fcpRanks: {
-          percentile_ranks: {
-            field: FCP_FIELD,
-            values: [1000, 2000],
-            keyed: false,
-          },
-        },
         lcp: {
-          avg: {
+          percentiles: {
             field: LCP_FIELD,
+            percents: [50],
+          },
+        },
+        fid: {
+          percentiles: {
+            field: FID_FIELD,
+            percents: [50],
+          },
+        },
+        cls: {
+          percentiles: {
+            field: CLS_FIELD,
+            percents: [50],
           },
         },
         lcpRanks: {
@@ -66,21 +65,6 @@ export async function getWebCoreVitals({
             field: LCP_FIELD,
             values: [2500, 4000],
             keyed: false,
-          },
-        },
-        tbt: {
-          avg: {
-            field: TBT_FIELD,
-          },
-        },
-        cls: {
-          avg: {
-            field: CLS_FIELD,
-          },
-        },
-        fid: {
-          avg: {
-            field: FID_FIELD,
           },
         },
         fidRanks: {
@@ -97,13 +81,6 @@ export async function getWebCoreVitals({
             keyed: false,
           },
         },
-        tbtRanks: {
-          percentile_ranks: {
-            field: TBT_FIELD,
-            values: [0.1, 0.25],
-            keyed: false,
-          },
-        },
       },
     },
   });
@@ -112,16 +89,12 @@ export async function getWebCoreVitals({
 
   const response = await apmEventClient.search(params);
   const {
-    fcp,
     lcp,
-    tbt,
     cls,
     fid,
     lcpRanks,
-    fcpRanks,
     fidRanks,
     clsRanks,
-    tbtRanks,
   } = response.aggregations!;
 
   const getRanksPercentages = (
@@ -130,20 +103,20 @@ export async function getWebCoreVitals({
     const ranksVal = (ranks ?? [0, 0]).map(
       ({ value }) => value?.toFixed(0) ?? 0
     );
-    return [+ranksVal?.[0], ranksVal?.[1] - ranksVal?.[0], 100 - ranksVal?.[1]];
+    return [
+      Number(ranksVal?.[0]),
+      Number(ranksVal?.[1]) - Number(ranksVal?.[0]),
+      100 - Number(ranksVal?.[1]),
+    ];
   };
 
   // Divide by 1000 to convert ms into seconds
   return {
-    cls: cls?.value,
-    fid: fid?.value,
-    tbt: ((tbt?.value ?? 0) / 1000).toFixed(2),
-    fcp: ((fcp?.value ?? 0) / 1000).toFixed(2),
-    lcp: ((lcp?.value ?? 0) / 1000).toFixed(2),
+    cls: cls.values['50.0'],
+    fid: (fid.values['50.0'] / 1000).toFixed(2),
+    lcp: (lcp.values['50.0'] / 1000).toFixed(2),
 
     lcpRanks: getRanksPercentages(lcpRanks.values),
-    tbtRanks: getRanksPercentages(tbtRanks.values),
-    fcpRanks: getRanksPercentages(fcpRanks.values),
     fidRanks: getRanksPercentages(fidRanks.values),
     clsRanks: getRanksPercentages(clsRanks.values),
   };

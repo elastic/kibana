@@ -14,6 +14,7 @@ import {
   EuiStat,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { PaletteLegends } from './PaletteLegends';
 
@@ -45,7 +46,16 @@ export function ColorPaletteFlexItem({
       className={classNames('guideColorPalette__swatch', className)}
       style={{ width: percentage + '%' }}
     >
-      <EuiToolTip content={'you dont believe me?'}>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.apm.csm.dashboard.webVitals.pallette.tooltip',
+          {
+            defaultMessage:
+              '{percentage} % of users have a poor experience because the first input delay takes more than XXms.',
+            values: { percentage },
+          }
+        )}
+      >
         <ColoredSpan
           title={hexCode}
           style={{

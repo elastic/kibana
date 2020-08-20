@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { CoreVitalItem } from './ColorPaletteFlexItem';
-import {
-  CLS_LABEL,
-  FCP_LABEL,
-  FID_LABEL,
-  LCP_LABEL,
-  TBT_LABEL,
-} from './translations';
+import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
 
 export function CoreVitals() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -38,7 +32,7 @@ export function CoreVitals() {
   );
 
   return (
-    <EuiFlexGrid gutterSize="xl">
+    <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'}>
       <EuiFlexItem>
         <CoreVitalItem
           title={LCP_LABEL}
@@ -60,20 +54,6 @@ export function CoreVitals() {
           ranks={data?.clsRanks}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <CoreVitalItem
-          title={FCP_LABEL}
-          value={data?.fcp + 's'}
-          ranks={data?.fcpRanks}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <CoreVitalItem
-          title={TBT_LABEL}
-          value={data?.tbt ?? 'N/A'}
-          ranks={data?.tbtRanks}
-        />
-      </EuiFlexItem>
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 }

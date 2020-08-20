@@ -27,7 +27,7 @@ export function RumDashboard() {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={1} data-cy={`client-metrics`}>
               <EuiTitle size="xs">
-                <h3>{I18LABELS.pageLoadTimes}</h3>
+                <h3>{I18LABELS.pageLoadDuration}</h3>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ClientMetrics />
