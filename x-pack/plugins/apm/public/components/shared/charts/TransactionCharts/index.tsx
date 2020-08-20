@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { flatten, isEmpty, mean } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { flatten, isEmpty } from 'lodash';
+import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
@@ -31,7 +31,7 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import {
   asDecimal,
-  getDurationFormatter,
+  asDuration,
   TimeFormatter,
   tpmUnit,
 } from '../../../../utils/formatters';
@@ -39,7 +39,7 @@ import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { BrowserLineChart } from './BrowserLineChart';
 import { DurationByCountryMap } from './DurationByCountryMap';
-import { Serie, TransactionLineChart } from './TransactionLineChart';
+import { TransactionLineChart } from './TransactionLineChart';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
@@ -59,14 +59,18 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
-  return (t: number) => formatter(t).formatted;
+export function getResponseTimeTickFormatter(formatter?: TimeFormatter) {
+  return (t: number) => {
+    return formatter ? formatter(t).formatted : asDuration(t);
+  };
 }
 
-export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
+export function getResponseTimeTooltipFormatter(formatter?: TimeFormatter) {
   return (p: Coordinate) => {
     return isValidCoordinateValue(p.y)
-      ? formatter(p.y).formatted
+      ? formatter
+        ? formatter(p.y).formatted
+        : asDuration(p.y)
       : NOT_AVAILABLE_LABEL;
   };
 }
@@ -79,18 +83,6 @@ export function getMaxY(responseTimeSeries: TimeSeries[]) {
   const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
 
   return Math.max(...numbers, 0);
-}
-
-function getAverageY(responseTimeSeries: TimeSeries[]) {
-  const averageSeries = responseTimeSeries.find(
-    (serie) => serie.title === 'Avg.'
-  );
-  if (averageSeries) {
-    const averageYValues = (averageSeries.data as Coordinate[])
-      .map((c) => c.y)
-      .filter((y) => y && isFinite(y));
-    return mean(averageYValues);
-  }
 }
 
 export function TransactionCharts({
@@ -167,21 +159,6 @@ export function TransactionCharts({
 
   const { responseTimeSeries, tpmSeries } = charts;
   const { transactionType } = urlParams;
-  const [maxY, setMaxY] = useState(0);
-  useEffect(() => {
-    setMaxY(getMaxY(responseTimeSeries));
-  }, [responseTimeSeries]);
-
-  const averageY = getAverageY(responseTimeSeries);
-
-  const formatTooltip = getDurationFormatter(averageY ?? maxY);
-  const formatter = getDurationFormatter(maxY);
-
-  const onToggleLegend = (series: Serie[]) => {
-    if (!isEmpty(series)) {
-      setMaxY(getMaxY(series as TimeSeries[]));
-    }
-  };
 
   return (
     <>
@@ -202,12 +179,9 @@ export function TransactionCharts({
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
               <TransactionLineChart
-                onToggleLegend={onToggleLegend}
                 series={responseTimeSeries}
-                tickFormatY={getResponseTimeTickFormatter(formatter)}
-                formatTooltipValue={getResponseTimeTooltipFormatter(
-                  formatTooltip
-                )}
+                tickFormatY={getResponseTimeTickFormatter()}
+                formatTooltipValue={getResponseTimeTooltipFormatter()}
               />
             </React.Fragment>
           </EuiPanel>

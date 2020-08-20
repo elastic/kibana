@@ -79,18 +79,6 @@ export class InnerCustomPlot extends PureComponent {
         return i === _i ? !disabledValue : !!disabledValue;
       });
 
-      if (typeof this.props.onToggleLegend === 'function') {
-        //Filters out disabled series
-        const availableSeries = this.props.series
-          .map((serie, index) => {
-            if (!nextSeriesEnabledState[index]) {
-              return serie;
-            }
-          })
-          .filter((serie) => serie);
-        this.props.onToggleLegend(availableSeries);
-      }
-
       return {
         seriesEnabledState: nextSeriesEnabledState,
       };
@@ -247,7 +235,6 @@ InnerCustomPlot.propTypes = {
     })
   ),
   noHits: PropTypes.bool,
-  onToggleLegend: PropTypes.func,
 };
 
 InnerCustomPlot.defaultProps = {
