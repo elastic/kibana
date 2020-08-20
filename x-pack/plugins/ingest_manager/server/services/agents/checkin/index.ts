@@ -63,7 +63,7 @@ async function processEventsForCheckin(
   const updatedErrorEvents: Array<AgentEvent | NewAgentEvent> = [...agent.current_error_events];
   for (const event of events) {
     // @ts-ignore
-    event.config_id = agent.config_id;
+    event.policy_id = agent.policy_id;
 
     if (isErrorOrState(event)) {
       // Remove any global or specific to a stream event

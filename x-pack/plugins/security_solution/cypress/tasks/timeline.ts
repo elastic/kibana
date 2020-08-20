@@ -12,6 +12,7 @@ import {
   CREATE_NEW_TIMELINE,
   EXPORT_TIMELINE_ACTION,
   FIRST_TIMELINE,
+  HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -118,7 +119,7 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(REMOVE_COLUMN).first().should('exist');
+  cy.get(HEADER).eq(column).click();
   cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
 };
 
