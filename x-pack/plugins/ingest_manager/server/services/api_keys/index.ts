@@ -38,11 +38,7 @@ export async function generateOutputApiKey(
   return { key: `${key.id}:${key.api_key}`, id: key.id };
 }
 
-export async function generateAccessApiKey(
-  soClient: SavedObjectsClientContract,
-  agentId: string,
-  configId: string
-) {
+export async function generateAccessApiKey(soClient: SavedObjectsClientContract, agentId: string) {
   const key = await createAPIKey(soClient, agentId, {
     // Useless role to avoid to have the privilege of the user that created the key
     'fleet-apikey-access': {
