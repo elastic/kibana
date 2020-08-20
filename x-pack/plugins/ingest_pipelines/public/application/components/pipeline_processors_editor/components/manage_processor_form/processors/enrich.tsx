@@ -81,7 +81,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef,
+    serializer: from.undefinedIfValue,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.overrideFieldLabel', {
       defaultMessage: 'Override',
     }),

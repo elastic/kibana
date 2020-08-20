@@ -129,7 +129,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(false),
+    serializer: from.undefinedIfValue(false),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.stripBracketsFieldLabel', {
       defaultMessage: 'Strip brackets',
     }),

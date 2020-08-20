@@ -33,10 +33,12 @@ import {
   Pipeline,
   Remove,
   Rename,
+  Script,
+  FormFieldsComponent,
 } from '../manage_processor_form/processors';
 
 interface FieldDescriptor {
-  FieldsComponent?: FunctionComponent;
+  FieldsComponent?: FormFieldsComponent;
   docLinkPath: string;
   /**
    * A sentence case label that can be displayed to users
@@ -223,7 +225,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   script: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Script,
     docLinkPath: '/script-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.script', {
       defaultMessage: 'Script',

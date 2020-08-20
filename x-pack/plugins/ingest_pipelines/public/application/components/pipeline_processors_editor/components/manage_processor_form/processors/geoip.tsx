@@ -61,7 +61,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(true),
+    serializer: from.undefinedIfValue(true),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.firstOnlyFieldLabel', {
       defaultMessage: 'First only',
     }),

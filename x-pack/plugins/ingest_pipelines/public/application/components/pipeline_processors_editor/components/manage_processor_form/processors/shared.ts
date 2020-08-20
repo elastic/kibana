@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { FunctionComponent } from 'react';
 import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
 
@@ -64,7 +64,9 @@ export const from = {
     }
   },
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
-  defaultBoolToUndef: (defaultBool: boolean) => (v: boolean) => (v === defaultBool ? undefined : v),
+  undefinedIfValue: (value: any) => (v: boolean) => (v === value ? undefined : v),
 };
 
 export type FieldsConfig = Record<string, FieldConfig>;
+
+export type FormFieldsComponent = FunctionComponent<{ initialFieldValues?: Record<string, any> }>;
