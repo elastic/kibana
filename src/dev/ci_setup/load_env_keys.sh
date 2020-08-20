@@ -34,7 +34,7 @@ else
   PERCY_TOKEN=$(retry 5 vault read -field=value secret/kibana-issues/dev/percy)
   export PERCY_TOKEN
 
-  FOSSA_API_KEY=$(vault read -field=token secret/jenkins-ci/fossa/api-token)
+  FOSSA_API_KEY=$(retry 5 vault read -field=token secret/jenkins-ci/fossa/api-token)
   export FOSSA_API_KEY
 
   # remove vault related secrets
