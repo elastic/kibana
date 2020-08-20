@@ -5,13 +5,10 @@
  */
 
 import _ from 'lodash';
-import { esFilters } from '../../../../src/plugins/data/public';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { CoreStart } from '../../../../src/core/public';
-
-export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 
 let licenseId: string | undefined;
 export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
