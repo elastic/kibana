@@ -66,8 +66,6 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
         await supertest.put(TIMELINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
 
-        // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
-        // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
         await waitFor(async () => {
           const { body } = await supertest
             .get(`${TIMELINE_PREPACKAGED_URL}/_status`)

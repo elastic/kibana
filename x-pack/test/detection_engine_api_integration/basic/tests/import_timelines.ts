@@ -255,7 +255,6 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
       };
-      beforeEach(async () => {});
 
       afterEach(async () => {
         await deleteAllTimelines(es);
@@ -375,7 +374,6 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
       };
-      beforeEach(async () => {});
 
       afterEach(async () => {
         await deleteAllTimelines(es);
