@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, ByteSizeValue, TypeOf } from '@kbn/config-schema';
 
 const KibanaServerSchema = schema.object({
   hostname: schema.maybe(
@@ -114,7 +114,7 @@ const CsvSchema = schema.object({
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
-    defaultValue: 1024 * 1024 * 10,
+    defaultValue: ByteSizeValue.parse('10mb').getValueInBytes(),
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
