@@ -5,6 +5,10 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import Boom from 'boom';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import { appContextService } from './services';
+
 export class IngestManagerError extends Error {
   constructor(message?: string) {
     super(message);
@@ -21,6 +25,41 @@ export const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
 
   return 400; // Bad Request
+};
+
+interface IngestErrorHandler {
+  error: IngestManagerError | Boom | Error;
+  response: KibanaResponseFactory;
+  request?: KibanaRequest;
+  context?: RequestHandlerContext;
+}
+
+export const defaultIngestErrorHandler = async ({
+  error,
+  request,
+  response,
+  context,
+}: IngestErrorHandler) => {
+  const logger = appContextService.getLogger();
+  if (error instanceof IngestManagerError) {
+    logger.error(error.message);
+    return response.customError({
+      statusCode: getHTTPResponseCode(error),
+      body: { message: error.message },
+    });
+  }
+  if ('isBoom' in error) {
+    logger.error(error.output.payload.message);
+    return response.customError({
+      statusCode: error.output.statusCode,
+      body: { message: error.output.payload.message },
+    });
+  }
+  logger.error(error);
+  return response.customError({
+    statusCode: 500,
+    body: { message: error.message },
+  });
 };
 
 export class RegistryError extends IngestManagerError {}
