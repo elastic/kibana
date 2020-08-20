@@ -18,10 +18,10 @@
  */
 
 import { EsQueryConfig } from './build_es_query';
-import { UI_SETTINGS } from '../../';
+import { GetConfigFn, UI_SETTINGS } from '../../';
 
 interface KibanaConfig {
-  get<T>(key: string): T;
+  get: GetConfigFn;
 }
 
 export function getEsQueryConfig(config: KibanaConfig) {

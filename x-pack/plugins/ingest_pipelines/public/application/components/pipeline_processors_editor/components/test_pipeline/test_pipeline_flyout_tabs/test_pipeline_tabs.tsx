@@ -8,12 +8,12 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 
-export type Tab = 'documents' | 'output';
+export type TestPipelineFlyoutTab = 'documents' | 'output';
 
 interface Props {
-  onTabChange: (tab: Tab) => void;
-  selectedTab: Tab;
-  getIsDisabled: (tab: Tab) => boolean;
+  onTabChange: (tab: TestPipelineFlyoutTab) => void;
+  selectedTab: TestPipelineFlyoutTab;
+  getIsDisabled: (tab: TestPipelineFlyoutTab) => boolean;
 }
 
 export const Tabs: React.FunctionComponent<Props> = ({
@@ -22,15 +22,15 @@ export const Tabs: React.FunctionComponent<Props> = ({
   getIsDisabled,
 }) => {
   const tabs: Array<{
-    id: Tab;
+    id: TestPipelineFlyoutTab;
     name: React.ReactNode;
   }> = [
     {
       id: 'documents',
       name: (
         <FormattedMessage
-          id="xpack.ingestPipelines.tabs.documentsTabTitle"
-          defaultMessage="Documents"
+          id="xpack.ingestPipelines.tabs.configurationTabTitle"
+          defaultMessage="Configuration"
         />
       ),
     },
