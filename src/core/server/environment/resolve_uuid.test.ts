@@ -23,7 +23,6 @@ import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import { PathConfigType } from '../path';
 import { HttpConfigType } from '../http';
-import { Logger } from '../logging';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',

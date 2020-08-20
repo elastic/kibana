@@ -26,7 +26,7 @@ jest.mock('./fs', () => ({
   mkdir: jest.fn(() => Promise.resolve('')),
 }));
 
-const mkdirMock = mkdir as Jest.Mock;
+const mkdirMock = mkdir as jest.Mock;
 
 describe('createDataFolder', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
