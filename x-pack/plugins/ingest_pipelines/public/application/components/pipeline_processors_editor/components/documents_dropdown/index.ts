@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TestPipelineActions } from './test_pipeline_actions';
+export { DocumentsDropdown } from './documents_dropdown';

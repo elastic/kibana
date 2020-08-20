@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCodeBlock,
@@ -17,39 +17,40 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useTestConfigContext } from '../../../context';
+import { Document } from '../../../types';
+import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
 
 interface Props {
-  executeOutput?: { docs: object[] };
-  handleExecute: (documents: object[], verbose: boolean) => void;
-  isExecuting: boolean;
+  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
+  isRunningTest: boolean;
+  cachedVerbose?: boolean;
+  cachedDocuments: Document[];
+  testOutput?: any;
 }
 
 export const OutputTab: React.FunctionComponent<Props> = ({
-  executeOutput,
-  handleExecute,
-  isExecuting,
+  handleTestPipeline,
+  isRunningTest,
+  cachedVerbose,
+  cachedDocuments,
+  testOutput,
 }) => {
-  const { setCurrentTestConfig, testConfig } = useTestConfigContext();
-  const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
+  const [isVerboseEnabled, setIsVerboseEnabled] = useState(Boolean(cachedVerbose));
 
-  const onEnableVerbose = (isVerboseEnabled: boolean) => {
-    setCurrentTestConfig({
-      ...testConfig,
-      verbose: isVerboseEnabled,
-    });
+  const onEnableVerbose = (isVerbose: boolean) => {
+    setIsVerboseEnabled(isVerbose);
 
-    handleExecute(cachedDocuments!, isVerboseEnabled);
+    handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
   };
 
   let content: React.ReactNode | undefined;
 
-  if (isExecuting) {
+  if (isRunningTest) {
     content = <EuiLoadingSpinner size="m" />;
-  } else if (executeOutput) {
+  } else if (testOutput) {
     content = (
       <EuiCodeBlock language="json" isCopyable>
-        {JSON.stringify(executeOutput, null, 2)}
+        {JSON.stringify(testOutput, null, 2)}
       </EuiCodeBlock>
     );
   }
@@ -76,14 +77,16 @@ export const OutputTab: React.FunctionComponent<Props> = ({
                 defaultMessage="View verbose output"
               />
             }
-            checked={cachedVerbose}
+            checked={isVerboseEnabled}
             onChange={(e) => onEnableVerbose(e.target.checked)}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
-            onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}
+            onClick={() =>
+              handleTestPipeline({ documents: cachedDocuments!, verbose: isVerboseEnabled })
+            }
             iconType="refresh"
           >
             <FormattedMessage
