@@ -1,6 +1,7 @@
 const ciStats = require('./ci_stats');
 
-const BUILD_STATUS = env.BUILD_STATUS === 'SUCCESS' ? 'SUCCESS' : 'FAILURE';
+// TODO this should be a TeamCity REST API call
+const BUILD_STATUS = process.env.BUILD_STATUS === 'SUCCESS' ? 'SUCCESS' : 'FAILURE';
 
 (async () => {
   try {

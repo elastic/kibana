@@ -21,8 +21,8 @@ const ciStats = require('./ci_stats');
     console.log(`\n##teamcity[setParameter name='env.CI_STATS_BUILD_ID' value='${build.id}']\n`);
 
     await ciStats.post(`v1/git_info?buildId=${build.id}`, {
-      branch: env.GIT_BRANCH.replace(/^(refs\/heads\/|origin\/)/, ''),
-      commit: env.GIT_COMMIT,
+      branch: process.env.GIT_BRANCH.replace(/^(refs\/heads\/|origin\/)/, ''),
+      commit: process.env.GIT_COMMIT,
       targetBranch: null, // TODO once we have PR support
       mergeBase: null, // TODO once we have PR support
     });
