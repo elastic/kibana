@@ -268,13 +268,3 @@ export const routes: BreadcrumbRoute[] = [
     name: RouteName.ANOMALY_DETECTION,
   },
 ];
-
-export const rumRoutes: BreadcrumbRoute[] = [
-  {
-    exact: true,
-    path: '/',
-    render: renderAsRedirectTo('/client-side-monitoring'),
-    breadcrumb: 'Client Side Monitoring',
-    name: RouteName.CSM,
-  },
-];
