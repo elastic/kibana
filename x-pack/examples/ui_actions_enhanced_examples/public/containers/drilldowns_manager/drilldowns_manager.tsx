@@ -12,6 +12,7 @@ import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '../../../../../plugins/ui_actions_enhanced/public';
+import { SAMPLE_ML_JOB_CLICK_TRIGGER } from '../../triggers';
 
 export const DrilldownsManager: React.FC = () => {
   const { plugins } = useUiActions();
@@ -51,7 +52,7 @@ export const DrilldownsManager: React.FC = () => {
             onClose={() => setShowManager(false)}
             viewMode={'create'}
             dynamicActionManager={manager}
-            triggers={['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER']}
+            triggers={[SAMPLE_ML_JOB_CLICK_TRIGGER]}
           />
         </EuiFlyout>
       )}

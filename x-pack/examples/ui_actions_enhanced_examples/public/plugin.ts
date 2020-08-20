@@ -13,6 +13,7 @@ import {
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToUrlDrilldown } from './drilldowns/dashboard_to_url_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
+import { MlToUrlDrilldown } from './drilldowns/ml_to_url_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
@@ -45,6 +46,7 @@ export class UiActionsEnhancedExamplesPlugin
     uiActions.registerDrilldown(new DashboardHelloWorldOnlyRangeSelectDrilldown());
     uiActions.registerDrilldown(new DashboardToUrlDrilldown());
     uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
+    uiActions.registerDrilldown(new MlToUrlDrilldown());
 
     uiActions.registerTrigger(sampleMlJobClickTrigger);
 
