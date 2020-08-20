@@ -24,3 +24,4 @@ export const plugin = () => new ChartsPlugin();
 export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
+export * from './services/palettes/types';

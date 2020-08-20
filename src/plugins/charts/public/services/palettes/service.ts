@@ -21,6 +21,7 @@ import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
 import { buildPalettes } from './palettes';
+import { LegacyColorsService } from '../legacyColors';
 
 export interface PaletteSetupPlugins {
   expressions: ExpressionsSetup;
@@ -30,9 +31,9 @@ export interface PaletteSetupPlugins {
 export class PaletteService {
   constructor() {}
 
-  public setup(core: CoreSetup, plugins: PaletteSetupPlugins) {
-    const palettes = buildPalettes(plugins);
+  public setup(core: CoreSetup, colorsService: LegacyColorsService) {
+    const palettes = buildPalettes(colorsService);
 
-    return { palettes };
+    return palettes;
   }
 }

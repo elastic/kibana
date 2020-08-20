@@ -7,6 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
+import { PaletteDefinition } from 'src/plugins/charts/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -60,7 +61,6 @@ export interface EditorFrameSetup {
   registerVisualization: <T, P>(
     visualization: Visualization<T, P> | Promise<Visualization<T, P>>
   ) => void;
-  palettes: Record<string, PaletteDefinition>;
 }
 
 export interface EditorFrameStart {

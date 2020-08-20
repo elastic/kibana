@@ -33,13 +33,12 @@ import {
   ILensInterpreterRenderHandlers,
   LensFilterEvent,
   LensBrushEvent,
-  SeriesLayer,
 } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, SeriesLayer } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
@@ -91,6 +90,11 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'Y axis title',
     },
+    palette: {
+      default: `{theme "palette" default={palette name="default"} }`,
+      help: '',
+      types: ['string'],
+    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
@@ -133,11 +137,6 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['lens_xy_layer'] as any,
       help: 'Layers of visual series',
       multi: true,
-    },
-    palette: {
-      types: ['lens_palette'],
-      help: '',
-      default: `{lens_palette_default}`,
     },
   },
   fn(data: LensMultiTable, args: XYArgs) {
@@ -516,6 +515,7 @@ export function XYChart({
                     (splitAccessor ? splits.indexOf(seriesKeys[0]) * accessors.length : 0) +
                     accessors.indexOf(String(yAccessor)),
                   maxDepth: 1,
+                  behindText: false,
                 },
               ];
               return palette.getColor(seriesLayers);

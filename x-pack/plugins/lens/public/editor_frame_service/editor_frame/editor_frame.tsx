@@ -6,6 +6,7 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { PaletteDefinition } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import {
   Datasource,
@@ -13,7 +14,6 @@ import {
   FramePublicAPI,
   Visualization,
   DatasourceMetaData,
-  PaletteDefinition,
 } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';

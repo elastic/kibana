@@ -29,6 +29,7 @@ export type Color = Omit<LegacyColorsService, 'init'>;
 export interface ChartsPluginSetup {
   legacyColors: Color;
   theme: Theme;
+  palettes: ReturnType<PaletteService['setup']>;
 }
 
 /** @public */
@@ -40,14 +41,17 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
   private readonly legacyColorsService = new LegacyColorsService();
   private readonly paletteService = new PaletteService();
 
-  public setup({ uiSettings }: CoreSetup): ChartsPluginSetup {
-    this.themeService.init(uiSettings);
-    this.legacyColorsService.init(uiSettings);
-    this.paletteService.setup();
+  private palettes: undefined | ReturnType<PaletteService['setup']>;
+
+  public setup(core: CoreSetup): ChartsPluginSetup {
+    this.themeService.init(core.uiSettings);
+    this.legacyColorsService.init(core.uiSettings);
+    this.palettes = this.paletteService.setup(core, this.legacyColorsService);
 
     return {
       legacyColors: this.legacyColorsService,
       theme: this.themeService,
+      palettes: this.palettes,
     };
   }
 
@@ -55,6 +59,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     return {
       legacyColors: this.legacyColorsService,
       theme: this.themeService,
+      palettes: this.palettes!,
     };
   }
 }

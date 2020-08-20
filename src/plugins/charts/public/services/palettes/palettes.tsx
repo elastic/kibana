@@ -28,12 +28,12 @@ import {
   euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import { PaletteSetupPlugins } from './service';
 import { lightenColor } from './lighten_color';
 import { PaletteDefinition, SeriesLayer } from './types';
+import { LegacyColorsService } from '../legacyColors';
 
 function buildRoundRobinCategoricalWithMappedColors(
-  colorService: ChartsPluginSetup['legacyColors'],
+  colorService: LegacyColorsService,
   id: string,
   colors: (n: number) => string[],
   behindTextColors?: (n: number) => string[]
@@ -89,15 +89,15 @@ function buildSyncedKibanaPalette(colors: ChartsPluginSetup['legacyColors']) {
 }
 
 export const buildPalettes: (
-  dependencies: PaletteSetupPlugins
-) => Record<string, PaletteDefinition> = ({ charts }) => {
+  legacyColorsService: LegacyColorsService
+) => Record<string, PaletteDefinition> = (legacyColorsService) => {
   const buildRoundRobinCategorical = (
     id: string,
     colors: (n: number) => string[],
     behindTextColors?: (n: number) => string[]
   ) => {
     return buildRoundRobinCategoricalWithMappedColors(
-      charts.legacyColors,
+      legacyColorsService,
       id,
       colors,
       behindTextColors
@@ -118,7 +118,7 @@ export const buildPalettes: (
       title: i18n.translate('xpack.lens.palettes.kibanaPaletteLabel', {
         defaultMessage: 'legacy',
       }),
-      ...buildSyncedKibanaPalette(charts.legacyColors),
+      ...buildSyncedKibanaPalette(legacyColorsService),
     },
     negative: {
       title: i18n.translate('xpack.lens.palettes.negativeLabel', { defaultMessage: 'negative' }),
