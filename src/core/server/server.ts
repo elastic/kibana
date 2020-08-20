@@ -31,7 +31,7 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { UuidService } from './uuid';
+import { EnvironmentService } from './environment';
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
@@ -64,7 +64,7 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
-  private readonly uuid: UuidService;
+  private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -95,7 +95,7 @@ export class Server {
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
-    this.uuid = new UuidService(core);
+    this.environment = new EnvironmentService(core);
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
@@ -124,7 +124,7 @@ export class Server {
     });
 
     const auditTrailSetup = this.auditTrail.setup();
-    const uuidSetup = await this.uuid.setup();
+    const environmentSetup = await this.environment.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -174,11 +174,11 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
+      environment: environmentSetup,
       http: httpSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
       uiSettings: uiSettingsSetup,
-      uuid: uuidSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,

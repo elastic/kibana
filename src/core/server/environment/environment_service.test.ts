@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UuidService } from './uuid_service';
+import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { CoreContext } from '../core_context';
 
@@ -40,7 +40,7 @@ describe('UuidService', () => {
 
   describe('#setup()', () => {
     it('calls resolveInstanceUuid with core configuration service', async () => {
-      const service = new UuidService(coreContext);
+      const service = new EnvironmentService(coreContext);
       await service.setup();
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
@@ -50,7 +50,7 @@ describe('UuidService', () => {
     });
 
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      const service = new UuidService(coreContext);
+      const service = new EnvironmentService(coreContext);
       const setup = await service.setup();
       expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
     });

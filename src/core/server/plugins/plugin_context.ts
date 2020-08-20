@@ -182,8 +182,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
     },
-    uuid: {
-      getInstanceUuid: deps.uuid.getInstanceUuid,
+    environment: {
+      getInstanceUuid: deps.environment.getInstanceUuid,
     },
     getStartServices: () => plugin.startDependencies,
     auditTrail: deps.auditTrail,

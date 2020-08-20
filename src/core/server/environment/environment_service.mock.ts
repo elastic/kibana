@@ -17,4 +17,25 @@
  * under the License.
  */
 
-export { UuidService, UuidServiceSetup } from './uuid_service';
+import { EnvironmentService, EnvironmentServiceSetup } from './environment_service';
+
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<EnvironmentServiceSetup> = {
+    getInstanceUuid: jest.fn().mockImplementation(() => 'uuid'),
+  };
+  return setupContract;
+};
+
+type EnvironmentServiceContract = PublicMethodsOf<EnvironmentService>;
+const createMock = () => {
+  const mocked: jest.Mocked<EnvironmentServiceContract> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockResolvedValue(createSetupContractMock());
+  return mocked;
+};
+
+export const environmentServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

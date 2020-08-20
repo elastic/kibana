@@ -92,7 +92,7 @@ export class Plugin {
     const router = core.http.createRouter();
     this.legacyShimDependencies = {
       router,
-      instanceUuid: core.uuid.getInstanceUuid(),
+      instanceUuid: core.environment.getInstanceUuid(),
       esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
@@ -162,7 +162,7 @@ export class Plugin {
         config,
         log: kibanaMonitoringLog,
         kibanaStats: {
-          uuid: core.uuid.getInstanceUuid(),
+          uuid: core.environment.getInstanceUuid(),
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo.hostname,

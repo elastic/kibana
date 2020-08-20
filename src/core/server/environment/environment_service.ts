@@ -27,7 +27,7 @@ import { IConfigService } from '../config';
  *
  * @public
  */
-export interface UuidServiceSetup {
+export interface EnvironmentServiceSetup {
   /**
    * Retrieve the Kibana instance uuid.
    */
@@ -35,7 +35,7 @@ export interface UuidServiceSetup {
 }
 
 /** @internal */
-export class UuidService {
+export class EnvironmentService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
   private uuid: string = '';
