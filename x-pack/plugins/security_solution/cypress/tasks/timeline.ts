@@ -9,6 +9,7 @@ import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
 import {
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
+  HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -114,7 +115,7 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(REMOVE_COLUMN).first().should('exist');
+  cy.get(HEADER).eq(column).click();
   cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
 };
 

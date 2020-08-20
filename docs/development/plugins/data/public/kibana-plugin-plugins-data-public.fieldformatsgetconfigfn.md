@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export declare type FieldFormatsGetConfigFn = GetConfigFn;
 ```

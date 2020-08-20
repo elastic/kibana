@@ -13,4 +13,5 @@ export interface AuditEvent {
   scope?: string;
   user?: string;
   space?: string;
+  requestId?: string;
 }

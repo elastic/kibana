@@ -221,13 +221,6 @@ export class Simulator {
   }
 
   /**
-   * Lines that connect the nodes in the graph
-   */
-  public edgeLines(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:edgeline"]');
-  }
-
-  /**
    * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
