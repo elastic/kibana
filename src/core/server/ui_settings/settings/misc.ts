@@ -36,7 +36,7 @@ export const getMiscUiSettings = (): Record<string, UiSettingsParams> => {
     },
     buildNum: {
       readonly: true,
-      schema: schema.maybe(schema.string()),
+      schema: schema.maybe(schema.any()),
     },
   };
 };
