@@ -33,7 +33,6 @@ export const WorkplaceSearch: React.FC = () => {
         </Route>
         <Route>
           <Redirect to={SETUP_GUIDE_PATH} />
-          <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
         </Route>
       </Switch>
     );
