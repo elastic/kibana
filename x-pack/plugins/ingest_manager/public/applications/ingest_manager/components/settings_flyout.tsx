@@ -139,7 +139,8 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             id: 'disabled',
             disabled: true,
             label: i18n.translate('xpack.ingestManager.settings.autoUpgradeDisabledLabel', {
-              defaultMessage: 'Manually manage agent binary versions. Requires Gold license.',
+              defaultMessage:
+                'Manually manage agent binary versions. Requires a Gold subscription.',
             }),
           },
         ]}
@@ -167,7 +168,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               'xpack.ingestManager.settings.integrationUpgradeEnabledFieldLabel',
               {
                 defaultMessage:
-                  'Automatically update integrations to the latest version to receive the latest assets. Agent configurations may need to be updated in order to use new features.',
+                  'Automatically update integrations to the latest version to get the latest assets. You might need to update agent policies to use new features.',
               }
             ),
           },
@@ -210,7 +211,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.settings.globalOutputDescription"
-          defaultMessage="The global output is applied to all agent configurations and specifies where data is sent."
+          defaultMessage="Specify where to send data. These settings are applied to all Elastic Agent policies."
         />
       </EuiText>
       <EuiSpacer size="m" />

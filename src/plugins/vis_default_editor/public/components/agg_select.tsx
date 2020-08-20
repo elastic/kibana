@@ -159,6 +159,7 @@ function DefaultEditorAggSelect({
         isClearable={false}
         isInvalid={showValidation ? !isValid : false}
         fullWidth={true}
+        sortMatchesBy="startsWith"
         compressed
       />
     </EuiFormRow>

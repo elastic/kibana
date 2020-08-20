@@ -298,7 +298,7 @@ const ConfirmUpdate = React.memo<{
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent configuration."
+                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
               />
             </EuiCallOut>
             <EuiSpacer size="xl" />
