@@ -28,6 +28,7 @@ import { getTaskStateBadge } from './use_columns';
 import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
+  getAnalysisType,
   ANALYSIS_CONFIG_TYPE,
   REGRESSION_STATS,
   isRegressionEvaluateResponse,
@@ -76,6 +77,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const resultsField = item.config.dest.results_field;
   const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
   const isRegressionJob = isRegressionAnalysis(item.config.analysis);
+  const analysisType = getAnalysisType(item.config.analysis);
 
   const loadData = async () => {
     setIsLoadingGeneralization(true);
@@ -160,6 +162,10 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const stateValues: any = { ...item.stats };
 
+  const analysisStatsValues = stateValues.analysis_stats
+    ? stateValues.analysis_stats[`${analysisType}_stats`]
+    : undefined;
+
   if (item.config?.description) {
     stateValues.description = item.config.description;
   }
@@ -169,16 +175,19 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
       defaultMessage: 'State',
     }),
-    items: Object.entries(stateValues).map(([stateKey, stateValue]) => {
-      const title = stateKey.toString();
-      if (title === 'state') {
-        return {
-          title,
-          description: getTaskStateBadge(getItemDescription(stateValue)),
-        };
-      }
-      return { title, description: getItemDescription(stateValue) };
-    }),
+    items: Object.entries(stateValues)
+      .map(([stateKey, stateValue]) => {
+        const title = stateKey.toString();
+        if (title === 'state') {
+          return {
+            title,
+            description: getTaskStateBadge(getItemDescription(stateValue)),
+          };
+        } else if (title !== 'analysis_stats') {
+          return { title, description: getItemDescription(stateValue) };
+        }
+      })
+      .filter((stateItem) => stateItem !== undefined),
     position: 'left',
   };
 
@@ -223,6 +232,36 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     ],
     position: 'right',
   };
+
+  const analysisStats: SectionConfig = analysisStatsValues
+    ? {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.analysisStats',
+          {
+            defaultMessage: 'Analysis stats',
+          }
+        ),
+        items: [
+          {
+            title: 'timestamp',
+            description: formatHumanReadableDateTimeSeconds(
+              moment(analysisStatsValues.timestamp).unix() * 1000
+            ),
+          },
+          {
+            title: 'timing_stats',
+            description: getItemDescription(analysisStatsValues.timing_stats),
+          },
+          ...Object.entries(
+            analysisStatsValues.parameters || analysisStatsValues.hyperparameters
+          ).map(([stateKey, stateValue]) => {
+            const title = stateKey.toString();
+            return { title, description: getItemDescription(stateValue) };
+          }),
+        ],
+        position: 'right',
+      }
+    : {};
 
   if (jobIsCompleted && isRegressionJob) {
     stats.items.push(
@@ -315,7 +354,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <ExpandedRowDetailsPane sections={[state, progress, stats]} />,
+      content: <ExpandedRowDetailsPane sections={[state, progress, stats, analysisStats]} />,
     },
     {
       id: 'ml-analytics-job-json',
