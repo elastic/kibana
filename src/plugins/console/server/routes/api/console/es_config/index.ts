@@ -17,9 +17,17 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
+import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
+import { RouteDependencies } from '../../../';
+
+export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
+  router.get({ path: '/api/console/es_config', validate: false }, async (ctx, req, res) => {
+    const {
+      hosts: [host],
+    } = await services.esLegacyConfigService.readConfig();
+
+    const body: EsConfigApiResponse = { host };
+
+    return res.ok({ body });
+  });
+};

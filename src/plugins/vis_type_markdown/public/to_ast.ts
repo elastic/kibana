@@ -17,9 +17,23 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
+import { Vis } from '../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
+
+export const toExpressionAst = (vis: Vis) => {
+  const { markdown, fontSize, openLinksInNewTab } = vis.params;
+
+  const markdownVis = buildExpressionFunction<MarkdownVisExpressionFunctionDefinition>(
+    'markdownVis',
+    {
+      markdown,
+      font: buildExpression(`font size=${fontSize}`),
+      openLinksInNewTab,
+    }
+  );
+
+  const ast = buildExpression([markdownVis]);
+
+  return ast.toAst();
+};

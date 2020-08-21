@@ -18,7 +18,6 @@
  */
 
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
-import { registerCspCollector } from './server/lib/csp_usage_collector';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -35,11 +34,6 @@ export default function (kibana) {
 
     uiExports: {
       uiSettingDefaults: getUiSettingDefaults(),
-    },
-
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      registerCspCollector(usageCollection, server);
     },
   });
 }
