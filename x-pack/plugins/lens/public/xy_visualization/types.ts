@@ -353,7 +353,6 @@ export interface XYState {
 }
 
 export type State = XYState;
-export type PersistableState = XYState;
 
 export const visualizationTypes: VisualizationType[] = [
   {
