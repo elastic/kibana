@@ -26,12 +26,14 @@ interface RenderValue {
   visConfig: MarkdownVisParams;
 }
 
-export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
+export type MarkdownVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'markdownVis',
   unknown,
   Arguments,
   Render<RenderValue>
-> => ({
+>;
+
+export const createMarkdownVisFn = (): MarkdownVisExpressionFunctionDefinition => ({
   name: 'markdownVis',
   type: 'render',
   inputTypes: [],
@@ -65,7 +67,7 @@ export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
   fn(input, args) {
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'markdown_vis',
       value: {
         visType: 'markdown',
         visConfig: {
