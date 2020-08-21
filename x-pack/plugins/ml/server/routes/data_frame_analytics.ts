@@ -16,7 +16,6 @@ import {
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
-  getDataFrameAnalyticsBaselineSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
@@ -556,7 +555,6 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}/baseline',
       validate: {
         params: analyticsIdSchema,
-        body: getDataFrameAnalyticsBaselineSchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],

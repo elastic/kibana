@@ -81,11 +81,3 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
-
-export const getDataFrameAnalyticsBaselineSchema = schema.object({
-  /**
-   * Analytics Baseline
-   */
-  destinationIndex: schema.string(),
-  predictionField: schema.string(),
-});
