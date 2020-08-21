@@ -31,7 +31,7 @@ export {
   IndexPattern,
   REFRESH_TRANSFORM_LIST_STATE,
 } from './transform';
-export { TRANSFORM_LIST_COLUMN, TransformListRow } from './transform_list';
+export { TRANSFORM_LIST_COLUMN, TransformListAction, TransformListRow } from './transform_list';
 export {
   getTransformProgress,
   isCompletedBatchTransform,

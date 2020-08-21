@@ -15,11 +15,12 @@ export default function ({ loadTestFile }) {
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 
-    // Package configs
-    loadTestFile(require.resolve('./package_config/create'));
-    loadTestFile(require.resolve('./package_config/update'));
-    loadTestFile(require.resolve('./package_config/get'));
-    // Agent config
-    loadTestFile(require.resolve('./agent_config/index'));
+    // Package policies
+    loadTestFile(require.resolve('./package_policy/create'));
+    loadTestFile(require.resolve('./package_policy/update'));
+    loadTestFile(require.resolve('./package_policy/get'));
+
+    // Agent policies
+    loadTestFile(require.resolve('./agent_policy/index'));
   });
 }
