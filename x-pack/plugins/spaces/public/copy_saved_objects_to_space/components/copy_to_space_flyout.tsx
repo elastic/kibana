@@ -282,6 +282,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
           copyResult={copyResult}
           numberOfSelectedSpaces={copyOptions.selectedSpaceIds.length}
           retries={retries}
+          onClose={onClose}
           onCopyStart={startCopy}
           onCopyFinish={finishCopy}
         />

@@ -75,8 +75,8 @@ You can request to overwrite any objects that already exist in the target space 
   `errors`:::
     (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
 +
-NOTE: One object may result in multiple errors which require separate steps to resolve (for instance, a `missing_references` error and a
-`conflict` error).
+NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and a
+`conflict` error.
 +
 .Properties of `errors`
 [%collapsible%open]
@@ -104,17 +104,17 @@ NOTE: One object may result in multiple errors which require separate steps to r
 ======
 
   `successResults`:::
-    (Optional, array) Indicates the objects that were copied successfully, with any metadata if applicable.
+    (Optional, array) Indicates successfully copied objects, with any applicable metadata.
 +
-NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
-errors. See the examples below for how to resolve these errors.
+NOTE: Objects are created when all resolvable errors are addressed, including conflict and missing references errors. For more information,
+refer to the <<spaces-api-copy-saved-objects-example,examples>>.
 
 =====
 [[spaces-api-copy-saved-objects-example]]
 ==== {api-examples-title}
 
 [[spaces-api-copy-saved-objects-example-1]]
-===== 1. Successful copy (with `createNewCopies` enabled)
+===== Successful copy (with `createNewCopies` enabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
 the dashboard has a reference to a visualization, and that has a reference to an index pattern:
@@ -175,11 +175,11 @@ The API returns the following:
 }
 ----
 
-This result indicates that the copy was successful, and all three objects were created. Since these objects were created as new copies, each
-entry in the `successResults` array includes a `destinationId` attribute.
+The result indicates a successful copy, and all three objects are created. Since these objects were created as new copies, each entry in the
+`successResults` array includes a `destinationId` attribute.
 
 [[spaces-api-copy-saved-objects-example-2]]
-===== 2. Successful copy (with `createNewCopies` disabled)
+===== Successful copy (with `createNewCopies` disabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
 the dashboard has a reference to a visualization, and that has a reference to an index pattern:
@@ -236,13 +236,14 @@ The API returns the following:
 }
 ----
 
-This result indicates that the copy was successful, and all three objects were created.
+The result indicates a successful copy, and all three objects are created.
 
 [[spaces-api-copy-saved-objects-example-3]]
-===== 3. Failed copy (with conflict errors)
+===== Failed copy (with conflict errors)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` and `sales` spaces. In
-this example, the dashboard has a reference to a visualization and a canvas, and the visualization has a reference to an index pattern:
+this example, the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to an index
+pattern:
 
 [source,sh]
 ----
@@ -369,31 +370,31 @@ The API returns the following:
 }
 ----
 
-This result indicates that the copy was successful for the `marketing` space, but it was not successful for the `sales` space because the
-index pattern, visualization, and dashboard each resulted in a conflict error:
+The result indicates a successful copy for the `marketing` space, and an unsuccessful copy for the `sales` space because the index pattern,
+visualization, and *Canvas* workpad each resulted in a conflict error:
 
-* An index pattern with the same ID already exists, so this resulted in a conflict error. This can be resolved by overwriting the existing
-object, or skipping this object entirely.
+* An index pattern with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
+or skip the object.
 
-* A visualization with a different ID but the same "origin" already exists, so this resulted in a conflict error as well. The
-`destinationId` field contains the `id` of the other visualization which caused this conflict. This behavior was added to ensure that new
-objects which can be shared between spaces behave in a similar way as legacy non-shareable objects. When a shareable object is copied into a
-new space, it retains its origin so that its conflicts will be encountered as expected. This can be resolved by overwriting the specified
-destination object, or skipping this object entirely.
+* A visualization with a different ID, but the same origin already exists, which resulted in a conflict error. The `destinationId` field
+contains the `id` of the other visualization, which caused the conflict. The behavior is added to make sure that new objects that can be
+shared between spaces behave in a similar way as legacy non-shareable objects. When a shareable object is copied into a new space, it
+retains its origin so that the conflicts are encountered as expected. To resolve, overwrite the specified destination object, or skip the
+object.
 
-* Two canvases with different IDs but the same "origin" already exist, so this resulted in an ambiguous conflict error. The `destinations`
-array describes to the other canvases which caused this conflict. When a shareable object is copied into a new space, and is _then_ shared
-to another space where an object of the same origin exists, this situation may occur. This can be resolved by picking one of the destination
-objects to overwrite, or skipping this object entirely.
+* Two *Canvas* workpads with different IDs, but the same origin, already exist, which resulted in a conflict error. The `destinations` array
+describes the other workpads which caused the conflict. When a shareable object is copied into a new space, then shared to another space
+where an object of the same origin exists, the conflict error occurs. To resolve, pick a destination object to overwrite, or skip the
+object.
 
-No objects will be copied until these errors are resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-1,Resolve copy
-conflicts API>>.
+Objects are created when the error is resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-1,Resolve copy conflicts
+API>>.
 
 [[spaces-api-copy-saved-objects-example-4]]
-===== 4. Failed copy (with missing reference errors)
+===== Failed copy (with missing reference errors)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization and a canvas, and the visualization has a reference to an index pattern:
+the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to an index pattern:
 
 [source,sh]
 ----
@@ -459,7 +460,7 @@ The API returns the following:
 }
 ----
 
-This result indicates that the copy was not successful because the visualization resulted in a missing references error.
+The result indicates an unsuccessful copy because the visualization resulted in a missing references error.
 
-No objects will be copied until this error is resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-2,Resolve copy
+Objects are created when the errors are resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-2,Resolve copy
 conflicts API>>.

@@ -5,7 +5,14 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
@@ -18,6 +25,7 @@ interface Props {
   copyResult: Record<string, ProcessedImportResponse>;
   retries: Record<string, ImportRetry[]>;
   numberOfSelectedSpaces: number;
+  onClose: () => void;
   onCopyStart: () => void;
   onCopyFinish: () => void;
 }
@@ -27,7 +35,13 @@ const isResolvableError = ({ error: { type } }: FailedImport) =>
 const isUnresolvableError = (failure: FailedImport) => !isResolvableError(failure);
 
 export const CopyToSpaceFlyoutFooter = (props: Props) => {
-  const { copyInProgress, initialCopyFinished, copyResult, retries } = props;
+  const {
+    copyInProgress,
+    conflictResolutionInProgress,
+    initialCopyFinished,
+    copyResult,
+    retries,
+  } = props;
 
   let summarizedResults = {
     successCount: 0,
@@ -83,10 +97,10 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
       actionButton = (
         <EuiButton
           fill
-          isLoading={props.conflictResolutionInProgress}
+          isLoading={conflictResolutionInProgress}
           aria-live="assertive"
           aria-label={
-            props.conflictResolutionInProgress
+            conflictResolutionInProgress
               ? i18n.translate('xpack.spaces.management.copyToSpace.inProgressButtonLabel', {
                   defaultMessage: 'Copy is in progress. Please wait.',
                 })
@@ -126,7 +140,24 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
     }
 
     return (
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={() => props.onClose()}
+            data-test-subj="cts-cancel-button"
+            disabled={
+              // Cannot cancel while the operation is in progress, or after some objects have already been created
+              (copyInProgress && !initialCopyFinished) ||
+              conflictResolutionInProgress ||
+              summarizedResults.successCount > 0
+            }
+          >
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.cancelButton"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
       </EuiFlexGroup>
     );

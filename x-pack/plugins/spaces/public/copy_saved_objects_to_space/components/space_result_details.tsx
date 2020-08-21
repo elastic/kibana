@@ -178,7 +178,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   options={selectProps.options}
                   valueOfSelected={destinationMap.get(`${type}:${id}`)}
                   onChange={selectProps.onChange}
-                  append={i18n.translate(
+                  prepend={i18n.translate(
                     'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
                     { defaultMessage: 'Object ID' }
                   )}

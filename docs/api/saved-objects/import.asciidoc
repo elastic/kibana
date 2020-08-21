@@ -23,14 +23,14 @@ experimental[] Create sets of {kib} saved objects from a file created by the exp
 ==== Query parameters
 
 `createNewCopies`::
-  (Optional, boolean) Creates new copies of saved objects, regenerating each object's ID and resetting its origin in the process. If this
-  option is used, potential conflict errors will be avoided.
+  (Optional, boolean) Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
+  errors are avoided.
 +
 NOTE: This cannot be used with the `overwrite` option.
 
 `overwrite`::
-  (Optional, boolean) Overwrites saved objects if they already exist. If this option is used, potential conflict errors will be
-  automatically resolved by overwriting the destination object.
+  (Optional, boolean) Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by
+  overwriting the destination object.
 +
 NOTE: This cannot be used with the `createNewCopies` option.
 
@@ -46,23 +46,23 @@ The request body must include the multipart/form-data type.
 ==== Response body
 
 `success`::
-  (boolean) Indicates if the import was completely successful. When set to `false`, some objects may have been copied. For additional
-  information, refer to the `errors` and `successResults` properties.
+  (boolean) Indicates when the import was successfully completed. When set to `false`, some objects may not have been created. For
+  additional information, refer to the `errors` and `successResults` properties.
 
 `successCount`::
   (number) Indicates the number of successfully imported records.
 
 `errors`::
-  (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
+  (Optional, array) Indicates the import was unsuccessful and specifies the objects that failed to import.
 +
-NOTE: One object may result in multiple errors which require separate steps to resolve (for instance, a `missing_references` error and a
+NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and
 `conflict` error).
 
 `successResults`::
-  (array) Indicates the objects that were imported successfully, with any metadata if applicable.
+  (Optional, array) Indicates the objects that are successfully imported, with any metadata if applicable.
 +
-NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
-errors. See the examples below for how to resolve these errors.
+NOTE: Objects are only created when all resolvable errors are addressed, including conflicts and missing references. For information on how
+to resolve errors, refer to the <<saved-objects-api-import-example,examples>>.
 
 [[saved-objects-api-import-codes]]
 ==== Response code
@@ -74,7 +74,7 @@ errors. See the examples below for how to resolve these errors.
 ==== Examples
 
 [[saved-objects-api-import-example-1]]
-===== 1. Successful import (with `createNewCopies` enabled)
+===== Successful import with `createNewCopies` enabled
 
 Import an index pattern and dashboard:
 
@@ -122,11 +122,11 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was successful, and both objects were created. Since these objects were created as new copies, each
-entry in the `successResults` array includes a `destinationId` attribute.
+The result indicates a successful import, and both objects are created. Since these objects are created as new copies, each entry in the
+`successResults` array includes a `destinationId` attribute.
 
 [[saved-objects-api-import-example-2]]
-===== 2. Successful import (with `createNewCopies` disabled)
+===== Successful import with `createNewCopies` disabled
 
 Import an index pattern and dashboard:
 
@@ -172,12 +172,12 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was successful, and both objects were created.
+The result indicates a successful import, and both objects are created.
 
 [[saved-objects-api-import-example-3]]
-===== 3. Failed import (with conflict errors)
+===== Failed import with conflict errors
 
-Import an index pattern, visualization, canvas, and dashboard, where some objects already exists:
+Import an index pattern, visualization, *Canvas* workpad, and dashboard that include saved objects:
 
 [source,sh]
 --------------------------------------------------
@@ -266,30 +266,29 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was not successful because the index pattern, visualization, and dashboard each resulted in a conflict
+The result indicates an unsuccessful import because the index pattern, visualization, *Canvas* workpad, and dashboard resulted in a conflict
 error:
 
-* An index pattern with the same ID already exists, so this resulted in a conflict error. This can be resolved by overwriting the existing
-object, or skipping this object entirely.
+* An index pattern with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
+or skip the object.
 
-* A visualization with a different ID but the same "origin" already exists, so this resulted in a conflict error as well. The
-`destinationId` field contains the `id` of the other visualization which caused this conflict. This behavior was added to ensure that new
-objects which can be shared between <<xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object
-is exported and then imported into a new space, it retains its origin so that its conflicts will be encountered as expected. This can be
-resolved by overwriting the specified destination object, or skipping this object entirely.
+* A visualization with a different ID, but the same origin already exists, which resulted in a conflict error. The `destinationId` field
+contains the `id` of the other visualization, which caused the conflict. The behavior is added to make sure that new objects that can be
+shared between <<xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object is exported and then
+imported into a new space, it retains its origin so that the conflicts are encountered as expected. To resolve, overwrite the specified
+destination object, or skip the object.
 
-* Two canvases with different IDs but the same "origin" already exist, so this resulted in an ambiguous conflict error. The `destinations`
-array describes to the other canvases which caused this conflict. When a shareable object is exported and then imported into a new space,
-and is _then_ shared to another space where an object of the same origin exists, this situation may occur. This can be resolved by picking
-one of the destination objects to overwrite, or skipping this object entirely.
+* Two *Canvas* workpads with different IDs, but the same origin, already exist, which resulted in a conflict error. The `destinations` array
+describes the other workpads which caused the conflict. When a shareable object is exported, imported into a new space, then shared to
+another space where an object of the same origin exists, the conflict error occurs. To resolve, pick a destination object to overwrite, or
+skip the object.
 
-No objects will be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-1,Resolve import errors
-API>>.
+Objects are created when the error is resolved using the <<saved-objects-api-resolve-import-errors-example-1,Resolve import errors API>>.
 
 [[saved-objects-api-import-example-4]]
-===== 4. Failed import (with missing reference errors)
+===== Failed import with missing reference errors
 
-Import a visualization and dashboard with an index pattern for the visualization reference that doesn\'t exist:
+Import a visualization and dashboard when the index pattern for the visualization doesn't exist:
 
 [source,sh]
 --------------------------------------------------
@@ -364,7 +363,6 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was not successful because the visualization and search each resulted in a missing references error.
+The result indicates an unsuccessful import because the visualization and search resulted in a missing references error.
 
-No objects will be imported until these errors are resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import
-errors API>>.
+Objects are created when the errors are resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.

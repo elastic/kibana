@@ -304,6 +304,9 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           />
         </p>
       </EuiCallOut>
+      <EuiSpacer
+        size="m"
+      />
     </span>
     <span>
       <EuiSpacer

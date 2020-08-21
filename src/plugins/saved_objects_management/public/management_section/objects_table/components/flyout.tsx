@@ -825,24 +825,27 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     let legacyFileWarning;
     if (this.state.isLegacyFile) {
       legacyFileWarning = (
-        <EuiCallOut
-          data-test-subj="importSavedObjectsLegacyWarning"
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
-              defaultMessage="Support for JSON files is going away"
-            />
-          }
-          color="warning"
-          iconType="help"
-        >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
-              defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
-            />
-          </p>
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            data-test-subj="importSavedObjectsLegacyWarning"
+            title={
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
+                defaultMessage="Support for JSON files is going away"
+              />
+            }
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
+                defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
       );
     }
 
