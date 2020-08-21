@@ -44,7 +44,8 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`winlogbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            winlogbeatLink: '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
+            winlogbeatLink:
+              '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/winlogbeat',
           },
         }

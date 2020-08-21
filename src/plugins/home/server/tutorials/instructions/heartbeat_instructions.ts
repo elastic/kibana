@@ -92,7 +92,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`heartbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            heartbeatLink: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
+            heartbeatLink:
+              '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/heartbeat',
           },
         }

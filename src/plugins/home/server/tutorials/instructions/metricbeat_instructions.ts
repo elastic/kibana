@@ -32,7 +32,9 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.osxTextPre', {
         defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
-        values: { link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html' },
+        values: {
+          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
@@ -46,7 +48,9 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPre', {
         defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
-        values: { link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html' },
+        values: {
+          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
@@ -63,7 +67,9 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.rpmTextPre', {
         defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
-        values: { link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html' },
+        values: {
+          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
@@ -92,7 +98,8 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`metricbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            metricbeatLink: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+            metricbeatLink:
+              '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/metricbeat',
           },
         }
