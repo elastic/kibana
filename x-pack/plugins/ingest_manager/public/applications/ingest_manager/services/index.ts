@@ -8,8 +8,8 @@ export { getFlattenedObject } from '../../../../../../../src/core/public';
 
 export {
   AgentStatusKueryHelper,
-  agentConfigRouteService,
-  packageConfigRouteService,
+  agentPolicyRouteService,
+  packagePolicyRouteService,
   dataStreamRouteService,
   fleetSetupRouteService,
   agentRouteService,
@@ -19,9 +19,10 @@ export {
   outputRoutesService,
   settingsRoutesService,
   appRoutesService,
-  packageToPackageConfigInputs,
-  storedPackageConfigsToAgentInputs,
-  configToYaml,
+  packageToPackagePolicyInputs,
+  storedPackagePoliciesToAgentInputs,
+  fullAgentPolicyToYaml,
   isPackageLimited,
-  doesAgentConfigAlreadyIncludePackage,
+  doesAgentPolicyAlreadyIncludePackage,
+  isValidNamespace,
 } from '../../../../common';
