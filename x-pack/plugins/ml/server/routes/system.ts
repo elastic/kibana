@@ -253,7 +253,6 @@ export function systemRoutes(
           fields: ['*'],
           ignore_unavailable: true,
           allow_no_indices: true,
-          ignore: 404,
         };
 
         const { body } = await client.asCurrentUser.fieldCaps(options);

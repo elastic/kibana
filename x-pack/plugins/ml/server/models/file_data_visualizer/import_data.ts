@@ -40,9 +40,9 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
 
         // create the pipeline if one has been supplied
         if (pipelineId !== undefined) {
-          const { body } = await createPipeline(pipelineId, pipeline);
-          if (body.acknowledged !== true) {
-            throw body;
+          const resp = await createPipeline(pipelineId, pipeline);
+          if (resp.acknowledged !== true) {
+            throw resp;
           }
         }
         createdPipelineId = pipelineId;
@@ -80,7 +80,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         id,
         index: createdIndex,
         pipelineId: createdPipelineId,
-        error: error.error !== undefined ? error.error : error,
+        error: error.body !== undefined ? error.body : error,
         docCount,
         ingestError: error.ingestError,
         failures: error.failures || [],
