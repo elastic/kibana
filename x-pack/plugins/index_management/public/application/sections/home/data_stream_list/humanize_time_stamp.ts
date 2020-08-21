@@ -6,5 +6,5 @@
 
 import moment from 'moment';
 
-export const humanizeTimeStamp = (timeStamp?: number): string =>
+export const humanizeTimeStamp = (timeStamp: number): string =>
   moment(timeStamp).format('MMMM Do, YYYY h:mm:ss A');

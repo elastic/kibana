@@ -52,13 +52,12 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  const assertDataStreamStorageSizeExists = (dataStream: DataStream) => {
+  const assertDataStreamStorageSizeExists = (storageSize: string) => {
     // Storage size of a document doesn't like it would be deterministic (could vary depending
     // on how ES, Lucene, and the file system interact), so we'll just assert its presence and
-    // type, and then remove it.
-    expect(dataStream.storageSize).to.be.ok();
-    expect(typeof dataStream.storageSize).to.be('string');
-    delete dataStream.storageSize;
+    // type.
+    expect(storageSize).to.be.ok();
+    expect(typeof storageSize).to.be('string');
   };
 
   describe('Data streams', function () {
@@ -101,24 +100,24 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ES determines these values so we'll just echo them back.
         const { name: indexName, uuid } = dataStreams[0].indices[0];
-        assertDataStreamStorageSizeExists(dataStreams[0]);
+        const { storageSize, ...dataStreamWithoutStorageSize } = dataStreams[0];
+        assertDataStreamStorageSizeExists(storageSize);
 
-        expect(dataStreams).to.eql([
-          {
-            name: testDataStreamName,
-            timeStampField: { name: '@timestamp' },
-            indices: [
-              {
-                name: indexName,
-                uuid,
-              },
-            ],
-            generation: 1,
-            health: 'yellow',
-            indexTemplateName: testDataStreamName,
-            maxTimeStamp: 0,
-          },
-        ]);
+        expect(dataStreams.length).to.be(1);
+        expect(dataStreamWithoutStorageSize).to.eql({
+          name: testDataStreamName,
+          timeStampField: { name: '@timestamp' },
+          indices: [
+            {
+              name: indexName,
+              uuid,
+            },
+          ],
+          generation: 1,
+          health: 'yellow',
+          indexTemplateName: testDataStreamName,
+          maxTimeStamp: 0,
+        });
       });
 
       it('returns a single data stream by ID', async () => {
@@ -129,9 +128,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ES determines these values so we'll just echo them back.
         const { name: indexName, uuid } = dataStream.indices[0];
-        assertDataStreamStorageSizeExists(dataStream);
+        const { storageSize, ...dataStreamWithoutStorageSize } = dataStream;
+        assertDataStreamStorageSizeExists(storageSize);
 
-        expect(dataStream).to.eql({
+        expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
           timeStampField: { name: '@timestamp' },
           indices: [

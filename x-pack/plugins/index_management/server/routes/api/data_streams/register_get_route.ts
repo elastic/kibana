@@ -10,7 +10,6 @@ import { deserializeDataStream, deserializeDataStreamList } from '../../../../co
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-// Require the template format version (V1 or V2) to be provided as Query param
 const querySchema = schema.object({
   includeStats: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });

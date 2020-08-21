@@ -133,7 +133,15 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
           defaultMessage: 'The most recent document to be added to the data stream',
         }),
-        content: humanizeTimeStamp(maxTimeStamp),
+        content: maxTimeStamp ? (
+          humanizeTimeStamp(maxTimeStamp)
+        ) : (
+          <em>
+            {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampNoneMessage', {
+              defaultMessage: `None`,
+            })}
+          </em>
+        ),
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
@@ -188,11 +196,13 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
           defaultMessage: `The index lifecycle policy that manages the data stream's data`,
         }),
-        content:
-          ilmPolicyName ??
-          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
-            defaultMessage: `-`,
-          }),
+        content: ilmPolicyName ?? (
+          <em>
+            {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
+              defaultMessage: `None`,
+            })}
+          </em>
+        ),
       },
     ];
 
