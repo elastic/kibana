@@ -46,6 +46,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
+      loadTestFile(require.resolve('./mvt_scaling'));
       loadTestFile(require.resolve('./add_layer_panel'));
       loadTestFile(require.resolve('./import_geojson'));
       loadTestFile(require.resolve('./layer_errors'));
