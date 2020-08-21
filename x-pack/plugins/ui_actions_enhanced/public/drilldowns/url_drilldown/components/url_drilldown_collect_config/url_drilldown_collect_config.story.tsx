@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { join } from 'path';
+import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { Demo } from './__tests__/demo';
 
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'ui_actions_enhanced',
-  storyGlobs: [join(__dirname, '..', 'public', '**', '*.story.tsx')],
-});
+storiesOf('UrlDrilldownCollectConfig', module).add('default', () => <Demo />);

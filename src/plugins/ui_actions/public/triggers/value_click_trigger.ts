@@ -27,6 +27,6 @@ export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
     defaultMessage: 'Single click',
   }),
   description: i18n.translate('uiActions.triggers.valueClickDescription', {
-    defaultMessage: 'A single point clicked on a visualization',
+    defaultMessage: 'A single point on the visualization',
   }),
 };

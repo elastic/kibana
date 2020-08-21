@@ -32,3 +32,4 @@ export {
 } from './dynamic_actions';
 
 export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';
+export * from './drilldowns/url_drilldown';
