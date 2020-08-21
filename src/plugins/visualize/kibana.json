@@ -9,7 +9,9 @@
     "navigation",
     "savedObjects",
     "visualizations",
-    "embeddable"
+    "embeddable",
+    "dashboard",
+    "uiActions"
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [

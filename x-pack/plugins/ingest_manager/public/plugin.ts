@@ -25,7 +25,7 @@ import {
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
 } from './applications/ingest_manager/components/home_integration';
-import { registerPackageConfigComponent } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
+import { registerPackagePolicyComponent } from './applications/ingest_manager/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -38,7 +38,7 @@ export interface IngestManagerSetup {}
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
 export interface IngestManagerStart {
-  registerPackageConfigComponent: typeof registerPackageConfigComponent;
+  registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
   isInitialized: () => Promise<true>;
 }
 
@@ -127,7 +127,7 @@ export class IngestManagerPlugin
 
         return successPromise;
       },
-      registerPackageConfigComponent,
+      registerPackagePolicyComponent,
     };
   }
 
