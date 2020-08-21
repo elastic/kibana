@@ -47,7 +47,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils {{#ubi}}findutils{{/ubi}} && \
+        fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
       {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
     done; \

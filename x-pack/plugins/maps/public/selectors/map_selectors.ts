@@ -32,7 +32,7 @@ import {
   SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
-import { extractFeaturesFromFilters } from '../elasticsearch_geo_utils';
+import { extractFeaturesFromFilters } from '../../common/elasticsearch_geo_utils';
 import { MapStoreState } from '../reducers/store';
 import {
   DataRequestDescriptor,

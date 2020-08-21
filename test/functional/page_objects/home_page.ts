@@ -118,6 +118,21 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('onCloudTutorial');
     }
 
+    // click on side nav toggle button to see all of side nav
+    async clickOnToggleNavButton() {
+      await testSubjects.click('toggleNavButton');
+    }
+
+    // collapse the observability side nav details
+    async collapseObservabibilitySideNav() {
+      await testSubjects.click('collapsibleNavGroup-observability');
+    }
+
+    // dock the side nav
+    async dockTheSideNav() {
+      await testSubjects.click('collapsible-nav-lock');
+    }
+
     async loadSavedObjects() {
       await retry.try(async () => {
         await testSubjects.click('loadSavedObjects');
