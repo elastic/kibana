@@ -15,7 +15,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   });
 
   // security feature is disabled
-  if (!server.plugins.security || !server.newPlatform.setup.plugins.security) {
+  if (!server.newPlatform.setup.plugins.security) {
     return await withXpackInfo();
   }
 
