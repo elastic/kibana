@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 
-import { StartTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/start_transforms';
+import type { StopTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/stop_transforms';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -19,23 +19,35 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const transform = getService('transform');
 
-  async function createTransform(transformId: string) {
+  async function createAndRunTransform(transformId: string) {
     const config = generateTransformConfig(transformId);
-    await transform.api.createTransform(transformId, config);
+
+    // to be able to test stopping transforms,
+    // we create a slowly continuous transform so it doesn't
+    // stop automatically.
+    config.settings = {
+      docs_per_second: 100,
+      max_page_search_size: 100,
+    };
+    config.sync = {
+      time: { field: '@timestamp' },
+    };
+
+    await transform.api.createAndRunTransform(transformId, config);
   }
 
-  describe('/api/transform/start_transforms', function () {
+  describe('/api/transform/stop_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
     });
 
-    describe('single transform start', function () {
-      const transformId = 'transform-test-start';
+    describe('single transform stop', function () {
+      const transformId = 'transform-test-stop';
       const destinationIndex = generateDestIndex(transformId);
 
       beforeEach(async () => {
-        await createTransform(transformId);
+        await createAndRunTransform(transformId);
       });
 
       afterEach(async () => {
@@ -43,10 +55,10 @@ export default ({ getService }: FtrProviderContext) => {
         await transform.api.deleteIndices(destinationIndex);
       });
 
-      it('should start the transform by transformId', async () => {
-        const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
+      it('should stop the transform by transformId', async () => {
+        const reqBody: StopTransformsRequestSchema = [{ id: transformId, state: 'started' }];
         const { body } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -57,14 +69,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body[transformId].success).to.eql(true);
         expect(typeof body[transformId].error).to.eql('undefined');
-        await transform.api.waitForBatchTransformToComplete(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
 
       it('should return 200 with success:false for unauthorized user', async () => {
-        const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
+        const reqBody: StopTransformsRequestSchema = [{ id: transformId, state: 'started' }];
         const { body } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
@@ -76,16 +87,18 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('string');
 
-        await transform.api.waitForTransformState(transformId, 'stopped');
-        await transform.api.waitForIndicesNotToExist(destinationIndex);
+        await transform.api.waitForTransformStateNotToBe(transformId, 'stopped');
+        await transform.api.waitForIndicesToExist(destinationIndex);
       });
     });
 
-    describe('single transform start with invalid transformId', function () {
+    describe('single transform stop with invalid transformId', function () {
       it('should return 200 with error in response if invalid transformId', async () => {
-        const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
+        const reqBody: StopTransformsRequestSchema = [
+          { id: 'invalid_transform_id', state: 'started' },
+        ];
         const { body } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -99,16 +112,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('bulk start', function () {
-      const reqBody: StartTransformsRequestSchema = [
-        { id: 'bulk_start_test_1' },
-        { id: 'bulk_start_test_2' },
+    describe('bulk stop', function () {
+      const reqBody: StopTransformsRequestSchema = [
+        { id: 'bulk_stop_test_1', state: 'started' },
+        { id: 'bulk_stop_test_2', state: 'started' },
       ];
       const destinationIndices = reqBody.map((d) => generateDestIndex(d.id));
 
       beforeEach(async () => {
         await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
-          await createTransform(id);
+          await createAndRunTransform(id);
         });
       });
 
@@ -119,9 +132,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should start multiple transforms by transformIds', async () => {
+      it('should stop multiple transforms by transformIds', async () => {
         const { body } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
@@ -132,26 +145,28 @@ export default ({ getService }: FtrProviderContext) => {
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
-          await transform.api.waitForBatchTransformToComplete(transformId);
           await transform.api.waitForIndicesToExist(destinationIndices[idx]);
         });
       });
 
-      it('should start multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
+      it('should stop multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
         const { body } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/api/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send([{ id: reqBody[0].id }, { id: invalidTransformId }, { id: reqBody[1].id }])
+          .send([
+            { id: reqBody[0].id, state: reqBody[0].state },
+            { id: invalidTransformId, state: 'stopped' },
+            { id: reqBody[1].id, state: reqBody[1].state },
+          ])
           .expect(200);
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
-          await transform.api.waitForBatchTransformToComplete(transformId);
           await transform.api.waitForIndicesToExist(destinationIndices[idx]);
         });
 

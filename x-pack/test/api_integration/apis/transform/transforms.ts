@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function createTransform(transformId: string) {
     const config = generateTransformConfig(transformId);
-    await transform.api.createTransform(config);
+    await transform.api.createTransform(transformId, config);
   }
 
   describe('/api/transform/transforms', function () {

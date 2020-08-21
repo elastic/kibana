@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { CreateRequestBody } from '../../../../plugins/transform/public/app/common/transform';
+
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -14,11 +16,10 @@ export function generateDestIndex(transformId: string): string {
   return `user-${transformId}`;
 }
 
-export function generateTransformConfig(transformId: string) {
+export function generateTransformConfig(transformId: string): CreateRequestBody {
   const destinationIndex = generateDestIndex(transformId);
 
   return {
-    id: transformId,
     source: { index: ['farequote-*'] },
     pivot: {
       group_by: { airline: { terms: { field: 'airline' } } },

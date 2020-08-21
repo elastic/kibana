@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+
+import type { PreviewRequestBody } from '../../../../plugins/transform/public/app/common/transform';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -24,9 +27,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   function getTransformPreviewConfig() {
     const config = generateTransformConfig('the-dummy-id');
-    delete config.id;
     delete config.dest;
-    return config;
+    return config as PreviewRequestBody;
   }
 
   describe('/api/transform/transforms/_preview', function () {

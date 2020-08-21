@@ -8,10 +8,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
-import {
-  TransformPivotConfig,
-  TransformStats,
-} from '../../../../plugins/transform/public/app/common';
+import type { TransformStats } from '../../../../plugins/transform/public/app/common';
+import type { CreateRequestBody } from '../../../../plugins/transform/public/app/common/transform';
+
+export async function asyncForEach(array: any[], callback: Function) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
 
 export function TransformAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
@@ -79,7 +83,17 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanTransformIndices() {
-      await this.deleteIndices('.transform-*', true);
+      const {
+        body: { transforms },
+      } = await esSupertest.get(`/_transform/`).expect(200);
+      const transformIds = transforms.map((t: { id: string }) => t.id);
+
+      await asyncForEach(transformIds, async (transformId: string) => {
+        await esSupertest.post(`/_transform/${transformId}/_stop?force=true`).expect(200);
+        await this.waitForTransformState(transformId, 'stopped');
+        await esSupertest.delete(`/_transform/${transformId}`).expect(200);
+        await this.waitForTransformNotToExist(transformId);
+      });
     },
 
     async getTransformStats(transformId: string): Promise<TransformStats> {
@@ -116,6 +130,23 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async waitForTransformStateNotToBe(transformId: string, notExpectedState: TransformState) {
+      await retry.waitForWithTimeout(
+        `transform state not to be ${notExpectedState}`,
+        2 * 60 * 1000,
+        async () => {
+          const state = await this.getTransformState(transformId);
+          if (state !== notExpectedState) {
+            return true;
+          } else {
+            throw new Error(
+              `not expected transform state to be ${notExpectedState} but got ${state}`
+            );
+          }
+        }
+      );
+    },
+
     async waitForBatchTransformToComplete(transformId: string) {
       await retry.waitForWithTimeout(`batch transform to complete`, 2 * 60 * 1000, async () => {
         const stats = await this.getTransformStats(transformId);
@@ -133,8 +164,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       return await esSupertest.get(`/_transform/${transformId}`).expect(expectedCode);
     },
 
-    async createTransform(transformConfig: TransformPivotConfig) {
-      const transformId = transformConfig.id;
+    async createTransform(transformId: string, transformConfig: CreateRequestBody) {
       log.debug(`Creating transform with id '${transformId}'...`);
       await esSupertest.put(`/_transform/${transformId}`).send(transformConfig).expect(200);
 
@@ -168,15 +198,15 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest.post(`/_transform/${transformId}/_start`).expect(200);
     },
 
-    async createAndRunTransform(transformConfig: TransformPivotConfig) {
-      await this.createTransform(transformConfig);
-      await this.startTransform(transformConfig.id);
+    async createAndRunTransform(transformId: string, transformConfig: CreateRequestBody) {
+      await this.createTransform(transformId, transformConfig);
+      await this.startTransform(transformId);
       if (transformConfig.sync === undefined) {
         // batch mode
-        await this.waitForBatchTransformToComplete(transformConfig.id);
+        await this.waitForBatchTransformToComplete(transformId);
       } else {
         // continuous mode
-        await this.waitForTransformState(transformConfig.id, TRANSFORM_STATE.STARTED);
+        await this.waitForTransformStateNotToBe(transformId, TRANSFORM_STATE.STOPPED);
       }
     },
   };

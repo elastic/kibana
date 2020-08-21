@@ -46,8 +46,8 @@ export interface CreateRequestBody extends PreviewRequestBody {
   };
   sync?: {
     time: {
+      delay?: string;
       field: string;
-      delay: string;
     };
   };
 }
