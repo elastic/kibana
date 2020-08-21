@@ -65,7 +65,7 @@ describe('Monitoring plugin', () => {
         serverBasePath: '',
       },
     },
-    uuid: {
+    environment: {
       getInstanceUuid: jest.fn(),
     },
     elasticsearch: {
