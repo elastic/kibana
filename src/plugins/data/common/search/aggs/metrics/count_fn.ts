@@ -54,12 +54,6 @@ export const aggCount = (): FunctionDefinition => ({
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
-    json: {
-      types: ['string'],
-      help: i18n.translate('data.search.aggs.metrics.count.json.help', {
-        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
-      }),
-    },
     customLabel: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.count.customLabel.help', {

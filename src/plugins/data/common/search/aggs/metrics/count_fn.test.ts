@@ -34,7 +34,6 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "customLabel": undefined,
-              "json": undefined,
             },
             "schema": undefined,
             "type": "count",
