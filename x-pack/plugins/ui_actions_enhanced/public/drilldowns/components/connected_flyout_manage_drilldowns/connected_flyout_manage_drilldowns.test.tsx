@@ -20,7 +20,7 @@ import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
 import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
-import { toastDrilldownsCRUDError } from './i18n';
+import { toastDrilldownsCRUDError } from '../../hooks/i18n';
 import { ActionFactory } from '../../../dynamic_actions';
 
 const storage = new Storage(new StubBrowserStorage());
