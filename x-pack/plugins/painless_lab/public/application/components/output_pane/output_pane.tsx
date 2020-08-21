@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EuiTabbedContentTab } from '@elastic/eui';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
@@ -50,6 +51,7 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
     <EuiPanel className="painlessLabRightPane">
       <EuiTabbedContent
         className="painlessLabRightPane__tabs"
+        data-test-subj="painlessTabs"
         size="s"
         tabs={[
           {

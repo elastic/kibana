@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/grok_debugger'),
       require.resolve('./apps/search_profiler'),
       require.resolve('./apps/uptime'),
+      require.resolve('./apps/painless_lab'),
     ],
     pageObjects,
     services,
