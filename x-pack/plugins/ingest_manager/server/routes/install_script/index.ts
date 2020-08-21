@@ -38,14 +38,14 @@ export const registerRoutes = ({
       const http = appContextService.getHttpSetup();
       const serverInfo = http.getServerInfo();
       const basePath = http.basePath;
-      const kibanaUrl =
-        (await settingsService.getSettings(soClient)).kibana_url ||
+      const kibanaUrl = (await settingsService.getSettings(soClient)).kibana_url || [
         url.format({
           protocol: serverInfo.protocol,
           hostname: serverInfo.hostname,
           port: serverInfo.port,
           pathname: basePath.serverBasePath,
-        });
+        }),
+      ];
 
       const script = getScript(request.params.osType, kibanaUrl);
 
