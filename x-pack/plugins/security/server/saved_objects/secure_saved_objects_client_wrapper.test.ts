@@ -135,26 +135,36 @@ const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => 
   );
 };
 
-const expectObjectNamespaceFiltering = async (fn: Function, args: Record<string, any>) => {
-  clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
-    getMockCheckPrivilegesSuccess // privilege check for authorization
-  );
+const expectObjectNamespaceFiltering = async (
+  fn: Function,
+  args: Record<string, any>,
+  privilegeChecks = 1
+) => {
+  for (let i = 0; i < privilegeChecks; i++) {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+      getMockCheckPrivilegesSuccess // privilege check for authorization
+    );
+  }
   clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure // privilege check for namespace filtering
   );
 
-  const authorizedNamespace = args.options.namespace || 'default';
+  const authorizedNamespace = args.options?.namespace || 'default';
   const namespaces = ['some-other-namespace', authorizedNamespace];
   const returnValue = { namespaces, foo: 'bar' };
   // we don't know which base client method will be called; mock them all
   clientOpts.baseClient.create.mockReturnValue(returnValue as any);
   clientOpts.baseClient.get.mockReturnValue(returnValue as any);
   clientOpts.baseClient.update.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.addToNamespaces.mockReturnValue(returnValue as any);
+  clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(returnValue as any);
 
   const result = await fn.bind(client)(...Object.values(args));
   expect(result).toEqual(expect.objectContaining({ namespaces: [authorizedNamespace, '?'] }));
 
-  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+  expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(
+    privilegeChecks + 1
+  );
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
     'login:',
     namespaces
@@ -368,6 +378,11 @@ describe('#addToNamespaces', () => {
       [privilege2],
       undefined // default namespace
     );
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    // this operation is unique because it requires two privilege checks before it executes
+    await expectObjectNamespaceFiltering(client.addToNamespaces, { type, id, namespaces }, 2);
   });
 });
 
@@ -681,6 +696,10 @@ describe('#deleteFromNamespaces', () => {
       [privilege],
       namespaces
     );
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    await expectObjectNamespaceFiltering(client.deleteFromNamespaces, { type, id, namespaces });
   });
 });
 

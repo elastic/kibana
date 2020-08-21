@@ -18,7 +18,7 @@ import {
   SelectField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, isArrayOfStrings } from './shared';
+import { FieldsConfig, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
@@ -89,9 +89,7 @@ const fieldsConfig: FieldsConfig = {
     serializer: (v: string[]) => {
       return v.length ? v : undefined;
     },
-    deserializer: (v) => {
-      return isArrayOfStrings(v) ? v : [];
-    },
+    deserializer: to.arrayOfStrings,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsFieldLabel',
       {
