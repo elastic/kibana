@@ -46,7 +46,12 @@ import {
   TaskStatus,
   ElasticJs,
 } from './task';
-import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
+import {
+  createTaskPoller,
+  PollingError,
+  PollingErrorType,
+  createObservableMonitor,
+} from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
@@ -154,13 +159,38 @@ export class TaskManager {
       maxWorkers: opts.config.max_workers,
     });
 
-    this.poller$ = createTaskPoller<string, FillPoolResult>({
-      pollInterval: opts.config.poll_interval,
-      bufferCapacity: opts.config.request_capacity,
-      getCapacity: () => this.pool.availableWorkers,
-      pollRequests$: this.claimRequests$,
-      work: this.pollForWork,
-    });
+    const {
+      max_poll_inactivity_cycles: maxPollInactivityCycles,
+      poll_interval: pollInterval,
+    } = opts.config;
+    this.poller$ = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
+      () =>
+        createTaskPoller<string, FillPoolResult>({
+          pollInterval,
+          bufferCapacity: opts.config.request_capacity,
+          getCapacity: () => this.pool.availableWorkers,
+          pollRequests$: this.claimRequests$,
+          work: this.pollForWork,
+          // Time out the `work` phase if it takes longer than a certain number of polling cycles
+          // The `work` phase includes the prework needed *before* executing a task
+          // (such as polling for new work, marking tasks as running etc.) but does not
+          // include the time of actually running the task
+          workTimeout: pollInterval * maxPollInactivityCycles,
+        }),
+      {
+        heartbeatInterval: pollInterval,
+        // Time out the poller itself if it has failed to complete the entire stream for a certain amount of time.
+        // This is different that the `work` timeout above, as the poller could enter an invalid state where
+        // it fails to complete a cycle even thought `work` is completing quickly.
+        // We grant it a single cycle longer than the time alotted to `work` so that timing out the `work`
+        // doesn't get short circuited by the monitor reinstantiating the poller all together (a far more expensive
+        // operation than just timing out the `work` internally)
+        inactivityTimeout: pollInterval * (maxPollInactivityCycles + 1),
+        onError: (error) => {
+          this.logger.error(`[Task Poller Monitor]: ${error.message}`);
+        },
+      }
+    );
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {

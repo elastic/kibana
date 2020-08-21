@@ -111,14 +111,21 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
       {/* Field subType (if any) */}
       <FormDataProvider pathsToWatch="type">
-        {({ type }) => (
-          <SubTypeParameter
-            key={type}
-            type={type}
-            isMultiField={isMultiField ?? false}
-            isRootLevelField={isRootLevelField}
-          />
-        )}
+        {({ type }) => {
+          if (type === undefined) {
+            return null;
+          }
+
+          const [fieldType] = type;
+          return (
+            <SubTypeParameter
+              key={fieldType.value}
+              type={fieldType.value}
+              isMultiField={isMultiField ?? false}
+              isRootLevelField={isRootLevelField}
+            />
+          );
+        }}
       </FormDataProvider>
     </EuiFlexGroup>
   );
@@ -188,7 +195,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
               {({ type, subType }) => {
-                const ParametersForm = getParametersFormForType(type, subType);
+                const ParametersForm = getParametersFormForType(
+                  type?.[0].value,
+                  subType?.[0].value
+                );
 
                 if (!ParametersForm) {
                   return null;

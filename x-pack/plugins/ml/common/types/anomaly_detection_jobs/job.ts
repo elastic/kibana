@@ -93,6 +93,6 @@ export interface CustomRule {
 }
 
 export interface PerPartitionCategorization {
-  enabled: boolean;
+  enabled?: boolean;
   stop_on_warn?: boolean;
 }

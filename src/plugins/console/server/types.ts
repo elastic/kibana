@@ -38,8 +38,8 @@ export interface ESConfigForProxy {
   requestTimeout: Duration;
   ssl?: {
     verificationMode: 'none' | 'certificate' | 'full';
-    certificateAuthorities: string[] | string;
     alwaysPresentCertificate: boolean;
+    certificateAuthorities?: string[];
     certificate?: string;
     key?: string;
     keyPassphrase?: string;

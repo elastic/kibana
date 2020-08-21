@@ -16,7 +16,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { registerSource } from '../source_registry';
-import { turfBboxToBounds } from '../../../elasticsearch_geo_utils';
+import { turfBboxToBounds } from '../../../../common/elasticsearch_geo_utils';
 import { DataRequestAbortError } from '../../util/data_request';
 
 const MAX_GEOTILE_LEVEL = 29;
