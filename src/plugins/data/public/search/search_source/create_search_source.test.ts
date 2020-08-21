@@ -16,27 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
+import { SearchSourceDependencies } from './search_source';
 import { IIndexPattern } from '../../../common/index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
-import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 
 describe('createSearchSource', () => {
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
   let indexPatternContractMock: jest.Mocked<IndexPatternsContract>;
-  let dependencies: any;
+  let dependencies: SearchSourceDependencies;
   let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
 
   beforeEach(() => {
-    const core = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
 
     dependencies = {
-      searchService: data.search,
-      uiSettings: core.uiSettings,
-      injectedMetadata: core.injectedMetadata,
+      getConfig: jest.fn(),
+      search: jest.fn(),
+      legacySearch: data.search.__LEGACY,
+      esShardTimeout: 30000,
     };
 
     indexPatternContractMock = ({
