@@ -427,7 +427,7 @@ describe('loader', () => {
         indexPatterns: {
           '2': sampleIndexPatterns['2'],
         },
-        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: 'b' } },
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: '2' } },
       });
 
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {

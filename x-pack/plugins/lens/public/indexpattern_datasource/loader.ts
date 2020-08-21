@@ -6,13 +6,7 @@
 
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  HttpSetup,
-  SavedObjectReference,
-} from 'kibana/public';
-import { SimpleSavedObject } from 'kibana/public';
+import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
 import { StateSetter } from '../types';
 import {
   IndexPattern,
