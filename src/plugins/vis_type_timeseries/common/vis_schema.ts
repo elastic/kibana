@@ -80,18 +80,8 @@ export const metricsItems = schema.object({
   field: stringOptionalNullable,
   id: stringRequired,
   metric_agg: stringOptionalNullable,
-  numerator: schema.maybe(
-    schema.object({
-      language: schema.string(),
-      query: schema.string(),
-    })
-  ),
-  denominator: schema.maybe(
-    schema.object({
-      language: schema.string(),
-      query: schema.string(),
-    })
-  ),
+  numerator: schema.maybe(queryObject),
+  denominator: schema.maybe(queryObject),
   sigma: stringOptionalNullable,
   unit: stringOptionalNullable,
   model_type: stringOptionalNullable,
@@ -138,12 +128,7 @@ export const metricsItems = schema.object({
 const splitFiltersItems = schema.object({
   id: stringOptionalNullable,
   color: stringOptionalNullable,
-  filter: schema.maybe(
-    schema.object({
-      language: schema.string(),
-      query: schema.string(),
-    })
-  ),
+  filter: schema.maybe(queryObject),
   label: stringOptionalNullable,
 });
 
