@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './saved_object_store';
-export * from './filter_references';
+import { Ast } from '@kbn/interpreter/common';
+
+export function buildExpression(): Ast {
+  return {
+    type: 'expression',
+    chain: [{ type: 'function', function: 'test', arguments: {} }],
+  };
+}
