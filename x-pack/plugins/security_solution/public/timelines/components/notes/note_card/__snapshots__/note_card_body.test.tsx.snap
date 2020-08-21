@@ -24,6 +24,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
             "size": "64px",
           },
         },
+        "browserDefaultFontSize": "16px",
         "euiAnimSlightBounce": "cubic-bezier(0.34, 1.61, 0.7, 1)",
         "euiAnimSlightResistance": "cubic-bezier(0.694, 0.0482, 0.335, 1)",
         "euiAnimSpeedExtraFast": "90ms",
@@ -434,6 +435,28 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiScrollBarCorner": "6px",
         "euiSelectableListItemBorder": "1px solid #202128",
         "euiSelectableListItemPadding": "4px 12px",
+        "euiSelectableTemplateSitewideTypes": Object {
+          "application": Object {
+            "color": "#6092c0",
+            "font-weight": 500,
+          },
+          "article": Object {
+            "color": "#9777bc",
+            "font-weight": 500,
+          },
+          "case": Object {
+            "color": "#e7664c",
+            "font-weight": 500,
+          },
+          "deployment": Object {
+            "color": "#54b399",
+            "font-weight": 500,
+          },
+          "platform": Object {
+            "color": "#d6bf57",
+            "font-weight": 500,
+          },
+        },
         "euiShadowColor": "#000000",
         "euiShadowColorLarge": "#000000",
         "euiSize": "16px",
