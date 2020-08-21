@@ -43,7 +43,7 @@ interface MockDepsArgument extends Partial<Omit<RouteDependencies, 'proxy'>> {
 }
 
 export const getProxyRouteHandlerDeps = ({
-  proxy = defaultProxyValue,
+  proxy,
   log = coreMock.createPluginInitializerContext().logger.get(),
   router = httpServiceMock.createSetupContract().createRouter(),
 }: MockDepsArgument): RouteDependencies => {
@@ -55,13 +55,12 @@ export const getProxyRouteHandlerDeps = ({
   return {
     services,
     router,
-    proxy:
-      defaultProxyValue !== proxy
-        ? {
-            ...defaultProxyValue,
-            ...proxy,
-          }
-        : defaultProxyValue,
+    proxy: proxy
+      ? {
+          ...defaultProxyValue,
+          ...proxy,
+        }
+      : defaultProxyValue,
     log,
   };
 };
