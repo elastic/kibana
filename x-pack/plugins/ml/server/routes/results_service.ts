@@ -76,16 +76,16 @@ function getPartitionFieldsValues(client: IScopedClusterClient, payload: any) {
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }
 
-function getCategorizerStats(legacyClient: ILegacyScopedClusterClient, params: any, query: any) {
+function getCategorizerStats(client: IScopedClusterClient, params: any, query: any) {
   const { jobId } = params;
   const { partitionByValue } = query;
-  const rs = resultsServiceProvider(legacyClient);
+  const rs = resultsServiceProvider(client);
   return rs.getCategorizerStats(jobId, partitionByValue);
 }
 
-function getCategoryStoppedPartitions(legacyClient: ILegacyScopedClusterClient, payload: any) {
+function getCategoryStoppedPartitions(client: IScopedClusterClient, payload: any) {
   const { jobIds, fieldToBucket } = payload;
-  const rs = resultsServiceProvider(legacyClient);
+  const rs = resultsServiceProvider(client);
   return rs.getCategoryStoppedPartitions(jobIds, fieldToBucket);
 }
 
@@ -304,9 +304,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCategorizerStats(legacyClient, request.params, request.query);
+        const resp = await getCategorizerStats(client, request.params, request.query);
         return response.ok({
           body: resp,
         });
@@ -334,9 +334,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCategoryStoppedPartitions(legacyClient, request.body);
+        const resp = await getCategoryStoppedPartitions(client, request.body);
         return response.ok({
           body: resp,
         });
