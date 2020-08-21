@@ -191,7 +191,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
             })
           : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
-              defaultMessage: 'This field doesn't have data. Drag and drop to visualize.',
+              defaultMessage: "This field doesn't have data. Drag and drop to visualize.",
             })
       }
       type="iInCircle"
