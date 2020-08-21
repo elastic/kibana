@@ -149,7 +149,7 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config);
+      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
     }
 
     // Always create the bulk uploader
