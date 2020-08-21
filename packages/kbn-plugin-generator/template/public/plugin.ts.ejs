@@ -1,12 +1,12 @@
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
-import { <%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart, AppPluginStartDependencies } from './types';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '<%= importFromRoot('src/core/public') %>';
+import { <%= upperCamelCase(name) %>PluginSetup, <%= upperCamelCase(name) %>PluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 
-export class <%= upperCamelCaseName %>Plugin
-  implements Plugin<<%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart> {
-  
-  public setup(core: CoreSetup): <%= upperCamelCaseName %>PluginSetup {
+export class <%= upperCamelCase(name) %>Plugin
+  implements Plugin<<%= upperCamelCase(name) %>PluginSetup, <%= upperCamelCase(name) %>PluginStart> {
+
+  public setup(core: CoreSetup): <%= upperCamelCase(name) %>PluginSetup {
     // Register an application into the side navigation menu
     core.application.register({
       id: '<%= camelCase(name) %>',
@@ -34,7 +34,7 @@ export class <%= upperCamelCaseName %>Plugin
     };
   }
 
-  public start(core: CoreStart): <%= upperCamelCaseName %>PluginStart {
+  public start(core: CoreStart): <%= upperCamelCase(name) %>PluginStart {
     return {};
   }
 
