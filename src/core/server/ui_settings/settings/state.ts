@@ -17,23 +17,24 @@
  * under the License.
  */
 
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../types';
-import { getAccessibilitySettings } from './accessibility';
-import { getDateFormatSettings } from './date_formats';
-import { getMiscUiSettings } from './misc';
-import { getNavigationSettings } from './navigation';
-import { getNotificationsSettings } from './notifications';
-import { getThemeSettings } from './theme';
-import { getStateSettings } from './state';
 
-export const getCoreSettings = (): Record<string, UiSettingsParams> => {
+export const getStateSettings = (): Record<string, UiSettingsParams> => {
   return {
-    ...getAccessibilitySettings(),
-    ...getDateFormatSettings(),
-    ...getMiscUiSettings(),
-    ...getNavigationSettings(),
-    ...getNotificationsSettings(),
-    ...getThemeSettings(),
-    ...getStateSettings(),
+    'state:storeInSessionStorage': {
+      name: i18n.translate('core.ui_settings.params.storeUrlTitle', {
+        defaultMessage: 'Store URLs in session storage',
+      }),
+      value: false,
+      description: i18n.translate('core.ui_settings.params.storeUrlText', {
+        defaultMessage:
+          'The URL can sometimes grow to be too large for some browsers to handle. ' +
+          'To counter-act this we are testing if storing parts of the URL in session storage could help. ' +
+          'Please let us know how it goes!',
+      }),
+      schema: schema.boolean(),
+    },
   };
 };

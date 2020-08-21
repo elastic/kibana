@@ -21,13 +21,13 @@ import { UiSettingsParams } from '../../../types';
 import { getThemeSettings } from './theme';
 
 describe('theme settings', () => {
-  const navigationSettings = getThemeSettings();
+  const themeSettings = getThemeSettings();
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
 
   describe('theme:darkMode', () => {
-    const validate = getValidationFn(navigationSettings['theme:darkMode']);
+    const validate = getValidationFn(themeSettings['theme:darkMode']);
 
     it('should only accept boolean values', () => {
       expect(() => validate(true)).not.toThrow();
@@ -42,7 +42,7 @@ describe('theme settings', () => {
   });
 
   describe('theme:version', () => {
-    const validate = getValidationFn(navigationSettings['theme:version']);
+    const validate = getValidationFn(themeSettings['theme:version']);
 
     it('should only accept valid values', () => {
       expect(() => validate('v7')).not.toThrow();
