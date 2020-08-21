@@ -27,17 +27,17 @@ export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
 });
 
 export const POOR_LABEL = i18n.translate('xpack.apm.rum.coreVitals.poor', {
-  defaultMessage: 'poor',
+  defaultMessage: 'a poor',
 });
 
 export const GOOD_LABEL = i18n.translate('xpack.apm.rum.coreVitals.good', {
-  defaultMessage: 'good',
+  defaultMessage: 'a good',
 });
 
 export const AVERAGE_LABEL = i18n.translate(
   'xpack.apm.rum.coreVitals.average',
   {
-    defaultMessage: 'average',
+    defaultMessage: 'an average',
   }
 );
 

@@ -38,6 +38,8 @@ export function CoreVitals() {
           title={LCP_LABEL}
           value={data?.lcp + 's'}
           ranks={data?.lcpRanks}
+          loading={status !== 'success'}
+          thresholds={{ good: '2.5s', bad: '4.0s' }}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -45,6 +47,8 @@ export function CoreVitals() {
           title={FID_LABEL}
           value={data?.fid ?? 'N/A'}
           ranks={data?.fidRanks}
+          loading={status !== 'success'}
+          thresholds={{ good: '100ms', bad: '300ms' }}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -52,6 +56,8 @@ export function CoreVitals() {
           title={CLS_LABEL}
           value={data?.cls ?? 'N/A'}
           ranks={data?.clsRanks}
+          loading={status !== 'success'}
+          thresholds={{ good: '0.1', bad: '0.25' }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
