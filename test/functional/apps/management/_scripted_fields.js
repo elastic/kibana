@@ -53,7 +53,6 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-
   describe('scripted fields', function () {
     this.tags(['skipFirefox']);
 
@@ -449,7 +448,6 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-
       //add a test to sort date scripted field
       //https://github.com/elastic/kibana/issues/75711
       it.skip('should sort scripted field value in Discover', async function () {
@@ -486,8 +484,6 @@ export default function ({ getService, getPageObjects }) {
         });
         await filterBar.removeAllFilters();
       });
-
-
 
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
