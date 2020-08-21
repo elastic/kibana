@@ -75,7 +75,15 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       schema: schema.string({
         validate: (value) => {
           if (!timezones.includes(value)) {
-            return `Invalid timezone: ${value}`;
+            return i18n.translate(
+              'core.ui_settings.params.dateFormat.timezone.invalidValidationMessage',
+              {
+                defaultMessage: 'Invalid timezone: {timezone}',
+                values: {
+                  timezone: value,
+                },
+              }
+            );
           }
         },
       }),
@@ -125,7 +133,15 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       schema: schema.string({
         validate: (value) => {
           if (!weekdays.includes(value)) {
-            return `Invalid day of week: ${value}`;
+            return i18n.translate(
+              'core.ui_settings.params.dayOfWeekText.invalidValidationMessage',
+              {
+                defaultMessage: 'Invalid day of week: {dayOfWeek}',
+                values: {
+                  dayOfWeek: value,
+                },
+              }
+            );
           }
         },
       }),
