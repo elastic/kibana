@@ -30,13 +30,13 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
         color="text"
         size="xs"
         href={getLink('explorer', jobsList)}
-        iconType="tableOfContents"
+        iconType="visTable"
         aria-label={openJobsInAnomalyExplorerText}
         className="results-button"
         data-test-subj={`openOverviewJobsInAnomalyExplorer`}
       >
-        {i18n.translate('xpack.ml.overview.anomalyDetection.exploreActionName', {
-          defaultMessage: 'Explore',
+        {i18n.translate('xpack.ml.overview.anomalyDetection.viewActionName', {
+          defaultMessage: 'View',
         })}
       </EuiButtonEmpty>
     </EuiToolTip>

@@ -31,13 +31,19 @@ import {
   TRANSFORM_MODE,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
+import { useStopTransforms } from '../../../../hooks';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
-import { useDeleteAction, DeleteButton, DeleteButtonModal } from '../action_delete';
-import { useStartAction, StartButton, StartButtonModal } from '../action_start';
-import { StopButton } from '../action_stop';
+import {
+  isDeleteActionDisabled,
+  useDeleteAction,
+  DeleteActionName,
+  DeleteActionModal,
+} from '../action_delete';
+import { useStartAction, StartActionName, StartActionModal } from '../action_start';
+import { StopActionName } from '../action_stop';
 
 import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
 import { getTaskStateBadge, useColumns } from './use_columns';
@@ -89,8 +95,8 @@ export const TransformList: FC<Props> = ({
 
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
-  const bulkStartAction = useStartAction();
-  const bulkDeleteAction = useDeleteAction();
+  const bulkStartAction = useStartAction(false);
+  const bulkDeleteAction = useDeleteAction(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
 
@@ -99,6 +105,8 @@ export const TransformList: FC<Props> = ({
 
   const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
+
+  const stopTransforms = useStopTransforms();
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -257,13 +265,23 @@ export const TransformList: FC<Props> = ({
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
-      <StartButton items={transformSelection} onClick={bulkStartAction.openModal} />
+      <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
+        <StartActionName items={transformSelection} />
+      </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
-      <StopButton items={transformSelection} />
+      <EuiButtonEmpty onClick={() => stopTransforms(transformSelection)}>
+        <StopActionName items={transformSelection} />
+      </EuiButtonEmpty>
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
-      <DeleteButton items={transformSelection} onClick={bulkDeleteAction.openModal} />
+      <EuiButtonEmpty onClick={() => bulkDeleteAction.openModal(transformSelection)}>
+        <DeleteActionName
+          canDeleteTransform={capabilities.canDeleteTransform}
+          disabled={isDeleteActionDisabled(transformSelection, false)}
+          isBulkAction={true}
+        />
+      </EuiButtonEmpty>
     </div>,
   ];
 
@@ -381,8 +399,8 @@ export const TransformList: FC<Props> = ({
   return (
     <div data-test-subj="transformListTableContainer">
       {/* Bulk Action Modals */}
-      {bulkStartAction.isModalVisible && <StartButtonModal {...bulkStartAction} />}
-      {bulkDeleteAction.isModalVisible && <DeleteButtonModal {...bulkDeleteAction} />}
+      {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
+      {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
 
       {/* Single Action Modals */}
       {singleActionModals}
