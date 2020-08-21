@@ -21,11 +21,10 @@ const mockSearchResponse = {
   search: mockTimeRange,
 };
 
-const mlClusterClientFactory = (resp: any): IScopedClusterClient => {
-  const callAs = (path: string) => {
-    return new Promise((resolve) => {
-      resolve({ body: resp[path] });
-    }) as Promise<any>;
+const mlClusterClientFactory = (response: any): IScopedClusterClient => {
+  const callAs = {
+    fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
+    search: () => Promise.resolve({ body: response.search }),
   };
   return ({
     asCurrentUser: callAs,

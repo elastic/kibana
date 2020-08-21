@@ -25,19 +25,19 @@ const mlClusterClientFactory = (
   responses: Record<string, any>,
   fail = false
 ): IScopedClusterClient => {
-  const callAs = (requestName: string) => {
-    return new Promise((resolve, reject) => {
-      const response = responses[requestName];
-      if (fail) {
-        reject(response);
-      } else {
-        resolve({ body: response });
-      }
-    }) as Promise<any>;
+  const callAs = {
+    search: () => Promise.resolve({ body: responses.search }),
+    fieldCaps: () => Promise.resolve({ body: responses.fieldCaps }),
   };
+
+  const callAsFail = {
+    search: () => Promise.reject({ body: {} }),
+    fieldCaps: () => Promise.reject({ body: {} }),
+  };
+
   return ({
-    asCurrentUser: callAs,
-    asInternalUser: callAs,
+    asCurrentUser: fail === false ? callAs : callAsFail,
+    asInternalUser: fail === false ? callAs : callAsFail,
   } as unknown) as IScopedClusterClient;
 };
 

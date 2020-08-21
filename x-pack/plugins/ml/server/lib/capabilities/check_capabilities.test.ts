@@ -24,19 +24,27 @@ const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
 
 const mlClusterClientNonUpgrade = ({
-  assInternalUser: async () => ({
-    body: {
-      upgrade_mode: false,
+  asInternalUser: {
+    ml: {
+      info: async () => ({
+        body: {
+          upgrade_mode: false,
+        },
+      }),
     },
-  }),
+  },
 } as unknown) as IScopedClusterClient;
 
 const mlClusterClientUpgrade = ({
-  asInternalUser: async () => ({
-    body: {
-      upgrade_mode: true,
+  asInternalUser: {
+    ml: {
+      info: async () => ({
+        body: {
+          upgrade_mode: true,
+        },
+      }),
     },
-  }),
+  },
 } as unknown) as IScopedClusterClient;
 
 describe('check_capabilities', () => {

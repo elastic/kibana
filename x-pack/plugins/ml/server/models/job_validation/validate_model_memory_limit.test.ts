@@ -73,7 +73,7 @@ describe('ML - validateModelMemoryLimit', () => {
     'ml.estimateModelMemory'?: ModelMemoryEstimateResponse;
   }
 
-  // mock callAsCurrentUser
+  // mock asCurrentUser
   // used in three places:
   // - to retrieve the info endpoint
   // - to search for cardinality of split field
@@ -81,22 +81,14 @@ describe('ML - validateModelMemoryLimit', () => {
   const getMockMlClusterClient = ({
     'ml.estimateModelMemory': estimateModelMemory,
   }: MockAPICallResponse = {}): IScopedClusterClient => {
-    const callAs = (call: string) => {
-      if (typeof call === undefined) {
-        return Promise.reject();
-      }
-
-      let response = {};
-      if (call === 'ml.info') {
-        response = mlInfoResponse;
-      } else if (call === 'search') {
-        response = cardinalitySearchResponse;
-      } else if (call === 'fieldCaps') {
-        response = fieldCapsResponse;
-      } else if (call === 'ml.estimateModelMemory') {
-        response = estimateModelMemory || modelMemoryEstimateResponse;
-      }
-      return Promise.resolve({ body: response });
+    const callAs = {
+      ml: {
+        info: () => Promise.resolve({ body: mlInfoResponse }),
+        estimateModelMemory: () =>
+          Promise.resolve({ body: estimateModelMemory || modelMemoryEstimateResponse }),
+      },
+      search: () => Promise.resolve({ body: cardinalitySearchResponse }),
+      fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
     };
 
     return ({

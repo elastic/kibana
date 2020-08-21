@@ -10,10 +10,9 @@ import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 import { estimateBucketSpanFactory, BucketSpanEstimatorData } from './bucket_span_estimator';
 
-const callAs = () => {
-  return new Promise((resolve) => {
-    resolve({ body: {} });
-  }) as Promise<any>;
+const callAs = {
+  search: () => Promise.resolve({ body: {} }),
+  cluster: { getSettings: () => Promise.resolve({ body: {} }) },
 };
 
 const mlClusterClient = ({

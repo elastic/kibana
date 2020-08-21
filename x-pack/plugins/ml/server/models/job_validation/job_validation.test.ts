@@ -9,46 +9,25 @@ import { IScopedClusterClient } from 'kibana/server';
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
 
-const mlClusterClient = ({
-  // mock callAsCurrentUser
-  asCurrentUser: (method: string) => {
-    return new Promise((resolve) => {
-      if (method === 'fieldCaps') {
-        resolve({ body: { fields: [] } });
-        return;
-      } else if (method === 'ml.info') {
-        resolve({
-          body: {
-            limits: {
-              effective_max_model_memory_limit: '100MB',
-              max_model_memory_limit: '1GB',
-            },
+const callAs = {
+  fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
+  ml: {
+    info: () =>
+      Promise.resolve({
+        body: {
+          limits: {
+            effective_max_model_memory_limit: '100MB',
+            max_model_memory_limit: '1GB',
           },
-        });
-      }
-      resolve({ body: {} });
-    }) as Promise<any>;
+        },
+      }),
   },
+  search: () => Promise.resolve({ body: {} }),
+};
 
-  // mock callAsInternalUser
-  asInternalUser: (method: string) => {
-    return new Promise((resolve) => {
-      if (method === 'fieldCaps') {
-        resolve({ body: { fields: [] } });
-        return;
-      } else if (method === 'ml.info') {
-        resolve({
-          body: {
-            limits: {
-              effective_max_model_memory_limit: '100MB',
-              max_model_memory_limit: '1GB',
-            },
-          },
-        });
-      }
-      resolve({ body: {} });
-    }) as Promise<any>;
-  },
+const mlClusterClient = ({
+  asCurrentUser: callAs,
+  asInternalUser: callAs,
 } as unknown) as IScopedClusterClient;
 
 // Note: The tests cast `payload` as any

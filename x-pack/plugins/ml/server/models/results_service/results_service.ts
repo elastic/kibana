@@ -456,7 +456,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
         },
       });
     }
-    const results: SearchResponse<AnomalyCategorizerStatsDoc> = await callAsInternalUser('search', {
+    const { body } = await asInternalUser.search<SearchResponse<AnomalyCategorizerStatsDoc>>({
       index: ML_RESULTS_INDEX_PATTERN,
       body: {
         query: {
@@ -473,7 +473,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
         },
       },
     });
-    return results ? results.hits.hits.map((r) => r._source) : [];
+    return body ? body.hits.hits.map((r) => r._source) : [];
   }
 
   async function getCategoryStoppedPartitions(
@@ -485,15 +485,15 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     };
     // first determine from job config if stop_on_warn is true
     // if false return []
-    const jobConfigResponse: MlJobsResponse = await callAsInternalUser('ml.jobs', {
-      jobId: jobIds,
+    const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>({
+      job_id: jobIds.join(),
     });
 
-    if (!jobConfigResponse || jobConfigResponse.jobs.length < 1) {
+    if (!body || body.jobs.length < 1) {
       throw Boom.notFound(`Unable to find anomaly detector jobs ${jobIds.join(', ')}`);
     }
 
-    const jobIdsWithStopOnWarnSet = jobConfigResponse.jobs
+    const jobIdsWithStopOnWarnSet = body.jobs
       .filter(
         (jobConfig) =>
           jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true
@@ -543,7 +543,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
           },
         },
       ];
-      const results: SearchResponse<any> = await callAsInternalUser('search', {
+      const { body: results } = await asInternalUser.search<SearchResponse<any>>({
         index: ML_RESULTS_INDEX_PATTERN,
         size: 0,
         body: {
