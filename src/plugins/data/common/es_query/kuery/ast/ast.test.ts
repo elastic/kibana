@@ -37,31 +37,6 @@ describe('kuery AST API', () => {
     } as unknown) as IIndexPattern;
   });
 
-  describe.only('benchmark', () => {
-    test('parsing', () => {
-      for (let i = 0; i < 100; ++i) {
-        fromKueryExpression(
-          'not fleet-agent-actions.attributes.sent_at: * and fleet-agent-actions.attributes.agent_id:1234567'
-        );
-      }
-    });
-
-    test('manually building', () => {
-      const sentAt = '*';
-      const agentId = '1234567';
-
-      for (let i = 0; i < 100; ++i) {
-        nodeTypes.function.buildNode('and', [
-          nodeTypes.function.buildNode(
-            'not',
-            nodeTypes.function.buildNode('is', 'fleet-agent-actions.attributes.sent_at', sentAt)
-          ),
-          nodeTypes.function.buildNode('is', 'fleet-agent-actions.attributes.agent_id', agentId),
-        ]);
-      }
-    });
-  });
-
   describe('fromKueryExpression', () => {
     test('should return a match all "is" function for whitespace', () => {
       const expected = nodeTypes.function.buildNode('is', '*', '*');
