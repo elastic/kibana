@@ -64,9 +64,7 @@ import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { Subscription } from 'rxjs';
-import { Toast } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
-import { ToastsSetup } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -1742,11 +1740,6 @@ export class SearchInterceptor {
     protected application: CoreStart['application'];
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
-    getPendingCount$(): Observable<number>;
-    // @internal (undocumented)
-    protected hideToast: () => void;
-    // @internal
-    protected longRunningToast?: Toast;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // (undocumented)
@@ -1759,8 +1752,6 @@ export class SearchInterceptor {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
-    // @internal (undocumented)
-    protected showToast: () => void;
     // @internal
     protected timeoutSubscriptions: Subscription;
 }
@@ -1773,8 +1764,6 @@ export interface SearchInterceptorDeps {
     http: CoreSetup_2['http'];
     // (undocumented)
     startServices: Promise<[CoreStart, any, unknown]>;
-    // (undocumented)
-    toasts: ToastsSetup;
     // (undocumented)
     uiSettings: CoreSetup_2['uiSettings'];
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts

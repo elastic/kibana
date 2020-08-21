@@ -16,7 +16,6 @@ export interface SearchInterceptorDeps
 |  --- | --- | --- |
 |  [http](./kibana-plugin-plugins-data-public.searchinterceptordeps.http.md) | <code>CoreSetup['http']</code> |  |
 |  [startServices](./kibana-plugin-plugins-data-public.searchinterceptordeps.startservices.md) | <code>Promise&lt;[CoreStart, any, unknown]&gt;</code> |  |
-|  [toasts](./kibana-plugin-plugins-data-public.searchinterceptordeps.toasts.md) | <code>ToastsSetup</code> |  |
 |  [uiSettings](./kibana-plugin-plugins-data-public.searchinterceptordeps.uisettings.md) | <code>CoreSetup['uiSettings']</code> |  |
 |  [usageCollector](./kibana-plugin-plugins-data-public.searchinterceptordeps.usagecollector.md) | <code>SearchUsageCollector</code> |  |
 
