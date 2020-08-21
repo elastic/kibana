@@ -15,7 +15,7 @@ export interface IngestManagerConfigType {
     pollingRequestTimeout: number;
     maxConcurrentConnections: number;
     kibana: {
-      host?: string;
+      host?: string[] | string;
       ca_sha256?: string;
     };
     elasticsearch: {

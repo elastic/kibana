@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
-  kibanaUrl: string;
+  kibanaUrl: string[];
   apiKey: EnrollmentAPIKey;
   kibanaCASha256?: string;
 }

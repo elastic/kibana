@@ -8,7 +8,7 @@ import { appContextService } from '../app_context';
 import { macosInstallTemplate } from './install_templates/macos';
 import { linuxInstallTemplate } from './install_templates/linux';
 
-export function getScript(osType: 'macos' | 'linux', kibanaUrl: string): string {
+export function getScript(osType: 'macos' | 'linux', kibanaUrl: string[]): string {
   const variables = { kibanaUrl, kibanaVersion: appContextService.getKibanaVersion() };
 
   switch (osType) {

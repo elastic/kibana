@@ -18,13 +18,12 @@ import {
   EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiRadioGroup,
   EuiComboBox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import { useInput, useComboInput, useCore, useGetSettings, sendPutSettings } from '../hooks';
+import { useComboInput, useCore, useGetSettings, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
@@ -36,11 +35,18 @@ interface Props {
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useCore();
-  const kibanaUrlInput = useInput('', (value) => {
-    if (!value.match(URL_REGEX)) {
+  const kibanaUrlInput = useComboInput([], (value) => {
+    if (value.some((v) => !v.match(URL_REGEX))) {
       return [
         i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
           defaultMessage: 'Invalid URL',
+        }),
+      ];
+    }
+    if (value.length === 0) {
+      return [
+        i18n.translate('xpack.ingestManager.settings.kibanaUrlEmptyError', {
+          defaultMessage: 'At least one URL is required',
         }),
       ];
     }
@@ -118,7 +124,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (settings) {
       inputs.kibanaUrl.setValue(
-        settings.kibana_url || `${window.location.origin}${core.http.basePath.get()}`
+        settings.kibana_url || [`${window.location.origin}${core.http.basePath.get()}`]
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -222,7 +228,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           })}
           {...inputs.kibanaUrl.formRowProps}
         >
-          <EuiFieldText required={true} {...inputs.kibanaUrl.props} name="kibanaUrl" />
+          <EuiComboBox noSuggestions {...inputs.kibanaUrl.props} />
         </EuiFormRow>
       </EuiFormRow>
       <EuiSpacer size="m" />

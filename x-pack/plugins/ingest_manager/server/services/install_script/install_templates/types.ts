@@ -5,6 +5,6 @@
  */
 
 export type InstallTemplateFunction = (variables: {
-  kibanaUrl: string;
+  kibanaUrl: string[];
   kibanaVersion: string;
 }) => string;

@@ -34,8 +34,9 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
   const settings = useGetSettings();
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
 
-  const kibanaUrl =
-    settings.data?.item?.kibana_url ?? `${window.location.origin}${core.http.basePath.get()}`;
+  const kibanaUrl = settings.data?.item?.kibana_url ?? [
+    `${window.location.origin}${core.http.basePath.get()}`,
+  ];
   const kibanaCASha256 = settings.data?.item?.kibana_ca_sha256;
 
   const steps: EuiContainedStepProps[] = [
