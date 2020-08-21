@@ -10,7 +10,9 @@ jest.mock('ui/new_platform');
 jest.mock('./load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
+import { SearchSource } from '../../../../../../../src/plugins/data/public/search/search_source';
 
+// @ts-expect-error
 import { loadIndexSettings } from './load_index_settings';
 
 import { ESSearchSource } from './es_search_source';
@@ -58,7 +60,7 @@ describe('ESSearchSource', () => {
         const mockSearchService = {
           searchSource: {
             async create() {
-              return mockSearchSource as SearchSource;
+              return (mockSearchSource as unknown) as SearchSource;
             },
           },
         };
@@ -67,14 +69,13 @@ describe('ESSearchSource', () => {
         getIndexPatternService.mockReturnValue(mockIndexPatternService);
         // @ts-expect-error
         getSearchService.mockReturnValue(mockSearchService);
-        // @ts-expect-error
         loadIndexSettings.mockReturnValue({
           maxResultWindow: 1000,
         });
         // @ts-expect-error
         getHttp.mockReturnValue({
           basePath: {
-            prepend(path) {
+            prepend(path: string) {
               return `rootdir${path};`;
             },
           },
@@ -83,7 +84,13 @@ describe('ESSearchSource', () => {
 
       const searchFilters: MapFilters = {
         filters: [],
+        zoom: 0,
         fieldNames: ['tooltipField', 'styleField'],
+        timeFilters: {
+          from: 'now',
+          to: '15m',
+          mode: 'relative',
+        },
       };
 
       it('Should only include required props', async () => {
@@ -126,12 +133,12 @@ describe('ESSearchSource', () => {
   describe('getFields', () => {
     it('default', () => {
       const esSearchSource = new ESSearchSource({}, null);
-      const docField = esSearchSource.createField('prop1');
+      const docField = esSearchSource.createField({ fieldName: 'prop1' });
       expect(docField.canReadFromGeoJson()).toBe(true);
     });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT }, null);
-      const docField = esSearchSource.createField('prop1');
+      const docField = esSearchSource.createField({ fieldName: 'prop1' });
       expect(docField.canReadFromGeoJson()).toBe(false);
     });
   });
