@@ -34,7 +34,6 @@ export const SnapshotNodeMetricRT = rt.intersection([
   SnapshotNodeMetricOptionalRT,
 ]);
 export const SnapshotNodeRT = rt.type({
-  name: rt.string,
   metrics: rt.array(SnapshotNodeMetricRT),
   path: rt.array(SnapshotNodePathRT),
 });
