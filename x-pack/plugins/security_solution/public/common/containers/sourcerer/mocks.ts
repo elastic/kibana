@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityPageName } from './constants';
+import { SecurityPageName } from '../../store/sourcerer/model';
 import { getSourceDefaults } from './index';
 
 export const mockPatterns = [

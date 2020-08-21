@@ -27,6 +27,7 @@ import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
+import { initialSourcererState } from '../store/sourcerer';
 
 export const mockGlobalState: State = {
   app: {
@@ -241,6 +242,7 @@ export const mockGlobalState: State = {
     },
     insertTimeline: null,
   },
+  sourcerer: initialSourcererState, // TO DO
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

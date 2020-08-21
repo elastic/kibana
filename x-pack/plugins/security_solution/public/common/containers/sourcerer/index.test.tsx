@@ -14,7 +14,7 @@ import {
   mockPatterns,
   mockSource,
 } from './mocks';
-import { SecurityPageName } from './constants';
+import { SecurityPageName } from '../../store/sourcerer/model';
 const mockSourceDefaults = mockSource(SecurityPageName.default);
 jest.mock('../../lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { SecurityPageName } from '../../containers/sourcerer/constants';
+import { SecurityPageName } from '../../store/sourcerer/model';
 import { mockPatterns, mockSourceGroup } from '../../containers/sourcerer/mocks';
 import { MaybeSourcerer } from './index';
 import * as i18n from './translations';
