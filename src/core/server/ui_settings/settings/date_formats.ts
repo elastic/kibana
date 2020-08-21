@@ -37,19 +37,19 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
 
   return {
     dateFormat: {
-      name: i18n.translate('kbn.advancedSettings.dateFormatTitle', {
+      name: i18n.translate('core.ui_settings.params.dateFormatTitle', {
         defaultMessage: 'Date format',
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSS',
-      description: i18n.translate('kbn.advancedSettings.dateFormatText', {
+      description: i18n.translate('core.ui_settings.params.dateFormatText', {
         defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
         description:
-          'Part of composite text: kbn.advancedSettings.dateFormatText + ' +
-          'kbn.advancedSettings.dateFormat.optionsLinkText',
+          'Part of composite text: core.ui_settings.params.dateFormatText + ' +
+          'core.ui_settings.params.dateFormat.optionsLinkText',
         values: {
           formatLink:
             '<a href="https://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.dateFormat.optionsLinkText', {
+            i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
               defaultMessage: 'format',
             }) +
             '</a>',
@@ -58,11 +58,11 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       schema: schema.string(),
     },
     'dateFormat:tz': {
-      name: i18n.translate('kbn.advancedSettings.dateFormat.timezoneTitle', {
+      name: i18n.translate('core.ui_settings.params.dateFormat.timezoneTitle', {
         defaultMessage: 'Timezone for date formatting',
       }),
       value: 'Browser',
-      description: i18n.translate('kbn.advancedSettings.dateFormat.timezoneText', {
+      description: i18n.translate('core.ui_settings.params.dateFormat.timezoneText', {
         defaultMessage:
           'Which timezone should be used. {defaultOption} will use the timezone detected by your browser.',
         values: {
@@ -81,7 +81,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
     },
     'dateFormat:scaled': {
-      name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
+      name: i18n.translate('core.ui_settings.params.dateFormat.scaledTitle', {
         defaultMessage: 'Scaled date format',
       }),
       type: 'json',
@@ -93,18 +93,18 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
   ["P1DT", "YYYY-MM-DD"],
   ["P1YT", "YYYY"]
 ]`,
-      description: i18n.translate('kbn.advancedSettings.dateFormat.scaledText', {
+      description: i18n.translate('core.ui_settings.params.dateFormat.scaledText', {
         defaultMessage:
           'Values that define the format used in situations where time-based ' +
           'data is rendered in order, and formatted timestamps should adapt to the ' +
           'interval between measurements. Keys are {intervalsLink}.',
         description:
-          'Part of composite text: kbn.advancedSettings.dateFormat.scaledText + ' +
-          'kbn.advancedSettings.dateFormat.scaled.intervalsLinkText',
+          'Part of composite text: core.ui_settings.params.dateFormat.scaledText + ' +
+          'core.ui_settings.params.dateFormat.scaled.intervalsLinkText',
         values: {
           intervalsLink:
             '<a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.dateFormat.scaled.intervalsLinkText', {
+            i18n.translate('core.ui_settings.params.dateFormat.scaled.intervalsLinkText', {
               defaultMessage: 'ISO8601 intervals',
             }) +
             '</a>',
@@ -113,11 +113,11 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       schema: schema.string(),
     },
     'dateFormat:dow': {
-      name: i18n.translate('kbn.advancedSettings.dateFormat.dayOfWeekTitle', {
+      name: i18n.translate('core.ui_settings.params.dateFormat.dayOfWeekTitle', {
         defaultMessage: 'Day of week',
       }),
       value: defaultWeekday,
-      description: i18n.translate('kbn.advancedSettings.dateFormat.dayOfWeekText', {
+      description: i18n.translate('core.ui_settings.params.dateFormat.dayOfWeekText', {
         defaultMessage: 'What day should weeks start on?',
       }),
       type: 'select',
@@ -131,16 +131,16 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
     },
     dateNanosFormat: {
-      name: i18n.translate('kbn.advancedSettings.dateNanosFormatTitle', {
+      name: i18n.translate('core.ui_settings.params.dateNanosFormatTitle', {
         defaultMessage: 'Date with nanoseconds format',
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
-      description: i18n.translate('kbn.advancedSettings.dateNanosFormatText', {
+      description: i18n.translate('core.ui_settings.params.dateNanosFormatText', {
         defaultMessage: 'Used for the {dateNanosLink} datatype of Elasticsearch',
         values: {
           dateNanosLink:
             '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.dateNanosLinkTitle', {
+            i18n.translate('core.ui_settings.params.dateNanosLinkTitle', {
               defaultMessage: 'date_nanos',
             }) +
             '</a>',

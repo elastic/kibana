@@ -24,11 +24,11 @@ import { UiSettingsParams } from '../types';
 export const getMiscUiSettings = (): Record<string, UiSettingsParams> => {
   return {
     'truncate:maxHeight': {
-      name: i18n.translate('kbn.advancedSettings.maxCellHeightTitle', {
+      name: i18n.translate('core.ui_settings.params.maxCellHeightTitle', {
         defaultMessage: 'Maximum table cell height',
       }),
       value: 115,
-      description: i18n.translate('kbn.advancedSettings.maxCellHeightText', {
+      description: i18n.translate('core.ui_settings.params.maxCellHeightText', {
         defaultMessage:
           'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
       }),

@@ -24,24 +24,24 @@ import { UiSettingsParams } from '../../../types';
 export const getThemeSettings = (): Record<string, UiSettingsParams> => {
   return {
     'theme:darkMode': {
-      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
+      name: i18n.translate('core.ui_settings.params.darkModeTitle', {
         defaultMessage: 'Dark mode',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.darkModeText', {
+      description: i18n.translate('core.ui_settings.params.darkModeText', {
         defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,
       schema: schema.boolean(),
     },
     'theme:version': {
-      name: i18n.translate('kbn.advancedSettings.themeVersionTitle', {
+      name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
       value: 'v7',
       type: 'select',
       options: ['v7', 'v8 (beta)'],
-      description: i18n.translate('kbn.advancedSettings.themeVersionText', {
+      description: i18n.translate('core.ui_settings.params.themeVersionText', {
         defaultMessage: `Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,

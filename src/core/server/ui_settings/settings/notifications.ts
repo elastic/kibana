@@ -24,22 +24,22 @@ import { UiSettingsParams } from '../../../types';
 export const getNotificationsSettings = (): Record<string, UiSettingsParams> => {
   return {
     'notifications:banner': {
-      name: i18n.translate('kbn.advancedSettings.notifications.bannerTitle', {
+      name: i18n.translate('core.ui_settings.params.notifications.bannerTitle', {
         defaultMessage: 'Custom banner notification',
       }),
       value: '',
       type: 'markdown',
-      description: i18n.translate('kbn.advancedSettings.notifications.bannerText', {
+      description: i18n.translate('core.ui_settings.params.notifications.bannerText', {
         defaultMessage:
           'A custom banner intended for temporary notices to all users. {markdownLink}.',
         description:
-          'Part of composite text: kbn.advancedSettings.notifications.bannerText + ' +
-          'kbn.advancedSettings.notifications.banner.markdownLinkText',
+          'Part of composite text: core.ui_settings.params.notifications.bannerText + ' +
+          'core.ui_settings.params.notifications.banner.markdownLinkText',
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
             target="_blank" rel="noopener">` +
-            i18n.translate('kbn.advancedSettings.notifications.banner.markdownLinkText', {
+            i18n.translate('core.ui_settings.params.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +
             '</a>',
@@ -49,11 +49,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       schema: schema.string(),
     },
     'notifications:lifetime:banner': {
-      name: i18n.translate('kbn.advancedSettings.notifications.bannerLifetimeTitle', {
+      name: i18n.translate('core.ui_settings.params.notifications.bannerLifetimeTitle', {
         defaultMessage: 'Banner notification lifetime',
       }),
       value: 3000000,
-      description: i18n.translate('kbn.advancedSettings.notifications.bannerLifetimeText', {
+      description: i18n.translate('core.ui_settings.params.notifications.bannerLifetimeText', {
         defaultMessage:
           'The time in milliseconds which a banner notification will be displayed on-screen for. ' +
           'Setting to {infinityValue} will disable the countdown.',
@@ -66,11 +66,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
     },
     'notifications:lifetime:error': {
-      name: i18n.translate('kbn.advancedSettings.notifications.errorLifetimeTitle', {
+      name: i18n.translate('core.ui_settings.params.notifications.errorLifetimeTitle', {
         defaultMessage: 'Error notification lifetime',
       }),
       value: 300000,
-      description: i18n.translate('kbn.advancedSettings.notifications.errorLifetimeText', {
+      description: i18n.translate('core.ui_settings.params.notifications.errorLifetimeText', {
         defaultMessage:
           'The time in milliseconds which an error notification will be displayed on-screen for. ' +
           'Setting to {infinityValue} will disable.',
@@ -83,11 +83,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
     },
     'notifications:lifetime:warning': {
-      name: i18n.translate('kbn.advancedSettings.notifications.warningLifetimeTitle', {
+      name: i18n.translate('core.ui_settings.params.notifications.warningLifetimeTitle', {
         defaultMessage: 'Warning notification lifetime',
       }),
       value: 10000,
-      description: i18n.translate('kbn.advancedSettings.notifications.warningLifetimeText', {
+      description: i18n.translate('core.ui_settings.params.notifications.warningLifetimeText', {
         defaultMessage:
           'The time in milliseconds which a warning notification will be displayed on-screen for. ' +
           'Setting to {infinityValue} will disable.',
@@ -100,11 +100,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
     },
     'notifications:lifetime:info': {
-      name: i18n.translate('kbn.advancedSettings.notifications.infoLifetimeTitle', {
+      name: i18n.translate('core.ui_settings.params.notifications.infoLifetimeTitle', {
         defaultMessage: 'Info notification lifetime',
       }),
       value: 5000,
-      description: i18n.translate('kbn.advancedSettings.notifications.infoLifetimeText', {
+      description: i18n.translate('core.ui_settings.params.notifications.infoLifetimeText', {
         defaultMessage:
           'The time in milliseconds which an information notification will be displayed on-screen for. ' +
           'Setting to {infinityValue} will disable.',

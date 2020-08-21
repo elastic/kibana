@@ -24,11 +24,11 @@ import { UiSettingsParams } from '../../../types';
 export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => {
   return {
     'accessibility:disableAnimations': {
-      name: i18n.translate('kbn.advancedSettings.disableAnimationsTitle', {
+      name: i18n.translate('core.ui_settings.params.disableAnimationsTitle', {
         defaultMessage: 'Disable Animations',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.disableAnimationsText', {
+      description: i18n.translate('core.ui_settings.params.disableAnimationsText', {
         defaultMessage:
           'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
