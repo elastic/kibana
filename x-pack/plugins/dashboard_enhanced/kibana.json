@@ -6,6 +6,7 @@
   "requiredPlugins": ["data", "uiActionsEnhanced", "embeddable", "dashboard", "share"],
   "configPath": ["xpack", "dashboardEnhanced"],
   "requiredBundles": [
+    "embeddable",
     "kibanaUtils",
     "embeddableEnhanced",
     "kibanaReact",
