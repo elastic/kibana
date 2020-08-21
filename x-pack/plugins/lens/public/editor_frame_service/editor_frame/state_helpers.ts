@@ -8,12 +8,13 @@ import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
 import { Datasource, DatasourcePublicAPI, Visualization } from '../../types';
 import { buildExpression } from './expression_helpers';
+import { Document } from '../../persistence/saved_object_store';
 
 export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[]
-): Promise<Record<string, { isLoading: boolean; state: unknown }>> {
+) {
   const states: Record<string, { isLoading: boolean; state: unknown }> = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
@@ -52,12 +53,17 @@ export function createDatasourceLayers(
 }
 
 export async function persistedStateToExpression(
-  visualization: Visualization,
-  visualizationState: unknown,
   datasources: Record<string, Datasource>,
-  persistedDatasourceStates: Record<string, unknown>,
-  references?: SavedObjectReference[]
-): Promise<Ast> {
+  visualizations: Record<string, Visualization>,
+  doc: Document
+): Promise<Ast | null> {
+  const {
+    state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
+    visualizationType,
+    references,
+  } = doc;
+  if (!visualizationType) return null;
+  const visualization = visualizations[visualizationType!];
   const datasourceStates = await initializeDatasources(
     datasources,
     Object.fromEntries(
@@ -77,5 +83,5 @@ export async function persistedStateToExpression(
     datasourceMap: datasources,
     datasourceStates,
     datasourceLayers,
-  })!;
+  });
 }

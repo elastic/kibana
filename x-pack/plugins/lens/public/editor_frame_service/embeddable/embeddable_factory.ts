@@ -34,7 +34,7 @@ interface StartServices {
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
-  documentToExpression: (doc: Document) => Promise<Ast>;
+  documentToExpression: (doc: Document) => Promise<Ast | null>;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {

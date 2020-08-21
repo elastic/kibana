@@ -50,7 +50,7 @@ export function injectFilterReferences(
     }
     return {
       ...filterRow,
-      meta: metaRest,
+      meta: { ...metaRest, index: reference.id },
     };
   });
 }

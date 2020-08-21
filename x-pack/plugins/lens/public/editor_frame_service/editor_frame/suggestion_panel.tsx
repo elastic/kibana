@@ -113,7 +113,7 @@ const SuggestionPreview = ({
 }: {
   onSelect: () => void;
   preview: {
-    expression?: Ast;
+    expression?: Ast | null;
     icon: IconType;
     title: string;
   };
@@ -309,7 +309,7 @@ export function SuggestionPanel({
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
-              expression: currentStateExpression!,
+              expression: currentStateExpression,
               icon:
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
                   .icon || 'empty',
@@ -327,7 +327,7 @@ export function SuggestionPanel({
           return (
             <SuggestionPreview
               preview={{
-                expression: suggestion.previewExpression!,
+                expression: suggestion.previewExpression,
                 icon: suggestion.previewIcon,
                 title: suggestion.title,
               }}

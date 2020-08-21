@@ -61,19 +61,19 @@ export class EditorFrameService {
   private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
   private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
 
+  /**
+   * This method takes a Lens saved object as returned from the persistence helper,
+   * initializes datsources and visualization and creates the current expression.
+   * This is an asynchronous process and should only be triggered once for a saved object.
+   * @param doc parsed Lens saved object
+   */
   private async documentToExpression(doc: Document) {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       collectAsyncDefinitions(this.datasources),
       collectAsyncDefinitions(this.visualizations),
     ]);
 
-    return await persistedStateToExpression(
-      resolvedVisualizations[doc.visualizationType!],
-      doc.state.visualization,
-      resolvedDatasources,
-      doc.state.datasourceStates,
-      doc.references
-    );
+    return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
   }
 
   public setup(
@@ -85,10 +85,6 @@ export class EditorFrameService {
 
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
-        collectAsyncDefinitions(this.datasources),
-        collectAsyncDefinitions(this.visualizations),
-      ]);
       return {
         capabilities: coreStart.application.capabilities,
         savedObjectsClient: coreStart.savedObjects.client,
@@ -98,8 +94,6 @@ export class EditorFrameService {
         documentToExpression: this.documentToExpression.bind(this),
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
-        datasources: resolvedDatasources,
-        visualizations: resolvedVisualizations,
       };
     };
 

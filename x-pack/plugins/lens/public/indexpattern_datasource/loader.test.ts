@@ -12,6 +12,8 @@ import {
   changeIndexPattern,
   changeLayerIndexPattern,
   syncExistingFields,
+  extractReferences,
+  injectReferences,
 } from './loader';
 import { IndexPatternPersistedState, IndexPatternPrivateState, IndexPatternField } from './types';
 import { documentField } from './document_field';
@@ -420,6 +422,79 @@ describe('loader', () => {
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'b',
       });
+    });
+  });
+
+  describe('saved object references', () => {
+    const state: IndexPatternPrivateState = {
+      currentIndexPatternId: 'b',
+      indexPatternRefs: [],
+      indexPatterns: {},
+      existingFields: {},
+      layers: {
+        a: {
+          indexPatternId: 'id-index-pattern-a',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'avg',
+              sourceField: 'myfield',
+            },
+          },
+        },
+        b: {
+          indexPatternId: 'id-index-pattern-b',
+          columnOrder: ['col2'],
+          columns: {
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'avg',
+              sourceField: 'myfield2',
+            },
+          },
+        },
+      },
+      isFirstExistenceFetch: false,
+    };
+
+    it('should create a reference for each layer and for current index pattern', () => {
+      const { savedObjectReferences } = extractReferences(state);
+      expect(savedObjectReferences).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "b",
+            "name": "indexpattern-datasource-current-indexpattern",
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "id-index-pattern-a",
+            "name": "indexpattern-datasource-layer-a",
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "id-index-pattern-b",
+            "name": "indexpattern-datasource-layer-b",
+            "type": "index-pattern",
+          },
+        ]
+      `);
+    });
+
+    it('should restore layers', () => {
+      const { savedObjectReferences, state: persistedState } = extractReferences(state);
+      expect(injectReferences(persistedState, savedObjectReferences).layers).toEqual(state.layers);
+    });
+
+    it('should restore current index pattern', () => {
+      const { savedObjectReferences, state: persistedState } = extractReferences(state);
+      expect(injectReferences(persistedState, savedObjectReferences).currentIndexPatternId).toEqual(
+        state.currentIndexPatternId
+      );
     });
   });
 
