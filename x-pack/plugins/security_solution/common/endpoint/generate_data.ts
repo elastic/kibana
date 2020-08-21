@@ -19,11 +19,11 @@ import {
 import { factory as policyFactory } from './models/policy_config';
 import { parentEntityId } from './models/event';
 import {
-  GetAgentConfigsResponseItem,
+  GetAgentPoliciesResponseItem,
   GetPackagesResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
 import {
-  AgentConfigStatus,
+  AgentPolicyStatus,
   EsAssetReference,
   InstallationStatus,
   KibanaAssetReference,
@@ -1031,9 +1031,9 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generates an Ingest `package config` that includes the Endpoint Policy data
+   * Generates an Ingest `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackageConfig(): PolicyData {
+  public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
@@ -1043,7 +1043,7 @@ export class EndpointDocGenerator {
       created_by: 'elastic',
       updated_at: new Date().toISOString(),
       updated_by: 'elastic',
-      config_id: this.seededUUIDv4(),
+      policy_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
       inputs: [
@@ -1076,20 +1076,20 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generate an Agent Configuration (ingest)
+   * Generate an Agent Policy (ingest)
    */
-  public generateAgentConfig(): GetAgentConfigsResponseItem {
+  public generateAgentPolicy(): GetAgentPoliciesResponseItem {
     return {
       id: this.seededUUIDv4(),
-      name: 'Agent Config',
-      status: AgentConfigStatus.Active,
+      name: 'Agent Policy',
+      status: AgentPolicyStatus.Active,
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
-      package_configs: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
+      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
       agents: 0,
     };
   }

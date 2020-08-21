@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../../../../src/core/server';
-import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
+import { NewPackagePolicy } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
@@ -67,23 +67,23 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
 };
 
 /**
- * Callback to handle creation of PackageConfigs in Ingest Manager
+ * Callback to handle creation of PackagePolicies in Ingest Manager
  */
-export const getPackageConfigCreateCallback = (
+export const getPackagePolicyCreateCallback = (
   logger: Logger,
   manifestManager: ManifestManager
-): ((newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>) => {
-  const handlePackageConfigCreate = async (
-    newPackageConfig: NewPackageConfig
-  ): Promise<NewPackageConfig> => {
-    // We only care about Endpoint package configs
-    if (newPackageConfig.package?.name !== 'endpoint') {
-      return newPackageConfig;
+): ((newPackagePolicy: NewPackagePolicy) => Promise<NewPackagePolicy>) => {
+  const handlePackagePolicyCreate = async (
+    newPackagePolicy: NewPackagePolicy
+  ): Promise<NewPackagePolicy> => {
+    // We only care about Endpoint package policies
+    if (newPackagePolicy.package?.name !== 'endpoint') {
+      return newPackagePolicy;
     }
 
     // We cast the type here so that any changes to the Endpoint specific data
     // follow the types/schema expected
-    let updatedPackageConfig = newPackageConfig as NewPolicyData;
+    let updatedPackagePolicy = newPackagePolicy as NewPolicyData;
 
     // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
@@ -96,8 +96,8 @@ export const getPackageConfigCreateCallback = (
 
     // Until we get the Default Policy Configuration in the Endpoint package,
     // we will add it here manually at creation time.
-    updatedPackageConfig = {
-      ...newPackageConfig,
+    updatedPackagePolicy = {
+      ...newPackagePolicy,
       inputs: [
         {
           type: 'endpoint',
@@ -115,8 +115,8 @@ export const getPackageConfigCreateCallback = (
       ],
     };
 
-    return updatedPackageConfig;
+    return updatedPackagePolicy;
   };
 
-  return handlePackageConfigCreate;
+  return handlePackagePolicyCreate;
 };
