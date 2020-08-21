@@ -196,6 +196,7 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiFormRow fullWidth={true} label="Tags">
+            {/* TODO: add the output of this component to the params we ship to IM */}
             <EuiComboBox
               customOptionText="Add {searchValue} as a new tag."
               fullWidth={true}
