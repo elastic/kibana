@@ -12,7 +12,7 @@ import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { generateDestIndex, generateTransformConfig } from './common';
+import { asyncForEach, generateDestIndex, generateTransformConfig } from './common';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -82,102 +82,83 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // describe('single transform start with invalid transformId', function () {
-    //   it('should return 200 with error in response if invalid transformId', async () => {
-    //     const transformsInfo: TransformEndpointRequest[] = [{ id: 'invalid_transform_id' }];
-    //     const { body } = await supertest
-    //       .post(`/api/transform/start_transforms`)
-    //       .auth(
-    //         USER.TRANSFORM_POWERUSER,
-    //         transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-    //       )
-    //       .set(COMMON_REQUEST_HEADERS)
-    //       .send({
-    //         transformsInfo,
-    //       })
-    //       .expect(200);
-    //     expect(body.invalid_transform_id.transformDeleted.success).to.eql(false);
-    //     expect(body.invalid_transform_id.transformDeleted).to.have.property('error');
-    //   });
-    // });
+    describe('single transform start with invalid transformId', function () {
+      it('should return 200 with error in response if invalid transformId', async () => {
+        const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
+        const { body } = await supertest
+          .post(`/api/transform/start_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send(reqBody)
+          .expect(200);
 
-    // describe('bulk start', function () {
-    //   const transformsInfo: TransformEndpointRequest[] = [
-    //     { id: 'bulk_start_test_1' },
-    //     { id: 'bulk_start_test_2' },
-    //   ];
-    //   const destinationIndices = transformsInfo.map((d) => generateDestIndex(d.id));
+        expect(body.invalid_transform_id.success).to.eql(false);
+        expect(body.invalid_transform_id).to.have.property('error');
+      });
+    });
 
-    //   beforeEach(async () => {
-    //     await asyncForEach(transformsInfo, async ({ id }: { id: string }, idx: number) => {
-    //       await createTransform(id);
-    //       await transform.api.createIndices(destinationIndices[idx]);
-    //     });
-    //   });
+    describe('bulk start', function () {
+      const reqBody: StartTransformsRequestSchema = [
+        { id: 'bulk_start_test_1' },
+        { id: 'bulk_start_test_2' },
+      ];
+      const destinationIndices = reqBody.map((d) => generateDestIndex(d.id));
 
-    //   afterEach(async () => {
-    //     await asyncForEach(destinationIndices, async (destinationIndex: string) => {
-    //       await transform.api.deleteIndices(destinationIndex);
-    //     });
-    //   });
+      beforeEach(async () => {
+        await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
+          await createTransform(id);
+        });
+      });
 
-    // it('should start multiple transforms by transformIds', async () => {
-    //   const { body } = await supertest
-    //     .post(`/api/transform/start_transforms`)
-    //     .auth(
-    //       USER.TRANSFORM_POWERUSER,
-    //       transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-    //     )
-    //     .set(COMMON_REQUEST_HEADERS)
-    //     .send({
-    //       transformsInfo,
-    //     })
-    //     .expect(200);
+      afterEach(async () => {
+        await transform.api.cleanTransformIndices();
+        await asyncForEach(destinationIndices, async (destinationIndex: string) => {
+          await transform.api.deleteIndices(destinationIndex);
+        });
+      });
 
-    //   await asyncForEach(
-    //     transformsInfo,
-    //     async ({ id: transformId }: { id: string }, idx: number) => {
-    //       expect(body[transformId].transformDeleted.success).to.eql(true);
-    //       expect(body[transformId].destIndexDeleted.success).to.eql(false);
-    //       expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-    //       await transform.api.waitForTransformNotToExist(transformId);
-    //       await transform.api.waitForIndicesToExist(destinationIndices[idx]);
-    //     }
-    //   );
-    // });
+      it('should start multiple transforms by transformIds', async () => {
+        const { body } = await supertest
+          .post(`/api/transform/start_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send(reqBody)
+          .expect(200);
 
-    //   // it('should start multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
-    //   //   const invalidTransformId = 'invalid_transform_id';
-    //   //   const { body } = await supertest
-    //   //     .post(`/api/transform/start_transforms`)
-    //   //     .auth(
-    //   //       USER.TRANSFORM_POWERUSER,
-    //   //       transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-    //   //     )
-    //   //     .set(COMMON_REQUEST_HEADERS)
-    //   //     .send({
-    //   //       transformsInfo: [
-    //   //         { id: transformsInfo[0].id },
-    //   //         { id: invalidTransformId },
-    //   //         { id: transformsInfo[1].id },
-    //   //       ],
-    //   //     })
-    //   //     .expect(200);
+        await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
+          expect(body[transformId].success).to.eql(true);
+          await transform.api.waitForBatchTransformToComplete(transformId);
+          await transform.api.waitForIndicesToExist(destinationIndices[idx]);
+        });
+      });
 
-    //   //   await asyncForEach(
-    //   //     transformsInfo,
-    //   //     async ({ id: transformId }: { id: string }, idx: number) => {
-    //   //       expect(body[transformId].transformDeleted.success).to.eql(true);
-    //   //       expect(body[transformId].destIndexDeleted.success).to.eql(false);
-    //   //       expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
-    //   //       await transform.api.waitForTransformNotToExist(transformId);
-    //   //       await transform.api.waitForIndicesToExist(destinationIndices[idx]);
-    //   //     }
-    //   //   );
+      it('should start multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
+        const invalidTransformId = 'invalid_transform_id';
+        const { body } = await supertest
+          .post(`/api/transform/start_transforms`)
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send([{ id: reqBody[0].id }, { id: invalidTransformId }, { id: reqBody[1].id }])
+          .expect(200);
 
-    //   //   expect(body[invalidTransformId].transformDeleted.success).to.eql(false);
-    //   //   expect(body[invalidTransformId].transformDeleted).to.have.property('error');
-    //   // });
-    // });
+        await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
+          expect(body[transformId].success).to.eql(true);
+          await transform.api.waitForBatchTransformToComplete(transformId);
+          await transform.api.waitForIndicesToExist(destinationIndices[idx]);
+        });
+
+        expect(body[invalidTransformId].success).to.eql(false);
+        expect(body[invalidTransformId]).to.have.property('error');
+      });
+    });
   });
 };
