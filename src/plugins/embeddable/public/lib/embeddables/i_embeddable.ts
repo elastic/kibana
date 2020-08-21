@@ -22,7 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
-import { TimeRange, Query, Filter } from '../../../../data/common';
+import type { TimeRange, Query, Filter } from '../../../../data/common';
 
 export interface EmbeddableError {
   name: string;
