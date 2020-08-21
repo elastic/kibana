@@ -155,7 +155,7 @@ export class Home extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup className="homHeader__actions">
                   <EuiFlexItem className="homHeader__actionItem">
-                    <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
+                    <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
                       {i18n.translate('home.pageHeader.addDataButtonLabel', {
                         defaultMessage: 'Add data',
                       })}
