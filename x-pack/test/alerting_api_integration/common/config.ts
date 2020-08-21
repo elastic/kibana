@@ -60,7 +60,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     // if options.proxyPort is defined than use it for a proxy service in other case try to use port from range 4000 till 4100
-    const proxyPort = options.proxyPort ?? (await getPort({ port: getPort.makeRange(4000, 4100) }));
+    const proxyPort = options.proxyPort ?? (await getPort({ port: getPort.makeRange(3000, 3100) }));
     const actionsProxyUrl = options.enableActionsProxy
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,

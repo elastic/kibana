@@ -40,7 +40,9 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
     after(() => {
-      httpServer.close();
+      if (httpServer.listening) {
+        httpServer.close();
+      }
     });
   });
 }

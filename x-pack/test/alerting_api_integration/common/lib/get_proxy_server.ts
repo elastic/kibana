@@ -34,8 +34,9 @@ export const getHttpProxyServer = async (
   let attempts = 0;
   let isSuccess = false;
 
+  let freePort;
   while (!isSuccess && attempts < 10) {
-    const freePort = await getPort({ port: proxyPort });
+    freePort = await getPort({ port: proxyPort });
     log.info('freePort ', freePort, 'getHttpProxyServer');
     if (freePort === proxyPort) {
       isSuccess = true;
@@ -46,7 +47,9 @@ export const getHttpProxyServer = async (
     }
   }
 
-  proxyServer.listen(proxyPort);
+  if (freePort === proxyPort) {
+    proxyServer.listen(proxyPort);
+  }
   return proxyServer;
 };
 
