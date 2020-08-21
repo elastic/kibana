@@ -23,6 +23,7 @@ export interface IndexPattern {
 
 export interface IndexPatternField {
   name: string;
+  displayName: string;
   type: string;
   esTypes?: string[];
   aggregatable: boolean;
