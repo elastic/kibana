@@ -17,6 +17,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -128,7 +129,7 @@ export function InnerWorkspacePanel({
           visualizationState,
           datasourceMap,
           datasourceStates,
-          framePublicAPI,
+          datasourceLayers: framePublicAPI.datasourceLayers,
         });
       } catch (e) {
         // Most likely an error in the expression provided by a datasource or visualization
@@ -170,6 +171,23 @@ export function InnerWorkspacePanel({
   const autoRefreshFetch$ = useMemo(
     () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
     [plugins.data.query.timefilter.timefilter]
+  );
+
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: framePublicAPI.query,
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      filters: framePublicAPI.filters,
+    }),
+    [
+      framePublicAPI.query,
+      framePublicAPI.dateRange.fromDate,
+      framePublicAPI.dateRange.toDate,
+      framePublicAPI.filters,
+    ]
   );
 
   useEffect(() => {
@@ -258,6 +276,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          searchContext={context}
           reload$={autoRefreshFetch$}
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {

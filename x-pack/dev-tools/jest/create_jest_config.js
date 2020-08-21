@@ -58,7 +58,6 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${xPackKibanaDirectory}/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
-      `${kibanaDirectory}/src/dev/jest/setup/default_timeout.js`,
     ],
     testEnvironment: 'jest-environment-jsdom-thirteen',
     testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
