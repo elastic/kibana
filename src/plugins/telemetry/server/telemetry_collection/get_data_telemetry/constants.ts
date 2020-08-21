@@ -128,6 +128,9 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*suricata*', patternName: 'suricata' },
   // { pattern: '*fsf*', patternName: 'fsf' }, // Disabled because it's too vague
   { pattern: '*wazuh*', patternName: 'wazuh' },
+
+  // meow attacks
+  { pattern: '*meow*', patternName: 'meow' },
 ] as const;
 
 // Get the unique list of index patterns (some are duplicated for documentation purposes)

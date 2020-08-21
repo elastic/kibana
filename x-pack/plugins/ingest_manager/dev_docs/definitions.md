@@ -13,9 +13,9 @@ definitions for one or multiple inputs and each input can contain one or multipl
 With the example of the nginx Package policy, it contains two inputs: `logs` and `nginx/metrics`. Logs and metrics are collected
 differently. The `logs` input contains two streams, `access` and `error`, the `nginx/metrics` input contains the stubstatus stream.
 
-## Data Stream
+## Data stream
 
-Data Streams are a [new concept](https://github.com/elastic/elasticsearch/issues/53100) in Elasticsearch which simplify
+Data streams are a [new concept](https://github.com/elastic/elasticsearch/issues/53100) in Elasticsearch which simplify
 ingesting data and the setup of Elasticsearch.
 
 ## Elastic Agent
@@ -35,7 +35,7 @@ Fleet is the part of the Ingest Manager UI in Kibana that handles the part of en
 
 Ingest Management + Elastic Agent follow a strict new indexing strategy: `{type}-{dataset}-{namespace}`. An example
 for this is `logs-nginx.access-default`. More details about it can be found in the Index Strategy below. All data of
-the index strategy is sent to Data Streams.
+the index strategy is sent to data streams.
 
 ## Input
 
