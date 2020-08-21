@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SCALING_TYPES } from '../../../../common/constants';
+
 jest.mock('../../../kibana_services');
 jest.mock('ui/new_platform');
 
@@ -20,6 +22,30 @@ describe('ESSearchSource', () => {
       expect(esSearchSource.getMinZoom()).toBe(0);
       expect(esSearchSource.getMaxZoom()).toBe(24);
       expect(esSearchSource.getLayerName()).toBe('source_layer');
+    });
+  });
+
+  describe('isFilterByMapBounds', () => {
+    it('default', () => {
+      const esSearchSource = new ESSearchSource({}, null);
+      expect(esSearchSource.isFilterByMapBounds()).toBe(true);
+    });
+    it('mvt', () => {
+      const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT }, null);
+      expect(esSearchSource.isFilterByMapBounds()).toBe(false);
+    });
+  });
+
+  describe('getJoinsDisabledReason', () => {
+    it('default', () => {
+      const esSearchSource = new ESSearchSource({}, null);
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+    });
+    it('mvt', () => {
+      const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT }, null);
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(
+        'Joins are not supported when scaling by mvt vector tiles'
+      );
     });
   });
 });
