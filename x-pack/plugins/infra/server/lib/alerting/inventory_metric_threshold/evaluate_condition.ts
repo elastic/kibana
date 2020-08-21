@@ -122,14 +122,14 @@ const getData = async (
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 
     return nodes.reduce((acc, n) => {
-      const nodePathItem = last(n.path)!;
+      const { name: nodeName } = n;
       const m = first(n.metrics);
       if (m && m.value && m.timeseries) {
         const { timeseries } = m;
         const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
-        acc[nodePathItem.label] = values;
+        acc[nodeName] = values;
       } else {
-        acc[nodePathItem.label] = m && m.value;
+        acc[nodeName] = m && m.value;
       }
       return acc;
     }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);

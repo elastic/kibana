@@ -189,6 +189,7 @@ const mergeNodeBuckets = (
 
   return nodeGroupByBuckets.map((node) => {
     return {
+      name: node.key.name || node.key.id, // For type safety; name can be derived from getNodePath but not in a TS-friendly way
       path: getNodePath(node, options),
       metrics: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
     };
