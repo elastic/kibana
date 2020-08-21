@@ -38,7 +38,7 @@ export interface FormHook<T extends FormData = FormData> {
   getFieldDefaultValue: (fieldName: string) => unknown;
   /* Returns a list of all errors in the form */
   getErrors: () => string[];
-  reset: (options?: { resetValues?: boolean }) => void;
+  reset: (options?: { resetValues?: boolean; defaultValue?: FormData }) => void;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<T>;
   __addField: (field: FieldHook) => void;
@@ -47,6 +47,7 @@ export interface FormHook<T extends FormData = FormData> {
     fieldNames: string[]
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => T;
+  __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
 
@@ -115,7 +116,7 @@ export interface FieldHook<T = unknown> {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  reset: (options?: { resetValue: boolean }) => unknown | undefined;
+  reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 

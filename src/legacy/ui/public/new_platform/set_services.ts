@@ -41,7 +41,6 @@ interface NpStart {
 export function setSetupServices(npSetup: NpSetup) {
   // Services that need to be set in the legacy platform since the legacy data plugin
   // which previously provided them has been removed.
-  dataServices.setInjectedMetadata(npSetup.core.injectedMetadata);
   visualizationsServices.setUISettings(npSetup.core.uiSettings);
   visualizationsServices.setUsageCollector(npSetup.plugins.usageCollection);
 }
@@ -49,7 +48,6 @@ export function setSetupServices(npSetup: NpSetup) {
 export function setStartServices(npStart: NpStart) {
   // Services that need to be set in the legacy platform since the legacy data plugin
   // which previously provided them has been removed.
-  dataServices.setHttp(npStart.core.http);
   dataServices.setNotifications(npStart.core.notifications);
   dataServices.setOverlays(npStart.core.overlays);
   dataServices.setUiSettings(npStart.core.uiSettings);
