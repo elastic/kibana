@@ -13,7 +13,7 @@ jest.mock('../../lib/enterprise_search_request_handler', () => ({
 import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
 describe('credentials routes', () => {
-  describe('GET /api/app_search/credentials/collection', () => {
+  describe('GET /api/app_search/credentials', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {

@@ -12,7 +12,7 @@ import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_searc
 export function registerCredentialsRoutes({ router, config, log }: IRouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/credentials/collection',
+      path: '/api/app_search/credentials',
       validate: {
         query: schema.object({
           'page[current]': schema.number(),
