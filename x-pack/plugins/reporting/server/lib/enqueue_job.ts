@@ -5,57 +5,53 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/server';
-import { ESQueueCreateJobFn } from '../../server/types';
-import { ReportingCore } from '../core';
+import { ReportingCore } from '../';
+import { CreateJobBaseParams, CreateJobFn, ReportingUser } from '../types';
 import { LevelLogger } from './';
-import { ReportingStore, Report } from './store';
+import { Report } from './store';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
-  jobParams: unknown,
-  user: AuthenticatedUser | null,
+  jobParams: CreateJobBaseParams,
+  user: ReportingUser,
   context: RequestHandlerContext,
   request: KibanaRequest
 ) => Promise<Report>;
 
 export function enqueueJobFactory(
   reporting: ReportingCore,
-  store: ReportingStore,
   parentLogger: LevelLogger
 ): EnqueueJobFn {
-  const config = reporting.getConfig();
-  const queueTimeout = config.get('queue', 'timeout');
-  const browserType = config.get('capture', 'browser', 'type');
-  const maxAttempts = config.get('capture', 'maxAttempts');
   const logger = parentLogger.clone(['queue-job']);
 
   return async function enqueueJob(
     exportTypeId: string,
-    jobParams: unknown,
-    user: AuthenticatedUser | null,
+    jobParams: CreateJobBaseParams,
+    user: ReportingUser,
     context: RequestHandlerContext,
     request: KibanaRequest
   ) {
-    type ScheduleTaskFnType = ESQueueCreateJobFn<unknown>;
+    type ScheduleTaskFnType = CreateJobFn<CreateJobBaseParams>;
 
-    const username = user ? user.username : false;
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const scheduleTask = exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType;
+    const [scheduleTask, { store }] = await Promise.all([
+      exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType,
+      reporting.getPluginStartDeps(),
+    ]);
+
+    // add encrytped headers
     const payload = await scheduleTask(jobParams, context, request);
 
-    const options = {
-      timeout: queueTimeout,
-      created_by: username,
-      browser_type: browserType,
-      max_attempts: maxAttempts,
-    };
+    // store the pending report, puts it in the Reporting Management UI table
+    const report = await store.addReport(exportType.jobType, user, payload);
 
-    return await store.addReport(exportType.jobType, payload, options);
+    logger.info(`Scheduled ${exportType.name} report: ${report._id}`);
+
+    return report;
   };
 }

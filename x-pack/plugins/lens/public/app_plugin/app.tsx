@@ -19,6 +19,7 @@ import {
 import {
   createKbnUrlStateStorage,
   IStorageWrapper,
+  withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -69,6 +70,7 @@ export function App({
   navigation,
   onAppLeave,
   history,
+  getAppNameFromId,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -81,6 +83,7 @@ export function App({
   originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
+  getAppNameFromId?: (appId: string) => string | undefined;
 }) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -152,6 +155,7 @@ export function App({
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
     });
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       data.query,
@@ -166,6 +170,7 @@ export function App({
   }, [
     data.query.filterManager,
     data.query.timefilter.timefilter,
+    core.notifications.toasts,
     core.uiSettings,
     data.query,
     history,
@@ -333,9 +338,7 @@ export function App({
           ...s,
           isSaveModalVisible: false,
           originatingApp:
-            saveProps.newCopyOnSave && !saveProps.returnToOrigin
-              ? undefined
-              : currentOriginatingApp,
+            newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
@@ -533,6 +536,7 @@ export function App({
             originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
+            getAppNameFromId={getAppNameFromId}
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',

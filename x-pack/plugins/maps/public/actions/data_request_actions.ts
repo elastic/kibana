@@ -7,6 +7,7 @@
 
 import { Dispatch } from 'redux';
 import bbox from '@turf/bbox';
+import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
@@ -40,7 +41,7 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds, turfBboxToBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_geo_utils';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -133,7 +134,7 @@ export function syncDataForAllLayers() {
   };
 }
 
-export function syncDataForAllJoinLayers() {
+function syncDataForAllJoinLayers() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const syncPromises = getLayerList(getState())
       .filter((layer) => {
@@ -318,7 +319,7 @@ export function fitToLayerExtent(layerId: string) {
   };
 }
 
-export function fitToDataBounds() {
+export function fitToDataBounds(onNoBounds?: () => void) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layerList = getFittableLayers(getState());
 
@@ -365,12 +366,41 @@ export function fitToDataBounds() {
     }
 
     if (!corners.length) {
+      if (onNoBounds) {
+        onNoBounds();
+      }
       return;
     }
 
     const dataBounds = turfBboxToBounds(bbox(multiPoint(corners)));
 
     dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
+  };
+}
+
+let lastSetQueryCallId: string = '';
+export function autoFitToBounds() {
+  return async (dispatch: Dispatch) => {
+    // Method can be triggered before async actions complete
+    // Use localSetQueryCallId to only continue execution path if method has not been re-triggered.
+    const localSetQueryCallId = uuid();
+    lastSetQueryCallId = localSetQueryCallId;
+
+    // Joins are performed on the client.
+    // As a result, bounds for join layers must also be performed on the client.
+    // Therefore join layers need to fetch data prior to auto fitting bounds.
+    await dispatch<any>(syncDataForAllJoinLayers());
+
+    if (localSetQueryCallId === lastSetQueryCallId) {
+      // In cases where there are no bounds, such as no matching documents, fitToDataBounds does not trigger setGotoWithBounds.
+      // Ensure layer syncing occurs when setGotoWithBounds is not triggered.
+      function onNoBounds() {
+        if (localSetQueryCallId === lastSetQueryCallId) {
+          dispatch<any>(syncDataForAllLayers());
+        }
+      }
+      dispatch<any>(fitToDataBounds(onNoBounds));
+    }
   };
 }
 
