@@ -1074,7 +1074,6 @@
     "data.search.aggs.metrics.count.customLabel.help": "このアグリゲーションのカスタムラベルを表します",
     "data.search.aggs.metrics.count.enabled.help": "このアグリゲーションが有効かどうかを指定します",
     "data.search.aggs.metrics.count.id.help": "このアグリゲーションのID",
-    "data.search.aggs.metrics.count.json.help": "アグリゲーションがElasticsearchに送信されるときに含める高度なJSON",
     "data.search.aggs.metrics.count.schema.help": "このアグリゲーションで使用するスキーマ",
     "data.search.aggs.metrics.countLabel": "カウント",
     "data.search.aggs.metrics.countTitle": "カウント",

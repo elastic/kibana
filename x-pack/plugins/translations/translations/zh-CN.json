@@ -1075,7 +1075,6 @@
     "data.search.aggs.metrics.count.customLabel.help": "表示此聚合的定制标签",
     "data.search.aggs.metrics.count.enabled.help": "指定是否启用此聚合",
     "data.search.aggs.metrics.count.id.help": "此聚合的 ID",
-    "data.search.aggs.metrics.count.json.help": "聚合发送至 Elasticsearch 时要包括的高级 json",
     "data.search.aggs.metrics.count.schema.help": "要用于此聚合的方案",
     "data.search.aggs.metrics.countLabel": "计数",
     "data.search.aggs.metrics.countTitle": "计数",
