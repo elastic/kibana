@@ -5,7 +5,6 @@
  */
 
 import React, { useState } from 'react';
-import classNames from 'classnames';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,30 +30,36 @@ const ColoredSpan = styled.div`
   cursor: pointer;
 `;
 
-const getSpanStyle = (position: number, inFocus: boolean, hexCode: string) => {
-  const first = position === 0;
-  const last = position === 2;
+const getSpanStyle = (
+  position: number,
+  inFocus: boolean,
+  hexCode: string,
+  percentage: number
+) => {
+  let first = position === 0 || percentage === 100;
+  let last = position === 2 || percentage === 100;
+  if (percentage === 100) {
+    first = true;
+    last = true;
+  }
 
-  let spanStyle = {
+  const spanStyle: any = {
     backgroundColor: hexCode,
     opacity: !inFocus ? 1 : 0.3,
   };
+  let borderRadius = '';
+
   if (first) {
-    spanStyle = Object.assign(spanStyle, {
-      borderTopLeftRadius: 4,
-      borderBottomLeftRadius: 4,
-      borderTopRightRadius: 0,
-      borderBottomRightRadius: 0,
-    });
+    borderRadius = '4px 0 0 4px';
   }
   if (last) {
-    spanStyle = Object.assign(spanStyle, {
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-      borderTopRightRadius: 4,
-      borderBottomRightRadius: 4,
-    });
+    borderRadius = '0 4px 4px 0';
   }
+  if (first && last) {
+    borderRadius = '4px';
+  }
+  spanStyle.borderRadius = borderRadius;
+
   return spanStyle;
 };
 
@@ -77,37 +82,28 @@ export function ColorPaletteFlexItem({
   const bad = position === 2;
   const average = !good && !bad;
 
-  const spanStyle = getSpanStyle(position, inFocus, hexCode);
+  const spanStyle = getSpanStyle(position, inFocus, hexCode, percentage);
 
   return (
-    <EuiFlexItem
-      key={hexCode}
-      grow={false}
-      className={classNames(
-        'guideColorPalette__swatch',
-        'guideColorPalette__swatch--notRound'
-      )}
-      style={{ width: percentage + '%' }}
-    >
+    <EuiFlexItem key={hexCode} grow={false} style={{ width: percentage + '%' }}>
       <EuiToolTip
         content={i18n.translate(
           'xpack.apm.csm.dashboard.webVitals.palette.tooltip',
           {
             defaultMessage:
-              '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value} {averageMessage}.',
+              '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
             values: {
               percentage,
-              title,
+              title: title.toLowerCase(),
               exp: good ? GOOD_LABEL : bad ? POOR_LABEL : AVERAGE_LABEL,
-              moreOrLess: good ? LESS_LABEL : MORE_LABEL,
-              value: good ? thresholds.good : thresholds.bad,
-              averageMessage: i18n.translate(
-                'xpack.apm.rum.coreVitals.averageMessage',
-                {
-                  defaultMessage: 'and more than {bad}.',
-                  bad: thresholds.good,
-                }
-              ),
+              moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
+              value: good || average ? thresholds.good : thresholds.bad,
+              averageMessage: average
+                ? i18n.translate('xpack.apm.rum.coreVitals.averageMessage', {
+                    defaultMessage: ' and less than {bad}',
+                    values: { bad: thresholds.bad },
+                  })
+                : '',
             },
           }
         )}
@@ -121,7 +117,7 @@ export function ColorPaletteFlexItem({
 interface Props {
   title: string;
   value: string;
-  ranks: number[];
+  ranks?: number[];
   loading: boolean;
   thresholds: { good: string; bad: string };
 }
@@ -148,7 +144,6 @@ export function CoreVitalItem({
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup
-        className="guideColorPalette__swatchHolder"
         gutterSize="none"
         alignItems="flexStart"
         style={{ width: 340 }}

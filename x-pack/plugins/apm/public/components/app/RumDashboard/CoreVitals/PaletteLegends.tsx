@@ -22,10 +22,11 @@ const PaletteLegend = styled(EuiHealth)`
 `;
 
 interface Props {
+  onItemHover: (ind: number | null) => void;
   ranks: number[];
 }
 
-export const PaletteLegends = ({ ranks, onItemHover }: Props) => {
+export function PaletteLegends({ ranks, onItemHover }: Props) {
   const palette = euiPaletteForStatus(3);
 
   return (
@@ -46,4 +47,4 @@ export const PaletteLegends = ({ ranks, onItemHover }: Props) => {
       ))}
     </EuiFlexGroup>
   );
-};
+}
