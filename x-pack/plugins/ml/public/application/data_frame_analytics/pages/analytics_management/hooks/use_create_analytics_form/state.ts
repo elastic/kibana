@@ -8,13 +8,12 @@ import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/com
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
-import {
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
-  ANALYSIS_CONFIG_TYPE,
-  defaultSearchQuery,
-} from '../../../../common/analytics';
+import { ANALYSIS_CONFIG_TYPE, defaultSearchQuery } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
+import {
+  DataFrameAnalyticsConfig,
+  DataFrameAnalyticsId,
+} from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',

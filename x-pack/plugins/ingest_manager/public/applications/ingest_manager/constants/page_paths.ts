@@ -9,17 +9,17 @@ export type StaticPage =
   | 'integrations'
   | 'integrations_all'
   | 'integrations_installed'
-  | 'configurations'
-  | 'configurations_list'
+  | 'policies'
+  | 'policies_list'
   | 'fleet'
   | 'fleet_enrollment_tokens'
   | 'data_streams';
 
 export type DynamicPage =
   | 'integration_details'
-  | 'configuration_details'
-  | 'add_integration_from_configuration'
-  | 'add_integration_to_configuration'
+  | 'policy_details'
+  | 'add_integration_from_policy'
+  | 'add_integration_to_policy'
   | 'edit_integration'
   | 'fleet_agent_list'
   | 'fleet_agent_details';
@@ -40,13 +40,13 @@ export const PAGE_ROUTING_PATHS = {
   integrations_all: '/integrations',
   integrations_installed: '/integrations/installed',
   integration_details: '/integrations/detail/:pkgkey/:panel?',
-  configurations: '/configs',
-  configurations_list: '/configs',
-  configuration_details: '/configs/:configId/:tabId?',
-  configuration_details_settings: '/configs/:configId/settings',
-  add_integration_from_configuration: '/configs/:configId/add-integration',
-  add_integration_to_configuration: '/integrations/:pkgkey/add-integration',
-  edit_integration: '/configs/:configId/edit-integration/:packageConfigId',
+  policies: '/policies',
+  policies_list: '/policies',
+  policy_details: '/policies/:policyId/:tabId?',
+  policy_details_settings: '/policies/:policyId/settings',
+  add_integration_from_policy: '/policies/:policyId/add-integration',
+  add_integration_to_policy: '/integrations/:pkgkey/add-integration',
+  edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
   fleet_agent_details: '/fleet/agents/:agentId/:tabId?',
@@ -68,13 +68,13 @@ export const pagePathGetters: {
   integrations_installed: () => '/integrations/installed',
   integration_details: ({ pkgkey, panel }) =>
     `/integrations/detail/${pkgkey}${panel ? `/${panel}` : ''}`,
-  configurations: () => '/configs',
-  configurations_list: () => '/configs',
-  configuration_details: ({ configId, tabId }) => `/configs/${configId}${tabId ? `/${tabId}` : ''}`,
-  add_integration_from_configuration: ({ configId }) => `/configs/${configId}/add-integration`,
-  add_integration_to_configuration: ({ pkgkey }) => `/integrations/${pkgkey}/add-integration`,
-  edit_integration: ({ configId, packageConfigId }) =>
-    `/configs/${configId}/edit-integration/${packageConfigId}`,
+  policies: () => '/policies',
+  policies_list: () => '/policies',
+  policy_details: ({ policyId, tabId }) => `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
+  add_integration_from_policy: ({ policyId }) => `/policies/${policyId}/add-integration`,
+  add_integration_to_policy: ({ pkgkey }) => `/integrations/${pkgkey}/add-integration`,
+  edit_integration: ({ policyId, packagePolicyId }) =>
+    `/policies/${policyId}/edit-integration/${packagePolicyId}`,
   fleet: () => '/fleet',
   fleet_agent_list: ({ kuery }) => `/fleet/agents${kuery ? `?kuery=${kuery}` : ''}`,
   fleet_agent_details: ({ agentId, tabId }) =>
