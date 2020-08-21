@@ -26,10 +26,9 @@ export const Rename: FunctionComponent = () => {
       />
 
       <TargetField
-        label={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.renameForm.targetFieldHelpText',
-          { defaultMessage: 'Target field' }
-        )}
+        label={i18n.translate('xpack.ingestPipelines.pipelineEditor.renameForm.targetFieldLabel', {
+          defaultMessage: 'Target field',
+        })}
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.renameForm.targetFieldHelpText',
           { defaultMessage: 'Name of the new field.' }
