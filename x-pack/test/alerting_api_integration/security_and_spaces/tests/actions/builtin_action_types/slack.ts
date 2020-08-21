@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import http from 'http';
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
+import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
@@ -14,29 +14,20 @@ import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simu
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const config = getService('config');
 
   describe('slack action', () => {
     let simulatedActionId = '';
-
-    const slackSimulatorURL: string = 'http://localhost:9000';
+    let slackSimulatorURL: string = '';
     let slackServer: http.Server;
-    let proxyHaveBeenCalled = false;
-
-    const proxyServer = getHttpProxyServer(slackSimulatorURL, () => {
-      proxyHaveBeenCalled = true;
-    });
-    const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-    proxyServer.listen(Number(proxyUrl.port));
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
-      // let availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       if (!slackServer.listening) {
-        slackServer.listen('9000');
+        slackServer.listen(availablePort);
       }
-      // slackSimulatorURL = `http://localhost:${availablePort}`;
+      slackSimulatorURL = `http://localhost:${availablePort}`;
     });
 
     it('should return 200 when creating a slack action successfully', async () => {
@@ -166,7 +157,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('ok');
-      expect(proxyHaveBeenCalled).to.equal(true);
     });
 
     it('should handle an empty message error', async () => {
@@ -234,7 +224,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     after(() => {
       slackServer.close();
-      proxyServer.close();
     });
   });
 }

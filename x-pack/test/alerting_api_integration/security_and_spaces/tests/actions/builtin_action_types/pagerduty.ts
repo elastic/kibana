@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -18,27 +17,16 @@ import {
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const config = getService('config');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
     let pagerdutySimulatorURL: string = '<could not determine kibana url>';
-    let proxyServer: any;
-    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
     before(() => {
       pagerdutySimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
       );
-
-      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      if (!proxyServer.listening) {
-        proxyServer.listen(Number(proxyUrl.port));
-      }
     });
 
     it('should return successfully when passed valid create parameters', async () => {
@@ -156,7 +144,6 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(proxyHaveBeenCalled).to.equal(true);
 
       expect(result).to.eql({
         status: 'ok',
@@ -215,10 +202,6 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(result.status).to.equal('error');
       expect(result.message).to.match(/error posting pagerduty event: http status 502/);
       expect(result.retry).to.equal(true);
-    });
-
-    after(() => {
-      proxyServer.close();
     });
   });
 }

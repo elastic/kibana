@@ -7,7 +7,7 @@
 import http from 'http';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
+import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
@@ -31,7 +31,6 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const configService = getService('config');
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -67,22 +66,16 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   }
 
   describe('webhook action', () => {
-    const webhookSimulatorURL: string = 'http://localhost:9001';
+    let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
-    let proxyHaveBeenCalled = false;
 
-    const proxyServer = getHttpProxyServer(webhookSimulatorURL, () => {
-      proxyHaveBeenCalled = true;
-    });
-    const proxyUrl = getProxyUrl(configService.get('kbnTestServer.serverArgs'));
-    proxyServer.listen(Number(proxyUrl.port));
     // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
-      // const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
-      webhookServer.listen('9001');
-      // webhookSimulatorURL = `http://localhost:${availablePort}`;
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      webhookServer.listen(availablePort);
+      webhookSimulatorURL = `http://localhost:${availablePort}`;
 
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
@@ -148,7 +141,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('ok');
-      expect(proxyHaveBeenCalled).to.equal(true);
     });
 
     it('should support the POST method against webhook target', async () => {
@@ -249,7 +241,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     after(() => {
       webhookServer.close();
-      proxyServer.close();
     });
   });
 }
