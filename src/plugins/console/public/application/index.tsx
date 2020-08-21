@@ -19,19 +19,20 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NotificationsSetup } from 'src/core/public';
+import { HttpSetup, NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings } from '../services';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { createApi, createEsHostService } from './lib';
 
 export interface BootDependencies {
+  http: HttpSetup;
   docLinkVersion: string;
   I18nContext: any;
   notifications: NotificationsSetup;
-  elasticsearchUrl: string;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
 }
@@ -40,9 +41,9 @@ export function renderApp({
   I18nContext,
   notifications,
   docLinkVersion,
-  elasticsearchUrl,
   usageCollection,
   element,
+  http,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -54,14 +55,16 @@ export function renderApp({
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
+  const api = createApi({ http });
+  const esHostService = createEsHostService({ api });
 
   render(
     <I18nContext>
       <ServicesContextProvider
         value={{
-          elasticsearchUrl,
           docLinkVersion,
           services: {
+            esHostService,
             storage,
             history,
             settings,

@@ -125,7 +125,6 @@ export function LayerPanel(
                     const nextPublicAPI = layerDatasource.getPublicAPI({
                       state: newState,
                       layerId,
-                      dateRange: props.framePublicAPI.dateRange,
                     });
                     const nextTable = new Set(
                       nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
