@@ -259,18 +259,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       ...this.getActionContext(),
       filters,
     };
-    if (actionId === ACTION_GLOBAL_APPLY_FILTER) {
-      const applyFilterAction = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
-      if (!applyFilterAction) {
-        throw new Error('Unable to apply filter, could not locate action');
-      }
-      applyFilterAction.execute(executeContext);
-      return;
-    }
-
-    const action = (await this.getFilterActions()).find((filterAction) => {
-      return filterAction.id === actionId;
-    });
+    const action = getUiActions().getAction(actionId);
     if (!action) {
       throw new Error('Unable to apply filter, could not locate action');
     }

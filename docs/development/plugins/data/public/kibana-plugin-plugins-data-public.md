@@ -89,6 +89,7 @@
 
 |  Variable | Description |
 |  --- | --- |
+|  [ACTION\_GLOBAL\_APPLY\_FILTER](./kibana-plugin-plugins-data-public.action_global_apply_filter.md) |  |
 |  [AggGroupLabels](./kibana-plugin-plugins-data-public.agggrouplabels.md) |  |
 |  [AggGroupNames](./kibana-plugin-plugins-data-public.agggroupnames.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
