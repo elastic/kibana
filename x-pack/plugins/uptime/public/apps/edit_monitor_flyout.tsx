@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Dispatch, SetStateAction } from 'react';
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexItem,
@@ -21,7 +22,6 @@ import {
   EuiFlyoutFooter,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiTitle,
   EuiComboBoxOptionOption,
@@ -29,14 +29,25 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { getTags } from '../state/actions/tags';
 import { tagSelector, centralManagementSelector } from '../state/selectors';
-import { postMonitorConfig, hideEditMonitorFlyout } from '../state/actions/central_management';
+import {
+  postMonitorConfig,
+  hideEditMonitorFlyout,
+  getImAgentPolicies,
+  PostPackagePolicyParams,
+  getImAgentPolicyDetail,
+} from '../state/actions/central_management';
+import { CentralManagementState } from '../state/reducers/central_management';
+import { CENTRAL_CONFIG } from '../../common/constants';
+import { AgentPolicy } from '../../../ingest_manager/common';
 
 interface EditMonitorFlyoutComponentProps {
-  scheduleUnit?: 's' | 'm' | 'h';
+  centralManagement: CentralManagementState;
   onClose: () => void;
   onSubmit: () => void;
-  postMonitorConfig: () => void;
+  postMonitorConfig: (params: PostPackagePolicyParams) => void;
+  scheduleUnit?: 's' | 'm' | 'h';
   tags: string[];
+  updateAgentPolicyDetails: (policyId: string) => void;
 }
 
 const DEFAULT_UNIT_VALUE = 's';
@@ -53,6 +64,7 @@ const checkPeriodCount = (count: string) => {
   return isNaN(nCount) || nCount <= 0 || !Number.isInteger(nCount);
 };
 
+// TODO: lazy load
 export const EditMonitorFlyout: React.FC = (props) => {
   const dispatch = useDispatch();
   const tagsState = useSelector(tagSelector);
@@ -61,33 +73,83 @@ export const EditMonitorFlyout: React.FC = (props) => {
     dispatch(getTags());
   }, [dispatch]);
 
-  const centralManagement = useSelector(centralManagementSelector);
+  useEffect(() => {
+    dispatch(getImAgentPolicies());
+  }, [dispatch]);
 
-  if (!centralManagement.isEditFlyoutVisible) return null;
+  const centralManagement = useSelector(centralManagementSelector);
+  const { isEditFlyoutVisible } = centralManagement;
+
+  const updateAgentPolicyDetails = useCallback(
+    (policyId: string) => dispatch(getImAgentPolicyDetail(policyId)),
+    [dispatch]
+  );
+
+  if (!isEditFlyoutVisible) return null;
 
   return (
     <EditMonitorFlyoutComponent
       {...props}
+      centralManagement={centralManagement}
       onClose={() => dispatch(hideEditMonitorFlyout())}
       onSubmit={() => ({})}
-      postMonitorConfig={() => dispatch(postMonitorConfig())}
+      postMonitorConfig={(params: PostPackagePolicyParams) => dispatch(postMonitorConfig(params))}
       tags={tagsState.tags}
+      updateAgentPolicyDetails={updateAgentPolicyDetails}
     />
   );
 };
 
+const getDefaultPackageName = (existingNames?: string[]) => {
+  let packageName: string;
+  let count = 0;
+  do {
+    count += 1;
+    packageName = `${CENTRAL_CONFIG.PACKAGE_NAME}-${count}`;
+  } while (existingNames && existingNames.indexOf(packageName) >= 0);
+  return packageName;
+};
+
+const checkPackageName = (packageName: string | undefined, agentPolicy?: AgentPolicy): boolean =>
+  !!packageName &&
+  !!agentPolicy &&
+  !!agentPolicy.package_policies.find((policy) => policy.name === packageName);
+
 export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProps> = (props) => {
-  const [name, setName] = useState<string>('default-name');
-  const [url, setUrl] = useState<string>('default-url');
+  const { centralManagement } = props;
+  const { updateAgentPolicyDetails } = props;
+  const { agentPolicyDetail } = centralManagement;
+  const [name, setName] = useState<string>('');
+  const [url, setUrl] = useState<string>('');
   const [periodCount, setPeriodCount] = useState<string>('30');
   const [periodUnit, setPeriodUnit] = useState<string>(props.scheduleUnit ?? DEFAULT_UNIT_VALUE);
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<Array<EuiComboBoxOptionOption<unknown>>>([]);
+  const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<string | undefined>(undefined);
+  const [packagePolicyName, setPackagePolicyName] = useState<string | undefined>();
   const isNameInvalid = checkName(name);
   const isUrlInvalid = checkUrl(url);
   const isPeriodCountInvalid = checkPeriodCount(periodCount);
+  const isPackageNameInvalid = checkPackageName(packagePolicyName, agentPolicyDetail);
+
+  useEffect(() => {
+    if (selectedAgentPolicy) {
+      updateAgentPolicyDetails(selectedAgentPolicy);
+    }
+  }, [updateAgentPolicyDetails, selectedAgentPolicy]);
+
+  // FIXME: this causes the text field component to go from an uncontrolled to a controlled state
+  // and React outputs a warning
+  useEffect(() => {
+    if (!packagePolicyName && agentPolicyDetail) {
+      setPackagePolicyName(
+        getDefaultPackageName(agentPolicyDetail.package_policies.map(({ name }) => name))
+      );
+    }
+  }, [agentPolicyDetail, packagePolicyName, setPackagePolicyName]);
+
   return (
-    <EuiFlyout onClose={props.onClose}>
+    <EuiFlyout aria-labelledby="Edit monitor flyout" onClose={props.onClose}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle>
           <h2 id="uptime-central-management-flyout-title">Edit monitor</h2>
@@ -153,9 +215,22 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
             id="uptime-central-management-advanced"
             buttonContent={<EuiTextColor color="secondary">Advanced options</EuiTextColor>}
           >
-            <EuiText>
-              <p>Advanced settings are supposed to go here.</p>
-            </EuiText>
+            <EuiSpacer size="l" />
+            <AgentPolicySelect
+              centralManagement={centralManagement}
+              selectedAgentPolicy={selectedAgentPolicy}
+              setSelectedAgentPolicy={setSelectedAgentPolicy}
+            />
+            {/* TODO: provide error message when package name is already taken. */}
+            <EuiFormRow fullWidth={true} label="Package policy name">
+              <EuiFieldText
+                fullWidth={true}
+                name="packagePolicyName"
+                isInvalid={isPackageNameInvalid}
+                onChange={(e) => setPackagePolicyName(e.target.value)}
+                value={packagePolicyName}
+              />
+            </EuiFormRow>
           </EuiAccordion>
         </EuiForm>
       </EuiFlyoutBody>
@@ -166,9 +241,23 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              isDisabled={isNameInvalid || isUrlInvalid || isPeriodCountInvalid}
+              isDisabled={
+                isNameInvalid ||
+                isUrlInvalid ||
+                isPeriodCountInvalid ||
+                isPackageNameInvalid ||
+                !selectedAgentPolicy
+              }
               fill
-              onClick={() => props.postMonitorConfig()}
+              onClick={() =>
+                props.postMonitorConfig({
+                  agentPolicyId: selectedAgentPolicy!,
+                  packagePolicyName,
+                  name,
+                  schedule: periodCount + periodUnit,
+                  url,
+                })
+              }
               type="submit"
             >
               Save
@@ -177,5 +266,53 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
+  );
+};
+
+interface AgentPolicySelectProps {
+  centralManagement: Pick<
+    CentralManagementState,
+    'agentPolicyError' | 'agentPolicyPage' | 'loadingAgentPolicies'
+  >;
+  selectedAgentPolicy: string | undefined;
+  setSelectedAgentPolicy: Dispatch<SetStateAction<string | undefined>>;
+}
+
+const AgentPolicySelect = (props: AgentPolicySelectProps) => {
+  const { selectedAgentPolicy, setSelectedAgentPolicy } = props;
+  const { agentPolicyPage, loadingAgentPolicies } = props.centralManagement;
+  const policyError = props.centralManagement?.agentPolicyError;
+  const options =
+    agentPolicyPage?.items.map((policy) => ({
+      value: policy.id,
+      text: policy.name,
+    })) ?? [];
+
+  useEffect(() => {
+    if (!loadingAgentPolicies && selectedAgentPolicy === undefined && options.length) {
+      // TODO: default this more intelligently
+      setSelectedAgentPolicy(options[0].value);
+    }
+  }, [options, selectedAgentPolicy, setSelectedAgentPolicy, loadingAgentPolicies]);
+
+  return (
+    <EuiFormRow fullWidth={true} label="Agent policy">
+      <>
+        {policyError && (
+          <EuiCallOut color="danger" iconType="cross" title="Error loading policies">
+            {policyError.message}
+          </EuiCallOut>
+        )}
+        <EuiSelect
+          disabled={!!policyError || (!loadingAgentPolicies && !options.length)}
+          fullWidth
+          isLoading={loadingAgentPolicies}
+          id="agentPolicySelect"
+          options={options}
+          value={selectedAgentPolicy}
+          onChange={(e) => setSelectedAgentPolicy(e.target.value)}
+        />
+      </>
+    </EuiFormRow>
   );
 };

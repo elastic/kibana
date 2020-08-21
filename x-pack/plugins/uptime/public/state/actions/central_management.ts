@@ -5,9 +5,42 @@
  */
 
 import { createAction } from 'redux-actions';
+import { AgentPolicy } from '../../../../ingest_manager/common';
 
-export const postMonitorConfig = createAction('POST MONITOR CONFIG');
+export interface AgentPolicyPage {
+  items: AgentPolicy[];
+  page?: number;
+  perPage?: number;
+  success?: boolean;
+  total?: number;
+}
+
+export interface PostPackagePolicyParams {
+  agentPolicyId: string;
+  packagePolicyName: string;
+  name: string;
+  schedule: string;
+  url: string;
+}
+
+export const postMonitorConfig = createAction<PostPackagePolicyParams>('POST MONITOR CONFIG');
 
 export const showEditMonitorFlyout = createAction('SHOW EDIT MONITOR FLYOUT');
 
 export const hideEditMonitorFlyout = createAction('HIDE EDIT MONITOR FLYOUT');
+
+export const getImAgentPolicies = createAction('GET IM AGENT POLICIES');
+
+export const getImAgentPoliciesSuccess = createAction<AgentPolicyPage>(
+  'GET IM AGENT POLICIES SUCCESS'
+);
+
+export const getImAgentPoliciesFail = createAction<Error>('GET IM AGENT POLICIES FAIL');
+
+export const getImAgentPolicyDetail = createAction<string>('GET IM AGENT POLICY DETAIL');
+
+export const getImAgentPolicyDetailSuccess = createAction<AgentPolicy>(
+  'GET IM AGENT POLICY DETAIL SUCCESS'
+);
+
+export const getImAgentPolicyDetailFail = createAction<Error>('GET IM AGENT POLICY DETAIL FAIL');

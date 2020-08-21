@@ -4,24 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Action } from 'redux-actions';
 import { takeLatest, call } from 'redux-saga/effects';
 import { fetchTags } from '../api/tags';
 import { fetchEffectFactory } from './fetch_effect';
 import { getTags, getTagsSuccess, getTagsFail } from '../actions/tags';
-import { postMonitorConfig } from '../api/central_management';
-import { postMonitorConfig as postMonitorAction } from '../actions/central_management';
+import {
+  postMonitorConfig,
+  fetchAgentPolicies,
+  fetchAgentPolicyDetail,
+} from '../api/central_management';
+import {
+  postMonitorConfig as postMonitorAction,
+  getImAgentPolicies,
+  getImAgentPoliciesSuccess,
+  getImAgentPoliciesFail,
+  PostPackagePolicyParams,
+  getImAgentPolicyDetail,
+  getImAgentPolicyDetailSuccess,
+  getImAgentPolicyDetailFail,
+} from '../actions/central_management';
+import { CENTRAL_CONFIG } from '../../../common/constants';
 
-interface MonitorConfig {
-  configId: string;
-  name: string;
-  schedule: string;
-  url: string;
-}
-
-function* mapFieldsToConfig(fields: MonitorConfig): any {
+function* mapFieldsToConfig(fields: PostPackagePolicyParams): any {
   return {
     // TODO: take this as a parameter
-    config_id: fields.configId,
+    policy_id: fields.agentPolicyId,
     // TODO: take this as a parameter
     description: '',
     enabled: true,
@@ -55,33 +63,39 @@ function* mapFieldsToConfig(fields: MonitorConfig): any {
         type: 'synthetics/http',
       },
     ],
-    // TODO: take this as a parameter
-    name: 'synthetics-test',
+    name: fields.packagePolicyName,
     // TODO: take this as a parameter
     namespace: 'default',
     // TODO: what does this do?
     output_id: '',
     package: {
-      name: 'synthetics',
-      title: 'Elastic Synthetics',
-      version: '0.1.2',
+      name: CENTRAL_CONFIG.PACKAGE_NAME,
+      title: CENTRAL_CONFIG.PACKAGE_TITLE,
+      version: CENTRAL_CONFIG.CURRENT_PACKAGE_POLICY_VERSION,
     },
   };
 }
 
 export function* performImTasks() {
   yield takeLatest(String(getTags), fetchEffectFactory(fetchTags, getTagsSuccess, getTagsFail));
+  yield takeLatest(
+    String(getImAgentPolicies),
+    fetchEffectFactory(fetchAgentPolicies, getImAgentPoliciesSuccess, getImAgentPoliciesFail)
+  );
+  yield takeLatest(
+    String(getImAgentPolicyDetail),
+    fetchEffectFactory(
+      fetchAgentPolicyDetail,
+      getImAgentPolicyDetailSuccess,
+      getImAgentPolicyDetailFail
+    )
+  );
 }
 
 export function* performMonitorConfigPost() {
-  yield takeLatest(String(postMonitorAction), function* () {
+  yield takeLatest(String(postMonitorAction), function* (action: Action<PostPackagePolicyParams>) {
     try {
-      const payload = yield mapFieldsToConfig({
-        configId: 'ca0bd770-e231-11ea-ac1a-5b05f3ceedeb',
-        name: 'my-monitor-2',
-        schedule: '30s',
-        url: 'http://my-stuff.com',
-      });
+      const payload = yield mapFieldsToConfig(action.payload);
       yield call(postMonitorConfig, payload);
     } catch (e) {
       console.error(e);

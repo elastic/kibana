@@ -7,13 +7,23 @@
 import { apiService } from './utils';
 
 const IM_API_PATH = '/api/ingest_manager';
-const AGENT_CONFIGS_PATH = '/agent_configs';
-const PACKAGE_CONFIGS_PATH = '/package_configs';
+const AGENT_POLICIES_PATH = '/agent_policies';
+const PACKAGE_POLICIES_PATH = '/package_policies';
+
+const agentPolicies = (policyId: string) => `/agent_policies/${policyId}`;
 
 export const performCentralManagementOperations = async () => {
-  return await apiService.get(IM_API_PATH + AGENT_CONFIGS_PATH);
+  return await apiService.get(IM_API_PATH + AGENT_POLICIES_PATH);
+};
+
+export const fetchAgentPolicies = async () => {
+  return await apiService.get(IM_API_PATH + AGENT_POLICIES_PATH);
+};
+
+export const fetchAgentPolicyDetail = async (policyId: string) => {
+  return await apiService.get(IM_API_PATH + agentPolicies(policyId));
 };
 
 export const postMonitorConfig = async (payload: any) => {
-  return await apiService.post(IM_API_PATH + PACKAGE_CONFIGS_PATH, payload);
+  return await apiService.post(IM_API_PATH + PACKAGE_POLICIES_PATH, payload);
 };
