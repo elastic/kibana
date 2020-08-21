@@ -17,24 +17,23 @@
  * under the License.
  */
 
-import { routeValidationConfig } from './validation_config';
-import { createHandler } from './create_handler';
+import { HttpSetup } from 'kibana/public';
+import { EsConfigApiResponse } from '../../../common/types/api_responses';
+import { sendRequest } from '../../shared_imports';
 
-import { RouteDependencies } from '../../../';
+interface Dependencies {
+  http: HttpSetup;
+}
 
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  deps.router.post(
-    {
-      path: '/api/console/proxy',
-      options: {
-        tags: ['access:console'],
-        body: {
-          output: 'stream',
-          parse: false,
-        },
-      },
-      validate: routeValidationConfig,
+export type Api = ReturnType<typeof createApi>;
+
+export const createApi = ({ http }: Dependencies) => {
+  return {
+    getEsConfig: () => {
+      return sendRequest<EsConfigApiResponse>(http, {
+        path: '/api/console/es_config',
+        method: 'get',
+      });
     },
-    createHandler(deps)
-  );
+  };
 };
