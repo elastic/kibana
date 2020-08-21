@@ -41,7 +41,7 @@ target
 # package overrides
 /packages/eslint-config-kibana
 /packages/kbn-interpreter/src/common/lib/grammar.js
-/packages/kbn-plugin-generator/sao_template/template
+/packages/kbn-plugin-generator/template
 /packages/kbn-pm/dist
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
 /packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
