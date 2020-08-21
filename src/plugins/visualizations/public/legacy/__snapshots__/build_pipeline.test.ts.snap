@@ -4,8 +4,6 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls t
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_' font={font size=12} openLinksInNewTab=true "`;
-
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles pie function 1`] = `"kibana_pie visConfig='{\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"buckets\\":[1,2]}}' "`;
@@ -33,7 +31,5 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles timelion function 1`] = `"timelion_vis expression='foo' interval='bar' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles undefined markdown function 1`] = `"markdownvis '' font={font size=12} openLinksInNewTab=true "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;

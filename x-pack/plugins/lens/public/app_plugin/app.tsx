@@ -70,6 +70,7 @@ export function App({
   navigation,
   onAppLeave,
   history,
+  getAppNameFromId,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -82,6 +83,7 @@ export function App({
   originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
+  getAppNameFromId?: (appId: string) => string | undefined;
 }) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -534,6 +536,7 @@ export function App({
             originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
+            getAppNameFromId={getAppNameFromId}
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',
