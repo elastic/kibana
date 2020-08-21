@@ -198,9 +198,28 @@ export class IndexPattern implements IIndexPattern {
       await this.refreshFields();
     } else {
       if (specs) {
-        this.fields.replaceAll(specs);
+        this.fields.replaceAll(this.getFieldSpecs(specs));
       }
     }
+  }
+
+  /**
+   * Helper function to extend  field specs with e.g. displayName
+   */
+  private getFieldSpecs(specs: FieldSpec[] | undefined) {
+    if (!Array.isArray(specs)) {
+      return [];
+    }
+    return specs.map((spec) => {
+      return { ...spec, displayName: this.getFieldSpecDisplayName(spec.name) };
+    });
+  }
+  private getFieldSpecDisplayName(name: string) {
+    const displayNameMap = this.attributes?.fields;
+    if (!displayNameMap || !displayNameMap[name]) {
+      return '';
+    }
+    return displayNameMap[name].displayName || '';
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
@@ -220,7 +239,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    this.fields.replaceAll(this.getFieldSpecs(spec.fields));
     this.typeMeta = spec.typeMeta;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -359,6 +378,7 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields.add({
       name,
+      displayName: this.getFieldSpecDisplayName(name),
       script,
       type: fieldType,
       scripted: true,
@@ -584,7 +604,7 @@ export class IndexPattern implements IIndexPattern {
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
-    this.fields.replaceAll([...fields, ...scripted]);
+    this.fields.replaceAll(this.getFieldSpecs([...fields, ...scripted]));
   }
 
   refreshFields() {
