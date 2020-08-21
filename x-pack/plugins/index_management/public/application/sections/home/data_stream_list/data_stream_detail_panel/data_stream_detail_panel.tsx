@@ -138,7 +138,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ) : (
           <em>
             {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampNoneMessage', {
-              defaultMessage: `None`,
+              defaultMessage: `Never`,
             })}
           </em>
         ),

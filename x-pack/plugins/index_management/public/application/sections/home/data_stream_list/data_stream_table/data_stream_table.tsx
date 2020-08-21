@@ -80,7 +80,12 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       width: '300px',
       truncateText: true,
       sortable: true,
-      render: (maxTimeStamp: DataStream['maxTimeStamp']) => humanizeTimeStamp(maxTimeStamp),
+      render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
+        maxTimeStamp
+          ? humanizeTimeStamp(maxTimeStamp)
+          : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
+              defaultMessage: 'Never',
+            }),
     });
 
     columns.push({

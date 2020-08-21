@@ -11,7 +11,6 @@
 
 import expect from '@kbn/expect';
 
-import { DataStream } from '../../../../../plugins/index_management/common/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 // @ts-ignore
 import { API_BASE_PATH } from './constants';
