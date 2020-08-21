@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  describe('Dashboard Drilldowns', function () {
+  describe('Dashboard to dashboard drilldown', function () {
     before(async () => {
       log.debug('Dashboard Drilldowns:initTests');
       await PageObjects.common.navigateToApp('dashboard');

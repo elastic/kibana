@@ -162,6 +162,7 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
     <EuiFormFieldset
+      data-test-subj={`triggerPicker`}
       legend={{
         children: (
           <EuiText size="s">
