@@ -124,6 +124,8 @@ export function getIndexPatternDatasource({
       }),
     });
 
+  const indexPatternsService = data.indexPatterns;
+
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: 'indexpattern',
@@ -138,6 +140,7 @@ export function getIndexPatternDatasource({
         savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
+        indexPatternsService,
       });
     },
 
@@ -205,9 +208,9 @@ export function getIndexPatternDatasource({
                 id,
                 state,
                 setState,
-                savedObjectsClient,
                 onError: onIndexPatternLoadError,
                 storage,
+                indexPatternsService,
               });
             }}
             data={data}
@@ -285,7 +288,6 @@ export function getIndexPatternDatasource({
         <LayerPanel
           onChangeIndexPattern={(indexPatternId) => {
             changeLayerIndexPattern({
-              savedObjectsClient,
               indexPatternId,
               setState: props.setState,
               state: props.state,
@@ -293,6 +295,7 @@ export function getIndexPatternDatasource({
               onError: onIndexPatternLoadError,
               replaceIfPossible: true,
               storage,
+              indexPatternsService,
             });
           }}
           {...props}
