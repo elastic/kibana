@@ -5,7 +5,17 @@
  */
 
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiFlyout } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+  EuiFlyout,
+  EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import { Section } from '../../components/section/section';
 import { useUiActions } from '../../context';
 import {
@@ -17,6 +27,8 @@ import { SAMPLE_ML_JOB_CLICK_TRIGGER } from '../../triggers';
 export const DrilldownsManager: React.FC = () => {
   const { plugins } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
+  const [openPopup, setOpenPopup] = React.useState(false);
+  const viewRef = React.useRef<'create' | 'manage'>('create');
 
   const manager = React.useMemo(() => {
     const storage = new UiActionsEnhancedMemoryActionStorage();
@@ -27,22 +39,68 @@ export const DrilldownsManager: React.FC = () => {
     });
   }, [plugins]);
 
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      items: [
+        {
+          name: 'Create new view',
+          icon: 'plusInCircle',
+          onClick: () => {
+            setOpenPopup(false);
+            viewRef.current = 'create';
+            setShowManager((x) => !x);
+          },
+        },
+        {
+          name: 'Drilldown list view',
+          icon: 'list',
+          onClick: () => {
+            setOpenPopup(false);
+            viewRef.current = 'manage';
+            setShowManager((x) => !x);
+          },
+        },
+      ],
+    },
+  ];
+
+  const openManagerButton = showManager ? (
+    <EuiButton onClick={() => setShowManager(false)}>Close</EuiButton>
+  ) : (
+    <EuiPopover
+      id="contextMenuExample"
+      button={
+        <EuiButton
+          fill={!showManager}
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={() => setOpenPopup((x) => !x)}
+        >
+          Open Drilldown Manager
+        </EuiButton>
+      }
+      isOpen={openPopup}
+      panelPaddingSize="none"
+      withTitle
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
+
   return (
     <div>
       <Section title={'Drilldowns Manager'}>
         <EuiText>
           <p>
             <em>Drilldown Manager</em> can be integrated into any app in Kibana. Click the button
-            below to open the drilldown manager and see how works in this example plugin.
+            below to open the drilldown manager and see how it works in this example plugin.
           </p>
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill={!showManager} onClick={() => setShowManager((x) => !x)}>
-              {showManager ? 'Close' : 'Open Drilldown Manager'}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         </EuiFlexGroup>
       </Section>
 
@@ -50,7 +108,7 @@ export const DrilldownsManager: React.FC = () => {
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
           <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
             onClose={() => setShowManager(false)}
-            viewMode={'create'}
+            viewMode={viewRef.current}
             dynamicActionManager={manager}
             triggers={[SAMPLE_ML_JOB_CLICK_TRIGGER]}
           />
