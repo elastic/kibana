@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
+
 export const SOURCERER_FEATURE_FLAG_ON = true;
 
 export enum SecurityPageName {
@@ -17,13 +19,9 @@ export enum SecurityPageName {
 export type SourceGroupsType = keyof typeof SecurityPageName;
 
 export const sourceGroups = {
-  [SecurityPageName.default]: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'winlogbeat-*',
-    'blobbeat-*',
-  ],
+  [SecurityPageName.default]: DEFAULT_INDEX_PATTERN,
+  [SecurityPageName.host]: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
+  [SecurityPageName.detections]: [DEFAULT_SIGNALS_INDEX],
+  [SecurityPageName.timeline]: DEFAULT_INDEX_PATTERN,
+  [SecurityPageName.network]: ['auditbeat-*', 'filebeat-*', 'packetbeat-*'],
 };

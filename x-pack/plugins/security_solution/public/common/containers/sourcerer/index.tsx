@@ -291,17 +291,7 @@ export const useSourceManager = (): UseSourceManager => {
             },
           });
           const ip = await fetchIndexFields({ indexPatternsService, selectedPatterns });
-          // const ipf = await indexPatternsService.getFields();
-          console.log('results', { result, ip });
-          ////////////////////////////////////////
-          // LETS BUILD HERE
-          ////////////////////////////////////////
 
-          ////////////////////////////////////////
-          // STOP  HERE
-          ////////////////////////////////////////
-
-          debugger;
           if (isSubscribed) {
             dispatch({
               type: 'SET_SOURCE',
