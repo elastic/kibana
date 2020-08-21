@@ -7,6 +7,7 @@
 import { Capabilities, HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { toExpression, Ast } from '@kbn/interpreter/target/common';
 import {
   IndexPatternsContract,
   TimefilterContract,
@@ -26,6 +27,7 @@ import {
 import { DOC_TYPE, SavedObjectIndexStore } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { AttributeService, DashboardStart } from '../../../../../../src/plugins/dashboard/public';
+import { Document } from '../../persistence/saved_object_store';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -36,6 +38,7 @@ interface StartServices {
   indexPatternService: IndexPatternsContract;
   dashboard?: DashboardStart;
   uiActions?: UiActionsStart;
+  documentToExpression: (doc: Document) => Promise<Ast | null>;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -86,6 +89,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     const {
       timefilter,
       expressionRenderer,
+      documentToExpression,
       uiActions,
       coreHttp,
       savedObjectsClient,
@@ -117,6 +121,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         editable: await this.isEditable(),
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,
+        documentToExpression,
+        toExpressionString: toExpression,
       },
       input,
       parent
