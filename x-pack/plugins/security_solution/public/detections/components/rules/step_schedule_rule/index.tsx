@@ -24,7 +24,6 @@ interface StepScheduleRuleProps extends RuleStepProps {
 
 const stepScheduleDefaultValue = {
   interval: '5m',
-  isNew: true,
   from: '1m',
 };
 
@@ -54,7 +53,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       const { isValid: newIsValid, data } = await submit();
       if (newIsValid) {
         setStepData(RuleStep.scheduleRule, { ...data }, newIsValid);
-        setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
+        setMyStepData(data as ScheduleStepRule);
       }
     }
   }, [setStepData, submit]);

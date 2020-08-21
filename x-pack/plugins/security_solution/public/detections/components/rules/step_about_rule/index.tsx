@@ -95,7 +95,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.aboutRule, data, isValid);
-        setMyStepData({ ...data, isNew: false } as AboutStepRule);
+        setMyStepData(data as AboutStepRule);
       }
     }
   }, [setStepData, submit]);

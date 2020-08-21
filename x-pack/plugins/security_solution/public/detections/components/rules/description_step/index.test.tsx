@@ -299,7 +299,6 @@ describe('description_step', () => {
     describe('queryBar', () => {
       test('returns array of ListItems when queryBar exist', () => {
         const mockQueryBar = {
-          isNew: false,
           queryBar: {
             query: {
               query: 'user.name: root or user.name: admin',
@@ -369,7 +368,6 @@ describe('description_step', () => {
     describe('threshold', () => {
       test('returns threshold description when threshold exist and field is empty', () => {
         const mockThreshold = {
-          isNew: false,
           threshold: {
             field: [''],
             value: 100,
@@ -391,7 +389,6 @@ describe('description_step', () => {
 
       test('returns threshold description when threshold exist and field is set', () => {
         const mockThreshold = {
-          isNew: false,
           threshold: {
             field: ['user.name'],
             value: 100,

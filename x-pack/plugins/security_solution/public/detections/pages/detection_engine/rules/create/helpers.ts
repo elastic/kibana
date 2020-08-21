@@ -129,7 +129,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 };
 
 export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
-  const { isNew, ...formatScheduleData } = scheduleData;
+  const { ...formatScheduleData } = scheduleData;
   if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(
       formatScheduleData.interval
@@ -161,7 +161,6 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
-    isNew,
     note,
     ruleNameOverride,
     timestampOverride,

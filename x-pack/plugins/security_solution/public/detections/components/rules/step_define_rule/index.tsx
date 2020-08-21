@@ -58,7 +58,6 @@ interface StepDefineRuleProps extends RuleStepProps {
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
-  isNew: true,
   machineLearningJobId: '',
   ruleType: 'query',
   queryBar: {
@@ -134,7 +133,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       const { isValid, data } = await submit();
       if (isValid && setStepData) {
         setStepData(RuleStep.defineRule, data, isValid);
-        setMyStepData({ ...data, isNew: false } as DefineStepRule);
+        setMyStepData(data as DefineStepRule);
       }
     }
   }, [setStepData, submit]);

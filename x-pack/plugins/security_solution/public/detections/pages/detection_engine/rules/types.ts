@@ -59,10 +59,7 @@ export interface RuleStepProps {
   setForm?: (step: RuleStep, form: FormHook<FormData>) => void;
 }
 
-interface StepRuleData {
-  isNew: boolean;
-}
-export interface AboutStepRule extends StepRuleData {
+export interface AboutStepRule {
   author: string[];
   name: string;
   description: string;
@@ -97,7 +94,7 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
-export interface DefineStepRule extends StepRuleData {
+export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   machineLearningJobId: string;
@@ -107,13 +104,13 @@ export interface DefineStepRule extends StepRuleData {
   threshold: FieldValueThreshold;
 }
 
-export interface ScheduleStepRule extends StepRuleData {
+export interface ScheduleStepRule {
   interval: string;
   from: string;
   to?: string;
 }
 
-export interface ActionsStepRule extends StepRuleData {
+export interface ActionsStepRule {
   actions: AlertAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;

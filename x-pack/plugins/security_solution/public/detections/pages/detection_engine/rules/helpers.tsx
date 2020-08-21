@@ -64,7 +64,6 @@ export const getActionsStepsData = (
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
-    isNew: false,
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
@@ -72,7 +71,6 @@ export const getActionsStepsData = (
 };
 
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
-  isNew: false,
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
@@ -97,7 +95,6 @@ export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const fromHumanizedValue = getHumanizedDuration(from, interval);
 
   return {
-    isNew: false,
     interval,
     from: fromHumanizedValue,
   };
@@ -139,7 +136,6 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   } = rule;
 
   return {
-    isNew: false,
     author,
     isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
     isBuildingBlock: buildingBlockType !== undefined,

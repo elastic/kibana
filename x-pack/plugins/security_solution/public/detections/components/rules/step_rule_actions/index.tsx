@@ -42,7 +42,6 @@ interface StepRuleActionsProps extends RuleStepProps {
 
 const stepActionsDefaultValue = {
   enabled: true,
-  isNew: true,
   actions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
@@ -101,7 +100,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         const { isValid: newIsValid, data } = await submit();
         if (newIsValid) {
           setStepData(RuleStep.ruleActions, { ...data, enabled }, newIsValid);
-          setMyStepData({ ...data, isNew: false } as ActionsStepRule);
+          setMyStepData(data as ActionsStepRule);
         }
       }
     },
