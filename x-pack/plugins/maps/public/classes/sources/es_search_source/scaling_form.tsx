@@ -201,7 +201,7 @@ export class ScalingForm extends Component<Props, State> {
       />
     );
 
-    const info = (
+    const enabledInfo = (
       <>
         <EuiBetaBadge label={'beta'} />
         <EuiHorizontalRule margin="xs" />
@@ -211,12 +211,12 @@ export class ScalingForm extends Component<Props, State> {
       </>
     );
 
-    return this.props.mvtDisabledReason ? (
+    return !this.props.supportsMvt ? (
       <EuiToolTip position="left" content={this.props.mvtDisabledReason}>
         {mvtRadio}
       </EuiToolTip>
     ) : (
-      <EuiToolTip position="left" content={info}>
+      <EuiToolTip position="left" content={enabledInfo}>
         {mvtRadio}
       </EuiToolTip>
     );
