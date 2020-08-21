@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';
@@ -149,6 +149,9 @@ export class TaskManager {
     // pipe store events into the TaskManager's event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
+    const maxWorkers$ = new BehaviorSubject(opts.config.max_workers);
+    const pollInterval$ = new BehaviorSubject(opts.config.poll_interval);
+
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
       logger: this.logger,
@@ -156,7 +159,7 @@ export class TaskManager {
 
     this.pool = new TaskPool({
       logger: this.logger,
-      maxWorkers: opts.config.max_workers,
+      maxWorkers$,
     });
 
     const {
@@ -166,7 +169,7 @@ export class TaskManager {
     this.poller$ = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
       () =>
         createTaskPoller<string, FillPoolResult>({
-          pollInterval,
+          pollInterval$,
           bufferCapacity: opts.config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,

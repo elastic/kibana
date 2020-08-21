@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
+import { Subject, of, BehaviorSubject } from 'rxjs';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
@@ -24,10 +24,11 @@ describe('TaskPoller', () => {
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         getCapacity: () => 1,
         work,
+        workTimeout: pollInterval * 5,
         pollRequests$: new Subject<Option<void>>(),
       }).subscribe(() => {});
 
@@ -41,8 +42,50 @@ describe('TaskPoller', () => {
       expect(work).toHaveBeenCalledTimes(1);
 
       await sleep(0);
+      await sleep(0);
+      advance(pollInterval + 10);
+      await sleep(0);
+      expect(work).toHaveBeenCalledTimes(2);
+    })
+  );
+
+  test(
+    'poller adapts to pollInterval changes',
+    fakeSchedulers(async (advance) => {
+      const pollInterval = 100;
+      const pollInterval$ = new BehaviorSubject(pollInterval);
+      const bufferCapacity = 5;
+
+      const work = jest.fn(async () => true);
+      createTaskPoller<void, boolean>({
+        pollInterval$,
+        bufferCapacity,
+        getCapacity: () => 1,
+        work,
+        workTimeout: pollInterval * 5,
+        pollRequests$: new Subject<Option<void>>(),
+      }).subscribe(() => {});
+
+      // `work` is async, we have to force a node `tick`
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(1);
+
+      pollInterval$.next(pollInterval * 2);
+
+      // `work` is async, we have to force a node `tick`
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(1);
       advance(pollInterval);
       expect(work).toHaveBeenCalledTimes(2);
+
+      pollInterval$.next(pollInterval / 2);
+
+      // `work` is async, we have to force a node `tick`
+      await sleep(0);
+      advance(pollInterval / 2);
+      expect(work).toHaveBeenCalledTimes(3);
     })
   );
 
@@ -56,9 +99,10 @@ describe('TaskPoller', () => {
 
       let hasCapacity = true;
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
+        workTimeout: pollInterval * 5,
         getCapacity: () => (hasCapacity ? 1 : 0),
         pollRequests$: new Subject<Option<void>>(),
       }).subscribe(() => {});
@@ -113,9 +157,10 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<void>>();
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
+        workTimeout: pollInterval * 5,
         getCapacity: () => 1,
         pollRequests$,
       }).subscribe(jest.fn());
@@ -157,9 +202,10 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<void>>();
       createTaskPoller<void, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
+        workTimeout: pollInterval * 5,
         getCapacity: () => (hasCapacity ? 1 : 0),
         pollRequests$,
       }).subscribe(() => {});
@@ -200,9 +246,10 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, boolean>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
+        workTimeout: pollInterval * 5,
         getCapacity: () => 1,
         pollRequests$,
       }).subscribe(() => {});
@@ -235,7 +282,7 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, string[]>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work: async (...args) => {
           await worker;
@@ -285,7 +332,7 @@ describe('TaskPoller', () => {
       type ResolvableTupple = [string, PromiseLike<void> & Resolvable];
       const pollRequests$ = new Subject<Option<ResolvableTupple>>();
       createTaskPoller<[string, Resolvable], string[]>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work: async (...resolvables) => {
           await Promise.all(resolvables.map(([, future]) => future));
@@ -344,11 +391,12 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, string[]>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work: async (...args) => {
           throw new Error('failed to work');
         },
+        workTimeout: pollInterval * 5,
         getCapacity: () => 5,
         pollRequests$,
       }).subscribe(handler);
@@ -383,9 +431,10 @@ describe('TaskPoller', () => {
         return callCount;
       });
       createTaskPoller<string, number>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
+        workTimeout: pollInterval * 5,
         getCapacity: () => 5,
         pollRequests$,
       }).subscribe(handler);
@@ -424,9 +473,10 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => {});
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, void>({
-        pollInterval,
+        pollInterval$: of(pollInterval),
         bufferCapacity,
         work,
+        workTimeout: pollInterval * 5,
         getCapacity: () => 5,
         pollRequests$,
       }).subscribe(handler);
