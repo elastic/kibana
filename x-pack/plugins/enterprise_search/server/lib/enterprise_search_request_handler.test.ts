@@ -11,7 +11,7 @@
 
 import { mockConfig, mockLogger } from '../__mocks__';
 
-import { createAppSearchRequestHandler } from './app_search_request_handler';
+import { createEnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
 jest.mock('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -25,7 +25,7 @@ const responseMock = {
 };
 const KibanaAuthHeader = 'Basic 123';
 
-describe('createAppSearchRequestHandler', () => {
+describe('createEnterpriseSearchRequestHandler', () => {
   beforeEach(() => {
     responseMock.ok.mockClear();
     responseMock.notFound.mockClear();
@@ -40,7 +40,7 @@ describe('createAppSearchRequestHandler', () => {
 
     AppSearchAPI.mockReturn(appSearchAPIResponseBody);
 
-    const requestHandler = createAppSearchRequestHandler({
+    const requestHandler = createEnterpriseSearchRequestHandler({
       config: mockConfig,
       log: mockLogger,
       path: '/as/credentials/collection',
@@ -69,7 +69,7 @@ describe('createAppSearchRequestHandler', () => {
     it('should return 404 with a message', async () => {
       AppSearchAPI.mockReturnError();
 
-      const requestHandler = createAppSearchRequestHandler({
+      const requestHandler = createEnterpriseSearchRequestHandler({
         config: mockConfig,
         log: mockLogger,
         path: '/as/credentials/collection',
@@ -96,7 +96,7 @@ describe('createAppSearchRequestHandler', () => {
 
       AppSearchAPI.mockReturn(appSearchAPIResponseBody);
 
-      const requestHandler = createAppSearchRequestHandler({
+      const requestHandler = createEnterpriseSearchRequestHandler({
         config: mockConfig,
         log: mockLogger,
         path: '/as/credentials/collection',

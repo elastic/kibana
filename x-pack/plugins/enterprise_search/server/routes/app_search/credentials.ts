@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
-import { createAppSearchRequestHandler } from './app_search_request_handler';
+import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
 export function registerCredentialsRoutes({ router, config, log }: IRouteDependencies) {
   router.get(
@@ -19,7 +19,7 @@ export function registerCredentialsRoutes({ router, config, log }: IRouteDepende
         }),
       },
     },
-    createAppSearchRequestHandler({
+    createEnterpriseSearchRequestHandler({
       config,
       log,
       path: '/as/credentials/collection',

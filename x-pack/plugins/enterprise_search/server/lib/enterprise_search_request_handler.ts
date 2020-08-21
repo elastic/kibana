@@ -6,7 +6,7 @@
 import fetch from 'node-fetch';
 import querystring from 'querystring';
 import { Logger } from 'src/core/server';
-import { ConfigType } from '../../index';
+import { ConfigType } from '../index';
 
 interface IAppSearchRequestParams {
   config: ConfigType;
@@ -58,3 +58,5 @@ export function createAppSearchRequestHandler({
     }
   };
 }
+
+export const createEnterpriseSearchRequestHandler = createAppSearchRequestHandler;

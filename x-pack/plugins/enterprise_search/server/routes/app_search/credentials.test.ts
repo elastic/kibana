@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MockRouter, mockConfig, mockLogger } from '../__mocks__';
+import { MockRouter, mockConfig, mockLogger } from '../../__mocks__';
 
 import { registerCredentialsRoutes } from './credentials';
 
-jest.mock('./app_search_request_handler', () => ({
-  createAppSearchRequestHandler: jest.fn(),
+jest.mock('../../lib/enterprise_search_request_handler', () => ({
+  createEnterpriseSearchRequestHandler: jest.fn(),
 }));
-import { createAppSearchRequestHandler } from './app_search_request_handler';
+import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
 describe('credentials routes', () => {
   describe('GET /api/app_search/credentials/collection', () => {
@@ -27,8 +27,8 @@ describe('credentials routes', () => {
       });
     });
 
-    it('create a handler with app_search_request_handler', () => {
-      expect(createAppSearchRequestHandler).toHaveBeenCalledWith({
+    it('creates a handler with createEnterpriseSearchRequestHandler', () => {
+      expect(createEnterpriseSearchRequestHandler).toHaveBeenCalledWith({
         config: mockConfig,
         log: mockLogger,
         path: '/as/credentials/collection',
@@ -58,7 +58,9 @@ describe('credentials routes', () => {
           ],
         };
 
-        const { hasValidData } = (createAppSearchRequestHandler as jest.Mock).mock.calls[0][0];
+        const {
+          hasValidData,
+        } = (createEnterpriseSearchRequestHandler as jest.Mock).mock.calls[0][0];
 
         expect(hasValidData(response)).toBe(true);
       });
@@ -68,7 +70,7 @@ describe('credentials routes', () => {
           foo: 'bar',
         };
 
-        const hasValidData = (createAppSearchRequestHandler as jest.Mock).mock.calls[0][0]
+        const hasValidData = (createEnterpriseSearchRequestHandler as jest.Mock).mock.calls[0][0]
           .hasValidData;
 
         expect(hasValidData(response)).toBe(false);
