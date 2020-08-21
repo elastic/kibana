@@ -33,5 +33,6 @@ export { Script } from './script';
 export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';
 export { Split } from './split';
+export { Sort } from './sort';
 
 export { FormFieldsComponent } from './shared';

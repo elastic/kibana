@@ -36,6 +36,7 @@ import {
   SetProcessor,
   SetSecurityUser,
   Split,
+  Sort,
   FormFieldsComponent,
 } from '../manage_processor_form/processors';
 
@@ -255,7 +256,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   sort: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Sort,
     docLinkPath: '/sort-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.sort', {
       defaultMessage: 'Sort',
