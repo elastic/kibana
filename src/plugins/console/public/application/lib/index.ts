@@ -17,24 +17,5 @@
  * under the License.
  */
 
-import { routeValidationConfig } from './validation_config';
-import { createHandler } from './create_handler';
-
-import { RouteDependencies } from '../../../';
-
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  deps.router.post(
-    {
-      path: '/api/console/proxy',
-      options: {
-        tags: ['access:console'],
-        body: {
-          output: 'stream',
-          parse: false,
-        },
-      },
-      validate: routeValidationConfig,
-    },
-    createHandler(deps)
-  );
-};
+export { createApi, Api } from './api';
+export { createEsHostService, EsHostService } from './es_host_service';
