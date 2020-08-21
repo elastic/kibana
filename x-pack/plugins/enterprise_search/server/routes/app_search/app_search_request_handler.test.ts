@@ -14,23 +14,21 @@ import { mockConfig, mockLogger } from '../__mocks__';
 import { createAppSearchRequestHandler } from './app_search_request_handler';
 
 jest.mock('node-fetch');
-const fetch = jest.requireActual('node-fetch');
-const { Response } = fetch;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mocked<typeof fetch>;
-
-const responseMock = {
-  ok: jest.fn(),
-  notFound: jest.fn(),
-};
-
-beforeEach(() => {
-  responseMock.ok.mockClear();
-  responseMock.notFound.mockClear();
-  fetchMock.mockReset();
-});
+const fetchMock = require('node-fetch') as jest.Mock;
+const { Response } = jest.requireActual('node-fetch');
 
 describe('createAppSearchRequestHandler', () => {
+  const responseMock = {
+    ok: jest.fn(),
+    notFound: jest.fn(),
+  };
+
+  beforeEach(() => {
+    responseMock.ok.mockClear();
+    responseMock.notFound.mockClear();
+    fetchMock.mockReset();
+  });
   it('makes an API call and returns the response', async () => {
     const appSearchAPIResponseBody = {
       results: [{ name: 'engine1' }],

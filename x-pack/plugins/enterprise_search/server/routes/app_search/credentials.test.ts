@@ -58,8 +58,7 @@ describe('credentials routes', () => {
           ],
         };
 
-        const hasValidData = (createAppSearchRequestHandler as jest.Mock).mock.calls[0][0]
-          .hasValidData;
+        const { hasValidData } = (createAppSearchRequestHandler as jest.Mock).mock.calls[0][0];
 
         expect(hasValidData(response)).toBe(true);
       });

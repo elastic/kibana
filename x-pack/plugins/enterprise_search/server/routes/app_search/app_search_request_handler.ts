@@ -12,7 +12,7 @@ interface IAppSearchRequestParams {
   config: ConfigType;
   log: Logger;
   path: string;
-  hasValidData: (body) => boolean;
+  hasValidData: (body?: object) => boolean;
 }
 
 /**
@@ -51,7 +51,10 @@ export function createAppSearchRequestHandler({
       log.error(`Cannot connect to App Search: ${e.toString()}`);
       if (e instanceof Error) log.debug(e.stack as string);
 
-      return response.notFound({ body: 'cannot-connect' });
+      return response.customError({
+        statusCode: 502,
+        body: 'Error connecting or fetching data from Enterprise Search',
+      });
     }
   };
 }
