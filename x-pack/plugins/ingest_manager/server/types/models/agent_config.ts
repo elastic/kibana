@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { PackageConfigSchema } from './package_config';
+import { PackageConfigSchema, NamespaceSchema } from './package_config';
 import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
   name: schema.string({ minLength: 1 }),
-  namespace: schema.string({ minLength: 1 }),
+  namespace: NamespaceSchema,
   description: schema.maybe(schema.string()),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
