@@ -157,9 +157,12 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
 
-    // erase the help menu extension from previous app while switching to a next app
+    // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
       helpExtension$.next(undefined);
+      breadcrumbs$.next([]);
+      badge$.next(undefined);
+      docTitle.reset();
     });
 
     const setIsNavDrawerLocked = (isLocked: boolean) => {
