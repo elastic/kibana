@@ -608,7 +608,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
