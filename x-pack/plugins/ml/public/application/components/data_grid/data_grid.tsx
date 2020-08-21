@@ -100,8 +100,9 @@ export const DataGrid: FC<Props> = memo(
         analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
         ? {
             featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
-              const rowIndex = children?.props?.rowIndex;
+              const rowIndex = children?.props?.visibleRowIndex;
               const row = data[rowIndex];
+              if (!row) return <div />;
               const parsedFIArray = row.ml.feature_importance;
               let predictedValue: string | number | undefined;
               let topClasses: TopClasses = [];
