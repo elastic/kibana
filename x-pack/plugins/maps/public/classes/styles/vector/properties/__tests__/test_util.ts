@@ -43,6 +43,10 @@ export class MockStyle implements IStyle {
     return null;
   }
 
+  getType() {
+    return 'mockStyle';
+  }
+
   getStyleMeta(): StyleMeta {
     const geomTypes: GeometryTypes = {
       isPointsOnly: false,

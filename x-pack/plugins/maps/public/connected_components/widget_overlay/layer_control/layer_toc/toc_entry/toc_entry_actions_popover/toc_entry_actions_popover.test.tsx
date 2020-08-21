@@ -21,6 +21,10 @@ class MockStyle implements IStyle {
   renderEditor() {
     return null;
   }
+
+  getType() {
+    return 'mockStyle';
+  }
 }
 
 class LayerMock extends AbstractLayer implements ILayer {

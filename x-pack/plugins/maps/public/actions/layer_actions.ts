@@ -22,7 +22,6 @@ import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-  LAYER_STYLE_TYPE,
   REMOVE_LAYER,
   REMOVE_TRACKED_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
@@ -41,7 +40,7 @@ import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
-import { LAYER_TYPE } from '../../common/constants';
+import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 export function trackCurrentLayerState(layerId: string) {
