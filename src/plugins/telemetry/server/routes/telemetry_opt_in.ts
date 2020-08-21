@@ -95,11 +95,13 @@ export function registerTelemetryOptInRoutes({
 
       if (config.sendUsageFrom === 'server') {
         const optInStatusUrl = config.optInStatusUrl;
-        await sendTelemetryOptInStatus(
+        sendTelemetryOptInStatus(
           telemetryCollectionManager,
           { optInStatusUrl, newOptInStatus },
           statsGetterConfig
-        );
+        ).catch(() => {
+          // Swallow this error. The server is likely behind a firewall and can't reach the remote service
+        });
       }
 
       await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
