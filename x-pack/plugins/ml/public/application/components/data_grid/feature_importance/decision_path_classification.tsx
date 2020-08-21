@@ -49,7 +49,11 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
     let maxDomain;
     let minDomain;
     // if decisionPathData has calculated cumulative path
-    if (Array.isArray(decisionPathData) && decisionPathData.length === 3) {
+    if (
+      Array.isArray(decisionPathData) &&
+      decisionPathData.length > 0 &&
+      decisionPathData[0].length === 3
+    ) {
       const { max, min } = findMaxMin(decisionPathData, (d: [string, number, number]) => d[2]);
       const buffer = Math.abs(max - min) * 0.1;
       maxDomain = max + buffer;

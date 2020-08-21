@@ -34,7 +34,11 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
     let maxDomain;
     let minDomain;
     // if decisionPathData has calculated cumulative path
-    if (Array.isArray(decisionPathData) && decisionPathData.length === 3) {
+    if (
+      Array.isArray(decisionPathData) &&
+      decisionPathData.length > 0 &&
+      decisionPathData[0].length === 3
+    ) {
       const { max, min } = findMaxMin(decisionPathData, (d: [string, number, number]) => d[2]);
       maxDomain = max;
       minDomain = min;
