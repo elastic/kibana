@@ -7,15 +7,13 @@
 import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
-import { getApplyFilterLabel } from '../../common/i18n_getters';
-
-export const ADD_FILTER_MAPS_ACTION = 'ADD_FILTER_MAPS_ACTION';
+import { ActionExecutionContext, UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
 
 interface Props {
   value?: string;
   onChange: (value: string) => void;
   getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
+  getActionContext?: () => ActionExecutionContext;
 }
 
 interface State {
@@ -38,7 +36,7 @@ export class ActionSelect extends Component<Props, State> {
   }
 
   async _loadActions() {
-    if (!this.props.getFilterActions) {
+    if (!this.props.getFilterActions || !this.props.getActionContext) {
       return;
     }
     const actions = await this.props.getFilterActions();
@@ -48,33 +46,27 @@ export class ActionSelect extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.actions.length === 0) {
+    if (this.state.actions.length === 0 || !this.props.getActionContext) {
       return null;
     }
 
-    const options = [
-      {
-        value: ADD_FILTER_MAPS_ACTION,
+    if (this.state.actions.length === 1 && this.props.value === this.state.actions[0].id) {
+      return null;
+    }
+
+    const actionContext = this.props.getActionContext();
+    const options = this.state.actions.map((action) => {
+      const iconType = action.getIconType ? action.getIconType(actionContext) : null;
+      return {
+        value: action.id,
         inputDisplay: (
           <div>
-            <EuiIcon className="mapActionSelectIcon" type="filter" />
-            {getApplyFilterLabel()}
+            {iconType ? <EuiIcon className="mapActionSelectIcon" type={iconType} /> : null}
+            {action.getDisplayName ? action.getDisplayName(actionContext) : action.id}
           </div>
         ),
-      },
-      ...this.state.actions.map((action) => {
-        const iconType = action.getIconType();
-        return {
-          value: action.id,
-          inputDisplay: (
-            <div>
-              {iconType ? <EuiIcon className="mapActionSelectIcon" type={iconType} /> : null}
-              {action.getDisplayName()}
-            </div>
-          ),
-        };
-      }),
-    ];
+      };
+    });
 
     return (
       <EuiFormRow
@@ -86,7 +78,7 @@ export class ActionSelect extends Component<Props, State> {
         <EuiSuperSelect
           compressed
           options={options}
-          valueOfSelected={this.props.value ? this.props.value : ADD_FILTER_MAPS_ACTION}
+          valueOfSelected={this.props.value ? this.props.value : ''}
           onChange={this.props.onChange}
         />
       </EuiFormRow>

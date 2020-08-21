@@ -104,6 +104,7 @@ export class FeatureGeometryFilterForm extends Component {
         )}
         geoFields={this.props.geoFields}
         getFilterActions={this.props.getFilterActions}
+        getActionContext={this.props.getActionContext}
         intitialGeometryLabel={this.props.geometry.type.toLowerCase()}
         onSubmit={this._createFilter}
         isFilterGeometryClosed={

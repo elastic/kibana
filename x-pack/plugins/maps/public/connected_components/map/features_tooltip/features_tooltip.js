@@ -144,6 +144,7 @@ export class FeaturesTooltip extends Component {
             geoFields={geoFields}
             addFilters={this.props.addFilters}
             getFilterActions={this.props.getFilterActions}
+            getActionContext={this.props.getActionContext}
             loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
           />
         </Fragment>
@@ -181,6 +182,7 @@ export class FeaturesTooltip extends Component {
           onCloseTooltip={this.props.closeTooltip}
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           showFilterActions={this._showFilterActionsView}
         />
         {this._renderActions(geoFields)}

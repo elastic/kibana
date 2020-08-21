@@ -50,9 +50,3 @@ export function getEsSpatialRelationLabel(spatialRelation: $Values<typeof ES_SPA
       return spatialRelation;
   }
 }
-
-export function getApplyFilterLabel() {
-  return i18n.translate('xpack.maps.common.applyFilterLabel', {
-    defaultMessage: 'Apply filter to current view',
-  });
-}

@@ -14,16 +14,18 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 import { GeoFieldWithIndex } from './geo_field_with_index';
-import { ActionSelect, ADD_FILTER_MAPS_ACTION } from './action_select';
+import { ActionSelect } from './action_select';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 
 interface Props {
   className?: string;
   buttonLabel: string;
   geoFields: GeoFieldWithIndex[];
   getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
+  getActionContext?: () => ActionExecutionContext;
   onSubmit: ({
     actionId,
     filterLabel,
@@ -45,7 +47,7 @@ interface State {
 
 export class DistanceFilterForm extends Component<Props, State> {
   state: State = {
-    actionId: ADD_FILTER_MAPS_ACTION,
+    actionId: ACTION_GLOBAL_APPLY_FILTER,
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     filterLabel: '',
   };
@@ -100,6 +102,7 @@ export class DistanceFilterForm extends Component<Props, State> {
 
         <ActionSelect
           getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           value={this.state.actionId}
           onChange={this._onActionIdChange}
         />

@@ -20,13 +20,15 @@ import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
 import { getEsSpatialRelationLabel } from '../../common/i18n_getters';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
-import { ActionSelect, ADD_FILTER_MAPS_ACTION } from './action_select';
+import { ActionSelect } from './action_select';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 
 export class GeometryFilterForm extends Component {
   static propTypes = {
     buttonLabel: PropTypes.string.isRequired,
     geoFields: PropTypes.array.isRequired,
     getFilterActions: PropTypes.func,
+    getActionContext: PropTypes.func,
     intitialGeometryLabel: PropTypes.string.isRequired,
     onSubmit: PropTypes.func.isRequired,
     isFilterGeometryClosed: PropTypes.bool,
@@ -38,7 +40,7 @@ export class GeometryFilterForm extends Component {
   };
 
   state = {
-    actionId: ADD_FILTER_MAPS_ACTION,
+    actionId: ACTION_GLOBAL_APPLY_FILTER,
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     geometryLabel: this.props.intitialGeometryLabel,
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
@@ -144,6 +146,7 @@ export class GeometryFilterForm extends Component {
 
         <ActionSelect
           getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           value={this.state.actionId}
           onChange={this._onActionIdChange}
         />

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
-import { UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
 // @ts-expect-error
 import { MBMap } from '../map/mb';
 // @ts-expect-error
@@ -38,6 +38,7 @@ const RENDER_COMPLETE_EVENT = 'renderComplete';
 interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
   getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
+  getActionContext?: () => ActionExecutionContext;
   areLayersLoaded: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
@@ -186,6 +187,7 @@ export class MapContainer extends Component<Props, State> {
     const {
       addFilters,
       getFilterActions,
+      getActionContext,
       flyoutDisplay,
       isFullScreen,
       exitFullScreen,
@@ -234,6 +236,7 @@ export class MapContainer extends Component<Props, State> {
           <MBMap
             addFilters={addFilters}
             getFilterActions={getFilterActions}
+            getActionContext={getActionContext}
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
@@ -242,6 +245,7 @@ export class MapContainer extends Component<Props, State> {
               addFilters={addFilters}
               geoFields={this.state.geoFields}
               getFilterActions={getFilterActions}
+              getActionContext={getActionContext}
             />
           )}
           <WidgetOverlay />

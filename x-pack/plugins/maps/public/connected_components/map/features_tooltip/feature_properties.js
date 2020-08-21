@@ -16,7 +16,7 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getApplyFilterLabel } from '../../../../common/i18n_getters';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
 
 export class FeatureProperties extends React.Component {
   state = {
@@ -116,28 +116,19 @@ export class FeatureProperties extends React.Component {
   _renderFilterActions(tooltipProperty) {
     const panel = {
       id: 0,
-      items: [
-        {
-          name: getApplyFilterLabel(),
-          icon: <EuiIcon type="filter" />,
+      items: this.state.actions.map((action) => {
+        const actionContext = this.props.getActionContext();
+        const iconType = action.getIconType ? action.getIconType(actionContext) : null;
+        return {
+          name: action.getDisplayName ? action.getDisplayName(actionContext) : action.id,
+          icon: iconType ? <EuiIcon type={iconType} /> : null,
           onClick: async () => {
             this.props.onCloseTooltip();
             const filters = await tooltipProperty.getESFilters();
-            this.props.addFilters(filters);
+            this.props.addFilters(filters, action.id);
           },
-        },
-        ...this.state.actions.map((action) => {
-          return {
-            name: action.getDisplayName(),
-            icon: <EuiIcon type={action.getIconType()} />,
-            onClick: async () => {
-              this.props.onCloseTooltip();
-              const filters = await tooltipProperty.getESFilters();
-              this.props.addFilters(filters, action.id);
-            },
-          };
-        }),
-      ],
+        };
+      }),
     };
 
     return (
@@ -195,10 +186,12 @@ export class FeatureProperties extends React.Component {
       </EuiFlexItem>
     );
 
-    let applyFirstFilterAction;
-    if (this.state.actions.length) {
-      const action = this.state.actions[0];
-      applyFirstFilterAction = (
+    const action = this.state.actions.find((action) => {
+      return action.id !== ACTION_GLOBAL_APPLY_FILTER;
+    });
+    let applyAction;
+    if (action) {
+      applyAction = (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
@@ -240,7 +233,7 @@ export class FeatureProperties extends React.Component {
       <td>
         <EuiFlexGroup gutterSize="xs">
           {applyFilterButton}
-          {applyFirstFilterAction}
+          {applyAction}
           {showMoreFilterActions}
         </EuiFlexGroup>
       </td>

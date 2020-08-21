@@ -304,18 +304,13 @@ export class MBMap extends React.Component {
     let drawControl;
     let tooltipControl;
     if (this.state.mbMap) {
-      drawControl = (
-        <DrawControl
-          mbMap={this.state.mbMap}
-          addFilters={this.props.addFilters}
-          getFilterActions={this.props.getFilterActions}
-        />
-      );
+      drawControl = <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />;
       tooltipControl = !this.props.disableTooltipControl ? (
         <TooltipControl
           mbMap={this.state.mbMap}
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           geoFields={this.props.geoFields}
           renderTooltipContent={this.props.renderTooltipContent}
         />

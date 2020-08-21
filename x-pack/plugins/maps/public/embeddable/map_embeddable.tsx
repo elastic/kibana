@@ -11,8 +11,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
+  ActionExecutionContext,
   TriggerContextMapping,
 } from '../../../../../src/plugins/ui_actions/public';
 import {
@@ -53,7 +55,6 @@ import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
-import { ADD_FILTER_MAPS_ACTION } from '../components/action_select';
 
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
 export { MapEmbeddableInput, MapEmbeddableConfig };
@@ -235,6 +236,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
           <MapContainer
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
             getFilterActions={this.getFilterActions}
+            getActionContext={this.getActionContext}
             renderTooltipContent={this._renderTooltipContent}
           />
         </I18nContext>
@@ -252,13 +254,17 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     return await this._store.dispatch<any>(replaceLayerList(this._layerList));
   }
 
-  addFilters = async (filters: Filter[], actionId: string = ADD_FILTER_MAPS_ACTION) => {
-    if (actionId === ADD_FILTER_MAPS_ACTION) {
-      const applyFilterAction = getUiActions().getAction('ACTION_APPLY_FILTER');
+  addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+    const executeContext = {
+      ...this.getActionContext(),
+      filters,
+    };
+    if (actionId === ACTION_GLOBAL_APPLY_FILTER) {
+      const applyFilterAction = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
       if (!applyFilterAction) {
         throw new Error('Unable to apply filter, could not locate action');
       }
-      applyFilterAction.execute(this.getFilterActionContext(filters));
+      applyFilterAction.execute(executeContext);
       return;
     }
 
@@ -268,20 +274,25 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     if (!action) {
       throw new Error('Unable to apply filter, could not locate action');
     }
-    action.execute(this.getFilterActionContext(filters));
+    action.execute(executeContext);
   };
 
   getFilterActions = async () => {
-    return await getUiActions().getTriggerCompatibleActions('FILTER_TRIGGER', {
+    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
+      filters: [],
     });
   };
 
-  getFilterActionContext = (filters: Filter[]) => {
+  getActionContext = () => {
+    const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
+    if (!trigger) {
+      throw new Error('Unable to get context, could not locate trigger');
+    }
     return {
       embeddable: this,
-      filters,
-    };
+      trigger,
+    } as ActionExecutionContext;
   };
 
   destroy() {
