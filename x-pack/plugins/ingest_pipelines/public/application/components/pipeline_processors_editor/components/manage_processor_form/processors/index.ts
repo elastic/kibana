@@ -32,5 +32,6 @@ export { Rename } from './rename';
 export { Script } from './script';
 export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';
+export { Split } from './split';
 
 export { FormFieldsComponent } from './shared';

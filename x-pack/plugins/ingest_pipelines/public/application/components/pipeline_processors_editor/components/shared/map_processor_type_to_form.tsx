@@ -35,6 +35,7 @@ import {
   Script,
   SetProcessor,
   SetSecurityUser,
+  Split,
   FormFieldsComponent,
 } from '../manage_processor_form/processors';
 
@@ -247,7 +248,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   split: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Split,
     docLinkPath: '/split-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.split', {
       defaultMessage: 'Split',

@@ -38,7 +38,7 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.propertiesFieldLabel',
       {
-        defaultMessage: 'Properties',
+        defaultMessage: 'Properties (optional)',
       }
     ),
     helpText: (
