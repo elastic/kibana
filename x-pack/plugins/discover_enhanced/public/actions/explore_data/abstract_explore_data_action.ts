@@ -59,6 +59,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
+
     return true;
   }
 

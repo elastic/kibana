@@ -31,7 +31,6 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
@@ -164,7 +163,6 @@ export class TimeseriesVisualization extends Component {
     const mainAxisGroupId = yAxisIdGenerator('main_group');
 
     const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
-    const enableHistogramMode = areFieldsDifferent('chart_type')(seriesModel);
     const firstSeries = seriesModel.find((s) => s.formatter && !s.separate_axis);
 
     const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
@@ -243,7 +241,6 @@ export class TimeseriesVisualization extends Component {
           series={series}
           yAxis={yAxis}
           onBrush={onBrush}
-          enableHistogramMode={enableHistogramMode}
           backgroundColor={model.background_color}
           showGrid={Boolean(model.show_grid)}
           legend={Boolean(model.show_legend)}

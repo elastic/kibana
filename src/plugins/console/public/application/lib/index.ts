@@ -17,6 +17,5 @@
  * under the License.
  */
 
-import { uniq, map, size, flow } from 'lodash';
-
-export const areFieldsDifferent = (name) => (series) => flow(uniq, size)(map(series, name)) > 1;
+export { createApi, Api } from './api';
+export { createEsHostService, EsHostService } from './es_host_service';

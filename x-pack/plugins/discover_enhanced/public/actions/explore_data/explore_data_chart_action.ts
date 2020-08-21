@@ -7,9 +7,6 @@
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
 import {
-  isTimeRange,
-  isQuery,
-  isFilters,
   ApplyGlobalFilterActionContext,
   esFilters,
 } from '../../../../../../src/plugins/data/public';
@@ -64,9 +61,9 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
 
       const input = embeddable.getInput();
 
-      if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
-      if (isQuery(input.query)) state.query = input.query;
-      if (isFilters(input.filters)) state.filters = [...input.filters, ...(state.filters || [])];
+      if (input.timeRange && !state.timeRange) state.timeRange = input.timeRange;
+      if (input.query) state.query = input.query;
+      if (input.filters) state.filters = [...input.filters, ...(state.filters || [])];
     }
 
     const path = await urlGenerator.createUrl(state);

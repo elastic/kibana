@@ -17,24 +17,38 @@
  * under the License.
  */
 
-import { routeValidationConfig } from './validation_config';
-import { createHandler } from './create_handler';
+import { Api } from './api';
 
-import { RouteDependencies } from '../../../';
+/**
+ * Very simple state for holding the current ES host.
+ *
+ * This is used to power the copy as cURL functionality.
+ */
+export class EsHostService {
+  private host = 'http://localhost:9200';
 
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  deps.router.post(
-    {
-      path: '/api/console/proxy',
-      options: {
-        tags: ['access:console'],
-        body: {
-          output: 'stream',
-          parse: false,
-        },
-      },
-      validate: routeValidationConfig,
-    },
-    createHandler(deps)
-  );
-};
+  constructor(private readonly api: Api) {}
+
+  private setHost(host: string): void {
+    this.host = host;
+  }
+
+  /**
+   * Initialize the host value based on the value set on the server.
+   *
+   * This call is necessary because this value can only be retrieved at
+   * runtime.
+   */
+  public async init() {
+    const { data } = await this.api.getEsConfig();
+    if (data && data.host) {
+      this.setHost(data.host);
+    }
+  }
+
+  public getHost(): string {
+    return this.host;
+  }
+}
+
+export const createEsHostService = ({ api }: { api: Api }) => new EsHostService(api);

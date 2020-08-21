@@ -17,24 +17,23 @@
  * under the License.
  */
 
-import { routeValidationConfig } from './validation_config';
-import { createHandler } from './create_handler';
+import { Vis } from '../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
 
-import { RouteDependencies } from '../../../';
+export const toExpressionAst = (vis: Vis) => {
+  const { markdown, fontSize, openLinksInNewTab } = vis.params;
 
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  deps.router.post(
+  const markdownVis = buildExpressionFunction<MarkdownVisExpressionFunctionDefinition>(
+    'markdownVis',
     {
-      path: '/api/console/proxy',
-      options: {
-        tags: ['access:console'],
-        body: {
-          output: 'stream',
-          parse: false,
-        },
-      },
-      validate: routeValidationConfig,
-    },
-    createHandler(deps)
+      markdown,
+      font: buildExpression(`font size=${fontSize}`),
+      openLinksInNewTab,
+    }
   );
+
+  const ast = buildExpression([markdownVis]);
+
+  return ast.toAst();
 };
