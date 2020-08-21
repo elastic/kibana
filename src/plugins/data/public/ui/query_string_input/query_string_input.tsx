@@ -498,14 +498,13 @@ export class QueryStringInputUI extends Component<Props, State> {
 
     this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.handleListUpdate();
 
     window.addEventListener('resize', this.handleAutoHeight);
-    setTimeout(() => {
-      window.addEventListener('scroll', this.handleListUpdate, {
-        passive: true, // for better performance as we won't call preventDefault
-        capture: true, // scroll events don't bubble, they must be captured instead
-      });
-    }, 500);
+    window.addEventListener('scroll', this.handleListUpdate, {
+      passive: true, // for better performance as we won't call preventDefault
+      capture: true, // scroll events don't bubble, they must be captured instead
+    });
   }
 
   public componentDidUpdate(prevProps: Props) {

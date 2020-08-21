@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
+import { suggestionsListRequiredBottomSpace, suggestionsListRequiredWidth } from './constants';
 
 interface Props {
   index: number | null;
@@ -38,7 +39,6 @@ interface Props {
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
-  private suggestionsListRequiredWidth = 600;
 
   public render() {
     if (!this.props.show || isEmpty(this.props.suggestions)) {
@@ -47,8 +47,7 @@ export class SuggestionsComponent extends Component<Props> {
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
       const isDescriptionFittable = Boolean(
-        this.props.queryBarRect &&
-          this.props.queryBarRect.width >= this.suggestionsListRequiredWidth
+        this.props.queryBarRect && this.props.queryBarRect.width >= suggestionsListRequiredWidth
       );
       return (
         <SuggestionComponent
@@ -128,10 +127,22 @@ export const StyledSuggestionsComponent = styled(SuggestionsComponent)`
   ${(props) => {
     const { queryBarRect } = props;
 
-    return queryBarRect
-      ? `left: ${queryBarRect.left}px;
+    if (!queryBarRect) {
+      return '';
+    }
+
+    const documentHeight = document.documentElement.clientHeight || window.innerHeight;
+
+    // reflects if the suggestions list has enough space below to be opened down
+    const isSuggestionsListFittable =
+      documentHeight - (queryBarRect.top + queryBarRect.height) >
+      suggestionsListRequiredBottomSpace;
+    const verticalListPosition = isSuggestionsListFittable
+      ? `top: ${window.scrollY + queryBarRect.bottom}px;`
+      : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
+
+    return `left: ${queryBarRect.left}px;
       width: ${queryBarRect.width}px;
-      top: ${window.scrollY + queryBarRect.bottom}px;`
-      : '';
+      ${verticalListPosition};`;
   }}
 `;
