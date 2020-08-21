@@ -436,14 +436,18 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     return `${this.params.appBasePath}/${page}`;
   }
 
+  /**
+   * Creates generic index based search ML url
+   * e.g. `jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a`
+   */
   private createIndexBasedMlUrl(mlGenericUrlState: MlGenericUrlState): string {
     const { globalState, appState, page, index, savedSearchId, ...restParams } = mlGenericUrlState;
     let url = `${this.params.appBasePath}/${page}`;
 
-    if (index && !savedSearchId) {
+    if (index !== undefined && savedSearchId === undefined) {
       url = url + `?index=${index}`;
     }
-    if (!index && savedSearchId) {
+    if (index === undefined && savedSearchId !== undefined) {
       url = url + `?savedSearchId=${savedSearchId}`;
     }
 
