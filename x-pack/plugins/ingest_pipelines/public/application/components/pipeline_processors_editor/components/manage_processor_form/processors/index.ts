@@ -30,3 +30,6 @@ export { Pipeline } from './pipeline';
 export { Remove } from './remove';
 export { Rename } from './rename';
 export { Script } from './script';
+export { SetProcessor } from './set';
+
+export { FormFieldsComponent } from './shared';

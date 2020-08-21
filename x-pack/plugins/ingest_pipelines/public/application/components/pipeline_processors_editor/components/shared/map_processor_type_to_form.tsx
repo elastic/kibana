@@ -34,6 +34,7 @@ import {
   Remove,
   Rename,
   Script,
+  SetProcessor,
   FormFieldsComponent,
 } from '../manage_processor_form/processors';
 
@@ -231,6 +232,13 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Script',
     }),
   },
+  set: {
+    FieldsComponent: SetProcessor,
+    docLinkPath: '/set-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
+      defaultMessage: 'Set',
+    }),
+  },
   set_security_user: {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/ingest-node-set-security-user-processor.html',
@@ -278,15 +286,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
-    }),
-  },
-
-  // --- The below processor descriptors have components implemented ---
-  set: {
-    FieldsComponent: undefined,
-    docLinkPath: '/set-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
-      defaultMessage: 'Set',
     }),
   },
 };

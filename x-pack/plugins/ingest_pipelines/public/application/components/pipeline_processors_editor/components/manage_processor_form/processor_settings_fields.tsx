@@ -33,10 +33,19 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({ processor })
             const formDescriptor = getProcessorDescriptor(type as any);
 
             if (formDescriptor?.FieldsComponent) {
+              const renderedFields = (
+                <formDescriptor.FieldsComponent initialFieldValues={processor?.options} />
+              );
               return (
                 <>
-                  <formDescriptor.FieldsComponent initialFieldValues={processor?.options} />
-                  <EuiHorizontalRule />
+                  {renderedFields ? (
+                    <>
+                      {renderedFields}
+                      <EuiHorizontalRule />
+                    </>
+                  ) : (
+                    renderedFields
+                  )}
                   <CommonProcessorFields />
                 </>
               );

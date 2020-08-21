@@ -65,6 +65,10 @@ export const CommonProcessorFields: FunctionComponent = () => {
           editorProps: {
             languageId: 'painless',
             height: 75,
+            options: {
+              lineNumbers: 'off',
+              minimap: { enabled: false },
+            },
           },
         }}
         path="fields.if"
