@@ -6,6 +6,6 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Demo } from './__tests__/demo';
+import { Demo } from './test_samples/demo';
 
 storiesOf('UrlDrilldownCollectConfig', module).add('default', () => <Demo />);

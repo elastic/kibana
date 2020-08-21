@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Demo } from './__tests__/demo';
+import { Demo } from './test_samples/demo';
 import { cleanup, fireEvent, render } from '@testing-library/react/pure';
 import React from 'react';
 
