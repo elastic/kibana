@@ -16,9 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-interface PluginGenerator {
-  /**
-   * Run plugin generator.
-   */
-  run: (...args: any[]) => any;
-}
+
+const Path = require('path');
+
+const { run } = require('@kbn/dev-utils');
+const del = require('del');
+const execa = require('execa');
+
+run(
+  async ({ flags }) => {
+    await del(Path.resolve(__dirname, '../target'));
+
+    await execa(require.resolve('typescript/bin/tsc'), flags.watch ? ['--watch'] : [], {
+      cwd: Path.resolve(__dirname, '..'),
+      stdio: 'inherit',
+    });
+  },
+  {
+    flags: {
+      boolean: ['watch'],
+      help: `
+        --watch           Watch files and rebuild on changes
+      `,
+    },
+  }
+);
