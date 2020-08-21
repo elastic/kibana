@@ -31,7 +31,7 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
-export const pieVisualization: Visualization<PieVisualizationState, PieVisualizationState> = {
+export const pieVisualization: Visualization<PieVisualizationState> = {
   id: 'lnsPie',
 
   visualizationTypes: [
@@ -91,8 +91,6 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     );
   },
 
-  getPersistableState: (state) => state,
-
   getSuggestions: suggestions,
 
   getConfiguration({ state, frame, layerId }) {
@@ -122,6 +120,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
             supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
             filterOperations: bucketedOperations,
             required: true,
+            dataTestSubj: 'lnsPie_groupByDimensionPanel',
           },
           {
             groupId: 'metric',
@@ -133,6 +132,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
             supportsMoreColumns: !layer.metric,
             filterOperations: numberMetricOperations,
             required: true,
+            dataTestSubj: 'lnsPie_sizeByDimensionPanel',
           },
         ],
       };
@@ -150,6 +150,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           supportsMoreColumns: sortedColumns.length < MAX_PIE_BUCKETS,
           filterOperations: bucketedOperations,
           required: true,
+          dataTestSubj: 'lnsPie_sliceByDimensionPanel',
         },
         {
           groupId: 'metric',
@@ -161,6 +162,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           supportsMoreColumns: !layer.metric,
           filterOperations: numberMetricOperations,
           required: true,
+          dataTestSubj: 'lnsPie_sizeByDimensionPanel',
         },
       ],
     };

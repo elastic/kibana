@@ -12,6 +12,7 @@ import {
   GetServicesFunction,
   RawAction,
   PreConfiguredAction,
+  ProxySettings,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
@@ -28,6 +29,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
+  proxySettings?: ProxySettings;
 }
 
 export interface ExecuteOptions {
@@ -59,7 +61,7 @@ export class ActionExecutor {
     actionId,
     params,
     request,
-  }: ExecuteOptions): Promise<ActionTypeExecutorResult> {
+  }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
@@ -78,6 +80,7 @@ export class ActionExecutor {
       eventLogger,
       preconfiguredActions,
       getActionsClientWithRequest,
+      proxySettings,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -125,7 +128,7 @@ export class ActionExecutor {
     };
 
     eventLogger.startTiming(event);
-    let rawResult: ActionTypeExecutorResult | null | undefined | void;
+    let rawResult: ActionTypeExecutorResult<unknown>;
     try {
       rawResult = await actionType.executor({
         actionId,
@@ -133,6 +136,7 @@ export class ActionExecutor {
         params: validatedParams,
         config: validatedConfig,
         secrets: validatedSecrets,
+        proxySettings,
       });
     } catch (err) {
       rawResult = {
@@ -173,7 +177,7 @@ export class ActionExecutor {
   }
 }
 
-function actionErrorToMessage(result: ActionTypeExecutorResult): string {
+function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
   if (result.serviceMessage) {

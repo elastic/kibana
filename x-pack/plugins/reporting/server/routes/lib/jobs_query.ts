@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { get } from 'lodash';
 import { ReportingCore } from '../../';
-import { AuthenticatedUser } from '../../../../security/server';
-import { JobSource } from '../../types';
+import { JobSource, ReportingUser } from '../../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
 
+// TODO: use SearchRequest from elasticsearch-client
 interface QueryBody {
   size?: number;
   from?: number;
@@ -35,11 +35,12 @@ interface GetOpts {
   includeContent?: boolean;
 }
 
+// TODO: use SearchResult from elasticsearch-client
 interface CountAggResult {
   count: number;
 }
 
-const getUsername = (user: AuthenticatedUser | null) => (user ? user.username : false);
+const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
 export function jobsQueryFactory(reportingCore: ReportingCore) {
   const { elasticsearch } = reportingCore.getPluginSetupDeps();
@@ -80,7 +81,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
   return {
     list(
       jobTypes: string[],
-      user: AuthenticatedUser | null,
+      user: ReportingUser,
       page = 0,
       size = defaultSize,
       jobIds: string[] | null
@@ -109,7 +110,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
       return getHits(execQuery('search', body));
     },
 
-    count(jobTypes: string[], user: AuthenticatedUser | null) {
+    count(jobTypes: string[], user: ReportingUser) {
       const username = getUsername(user);
       const body: QueryBody = {
         query: {
@@ -129,11 +130,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore) {
       });
     },
 
-    get(
-      user: AuthenticatedUser | null,
-      id: string,
-      opts: GetOpts = {}
-    ): Promise<JobSource<unknown> | void> {
+    get(user: ReportingUser, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
       if (!id) return Promise.resolve();
       const username = getUsername(user);
 

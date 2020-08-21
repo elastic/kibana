@@ -23,15 +23,19 @@ jest.mock('./get_plugin_bundles.ts');
 jest.mock('../common/theme_tags.ts');
 jest.mock('./filter_by_id.ts');
 
-import Path from 'path';
-import Os from 'os';
+jest.mock('os', () => {
+  const realOs = jest.requireActual('os');
+  jest.spyOn(realOs, 'cpus').mockImplementation(() => {
+    return ['foo'] as any;
+  });
+  return realOs;
+});
 
+import Path from 'path';
 import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import { OptimizerConfig } from './optimizer_config';
+import { OptimizerConfig, ParsedOptions } from './optimizer_config';
 import { parseThemeTags } from '../common';
-
-jest.spyOn(Os, 'cpus').mockReturnValue(['foo'] as any);
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -118,6 +122,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -145,6 +150,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -172,6 +178,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -201,6 +208,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -227,6 +235,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/x/y/z,
@@ -253,6 +262,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
@@ -276,6 +286,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
@@ -299,6 +310,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
@@ -323,6 +335,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
@@ -347,6 +360,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "includeCoreBundle": false,
         "inspectWorkers": false,
         "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
@@ -384,18 +398,22 @@ describe('OptimizerConfig::create()', () => {
     getPluginBundles.mockReturnValue([Symbol('bundle1'), Symbol('bundle2')]);
     filterById.mockReturnValue(Symbol('filtered bundles'));
 
-    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): any => ({
+    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
+      [key in keyof ParsedOptions]: any;
+    } => ({
       cache: Symbol('parsed cache'),
       dist: Symbol('parsed dist'),
       maxWorkerCount: Symbol('parsed max worker count'),
       pluginPaths: Symbol('parsed plugin paths'),
       pluginScanDirs: Symbol('parsed plugin scan dirs'),
       repoRoot: Symbol('parsed repo root'),
+      outputRoot: Symbol('parsed output root'),
       watch: Symbol('parsed watch'),
       themeTags: Symbol('theme tags'),
       inspectWorkers: Symbol('parsed inspect workers'),
       profileWebpack: Symbol('parsed profile webpack'),
       filters: [],
+      includeCoreBundle: false,
     }));
   });
 
@@ -474,6 +492,7 @@ describe('OptimizerConfig::create()', () => {
           Array [
             Symbol(new platform plugins),
             Symbol(parsed repo root),
+            Symbol(parsed output root),
           ],
         ],
         "instances": Array [

@@ -99,6 +99,7 @@ export function WorkspacePanelWrapper({
         {(!emptyExpression || title) && (
           <EuiPageContentHeader
             className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
             })}
           >

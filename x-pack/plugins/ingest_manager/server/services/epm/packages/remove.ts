@@ -6,13 +6,14 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
-import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
-import { packageConfigService, appContextService } from '../..';
+import { packagePolicyService, appContextService } from '../..';
+import { splitPkgKey } from '../registry';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -21,21 +22,21 @@ export async function removeInstallation(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
-  const [pkgName] = pkgkey.split('-');
+  const { pkgName } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false)
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
-  const { total } = await packageConfigService.list(savedObjectsClient, {
-    kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+  const { total } = await packagePolicyService.list(savedObjectsClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 0,
     perPage: 0,
   });
 
   if (total > 0)
     throw Boom.badRequest(
-      `unable to remove package with existing package config(s) in use by agent(s)`
+      `unable to remove package with existing package policy(s) in use by agent(s)`
     );
 
   // recreate or delete index patterns when a package is uninstalled
@@ -102,10 +103,12 @@ async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): P
 
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
-  installedObjects: AssetReference[]
+  installedRefs: AssetReference[]
 ) {
+  if (!installedRefs.length) return;
+
   const logger = appContextService.getLogger();
-  const deletePromises = installedObjects.map(({ id, type }) => {
+  const deletePromises = installedRefs.map(({ id, type }) => {
     const assetType = type as AssetType;
 
     if (savedObjectTypes.includes(assetType)) {

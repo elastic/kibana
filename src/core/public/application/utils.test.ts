@@ -18,15 +18,15 @@
  */
 
 import { of } from 'rxjs';
-import { LegacyApp, App, AppStatus, AppNavLinkStatus } from './types';
+import { App, AppNavLinkStatus, AppStatus, LegacyApp } from './types';
 import { BasePath } from '../http/base_path';
 import {
-  removeSlashes,
   appendAppPath,
-  isLegacyApp,
-  relativeToAbsolute,
-  parseAppUrl,
   getAppInfo,
+  isLegacyApp,
+  parseAppUrl,
+  relativeToAbsolute,
+  removeSlashes,
 } from './utils';
 
 describe('removeSlashes', () => {
@@ -494,7 +494,7 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.default,
+      navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
       legacy: false,
     });
@@ -509,8 +509,35 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.default,
+      navLinkStatus: AppNavLinkStatus.visible,
       legacy: true,
     });
+  });
+
+  it('computes the navLinkStatus depending on the app status', () => {
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.inaccessible,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      })
+    );
+    expect(
+      getAppInfo(
+        createApp({
+          navLinkStatus: AppNavLinkStatus.default,
+          status: AppStatus.accessible,
+        })
+      )
+    ).toEqual(
+      expect.objectContaining({
+        navLinkStatus: AppNavLinkStatus.visible,
+      })
+    );
   });
 });

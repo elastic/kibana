@@ -9,10 +9,15 @@ import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
 import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { ShallowWrapper } from 'enzyme';
-import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 
 jest.mock('./state_helpers');
+
+interface IndexPatternPickerOption {
+  label: string;
+  checked?: 'on' | 'off';
+}
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [
@@ -60,30 +65,35 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'unsupported',
+          displayName: 'unsupported',
           type: 'geo',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -97,6 +107,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -111,6 +122,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -132,6 +144,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -150,18 +163,21 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -187,9 +203,9 @@ describe('Layer Data Panel', () => {
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
-    const options: Array<{ label: string; checked?: 'on' | 'off' }> = getIndexPatternPickerOptions(
+    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(
       instance
-    ).map((option) =>
+    ).map((option: IndexPatternPickerOption) =>
       option.label === selectedLabel
         ? { ...option, checked: 'on' }
         : { ...option, checked: undefined }
@@ -198,17 +214,17 @@ describe('Layer Data Panel', () => {
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {
-    return getIndexPatternPickerList(instance).dive().find(EuiSelectableList).prop('options');
+    return getIndexPatternPickerList(instance).prop('options');
   }
 
   it('should list all index patterns', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
 
-    expect(getIndexPatternPickerOptions(instance)!.map((option) => option.label)).toEqual([
-      'my-fake-index-pattern',
-      'my-fake-restricted-pattern',
-      'my-compatible-pattern',
-    ]);
+    expect(
+      getIndexPatternPickerOptions(instance)!.map(
+        (option: IndexPatternPickerOption) => option.label
+      )
+    ).toEqual(['my-fake-index-pattern', 'my-fake-restricted-pattern', 'my-compatible-pattern']);
   });
 
   it('should switch data panel to target index pattern', () => {

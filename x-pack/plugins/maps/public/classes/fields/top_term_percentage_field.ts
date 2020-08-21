@@ -79,4 +79,8 @@ export class TopTermPercentageField implements IESAggField {
   canValueBeFormatted(): boolean {
     return false;
   }
+
+  canReadFromGeoJson(): boolean {
+    return true;
+  }
 }

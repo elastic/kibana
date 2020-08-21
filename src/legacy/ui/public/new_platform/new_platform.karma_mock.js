@@ -26,7 +26,7 @@ import {
   getAggTypes,
   AggConfigs,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../src/plugins/data/public/search/aggs';
+} from '../../../../../src/plugins/data/common/search/aggs';
 import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/public/';
 import {
@@ -184,12 +184,13 @@ const mockAggTypesRegistry = () => {
   const registry = new AggTypesRegistry();
   const registrySetup = registry.setup();
   const aggTypes = getAggTypes({
-    uiSettings: mockCoreSetup.uiSettings,
-    query: querySetup,
-    getInternalStartServices: () => ({
-      fieldFormats: getFieldFormatsRegistry(mockCoreStart),
-      notifications: mockCoreStart.notifications,
+    calculateBounds: sinon.fake(),
+    getConfig: sinon.fake(),
+    getFieldFormatsStart: () => ({
+      deserialize: sinon.fake(),
+      getDefaultInstance: sinon.fake(),
     }),
+    isDefaultTimezone: () => true,
   });
   aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));
   aggTypes.metrics.forEach((type) => registrySetup.registerMetric(type));
@@ -220,17 +221,6 @@ export const npSetup = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
-      __LEGACY: {
-        renderers: {
-          register: () => undefined,
-          get: () => null,
-        },
-        getExecutor: () => ({
-          interpreter: {
-            interpretAst: () => {},
-          },
-        }),
-      },
     },
     data: {
       autocomplete: {
@@ -240,7 +230,6 @@ export const npSetup = {
       query: querySetup,
       search: {
         aggs: {
-          calculateAutoTimeExpression: sinon.fake(),
           types: aggTypesRegistry.setup(),
         },
         __LEGACY: {

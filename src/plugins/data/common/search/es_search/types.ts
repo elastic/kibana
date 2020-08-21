@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
 export type ISearchRequestParams = {
   trackTotalHits?: boolean;
-} & SearchParams;
+} & Search;
 
 export interface IEsSearchRequest extends IKibanaSearchRequest {
   params?: ISearchRequestParams;
@@ -31,5 +32,13 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 }
 
 export interface IEsSearchResponse extends IKibanaSearchResponse {
+  /**
+   * Indicates whether async search is still in flight
+   */
+  isRunning?: boolean;
+  /**
+   * Indicates whether the results returned are complete or partial
+   */
+  isPartial?: boolean;
   rawResponse: SearchResponse<any>;
 }
