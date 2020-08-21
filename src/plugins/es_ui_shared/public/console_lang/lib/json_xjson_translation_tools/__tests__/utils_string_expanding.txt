@@ -1,8 +1,9 @@
+
 ==========
 Scripts in requests
 -------------------------------------
 {
-  "f": { "script": { "source": "\ntest\ntest\\\\\\\\\\\\\\\\2\n" } },
+  "f": { "script": { "source": "\ntest\ntest\\2\n" } },
   "g": { "script": "second + \"\\\";" },
   "a": "short with \\",
   "\\\\h": 1,
@@ -12,7 +13,7 @@ Scripts in requests
 {
   "f": { "script": { "source": """
 test
-test\\\\\\\\2
+test\2
 """ } },
   "g": { "script": """second + "\";""" },
   "a": """short with \""",
@@ -23,11 +24,11 @@ test\\\\\\\\2
 Preserve triple quotes
 -------------------------------------
 {
-  "content\\\": "tri\"ple",
+  "content\\": "tri\"ple",
 }
 -------------------------------------
 {
-  "content\\\": """tri"ple""",
+  "content\\": """tri"ple""",
 }
 ==========
 Correctly parse with JSON embedded inside values
@@ -81,4 +82,14 @@ Single quotes escaped special case, end
 -------------------------------------
 {
   "query": "test\""
+}
+==========
+Strings in Arrays
+-------------------------------------
+{
+  "array": ["expand \\ me", "do not expand", "do expand \\"]
+}
+-------------------------------------
+{
+  "array": ["""expand \ me""", "do not expand", """do expand \"""]
 }
