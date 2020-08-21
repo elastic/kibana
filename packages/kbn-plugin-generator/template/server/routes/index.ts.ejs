@@ -1,4 +1,5 @@
-import { IRouter } from '<%= relRoot %>/../src/core/server';
+import { IRouter } from '<%= importFromRoot('src/core/server') %>';
+
 
 export function defineRoutes(router: IRouter) {
   router.get(
