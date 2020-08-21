@@ -578,3 +578,51 @@ test('Should read out ordinal type correctly', async () => {
   expect(ordinalColorStyle2.isOrdinal()).toEqual(true);
   expect(ordinalColorStyle2.isCategorical()).toEqual(false);
 });
+
+describe('renderFieldMetaPopover', () => {
+  test('Should enable toggle when field is backed by geojson-source', async () => {
+    const colorStyle = makeProperty({
+      color: 'Blues',
+      type: undefined,
+      fieldMetaOptions,
+    });
+
+    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+
+    const component = shallow(legendRow);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('Should disable toggle when field is not backed by geojson source', async () => {
+    const nonGeoJsonField = Object.create(mockField);
+    nonGeoJsonField.canReadFromGeoJson = () => {
+      return false;
+    };
+    const colorStyle = makeProperty(
+      {
+        color: 'Blues',
+        type: undefined,
+        fieldMetaOptions,
+      },
+      undefined,
+      nonGeoJsonField
+    );
+
+    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+
+    const component = shallow(legendRow);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+});
