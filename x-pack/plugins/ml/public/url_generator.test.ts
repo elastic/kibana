@@ -37,6 +37,23 @@ describe('MlUrlGenerator', () => {
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(groupIds:!(farequote,categorization))');
       });
+
+      it('should generate valid URL for the Data Visualizer Viewer page', async () => {
+        const url = await urlGenerator.createUrl({
+          page: ML_TABS.DATA_VISUALIZER_NEW_JOB,
+          index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
+          globalState: {
+            time: {
+              from: 'now-30m',
+              to: 'now',
+              mode: 'quick',
+            },
+          },
+        });
+        expect(url).toBe(
+          '/app/ml/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,mode:quick,to:now))'
+        );
+      });
     });
 
     describe('Anomaly Explorer Page', () => {
@@ -165,7 +182,7 @@ describe('MlUrlGenerator', () => {
     describe('ExplorationPage', () => {
       it('should generate valid URL for the Data Frame Analytics exploration page for job', async () => {
         const url = await urlGenerator.createUrl({
-          page: 'data_frame_analytics/exploration',
+          page: ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION,
           jobId: 'grid_regression_1',
           analysisType: ANALYSIS_CONFIG_TYPE.REGRESSION,
         });
@@ -179,9 +196,40 @@ describe('MlUrlGenerator', () => {
   describe('DataVisualizer', () => {
     it('should generate valid URL for the Data Visualizer page', async () => {
       const url = await urlGenerator.createUrl({
-        page: 'datavisualizer',
+        page: ML_TABS.DATA_VISUALIZER,
       });
       expect(url).toBe('/app/ml/datavisualizer');
+    });
+
+    it('should generate valid URL for the Data Visualizer import file page', async () => {
+      const url = await urlGenerator.createUrl({
+        page: ML_TABS.DATA_VISUALIZER_FILE,
+      });
+      expect(url).toBe('/app/ml/filedatavisualizer');
+    });
+
+    it('should generate valid URL for the Data Visualizer import by index page', async () => {
+      const url = await urlGenerator.createUrl({
+        page: ML_TABS.DATA_VISUALIZER_INDEX_SELECT,
+      });
+      expect(url).toBe('/app/ml/datavisualizer_index_select');
+    });
+
+    it('should generate valid URL for the Data Visualizer Viewer page', async () => {
+      const url = await urlGenerator.createUrl({
+        page: ML_TABS.DATA_VISUALIZER_VIEWER,
+        index: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+        globalState: {
+          time: {
+            from: 'now-30m',
+            to: 'now',
+            mode: 'quick',
+          },
+        },
+      });
+      expect(url).toBe(
+        '/app/ml/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,mode:quick,to:now))'
+      );
     });
   });
 

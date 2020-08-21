@@ -32,11 +32,54 @@ export const ML_TABS = {
   TIME_SERIES_EXPLORER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS: 'data_frame_analytics',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
+  /**
+   * Page: Data Visualizer
+   */
   DATA_VISUALIZER: 'datavisualizer',
+  /**
+   * Page: Data Visualizer
+   * Create data visualizer by selecting an existing Elasticsearch index
+   */
+  DATA_VISUALIZER_INDEX_SELECT: 'datavisualizer_index_select',
+  /**
+   * Page: Data Visualizer
+   * Create data visualizer by importing log data
+   */
+  DATA_VISUALIZER_FILE: 'filedatavisualizer',
+  /**
+   * Page: Data Visualizer
+   * Create a job from the index pattern
+   */
+  get DATA_VISUALIZER_VIEWER() {
+    return `${this.ANOMALY_DETECTION}/new_job/${this.DATA_VISUALIZER}`;
+  },
+  get DATA_VISUALIZER_NEW_JOB() {
+    return `${this.ANOMALY_DETECTION}/new_job/step/job_type`;
+  },
+
   SETTINGS: 'settings',
   CALENDARS: 'settings/calendars_list',
   FILTERS: 'settings/filter_lists',
 } as const;
+
+export interface MlCommonGlobalState {
+  time?: TimeRange;
+}
+export interface MlCommonAppState {
+  [key: string]: any;
+}
+
+export interface MlIndexBasedSearchState {
+  index?: string;
+  savedSearchId?: string;
+}
+
+export interface MlGenericUrlState extends MlIndexBasedSearchState {
+  page: typeof ML_TABS.DATA_VISUALIZER_VIEWER | typeof ML_TABS.DATA_VISUALIZER_NEW_JOB;
+  globalState?: MlCommonGlobalState;
+  appState?: MlCommonAppState;
+  [key: string]: any;
+}
 
 export interface AnomalyDetectionQueryState {
   jobId?: JobId;
@@ -125,7 +168,10 @@ export interface DataFrameAnalyticsUrlState extends DataFrameAnalyticsQueryState
 }
 
 export interface DataVisualizerUrlState {
-  page: typeof ML_TABS.DATA_VISUALIZER;
+  page:
+    | typeof ML_TABS.DATA_VISUALIZER
+    | typeof ML_TABS.DATA_VISUALIZER_FILE
+    | typeof ML_TABS.DATA_VISUALIZER_INDEX_SELECT;
 }
 
 export interface DataFrameAnalyticsExplorationQueryState {
@@ -150,7 +196,8 @@ export type MlUrlGeneratorState =
   | TimeSeriesExplorerUrlState
   | DataFrameAnalyticsUrlState
   | DataFrameAnalyticsExplorationUrlState
-  | DataVisualizerUrlState;
+  | DataVisualizerUrlState
+  | MlGenericUrlState;
 
 interface Params {
   appBasePath: string;
@@ -162,39 +209,50 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
 
   public readonly id = ML_APP_URL_GENERATOR;
 
-  public readonly createUrl = async ({ page, ...params }: MlUrlGeneratorState): Promise<string> => {
-    if (page === ML_TABS.ANOMALY_DETECTION) {
-      return this.createAnomalyDetectionJobManagementUrl(
-        params as Omit<AnomalyDetectionUrlState, 'page'>
-      );
+  public readonly createUrl = async (mlUrlGeneratorState: MlUrlGeneratorState): Promise<string> => {
+    switch (mlUrlGeneratorState.page) {
+      case ML_TABS.ANOMALY_DETECTION:
+        return this.createAnomalyDetectionJobManagementUrl(
+          mlUrlGeneratorState as AnomalyDetectionUrlState
+        );
+      case ML_TABS.ANOMALY_EXPLORER:
+        return this.createExplorerUrl(mlUrlGeneratorState as ExplorerUrlState);
+      case ML_TABS.TIME_SERIES_EXPLORER:
+        return this.createSingleMetricViewerUrl(mlUrlGeneratorState as TimeSeriesExplorerUrlState);
+      case ML_TABS.DATA_FRAME_ANALYTICS:
+        return this.createDataframeAnalyticsUrl(mlUrlGeneratorState as DataFrameAnalyticsUrlState);
+      case ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION:
+        return this.createDataframeAnalyticsExplorationUrl(
+          mlUrlGeneratorState as DataFrameAnalyticsExplorationUrlState
+        );
+      case ML_TABS.DATA_VISUALIZER:
+        return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
+      case ML_TABS.DATA_VISUALIZER_FILE:
+        return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
+      case ML_TABS.DATA_VISUALIZER_INDEX_SELECT:
+        return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
+      case ML_TABS.DATA_VISUALIZER_NEW_JOB:
+        return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
+      case ML_TABS.DATA_VISUALIZER_VIEWER:
+        return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
+      default:
+        throw new Error('Page type is not provided or unknown');
     }
-    if (page === ML_TABS.ANOMALY_EXPLORER) {
-      return this.createExplorerUrl(params as Omit<ExplorerUrlState, 'page'>);
-    }
-    if (page === ML_TABS.TIME_SERIES_EXPLORER) {
-      return this.createSingleMetricViewerUrl(params as Omit<TimeSeriesExplorerUrlState, 'page'>);
-    }
-    if (page === ML_TABS.DATA_FRAME_ANALYTICS) {
-      return this.createDataframeAnalyticsUrl(params as Omit<DataFrameAnalyticsUrlState, 'page'>);
-    }
-    if (page === ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION) {
-      return this.createDataframeAnalyticsExplorationUrl(
-        params as Omit<DataFrameAnalyticsExplorationUrlState, 'page'>
-      );
-    }
-    if (page === ML_TABS.DATA_VISUALIZER) {
-      return this.createDataVisualizerUrl(params as Omit<DataVisualizerUrlState, 'page'>);
-    }
-
-    throw new Error('Page type is not provided or unknown');
   };
 
+  private static extractParams<UrlState>(urlState: UrlState) {
+    // page should be guaranteed to exist here but <UrlState> is unknown
+    // @ts-ignore
+    const { page, ...params } = urlState;
+    return { page, params };
+  }
   /**
    * Creates URL to the Anomaly Detection Job management page
    */
   private createAnomalyDetectionJobManagementUrl(
-    params: Omit<AnomalyDetectionUrlState, 'page'>
+    mlUrlGeneratorState: AnomalyDetectionUrlState // Omit<AnomalyDetectionUrlState, 'page'>
   ): string {
+    const { params } = MlUrlGenerator.extractParams<AnomalyDetectionUrlState>(mlUrlGeneratorState);
     let url = `${this.params.appBasePath}/${ML_TABS.ANOMALY_DETECTION}`;
     if (isEmpty(params)) {
       return url;
@@ -224,7 +282,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     query,
     mlExplorerSwimlane = {},
     mlExplorerFilter = {},
-  }: Omit<ExplorerUrlState, 'page'>): string {
+  }: ExplorerUrlState): string {
     let url = `${this.params.appBasePath}/${ML_TABS.ANOMALY_EXPLORER}`;
 
     const appState: Partial<ExplorerAppState> = {
@@ -271,7 +329,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     query,
     detectorIndex,
     entities,
-  }: Omit<TimeSeriesExplorerUrlState, 'page'>): string {
+  }: TimeSeriesExplorerUrlState): string {
     let url = `${this.params.appBasePath}/${ML_TABS.TIME_SERIES_EXPLORER}`;
     const queryState: TimeSeriesExplorerGlobalState = {
       ml: {
@@ -317,9 +375,12 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
    * Creates URL to the DataFrameAnalytics Exploration page
    */
   private createDataframeAnalyticsExplorationUrl(
-    params: Omit<DataFrameAnalyticsExplorationUrlState, 'page'>
+    mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState
   ): string {
     let url = `${this.params.appBasePath}/${ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION}`;
+    const { params } = MlUrlGenerator.extractParams<DataFrameAnalyticsExplorationUrlState>(
+      mlUrlGeneratorState
+    );
 
     if (!isEmpty(params)) {
       const { jobId, analysisType } = params;
@@ -344,8 +405,11 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
   /**
    * Creates URL to the DataFrameAnalytics page
    */
-  private createDataframeAnalyticsUrl(params: Omit<DataFrameAnalyticsUrlState, 'page'>): string {
+  private createDataframeAnalyticsUrl(mlUrlGeneratorState: DataFrameAnalyticsUrlState): string {
     let url = `${this.params.appBasePath}/${ML_TABS.DATA_FRAME_ANALYTICS}`;
+    const { params } = MlUrlGenerator.extractParams<DataFrameAnalyticsUrlState>(
+      mlUrlGeneratorState
+    );
 
     if (!isEmpty(params)) {
       const { jobId, groupIds } = params;
@@ -368,8 +432,39 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
   /**
    * Creates URL to the Data Visualizer page
    */
-  private createDataVisualizerUrl({}: Omit<DataVisualizerUrlState, 'page'>): string {
-    return `${this.params.appBasePath}/${ML_TABS.DATA_VISUALIZER}`;
+  private createDataVisualizerUrl({ page }: DataVisualizerUrlState): string {
+    return `${this.params.appBasePath}/${page}`;
+  }
+
+  private createIndexBasedMlUrl(mlGenericUrlState: MlGenericUrlState): string {
+    const { globalState, appState, page, index, savedSearchId, ...restParams } = mlGenericUrlState;
+    let url = `${this.params.appBasePath}/${page}`;
+
+    if (index && !savedSearchId) {
+      url = url + `?index=${index}`;
+    }
+    if (!index && savedSearchId) {
+      url = url + `?savedSearchId=${savedSearchId}`;
+    }
+
+    if (!isEmpty(restParams)) {
+      Object.keys(restParams).forEach((key) => {
+        url = setStateToKbnUrl(
+          key,
+          restParams[key],
+          { useHash: false, storeInHashQuery: false },
+          url
+        );
+      });
+    }
+
+    if (globalState) {
+      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
+    }
+    if (appState) {
+      url = setStateToKbnUrl('_a', appState, { useHash: false, storeInHashQuery: false }, url);
+    }
+    return url;
   }
 }
 
