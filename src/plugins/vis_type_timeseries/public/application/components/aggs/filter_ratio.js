@@ -54,9 +54,13 @@ export const FilterRatioAgg = (props) => {
     props.onChange,
   ]);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleQueryChange = useCallback((name, value) => handleChange({ [name]: value }), [
+  const handleNumeratorQueryChange = useCallback((query) => handleChange({ numerator: query }), [
     handleChange,
   ]);
+  const handleDenominatorQueryChange = useCallback(
+    (query) => handleChange({ denominator: query }),
+    [handleChange]
+  );
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
@@ -108,7 +112,7 @@ export const FilterRatioAgg = (props) => {
           >
             <QueryBarWrapper
               query={model.numerator}
-              onChange={(query) => handleQueryChange('numerator', query)}
+              onChange={handleNumeratorQueryChange}
               indexPatterns={[indexPattern]}
             />
           </EuiFormRow>
@@ -126,7 +130,7 @@ export const FilterRatioAgg = (props) => {
           >
             <QueryBarWrapper
               query={model.denominator}
-              onChange={(query) => handleQueryChange('denominator', query)}
+              onChange={handleDenominatorQueryChange}
               indexPatterns={[indexPattern]}
             />
           </EuiFormRow>
