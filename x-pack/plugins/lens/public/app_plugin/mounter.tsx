@@ -87,6 +87,7 @@ export async function mountApp(
           redirectTo(routeProps, id, returnToOrigin, newlyCreated)
         }
         originatingApp={originatingApp}
+        getAppNameFromId={stateTransfer.getAppNameFromId}
         onAppLeave={params.onAppLeave}
         history={routeProps.history}
       />
