@@ -580,49 +580,42 @@ test('Should read out ordinal type correctly', async () => {
 });
 
 describe('renderFieldMetaPopover', () => {
-  test('Should enable toggle when field is backed by geojson-source', async () => {
-    const colorStyle = makeProperty({
-      color: 'Blues',
-      type: undefined,
-      fieldMetaOptions,
+  const nonGeoJsonField = Object.create(mockField);
+  nonGeoJsonField.canReadFromGeoJson = () => {
+    return false;
+  };
+
+  [
+    { field: mockField, name: 'Should enable toggle when field is backed by geojson-source' },
+    {
+      field: nonGeoJsonField,
+      name: 'Should disable toggle when field is not backed by geojson source',
+    },
+  ].forEach((stub) => {
+    test(stub.name, async () => {
+      const colorStyle = makeProperty(
+        {
+          color: 'Blues',
+          type: undefined,
+          fieldMetaOptions,
+        },
+        undefined,
+        stub.field
+      );
+
+      const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+      if (legendRow === null) {
+        throw new Error('Should render');
+      }
+
+      const component = shallow(legendRow);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
     });
-
-    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
-
-    const component = shallow(legendRow);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('Should disable toggle when field is not backed by geojson source', async () => {
-    const nonGeoJsonField = Object.create(mockField);
-    nonGeoJsonField.canReadFromGeoJson = () => {
-      return false;
-    };
-    const colorStyle = makeProperty(
-      {
-        color: 'Blues',
-        type: undefined,
-        fieldMetaOptions,
-      },
-      undefined,
-      nonGeoJsonField
-    );
-
-    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
-
-    const component = shallow(legendRow);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
   });
 });

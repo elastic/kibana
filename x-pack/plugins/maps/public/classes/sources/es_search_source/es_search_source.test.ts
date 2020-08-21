@@ -48,4 +48,17 @@ describe('ESSearchSource', () => {
       );
     });
   });
+
+  describe('getFields', () => {
+    it('default', () => {
+      const esSearchSource = new ESSearchSource({}, null);
+      const docField = esSearchSource.createField('prop1');
+      expect(docField.canReadFromGeoJson()).toBe(true);
+    });
+    it('mvt', () => {
+      const esSearchSource = new ESSearchSource({ scalingType: SCALING_TYPES.MVT }, null);
+      const docField = esSearchSource.createField('prop1');
+      expect(docField.canReadFromGeoJson()).toBe(false);
+    });
+  });
 });
