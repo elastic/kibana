@@ -137,7 +137,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             placeholder={alertFormI18n.inputPlaceHolder}
             options={options}
             selectedOptions={options.filter((opt) =>
-              formFields?.defaultConnectors.includes(opt.value)
+              formFields?.defaultConnectors?.includes(opt.value)
             )}
             inputRef={(input) => {
               inputRef.current = input;

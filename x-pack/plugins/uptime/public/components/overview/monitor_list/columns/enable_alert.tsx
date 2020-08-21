@@ -50,7 +50,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
     : (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
 
   const defaultActions = (actionConnectors ?? []).filter((act) =>
-    dss.settings?.defaultConnectors.includes(act.id)
+    dss.settings?.defaultConnectors?.includes(act.id)
   );
 
   const enableAlert = () => {
