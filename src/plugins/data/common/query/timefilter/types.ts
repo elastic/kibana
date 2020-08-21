@@ -28,7 +28,7 @@ export interface RefreshInterval {
 export interface TimeRange {
   from: string;
   to: string;
-  mode?: 'absolute' | 'relative';
+  mode?: 'absolute' | 'relative' | 'quick';
 }
 
 export interface TimeRangeBounds {
