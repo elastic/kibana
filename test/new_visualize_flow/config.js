@@ -37,7 +37,6 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
-        '--visualize.showNewVisualizeFlow=true',
       ],
     },
 

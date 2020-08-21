@@ -20,4 +20,5 @@ export interface SavedObjectsBulkCreateObject<T = unknown>
 |  [migrationVersion](./kibana-plugin-core-server.savedobjectsbulkcreateobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [references](./kibana-plugin-core-server.savedobjectsbulkcreateobject.references.md) | <code>SavedObjectReference[]</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsbulkcreateobject.type.md) | <code>string</code> |  |
+|  [version](./kibana-plugin-core-server.savedobjectsbulkcreateobject.version.md) | <code>string</code> |  |
 

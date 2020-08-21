@@ -41,6 +41,7 @@ export class CategorizationJobCreator extends JobCreator {
     ML_JOB_AGGREGATION.COUNT;
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
+  private _partitionFieldName: string | null = null;
 
   constructor(
     indexPattern: IndexPattern,
@@ -75,6 +76,11 @@ export class CategorizationJobCreator extends JobCreator {
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
     dtr.by_field_name = mlCategory.id;
+
+    // API requires if per_partition_categorization is enabled, add partition field to the detector
+    if (this.perPartitionCategorization && this.categorizationPerPartitionField !== null) {
+      dtr.partition_field_name = this.categorizationPerPartitionField;
+    }
     this._addDetector(dtr, agg, mlCategory);
   }
 
@@ -171,6 +177,31 @@ export class CategorizationJobCreator extends JobCreator {
       // set the bucketspan back to the original value
       // as setDetectorType applies a default
       this.bucketSpan = bs;
+    }
+  }
+
+  public get categorizationPerPartitionField() {
+    return this._partitionFieldName;
+  }
+
+  public set categorizationPerPartitionField(fieldName: string | null) {
+    if (fieldName === null) {
+      this._detectors.forEach((detector) => {
+        delete detector.partition_field_name;
+      });
+      if (this._partitionFieldName !== null) this.removeInfluencer(this._partitionFieldName);
+      this._partitionFieldName = null;
+    } else {
+      if (this._partitionFieldName !== fieldName) {
+        // remove the previous field from list of influencers
+        // and add the new one
+        if (this._partitionFieldName !== null) this.removeInfluencer(this._partitionFieldName);
+        this.addInfluencer(fieldName);
+        this._partitionFieldName = fieldName;
+        this._detectors.forEach((detector) => {
+          detector.partition_field_name = fieldName;
+        });
+      }
     }
   }
 }
