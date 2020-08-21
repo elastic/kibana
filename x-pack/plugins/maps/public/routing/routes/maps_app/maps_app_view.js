@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
@@ -29,13 +28,9 @@ import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { startAppStateSyncing } from '../../state_syncing/app_sync';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
-import { goToSpecifiedPath } from '../../maps_router';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from './top_nav_config';
-
-const unsavedChangesWarning = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesWarning', {
-  defaultMessage: 'Your map has unsaved changes. Are you sure you want to leave?',
-});
+import { getBreadcrumbs, unsavedChangesWarning } from './get_breadcrumbs';
 
 export class MapsAppView extends React.Component {
   _globalSyncUnsubscribe = null;
@@ -117,24 +112,13 @@ export class MapsAppView extends React.Component {
   }
 
   _setBreadcrumbs = () => {
-    getCoreChrome().setBreadcrumbs([
-      {
-        text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
-          defaultMessage: 'Maps',
-        }),
-        onClick: () => {
-          if (this._hasUnsavedChanges()) {
-            const navigateAway = window.confirm(unsavedChangesWarning);
-            if (navigateAway) {
-              goToSpecifiedPath('/');
-            }
-          } else {
-            goToSpecifiedPath('/');
-          }
-        },
-      },
-      { text: this.props.savedMap.title },
-    ]);
+    const breadcrumbs = getBreadcrumbs({
+      title: this.props.savedMap.title,
+      hasUnsavedChanges: this._hasUnsavedChanges(),
+      originatingApp: this.state.originatingApp,
+      getAppNameFromId: this.props.stateTransfer.getAppNameFromId,
+    });
+    getCoreChrome().setBreadcrumbs(breadcrumbs);
   };
 
   _updateFromGlobalState = ({ changes, state: globalState }) => {
