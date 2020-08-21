@@ -31,7 +31,7 @@ export const validateConvertFilterToKueryNode = (
   filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
-  if (filter && filter.length > 0 && indexMapping) {
+  if (filter && indexMapping) {
     const filterKueryNode =
       typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
 
