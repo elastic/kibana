@@ -117,7 +117,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     };
 
     if (filters?.bool) {
-      esParams.body.query.bool.must = filters;
+      esParams.body.query.bool.filter.push(filters);
     }
 
     /**

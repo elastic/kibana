@@ -148,38 +148,38 @@ describe('getMonitorStatus', () => {
                     },
                   },
                 },
-              ],
-              "must": Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "match_phrase": Object {
-                              "monitor.id": "apm-dev",
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.id": "apm-dev",
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "match_phrase": Object {
-                              "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
+              ],
             },
           },
           "size": 0,
@@ -416,56 +416,56 @@ describe('getMonitorStatus', () => {
                     },
                   },
                 },
-              ],
-              "must": Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "match_phrase": Object {
-                              "tags": "org:google",
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "tags": "org:google",
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "match_phrase": Object {
-                                    "monitor.type": "http",
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "monitor.type": "http",
+                                    },
                                   },
-                                },
-                              ],
+                                ],
+                              },
                             },
-                          },
-                          Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "match_phrase": Object {
-                                    "monitor.type": "tcp",
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "monitor.type": "tcp",
+                                    },
                                   },
-                                },
-                              ],
+                                ],
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
+              ],
             },
           },
           "size": 0,
@@ -561,16 +561,16 @@ describe('getMonitorStatus', () => {
                     },
                   },
                 },
-              ],
-              "must": Object {
-                "bool": Object {
-                  "filter": Object {
-                    "exists": Object {
-                      "field": "monitor.status",
+                Object {
+                  "bool": Object {
+                    "filter": Object {
+                      "exists": Object {
+                        "field": "monitor.status",
+                      },
                     },
                   },
                 },
-              },
+              ],
             },
           },
           "size": 0,
