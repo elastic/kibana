@@ -143,6 +143,6 @@ export const StyledSuggestionsComponent = styled(SuggestionsComponent)`
 
     return `left: ${queryBarRect.left}px;
       width: ${queryBarRect.width}px;
-      ${verticalListPosition};`;
+      ${verticalListPosition}`;
   }}
 `;
