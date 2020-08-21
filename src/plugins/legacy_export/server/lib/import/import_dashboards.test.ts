@@ -30,12 +30,18 @@ describe('importDashboards(req)', () => {
     savedObjectClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
     importedObjects = [
-      { id: 'dashboard-01', type: 'dashboard', attributes: { panelJSON: '{}' }, references: [] },
+      {
+        id: 'dashboard-01',
+        type: 'dashboard',
+        attributes: { panelJSON: '{}' },
+        references: [],
+        version: 'foo',
+      },
       { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' }, references: [] },
     ];
   });
 
-  test('should call bulkCreate with each asset', async () => {
+  test('should call bulkCreate with each asset, filtering out any version if present', async () => {
     await importDashboards(savedObjectClient, importedObjects, { overwrite: false, exclude: [] });
 
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledTimes(1);
