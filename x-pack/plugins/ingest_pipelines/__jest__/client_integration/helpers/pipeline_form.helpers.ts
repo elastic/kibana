@@ -13,8 +13,8 @@ export const getFormActions = (testBed: TestBed) => {
     find('submitButton').simulate('click');
   };
 
-  const clickTestPipelineButton = () => {
-    find('testPipelineButton').simulate('click');
+  const clickAddDocumentsButton = () => {
+    find('addDocumentsButton').simulate('click');
   };
 
   const clickShowRequestLink = () => {
@@ -34,11 +34,12 @@ export const getFormActions = (testBed: TestBed) => {
     clickShowRequestLink,
     toggleVersionSwitch,
     toggleOnFailureSwitch,
-    clickTestPipelineButton,
+    clickAddDocumentsButton,
   };
 };
 
 export type PipelineFormTestSubjects =
+  | 'addDocumentsButton'
   | 'submitButton'
   | 'pageTitle'
   | 'savePipelineError'

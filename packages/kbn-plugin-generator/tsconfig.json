@@ -1,5 +1,12 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["**/*", "index.js.d.ts"],
-  "exclude": ["sao_template/template/*"]
+  "compilerOptions": {
+    "outDir": "target",
+    "target": "ES2019",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/template/*"]
 }
