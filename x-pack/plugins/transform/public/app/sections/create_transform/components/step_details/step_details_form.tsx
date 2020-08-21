@@ -48,10 +48,12 @@ export interface StepDetailsExposedState {
   indexPatternDateField?: string | undefined;
 }
 
+const defaultContinuousModeDelay = '60s';
+
 export function getDefaultStepDetailsState(): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
-    continuousModeDelay: '60s',
+    continuousModeDelay: defaultContinuousModeDelay,
     createIndexPattern: true,
     isContinuousModeEnabled: false,
     transformId: '',
@@ -72,7 +74,7 @@ export function applyTransformConfigToDetailsState(
     const time = transformConfig.sync?.time;
     if (time !== undefined) {
       state.continuousModeDateField = time.field;
-      state.continuousModeDelay = time.delay;
+      state.continuousModeDelay = time?.delay ?? defaultContinuousModeDelay;
       state.isContinuousModeEnabled = true;
     }
   }
