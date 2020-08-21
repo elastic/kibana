@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import { routeValidationConfig } from './validation_config';
-import { createHandler } from './create_handler';
-
+import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
 import { RouteDependencies } from '../../../';
 
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  deps.router.post(
-    {
-      path: '/api/console/proxy',
-      options: {
-        tags: ['access:console'],
-        body: {
-          output: 'stream',
-          parse: false,
-        },
-      },
-      validate: routeValidationConfig,
-    },
-    createHandler(deps)
-  );
+export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
+  router.get({ path: '/api/console/es_config', validate: false }, async (ctx, req, res) => {
+    const {
+      hosts: [host],
+    } = await services.esLegacyConfigService.readConfig();
+
+    const body: EsConfigApiResponse = { host };
+
+    return res.ok({ body });
+  });
 };
