@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
-import { CspConfig } from '../../../../../../core/server';
-import {
-  UsageCollectionSetup,
-  CollectorOptions,
-} from '../../../../../../plugins/usage_collection/server';
+import { UsageCollectionSetup, CollectorOptions } from 'src/plugins/usage_collection/server';
+import { HttpServiceSetup, CspConfig } from '../../../../../core/server';
 
 interface Usage {
   strict: boolean;
@@ -30,12 +26,12 @@ interface Usage {
   rulesChangedFromDefault: boolean;
 }
 
-export function createCspCollector(server: Server): CollectorOptions<Usage> {
+export function createCspCollector(http: HttpServiceSetup): CollectorOptions<Usage> {
   return {
     type: 'csp',
     isReady: () => true,
     async fetch() {
-      const { strict, warnLegacyBrowsers, header } = server.newPlatform.setup.core.http.csp;
+      const { strict, warnLegacyBrowsers, header } = http.csp;
 
       return {
         strict,
@@ -60,8 +56,11 @@ export function createCspCollector(server: Server): CollectorOptions<Usage> {
   };
 }
 
-export function registerCspCollector(usageCollection: UsageCollectionSetup, server: Server): void {
-  const collectorConfig = createCspCollector(server);
-  const collector = usageCollection.makeUsageCollector<Usage>(collectorConfig);
+export function registerCspCollector(
+  usageCollection: UsageCollectionSetup,
+  http: HttpServiceSetup
+): void {
+  const collectorOptions = createCspCollector(http);
+  const collector = usageCollection.makeUsageCollector<Usage>(collectorOptions);
   usageCollection.registerCollector(collector);
 }

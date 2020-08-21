@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
+export { createApi, Api } from './api';
+export { createEsHostService, EsHostService } from './es_host_service';

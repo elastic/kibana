@@ -17,9 +17,23 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
+import { HttpSetup } from 'kibana/public';
+import { EsConfigApiResponse } from '../../../common/types/api_responses';
+import { sendRequest } from '../../shared_imports';
+
+interface Dependencies {
+  http: HttpSetup;
+}
+
+export type Api = ReturnType<typeof createApi>;
+
+export const createApi = ({ http }: Dependencies) => {
+  return {
+    getEsConfig: () => {
+      return sendRequest<EsConfigApiResponse>(http, {
+        path: '/api/console/es_config',
+        method: 'get',
+      });
+    },
+  };
+};
