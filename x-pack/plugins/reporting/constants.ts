@@ -39,9 +39,16 @@ export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
 // Diagnostic links/help for common reporting issues
+// We check each log-line to see if it includes keys here,
+// and respond back with links/help on known issues.
 export const BROWSER_TEST_COMMON_ISSUES: Map<string, string> = new Map();
 
 BROWSER_TEST_COMMON_ISSUES.set(
   'Could not find the default font',
   `Chrome couldn't find a default font, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.`
+);
+
+BROWSER_TEST_COMMON_ISSUES.set(
+  'cannot open shared object file',
+  `Chrome couldn't start properly due to missing system dependencies, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.`
 );

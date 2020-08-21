@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import os from 'os';
 import numeral from '@elastic/numeral';
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
@@ -13,6 +14,7 @@ import { LevelLogger as Logger } from '../../lib';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
+const TWO_GIGABYTES = 2147483648; // ONE POINT TWENTY ONE JIGAWATTS?!?
 
 interface ConfigResponse {
   help: string[];
@@ -36,6 +38,7 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
       const warnings = [];
       const { callAsInternalUser } = elasticsearch.legacy.client;
       const config = reporting.getConfig();
+      const memAvailable = os.totalmem();
 
       const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
         includeDefaults: true,
@@ -52,6 +55,12 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
         elasticSearchMaxContent.toUpperCase()
       );
       const kibanaMaxContentBytes = config.get('csv', 'maxSizeBytes');
+
+      if (memAvailable < TWO_GIGABYTES) {
+        warnings.push(
+          `In order to successfully run PDF and PNG reports, Kibana needs 2GB of free memory.`
+        );
+      }
 
       if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
         warnings.push(
