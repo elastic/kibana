@@ -169,6 +169,43 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
   },
 };
 
+type ValueLabelsConfigResult = ValueLabelConfig & {
+  type: 'lens_xy_displayValuesConfig';
+};
+
+export const valueLabelsConfig: ExpressionFunctionDefinition<
+  'lens_xy_displayValuesConfig',
+  null,
+  ValueLabelConfig,
+  ValueLabelsConfigResult
+> = {
+  name: 'lens_xy_displayValuesConfig',
+  aliases: [],
+  type: 'lens_xy_displayValuesConfig',
+  help: ``,
+  inputTypes: ['null'],
+  args: {
+    showLabels: {
+      types: ['boolean'],
+      help: '',
+    },
+    fontSize: {
+      types: ['number'],
+      help: '',
+    },
+    position: {
+      types: ['string'],
+      help: '',
+    },
+  },
+  fn: function fn(input: unknown, args: ValueLabelConfig) {
+    return {
+      type: 'lens_xy_displayValuesConfig',
+      ...args,
+    };
+  },
+};
+
 type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
 export const yAxisConfig: ExpressionFunctionDefinition<
@@ -199,7 +236,7 @@ export const yAxisConfig: ExpressionFunctionDefinition<
     showValueLabels: {
       types: ['boolean'],
       default: false,
-      help: 'Whether to show value labels on the chart bars (horizontal only)',
+      help: '',
     },
   },
   fn: function fn(input: unknown, args: YConfig) {
@@ -293,6 +330,12 @@ export type SeriesType =
 
 export type YAxisMode = 'auto' | 'left' | 'right';
 
+export interface ValueLabelConfig {
+  showLabels: boolean;
+  fontSize?: number;
+  position?: 'inside' | 'outside';
+}
+
 export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
@@ -328,6 +371,7 @@ export interface XYArgs {
   showYAxisTitle?: boolean;
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+  displayValues: ValueLabelConfig & { type: 'lens_xy_displayValuesConfig' };
 }
 
 // Persisted parts of the state
@@ -342,6 +386,7 @@ export interface XYState {
   showYAxisTitle?: boolean;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
+  displayValues?: ValueLabelConfig;
 }
 
 export type State = XYState;

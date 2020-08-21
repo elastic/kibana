@@ -126,6 +126,10 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show y axis title',
       }),
     },
+    displayValues: {
+      types: ['lens_xy_displayValuesConfig'],
+      help: '',
+    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,
@@ -223,7 +227,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, displayValues } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -322,10 +326,6 @@ export function XYChart({
     );
   };
 
-  const shouldEnrichThemeWithValueLabels = filteredLayers.some(({ seriesType }) =>
-    seriesType.includes('bar')
-  );
-
   return (
     <Chart>
       <Settings
@@ -338,15 +338,18 @@ export function XYChart({
         showLegendExtra={false}
         theme={{
           ...chartTheme,
-          ...(shouldEnrichThemeWithValueLabels && {
+          ...{
             barSeriesStyle: {
+              ...chartTheme.barSeriesStyle,
               displayValue: {
-                fill: 'white',
-                offsetX: 0,
-                offsetY: 0,
+                ...chartTheme.axes?.tickLabelStyle,
+                fontSize: displayValues.fontSize,
+                fill: displayValues.position === 'inside' ? 'white' : 'black',
+                offsetX: shouldRotate ? (displayValues.position === 'inside' ? +5 : -15) : 0,
+                offsetY: shouldRotate ? 0 : displayValues.position === 'inside' ? -5 : +10,
               },
             },
-          }),
+          },
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
@@ -476,10 +479,11 @@ export function XYChart({
           const table = data.tables[layerId];
 
           const shouldShowValueLabel =
-            !chartHasMoreThanOneSeries &&
-            shouldRotate &&
-            yConfig &&
-            yConfig?.find(({ forAccessor }) => forAccessor === accessor)?.showValueLabels;
+            displayValues.showLabels ||
+            // !chartHasMoreThanOneSeries &&
+            // shouldRotate &&
+            (yConfig &&
+              yConfig?.find(({ forAccessor }) => forAccessor === accessor)?.showValueLabels);
 
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
@@ -494,6 +498,10 @@ export function XYChart({
               )
           );
 
+          const associatedAxes = yAxesConfiguration.find((axisConfiguration) =>
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+          );
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
@@ -504,9 +512,7 @@ export function XYChart({
             xScaleType,
             yScaleType,
             color: () => getSeriesColor(layer, accessor),
-            groupId: yAxesConfiguration.find((axisConfiguration) =>
-              axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
-            )?.groupId,
+            groupId: associatedAxes?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
             name(d) {
@@ -553,7 +559,7 @@ export function XYChart({
                 displayValueSettings: {
                   // TODO: workaround for elastic-charts issue with horizontal bar chart and isValueContainedInElement flag
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  valueFormatter: (d: any): string => xAxisFormatter.convert(d),
+                  valueFormatter: (d: any): string => associatedAxes?.formatter.convert(d) || '',
                   showValueLabel: shouldShowValueLabel,
                   isAlternatingValueLabel: false,
                   isValueContainedInElement: true,

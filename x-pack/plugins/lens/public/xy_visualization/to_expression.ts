@@ -146,6 +146,22 @@ export const buildExpression = (
               ],
             },
           ],
+          displayValues: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_displayValuesConfig',
+                  arguments: {
+                    showLabels: [state?.displayValues?.showLabels ?? false],
+                    fontSize: [state?.displayValues?.fontSize ?? 10],
+                    position: [state?.displayValues?.position ?? 'inside'],
+                  },
+                },
+              ],
+            },
+          ],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 

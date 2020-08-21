@@ -29,6 +29,7 @@ import {
   EuiHorizontalRule,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
   VisualizationDimensionEditorProps,
@@ -79,6 +80,27 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     value: 'hide',
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
       defaultMessage: 'hide',
+    }),
+  },
+];
+
+const valueLabelsPositioningOptions: Array<{
+  id: string;
+  value: 'inside' | 'outside';
+  label: string;
+}> = [
+  {
+    id: 'xy_valueLabels_inside',
+    value: 'inside',
+    label: i18n.translate('xpack.lens.xyChart.valueLabels.labelsPositioning.inside', {
+      defaultMessage: 'inside',
+    }),
+  },
+  {
+    id: 'xy_valueLabels_outside',
+    value: 'outside',
+    label: i18n.translate('xpack.lens.xyChart.valueLabels.labelsPositioning.outside', {
+      defaultMessage: 'outside',
     }),
   },
 ];
@@ -235,6 +257,20 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
+  const onValueDisplayVisibilitySettingsChange = (enabled: boolean): void => {
+    setState({
+      ...state,
+      displayValues: {
+        ...state.displayValues,
+        showLabels: enabled,
+      },
+    });
+  };
+
+  const shouldEnableValueLabels = state?.layers.some((layer) => layer.seriesType.includes('bar'));
+  const showValueLabels = Boolean(shouldEnableValueLabels && state?.displayValues?.showLabels);
+  const valueLabelsPositioning = state?.displayValues?.position || 'inside';
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -366,6 +402,80 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           </EuiFormRow>
           <EuiHorizontalRule margin="s" />
           <EuiFormRow
+            display="columnCompressedSwitch"
+            fullWidth
+            label={i18n.translate('xpack.lens.xyChart.valueLabels.showlabels.label', {
+              defaultMessage: 'Value Labels Display',
+            })}
+          >
+            <EuiSwitch
+              data-test-subj="lnsshowShowValueLabelsSwitch"
+              showLabel={false}
+              label={i18n.translate('xpack.lens.xyChart.valueLabels.showlabels', {
+                defaultMessage: 'Value Labels Display',
+              })}
+              onChange={({ target }) => onValueDisplayVisibilitySettingsChange(target.checked)}
+              checked={showValueLabels}
+              disabled={!shouldEnableValueLabels}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            fullWidth
+            label={i18n.translate('xpack.lens.xyChart.valueLabels.labelsFontSize.label', {
+              defaultMessage: 'Value Labels size',
+            })}
+          >
+            <EuiFieldNumber
+              value={state?.displayValues?.fontSize || 10}
+              onChange={({ target }) =>
+                setState({
+                  ...state,
+                  displayValues: {
+                    ...state.displayValues,
+                    showLabels: true,
+                    fontSize: Number(target.value),
+                  },
+                })
+              }
+              disabled={!shouldEnableValueLabels}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.valueLabels.labelsPositioning.label', {
+              defaultMessage: 'Value labels position',
+            })}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+                defaultMessage: 'Value labels position',
+              })}
+              name="valueLabelsPositioning"
+              buttonSize="compressed"
+              options={valueLabelsPositioningOptions}
+              idSelected={
+                valueLabelsPositioningOptions.find(({ value }) => value === valueLabelsPositioning)!
+                  .id
+              }
+              isDisabled={!shouldEnableValueLabels || !showValueLabels}
+              onChange={(optionId) => {
+                const newMode = valueLabelsPositioningOptions.find(({ id }) => id === optionId)!
+                  .value;
+                setState({
+                  ...state,
+                  displayValues: {
+                    ...state.displayValues,
+                    showLabels: true,
+                    position: newMode,
+                  },
+                });
+              }}
+            />
+          </EuiFormRow>
+          <EuiHorizontalRule margin="s" />
+          <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.xyChart.TickLabels', {
               defaultMessage: 'Tick Labels',
@@ -488,11 +598,10 @@ const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
   const { state, setState, layerId, accessor } = props;
-  const horizontalOnly = isHorizontalChart(state.layers);
-  const chartHasMoreThanOneSeries =
-    state.layers.length > 1 ||
-    state.layers.some(({ accessors }) => accessors.length > 1) ||
-    state.layers.some(({ splitAccessor }) => splitAccessor);
+  // const horizontalOnly = isHorizontalChart(state.layers);
+  // const chartHasMoreThanOneSeries =
+  // state.layers.length > 1 || state.layers.some(({ splitAccessor }) => splitAccessor);
+  const shouldEnableValueLabels = state?.layers.some((layer) => layer.seriesType.includes('bar'));
 
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -501,9 +610,8 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
     forAccessor: accessor,
   };
   const axisMode = layerConfig?.axisMode || 'auto';
-  const shouldShowValueLabels = horizontalOnly && !chartHasMoreThanOneSeries;
 
-  const showValueLabels = (shouldShowValueLabels && layerConfig?.showValueLabels) ?? false;
+  const showValueLabels = (shouldEnableValueLabels && layerConfig?.showValueLabels) ?? false;
 
   const createNewYAxisConfigsWithValue = useCallback(
     <K extends keyof YConfig, V extends YConfig[K]>(prop: K, newValue: V) => {
@@ -570,31 +678,30 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           }}
         />
       </EuiFormRow>
-      {shouldShowValueLabels && (
-        <EuiFormRow
-          display="columnCompressedSwitch"
-          fullWidth
+      <EuiFormRow
+        display="columnCompressedSwitch"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
+          defaultMessage: 'Show Value Labels',
+        })}
+      >
+        <EuiSwitch
+          data-test-subj="lnsshowShowValueLabelsSwitch"
+          showLabel={false}
           label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
             defaultMessage: 'Show Value Labels',
           })}
-        >
-          <EuiSwitch
-            data-test-subj="lnsshowShowValueLabelsSwitch"
-            showLabel={false}
-            label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
-              defaultMessage: 'Show Value Labels',
-            })}
-            onChange={({ target }) => {
-              const newYAxisConfigs = createNewYAxisConfigsWithValue(
-                'showValueLabels',
-                target.checked
-              );
-              setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
-            }}
-            checked={showValueLabels}
-          />
-        </EuiFormRow>
-      )}
+          onChange={({ target }) => {
+            const newYAxisConfigs = createNewYAxisConfigsWithValue(
+              'showValueLabels',
+              target.checked
+            );
+            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+          }}
+          checked={showValueLabels}
+          disabled={!shouldEnableValueLabels}
+        />
+      </EuiFormRow>
     </EuiForm>
   );
 }
