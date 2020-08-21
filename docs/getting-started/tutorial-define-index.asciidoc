@@ -46,8 +46,9 @@ contains the time series data.
 
 NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
-available, open the menu, then go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
+available, open the menu, then go to *Dev Tools > Console* and enter `GET _cat/indices`. Alternately, use
 `curl -XGET "http://localhost:9200/_cat/indices"`.
+For Windows, run `Invoke-RestMethod -Uri "http://localhost:9200/_cat/indices"` in Powershell.
 
 
 
