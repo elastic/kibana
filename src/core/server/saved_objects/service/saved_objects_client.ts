@@ -165,9 +165,27 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
  *
  * @public
  */
+export interface SavedObjectsAddToNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  namespaces: string[];
 }
 
 /**
@@ -360,7 +378,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
     return await this._repository.addToNamespaces(type, id, namespaces, options);
   }
 
@@ -377,7 +395,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 

@@ -52,6 +52,7 @@ describe('Search service', () => {
       } as any);
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
+      expect(start).toHaveProperty('searchSource');
     });
   });
 });

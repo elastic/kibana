@@ -54,7 +54,9 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -1040,7 +1042,7 @@ export class SavedObjectsRepository {
     id: string,
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -1089,7 +1091,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return {};
+    return { namespaces: doc.namespaces };
   }
 
   /**
@@ -1102,7 +1104,7 @@ export class SavedObjectsRepository {
     id: string,
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -1156,7 +1158,7 @@ export class SavedObjectsRepository {
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      return {};
+      return { namespaces: doc.namespaces };
     } else {
       // if there are no namespaces remaining, delete the saved object
       const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
@@ -1173,7 +1175,7 @@ export class SavedObjectsRepository {
 
       const deleted = body.result === 'deleted';
       if (deleted) {
-        return {};
+        return { namespaces: [] };
       }
 
       const deleteDocNotFound = body.result === 'not_found';

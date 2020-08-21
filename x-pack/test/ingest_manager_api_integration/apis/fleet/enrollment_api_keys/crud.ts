@@ -59,7 +59,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'config1',
+            policy_id: 'policy1',
           })
           .expect(200);
         keyId = apiResponse.item.id;
@@ -94,27 +94,27 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should not allow to create an enrollment api key for a non existing agent config', async () => {
+      it('should not allow to create an enrollment api key for a non existing agent policy', async () => {
         await supertest
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'idonotexistsconfig',
+            policy_id: 'idonotexistspolicy',
           })
           .expect(400);
       });
 
-      it('should allow to create an enrollment api key with an agent config', async () => {
+      it('should allow to create an enrollment api key with an agent policy', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'config1',
+            policy_id: 'policy1',
           })
           .expect(200);
 
         expect(apiResponse.success).to.eql(true);
-        expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'config_id');
+        expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
       });
 
       it('should create an ES ApiKey with limited privileges', async () => {
@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'config1',
+            policy_id: 'policy1',
           })
           .expect(200);
         expect(apiResponse.success).to.eql(true);

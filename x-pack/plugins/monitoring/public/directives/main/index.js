@@ -205,6 +205,7 @@ export class MonitoringMainController {
 
 export function monitoringMainProvider(breadcrumbs, license, $injector) {
   const $executor = $injector.get('$executor');
+  const $parse = $injector.get('$parse');
 
   return {
     restrict: 'E',
@@ -221,6 +222,10 @@ export function monitoringMainProvider(breadcrumbs, license, $injector) {
         Object.keys(setupObj.attributes).forEach((key) => {
           attributes.$observe(key, () => controller.setup(getSetupObj()));
         });
+        if (attributes.onLoaded) {
+          const onLoaded = $parse(attributes.onLoaded)(scope);
+          onLoaded();
+        }
       });
 
       initSetupModeState(scope, $injector, () => {

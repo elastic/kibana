@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
 import { History } from 'history';
+import { EuiBreadcrumb } from '@elastic/eui';
 import {
   Query,
   DataPublicPluginStart,
@@ -70,6 +71,7 @@ export function App({
   navigation,
   onAppLeave,
   history,
+  getAppNameFromId,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -82,6 +84,7 @@ export function App({
   originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
+  getAppNameFromId?: (appId: string) => string | undefined;
 }) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -201,6 +204,16 @@ export function App({
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     core.chrome.setBreadcrumbs([
+      ...(originatingApp && getAppNameFromId
+        ? [
+            {
+              onClick: (e) => {
+                core.application.navigateToApp(originatingApp);
+              },
+              text: getAppNameFromId(originatingApp),
+            } as EuiBreadcrumb,
+          ]
+        : []),
       {
         href: core.http.basePath.prepend(`/app/visualize#/`),
         onClick: (e) => {
@@ -217,7 +230,15 @@ export function App({
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
-  }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
+  }, [
+    core.application,
+    core.chrome,
+    core.http.basePath,
+    state.persistedDoc,
+    originatingApp,
+    redirectTo,
+    getAppNameFromId,
+  ]);
 
   useEffect(
     () => {
@@ -534,6 +555,7 @@ export function App({
             originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
+            getAppNameFromId={getAppNameFromId}
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',

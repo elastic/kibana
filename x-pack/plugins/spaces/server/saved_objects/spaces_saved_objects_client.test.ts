@@ -451,7 +451,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
-        const expectedReturnValue = createMockResponse();
+        const expectedReturnValue = { namespaces: ['foo', 'bar'] };
         baseClient.addToNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
 
         const type = Symbol();
@@ -481,7 +481,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
-        const expectedReturnValue = createMockResponse();
+        const expectedReturnValue = { namespaces: ['foo', 'bar'] };
         baseClient.deleteFromNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
 
         const type = Symbol();
