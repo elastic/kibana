@@ -18,13 +18,14 @@ jest.mock('node-fetch');
 const fetchMock = require('node-fetch') as jest.Mock;
 const { Response } = jest.requireActual('node-fetch');
 
-describe('createAppSearchRequestHandler', () => {
-  const responseMock = {
-    ok: jest.fn(),
-    notFound: jest.fn(),
-    customError: jest.fn(),
-  };
+const responseMock = {
+  ok: jest.fn(),
+  notFound: jest.fn(),
+  customError: jest.fn(),
+};
+const KibanaAuthHeader = 'Basic 123';
 
+describe('createAppSearchRequestHandler', () => {
   beforeEach(() => {
     responseMock.ok.mockClear();
     responseMock.notFound.mockClear();
@@ -36,9 +37,8 @@ describe('createAppSearchRequestHandler', () => {
       results: [{ name: 'engine1' }],
       meta: { page: { total_results: 1 } },
     };
-    const KibanaAuthHeader = 'Basic 123';
 
-    AppSearchAPI.shouldReturn(appSearchAPIResponseBody);
+    AppSearchAPI.mockReturn(appSearchAPIResponseBody);
 
     const requestHandler = createAppSearchRequestHandler({
       config: mockConfig,
@@ -49,19 +49,12 @@ describe('createAppSearchRequestHandler', () => {
       },
     });
 
-    await requestHandler(
-      null,
-      {
-        headers: {
-          authorization: KibanaAuthHeader,
-        },
-        query: {
-          type: 'indexed',
-          pageIndex: 1,
-        },
+    await makeAPICall(requestHandler, {
+      query: {
+        type: 'indexed',
+        pageIndex: 1,
       },
-      responseMock
-    );
+    });
 
     AppSearchAPI.shouldHaveBeenCalledWith(
       'http://localhost:3002/as/credentials/collection?type=indexed&pageIndex=1',
@@ -77,9 +70,7 @@ describe('createAppSearchRequestHandler', () => {
 
   describe('when an API request fails', () => {
     it('should return 404 with a message', async () => {
-      const KibanaAuthHeader = 'Basic 123';
-
-      AppSearchAPI.shouldReturnError();
+      AppSearchAPI.mockReturnError();
 
       const requestHandler = createAppSearchRequestHandler({
         config: mockConfig,
@@ -92,15 +83,7 @@ describe('createAppSearchRequestHandler', () => {
         },
       });
 
-      await requestHandler(
-        null,
-        {
-          headers: {
-            authorization: KibanaAuthHeader,
-          },
-        },
-        responseMock
-      );
+      await makeAPICall(requestHandler);
 
       AppSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
         headers: { Authorization: KibanaAuthHeader },
@@ -118,9 +101,8 @@ describe('createAppSearchRequestHandler', () => {
       const appSearchAPIResponseBody = {
         foo: 'bar',
       };
-      const KibanaAuthHeader = 'Basic 123';
 
-      AppSearchAPI.shouldReturn(appSearchAPIResponseBody);
+      AppSearchAPI.mockReturn(appSearchAPIResponseBody);
 
       const requestHandler = createAppSearchRequestHandler({
         config: mockConfig,
@@ -133,19 +115,12 @@ describe('createAppSearchRequestHandler', () => {
         },
       });
 
-      await requestHandler(
-        null,
-        {
-          headers: {
-            authorization: KibanaAuthHeader,
-          },
-          query: {
-            type: 'indexed',
-            pageIndex: 1,
-          },
+      await makeAPICall(requestHandler, {
+        query: {
+          type: 'indexed',
+          pageIndex: 1,
         },
-        responseMock
-      );
+      });
 
       AppSearchAPI.shouldHaveBeenCalledWith(
         `http://localhost:3002/as/credentials/collection?type=indexed&pageIndex=1`,
@@ -162,16 +137,29 @@ describe('createAppSearchRequestHandler', () => {
   });
 });
 
+const makeAPICall = (handler, params = {}) => {
+  return handler(
+    null,
+    {
+      headers: {
+        authorization: KibanaAuthHeader,
+      },
+      ...params,
+    },
+    responseMock
+  );
+};
+
 const AppSearchAPI = {
   shouldHaveBeenCalledWith(expectedUrl: string, expectedParams: object) {
     expect(fetchMock).toHaveBeenCalledWith(expectedUrl, expectedParams);
   },
-  shouldReturn(response: object) {
+  mockReturn(response: object) {
     fetchMock.mockImplementation(() => {
       return Promise.resolve(new Response(JSON.stringify(response)));
     });
   },
-  shouldReturnError() {
+  mockReturnError() {
     fetchMock.mockImplementation(() => {
       return Promise.reject('Failed');
     });
