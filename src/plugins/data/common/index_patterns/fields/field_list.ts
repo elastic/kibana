@@ -45,6 +45,9 @@ export type CreateIndexPatternFieldList = (
   onNotification?: OnNotification
 ) => IIndexPatternFieldList;
 
+// extending the array class and using a constructor doesn't work well
+// when calling filter and similar so wrapping in a callback.
+// to be removed in the future
 export const fieldList = (
   specs: FieldSpec[] = [],
   shortDotsEnable = false
