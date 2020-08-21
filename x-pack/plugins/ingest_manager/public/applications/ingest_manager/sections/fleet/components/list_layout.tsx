@@ -21,8 +21,8 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useRouteMatch } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
-import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
+import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';
+import { useGetAgentStatus } from '../../agent_policy/details_page/hooks';
 import { AgentEnrollmentFlyout } from '../components';
 import { DonutChart } from './donut_chart';
 
@@ -135,7 +135,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           <p>
             <FormattedMessage
               id="xpack.ingestManager.fleet.pageSubtitle"
-              defaultMessage="Manage and deploy configuration updates to a group of agents of any size."
+              defaultMessage="Manage and deploy policy updates to a group of agents of any size."
             />
           </p>
         </EuiText>
@@ -143,12 +143,12 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
     </EuiFlexGroup>
   );
 
-  const agentConfigsRequest = useGetAgentConfigs({
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
 
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   const routeMatch = useRouteMatch();
 
@@ -183,7 +183,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
     >
       {isEnrollmentFlyoutOpen ? (
         <AgentEnrollmentFlyout
-          agentConfigs={agentConfigs}
+          agentPolicies={agentPolicies}
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}
