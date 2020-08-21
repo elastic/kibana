@@ -17,6 +17,23 @@
  * under the License.
  */
 
-import { uniq, map, size, flow } from 'lodash';
+import { Vis } from '../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
 
-export const areFieldsDifferent = (name) => (series) => flow(uniq, size)(map(series, name)) > 1;
+export const toExpressionAst = (vis: Vis) => {
+  const { markdown, fontSize, openLinksInNewTab } = vis.params;
+
+  const markdownVis = buildExpressionFunction<MarkdownVisExpressionFunctionDefinition>(
+    'markdownVis',
+    {
+      markdown,
+      font: buildExpression(`font size=${fontSize}`),
+      openLinksInNewTab,
+    }
+  );
+
+  const ast = buildExpression([markdownVis]);
+
+  return ast.toAst();
+};
