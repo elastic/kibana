@@ -51,6 +51,8 @@ export interface BasicValidations {
   queryDelay: Validation;
   frequency: Validation;
   scrollSize: Validation;
+  categorizerMissingPerPartition: Validation;
+  categorizerVaryingPerPartitionField: Validation;
 }
 
 export interface AdvancedValidations {
@@ -76,6 +78,8 @@ export class JobValidator {
     queryDelay: { valid: true },
     frequency: { valid: true },
     scrollSize: { valid: true },
+    categorizerMissingPerPartition: { valid: true },
+    categorizerVaryingPerPartitionField: { valid: true },
   };
   private _advancedValidations: AdvancedValidations = {
     categorizationFieldValid: { valid: true },
@@ -273,6 +277,14 @@ export class JobValidator {
     this._advancedValidations.categorizationFieldValid.valid = valid;
   }
 
+  public get categorizerMissingPerPartition() {
+    return this._basicValidations.categorizerMissingPerPartition;
+  }
+
+  public get categorizerVaryingPerPartitionField() {
+    return this._basicValidations.categorizerVaryingPerPartitionField;
+  }
+
   /**
    * Indicates if the Pick Fields step has a valid input
    */
@@ -283,6 +295,8 @@ export class JobValidator {
         (this._jobCreator.type === JOB_TYPE.ADVANCED && this.modelMemoryLimit.valid)) &&
       this.bucketSpan.valid &&
       this.duplicateDetectors.valid &&
+      this.categorizerMissingPerPartition.valid &&
+      this.categorizerVaryingPerPartitionField.valid &&
       !this.validating &&
       (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
         (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
