@@ -103,9 +103,12 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], () => {
-        createSummaryRow($scope.row);
-      });
+      $scope.$watchMulti(
+        ['indexPattern.timeFieldName', 'row.highlight', '[]columns', 'row'],
+        () => {
+          createSummaryRow($scope.row);
+        }
+      );
 
       $scope.inlineFilter = function inlineFilter($event: any, type: string) {
         const column = $($event.target).data().column;
@@ -174,6 +177,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         let $cells = $el.children();
         newHtmls.forEach(function (html, i) {
           const $cell = $cells.eq(i);
+
           if ($cell.data('discover:html') === html) return;
 
           const reuse = find($cells.slice(i + 1), function (cell: any) {
