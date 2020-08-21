@@ -22,7 +22,15 @@ import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '../../../../../plugins/ui_actions_enhanced/public';
-import { SAMPLE_ML_JOB_CLICK_TRIGGER } from '../../triggers';
+import { SAMPLE_ML_JOB_CLICK_TRIGGER, SampleMlJob, SampleMlJobClickContext } from '../../triggers';
+
+export const job: SampleMlJob = {
+  job_id: '123',
+  job_type: 'anomaly_detector',
+  description: 'This is some ML job.',
+};
+
+export const context: SampleMlJobClickContext = { job };
 
 export const DrilldownsManager: React.FC = () => {
   const { plugins } = useUiActions();
@@ -81,6 +89,7 @@ export const DrilldownsManager: React.FC = () => {
         </EuiButton>
       }
       isOpen={openPopup}
+      closePopover={() => setOpenPopup(false)}
       panelPaddingSize="none"
       withTitle
       anchorPosition="downLeft"
@@ -101,6 +110,22 @@ export const DrilldownsManager: React.FC = () => {
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="secondary"
+              fill
+              iconType="play"
+              iconSide="left"
+              onClick={() =>
+                plugins.uiActionsEnhanced.executeTriggerActions(
+                  SAMPLE_ML_JOB_CLICK_TRIGGER,
+                  context
+                )
+              }
+            >
+              Execute click action
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </Section>
 
