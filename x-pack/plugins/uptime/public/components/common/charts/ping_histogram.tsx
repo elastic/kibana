@@ -22,19 +22,10 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
-import { useUrlParams } from '../../../hooks';
+import { useGetUrlParams, useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 
 export interface PingHistogramComponentProps {
-  /**
-   * The date/time for the start of the timespan.
-   */
-  absoluteStartDate: number;
-  /**
-   * The date/time for the end of the timespan.
-   */
-  absoluteEndDate: number;
-
   /**
    * Height is needed, since by default charts takes height of 100%
    */
@@ -52,8 +43,6 @@ interface BarPoint {
 }
 
 export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
-  absoluteStartDate,
-  absoluteEndDate,
   data,
   loading = false,
   height,
@@ -64,6 +53,11 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   } = useContext(UptimeThemeContext);
 
   const [, updateUrlParams] = useUrlParams();
+
+  const {
+    absoluteDateRangeStart: absoluteStartDate,
+    absoluteDateRangeEnd: absoluteEndDate,
+  } = useGetUrlParams();
 
   let content: JSX.Element | undefined;
   if (!data?.histogram?.length) {

@@ -5,25 +5,28 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
-import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
-import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
-import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
+import {
+  EmptyState,
+  FilterGroupComponent,
+  KueryBar,
+  MonitorListComponent,
+  ParsingErrorCallout,
+} from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
-
-interface Props {
-  loading: boolean;
-  indexPattern: IIndexPattern | null;
-  setEsKueryFilters: (esFilters: string) => void;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { setEsKueryString } from '../state/actions';
+import { selectIndexPattern } from '../state/selectors';
+import { useOverviewPageData } from '../components/overview/use_overview_data';
+import { getPageSizeValue } from '../components/overview/monitor_list/use_monitor_list';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
@@ -37,53 +40,64 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = React.memo(
-  ({ indexPattern, setEsKueryFilters, loading }: Props) => {
-    const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
-    const { search, filters: urlFilters } = params;
+export const OverviewPage = React.memo(({}) => {
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+  const { search, filters: urlFilters } = params;
 
-    useTrackPageview({ app: 'uptime', path: 'overview' });
-    useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'overview' });
+  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-    const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
+  const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
 
-    useEffect(() => {
-      setEsKueryFilters(esFilters ?? '');
-    }, [esFilters, setEsKueryFilters]);
+  const { loading } = useSelector(selectIndexPattern);
 
-    const linkParameters = stringifyUrlParams(params, true);
+  const [esFilters, error] = useUpdateKueryString(search, urlFilters);
 
-    const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
-      defaultMessage: 'Overview',
-      description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-    });
+  useOverviewPageData({ pageSize, esKueryFilters: esFilters });
 
-    useBreadcrumbs([]); // No extra breadcrumbs on overview
+  const dispatch = useDispatch();
 
-    return (
-      <>
-        <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
-        <EmptyState>
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
-              <KueryBar
-                aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
-                  defaultMessage: 'Input filter criteria for the overview page',
-                })}
-                data-test-subj="xpack.uptime.filterBar"
-              />
-            </EuiFlexItem>
-            <EuiFlexItemStyled grow={true}>
-              <FilterGroup esFilters={esFilters} />
-            </EuiFlexItemStyled>
-            {error && !loading && <ParsingErrorCallout error={error} />}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <StatusPanel />
-          <EuiSpacer size="s" />
-          <MonitorList filters={esFilters} linkParameters={linkParameters} />
-        </EmptyState>
-      </>
-    );
-  }
-);
+  useEffect(() => {
+    dispatch(setEsKueryString(esFilters ?? ''));
+  }, [esFilters, dispatch]);
+
+  const linkParameters = stringifyUrlParams(params, true);
+
+  const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
+    defaultMessage: 'Overview',
+    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+  });
+
+  useBreadcrumbs([]); // No extra breadcrumbs on overview
+
+  return (
+    <>
+      <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
+      <EmptyState>
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
+            <KueryBar
+              aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
+                defaultMessage: 'Input filter criteria for the overview page',
+              })}
+              data-test-subj="xpack.uptime.filterBar"
+            />
+          </EuiFlexItem>
+          <EuiFlexItemStyled grow={true}>
+            <FilterGroupComponent />
+          </EuiFlexItemStyled>
+          {error && !loading && <ParsingErrorCallout error={error} />}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <StatusPanel />
+        <EuiSpacer size="s" />
+        <MonitorListComponent
+          esKueryFilters={esFilters}
+          linkParameters={linkParameters}
+          setPageSize={setPageSize}
+          pageSize={pageSize}
+        />
+      </EmptyState>
+    </>
+  );
+});

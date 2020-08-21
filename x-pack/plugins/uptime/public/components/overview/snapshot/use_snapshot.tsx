@@ -8,23 +8,14 @@ import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
 import { getSnapshotCountAction } from '../../../state/actions';
-import { SnapshotComponent } from './snapshot';
-import { esKuerySelector, snapshotDataSelector } from '../../../state/selectors';
+import { esKuerySelector } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 
-interface Props {
-  /**
-   * Height is needed, since by default charts takes height of 100%
-   */
-  height?: string;
-}
-
-export const Snapshot: React.FC<Props> = ({ height }: Props) => {
+export const useSnapshot = () => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const { count, loading } = useSelector(snapshotDataSelector);
   const esKuery = useSelector(esKuerySelector);
 
   const dispatch = useDispatch();
@@ -32,5 +23,4 @@ export const Snapshot: React.FC<Props> = ({ height }: Props) => {
   useEffect(() => {
     dispatch(getSnapshotCountAction({ dateRangeStart, dateRangeEnd, filters: esKuery }));
   }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, dispatch]);
-  return <SnapshotComponent count={count} height={height} loading={loading} />;
 };

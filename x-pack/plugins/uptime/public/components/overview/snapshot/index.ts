@@ -5,4 +5,3 @@
  */
 
 export { SnapshotComponent } from './snapshot';
-export { Snapshot } from './snapshot_container';

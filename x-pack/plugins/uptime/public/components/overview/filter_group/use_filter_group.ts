@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
 import { parseFiltersMap } from './parse_filter_map';
 import { fetchOverviewFilters } from '../../../state/actions';
-import { FilterGroupComponent } from './index';
 import { UptimeRefreshContext } from '../../../contexts';
-import { esKuerySelector, overviewFiltersSelector } from '../../../state/selectors';
+import { esKuerySelector } from '../../../state/selectors';
 
 interface Props {
-  esFilters?: string;
+  esKueryFilters?: string;
 }
 
-export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
+export const useFilterGroup = ({ esKueryFilters }: Props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const { filters: overviewFilters, loading } = useSelector(overviewFiltersSelector);
   const esKuery = useSelector(esKuerySelector);
 
   const { dateRangeStart, dateRangeEnd, statusFilter, filters: urlFilters } = useGetUrlParams();
@@ -46,11 +44,9 @@ export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
     dateRangeStart,
     dateRangeEnd,
     esKuery,
-    esFilters,
+    esKueryFilters,
     statusFilter,
     urlFilters,
     dispatch,
   ]);
-
-  return <FilterGroupComponent overviewFilters={overviewFilters} loading={loading} />;
 };

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { OverviewPageComponent } from '../overview';
+import { OverviewPage } from '../overview';
 import { shallowWithRouter } from '../../lib';
 
 describe('MonitorPage', () => {
@@ -91,11 +91,7 @@ describe('MonitorPage', () => {
   it('shallow renders expected elements for valid props', () => {
     expect(
       shallowWithRouter(
-        <OverviewPageComponent
-          indexPattern={indexPattern}
-          setEsKueryFilters={jest.fn()}
-          loading={false}
-        />
+        <OverviewPage indexPattern={indexPattern} setEsKueryFilters={jest.fn()} loading={false} />
       )
     ).toMatchSnapshot();
   });

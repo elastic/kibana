@@ -5,4 +5,3 @@
  */
 
 export { FilterGroupComponent } from './filter_group';
-export { FilterGroup } from './filter_group_container';

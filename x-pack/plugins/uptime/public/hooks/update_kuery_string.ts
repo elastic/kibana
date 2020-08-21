@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../src/plugins/data/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
+import { useIndexPattern } from '../components/overview/kuery_bar/use_index_pattern';
+import { useSelector } from 'react-redux';
+import { selectIndexPattern } from '../state/selectors';
 
 const getKueryString = (urlFilters: string): string => {
   let kueryString = '';
@@ -24,10 +27,11 @@ const getKueryString = (urlFilters: string): string => {
 };
 
 export const useUpdateKueryString = (
-  indexPattern: IIndexPattern | null,
   filterQueryString = '',
   urlFilters: string
 ): [string?, Error?] => {
+  const { index_pattern: indexPattern } = useSelector(selectIndexPattern);
+
   const kueryString = getKueryString(urlFilters);
 
   const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);

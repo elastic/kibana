@@ -8,23 +8,18 @@ import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
-import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
-
-interface PresentationalComponentProps {
-  loading: boolean;
-  overviewFilters: OverviewFilters;
-}
+import { useSelector } from 'react-redux';
+import { overviewFiltersSelector } from '../../../state/selectors';
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
 
-export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
-  overviewFilters,
-  loading,
-}) => {
+export const FilterGroupComponent = () => {
+  const { filters: overviewFilters, loading } = useSelector(overviewFiltersSelector);
+
   const { locations, ports, schemes, tags } = overviewFilters;
 
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{

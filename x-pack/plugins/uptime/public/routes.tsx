@@ -6,7 +6,6 @@
 
 import React, { FC, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { OverviewPage } from './components/overview/overview_container';
 import {
   CERTIFICATES_ROUTE,
   MONITOR_ROUTE,
@@ -16,6 +15,7 @@ import {
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
+import { OverviewPage } from './pages/overview';
 
 interface RouteProps {
   path: string;

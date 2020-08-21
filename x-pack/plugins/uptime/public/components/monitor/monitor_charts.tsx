@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PingHistogram } from './ping_histogram/ping_histogram_container';
-import { MonitorDuration } from './monitor_duration/monitor_duration_container';
+import { PingHistogram } from './ping_histogram';
+import { MonitorDuration } from './monitor_duration';
 
 interface MonitorChartsProps {
   monitorId: string;

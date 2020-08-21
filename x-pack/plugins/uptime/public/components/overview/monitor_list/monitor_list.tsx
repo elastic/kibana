@@ -26,16 +26,17 @@ import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
-import { MonitorListProps } from './monitor_list_container';
-import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
+import { useSelector } from 'react-redux';
+import { monitorListSelector } from '../../../state/selectors';
 
-interface Props extends MonitorListProps {
+interface Props {
   pageSize: number;
   setPageSize: (val: number) => void;
-  monitorList: MonitorList;
+  esKueryFilters?: string;
+  linkParameters?: string;
 }
 
 const TruncatedEuiLink = styled(EuiLink)`
@@ -44,19 +45,20 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
-export const noItemsMessage = (loading: boolean, filters?: string) => {
+export const noItemsMessage = (loading: boolean, esKueryFilters?: string) => {
   if (loading) return labels.LOADING;
-  return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
+  return !!esKueryFilters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
 export const MonitorListComponent: React.FC<Props> = ({
-  filters,
-  monitorList: { list, error, loading },
+  esKueryFilters,
   linkParameters,
-  pageSize,
   setPageSize,
+  pageSize,
 }) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
+
+  const { list, error, loading } = useSelector(monitorListSelector);
 
   const items = list.summaries ?? [];
 
@@ -174,7 +176,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={noItemsMessage(loading, filters)}
+        noItemsMessage={noItemsMessage(loading, esKueryFilters)}
         columns={columns}
       />
       <EuiSpacer size="m" />

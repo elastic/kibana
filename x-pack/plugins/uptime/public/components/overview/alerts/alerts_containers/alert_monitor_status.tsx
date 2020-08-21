@@ -26,7 +26,6 @@ import {
   AtomicStatusCheckParamsType,
   GetMonitorAvailabilityParamsType,
 } from '../../../../../common/runtime_types';
-import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
 import { useUpdateKueryString } from '../../../../hooks';
 
 interface Props {
@@ -69,12 +68,11 @@ export const AlertMonitorStatus: React.FC<Props> = ({
     }
   }, [alertParams, dispatch]);
 
-  const { index_pattern: indexPattern } = useIndexPattern();
-
   const { count, loading } = useSelector(snapshotDataSelector);
+
   const esKuery = useSelector(esKuerySelector);
+
   const [esFilters] = useUpdateKueryString(
-    indexPattern,
     alertParams.search,
     alertParams.filters === undefined || typeof alertParams.filters === 'string'
       ? ''
