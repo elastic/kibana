@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { Subscription } from 'rxjs';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -27,6 +28,8 @@ import {
   CoreStart,
   Plugin,
   ScopedHistory,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
 } from '../../../core/public';
 import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
 import { bootstrap } from './bootstrap';
@@ -89,6 +92,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
   private outgoingOnlyStateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private isRegistryReady = false;
+  private appList?: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>;
+  private appListSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -121,7 +126,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+    this.appListSubscription = core.application.applications$.subscribe((appList) => {
+      this.appList = appList;
+    });
+
+    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(
+      core.application.navigateToApp,
+      undefined,
+      this.appList
+    );
     this.isRegistryReady = true;
 
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
@@ -151,7 +164,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEmbeddableFactories: this.getEmbeddableFactories,
       getStateTransfer: (history?: ScopedHistory) => {
         return history
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
+          ? new EmbeddableStateTransfer(core.application.navigateToApp, history, this.appList)
           : this.outgoingOnlyStateTransfer;
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),
@@ -159,7 +172,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appListSubscription) {
+      this.appListSubscription.unsubscribe();
+    }
+  }
 
   private getEmbeddableFactories = () => {
     this.ensureFactoriesExist();
