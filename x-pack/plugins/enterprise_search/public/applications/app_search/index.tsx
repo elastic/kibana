@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
+import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../index';
+import { AppLogic, IAppLogicActions, IAppLogicValues } from './app_logic';
+import { IInitialAppData } from '../../../common/types';
+
+import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
 import {
@@ -25,20 +29,29 @@ import {
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
-export const AppSearch: React.FC = () => {
+export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
+  return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
+};
 
-  if (!config.host)
-    return (
-      <Switch>
-        <Route exact path={SETUP_GUIDE_PATH}>
-          <SetupGuide />
-        </Route>
-        <Route>
-          <Redirect to={SETUP_GUIDE_PATH} />
-        </Route>
-      </Switch>
-    );
+export const AppSearchUnconfigured: React.FC = () => (
+  <Switch>
+    <Route exact path={SETUP_GUIDE_PATH}>
+      <SetupGuide />
+    </Route>
+    <Route>
+      <Redirect to={SETUP_GUIDE_PATH} />
+    </Route>
+  </Switch>
+);
+
+export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
+  const { hasInitialized } = useValues(AppLogic) as IAppLogicValues;
+  const { initializeAppData } = useActions(AppLogic) as IAppLogicActions;
+
+  useEffect(() => {
+    if (!hasInitialized) initializeAppData(props);
+  }, [hasInitialized]);
 
   return (
     <Switch>
