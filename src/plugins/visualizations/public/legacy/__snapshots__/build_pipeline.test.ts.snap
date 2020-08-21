@@ -1,16 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | testing custom expressions"`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | test"`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles markdown function 1`] = `"markdownvis '## hello _markdown_' font={font size=12} openLinksInNewTab=true "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with buckets 1`] = `"metricvis metric={visdimension 0 } metric={visdimension 1 } "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function with percentage mode should have percentage format 1`] = `"metricvis percentageMode=true metric={visdimension 0 format='percent' } "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metric function without buckets 1`] = `"metricvis metric={visdimension 0 } metric={visdimension 1 } "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
 
