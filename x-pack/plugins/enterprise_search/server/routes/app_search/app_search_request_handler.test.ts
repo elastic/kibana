@@ -22,11 +22,13 @@ describe('createAppSearchRequestHandler', () => {
   const responseMock = {
     ok: jest.fn(),
     notFound: jest.fn(),
+    customError: jest.fn(),
   };
 
   beforeEach(() => {
     responseMock.ok.mockClear();
     responseMock.notFound.mockClear();
+    responseMock.customError.mockClear();
     fetchMock.mockReset();
   });
   it('makes an API call and returns the response', async () => {
@@ -104,8 +106,9 @@ describe('createAppSearchRequestHandler', () => {
         headers: { Authorization: KibanaAuthHeader },
       });
 
-      expect(responseMock.notFound).toHaveBeenCalledWith({
-        body: 'cannot-connect',
+      expect(responseMock.customError).toHaveBeenCalledWith({
+        body: 'Error connecting or fetching data from Enterprise Search',
+        statusCode: 502,
       });
     });
   });
@@ -151,8 +154,9 @@ describe('createAppSearchRequestHandler', () => {
         }
       );
 
-      expect(responseMock.notFound).toHaveBeenCalledWith({
-        body: 'cannot-connect',
+      expect(responseMock.customError).toHaveBeenCalledWith({
+        body: 'Error connecting or fetching data from Enterprise Search',
+        statusCode: 502,
       });
     });
   });
