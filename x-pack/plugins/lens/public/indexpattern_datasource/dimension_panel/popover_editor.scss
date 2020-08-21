@@ -18,3 +18,14 @@
   padding-top: 0;
   padding-bottom: 0;
 }
+
+.lnsIndexPatternDimensionEditor__filtersEditor {
+  max-width: 100%;
+  width: $euiSize * 30;
+}
+
+// todo: remove after closing https://github.com/elastic/eui/issues/3548
+.lnsDimensionPanel__fixTranslateDnd {
+  // sass-lint:disable-block no-important
+  transform: none !important;
+}

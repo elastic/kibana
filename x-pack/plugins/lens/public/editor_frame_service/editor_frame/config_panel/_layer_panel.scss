@@ -35,6 +35,24 @@
   min-height: $euiSizeXXL;
 }
 
+.lnsLayerPanel__panel {
+  position: relative;
+}
+
+.lnsLayerPanel__anchor {
+  width: 100%;
+}
+
+.lnsLayerPanel__dndGrab {
+  padding: $euiSizeS;
+}
+
+.lnsLayerPanel__filterLink {
+  width: 100%;
+  align-self: flex-start;
+  word-break: break-word;
+}
+
 .lnsLayerPanel__styleEditor {
   width: $euiSize * 30;
   padding: $euiSizeS;

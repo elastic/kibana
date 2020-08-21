@@ -7,6 +7,7 @@
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation } from './terms';
+import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
@@ -21,6 +22,7 @@ import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/pub
 // If you want to implement a new operation, add it to this array and
 // its type will get propagated to everything else
 const internalOperationDefinitions = [
+  filtersOperation,
   termsOperation,
   dateHistogramOperation,
   minOperation,
@@ -32,6 +34,7 @@ const internalOperationDefinitions = [
 ];
 
 export { termsOperation } from './terms';
+export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
