@@ -44,9 +44,6 @@ describe('createAppSearchRequestHandler', () => {
       config: mockConfig,
       log: mockLogger,
       path: '/as/credentials/collection',
-      hasValidData: (body) => {
-        return Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number';
-      },
     });
 
     await makeAPICall(requestHandler, {
@@ -76,11 +73,6 @@ describe('createAppSearchRequestHandler', () => {
         config: mockConfig,
         log: mockLogger,
         path: '/as/credentials/collection',
-        hasValidData: (body) => {
-          return (
-            Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number'
-          );
-        },
       });
 
       await makeAPICall(requestHandler);
@@ -115,19 +107,11 @@ describe('createAppSearchRequestHandler', () => {
         },
       });
 
-      await makeAPICall(requestHandler, {
-        query: {
-          type: 'indexed',
-          pageIndex: 1,
-        },
-      });
+      await makeAPICall(requestHandler);
 
-      AppSearchAPI.shouldHaveBeenCalledWith(
-        `http://localhost:3002/as/credentials/collection?type=indexed&pageIndex=1`,
-        {
-          headers: { Authorization: KibanaAuthHeader },
-        }
-      );
+      AppSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
+        headers: { Authorization: KibanaAuthHeader },
+      });
 
       expect(responseMock.customError).toHaveBeenCalledWith({
         body: 'Error connecting or fetching data from Enterprise Search',

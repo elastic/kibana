@@ -12,7 +12,7 @@ interface IAppSearchRequestParams {
   config: ConfigType;
   log: Logger;
   path: string;
-  hasValidData: (body?: object) => boolean;
+  hasValidData?: (body?: object) => boolean;
 }
 
 /**
@@ -27,7 +27,7 @@ export function createAppSearchRequestHandler({
   config,
   log,
   path,
-  hasValidData,
+  hasValidData = () => true,
 }: IAppSearchRequestParams) {
   return async (_context, request, response) => {
     try {
