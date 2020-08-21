@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "6.8.12",
+  "version": "6.8.13",
   "branch": "6.8",
   "types": "./kibana.d.ts",
   "build": {
@@ -94,7 +94,9 @@
     "**/cypress/lodash": "4.17.13",
     "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
     "**/grunt/js-yaml": "^3.13.1",
+    "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
     "**/load-grunt-config/js-yaml": "^3.13.1",
+    "**/request": "^2.88.2",
     "**/serialize-javascript": "^2.1.1",
     "@types/react": "16.3.14"
   },
@@ -267,7 +269,7 @@
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
     "wreck": "^14.0.2",
-    "x-pack": "6.8.12",
+    "x-pack": "6.8.13",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
@@ -433,7 +435,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.21.0",
+    "node": "10.22.0",
     "yarn": "^1.21.1"
   }
 }
