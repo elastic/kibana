@@ -73,8 +73,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
   let servicenowSimulatorURL: string = '<could not determine kibana url>';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75522
-  describe.skip('ServiceNow', () => {
+  describe('ServiceNow', () => {
     before(() => {
       servicenowSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
