@@ -148,8 +148,8 @@ describe('isFittable', () => {
       canFit: false,
     },
     {
-      isVisible: false,
-      fitToBounds: true,
+      isVisible: true,
+      fitToBounds: false,
       canFit: false,
     },
     {
