@@ -24,6 +24,7 @@ import { FieldNameField } from './common_fields/field_name_field';
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
+  /* Required fields config */
   value: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
@@ -43,6 +44,7 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
+  /* Optional fields config */
   override: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,

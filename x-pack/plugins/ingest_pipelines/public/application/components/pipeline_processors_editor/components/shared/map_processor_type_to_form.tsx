@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent } from 'react';
 
 import {
   Append,
@@ -35,6 +34,7 @@ import {
   Rename,
   Script,
   SetProcessor,
+  SetSecurityUser,
   FormFieldsComponent,
 } from '../manage_processor_form/processors';
 
@@ -240,7 +240,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   set_security_user: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: SetSecurityUser,
     docLinkPath: '/ingest-node-set-security-user-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.setSecurityUser', {
       defaultMessage: 'Set security user',

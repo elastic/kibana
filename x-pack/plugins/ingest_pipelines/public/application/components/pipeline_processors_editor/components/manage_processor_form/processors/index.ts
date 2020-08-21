@@ -31,5 +31,6 @@ export { Remove } from './remove';
 export { Rename } from './rename';
 export { Script } from './script';
 export { SetProcessor } from './set';
+export { SetSecurityUser } from './set_security_user';
 
 export { FormFieldsComponent } from './shared';
