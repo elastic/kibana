@@ -275,6 +275,7 @@ export class Server {
             typeRegistry: coreStart.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
+            client: coreStart.elasticsearch.client.asScoped(req),
             legacy: {
               client: coreStart.elasticsearch.legacy.client.asScoped(req),
             },

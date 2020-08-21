@@ -6,33 +6,33 @@
 
 import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { SearchResponse } from 'elasticsearch';
 import {
-  LegacyAPICaller,
   SharedGlobalConfig,
   RequestHandlerContext,
+  ElasticsearchClient,
   Logger,
 } from '../../../../../src/core/server';
 import {
-  ISearchOptions,
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
+  SearchUsage,
+  ISearchOptions,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
+import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
 
-export interface AsyncSearchResponse<T> {
-  id: string;
-  is_partial: boolean;
-  is_running: boolean;
-  response: SearchResponse<T>;
+function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
+  return response.hasOwnProperty('isPartial') && response.hasOwnProperty('isRunning');
 }
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
-  logger: Logger
+  logger: Logger,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   const search = async (
     context: RequestHandlerContext,
@@ -41,22 +41,39 @@ export const enhancedEsSearchStrategyProvider = (
   ) => {
     logger.info(`search ${JSON.stringify(request.params) || request.id}`);
     const config = await config$.pipe(first()).toPromise();
-    const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+    const client = context.core.elasticsearch.client.asCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    return request.indexType === 'rollup'
-      ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options);
+    const isAsync = request.indexType !== 'rollup';
+
+    try {
+      const response = isAsync
+        ? await asyncSearch(client, { ...request, params }, options)
+        : await rollupSearch(client, { ...request, params }, options);
+
+      if (
+        usage &&
+        isAsync &&
+        isEnhancedEsSearchResponse(response) &&
+        !response.isRunning &&
+        !response.isPartial
+      ) {
+        usage.trackSuccess(response.rawResponse.took);
+      }
+
+      return response;
+    } catch (e) {
+      if (usage) usage.trackError();
+      throw e;
+    }
   };
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.info(`cancel ${id}`);
-    const method = 'DELETE';
-    const path = encodeURI(`/_async_search/${id}`);
-    await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
-      method,
-      path,
+    await context.core.elasticsearch.client.asCurrentUser.transport.request({
+      method: 'DELETE',
+      path: encodeURI(`/_async_search/${id}`),
     });
   };
 
@@ -64,10 +81,10 @@ export const enhancedEsSearchStrategyProvider = (
 };
 
 async function asyncSearch(
-  caller: LegacyAPICaller,
+  client: ElasticsearchClient,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
-) {
+): Promise<IEsSearchResponse> {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     ...request.params,
   };
@@ -80,41 +97,60 @@ async function asyncSearch(
   const method = request.id ? 'GET' : 'POST';
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
-  // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
+  // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+  const batchedReduceSize = request.id ? undefined : 64;
 
-  const { id, response, is_partial, is_running } = (await caller(
-    'transport.request',
-    { method, path, body, query },
-    options
-  )) as AsyncSearchResponse<any>;
+  const asyncOptions = {
+    waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+    keepAlive: '1m', // Extend the TTL for this search request by one minute
+  };
 
+  const querystring = toSnakeCase({
+    ...asyncOptions,
+    ...(batchedReduceSize && { batchedReduceSize }),
+    ...queryParams,
+  });
+
+  // TODO: replace with async endpoints once https://github.com/elastic/elasticsearch-js/issues/1280 is resolved
+  const esResponse = await client.transport.request({
+    method,
+    path,
+    body,
+    querystring,
+  });
+
+  const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
   return {
     id,
-    is_partial,
-    is_running,
+    isPartial,
+    isRunning,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
   };
 }
 
 async function rollupSearch(
-  caller: LegacyAPICaller,
+  client: ElasticsearchClient,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
-) {
+): Promise<IEsSearchResponse> {
   const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
-  const query = toSnakeCase(params);
+  const querystring = toSnakeCase(params);
 
-  const rawResponse = await ((caller(
-    'transport.request',
-    { method, path, body, query },
-    options
-  ) as unknown) as SearchResponse<any>);
+  const esResponse = await client.transport.request({
+    method,
+    path,
+    body,
+    querystring,
+  });
 
-  return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+  const response = esResponse.body as SearchResponse<any>;
+  return {
+    rawResponse: shimHitsTotal(response),
+    ...getTotalLoaded(response._shards),
+  };
 }
 
 function toSnakeCase(obj: Record<string, any>) {

@@ -11,6 +11,8 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 export const DRAGGABLE_HEADER =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
 
+export const HEADER = '[data-test-subj="header"]';
+
 export const HEADERS_GROUP = '[data-test-subj="headers-group"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
@@ -19,10 +21,11 @@ export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
+export const PIN_EVENT = '[data-test-subj="pin"]';
+
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
-export const REMOVE_COLUMN =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="remove-column"]';
+export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
 
 export const RESET_FIELDS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';

@@ -59,7 +59,7 @@ const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.Funct
 >;
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
-  return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
+  return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
 const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
@@ -323,7 +323,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       fieldGroup.filter((field) => {
         if (
           localState.nameFilter.length &&
-          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
         ) {
           return false;
         }
@@ -409,7 +410,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       filters,
       chartsThemeService: charts.theme,
     }),
-    [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
+    [
+      core,
+      data,
+      currentIndexPattern,
+      dateRange,
+      query,
+      filters,
+      localState.nameFilter,
+      charts.theme,
+    ]
   );
 
   return (

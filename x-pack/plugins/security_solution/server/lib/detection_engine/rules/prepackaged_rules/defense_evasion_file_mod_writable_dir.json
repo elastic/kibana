@@ -7,7 +7,8 @@
     "Certain programs or applications may modify files or change ownership in writable directories. These can be exempted by username."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

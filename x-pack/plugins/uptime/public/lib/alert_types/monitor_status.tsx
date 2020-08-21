@@ -10,7 +10,7 @@ import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_u
 import { AlertTypeInitializer } from '.';
 
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from './translations';
+import { MonitorStatusTranslations } from '../../../common/translations';
 
 const { defaultActionMessage } = MonitorStatusTranslations;
 
@@ -42,7 +42,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
         validateFunc = validateMonitorStatusParams;
       })();
     }
-    return validateFunc && validateFunc(alertParams);
+    return validateFunc ? validateFunc(alertParams) : ({} as ValidationResult);
   },
   defaultActionMessage,
   requiresAppContext: false,

@@ -31,7 +31,7 @@ import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { ExceptionBuilder } from '../builder';
+import { ExceptionBuilderComponent } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -40,6 +40,7 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichNewExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
+  lowercaseHashValues,
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
@@ -195,7 +196,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
-          exceptionItemsToAdd.length === 0
+          exceptionItemsToAdd.every((item) => item.entries.length === 0)
       );
     }
   }, [
@@ -256,7 +257,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
       const osTypes = retrieveAlertOsTypes();
-      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
@@ -316,7 +317,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <ModalBodySection className="builder-section">
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
-                <ExceptionBuilder
+                <ExceptionBuilderComponent
                   exceptionListItems={initialExceptionItems}
                   listType={exceptionListType}
                   listId={ruleExceptionList.list_id}
@@ -343,6 +344,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 {alertData !== undefined && alertStatus !== 'closed' && (
                   <EuiFormRow fullWidth>
                     <EuiCheckbox
+                      data-test-subj="close-alert-on-add-add-exception-checkbox"
                       id="close-alert-on-add-add-exception-checkbox"
                       label="Close this alert"
                       checked={shouldCloseAlert}
@@ -352,6 +354,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 )}
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
+                    data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
                     id="bulk-close-alert-on-add-add-exception-checkbox"
                     label={
                       shouldDisableBulkClose
@@ -366,7 +369,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 {exceptionListType === 'endpoint' && (
                   <>
                     <EuiSpacer />
-                    <EuiText color="subdued" size="s">
+                    <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
                       {i18n.ENDPOINT_QUARANTINE_TEXT}
                     </EuiText>
                   </>
@@ -379,6 +382,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
           <EuiButton
+            data-test-subj="add-exception-confirm-button"
             onClick={onAddExceptionConfirm}
             isLoading={addExceptionIsLoading}
             isDisabled={isSubmitButtonDisabled}

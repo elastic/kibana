@@ -22,10 +22,10 @@ import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
   });
   describe('fetchInfo', () => {
     test('it handles 404', async () => {

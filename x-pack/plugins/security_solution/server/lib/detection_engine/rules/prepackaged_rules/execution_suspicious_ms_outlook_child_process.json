@@ -4,7 +4,8 @@
   ],
   "description": "Identifies suspicious child processes of Microsoft Outlook. These child processes are often associated with spear phishing activity.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

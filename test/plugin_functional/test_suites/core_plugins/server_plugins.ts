@@ -19,7 +19,6 @@
 
 import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 

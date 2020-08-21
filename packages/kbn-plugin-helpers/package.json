@@ -12,7 +12,7 @@
     "plugin-helpers": "bin/plugin-helpers.js"
   },
   "dependencies": {
-    "@babel/core": "^7.10.2",
+    "@babel/core": "^7.11.1",
     "argv-split": "^2.0.1",
     "commander": "^3.0.0",
     "del": "^5.1.0",
@@ -23,7 +23,6 @@
     "gulp-zip": "5.0.1",
     "inquirer": "^1.2.2",
     "minimatch": "^3.0.4",
-    "node-sass": "^4.13.1",
     "through2": "^2.0.3",
     "through2-map": "^3.0.0",
     "vinyl": "^2.2.0",
@@ -33,7 +32,6 @@
     "@types/gulp-rename": "^0.0.33",
     "@types/gulp-zip": "^4.0.1",
     "@types/inquirer": "^6.5.0",
-    "@types/node-sass": "^4.11.0",
     "@types/through2": "^2.0.35",
     "@types/through2-map": "^3.0.0",
     "@types/vinyl": "^2.0.4",

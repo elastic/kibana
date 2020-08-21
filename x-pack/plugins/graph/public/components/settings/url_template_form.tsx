@@ -128,6 +128,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         props.initialTemplate.icon && <LegacyIcon asListIcon icon={props.initialTemplate.icon} />
       }
       className={classNames('gphUrlTemplateList__accordion', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphUrlTemplateList__accordion--isOpen': open,
       })}
       buttonClassName="gphUrlTemplateList__accordionbutton"

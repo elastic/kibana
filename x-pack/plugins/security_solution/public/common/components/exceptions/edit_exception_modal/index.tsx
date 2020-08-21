@@ -31,7 +31,7 @@ import {
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { ExceptionBuilder } from '../builder';
+import { ExceptionBuilderComponent } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -40,6 +40,7 @@ import {
   getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
+  lowercaseHashValues,
 } from '../helpers';
 import { Loader } from '../../loader';
 
@@ -136,7 +137,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
-          exceptionItemsToAdd.length === 0
+          exceptionItemsToAdd.every((item) => item.entries.length === 0)
       );
     }
   }, [
@@ -195,7 +196,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     ];
     if (exceptionListType === 'endpoint') {
       const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
@@ -231,7 +232,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilder
+              <ExceptionBuilderComponent
                 exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}
                 listId={exceptionItem.list_id}
@@ -258,7 +259,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection>
               <EuiFormRow fullWidth>
                 <EuiCheckbox
-                  id="close-alert-on-add-add-exception-checkbox"
+                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                  id="close-alert-on-add-edit-exception-checkbox"
                   label={
                     shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
                   }
@@ -270,7 +272,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               {exceptionListType === 'endpoint' && (
                 <>
                   <EuiSpacer />
-                  <EuiText color="subdued" size="s">
+                  <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>
                 </>
@@ -291,6 +293,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
           <EuiButton
+            data-test-subj="edit-exception-confirm-button"
             onClick={onEditExceptionConfirm}
             isLoading={addExceptionIsLoading}
             isDisabled={isSubmitButtonDisabled}

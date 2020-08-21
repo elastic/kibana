@@ -4,6 +4,11 @@ exports[`timeseriesFetcher should make the correct query 1`] = `
 Array [
   Array [
     Object {
+      "apm": Object {
+        "events": Array [
+          "error",
+        ],
+      },
       "body": Object {
         "aggs": Object {
           "distribution": Object {
@@ -21,11 +26,6 @@ Array [
         "query": Object {
           "bool": Object {
             "filter": Array [
-              Object {
-                "term": Object {
-                  "processor.event": "error",
-                },
-              },
               Object {
                 "term": Object {
                   "service.name": "myServiceName",
@@ -50,7 +50,6 @@ Array [
         },
         "size": 0,
       },
-      "index": "apm-*",
     },
   ],
 ]

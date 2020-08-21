@@ -5,12 +5,10 @@
  */
 
 import React from 'react';
-import * as reactTestingLibrary from '@testing-library/react';
-
 import { PolicyList } from './index';
-import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_list';
+import '../../../../common/mock/match_media.ts';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { AppAction } from '../../../../common/store/actions';
+import { setPolicyListApiMockImplementation } from '../store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -18,11 +16,12 @@ jest.mock('../../../../common/components/link_to');
 describe.skip('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
-  let store: AppContextTestRender['store'];
+  let coreStart: AppContextTestRender['coreStart'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    ({ history, store } = mockedContext);
+    ({ history, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<PolicyList />);
   });
 
@@ -46,34 +45,30 @@ describe.skip('when on the policies page', () => {
 
   describe('when list data loads', () => {
     let firstPolicyID: string;
-    beforeEach(() => {
-      reactTestingLibrary.act(() => {
-        history.push('/policy');
-        reactTestingLibrary.act(() => {
-          const policyListData = mockPolicyResultList({ total: 3 });
-          firstPolicyID = policyListData.items[0].id;
-          const action: AppAction = {
-            type: 'serverReturnedPolicyListData',
-            payload: {
-              policyItems: policyListData.items,
-              total: policyListData.total,
-              pageSize: policyListData.perPage,
-              pageIndex: policyListData.page,
-            },
-          };
-          store.dispatch(action);
-        });
-      });
+    const renderList = async () => {
+      const renderResult = render();
+      history.push('/policy');
+      await Promise.all([
+        middlewareSpy
+          .waitForAction('serverReturnedPolicyListData')
+          .then((action) => (firstPolicyID = action.payload.policyItems[0].id)),
+        // middlewareSpy.waitForAction('serverReturnedAgentPolicyListData'),
+      ]);
+      return renderResult;
+    };
+
+    beforeEach(async () => {
+      setPolicyListApiMockImplementation(coreStart.http, 3);
     });
 
     it('should display rows in the table', async () => {
-      const renderResult = render();
+      const renderResult = await renderList();
       const rows = await renderResult.findAllByRole('row');
       expect(rows).toHaveLength(4);
     });
 
     it('should display policy name value as a link', async () => {
-      const renderResult = render();
+      const renderResult = await renderList();
       const policyNameLink = (await renderResult.findAllByTestId('policyNameLink'))[0];
       expect(policyNameLink).not.toBeNull();
       expect(policyNameLink.getAttribute('href')).toContain(`policy/${firstPolicyID}`);

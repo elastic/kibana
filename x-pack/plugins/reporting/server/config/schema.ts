@@ -46,7 +46,7 @@ const RulesSchema = schema.object({
 
 const CaptureSchema = schema.object({
   timeouts: schema.object({
-    openUrl: schema.number({ defaultValue: 30000 }),
+    openUrl: schema.number({ defaultValue: 60000 }),
     waitForElements: schema.number({ defaultValue: 30000 }),
     renderComplete: schema.number({ defaultValue: 30000 }),
   }),
@@ -97,7 +97,7 @@ const CaptureSchema = schema.object({
         bypass: schema.conditional(
           schema.siblingRef('enabled'),
           true,
-          schema.arrayOf(schema.string({ hostname: true })),
+          schema.arrayOf(schema.string()),
           schema.maybe(schema.never())
         ),
       }),
