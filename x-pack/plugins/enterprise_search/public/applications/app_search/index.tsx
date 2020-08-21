@@ -36,7 +36,6 @@ export const AppSearch: React.FC = () => {
         </Route>
         <Route>
           <Redirect to={SETUP_GUIDE_PATH} />
-          <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
         </Route>
       </Switch>
     );
@@ -50,8 +49,7 @@ export const AppSearch: React.FC = () => {
         <Layout navigation={<AppSearchNav />}>
           <Switch>
             <Route exact path={ROOT_PATH}>
-              {/* For some reason a Redirect to /engines just doesn't work here - it shows a blank page */}
-              <EngineOverview />
+              <Redirect to={ENGINES_PATH} />
             </Route>
             <Route exact path={ENGINES_PATH}>
               <EngineOverview />
