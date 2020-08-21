@@ -43,20 +43,37 @@ export enum RuleStep {
 }
 export type RuleStatusType = 'passive' | 'active' | 'valid';
 
-export interface RuleStepData {
-  data: unknown;
-  isValid: boolean;
+export interface RuleStepsData {
+  [RuleStep.defineRule]: DefineStepRule;
+  [RuleStep.aboutRule]: AboutStepRule;
+  [RuleStep.scheduleRule]: ScheduleStepRule;
+  [RuleStep.ruleActions]: ActionsStepRule;
 }
+
+export type RuleStepsFormData = {
+  [K in keyof RuleStepsData]: {
+    data: RuleStepsData[K];
+    isValid: boolean;
+  };
+};
+
+export type RuleStepsFormHooks = {
+  [K in keyof RuleStepsData]: FormHook<RuleStepsData[K]> | null;
+};
 
 export interface RuleStepProps {
   addPadding?: boolean;
   descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
+  setStepData?: <K extends keyof RuleStepsData>(
+    step: K,
+    data: RuleStepsData[K],
+    isValid: boolean
+  ) => void;
   isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
   resizeParentContainer?: (height: number) => void;
-  setForm?: (step: RuleStep, form: FormHook<FormData>) => void;
+  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, form: RuleStepsFormHooks[K]) => void;
 }
 
 export interface AboutStepRule {

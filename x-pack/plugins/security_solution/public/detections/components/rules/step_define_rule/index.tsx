@@ -10,12 +10,11 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import {
@@ -55,7 +54,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule | null;
 }
 
-const stepDefineDefaultValue: DefineStepRule = {
+export const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
   machineLearningJobId: '',
@@ -119,7 +118,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
   ] = useFetchIndexPatterns(myStepData.index, 'step_define_rule');
 
-  const { form } = useForm({
+  const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
@@ -129,11 +128,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
-      setStepData(RuleStep.defineRule, null, false);
+      // setStepData(RuleStep.defineRule, null, false); // TODO why do we set to null?
       const { isValid, data } = await submit();
       if (isValid && setStepData) {
         setStepData(RuleStep.defineRule, data, isValid);
-        setMyStepData(data as DefineStepRule);
+        setMyStepData(data);
       }
     }
   }, [setStepData, submit]);
@@ -172,7 +171,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatternQueryBar as IIndexPattern}
+        indexPatterns={indexPatternQueryBar}
         schema={filterRuleFieldsForType(schema as FormSchema & RuleFields, myStepData.ruleType)}
         data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
       />
