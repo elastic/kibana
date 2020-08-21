@@ -76,7 +76,7 @@ describe('#create', () => {
       attrNotSoSecret: 'not-so-secret',
       attrThree: 'three',
     };
-    const options = { id: 'predefined-uuid', overwrite: true };
+    const options = { id: 'predefined-uuid', overwrite: true, version: 'some-version' };
     const mockedResponse = {
       id: 'predefined-uuid',
       type: 'known-type',
@@ -117,7 +117,7 @@ describe('#create', () => {
         attrNotSoSecret: '*not-so-secret*',
         attrThree: 'three',
       },
-      { id: 'predefined-uuid', overwrite: true }
+      { id: 'predefined-uuid', overwrite: true, version: 'some-version' }
     );
   });
 
@@ -328,7 +328,7 @@ describe('#bulkCreate', () => {
     mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
 
     const bulkCreateParams = [
-      { id: 'predefined-uuid', type: 'known-type', attributes },
+      { id: 'predefined-uuid', type: 'known-type', attributes, version: 'some-version' },
       { type: 'unknown-type', attributes },
     ];
 
