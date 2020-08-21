@@ -23,7 +23,7 @@ import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
 
-import { isArrayOfStrings } from './shared';
+import { to } from './shared';
 
 const { minLengthField } = fieldValidators;
 
@@ -47,9 +47,7 @@ const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   target_fields: {
     type: FIELD_TYPES.COMBO_BOX,
-    deserializer: (v) => {
-      return isArrayOfStrings(v) ? v : [];
-    },
+    deserializer: to.arrayOfStrings,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.targetFieldsFieldLabel', {
       defaultMessage: 'Target fields',
     }),
@@ -112,7 +110,7 @@ const fieldsConfig: FieldsConfig = {
   trim: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
+    deserializer: to.booleanOrUndef,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.trimFieldLabel', {
       defaultMessage: 'Trim',
     }),
