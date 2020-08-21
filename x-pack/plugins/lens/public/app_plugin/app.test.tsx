@@ -8,7 +8,7 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { App } from './app';
+import { App, LensAppProps } from './app';
 import { EditorFrameInstance } from '../types';
 import { AppMountParameters } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -33,6 +33,7 @@ import { navigationPluginMock } from '../../../../../src/plugins/navigation/publ
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
+import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
@@ -125,26 +126,13 @@ describe('Lens App', () => {
   let core: ReturnType<typeof coreMock['createStart']>;
   let instance: ReactWrapper;
 
-  function makeDefaultArgs(): jest.Mocked<{
-    editorFrame: EditorFrameInstance;
-    data: typeof dataStartMock;
-    navigation: typeof navigationStartMock;
-    core: typeof core;
-    storage: Storage;
-    savedObjectId?: string;
-    docStorage: SavedObjectStore;
-    redirectTo: (
-      id?: string,
-      documentByValue?: Document,
-      returnToOrigin?: boolean,
-      newlyCreated?: boolean,
-      embeddableIdToReplace?: string
-    ) => void;
-    originatingApp: string | undefined;
-    onAppLeave: AppMountParameters['onAppLeave'];
-    history: History;
-    featureFlagConfig: DashboardFeatureFlagConfig;
-  }> {
+  const navMenuItems = {
+    expectedSaveButton: { emphasize: true, testId: 'lnsApp_saveButton' },
+    expectedSaveAsButton: { emphasize: false, testId: 'lnsApp_saveButton' },
+    expectedSaveAndReturnButton: { emphasize: true, testId: 'lnsApp_saveAndReturnButton' },
+  };
+
+  function makeDefaultArgs(): jest.Mocked<LensAppProps> {
     return ({
       navigation: navigationStartMock,
       editorFrame: createMockFrame(),
@@ -191,25 +179,7 @@ describe('Lens App', () => {
       onAppLeave: jest.fn(),
       history: createMemoryHistory(),
       featureFlagConfig: { showNewLensFlow: true },
-    } as unknown) as jest.Mocked<{
-      navigation: typeof navigationStartMock;
-      editorFrame: EditorFrameInstance;
-      data: typeof dataStartMock;
-      core: typeof core;
-      storage: Storage;
-      savedObjectId?: string;
-      docStorage: SavedObjectStore;
-      redirectTo: (
-        id?: string,
-        documentByValue?: Document,
-        returnToOrigin?: boolean,
-        newlyCreated?: boolean
-      ) => void;
-      originatingApp: string | undefined;
-      onAppLeave: AppMountParameters['onAppLeave'];
-      history: History;
-      featureFlagConfig: DashboardFeatureFlagConfig;
-    }>;
+    } as unknown) as jest.Mocked<LensAppProps>;
   }
 
   beforeEach(() => {
@@ -289,6 +259,68 @@ describe('Lens App', () => {
         query: { query: '', language: 'kuery' },
         filters: [pinnedFilter],
       })
+    );
+  });
+
+  it('Renders save button in by reference mode without originatingApp', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+
+    instance = mount(<App {...args} />);
+
+    const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
+    expect(topNavMenuConfig).toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveButton)
+    );
+    expect(topNavMenuConfig).not.toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveAsButton)
+    );
+    expect(topNavMenuConfig).not.toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+    );
+  });
+
+  it('Renders Save and Return and Save As in by reference mode when originatingApp is provided', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+    args.embeddableEditorIncomingState = { originatingApp: 'ultraDashboard' };
+    args.savedObjectId = 'wowASavedObject';
+    (args.docStorage.load as jest.Mock).mockResolvedValue({ id: '1234' });
+
+    instance = mount(<App {...args} />);
+
+    const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
+    expect(topNavMenuConfig).toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+    );
+    expect(topNavMenuConfig).toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveAsButton)
+    );
+    expect(topNavMenuConfig).not.toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveButton)
+    );
+  });
+
+  it('Renders Save and Return and Save As in create by value mode', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+    args.featureFlagConfig = { allowByValueEmbeddables: true };
+    args.embeddableEditorIncomingState = {
+      originatingApp: 'ultraDashboard',
+      valueInput: { whatchaGonnaDo: 'with all these values', id: 'allTheseValuesInYourValueInput' },
+    };
+
+    instance = mount(<App {...args} />);
+
+    const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
+    expect(topNavMenuConfig).toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+    );
+    expect(topNavMenuConfig).toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveAsButton)
+    );
+    expect(topNavMenuConfig).not.toContainEqual(
+      expect.objectContaining(navMenuItems.expectedSaveButton)
     );
   });
 

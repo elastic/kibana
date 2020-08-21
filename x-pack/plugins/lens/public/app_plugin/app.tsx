@@ -62,7 +62,7 @@ interface State {
   savedQuery?: SavedQuery;
 }
 
-interface LensAppProps {
+export interface LensAppProps {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -270,7 +270,6 @@ export function App({
           ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
         };
         updateDoc(doc);
-        redirectTo();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -387,9 +386,7 @@ export function App({
             byValueMode: false,
             isSaveModalVisible: false,
             originatingApp:
-              saveProps.newCopyOnSave && !saveProps.returnToOrigin
-                ? undefined
-                : currentOriginatingApp,
+              newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
             persistedDoc: newDoc,
             lastKnownDoc: newDoc,
           }));
@@ -485,7 +482,7 @@ export function App({
                         run: () => {
                           redirectTo(undefined, undefined, true, false);
                         },
-                        testId: 'lnsApp_saveAndReturnButton',
+                        testId: 'lnsApp_cancelButton',
                       },
                     ]
                   : []),
