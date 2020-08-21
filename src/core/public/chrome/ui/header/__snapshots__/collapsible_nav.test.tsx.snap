@@ -650,6 +650,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
@@ -901,6 +903,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-kibana"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1188,6 +1192,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-observability"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1436,6 +1442,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-security"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1636,6 +1644,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-management"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -2624,6 +2634,8 @@ exports[`CollapsibleNav renders the default nav 2`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
@@ -3305,6 +3317,8 @@ exports[`CollapsibleNav renders the default nav 3`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
