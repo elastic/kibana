@@ -79,10 +79,8 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   frame?: FramePublicAPI
 ): Ast | null => {
-  const validLayers = state.layers.filter(
-    (layer): layer is ValidLayer =>
-      !(layer.seriesType.includes('percentage') && !layer.splitAccessor) &&
-      Boolean(layer.accessors.length)
+  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
+    Boolean(layer.accessors.length)
   );
   if (!validLayers.length) {
     return null;

@@ -422,7 +422,7 @@ export function XYChart({
         title={showXAxisTitle ? xTitle : undefined}
         showGridLines={gridlinesVisibilitySettings?.x}
         gridLineStyle={{ strokeWidth: 2 }}
-        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor || filteredLayers[0].hide}
+        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
         tickFormat={tickLabelsVisibilitySettings?.x ? (d) => xAxisFormatter.convert(d) : () => ''}
       />
 
@@ -483,7 +483,7 @@ export function XYChart({
             xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
             data: rows,
-            xScaleType,
+            xScaleType: xAccessor ? xScaleType : 'ordinal',
             yScaleType,
             color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>

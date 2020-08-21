@@ -45,6 +45,24 @@ export function getSuggestions({
     table.columns.every((col) => col.operation.dataType !== 'number') ||
     table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType))
   ) {
+    if (table.changeType === 'unchanged' && state) {
+      // this isn't a table we would switch to, but we have a state already. In this case, just use the current state for all series types
+      return visualizationTypes.map((visType) => {
+        const seriesType = visType.id as SeriesType;
+        return {
+          seriesType,
+          score: 0,
+          state: {
+            ...state,
+            preferredSeriesType: seriesType,
+            layers: state.layers.map((layer) => ({ ...layer, seriesType })),
+          },
+          previewIcon: getIconForSeries(seriesType),
+          title: visType.label,
+          hide: true,
+        };
+      });
+    }
     return [];
   }
 
@@ -270,11 +288,7 @@ function getSuggestionsForLayer({
     !seriesType.includes('percentage')
   ) {
     const percentageOptions = { ...options };
-    if (
-      percentageOptions.xValue &&
-      percentageOptions.xValue.operation.scale === 'ordinal' &&
-      !percentageOptions.splitBy
-    ) {
+    if (percentageOptions.xValue?.operation.scale === 'ordinal' && !percentageOptions.splitBy) {
       percentageOptions.splitBy = percentageOptions.xValue;
       delete percentageOptions.xValue;
     }
@@ -391,7 +405,11 @@ function getSuggestionTitle(
           'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
       })
     );
-  const xTitle = xValue?.operation.label || '(empty)';
+  const xTitle =
+    xValue?.operation.label ||
+    i18n.translate('xpack.lens.xySuggestions.emptyAxisTitle', {
+      defaultMessage: '(empty)',
+    });
   const title =
     tableLabel ||
     (xValue?.operation.dataType === 'date'
@@ -433,12 +451,7 @@ function buildSuggestion({
   keptLayerIds: string[];
   hide?: boolean;
 }) {
-  if (
-    seriesType.includes('percentage') &&
-    xValue &&
-    xValue.operation.scale === 'ordinal' &&
-    !splitBy
-  ) {
+  if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;
     xValue = undefined;
   }
