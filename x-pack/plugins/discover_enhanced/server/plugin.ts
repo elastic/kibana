@@ -28,7 +28,7 @@ export class DiscoverEnhancedPlugin
 
   public setup(core: CoreSetup, { usageCollection }: SetupDependencies) {
     if (!!usageCollection) {
-      usageCollection.makeUsageCollector<{
+      const collector = usageCollection.makeUsageCollector<{
         exploreDataInChartActionEnabled: boolean;
       }>({
         type: 'discoverEnhanced',
@@ -45,6 +45,7 @@ export class DiscoverEnhancedPlugin
           };
         },
       });
+      usageCollection.registerCollector(collector);
     }
   }
 
