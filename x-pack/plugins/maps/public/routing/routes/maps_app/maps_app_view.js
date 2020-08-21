@@ -99,7 +99,7 @@ export class MapsAppView extends React.Component {
     getCoreChrome().setBreadcrumbs([]);
   }
 
-  _hasUnsavedChanges() {
+  _hasUnsavedChanges = () => {
     const savedLayerList = this.props.savedMap.getLayerList();
     return !savedLayerList
       ? !_.isEqual(this.props.layerListConfigOnly, this.state.initialLayerListConfig)
@@ -109,12 +109,12 @@ export class MapsAppView extends React.Component {
         // Need to perform the same process for layerListConfigOnly to compare apples to apples
         // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
         !_.isEqual(JSON.parse(JSON.stringify(this.props.layerListConfigOnly)), savedLayerList);
-  }
+  };
 
   _setBreadcrumbs = () => {
     const breadcrumbs = getBreadcrumbs({
       title: this.props.savedMap.title,
-      hasUnsavedChanges: this._hasUnsavedChanges(),
+      getHasUnsavedChanges: this._hasUnsavedChanges,
       originatingApp: this.state.originatingApp,
       getAppNameFromId: this.props.stateTransfer.getAppNameFromId,
     });

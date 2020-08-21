@@ -18,12 +18,12 @@ export const unsavedChangesWarning = i18n.translate(
 
 export function getBreadcrumbs({
   title,
-  hasUnsavedChanges,
+  getHasUnsavedChanges,
   originatingApp,
   getAppNameFromId,
 }: {
   title: string;
-  hasUnsavedChanges: boolean;
+  getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
   getAppNameFromId?: (id: string) => string;
 }) {
@@ -42,7 +42,7 @@ export function getBreadcrumbs({
       defaultMessage: 'Maps',
     }),
     onClick: () => {
-      if (hasUnsavedChanges) {
+      if (getHasUnsavedChanges()) {
         const navigateAway = window.confirm(unsavedChangesWarning);
         if (navigateAway) {
           goToSpecifiedPath('/');
