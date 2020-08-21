@@ -24,8 +24,8 @@ import { SetupGuide } from './components/setup_guide';
 import { Overview } from './components/overview';
 
 export const WorkplaceSearch: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
-  if (!enterpriseSearchUrl)
+  const { config } = useContext(KibanaContext) as IKibanaContext;
+  if (!config.host)
     return (
       <Switch>
         <Route exact path={SETUP_GUIDE_PATH}>
@@ -33,7 +33,6 @@ export const WorkplaceSearch: React.FC = () => {
         </Route>
         <Route>
           <Redirect to={SETUP_GUIDE_PATH} />
-          <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
         </Route>
       </Switch>
     );

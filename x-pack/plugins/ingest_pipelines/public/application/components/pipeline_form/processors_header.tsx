@@ -9,12 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
+import { useKibana } from '../../../shared_imports';
 
 import {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
-  TestPipelineButton,
+  TestPipelineActions,
 } from '../pipeline_processors_editor';
 
 export interface Props {
@@ -22,7 +22,8 @@ export interface Props {
 }
 
 export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
-  const { links } = usePipelineProcessorsContext();
+  const { services } = useKibana();
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -30,21 +31,33 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
       justifyContent="spaceBetween"
       responsive={false}
     >
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
-              defaultMessage: 'Processors',
-            })}
-          </h3>
-        </EuiTitle>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
+                  defaultMessage: 'Processors',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LoadFromJsonButton onDone={onLoadJson} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.processorsTreeDescription"
             defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={links.esDocsBasePath + '/ingest-processors.html'} target="_blank">
+                <EuiLink
+                  href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
+                  target="_blank"
+                  external
+                >
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {
@@ -58,10 +71,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <LoadFromJsonButton onDone={onLoadJson} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TestPipelineButton />
+        <TestPipelineActions />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

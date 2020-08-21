@@ -42,7 +42,7 @@ function msearch({
       index: index.title || index,
       search_type: searchType,
       ignore_unavailable: true,
-      preference: getPreference(config),
+      preference: getPreference(config.get),
     };
     const inlineBody = {
       ...body,
@@ -52,7 +52,7 @@ function msearch({
   });
 
   const searching = es.msearch({
-    ...getMSearchParams(config),
+    ...getMSearchParams(config.get),
     body: `${inlineRequests.join('\n')}\n`,
   });
 

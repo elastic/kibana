@@ -1,8 +1,6 @@
 [[vega-graph]]
 == Vega
 
-experimental[]
-
 Build custom visualizations using Vega and Vega-Lite, backed by one or more
 data sources including {es}, Elastic Map Service, URL,
 or static data. Use the {kib} extensions to Vega to embed Vega into
@@ -1259,7 +1257,7 @@ Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) va
 [[vega-queries]]
 ==== Writing {es} queries in Vega
 
-experimental[] {kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
+{kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
 with support for direct {es} queries specified as a `url`.
 
 Because of this, {kib} is **unable to support dynamically loaded data**,
@@ -1414,7 +1412,7 @@ try to get about 10-15 data points (buckets).
 [[vega-esmfiles]]
 === Access Elastic Map Service files
 
-experimental[] Access the Elastic Map Service files via the same mechanism:
+Access the Elastic Map Service files via the same mechanism:
 
 [source,yaml]
 ----
@@ -1619,7 +1617,7 @@ kibanaSetTimeFilter(start, end)
 [[vega-useful-links]]
 === Resources and examples
 
-experimental[] To learn more about Vega and Vega-Lite, refer to the resources and examples.
+To learn more about Vega and Vega-Lite, refer to the resources and examples.
 
 ==== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any

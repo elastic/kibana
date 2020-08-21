@@ -48,9 +48,7 @@ import {
 } from './index_patterns';
 import {
   setFieldFormats,
-  setHttp,
   setIndexPatterns,
-  setInjectedMetadata,
   setNotifications,
   setOverlays,
   setQueryService,
@@ -148,7 +146,7 @@ export class DataPublicPlugin
     const searchService = this.searchService.setup(core, {
       usageCollection,
       packageInfo: this.packageInfo,
-      registerFunction: expressions.registerFunction,
+      expressions,
     });
 
     return {
@@ -164,11 +162,9 @@ export class DataPublicPlugin
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
-    setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
