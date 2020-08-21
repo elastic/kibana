@@ -7,23 +7,9 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
-
-import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
-
-const fieldsConfig: FieldsConfig = {
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.targetFieldHelpText', {
-      defaultMessage: 'The field to assign the converted value to',
-    }),
-  },
-};
+import { TargetField } from './common_fields/target_field';
 
 export const Bytes: FunctionComponent = () => {
   return (
@@ -35,7 +21,7 @@ export const Bytes: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField />
 
       <IgnoreMissingField />
     </>
