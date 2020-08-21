@@ -5,9 +5,9 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { Config } from '../common';
 
 interface SetupDependencies {
