@@ -3,9 +3,10 @@
   "compilerOptions": {
     "outDir": "target",
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "target": "ES2018"
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ]
 }

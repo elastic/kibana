@@ -17,30 +17,21 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export * from './tooling_log';
-export * from './serializers';
-export {
-  CA_CERT_PATH,
-  ES_KEY_PATH,
-  ES_CERT_PATH,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
-  ES_EMPTYPASSWORD_P12_PATH,
-  ES_NOPASSWORD_P12_PATH,
-  KBN_KEY_PATH,
-  KBN_CERT_PATH,
-  KBN_P12_PATH,
-  KBN_P12_PASSWORD,
-} from './certs';
-export { REPO_ROOT } from './repo_root';
-export { KbnClient } from './kbn_client';
-export * from './run';
-export * from './axios';
-export * from './stdio';
-export * from './ci_stats_reporter';
-export * from './plugin_list';
-export * from './simple_kibana_platform_plugin_discovery';
-export * from './streams';
-export * from './babel';
-export * from './parse_kibana_platform_plugin';
+import Fs from 'fs';
+import { promisify } from 'util';
+
+import del from 'del';
+
+import { BuildContext } from '../build_context';
+
+const asyncMkdir = promisify(Fs.mkdir);
+
+export async function initTargets({ log, sourceDir, buildDir }: BuildContext) {
+  log.info('deleting the build and target directories');
+  await del(['build', 'target'], {
+    cwd: sourceDir,
+  });
+
+  log.debug(`creating build output dir [${buildDir}]`);
+  await asyncMkdir(buildDir, { recursive: true });
+}

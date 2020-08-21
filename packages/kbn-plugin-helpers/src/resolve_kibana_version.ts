@@ -17,30 +17,24 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export * from './tooling_log';
-export * from './serializers';
-export {
-  CA_CERT_PATH,
-  ES_KEY_PATH,
-  ES_CERT_PATH,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
-  ES_EMPTYPASSWORD_P12_PATH,
-  ES_NOPASSWORD_P12_PATH,
-  KBN_KEY_PATH,
-  KBN_CERT_PATH,
-  KBN_P12_PATH,
-  KBN_P12_PASSWORD,
-} from './certs';
-export { REPO_ROOT } from './repo_root';
-export { KbnClient } from './kbn_client';
-export * from './run';
-export * from './axios';
-export * from './stdio';
-export * from './ci_stats_reporter';
-export * from './plugin_list';
-export * from './simple_kibana_platform_plugin_discovery';
-export * from './streams';
-export * from './babel';
-export * from './parse_kibana_platform_plugin';
+import inquirer from 'inquirer';
+
+import { Plugin } from './load_kibana_platform_plugin';
+
+export async function resolveKibanaVersion(option: string | undefined, plugin: Plugin) {
+  const preselectedVersion = option || plugin.manifest.kibanaVersion || plugin.manifest.version;
+
+  if (preselectedVersion && preselectedVersion !== 'kibana') {
+    return preselectedVersion;
+  }
+
+  const answers = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'kibanaVersion',
+      message: 'What version of Kibana are you building for?',
+    },
+  ]);
+
+  return answers.kibanaVersion;
+}

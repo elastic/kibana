@@ -1,0 +1,6 @@
+{
+  "id": "foo",
+  "version": "1.0.0",
+  "kibanaVersion": "7.5.0",
+  "ui": true
+}

@@ -50,7 +50,7 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
         directory,
         manifestPath,
         id: manifest.id,
-        isUiPlugin: !!manifest.ui,
+        isUiPlugin: manifest.ui,
         extraPublicDirs: extraPublicDirs || [],
       };
     }
