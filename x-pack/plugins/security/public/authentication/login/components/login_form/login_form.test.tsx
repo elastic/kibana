@@ -455,7 +455,7 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
