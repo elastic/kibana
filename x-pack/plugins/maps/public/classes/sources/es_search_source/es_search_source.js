@@ -607,17 +607,14 @@ export class ESSearchSource extends AbstractESSource {
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const indexPatternTitle = indexPattern.title;
-    const geometryFieldName = this._descriptor.geoField;
     const dsl = await searchSource.getSearchRequestBody();
-
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
     );
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldName}&index=${indexPatternTitle}&requestBody=${risonDsl}`;
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
