@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should receive expected results after calling overview logging', async () => {
+    it('should receive 200 status after overview logging', async () => {
       // call overview page
       await supertest
         .post(API_URLS.LOG_PAGE_VIEW)
