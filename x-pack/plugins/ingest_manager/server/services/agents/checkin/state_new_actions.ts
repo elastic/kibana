@@ -20,12 +20,17 @@ import {
   Agent,
   AgentAction,
   AgentSOAttributes,
-  AgentConfig,
-  FullAgentConfig,
+  AgentPolicy,
+  FullAgentPolicy,
 } from '../../../types';
-import { agentConfigService } from '../../agent_config';
+import { agentPolicyService } from '../../agent_policy';
 import * as APIKeysService from '../../api_keys';
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_UPDATE_ACTIONS_INTERVAL_MS } from '../../../constants';
+import {
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_UPDATE_ACTIONS_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+} from '../../../constants';
 import { createAgentAction, getNewActionsSince } from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
@@ -49,14 +54,16 @@ function getInternalUserSOClient() {
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
 
-function createAgentConfigSharedObservable(configId: string) {
+function createAgentPolicySharedObservable(agentPolicyId: string) {
   const internalSOClient = getInternalUserSOClient();
   return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() =>
-      from(agentConfigService.get(internalSOClient, configId) as Promise<AgentConfig>)
+      from(agentPolicyService.get(internalSOClient, agentPolicyId) as Promise<AgentPolicy>)
     ),
     distinctUntilKeyChanged('revision'),
-    switchMap((data) => from(agentConfigService.getFullConfig(internalSOClient, configId))),
+    switchMap((data) =>
+      from(agentPolicyService.getFullAgentPolicy(internalSOClient, agentPolicyId))
+    ),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
@@ -95,48 +102,54 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
-function shouldCreateAgentConfigAction(agent: Agent, config: FullAgentConfig | null): boolean {
-  if (!config || !config.revision) {
+function shouldCreateAgentPolicyAction(agent: Agent, agentPolicy: FullAgentPolicy | null): boolean {
+  if (!agentPolicy || !agentPolicy.revision) {
     return false;
   }
-  const isAgentConfigOutdated = !agent.config_revision || agent.config_revision < config.revision;
-  if (!isAgentConfigOutdated) {
+  const isAgentPolicyOutdated =
+    !agent.policy_revision || agent.policy_revision < agentPolicy.revision;
+  if (!isAgentPolicyOutdated) {
     return false;
   }
 
   return true;
 }
 
-async function createAgentActionFromConfig(
+async function createAgentActionFromAgentPolicy(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  config: FullAgentConfig | null
+  policy: FullAgentPolicy | null
 ) {
   // Deep clone !not supporting Date, and undefined value.
-  const newConfig = JSON.parse(JSON.stringify(config));
+  const newAgentPolicy = JSON.parse(JSON.stringify(policy));
 
-  // Mutate the config to set the api token for this agent
-  newConfig.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+  // Mutate the policy to set the api token for this agent
+  newAgentPolicy.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
+    soClient,
+    agent
+  );
 
-  const configChangeAction = await createAgentAction(soClient, {
+  const policyChangeAction = await createAgentAction(soClient, {
     agent_id: agent.id,
     type: 'CONFIG_CHANGE',
-    data: { config: newConfig } as any,
+    data: { config: newAgentPolicy } as any,
     created_at: new Date().toISOString(),
     sent_at: undefined,
   });
 
-  return [configChangeAction];
+  return [policyChangeAction];
 }
 
 export function agentCheckinStateNewActionsFactory() {
   // Shared Observables
-  const agentConfigs$ = new Map<string, Observable<FullAgentConfig | null>>();
+  const agentPolicies$ = new Map<string, Observable<FullAgentPolicy | null>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
   const rateLimiter = createRateLimiter(
-    appContextService.getConfig()?.fleet.agentConfigRolloutRateLimitIntervalMs ?? 5000,
-    appContextService.getConfig()?.fleet.agentConfigRolloutRateLimitRequestPerInterval ?? 50
+    appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitIntervalMs ??
+      AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+    appContextService.getConfig()?.fleet.agentPolicyRolloutRateLimitRequestPerInterval ??
+      AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL
   );
 
   async function subscribeToNewActions(
@@ -144,23 +157,23 @@ export function agentCheckinStateNewActionsFactory() {
     agent: Agent,
     options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
-    if (!agent.config_id) {
-      throw new Error('Agent do not have a config');
+    if (!agent.policy_id) {
+      throw new Error('Agent does not have a policy');
     }
-    const configId = agent.config_id;
-    if (!agentConfigs$.has(configId)) {
-      agentConfigs$.set(configId, createAgentConfigSharedObservable(configId));
+    const agentPolicyId = agent.policy_id;
+    if (!agentPolicies$.has(agentPolicyId)) {
+      agentPolicies$.set(agentPolicyId, createAgentPolicySharedObservable(agentPolicyId));
     }
-    const agentConfig$ = agentConfigs$.get(configId);
-    if (!agentConfig$) {
-      throw new Error(`Invalid state no observable for config ${configId}`);
+    const agentPolicy$ = agentPolicies$.get(agentPolicyId);
+    if (!agentPolicy$) {
+      throw new Error(`Invalid state, no observable for policy ${agentPolicyId}`);
     }
 
-    const stream$ = agentConfig$.pipe(
+    const stream$ = agentPolicy$.pipe(
       timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
-      filter((config) => shouldCreateAgentConfigAction(agent, config)),
+      filter((agentPolicy) => shouldCreateAgentPolicyAction(agent, agentPolicy)),
       rateLimiter(),
-      mergeMap((config) => createAgentActionFromConfig(soClient, agent, config)),
+      mergeMap((agentPolicy) => createAgentActionFromAgentPolicy(soClient, agent, agentPolicy)),
       merge(newActions$),
       mergeMap(async (data) => {
         if (!data) {

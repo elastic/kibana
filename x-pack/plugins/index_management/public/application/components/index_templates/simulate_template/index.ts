@@ -10,4 +10,4 @@ export {
   Props as SimulateTemplateProps,
 } from './simulate_template_flyout';
 
-export { SimulateTemplate } from './simulate_template';
+export { SimulateTemplate, Filters as SimulateTemplateFilters } from './simulate_template';

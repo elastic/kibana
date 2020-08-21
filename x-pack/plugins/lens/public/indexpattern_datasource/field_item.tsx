@@ -100,7 +100,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     isLoading: false,
   });
 
-  const wrappableName = wrapOnDot(field.name)!;
+  const wrappableName = wrapOnDot(field.displayName)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
     ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
@@ -208,7 +208,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
-          label={field.name}
+          label={field.displayName}
           value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
@@ -225,7 +225,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
               defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
               values: {
-                fieldName: field.name,
+                fieldName: field.displayName,
                 fieldType: field.type,
               },
             })}

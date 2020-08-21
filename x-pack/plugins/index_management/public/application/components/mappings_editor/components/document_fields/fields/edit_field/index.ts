@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './edit_field_container';
+export {
+  EditFieldContainer,
+  defaultFlyoutProps,
+  Props as EditFieldContainerProps,
+} from './edit_field_container';
 
 export * from './basic_parameters_section';
 

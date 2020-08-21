@@ -25,12 +25,13 @@ import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 export const useField = <T>(
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> = {},
+  config: FieldConfig<any, T> & { initialValue?: T } = {},
   valueChangeListener?: (value: T) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
-    defaultValue = '',
+    defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
+    initialValue = config.defaultValue ?? '', // The value explicitly passed
     label = '',
     labelAppend = '',
     helpText = '',
@@ -44,14 +45,22 @@ export const useField = <T>(
 
   const { getFormData, __removeField, __updateFormDataAt, __validateFields } = form;
 
-  const initialValue = useMemo(() => {
-    if (typeof defaultValue === 'function') {
-      return deserializer ? deserializer(defaultValue()) : defaultValue();
-    }
-    return deserializer ? deserializer(defaultValue) : defaultValue;
-  }, [defaultValue, deserializer]) as T;
+  /**
+   * This callback is both used as the initial "value" state getter, **and** for when we reset the form
+   * (and thus reset the field value). When we reset the form, we can provide a new default value (which will be
+   * passed through this "initialValueGetter" handler).
+   */
+  const initialValueGetter = useCallback(
+    (updatedDefaultValue = initialValue) => {
+      if (typeof updatedDefaultValue === 'function') {
+        return deserializer ? deserializer(updatedDefaultValue()) : updatedDefaultValue();
+      }
+      return deserializer ? deserializer(updatedDefaultValue) : updatedDefaultValue;
+    },
+    [initialValue, deserializer]
+  );
 
-  const [value, setStateValue] = useState<T>(initialValue);
+  const [value, setStateValue] = useState<T>(initialValueGetter);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
@@ -429,7 +438,7 @@ export const useField = <T>(
 
   const reset: FieldHook<T>['reset'] = useCallback(
     (resetOptions = { resetValue: true }) => {
-      const { resetValue = true } = resetOptions;
+      const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
       setPristine(true);
       setValidating(false);
@@ -438,11 +447,12 @@ export const useField = <T>(
       setErrors([]);
 
       if (resetValue) {
-        setValue(initialValue);
-        return initialValue;
+        const newValue = initialValueGetter(updatedDefaultValue ?? defaultValue);
+        setValue(newValue);
+        return newValue;
       }
     },
-    [setValue, serializeOutput, initialValue]
+    [setValue, initialValueGetter, defaultValue]
   );
 
   // -- EFFECTS
