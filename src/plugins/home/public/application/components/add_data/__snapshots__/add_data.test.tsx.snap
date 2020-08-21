@@ -68,7 +68,7 @@ exports[`AddData render 1`] = `
     >
       <Synopsis
         description="Add and manage your fleet of Elastic Agents and integrations."
-        iconType="logstashInput"
+        iconType="indexManagementApp"
         id="ingestManager"
         isBeta={false}
         onClick={[Function]}
@@ -82,7 +82,7 @@ exports[`AddData render 1`] = `
     >
       <Synopsis
         description="Import your own CSV, NDJSON, or log file"
-        iconType="importAction"
+        iconType="document"
         id="ml_file_data_visualizer"
         isBeta={false}
         onClick={[Function]}

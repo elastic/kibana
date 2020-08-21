@@ -7,11 +7,11 @@ exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
   key="kibana"
 >
   <a
+    className="homSolutionPanel homSolutionPanel--kibana"
     href="kibana_landing_page"
     onClick={[Function]}
   >
     <EuiPanel
-      className="homSolutionPanel homSolutionPanel--kibana"
       paddingSize="none"
     >
       <EuiFlexGroup

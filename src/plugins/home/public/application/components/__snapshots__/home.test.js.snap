@@ -39,7 +39,7 @@ exports[`home change home route should render a link to change the default route
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -157,7 +157,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -273,7 +273,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -391,7 +391,7 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -509,7 +509,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -665,7 +665,7 @@ exports[`home header render 1`] = `
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -771,7 +771,7 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -899,7 +899,7 @@ exports[`home header should show "Manage" link if stack management is available 
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1015,7 +1015,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1121,7 +1121,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1227,7 +1227,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1333,7 +1333,7 @@ exports[`home should render home component 1`] = `
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1439,7 +1439,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1545,7 +1545,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
@@ -1658,7 +1658,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
             >
               <EuiButtonEmpty
                 href="#/tutorial_directory"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 Add data
               </EuiButtonEmpty>
