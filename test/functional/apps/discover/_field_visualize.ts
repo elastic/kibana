@@ -87,6 +87,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.close();
     });
 
+    it('should not show the "Visualize" button for geo field', async () => {
+      await PageObjects.discover.findFieldByName('geo.coordinates');
+      log.debug('visualize a geo field');
+      await PageObjects.discover.expectMissingFieldListItemVisualize('geo.coordinates');
+    });
+
     it('should preserve app filters in visualize', async () => {
       await filterBar.addFilter('bytes', 'is between', '3500', '4000');
       await PageObjects.discover.findFieldByName('geo.src');

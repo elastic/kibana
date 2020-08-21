@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
@@ -35,12 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
       await esArchiver.load('long_window_logstash_index_pattern');
+      await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
       await esArchiver.unload('long_window_logstash');
       await esArchiver.unload('long_window_logstash_index_pattern');
+      await security.testUser.restoreDefaults();
     });
 
     async function prepareTest(fromTime: string, toTime: string, interval: string) {
