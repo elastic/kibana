@@ -27,10 +27,10 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.loadIfNeeded('makelogs');
     });
 
-    after(async () => {
-      await esArchiver.unload('makelogs');
-      await esArchiver.unload('empty_kibana');
-    });
+    // after(async () => {
+    //   await esArchiver.unload('makelogs');
+    //   await esArchiver.unload('empty_kibana');
+    // });
 
     describe('', function () {
       this.tags('ciGroup7');
