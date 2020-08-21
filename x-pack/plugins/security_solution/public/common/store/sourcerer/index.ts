@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { appModel } from './app';
-export { dragAndDropModel } from './drag_and_drop';
-export { inputsModel } from './inputs';
-export { sourcererModel } from './sourcerer';
-export * from './types';
+import * as sourcererActions from './actions';
+import * as sourcererModel from './model';
+import * as sourcererSelectors from './selectors';
+
+export { sourcererActions, sourcererModel, sourcererSelectors };
+export * from './reducer';

@@ -12,6 +12,7 @@ import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
 import { AppState } from './app/reducer';
 import { InputsState } from './inputs/reducer';
+import { SourcererState } from './sourcerer/reducer';
 import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
@@ -25,6 +26,7 @@ export type StoreState = HostsPluginState &
     app: AppState;
     dragAndDrop: DragAndDropState;
     inputs: InputsState;
+    sourcerer: SourcererState;
   };
 /**
  * The redux `State` type for the Security App.

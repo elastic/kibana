@@ -5,8 +5,8 @@
  */
 
 import { get, noop, isEmpty } from 'lodash/fp';
-import React, { createContext, useCallback, useContext, useEffect, useReducer } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import React, { createContext, useCallback, useContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
@@ -15,15 +15,8 @@ import { SourceQuery } from '../../../graphql/types';
 
 import { sourceQuery } from '../source/index.gql_query';
 import { useApolloClient } from '../../utils/apollo_context';
+import { SOURCERER_FEATURE_FLAG_ON } from './constants';
 import {
-  sourceGroups,
-  SecurityPageName,
-  SourceGroupsType,
-  SOURCERER_FEATURE_FLAG_ON,
-} from './constants';
-import {
-  BrowserFields,
-  DocValueFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   getBrowserFields,
@@ -32,74 +25,31 @@ import {
   indicesExistOrDataTemporarilyUnavailable,
 } from './format';
 import { fetchIndexFields } from './async';
+import {
+  initialSourcererState,
+  sourceGroupSettings,
+  sourcererActions,
+  sourcererModel,
+  sourcererSelectors,
+} from '../../store/sourcerer';
+import { SecurityPageName } from '../../store/sourcerer/model';
 
-// TYPES
-interface ManageSource {
-  browserFields: BrowserFields;
-  defaultPatterns: string[];
-  docValueFields: DocValueFields[];
-  errorMessage: string | null;
-  id: SourceGroupsType;
-  indexPattern: IIndexPattern;
-  indexPatterns: string[];
-  indicesExist: boolean | undefined | null;
-  loading: boolean;
-}
-
-interface ManageSourceInit extends Partial<ManageSource> {
-  id: SourceGroupsType;
-}
-
-type ManageSourceGroupById = {
-  [id in SourceGroupsType]?: ManageSource;
-};
-
-type ActionManageSource =
-  | {
-      type: 'SET_SOURCE';
-      id: SourceGroupsType;
-      defaultIndex: string[];
-      payload: ManageSourceInit;
-    }
-  | {
-      type: 'SET_IS_SOURCE_LOADING';
-      id: SourceGroupsType;
-      payload: boolean;
-    }
-  | {
-      type: 'SET_ACTIVE_SOURCE_GROUP_ID';
-      payload: SourceGroupsType;
-    }
-  | {
-      type: 'SET_AVAILABLE_INDEX_PATTERNS';
-      payload: string[];
-    }
-  | {
-      type: 'SET_IS_INDEX_PATTERNS_LOADING';
-      payload: boolean;
-    };
-
-interface ManageSourcerer {
-  activeSourceGroupId: SourceGroupsType;
-  availableIndexPatterns: string[];
-  availableSourceGroupIds: SourceGroupsType[];
-  isIndexPatternsLoading: boolean;
-  sourceGroups: ManageSourceGroupById;
-}
-
-export interface UseSourceManager extends ManageSourcerer {
-  getManageSourceGroupById: (id: SourceGroupsType) => ManageSource;
+export interface UseSourceManager extends Omit<sourcererModel.SourcererModel, 'sourceGroups'> {
+  getManageSourceGroupById: (id: sourcererModel.SourceGroupsType) => sourcererModel.ManageSource;
   initializeSourceGroup: (
-    id: SourceGroupsType,
+    id: sourcererModel.SourceGroupsType,
     indexToAdd?: string[] | null,
     onlyCheckIndexToAdd?: boolean
   ) => void;
-  setActiveSourceGroupId: (id: SourceGroupsType) => void;
-  updateSourceGroupIndicies: (id: SourceGroupsType, updatedIndicies: string[]) => void;
+  setActiveSourceGroupId: (id: sourcererModel.SourceGroupsType) => void;
+  updateSourceGroupIndicies: (
+    id: sourcererModel.SourceGroupsType,
+    updatedIndicies: string[]
+  ) => void;
 }
 
 // DEFAULTS/INIT
-export const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) => ({
+export const getSourceDefaults = (id: sourcererModel.SourceGroupsType, defaultIndex: string[]) => ({
   browserFields: EMPTY_BROWSER_FIELDS,
   defaultPatterns: defaultIndex,
   docValueFields: EMPTY_DOCVALUE_FIELD,
@@ -111,68 +61,13 @@ export const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) 
   loading: true,
 });
 
-const initManageSource: ManageSourcerer = {
-  activeSourceGroupId: SecurityPageName.default,
-  availableIndexPatterns: [],
-  availableSourceGroupIds: [],
-  isIndexPatternsLoading: true,
-  sourceGroups: {},
-};
-const init: UseSourceManager = {
-  ...initManageSource,
-  getManageSourceGroupById: (id: SourceGroupsType) => getSourceDefaults(id, []),
+const { sourceGroups: foo, ...rest } = initialSourcererState;
+const popopopop: UseSourceManager = {
+  ...rest,
+  getManageSourceGroupById: (id: sourcererModel.SourceGroupsType) => getSourceDefaults(id, []),
   initializeSourceGroup: () => noop,
   setActiveSourceGroupId: () => noop,
   updateSourceGroupIndicies: () => noop,
-};
-
-const reducerManageSource = (state: ManageSourcerer, action: ActionManageSource) => {
-  switch (action.type) {
-    case 'SET_SOURCE':
-      return {
-        ...state,
-        sourceGroups: {
-          ...state.sourceGroups,
-          [action.id]: {
-            ...getSourceDefaults(action.id, action.defaultIndex),
-            ...state.sourceGroups[action.id],
-            ...action.payload,
-          },
-        },
-        availableSourceGroupIds: state.availableSourceGroupIds.includes(action.id)
-          ? state.availableSourceGroupIds
-          : [...state.availableSourceGroupIds, action.id],
-      };
-    case 'SET_IS_SOURCE_LOADING':
-      return {
-        ...state,
-        sourceGroups: {
-          ...state.sourceGroups,
-          [action.id]: {
-            ...state.sourceGroups[action.id],
-            id: action.id,
-            loading: action.payload,
-          },
-        },
-      };
-    case 'SET_ACTIVE_SOURCE_GROUP_ID':
-      return {
-        ...state,
-        activeSourceGroupId: action.payload,
-      };
-    case 'SET_AVAILABLE_INDEX_PATTERNS':
-      return {
-        ...state,
-        availableIndexPatterns: action.payload,
-      };
-    case 'SET_IS_INDEX_PATTERNS_LOADING':
-      return {
-        ...state,
-        isIndexPatternsLoading: action.payload,
-      };
-    default:
-      return state;
-  }
 };
 
 // HOOKS
@@ -183,15 +78,24 @@ export const useSourceManager = (): UseSourceManager => {
     },
   } = useKibana();
   const apolloClient = useApolloClient();
-  const [state, dispatch] = useReducer(reducerManageSource, initManageSource);
+  const dispatch = useDispatch();
+  const activeSourceGroupId = useSelector(sourcererSelectors.activeSourceGroupIdSelector);
+  const availableIndexPatterns = useSelector(sourcererSelectors.availableIndexPatternsSelector);
+  const availableSourceGroupIds = useSelector(sourcererSelectors.availableSourceGroupIdsSelector);
+  const isIndexPatternsLoading = useSelector(sourcererSelectors.isIndexPatternsLoadingSelector);
+  const sourceGroups = useSelector(sourcererSelectors.sourceGroupsSelector);
 
   // Kibana Index Patterns
-  const setIsIndexPatternsLoading = useCallback((loading: boolean) => {
-    dispatch({
-      type: 'SET_IS_INDEX_PATTERNS_LOADING',
-      payload: loading,
-    });
-  }, []);
+  const setIsIndexPatternsLoading = useCallback(
+    (loading: boolean) => {
+      dispatch(
+        sourcererActions.setIsIndexPatternsLoading({
+          payload: loading,
+        })
+      );
+    },
+    [dispatch]
+  );
   const getDefaultIndex = useCallback(
     (indexToAdd?: string[] | null, onlyCheckIndexToAdd?: boolean) => {
       const filterIndexAdd = (indexToAdd ?? []).filter((item) => item !== NO_ALERT_INDEX);
@@ -199,20 +103,24 @@ export const useSourceManager = (): UseSourceManager => {
         return onlyCheckIndexToAdd
           ? filterIndexAdd.sort()
           : [
-              ...state.availableIndexPatterns,
-              ...filterIndexAdd.filter((index) => !state.availableIndexPatterns.includes(index)),
+              ...availableIndexPatterns,
+              ...filterIndexAdd.filter((index) => !availableIndexPatterns.includes(index)),
             ].sort();
       }
-      return state.availableIndexPatterns.sort();
+      return availableIndexPatterns.sort();
     },
-    [state.availableIndexPatterns]
+    [availableIndexPatterns]
   );
-  const setAvailableIndexPatterns = useCallback((availableIndexPatterns: string[]) => {
-    dispatch({
-      type: 'SET_AVAILABLE_INDEX_PATTERNS',
-      payload: availableIndexPatterns,
-    });
-  }, []);
+  const setAvailableIndexPatterns = useCallback(
+    (availableIndexPatternsNow: string[]) => {
+      dispatch(
+        sourcererActions.setAvailableIndexPatterns({
+          payload: availableIndexPatternsNow,
+        })
+      );
+    },
+    [dispatch]
+  );
   const fetchKibanaIndexPatterns = useCallback(() => {
     setIsIndexPatternsLoading(true);
     const abortCtrl = new AbortController();
@@ -236,58 +144,66 @@ export const useSourceManager = (): UseSourceManager => {
 
   // Security Solution Source Groups
   const setActiveSourceGroupId = useCallback(
-    (sourceGroupId: SourceGroupsType) => {
-      if (state.availableSourceGroupIds.includes(sourceGroupId)) {
-        dispatch({
-          type: 'SET_ACTIVE_SOURCE_GROUP_ID',
-          payload: sourceGroupId,
-        });
+    (sourceGroupId: sourcererModel.SourceGroupsType) => {
+      if (availableSourceGroupIds.includes(sourceGroupId)) {
+        dispatch(
+          sourcererActions.setActiveSourceGroupId({
+            payload: sourceGroupId,
+          })
+        );
       }
     },
-    [state.availableSourceGroupIds]
+    [availableSourceGroupIds, dispatch]
   );
   const setIsSourceLoading = useCallback(
-    ({ id, loading }: { id: SourceGroupsType; loading: boolean }) => {
-      dispatch({
-        type: 'SET_IS_SOURCE_LOADING',
-        id,
-        payload: loading,
-      });
+    ({ id, loading }: { id: sourcererModel.SourceGroupsType; loading: boolean }) => {
+      dispatch(
+        sourcererActions.setIsSourceLoading({
+          id,
+          payload: loading,
+        })
+      );
     },
-    []
+    [dispatch]
   );
   const enrichSource = useCallback(
-    (id: SourceGroupsType, indexToAdd?: string[] | null, onlyCheckIndexToAdd?: boolean) => {
+    (
+      id: sourcererModel.SourceGroupsType,
+      indexToAdd?: string[] | null,
+      onlyCheckIndexToAdd?: boolean
+    ) => {
       let isSubscribed = true;
       const abortCtrl = new AbortController();
-      if (onlyCheckIndexToAdd && isEmpty(indexToAdd)) {
-        return dispatch({
-          type: 'SET_SOURCE',
-          id,
-          defaultIndex: indexToAdd,
-          payload: {
-            browserFields: EMPTY_BROWSER_FIELDS,
-            docValueFields: EMPTY_DOCVALUE_FIELD,
-            errorMessage: null,
+      if (onlyCheckIndexToAdd && isEmpty(indexToAdd) && indexToAdd != null) {
+        return dispatch(
+          sourcererActions.setSource({
             id,
-            indexPattern: getIndexFields('', []),
-            indexPatterns: [],
-            indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
-            loading: false,
-          },
-        });
+            defaultIndex: indexToAdd,
+            payload: {
+              browserFields: EMPTY_BROWSER_FIELDS,
+              docValueFields: EMPTY_DOCVALUE_FIELD,
+              errorMessage: null,
+              id,
+              indexPattern: getIndexFields('', []),
+              indexPatterns: [],
+              indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
+              loading: false,
+            },
+          })
+        );
       }
       const defaultIndex = getDefaultIndex(indexToAdd, onlyCheckIndexToAdd);
       const selectedPatterns = defaultIndex.filter((pattern) =>
-        state.availableIndexPatterns.includes(pattern)
+        availableIndexPatterns.includes(pattern)
       );
-      if (state.sourceGroups[id] == null) {
-        dispatch({
-          type: 'SET_SOURCE',
-          id,
-          defaultIndex: selectedPatterns,
-          payload: { defaultPatterns: defaultIndex, id },
-        });
+      if (sourceGroups[id] == null) {
+        dispatch(
+          sourcererActions.setSource({
+            id,
+            defaultIndex: selectedPatterns,
+            payload: { defaultPatterns: defaultIndex, id },
+          })
+        );
       }
 
       async function fetchSource() {
@@ -310,36 +226,38 @@ export const useSourceManager = (): UseSourceManager => {
           const ip = await fetchIndexFields({ indexPatternsService, selectedPatterns });
 
           if (isSubscribed) {
-            dispatch({
-              type: 'SET_SOURCE',
-              id,
-              defaultIndex: selectedPatterns,
-              payload: {
-                browserFields: getBrowserFields(selectedPatterns.join(), ip),
-                docValueFields: getDocValueFields(selectedPatterns.join(), ip),
-                errorMessage: null,
+            dispatch(
+              sourcererActions.setSource({
                 id,
-                indexPattern: getIndexFields(selectedPatterns.join(), ip),
-                indexPatterns: selectedPatterns,
-                indicesExist: indicesExistOrDataTemporarilyUnavailable(
-                  get('data.source.status.indicesExist', result)
-                ),
-                loading: false,
-              },
-            });
+                defaultIndex: selectedPatterns,
+                payload: {
+                  browserFields: getBrowserFields(selectedPatterns.join(), ip),
+                  docValueFields: getDocValueFields(selectedPatterns.join(), ip),
+                  errorMessage: null,
+                  id,
+                  indexPattern: getIndexFields(selectedPatterns.join(), ip),
+                  indexPatterns: selectedPatterns,
+                  indicesExist: indicesExistOrDataTemporarilyUnavailable(
+                    get('data.source.status.indicesExist', result)
+                  ),
+                  loading: false,
+                },
+              })
+            );
           }
         } catch (error) {
           if (isSubscribed) {
-            dispatch({
-              type: 'SET_SOURCE',
-              id,
-              defaultIndex: selectedPatterns,
-              payload: {
-                errorMessage: error.message,
+            dispatch(
+              sourcererActions.setSource({
                 id,
-                loading: false,
-              },
-            });
+                defaultIndex: selectedPatterns,
+                payload: {
+                  errorMessage: error.message,
+                  id,
+                  loading: false,
+                },
+              })
+            );
           }
         }
       }
@@ -353,35 +271,39 @@ export const useSourceManager = (): UseSourceManager => {
     },
     [
       apolloClient,
+      availableIndexPatterns,
+      dispatch,
       getDefaultIndex,
+      sourceGroups,
       indexPatternsService,
       setIsSourceLoading,
-      state.availableIndexPatterns,
-      state.sourceGroups,
     ]
   );
 
   const initializeSourceGroup = useCallback(
-    (id: SourceGroupsType, indexToAdd?: string[] | null, onlyCheckIndexToAdd?: boolean) =>
-      enrichSource(id, indexToAdd, onlyCheckIndexToAdd),
+    (
+      id: sourcererModel.SourceGroupsType,
+      indexToAdd?: string[] | null,
+      onlyCheckIndexToAdd?: boolean
+    ) => enrichSource(id, indexToAdd, onlyCheckIndexToAdd),
     [enrichSource]
   );
 
   const updateSourceGroupIndicies = useCallback(
-    (id: SourceGroupsType, updatedIndicies: string[]) => {
+    (id: sourcererModel.SourceGroupsType, updatedIndicies: string[]) => {
       enrichSource(id, updatedIndicies, true);
     },
     [enrichSource]
   );
   const getManageSourceGroupById = useCallback(
-    (id: SourceGroupsType) => {
-      const sourceById = state.sourceGroups[id];
+    (id: sourcererModel.SourceGroupsType) => {
+      const sourceById = sourceGroups[id];
       if (sourceById != null) {
         return sourceById;
       }
       return getSourceDefaults(id, getDefaultIndex());
     },
-    [getDefaultIndex, state.sourceGroups]
+    [getDefaultIndex, sourceGroups]
   );
 
   // load initial default index
@@ -391,15 +313,20 @@ export const useSourceManager = (): UseSourceManager => {
   }, []);
 
   useEffect(() => {
-    if (!state.isIndexPatternsLoading) {
-      Object.entries(sourceGroups).forEach(([key, value]) =>
-        initializeSourceGroup(key as SourceGroupsType, value, true)
+    if (!isIndexPatternsLoading) {
+      initializeSourceGroup(
+        SecurityPageName.default,
+        sourceGroupSettings[SecurityPageName.default],
+        true
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isIndexPatternsLoading]);
+  }, [isIndexPatternsLoading]);
   return {
-    ...state,
+    activeSourceGroupId,
+    availableIndexPatterns,
+    availableSourceGroupIds,
+    isIndexPatternsLoading,
     getManageSourceGroupById,
     initializeSourceGroup,
     setActiveSourceGroupId,
@@ -407,7 +334,7 @@ export const useSourceManager = (): UseSourceManager => {
   };
 };
 
-const ManageSourceContext = createContext<UseSourceManager>(init);
+const ManageSourceContext = createContext<UseSourceManager>(popopopop);
 
 export const useManageSource = () => useContext(ManageSourceContext);
 
