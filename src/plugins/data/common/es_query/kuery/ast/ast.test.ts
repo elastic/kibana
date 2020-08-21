@@ -37,6 +37,18 @@ describe('kuery AST API', () => {
     } as unknown) as IIndexPattern;
   });
 
+  describe.only('benchmark', () => {
+    test('blank expression', () => {
+      fromKueryExpression('  ');
+    });
+
+    test('fleet example', () => {
+      fromKueryExpression(
+        'not fleet-agent-actions.attributes.sent_at: * and fleet-agent-actions.attributes.agent_id:1234567'
+      );
+    });
+  });
+
   describe('fromKueryExpression', () => {
     test('should return a match all "is" function for whitespace', () => {
       const expected = nodeTypes.function.buildNode('is', '*', '*');
