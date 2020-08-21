@@ -37,6 +37,10 @@ export class HeatmapStyle implements IStyle {
     };
   }
 
+  getType() {
+    return LAYER_STYLE_TYPE.HEATMAP;
+  }
+
   renderEditor({
     onStyleDescriptorChange,
   }: {

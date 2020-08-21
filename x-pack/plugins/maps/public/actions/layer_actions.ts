@@ -22,6 +22,7 @@ import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+  LAYER_STYLE_TYPE,
   REMOVE_LAYER,
   REMOVE_TRACKED_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
@@ -382,7 +383,7 @@ export function clearMissingStyleProperties(layerId: string) {
     }
 
     const style = targetLayer!.getCurrentStyle();
-    if (!style || !('getDescriptorWithMissingStylePropsRemoved' in style)) {
+    if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 

@@ -11,7 +11,7 @@ import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
+import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
@@ -86,7 +86,7 @@ export function updateStyleMeta(layerId: string | null) {
     }
     const sourceDataRequest = layer.getSourceDataRequest();
     const style = layer.getCurrentStyle();
-    if (!style || !sourceDataRequest || !('pluckStyleMetaFromSourceDataRequest' in style)) {
+    if (!style || !sourceDataRequest || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
     const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromSourceDataRequest(

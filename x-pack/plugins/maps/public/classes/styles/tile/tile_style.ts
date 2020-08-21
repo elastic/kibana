@@ -17,6 +17,10 @@ export class TileStyle implements IStyle {
     };
   }
 
+  getType() {
+    return LAYER_STYLE_TYPE.TILE;
+  }
+
   renderEditor(/* { layer, onStyleDescriptorChange } */) {
     return null;
   }

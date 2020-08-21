@@ -9,6 +9,7 @@ import { StyleDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layers/layer';
 
 export interface IStyle {
+  getType(): string;
   renderEditor({
     layer,
     onStyleDescriptorChange,

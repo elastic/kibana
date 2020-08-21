@@ -198,6 +198,10 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
+  getType() {
+    return LAYER_STYLE_TYPE.VECTOR;
+  }
+
   getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,
