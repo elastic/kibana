@@ -41,7 +41,6 @@ import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-  Series,
 } from '../../../../../common/http_api/log_alerts/';
 import { AlertsContext } from './editor';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
