@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
   txtChangeButton,
   txtTriggerPickerHelpText,
@@ -347,7 +348,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
               disabled={!actionFactory.isCompatibleLicence()}
-              betaBadgeLabel={actionFactory.isBeta ? 'Beta' : undefined}
+              betaBadgeLabel={actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined}
               betaBadgeTooltipContent={
                 actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
               }

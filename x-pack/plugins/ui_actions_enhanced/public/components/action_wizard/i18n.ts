@@ -27,6 +27,13 @@ export const txtTriggerPickerHelpText = i18n.translate(
   }
 );
 
+export const txtBetaActionFactoryLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.betaActionLabel',
+  {
+    defaultMessage: `Beta`,
+  }
+);
+
 export const txtBetaActionFactoryTooltip = i18n.translate(
   'xpack.uiActionsEnhanced.components.actionWizard.betaActionTooltip',
   {
