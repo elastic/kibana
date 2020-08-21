@@ -26,3 +26,10 @@ export const txtTriggerPickerHelpText = i18n.translate(
     defaultMessage: "What's this?",
   }
 );
+
+export const txtBetaActionFactoryTooltip = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.betaActionTooltip',
+  {
+    defaultMessage: `This action is not GA. Please help us by reporting any bugs.`,
+  }
+);

@@ -35,6 +35,7 @@ export class ActionFactory<
   ) {}
 
   public readonly id = this.def.id;
+  public readonly isBeta = this.def.isBeta ?? false;
   public readonly minimalLicense = this.def.minimalLicense;
   public readonly order = this.def.order || 0;
   public readonly MenuItem? = this.def.MenuItem;

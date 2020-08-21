@@ -53,3 +53,17 @@ describe('License & ActionFactory', () => {
     expect(factory.isCompatibleLicence()).toBe(true);
   });
 });
+
+describe('isBeta', () => {
+  test('false by default', async () => {
+    const factory = new ActionFactory(def, () => licensingMock.createLicense());
+    expect(factory.isBeta).toBe(false);
+  });
+
+  test('true', async () => {
+    const factory = new ActionFactory({ ...def, isBeta: true }, () =>
+      licensingMock.createLicense()
+    );
+    expect(factory.isBeta).toBe(true);
+  });
+});

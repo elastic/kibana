@@ -41,6 +41,8 @@ const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 export class DashboardToUrlDrilldown implements Drilldown<Config, UrlTrigger> {
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
+  public readonly isBeta = true;
+
   public readonly order = 8;
 
   readonly minimalLicense = 'gold'; // example of minimal license support

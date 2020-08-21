@@ -21,7 +21,12 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { txtChangeButton, txtTriggerPickerHelpText, txtTriggerPickerLabel } from './i18n';
+import {
+  txtBetaActionFactoryTooltip,
+  txtChangeButton,
+  txtTriggerPickerHelpText,
+  txtTriggerPickerLabel,
+} from './i18n';
 import './action_wizard.scss';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
@@ -342,6 +347,10 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
               disabled={!actionFactory.isCompatibleLicence()}
+              betaBadgeLabel={actionFactory.isBeta ? 'Beta' : undefined}
+              betaBadgeTooltipContent={
+                actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
+              }
             >
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
