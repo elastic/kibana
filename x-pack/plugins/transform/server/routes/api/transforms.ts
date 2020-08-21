@@ -199,12 +199,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(async (ctx, req, res) => {
       try {
-        const body = await deleteTransforms(
-          req.body as DeleteTransformsRequestSchema,
-          ctx,
-          license,
-          res
-        );
+        const body = await deleteTransforms(req.body as DeleteTransformsRequestSchema, ctx, res);
 
         if (body && body.status) {
           if (body.status === 404) {
@@ -298,15 +293,14 @@ async function deleteDestIndexPatternById(
 async function deleteTransforms(
   reqBody: DeleteTransformsRequestSchema,
   ctx: RequestHandlerContext,
-  license: RouteDependencies['license'],
   response: KibanaResponseFactory
 ) {
-  const {
-    transformsInfo,
-    deleteDestIndex,
-    deleteDestIndexPattern,
-    forceDelete: shouldForceDelete,
-  } = reqBody;
+  const { transformsInfo } = reqBody;
+
+  // Cast possible undefineds as booleans
+  const deleteDestIndex = !!reqBody.deleteDestIndex;
+  const deleteDestIndexPattern = !!reqBody.deleteDestIndexPattern;
+  const shouldForceDelete = !!reqBody.forceDelete;
 
   const results: DeleteTransformsResponseSchema = {};
 
