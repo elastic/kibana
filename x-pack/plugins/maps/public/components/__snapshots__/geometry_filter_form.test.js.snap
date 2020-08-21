@@ -38,6 +38,10 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
       }
     }
   />
+  <ActionSelect
+    onChange={[Function]}
+    value="ACTION_GLOBAL_APPLY_FILTER"
+  />
   <EuiSpacer
     size="m"
   />
@@ -121,6 +125,10 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
       value="INTERSECTS"
     />
   </EuiFormRow>
+  <ActionSelect
+    onChange={[Function]}
+    value="ACTION_GLOBAL_APPLY_FILTER"
+  />
   <EuiSpacer
     size="m"
   />
@@ -176,6 +184,10 @@ exports[`should render error message 1`] = `
         "indexPatternTitle": "My index",
       }
     }
+  />
+  <ActionSelect
+    onChange={[Function]}
+    value="ACTION_GLOBAL_APPLY_FILTER"
   />
   <EuiSpacer
     size="m"
@@ -267,6 +279,10 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
       value="INTERSECTS"
     />
   </EuiFormRow>
+  <ActionSelect
+    onChange={[Function]}
+    value="ACTION_GLOBAL_APPLY_FILTER"
+  />
   <EuiSpacer
     size="m"
   />
