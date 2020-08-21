@@ -17,17 +17,17 @@ If you are targeting **Kibana 6.3 or greater** then checkout the corresponding K
 To target the current development version of Kibana just use the default  `master` branch.
 
 ```sh
-node scripts/generate_plugin my_plugin_name
+node scripts/generate_plugin --name my_plugin_name -y
 # generates a plugin in `plugins/my_plugin_name`
 ```
 
-To target 6.3, use the `6.x` branch (until the `6.3` branch is created).
+To target 6.8, use the `6.8` branch.
 
 ```sh
 git checkout 6.x
 yarn kbn bootstrap # always bootstrap when switching branches
-node scripts/generate_plugin my_plugin_name
-# generates a plugin for Kibana 6.3 in `../kibana-extra/my_plugin_name`
+node scripts/generate_plugin --name my_plugin_name -y
+# generates a plugin for Kibana 6.8 in `../kibana-extra/my_plugin_name`
 ```
 
 The generate script supports a few flags; run it with the `--help` flag to learn more.
@@ -49,7 +49,7 @@ yarn kbn bootstrap
 
 ## Plugin Development Scripts
 
-Generated plugins receive a handful of scripts that can be used during development. Those scripts are detailed in the [README.md](sao_template/template/README.md) file in each newly generated plugin, and expose the scripts provided by the [Kibana plugin helpers](../kbn-plugin-helpers), but here is a quick reference in case you need it:
+Generated plugins receive a handful of scripts that can be used during development. Those scripts are detailed in the [README.md](template/README.md) file in each newly generated plugin, and expose the scripts provided by the [Kibana plugin helpers](../kbn-plugin-helpers), but here is a quick reference in case you need it:
 
 > ***NOTE:*** All of these scripts should be run from the generated plugin.
 
