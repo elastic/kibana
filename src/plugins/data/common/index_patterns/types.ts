@@ -54,7 +54,15 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
-  attributes?: { fields: { [key: string]: { displayName: string } } };
+  attributes?: IndexPatternAttrs;
+}
+
+/**
+ * Generic location for IndexPattern class attributes from saved object
+ */
+
+export interface IndexPatternAttrs {
+  fields: { [key: string]: { displayName: string } };
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -138,7 +146,7 @@ export interface FieldSpecExportFmt {
   lang?: string;
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
-  displayName: string;
+  customLabel?: string;
   type: KBN_FIELD_TYPES;
   esTypes?: string[];
   scripted: boolean;
@@ -156,7 +164,6 @@ export interface FieldSpec {
   lang?: string;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
-  displayName?: string;
   name: string;
   type: string;
   esTypes?: string[];
@@ -166,6 +173,9 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+  customLabel?: string;
+  // not persisted
+  shortDotsEnable?: boolean;
 }
 
 export interface IndexPatternSpec {
