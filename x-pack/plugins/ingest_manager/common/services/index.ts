@@ -10,3 +10,4 @@ export { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export { decodeCloudId } from './decode_cloud_id';
+export { isValidNamespace } from './is_valid_namespace';

@@ -136,6 +136,7 @@ describe('Lens App', () => {
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
     history: History;
+    getAppNameFromId?: (appId: string) => string | undefined;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -187,6 +188,7 @@ describe('Lens App', () => {
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
       history: History;
+      getAppNameFromId?: (appId: string) => string | undefined;
     }>;
   }
 
@@ -293,6 +295,38 @@ describe('Lens App', () => {
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+      { text: 'Daaaaaaadaumching!' },
+    ]);
+  });
+
+  it('sets originatingApp breadcrumb when the document title changes', async () => {
+    const defaultArgs = makeDefaultArgs();
+    defaultArgs.originatingApp = 'ultraCoolDashboard';
+    defaultArgs.getAppNameFromId = () => 'The Coolest Container Ever Made';
+    instance = mount(<App {...defaultArgs} />);
+
+    expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+      { text: 'Create' },
+    ]);
+
+    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+      id: '1234',
+      title: 'Daaaaaaadaumching!',
+      expression: 'valid expression',
+      state: {
+        query: 'fake query',
+        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+      },
+    });
+    await act(async () => {
+      instance.setProps({ docId: '1234' });
+    });
+
+    expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
       { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Daaaaaaadaumching!' },
     ]);
