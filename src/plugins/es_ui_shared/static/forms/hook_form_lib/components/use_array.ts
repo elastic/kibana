@@ -18,6 +18,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { euiDragDropReorder } from '@elastic/eui';
 
 import { useFormContext } from '../form_context';
 
@@ -29,6 +30,7 @@ interface Props {
     items: ArrayItem[];
     addItem: () => void;
     removeItem: (id: number) => void;
+    moveItem: (sourceIdx: number, destinationIdx: number) => void;
   }) => JSX.Element;
 }
 
@@ -110,6 +112,13 @@ export const UseArray = ({
     });
   };
 
+  const moveItem = (sourceIdx: number, destinationIdx: number) => {
+    setItems((previousItems) => {
+      const reorderedItems = euiDragDropReorder(previousItems, sourceIdx, destinationIdx);
+      return updatePaths(reorderedItems);
+    });
+  };
+
   useEffect(() => {
     if (didMountRef.current) {
       setItems((prev) => {
@@ -120,5 +129,5 @@ export const UseArray = ({
     }
   }, [path, updatePaths]);
 
-  return children({ items, addItem, removeItem });
+  return children({ items, addItem, removeItem, moveItem });
 };

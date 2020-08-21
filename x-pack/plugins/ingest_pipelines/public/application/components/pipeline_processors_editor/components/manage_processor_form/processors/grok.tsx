@@ -6,16 +6,21 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
   UseField,
-  ComboBoxField,
+  Field,
+  UseArray,
+  ArrayItem,
   ToggleField,
   fieldValidators,
 } from '../../../../../../shared_imports';
 
 import { XJsonEditor } from '../field_components';
+
+import { DragAndDropList } from '../components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
@@ -103,7 +108,44 @@ export const Grok: FunctionComponent = () => {
         )}
       />
 
-      <UseField component={ComboBoxField} config={fieldsConfig.patterns} path="fields.patterns" />
+      <UseArray path="fields.patterns">
+        {({ items, addItem, removeItem, moveItem }) => {
+          return (
+            <EuiFormRow fullWidth>
+              <>
+                <DragAndDropList<ArrayItem>
+                  value={items}
+                  onMove={(sourceIdx, destinationIdx) => {
+                    moveItem(sourceIdx, destinationIdx);
+                  }}
+                  renderItem={(item) => {
+                    return (
+                      <EuiFlexGroup key={item.id} gutterSize="none">
+                        <EuiFlexItem>
+                          <UseField
+                            key={item.id}
+                            path={item.path}
+                            component={Field}
+                            componentProps={{ euiFieldProps: { compressed: true } }}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            iconType="minusInCircle"
+                            color="danger"
+                            onClick={() => removeItem(item.id)}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    );
+                  }}
+                />
+                <EuiButtonIcon iconType="plusInCircle" onClick={addItem} />
+              </>
+            </EuiFormRow>
+          );
+        }}
+      </UseArray>
 
       <UseField
         component={XJsonEditor}

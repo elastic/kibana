@@ -36,6 +36,8 @@ export {
   ValidationFuncArg,
   FormData,
   UseField,
+  UseArray,
+  ArrayItem,
   FormHook,
   useFormContext,
   FormDataProvider,
