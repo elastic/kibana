@@ -148,7 +148,7 @@ export interface AggregationOptionsByType {
   };
   percentile_ranks: {
     field: string;
-    values: (string | number)[];
+    values: Array<string | number>;
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   };

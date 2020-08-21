@@ -22,7 +22,7 @@ export const FCP_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
   defaultMessage: 'First contentful paint',
 });
 
-export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.fcp', {
+export const TBT_LABEL = i18n.translate('xpack.apm.rum.coreVitals.tbt', {
   defaultMessage: 'Total blocking time',
 });
 
