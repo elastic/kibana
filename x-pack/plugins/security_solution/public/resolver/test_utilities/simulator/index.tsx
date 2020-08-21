@@ -175,14 +175,24 @@ export class Simulator {
   }
 
   /**
-   * Return an Enzyme ReactWrapper for any child elements of a specific processNodeElement
-   *
-   * @param entityID The entity ID of the proocess node to select in
-   * @param selector The selector for the child element of the process node
+   * The button that opens a node's submenu.
    */
-  public processNodeChildElements(entityID: string, selector: string): ReactWrapper {
+  public processNodeSubmenuButton(
+    /** nodeID for the related node */ entityID: string
+  ): ReactWrapper {
     return this.domNodes(
-      `${processNodeElementSelector({ entityID })} [data-test-subj="${selector}"]`
+      `[data-test-subj="resolver:submenu:button"][data-test-resolver-node-id="${entityID}"]`
+    );
+  }
+
+  /**
+   * The primary button (used to select a node) which contains a label for the node as its content.
+   */
+  public processNodePrimaryButton(
+    /** nodeID for the related node */ entityID: string
+  ): ReactWrapper {
+    return this.domNodes(
+      `[data-test-subj="resolver:node:primary-button"][data-test-resolver-node-id="${entityID}"]`
     );
   }
 
@@ -211,7 +221,7 @@ export class Simulator {
   }
 
   /**
-   * This manually runs the animation frames tied to a configurable timestamp in the future
+   * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
     this.sideEffectSimulator.controls.time = time;

@@ -5,20 +5,32 @@
  */
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
+import {
+  TriggerContextMapping,
+  TriggerId,
+  UiActionsPresentable as Presentable,
+} from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { SerializedAction } from './types';
+import { BaseActionFactoryContext, SerializedAction } from './types';
 import { ILicense } from '../../../licensing/public';
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export class ActionFactory<
   Config extends object = object,
-  FactoryContext extends object = object,
-  ActionContext extends object = object
+  SupportedTriggers extends TriggerId = TriggerId,
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 > implements Omit<Presentable<FactoryContext>, 'getHref'>, Configurable<Config, FactoryContext> {
   constructor(
-    protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>,
+    protected readonly def: ActionFactoryDefinition<
+      Config,
+      SupportedTriggers,
+      FactoryContext,
+      ActionContext
+    >,
     protected readonly getLicence: () => ILicense
   ) {}
 
@@ -58,7 +70,8 @@ export class ActionFactory<
    */
   public isCompatibleLicence() {
     if (!this.minimalLicense) return true;
-    return this.getLicence().hasAtLeast(this.minimalLicense);
+    const licence = this.getLicence();
+    return licence.isAvailable && licence.isActive && licence.hasAtLeast(this.minimalLicense);
   }
 
   public create(
@@ -73,5 +86,9 @@ export class ActionFactory<
         return action.isCompatible(context);
       },
     };
+  }
+
+  public supportedTriggers(): SupportedTriggers[] {
+    return this.def.supportedTriggers();
   }
 }
