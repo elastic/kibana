@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useMlUrlGenerator } from '../../../../../contexts/kibana';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { ML_TABS } from '../../../../../../url_generator';
 
 interface Props {
   jobId: string;
@@ -20,9 +21,9 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
   const urlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
-  const redirectToAnalyticsManagementPage = async () => {
+  const redirectToAnalyticsJobPage = async () => {
     const path = await urlGenerator.createUrl({
-      page: 'data_frame_analytics/exploration',
+      page: ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION,
       jobId,
       analysisType,
     });
@@ -43,7 +44,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
             defaultMessage: 'View results for the analytics job.',
           }
         )}
-        onClick={redirectToAnalyticsManagementPage}
+        onClick={redirectToAnalyticsJobPage}
         data-test-subj="analyticsWizardViewResultsCard"
       />
     </Fragment>
