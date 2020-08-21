@@ -42,3 +42,10 @@ declare module '*.json' {
   // eslint-disable-next-line import/no-default-export
   export default json;
 }
+
+// Storybook references this module. It's @ts-ignored in the codebase but when
+// built into its dist it strips that out. Add it here to avoid a type checking
+// error.
+//
+// See https://github.com/storybookjs/storybook/issues/11684
+declare module 'react-syntax-highlighter/dist/cjs/create-element';
