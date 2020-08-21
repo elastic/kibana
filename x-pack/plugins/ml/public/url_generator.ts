@@ -56,7 +56,6 @@ export const ML_TABS = {
   get DATA_VISUALIZER_NEW_JOB() {
     return `${this.ANOMALY_DETECTION}/new_job/step/job_type`;
   },
-
   SETTINGS: 'settings',
   CALENDARS: 'settings/calendars_list',
   FILTERS: 'settings/filter_lists',
@@ -250,7 +249,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
    * Creates URL to the Anomaly Detection Job management page
    */
   private createAnomalyDetectionJobManagementUrl(
-    mlUrlGeneratorState: AnomalyDetectionUrlState // Omit<AnomalyDetectionUrlState, 'page'>
+    mlUrlGeneratorState: AnomalyDetectionUrlState
   ): string {
     const { params } = MlUrlGenerator.extractParams<AnomalyDetectionUrlState>(mlUrlGeneratorState);
     let url = `${this.params.appBasePath}/${ML_TABS.ANOMALY_DETECTION}`;
