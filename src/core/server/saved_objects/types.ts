@@ -37,6 +37,9 @@ import { SavedObjectUnsanitizedDoc } from './serialization';
 import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 import { SavedObject } from '../../types';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KueryNode } from '../../../plugins/data/common/es_query/kuery';
+
 export {
   SavedObjectAttributes,
   SavedObjectAttribute,
@@ -81,7 +84,7 @@ export interface SavedObjectsFindOptions {
   searchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string;
+  filter?: string | KueryNode;
   namespaces?: string[];
   /** An optional ES preference value to be used for the query **/
   preference?: string;

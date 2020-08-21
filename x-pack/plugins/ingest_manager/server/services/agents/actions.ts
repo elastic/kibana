@@ -9,6 +9,7 @@ import { Agent, AgentAction, AgentActionSOAttributes } from '../../../common/typ
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { savedObjectToAgentAction } from './saved_objects';
 import { appContextService } from '../app_context';
+import { nodeTypes } from '../../../../../../src/plugins/data/common/es_query/kuery/node_types';
 
 export async function createAgentAction(
   soClient: SavedObjectsClientContract,
@@ -29,9 +30,20 @@ export async function getAgentActionsForCheckin(
   soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<AgentAction[]> {
+  const filter = nodeTypes.function.buildNode('and', [
+    nodeTypes.function.buildNode(
+      'not',
+      nodeTypes.function.buildNode(
+        'is',
+        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
+        '*'
+      )
+    ),
+    nodeTypes.function.buildNode('is', 'fleet-agent-actions.attributes.agent_id', agentId),
+  ]);
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-    filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * and ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id:${agentId}`,
+    filter,
   });
 
   return Promise.all(
