@@ -9828,7 +9828,6 @@
     "xpack.ingestPipelines.requestFlyout.unnamedTitle": "请求",
     "xpack.ingestPipelines.settingsFormOnFailureFlyout.addButtonLabel": "添加",
     "xpack.ingestPipelines.settingsFormOnFailureFlyout.cancelButtonLabel": "取消",
-    "xpack.ingestPipelines.tabs.documentsTabTitle": "文档",
     "xpack.ingestPipelines.tabs.outputTabTitle": "输出",
     "xpack.ingestPipelines.testPipelineFlyout.documentsForm.documentsFieldLabel": "文档",
     "xpack.ingestPipelines.testPipelineFlyout.documentsForm.documentsJsonError": "文档 JSON 无效。",

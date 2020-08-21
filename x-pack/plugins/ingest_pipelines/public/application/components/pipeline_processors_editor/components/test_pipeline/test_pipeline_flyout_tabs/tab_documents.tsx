@@ -16,50 +16,59 @@ import {
   JsonEditorField,
   Form,
   useForm,
-  FormConfig,
   useKibana,
 } from '../../../../../../shared_imports';
 
-import { useTestConfigContext, TestConfig } from '../../../context';
-
-import { documentsSchema } from './schema';
+import { TestPipelineContext } from '../../../context';
+import { Document } from '../../../types';
+import { DeserializeResult } from '../../../deserialize';
+import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
+import { documentsSchema } from './documents_schema';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
-  handleExecute: (documents: object[], verbose: boolean) => void;
-  isExecuting: boolean;
+  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
+  setPerProcessorOutput: (documents: Document[] | undefined, processors: DeserializeResult) => void;
+  isRunningTest: boolean;
+  processors: DeserializeResult;
+  testPipelineData: TestPipelineContext['testPipelineData'];
 }
 
-export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
+export const DocumentsTab: React.FunctionComponent<Props> = ({
+  handleTestPipeline,
+  isRunningTest,
+  setPerProcessorOutput,
+  processors,
+  testPipelineData,
+}) => {
   const { services } = useKibana();
 
-  const { setCurrentTestConfig, testConfig } = useTestConfigContext();
-  const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
+  const {
+    config: { documents: cachedDocuments, verbose: cachedVerbose },
+  } = testPipelineData;
 
-  const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
+  const testPipeline = async () => {
+    const { isValid, data } = await form.submit();
+
     if (!isValid) {
       return;
     }
 
-    const { documents } = formData as TestConfig;
+    const { documents } = data as { documents: Document[] };
 
-    // Update context
-    setCurrentTestConfig({
-      ...testConfig,
-      documents,
-    });
+    await handleTestPipeline({ documents: documents!, verbose: cachedVerbose });
 
-    handleExecute(documents!, cachedVerbose);
+    // This is necessary to update the status and output of each processor
+    // as verbose may not be enabled
+    setPerProcessorOutput(documents, processors);
   };
 
   const { form } = useForm({
     schema: documentsSchema,
     defaultValue: {
       documents: cachedDocuments || '',
-      verbose: cachedVerbose || false,
     },
-    onSubmit: executePipeline,
   });
 
   return (
@@ -79,7 +88,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
                   {i18n.translate(
                     'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
                     {
-                      defaultMessage: 'Learn more',
+                      defaultMessage: 'Learn more.',
                     }
                   )}
                 </EuiLink>
@@ -95,6 +104,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
         form={form}
         data-test-subj="testPipelineForm"
         isInvalid={form.isSubmitted && !form.isValid}
+        onSubmit={testPipeline}
         error={form.getErrors()}
       >
         {/* Documents editor */}
@@ -118,12 +128,12 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
         <EuiSpacer size="m" />
 
         <EuiButton
-          onClick={form.submit}
+          onClick={testPipeline}
           size="s"
-          isLoading={isExecuting}
+          isLoading={isRunningTest}
           disabled={form.isSubmitted && !form.isValid}
         >
-          {isExecuting ? (
+          {isRunningTest ? (
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.runningButtonLabel"
               defaultMessage="Running"
