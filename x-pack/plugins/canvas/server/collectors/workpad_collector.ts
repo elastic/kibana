@@ -44,6 +44,14 @@ interface WorkpadTelemetry {
       max: number;
     };
   };
+  variables?: {
+    total: number;
+    per_workpad: {
+      avg: number;
+      min: number;
+      max: number;
+    };
+  };
 }
 
 /**
@@ -81,7 +89,10 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       });
     }, []);
 
-    return { pages, elementCounts, functionCounts };
+    const variableCount =
+      workpad.variables && workpad.variables.length ? workpad.variables.length : 0;
+
+    return { pages, elementCounts, functionCounts, variableCount };
   });
 
   // combine together info from across the workpads
@@ -91,9 +102,10 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     pageCounts: number[];
     elementCounts: number[];
     functionCounts: number[];
+    variableCounts: number[];
   }>(
     (accum, pageInfo) => {
-      const { pages, elementCounts, functionCounts } = pageInfo;
+      const { pages, elementCounts, functionCounts, variableCount } = pageInfo;
 
       return {
         pageMin: pages.count < accum.pageMin ? pages.count : accum.pageMin,
@@ -101,6 +113,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
         pageCounts: accum.pageCounts.concat(pages.count),
         elementCounts: accum.elementCounts.concat(elementCounts),
         functionCounts: accum.functionCounts.concat(functionCounts),
+        variableCounts: accum.variableCounts.concat([variableCount]),
       };
     },
     {
@@ -109,13 +122,23 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       pageCounts: [],
       elementCounts: [],
       functionCounts: [],
+      variableCounts: [],
     }
   );
-  const { pageCounts, pageMin, pageMax, elementCounts, functionCounts } = combinedWorkpadsInfo;
+  const {
+    pageCounts,
+    pageMin,
+    pageMax,
+    elementCounts,
+    functionCounts,
+    variableCounts,
+  } = combinedWorkpadsInfo;
 
   const pageTotal = arraySum(pageCounts);
   const elementsTotal = arraySum(elementCounts);
   const functionsTotal = arraySum(functionCounts);
+  const variableTotal = arraySum(variableCounts);
+
   const pagesInfo =
     workpadsInfo.length > 0
       ? {
@@ -151,11 +174,21 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
         }
       : undefined;
 
+  const variableInfo = {
+    total: variableTotal,
+    per_workpad: {
+      avg: variableTotal / variableCounts.length,
+      min: arrayMin(variableCounts) || 0,
+      max: arrayMax(variableCounts) || 0,
+    },
+  };
+
   return {
     workpads: { total: workpadsInfo.length },
     pages: pagesInfo,
     elements: elementsInfo,
     functions: functionsInfo,
+    variables: variableInfo,
   };
 }
 
