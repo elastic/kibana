@@ -15,11 +15,17 @@ export const BUILT_IN_ALERTS_FEATURE = {
   }),
   icon: 'bell',
   app: [],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [IndexThreshold],
   privileges: {
     all: {
       app: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       alerting: {
         all: [IndexThreshold],
         read: [],
@@ -29,11 +35,14 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: [],
-      ui: ['alerting:show'],
+      ui: [],
     },
     read: {
       app: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       alerting: {
         all: [],
         read: [IndexThreshold],
@@ -43,7 +52,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: [],
-      ui: ['alerting:show'],
+      ui: [],
     },
   },
 };

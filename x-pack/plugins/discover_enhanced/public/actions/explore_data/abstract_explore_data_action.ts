@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
-import { EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { KibanaLegacyStart } from '../../../../../../src/plugins/kibana_legacy/public';
@@ -18,7 +17,6 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
   discover: Pick<DiscoverStart, 'urlGenerator'>;
-  embeddable: Pick<EmbeddableStart, 'filtersAndTimeRangeFromContext'>;
   kibanaLegacy?: {
     dashboardConfig: {
       getHideWriteControls: KibanaLegacyStart['dashboardConfig']['getHideWriteControls'];
@@ -49,12 +47,16 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;
 
+    const { core, plugins } = this.params.start();
+    const { capabilities } = core.application;
+
+    if (capabilities.discover && !capabilities.discover.show) return false;
+    if (!plugins.discover.urlGenerator) return false;
     const isDashboardOnlyMode = !!this.params
       .start()
       .plugins.kibanaLegacy?.dashboardConfig.getHideWriteControls();
     if (isDashboardOnlyMode) return false;
 
-    if (!this.params.start().plugins.discover.urlGenerator) return false;
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
 

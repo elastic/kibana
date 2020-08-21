@@ -18,7 +18,7 @@ import { Title } from './Title';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 import { LicensePrompt } from '../../../../shared/LicensePrompt';
 
-export const CustomLinkOverview = () => {
+export function CustomLinkOverview() {
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
 
@@ -107,4 +107,4 @@ export const CustomLinkOverview = () => {
       </EuiPanel>
     </>
   );
-};
+}

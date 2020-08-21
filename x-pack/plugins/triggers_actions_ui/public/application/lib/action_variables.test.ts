@@ -12,7 +12,7 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('actionVariablesFromAlertType', () => {
   test('should return correct variables when no state or context provided', async () => {
-    const alertType = getAlertType({ context: [], state: [] });
+    const alertType = getAlertType({ context: [], state: [], params: [] });
     expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -46,6 +46,7 @@ describe('actionVariablesFromAlertType', () => {
         { name: 'bar', description: 'bar-description' },
       ],
       state: [],
+      params: [],
     });
     expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
       Array [
@@ -88,6 +89,7 @@ describe('actionVariablesFromAlertType', () => {
         { name: 'foo', description: 'foo-description' },
         { name: 'bar', description: 'bar-description' },
       ],
+      params: [],
     });
     expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
       Array [
@@ -133,6 +135,7 @@ describe('actionVariablesFromAlertType', () => {
         { name: 'fooS', description: 'fooS-description' },
         { name: 'barS', description: 'barS-description' },
       ],
+      params: [{ name: 'fooP', description: 'fooP-description' }],
     });
     expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
       Array [
@@ -163,6 +166,10 @@ describe('actionVariablesFromAlertType', () => {
         Object {
           "description": "barC-description",
           "name": "context.barC",
+        },
+        Object {
+          "description": "fooP-description",
+          "name": "params.fooP",
         },
         Object {
           "description": "fooS-description",

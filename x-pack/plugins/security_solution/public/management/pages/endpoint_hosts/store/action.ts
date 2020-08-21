@@ -12,34 +12,35 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
+import { EndpointState } from '../types';
 
-interface ServerReturnedHostList {
-  type: 'serverReturnedHostList';
+interface ServerReturnedEndpointList {
+  type: 'serverReturnedEndpointList';
   payload: HostResultList;
 }
 
-interface ServerFailedToReturnHostList {
-  type: 'serverFailedToReturnHostList';
+interface ServerFailedToReturnEndpointList {
+  type: 'serverFailedToReturnEndpointList';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostDetails {
-  type: 'serverReturnedHostDetails';
+interface ServerReturnedEndpointDetails {
+  type: 'serverReturnedEndpointDetails';
   payload: HostInfo;
 }
 
-interface ServerFailedToReturnHostDetails {
-  type: 'serverFailedToReturnHostDetails';
+interface ServerFailedToReturnEndpointDetails {
+  type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostPolicyResponse {
-  type: 'serverReturnedHostPolicyResponse';
+interface ServerReturnedEndpointPolicyResponse {
+  type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
 }
 
-interface ServerFailedToReturnHostPolicyResponse {
-  type: 'serverFailedToReturnHostPolicyResponse';
+interface ServerFailedToReturnEndpointPolicyResponse {
+  type: 'serverFailedToReturnEndpointPolicyResponse';
   payload: ServerApiError;
 }
 
@@ -62,8 +63,8 @@ interface UserSelectedEndpointPolicy {
   };
 }
 
-interface ServerCancelledHostListLoading {
-  type: 'serverCancelledHostListLoading';
+interface ServerCancelledEndpointListLoading {
+  type: 'serverCancelledEndpointListLoading';
 }
 
 interface ServerCancelledPolicyItemsLoading {
@@ -75,16 +76,42 @@ interface ServerReturnedEndpointPackageInfo {
   payload: GetPackagesResponse['response'][0];
 }
 
-export type HostAction =
-  | ServerReturnedHostList
-  | ServerFailedToReturnHostList
-  | ServerReturnedHostDetails
-  | ServerFailedToReturnHostDetails
-  | ServerReturnedHostPolicyResponse
-  | ServerFailedToReturnHostPolicyResponse
+interface ServerReturnedEndpointNonExistingPolicies {
+  type: 'serverReturnedEndpointNonExistingPolicies';
+  payload: EndpointState['nonExistingPolicies'];
+}
+
+interface ServerReturnedEndpointExistValue {
+  type: 'serverReturnedEndpointExistValue';
+  payload: boolean;
+}
+
+interface UserUpdatedEndpointListRefreshOptions {
+  type: 'userUpdatedEndpointListRefreshOptions';
+  payload: {
+    isAutoRefreshEnabled?: boolean;
+    autoRefreshInterval?: number;
+  };
+}
+
+interface AppRequestedEndpointList {
+  type: 'appRequestedEndpointList';
+}
+
+export type EndpointAction =
+  | ServerReturnedEndpointList
+  | ServerFailedToReturnEndpointList
+  | ServerReturnedEndpointDetails
+  | ServerFailedToReturnEndpointDetails
+  | ServerReturnedEndpointPolicyResponse
+  | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
-  | ServerCancelledHostListLoading
+  | ServerCancelledEndpointListLoading
+  | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
-  | ServerReturnedEndpointPackageInfo;
+  | ServerReturnedEndpointPackageInfo
+  | AppRequestedEndpointList
+  | ServerReturnedEndpointNonExistingPolicies
+  | UserUpdatedEndpointListRefreshOptions;

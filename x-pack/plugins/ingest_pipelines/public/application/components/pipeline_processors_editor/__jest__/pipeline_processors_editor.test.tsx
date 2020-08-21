@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
 
@@ -43,9 +44,6 @@ describe('Pipeline Editor', () => {
       },
       onFlyoutOpen: jest.fn(),
       onUpdate,
-      links: {
-        esDocsBasePath: 'test',
-      },
     });
   });
 
@@ -181,7 +179,7 @@ describe('Pipeline Editor', () => {
 
     it('prevents moving a processor while in edit mode', () => {
       const { find, exists } = testBed;
-      find('processors>0.editItemButton').simulate('click');
+      find('processors>0.manageItemButton').simulate('click');
       expect(exists('processorSettingsForm')).toBe(true);
       expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
       expect(find('processors>1.moveItemButton').props().disabled).toBe(true);

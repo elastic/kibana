@@ -7,17 +7,17 @@
 import React, { useContext } from 'react';
 
 import moment from 'moment';
+import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ContentSection } from '../shared/content_section';
-import { useRoutes } from '../shared/use_routes';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { getSourcePath } from '../../routes';
 
-import { IAppServerData } from './overview';
+import { OverviewLogic, IOverviewValues } from './overview_logic';
 
 import './recent_activity.scss';
 
@@ -29,10 +29,12 @@ export interface IFeedActivity {
   sourceId: string;
 }
 
-export const RecentActivity: React.FC<IAppServerData> = ({
-  organization: { name, defaultOrgName },
-  activityFeed,
-}) => {
+export const RecentActivity: React.FC = () => {
+  const {
+    organization: { name, defaultOrgName },
+    activityFeed,
+  } = useValues(OverviewLogic) as IOverviewValues;
+
   return (
     <ContentSection
       title={
@@ -89,8 +91,10 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   timestamp,
   sourceId,
 }) => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { getWSRoute } = useRoutes();
+  const {
+    http,
+    externalUrl: { getWorkplaceSearchUrl },
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({
@@ -103,7 +107,7 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   const linkProps = {
     onClick,
     target: '_blank',
-    href: getWSRoute(getSourcePath(sourceId)),
+    href: getWorkplaceSearchUrl(getSourcePath(sourceId)),
     external: true,
     color: status === 'error' ? 'danger' : 'primary',
     'data-test-subj': 'viewSourceDetailsLink',

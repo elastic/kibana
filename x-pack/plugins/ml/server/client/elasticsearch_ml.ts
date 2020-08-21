@@ -828,7 +828,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   ml.categories = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/categories/<%=categoryId%>',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/results/categories/<%=categoryId%>',
         req: {
           jobId: {
             type: 'string',
@@ -839,7 +839,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/categories',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/results/categories',
         req: {
           jobId: {
             type: 'string',
@@ -853,7 +853,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   ml.modelSnapshots = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>',
         req: {
           jobId: {
             type: 'string',
@@ -864,7 +864,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/model_snapshots',
         req: {
           jobId: {
             type: 'string',
@@ -878,7 +878,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   ml.updateModelSnapshot = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>/_update',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>/_update',
         req: {
           jobId: {
             type: 'string',
@@ -896,7 +896,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   ml.deleteModelSnapshot = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>',
         req: {
           jobId: {
             type: 'string',
@@ -913,7 +913,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   ml.revertModelSnapshot = ca({
     urls: [
       {
-        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>/_revert',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>/_revert',
         req: {
           jobId: {
             type: 'string',

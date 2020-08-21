@@ -33,7 +33,7 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  InternalStartServices,
+  DataPublicPluginEnhancements,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -48,9 +48,7 @@ import {
 } from './index_patterns';
 import {
   setFieldFormats,
-  setHttp,
   setIndexPatterns,
-  setInjectedMetadata,
   setNotifications,
   setOverlays,
   setQueryService,
@@ -119,17 +117,6 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    const getInternalStartServices = (): InternalStartServices => {
-      const { core: coreStart, self } = startServices();
-      return {
-        fieldFormats: self.fieldFormats,
-        notifications: coreStart.notifications,
-        uiSettings: coreStart.uiSettings,
-        searchService: self.search,
-        injectedMetadata: coreStart.injectedMetadata,
-      };
-    };
-
     expressions.registerFunction(esaggs);
     expressions.registerFunction(indexPatternLoad);
 
@@ -156,26 +143,28 @@ export class DataPublicPlugin
       }))
     );
 
+    const searchService = this.searchService.setup(core, {
+      usageCollection,
+      packageInfo: this.packageInfo,
+      expressions,
+    });
+
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, {
-        expressions,
-        usageCollection,
-        getInternalStartServices,
-        packageInfo: this.packageInfo,
-      }),
+      search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      __enhance: (enhancements: DataPublicPluginEnhancements) => {
+        searchService.__enhance(enhancements.search);
+      },
     };
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
-    setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -204,7 +193,7 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
-    const search = this.searchService.start(core, { indexPatterns });
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
     uiActions.addTriggerAction(
@@ -241,5 +230,7 @@ export class DataPublicPlugin
 
   public stop() {
     this.autocomplete.clearProviders();
+    this.queryService.stop();
+    this.searchService.stop();
   }
 }

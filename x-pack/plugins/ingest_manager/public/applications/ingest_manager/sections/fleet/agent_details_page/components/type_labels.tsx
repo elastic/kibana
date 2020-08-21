@@ -66,8 +66,8 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
   CONFIG: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.configLabel"
-        defaultMessage="Config"
+        id="xpack.ingestManager.agentEventSubtype.policyLabel"
+        defaultMessage="Policy"
       />
     </EuiBadge>
   ),
@@ -92,6 +92,14 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
       <FormattedMessage
         id="xpack.ingestManager.agentEventSubtype.stoppedLabel"
         defaultMessage="Stopped"
+      />
+    </EuiBadge>
+  ),
+  DEGRADED: (
+    <EuiBadge color="hollow">
+      <FormattedMessage
+        id="xpack.ingestManager.agentEventSubtype.degradedLabel"
+        defaultMessage="Degraded"
       />
     </EuiBadge>
   ),

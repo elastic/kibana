@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useValues } from 'kea';
 
 import {
   EuiSpacer,
@@ -21,14 +22,13 @@ import {
   EuiLinkProps,
 } from '@elastic/eui';
 import sharedSourcesIcon from '../shared/assets/share_circle.svg';
-import { useRoutes } from '../shared/use_routes';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { ContentSection } from '../shared/content_section';
 
-import { IAppServerData } from './overview';
+import { OverviewLogic, IOverviewValues } from './overview_logic';
 
 import { OnboardingCard } from './onboarding_card';
 
@@ -57,17 +57,19 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Invite your colleagues into this organization to search with you.' }
 );
 
-export const OnboardingSteps: React.FC<IAppServerData> = ({
-  hasUsers,
-  hasOrgSources,
-  canCreateContentSources,
-  canCreateInvitations,
-  accountsCount,
-  sourcesCount,
-  fpAccount: { isCurated },
-  organization: { name, defaultOrgName },
-  isFederatedAuth,
-}) => {
+export const OnboardingSteps: React.FC = () => {
+  const {
+    hasUsers,
+    hasOrgSources,
+    canCreateContentSources,
+    canCreateInvitations,
+    accountsCount,
+    sourcesCount,
+    fpAccount: { isCurated },
+    organization: { name, defaultOrgName },
+    isFederatedAuth,
+  } = useValues(OverviewLogic) as IOverviewValues;
+
   const accountsPath =
     !isFederatedAuth && (canCreateInvitations || isCurated) ? USERS_PATH : undefined;
   const sourcesPath = canCreateContentSources || isCurated ? ORG_SOURCES_PATH : undefined;
@@ -130,8 +132,10 @@ export const OnboardingSteps: React.FC<IAppServerData> = ({
 };
 
 export const OrgNameOnboarding: React.FC = () => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-  const { getWSRoute } = useRoutes();
+  const {
+    http,
+    externalUrl: { getWorkplaceSearchUrl },
+  } = useContext(KibanaContext) as IKibanaContext;
 
   const onClick = () =>
     sendTelemetry({
@@ -145,7 +149,7 @@ export const OrgNameOnboarding: React.FC = () => {
     onClick,
     target: '_blank',
     color: 'primary',
-    href: getWSRoute(ORG_SETTINGS_PATH),
+    href: getWorkplaceSearchUrl(ORG_SETTINGS_PATH),
     'data-test-subj': 'orgNameChangeButton',
   } as EuiButtonEmptyProps & EuiLinkProps;
 

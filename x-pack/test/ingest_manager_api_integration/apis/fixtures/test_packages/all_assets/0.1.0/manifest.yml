@@ -1,0 +1,20 @@
+format_version: 1.0.0
+name: all_assets 
+title: All Assets Installed/Uninstalled Test
+description: This is a test package for testing that all assets were installed when installing a package for the first time and removing the assets during package uninstall
+version: 0.1.0
+categories: []
+release: beta
+type: integration
+license: basic
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

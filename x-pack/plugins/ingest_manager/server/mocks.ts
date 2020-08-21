@@ -8,7 +8,7 @@ import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mock
 import { IngestManagerAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
-import { PackageConfigServiceInterface } from './services/package_config';
+import { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const createAppContextStartContractMock = (): IngestManagerAppContext => {
   return {
@@ -18,13 +18,14 @@ export const createAppContextStartContractMock = (): IngestManagerAppContext => 
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     kibanaVersion: '8.0.0',
+    kibanaBranch: 'master',
   };
 };
 
-export const createPackageConfigServiceMock = () => {
+export const createPackagePolicyServiceMock = () => {
   return {
     assignPackageStream: jest.fn(),
-    buildPackageConfigFromPackage: jest.fn(),
+    buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -32,5 +33,5 @@ export const createPackageConfigServiceMock = () => {
     getByIDs: jest.fn(),
     list: jest.fn(),
     update: jest.fn(),
-  } as jest.Mocked<PackageConfigServiceInterface>;
+  } as jest.Mocked<PackagePolicyServiceInterface>;
 };

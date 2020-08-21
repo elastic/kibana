@@ -5,7 +5,8 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
+import each from 'lodash/each';
+import get from 'lodash/get';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
@@ -76,7 +77,7 @@ export interface DeleteParams {
   id: string;
 }
 
-export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function annotationProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -103,7 +104,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
       delete params.body.key;
     }
 
-    return await callAsCurrentUser('index', params);
+    return await callAsInternalUser('index', params);
   }
 
   async function getAnnotations({
@@ -190,7 +191,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.each(jobIds, (jobId, i: number) => {
+      each(jobIds, (jobId, i: number) => {
         jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
       });
       boolCriteria.push({
@@ -286,14 +287,14 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
     };
 
     try {
-      const resp = await callAsCurrentUser('search', params);
+      const resp = await callAsInternalUser('search', params);
 
       if (resp.error !== undefined && resp.message !== undefined) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
       }
 
-      const docs: Annotations = _.get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
+      const docs: Annotations = get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
         // get the original source document and the document id, we need it
         // to identify the annotation when editing/deleting it.
         // if original `event` is undefined then substitute with 'user` by default
@@ -305,7 +306,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
         } as Annotation;
       });
 
-      const aggregations = _.get(resp, ['aggregations'], {}) as EsAggregationResult;
+      const aggregations = get(resp, ['aggregations'], {}) as EsAggregationResult;
       if (fields) {
         obj.aggregations = aggregations;
       }
@@ -335,7 +336,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
       refresh: 'wait_for',
     };
 
-    return await callAsCurrentUser('delete', param);
+    return await callAsInternalUser('delete', param);
   }
 
   return {

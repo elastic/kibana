@@ -16,6 +16,7 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { extractErrorMessage } from '../../../common/util/errors';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -406,7 +407,12 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       .toPromise()
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
-          return resolve([]);
+          const errorMessage = extractErrorMessage(resp.error);
+          return resolve({
+            annotationsData: [],
+            aggregations: {},
+            error: errorMessage !== '' ? errorMessage : undefined,
+          });
         }
 
         const annotationsData = [];
@@ -430,9 +436,12 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
         });
       })
       .catch((resp) => {
-        console.log('Error loading list of annotations for jobs list:', resp);
-        // Silently fail and just return an empty array for annotations to not break the UI.
-        return resolve([]);
+        const errorMessage = extractErrorMessage(resp);
+        return resolve({
+          annotationsData: [],
+          aggregations: {},
+          error: errorMessage !== '' ? errorMessage : undefined,
+        });
       });
   });
 }

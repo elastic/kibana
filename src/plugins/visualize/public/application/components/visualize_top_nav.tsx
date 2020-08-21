@@ -18,16 +18,14 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { isEqual } from 'lodash';
 
 import { OverlayRef } from 'kibana/public';
-import { Query } from 'src/plugins/data/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  SavedVisInstance,
+  VisualizeEditorVisInstance,
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
@@ -40,9 +38,11 @@ interface VisualizeTopNavProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   originatingApp?: string;
-  savedVisInstance: SavedVisInstance;
+  visInstance: VisualizeEditorVisInstance;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  embeddableId?: string;
 }
 
 const TopNav = ({
@@ -53,29 +53,29 @@ const TopNav = ({
   setHasUnsavedChanges,
   hasUnappliedChanges,
   originatingApp,
-  savedVisInstance,
+  setOriginatingApp,
+  visInstance,
   stateContainer,
   visualizationIdFromUrl,
+  embeddableId,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { embeddableHandler, vis } = savedVisInstance;
+  const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
   }, [embeddableHandler]);
-
-  const updateQuery = useCallback(
-    ({ query }: { query?: Query }) => {
-      if (!isEqual(currentAppState.query, query)) {
-        stateContainer.transitions.set('query', query || currentAppState.query);
-      } else {
-        savedVisInstance.embeddableHandler.reload();
+  const handleRefresh = useCallback(
+    (_payload: any, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        visInstance.embeddableHandler.reload();
       }
     },
-    [currentAppState.query, savedVisInstance.embeddableHandler, stateContainer.transitions]
+    [visInstance.embeddableHandler]
   );
+  const stateTransfer = services.embeddable.getStateTransfer();
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -86,9 +86,12 @@ const TopNav = ({
           hasUnappliedChanges,
           openInspector,
           originatingApp,
-          savedVisInstance,
+          setOriginatingApp,
+          visInstance,
           stateContainer,
           visualizationIdFromUrl,
+          stateTransfer,
+          embeddableId,
         },
         services
       );
@@ -100,10 +103,13 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
-    savedVisInstance,
+    visInstance,
+    setOriginatingApp,
     stateContainer,
     visualizationIdFromUrl,
     services,
+    embeddableId,
+    stateTransfer,
   ]);
   const [indexPattern, setIndexPattern] = useState(vis.data.indexPattern);
   const showDatePicker = () => {
@@ -145,8 +151,7 @@ const TopNav = ({
     <TopNavMenu
       appName={APP_NAME}
       config={config}
-      query={currentAppState.query}
-      onQuerySubmit={updateQuery}
+      onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPattern ? [indexPattern] : undefined}

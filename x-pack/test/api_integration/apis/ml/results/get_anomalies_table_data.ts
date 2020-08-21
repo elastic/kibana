@@ -7,9 +7,8 @@ import expect from '@kbn/expect';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Datafeed, Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');

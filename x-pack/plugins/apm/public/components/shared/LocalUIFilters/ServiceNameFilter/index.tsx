@@ -21,7 +21,7 @@ interface Props {
   loading: boolean;
 }
 
-const ServiceNameFilter = ({ loading, serviceNames }: Props) => {
+function ServiceNameFilter({ loading, serviceNames }: Props) {
   const {
     urlParams: { serviceName },
   } = useUrlParams();
@@ -72,6 +72,6 @@ const ServiceNameFilter = ({ loading, serviceNames }: Props) => {
       />
     </>
   );
-};
+}
 
 export { ServiceNameFilter };

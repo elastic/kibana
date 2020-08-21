@@ -45,7 +45,7 @@ const StyledElapsedTime = styled.div<StyledElapsedTime>`
   left: ${(props) => `${props.leftPct}%`};
   padding: 6px 8px;
   border-radius: 999px; // generate pill shape
-  transform: translate(-50%, -50%) rotateX(35deg);
+  transform: translate(-50%, -50%);
   user-select: none;
 `;
 
@@ -127,11 +127,11 @@ const EdgeLineComponent = React.memo(
 
     return (
       <StyledEdgeLine
-        role="presentation"
         className={className}
         style={style}
         resolverEdgeColor={colorMap.resolverEdge}
         magFactorX={magFactorX}
+        data-test-subj="resolver:graph:edgeline"
       >
         {elapsedTime && (
           <StyledElapsedTime

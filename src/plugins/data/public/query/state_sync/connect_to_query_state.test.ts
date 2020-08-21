@@ -48,7 +48,9 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return true;
-    case 'timepicker:timeDefaults':
+    case UI_SETTINGS.SEARCH_QUERY_LANGUAGE:
+      return 'kuery';
+    case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
       return { from: 'now-15m', to: 'now' };
     case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };

@@ -1,31 +1,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact:endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
-    "index": ".kibana",
-    "source": {
-      "references": [
-      ],
-      "endpoint:user-artifact": {
-        "body": "eJylkM8KwjAMxl9Fci59gN29iicvMqR02QjUbiSpKGPvbiw6ETwpuX1/fh9kBszKhALNcQa9TQgNCJ2nhOA+vJ4wdWaGqJSHPY8RRXxPCb3QkJEtP07IQUe2GOWYSoedqU8qXq16ikGqeAmpPNRtCqIU3WbnDx4WN38d/WvhQqmCXzDlIlojP9CsjLC0bqWtHwhaGN/1jHVkae3u+6N6Sg==",
-        "created": 1593016187465,
-        "compressionAlgorithm": "zlib",
-        "encryptionAlgorithm": "none",
-        "identifier": "endpoint-exceptionlist-linux-v1",
-        "encodedSha256": "5caaeabcb7864d47157fc7c28d5a7398b4f6bbaaa565d789c02ee809253b7613",
-        "encodedSize": 160,
-        "decodedSha256": "d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
-        "decodedSize": 358
-      },
-      "type": "endpoint:user-artifact",
-      "updated_at": "2020-06-24T16:29:47.584Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "endpoint:user-artifact:endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
     "index": ".kibana",
     "source": {
@@ -83,8 +58,9 @@
       ],
       "endpoint:user-artifact-manifest": {
         "created": 1593183699663,
+        "schemaVersion": "v1",
+        "semanticVersion": "1.0.1",
         "ids": [
-          "endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
           "endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
           "endpoint-exceptionlist-windows-v1-8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e"
         ]
@@ -191,7 +167,7 @@
       "fleet-agents": {
         "access_api_key_id": "8ZnT7HIBwLFvkUEPQaT3",
         "active": true,
-        "config_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
+        "policy_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
         "enrolled_at": "2020-06-25T18:52:47.290Z",
         "local_metadata": {
           "os": "macos"
@@ -204,7 +180,10 @@
       "references": [
       ],
       "type": "fleet-agents",
-      "updated_at": "2020-06-25T18:52:48.464Z"
+      "updated_at": "2020-06-25T18:52:48.464Z",
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
     }
   }
 }
@@ -219,14 +198,17 @@
         "active": true,
         "api_key": "8ZnT7HIBwLFvkUEPQaT3",
         "api_key_id": "8ZnT7HIBwLFvkUEPQaT3",
-        "config_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
+        "policy_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
         "created_at": "2020-06-25T17:25:30.065Z",
         "name": "Default (93aa98c8-d650-422e-aa7b-663dae3dff83)"
       },
       "references": [
       ],
       "type": "fleet-enrollment-api-keys",
-      "updated_at": "2020-06-25T17:25:30.114Z"
+      "updated_at": "2020-06-25T17:25:30.114Z",
+      "migrationVersion": {
+        "fleet-enrollment-api-keys": "7.10.0"
+      }
     }
   }
 }

@@ -117,6 +117,7 @@ export function getArgValueSuggestions() {
 
         const valueSplit = partial.split(':');
         return indexPattern.fields
+          .getAll()
           .filter((field) => {
             return (
               field.aggregatable &&
@@ -136,6 +137,7 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
+          .getAll()
           .filter((field) => {
             return (
               field.aggregatable &&
@@ -155,6 +157,7 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
+          .getAll()
           .filter((field) => {
             return (
               'date' === field.type &&

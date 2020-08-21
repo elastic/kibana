@@ -15,13 +15,16 @@ export const APM_FEATURE = {
   order: 900,
   icon: 'apmApp',
   navLinkId: 'apm',
-  app: ['apm', 'kibana'],
+  app: ['apm', 'csm', 'kibana'],
   catalogue: ['apm'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: Object.values(AlertType),
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
-      app: ['apm', 'kibana'],
+      app: ['apm', 'csm', 'kibana'],
       api: ['apm', 'apm_write'],
       catalogue: ['apm'],
       savedObject: {
@@ -31,10 +34,13 @@ export const APM_FEATURE = {
       alerting: {
         all: Object.values(AlertType),
       },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
-      app: ['apm', 'kibana'],
+      app: ['apm', 'csm', 'kibana'],
       api: ['apm'],
       catalogue: ['apm'],
       savedObject: {
@@ -43,6 +49,9 @@ export const APM_FEATURE = {
       },
       alerting: {
         all: Object.values(AlertType),
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
       ui: ['show', 'alerting:show', 'alerting:save'],
     },

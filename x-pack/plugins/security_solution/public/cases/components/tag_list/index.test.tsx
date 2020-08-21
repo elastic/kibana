@@ -102,14 +102,14 @@ describe('TagList ', () => {
         <TagList {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="case-tag-pepsi"]`).last().exists()).toBeTruthy();
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
     await act(async () => {
-      expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="case-tag-pepsi"]`).last().exists()).toBeFalsy();
       wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
       await waitFor(() => {
         wrapper.update();
-        expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeTruthy();
+        expect(wrapper.find(`[data-test-subj="case-tag-pepsi"]`).last().exists()).toBeTruthy();
       });
     });
   });

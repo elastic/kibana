@@ -45,7 +45,7 @@ interface Props {
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
   filterQuery?: string;
-  groupBy?: string;
+  groupBy?: string | string[];
 }
 
 const tooltipProps = {

@@ -18,7 +18,7 @@
  */
 
 import { SearchSourceFields } from './types';
-import { InvalidJSONProperty } from '../../../../kibana_utils/public';
+import { InvalidJSONProperty } from '../../../../kibana_utils/common';
 
 export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field

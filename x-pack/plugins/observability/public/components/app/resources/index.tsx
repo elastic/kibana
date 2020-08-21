@@ -31,7 +31,7 @@ const resources = [
   },
 ];
 
-export const Resources = () => {
+export function Resources() {
   return (
     <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
       <EuiFlexItem grow={false}>
@@ -46,4 +46,4 @@ export const Resources = () => {
       <EuiListGroup flush listItems={resources} data-test-subj="list-group" />
     </EuiFlexGroup>
   );
-};
+}

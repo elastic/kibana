@@ -5,6 +5,7 @@
  */
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
+import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -23,9 +24,9 @@ import { InfraSourceConfiguration } from '../../sources';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
 type ConditionResult = InventoryMetricConditions & {
-  shouldFire: boolean | boolean[];
+  shouldFire: boolean[];
   currentValue: number;
-  isNoData: boolean;
+  isNoData: boolean[];
   isError: boolean;
 };
 
@@ -37,7 +38,7 @@ export const evaluateCondition = async (
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
-  const { comparator, metric } = condition;
+  const { comparator, metric, customMetric } = condition;
   let { threshold } = condition;
 
   const timerange = {
@@ -55,7 +56,8 @@ export const evaluateCondition = async (
     metric,
     timerange,
     sourceConfiguration,
-    filterQuery
+    filterQuery,
+    customMetric
   );
 
   threshold = threshold.map((n) => convertMetricValue(metric, n));
@@ -71,8 +73,8 @@ export const evaluateCondition = async (
         value !== null &&
         (Array.isArray(value)
           ? value.map((v) => comparisonFunction(Number(v), threshold))
-          : comparisonFunction(value as number, threshold)),
-      isNoData: value === null,
+          : [comparisonFunction(value as number, threshold)]),
+      isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
       isError: value === undefined,
       currentValue: getCurrentValue(value),
     };
@@ -93,24 +95,31 @@ const getData = async (
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
   sourceConfiguration: InfraSourceConfiguration,
-  filterQuery?: string
+  filterQuery?: string,
+  customMetric?: SnapshotCustomMetricInput
 ) => {
   const snapshot = new InfraSnapshot();
   const esClient = <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => callCluster('search', options);
 
+  const metrics = [
+    metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },
+  ];
+
   const options = {
     filterQuery: parseFilterQuery(filterQuery),
     nodeType,
     groupBy: [],
     sourceConfiguration,
-    metrics: [{ type: metric }],
+    metrics,
     timerange,
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
   try {
     const { nodes } = await snapshot.getNodes(esClient, options);
+
+    if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 
     return nodes.reduce((acc, n) => {
       const nodePathItem = last(n.path) as any;

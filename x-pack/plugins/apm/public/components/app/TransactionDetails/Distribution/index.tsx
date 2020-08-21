@@ -7,19 +7,19 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import React, { FunctionComponent, useCallback } from 'react';
 import { isEmpty } from 'lodash';
+import React, { useCallback } from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getDurationFormatter } from '../../../../utils/formatters';
+import { history } from '../../../../utils/history';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 interface IChartPoint {
@@ -99,9 +99,7 @@ interface Props {
   bucketIndex: number;
 }
 
-export const TransactionDistribution: FunctionComponent<Props> = (
-  props: Props
-) => {
+export function TransactionDistribution(props: Props) {
   const {
     distribution,
     urlParams: { transactionType },
@@ -211,4 +209,4 @@ export const TransactionDistribution: FunctionComponent<Props> = (
       />
     </div>
   );
-};
+}

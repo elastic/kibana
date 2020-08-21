@@ -27,7 +27,7 @@ const retryResponseStatuses = [
   403, // AuthenticationException
   408, // RequestTimeout
   410, // Gone
-];
+] as const;
 
 /**
  * Retries the provided Elasticsearch API call when a `NoLivingConnectionsError` error is

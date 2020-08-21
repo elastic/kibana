@@ -15,5 +15,7 @@ export interface ElasticsearchServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [legacy](./kibana-plugin-core-server.elasticsearchservicestart.legacy.md) | <code>{</code><br/><code>        readonly createClient: (type: string, clientConfig?: Partial&lt;LegacyElasticsearchClientConfig&gt;) =&gt; ILegacyCustomClusterClient;</code><br/><code>        readonly client: ILegacyClusterClient;</code><br/><code>    }</code> |  |
+|  [client](./kibana-plugin-core-server.elasticsearchservicestart.client.md) | <code>IClusterClient</code> | A pre-configured [Elasticsearch client](./kibana-plugin-core-server.iclusterclient.md) |
+|  [createClient](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->. |
+|  [legacy](./kibana-plugin-core-server.elasticsearchservicestart.legacy.md) | <code>{</code><br/><code>        readonly config$: Observable&lt;ElasticsearchConfig&gt;;</code><br/><code>        readonly createClient: (type: string, clientConfig?: Partial&lt;LegacyElasticsearchClientConfig&gt;) =&gt; ILegacyCustomClusterClient;</code><br/><code>        readonly client: ILegacyClusterClient;</code><br/><code>    }</code> |  |
 

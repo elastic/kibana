@@ -18,12 +18,18 @@
  */
 
 import {
+  CoreSetup,
+  CoreStart,
+  Logger,
   Plugin,
   PluginInitializerContext,
-  CoreSetup,
   RequestHandlerContext,
 } from '../../../../core/server';
 import { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
+
+import { AggsService, AggsSetupDependencies } from './aggs';
+
+import { FieldFormatsStart } from '../field_formats';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
@@ -31,25 +37,45 @@ import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
-import { registerSearchUsageRoute } from './collectors/routes';
 import { IEsSearchRequest } from '../../common';
 
 interface StrategyMap {
   [name: string]: ISearchStrategy;
 }
 
+/** @internal */
+export interface SearchServiceSetupDependencies {
+  registerFunction: AggsSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
+}
+
+/** @internal */
+export interface SearchServiceStartDependencies {
+  fieldFormats: FieldFormatsStart;
+}
+
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
+  private readonly aggsService = new AggsService();
   private searchStrategies: StrategyMap = {};
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(
+    private initializerContext: PluginInitializerContext,
+    private readonly logger: Logger
+  ) {}
 
   public setup(
     core: CoreSetup<object, DataPluginStart>,
-    { usageCollection }: { usageCollection?: UsageCollectionSetup }
+    { registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
+    const usage = usageCollection ? usageProvider(core) : undefined;
+
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
+      esSearchStrategyProvider(
+        this.initializerContext.config.legacy.globalConfig$,
+        this.logger,
+        usage
+      )
     );
 
     core.savedObjects.registerType(searchTelemetry);
@@ -57,15 +83,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
-    const usage = usageProvider(core);
-
     registerSearchRoute(core);
-    registerSearchUsageRoute(core, usage);
 
-    return { registerSearchStrategy: this.registerSearchStrategy, usage };
+    return {
+      aggs: this.aggsService.setup({ registerFunction }),
+      registerSearchStrategy: this.registerSearchStrategy,
+      usage,
+    };
   }
 
-  private search(context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) {
+  private search(
+    context: RequestHandlerContext,
+    searchRequest: IEsSearchRequest,
+    options: Record<string, any>
+  ) {
     return this.getSearchStrategy(options.strategy || ES_SEARCH_STRATEGY).search(
       context,
       searchRequest,
@@ -73,20 +104,34 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
   }
 
-  public start(): ISearchStart {
+  public start(
+    { uiSettings }: CoreStart,
+    { fieldFormats }: SearchServiceStartDependencies
+  ): ISearchStart {
     return {
+      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       getSearchStrategy: this.getSearchStrategy,
-      search: this.search,
+      search: (
+        context: RequestHandlerContext,
+        searchRequest: IEsSearchRequest,
+        options: Record<string, any>
+      ) => {
+        return this.search(context, searchRequest, options);
+      },
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.aggsService.stop();
+  }
 
   private registerSearchStrategy = (name: string, strategy: ISearchStrategy) => {
+    this.logger.info(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
   private getSearchStrategy = (name: string): ISearchStrategy => {
+    this.logger.info(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);

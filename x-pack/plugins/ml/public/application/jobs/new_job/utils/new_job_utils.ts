@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import { esQuery, Query, esKuery } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
@@ -12,6 +13,20 @@ import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.
+
+const DEFAULT_QUERY = {
+  bool: {
+    must: [
+      {
+        match_all: {},
+      },
+    ],
+  },
+};
+
+export function getDefaultDatafeedQuery() {
+  return cloneDeep(DEFAULT_QUERY);
+}
 
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
@@ -27,16 +42,7 @@ export function createSearchItems(
     language: 'lucene',
   };
 
-  let combinedQuery: any = {
-    bool: {
-      must: [
-        {
-          match_all: {},
-        },
-      ],
-    },
-  };
-
+  let combinedQuery: any = getDefaultDatafeedQuery();
   if (savedSearch !== null) {
     const data = getQueryFromSavedSearch(savedSearch);
 

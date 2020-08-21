@@ -15,11 +15,17 @@ export const ACTIONS_FEATURE = {
   icon: 'bell',
   navLinkId: 'actions',
   app: [],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   privileges: {
     all: {
       app: [],
       api: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       savedObject: {
         all: [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
         read: [],
@@ -30,6 +36,9 @@ export const ACTIONS_FEATURE = {
       app: [],
       api: [],
       catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
         all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],

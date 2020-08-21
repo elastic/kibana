@@ -119,10 +119,16 @@ describe('CaseView ', () => {
       );
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-coke"]`)
           .first()
           .text()
       ).toEqual(data.tags[0]);
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-pepsi"]`)
+          .first()
+          .text()
+      ).toEqual(data.tags[1]);
       expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
         data.createdBy.username
       );

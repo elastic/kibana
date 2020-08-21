@@ -9,8 +9,10 @@ import {
   compressionAlgorithm,
   encryptionAlgorithm,
   identifier,
+  semanticVersion,
   sha256,
   size,
+  manifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
 import { created } from './common';
 
@@ -58,6 +60,8 @@ export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreat
 export const internalManifestSchema = t.exact(
   t.type({
     ids: t.array(identifier),
+    schemaVersion: manifestSchemaVersion,
+    semanticVersion,
   })
 );
 export type InternalManifestSchema = t.TypeOf<typeof internalManifestSchema>;

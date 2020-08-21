@@ -17,11 +17,12 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
 import { first } from 'rxjs/operators';
 
-export const InstallChromiumTask = {
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
+
+export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
@@ -32,6 +33,7 @@ export const InstallChromiumTask = {
         log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
 
         const { binaryPath$ } = installBrowser(
+          // TODO: https://github.com/elastic/kibana/issues/72496
           log,
           build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
           platform.getName(),

@@ -20,7 +20,7 @@
 import { ElasticsearchClient } from './types';
 
 /**
- * Serves the same purpose as the normal {@link ClusterClient | cluster client} but exposes
+ * Serves the same purpose as the normal {@link IClusterClient | cluster client} but exposes
  * an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal
  * user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers
  * extracted from the current user request to the API instead.

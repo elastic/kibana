@@ -9,11 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useForm, Form, SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';
-import { Types, useDispatch } from '../../mappings_state';
+import { MappingsTemplates } from '../../types';
+import { useDispatch } from '../../mappings_state_context';
 import { templatesFormSchema } from './templates_form_schema';
 import { documentationService } from '../../../../services/documentation';
-
-type MappingsTemplates = Types['MappingsTemplates'];
 
 interface Props {
   value?: MappingsTemplates;
@@ -45,6 +44,7 @@ const formSerializer: SerializerFunc<MappingsTemplates | undefined> = (formData)
 };
 
 const formDeserializer = (formData: { [key: string]: any }) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { dynamic_templates } = formData;
 
   return {
@@ -53,7 +53,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
 };
 
 export const TemplatesForm = React.memo(({ value }: Props) => {
-  const isMounted = useRef<boolean | undefined>(undefined);
+  const isMounted = useRef(false);
 
   const { form } = useForm<any>({
     schema: templatesFormSchema,
@@ -75,23 +75,16 @@ export const TemplatesForm = React.memo(({ value }: Props) => {
   }, [subscribe, dispatch, submitForm]);
 
   useEffect(() => {
-    if (isMounted.current === undefined) {
-      // On mount: don't reset the form
-      isMounted.current = true;
-      return;
-    } else if (isMounted.current === false) {
-      // When we save the snapshot on unMount we update the "defaultValue" in our state
-      // wich updates the "value" prop here on the component.
-      // To avoid resetting the form at this stage, we exit early.
-      return;
+    if (isMounted.current) {
+      // If the value has changed (it probably means that we have loaded a new JSON)
+      // we need to reset the form to update the fields values.
+      reset({ resetValues: true, defaultValue: value });
     }
-
-    // If the value has changed (it probably means that we have loaded a new JSON)
-    // we need to reset the form to update the fields values.
-    reset({ resetValues: true });
   }, [value, reset]);
 
   useEffect(() => {
+    isMounted.current = true;
+
     return () => {
       isMounted.current = false;
 

@@ -10,8 +10,6 @@ To integrate with the telemetry services for usage collection of your feature, t
 
 All you need to provide is a `type` for organizing your fields, `schema` field to define the expected types of usage fields reported, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
 
-### New Platform
-
 1. Make sure `usageCollection` is in your optional Plugins:
 
     ```json
@@ -179,7 +177,7 @@ New fields added to the telemetry payload currently mean that telemetry cluster 
 
 There are a few ways you can test that your usage collector is working properly.
 
-1. The `/api/stats?extended=true` HTTP API in Kibana (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
+1. The `/api/stats?extended=true&legacy=true` HTTP API in Kibana (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
 2. There is a dev script in x-pack that will give a sample of a payload of data that gets sent up to the telemetry cluster for the sending phase of telemetry. Collected data comes from:
     - The `.monitoring-*` indices, when Monitoring is enabled. Monitoring enhances the sent payload of telemetry by producing usage data potentially of multiple clusters that exist in the monitoring data. Monitoring data is time-based, and the time frame of collection is the last 15 minutes.
     - Live-pulled from ES API endpoints. This will get just real-time stats without context of historical data.
@@ -204,6 +202,10 @@ There are a few ways you can test that your usage collector is working properly.
 
 
 # UI Metric app
+
+The UI metrics implementation in its current state is not useful. We are working on improving the implementation to enable teams to use the data to visualize and gather information from what is being reported. Please refer to the telemetry team if you are interested in adding ui_metrics to your plugin.
+
+**Until a better implementation is introduced, please defer from adding any new ui metrics.**
 
 ## Purpose
 

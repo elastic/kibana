@@ -25,6 +25,7 @@
  */
 
 import { Logger } from 'src/core/server/logging';
+import { MigrationEsClient } from './migration_es_client';
 import { SavedObjectsSerializer } from '../../serialization';
 import {
   SavedObjectsTypeMappingDefinitions,
@@ -32,16 +33,15 @@ import {
   IndexMapping,
 } from '../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
-import { CallCluster } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
-import { fetchInfo, FullIndexInfo } from './elastic_index';
+import * as Index from './elastic_index';
 import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
 
 export interface MigrationOpts {
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
-  callCluster: CallCluster;
+  client: MigrationEsClient;
   index: string;
   log: Logger;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
@@ -56,11 +56,14 @@ export interface MigrationOpts {
   obsoleteIndexTemplatePattern?: string;
 }
 
+/**
+ * @internal
+ */
 export interface Context {
-  callCluster: CallCluster;
+  client: MigrationEsClient;
   alias: string;
-  source: FullIndexInfo;
-  dest: FullIndexInfo;
+  source: Index.FullIndexInfo;
+  dest: Index.FullIndexInfo;
   documentMigrator: VersionedTransformer;
   log: SavedObjectsMigrationLogger;
   batchSize: number;
@@ -76,13 +79,13 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { log, callCluster } = opts;
+  const { log, client } = opts;
   const alias = opts.index;
-  const source = createSourceContext(await fetchInfo(callCluster, alias), alias);
+  const source = createSourceContext(await Index.fetchInfo(client, alias), alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
 
   return {
-    callCluster,
+    client,
     alias,
     source,
     dest,
@@ -97,7 +100,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
   };
 }
 
-function createSourceContext(source: FullIndexInfo, alias: string) {
+function createSourceContext(source: Index.FullIndexInfo, alias: string) {
   if (source.exists && source.indexName === alias) {
     return {
       ...source,
@@ -109,10 +112,10 @@ function createSourceContext(source: FullIndexInfo, alias: string) {
 }
 
 function createDestContext(
-  source: FullIndexInfo,
+  source: Index.FullIndexInfo,
   alias: string,
   typeMappingDefinitions: SavedObjectsTypeMappingDefinitions
-): FullIndexInfo {
+): Index.FullIndexInfo {
   const targetMappings = disableUnknownTypeMappingFields(
     buildActiveMappings(typeMappingDefinitions),
     source.mappings

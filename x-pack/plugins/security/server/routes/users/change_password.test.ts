@@ -17,15 +17,18 @@ import {
   ScopeableRequest,
 } from '../../../../../../src/core/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
+import { Session } from '../../session_management';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
+  let session: jest.Mocked<PublicMethodsOf<Session>>;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
@@ -46,15 +49,11 @@ describe('Change password', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     authc = routeParamsMock.authc;
+    session = routeParamsMock.session;
 
-    authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user' }));
+    authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
-    authc.getSessionInfo.mockResolvedValue({
-      now: Date.now(),
-      idleTimeoutExpiration: null,
-      lifespanExpiration: null,
-      provider: { type: 'basic', name: 'basic' },
-    });
+    session.get.mockResolvedValue(sessionMock.createValue());
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockClusterClient = routeParamsMock.clusterClient;
@@ -199,6 +198,9 @@ describe('Change password', () => {
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
+      session.get.mockResolvedValue(
+        sessionMock.createValue({ provider: { type: 'token', name: 'token1' } })
+      );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -220,7 +222,7 @@ describe('Change password', () => {
     });
 
     it('successfully changes own password but does not re-login if current session does not exist.', async () => {
-      authc.getSessionInfo.mockResolvedValue(null);
+      session.get.mockResolvedValue(null);
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(204);

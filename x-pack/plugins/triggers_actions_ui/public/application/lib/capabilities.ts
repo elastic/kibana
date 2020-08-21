@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../../alerting_builtins/common';
 import { Alert, AlertType } from '../../types';
 
 /**
@@ -14,18 +13,6 @@ import { Alert, AlertType } from '../../types';
  */
 
 type Capabilities = Record<string, any>;
-
-const apps = ['apm', 'siem', 'uptime', 'infrastructure', 'actions', BUILT_IN_ALERTS_FEATURE_ID];
-
-function hasCapability(capabilities: Capabilities, capability: string) {
-  return apps.some((app) => capabilities[app]?.[capability]);
-}
-
-function createCapabilityCheck(capability: string) {
-  return (capabilities: Capabilities) => hasCapability(capabilities, capability);
-}
-
-export const hasShowAlertsCapability = createCapabilityCheck('alerting:show');
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;

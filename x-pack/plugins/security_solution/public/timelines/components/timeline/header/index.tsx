@@ -73,9 +73,9 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     {status === TimelineStatus.immutable && (
       <EuiCallOut
         data-test-subj="timelineImmutableCallOut"
-        title={i18n.CALL_OUT_IMMUTIABLE}
+        title={i18n.CALL_OUT_IMMUTABLE}
         color="primary"
-        iconType="info"
+        iconType="alert"
         size="s"
       />
     )}
