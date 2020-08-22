@@ -28,6 +28,7 @@ import { SavedObjectsErrorHelpers } from '../..';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
+const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 10485760, maxImportExportSize: 10000 } as SavedObjectConfig;
 const URL = '/internal/saved_objects/_import';
@@ -54,7 +55,7 @@ describe(`POST ${URL}`, () => {
 
   beforeEach(async () => {
     mockUuidv4.mockReset();
-    mockUuidv4.mockImplementation(() => jest.requireActual('uuidv4'));
+    mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
@@ -489,6 +490,7 @@ describe(`POST ${URL}`, () => {
       const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+        .set('x-opaque-id', uuidv4()) // prevents src/core/server/http/http_tools.ts from using our mocked uuidv4 to generate a unique ID for this request
         .send(
           [
             '--EXAMPLE',

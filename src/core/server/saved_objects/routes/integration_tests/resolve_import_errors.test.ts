@@ -27,6 +27,7 @@ import { SavedObjectConfig } from '../../saved_objects_config';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
+const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 10485760, maxImportExportSize: 10000 } as SavedObjectConfig;
 const URL = '/api/saved_objects/_resolve_import_errors';
@@ -58,7 +59,7 @@ describe(`POST ${URL}`, () => {
 
   beforeEach(async () => {
     mockUuidv4.mockReset();
-    mockUuidv4.mockImplementation(() => jest.requireActual('uuidv4'));
+    mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
