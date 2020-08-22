@@ -14,7 +14,7 @@ import { useValues, useActions } from 'kea';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
-import { ErrorState as ErrorConnecting } from './components/empty_states';
+import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 

@@ -28,7 +28,7 @@ import {
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
-import { ErrorState as ErrorConnecting } from './components/empty_states';
+import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {

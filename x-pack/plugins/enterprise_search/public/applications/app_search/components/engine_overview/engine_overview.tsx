@@ -42,8 +42,6 @@ export const EngineOverview: React.FC = () => {
   const { license } = useContext(LicenseContext) as ILicenseContext;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [hasErrorConnecting, setHasErrorConnecting] = useState(false);
-
   const [engines, setEngines] = useState([]);
   const [enginesPage, setEnginesPage] = useState(1);
   const [enginesTotal, setEnginesTotal] = useState(0);
@@ -57,16 +55,12 @@ export const EngineOverview: React.FC = () => {
     });
   };
   const setEnginesData = async (params: IGetEnginesParams, callbacks: ISetEnginesCallbacks) => {
-    try {
-      const response = await getEnginesData(params);
+    const response = await getEnginesData(params);
 
-      callbacks.setResults(response.results);
-      callbacks.setResultsTotal(response.meta.page.total_results);
+    callbacks.setResults(response.results);
+    callbacks.setResultsTotal(response.meta.page.total_results);
 
-      setIsLoading(false);
-    } catch (error) {
-      setHasErrorConnecting(true);
-    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -85,7 +79,6 @@ export const EngineOverview: React.FC = () => {
     }
   }, [license, metaEnginesPage]);
 
-  if (hasErrorConnecting) return <ErrorState />;
   if (isLoading) return <LoadingState />;
   if (!engines.length) return <EmptyState />;
 
