@@ -35,6 +35,7 @@ import {
   I18nStart,
   NotificationsStart,
   OverlayStart,
+  SavedObject,
 } from '../../../../core/public';
 import {
   SavedObjectSaveModal,
@@ -51,8 +52,10 @@ import {
  * into an embeddable input shape that contains that saved object's attributes by value.
  */
 export class AttributeService<
-  SavedObjectAttributes extends { title: string },
-  ValType extends EmbeddableInput & { attributes: SavedObjectAttributes },
+  SavedObjectAttributes extends { title: string; references?: SavedObject['references'] },
+  ValType extends EmbeddableInput & {
+    attributes: SavedObjectAttributes;
+  },
   RefType extends SavedObjectEmbeddableInput
 > {
   private embeddableFactory?: EmbeddableFactory;
@@ -83,7 +86,7 @@ export class AttributeService<
       const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
         SavedObjectAttributes
       >(this.type, input.savedObjectId);
-      return savedObject.attributes;
+      return { ...savedObject.attributes, references: savedObject.references };
     }
     return input.attributes;
   }

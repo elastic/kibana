@@ -40,12 +40,16 @@ import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath } from '../../../common';
-import { IBasePath } from '../../../../../../src/core/public';
+import { IBasePath, SavedObject } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'id' | 'type'>;
 
-export type LensByValueInput = { attributes: LensSavedObjectAttributes } & LensInheritedInput;
+export type LensByValueInput = {
+  attributes: LensSavedObjectAttributes;
+  references: SavedObject<LensSavedObjectAttributes>['references'];
+} & LensInheritedInput;
+
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensInheritedInput;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 

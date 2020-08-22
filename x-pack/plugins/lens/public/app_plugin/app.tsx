@@ -258,20 +258,26 @@ export function App({
             },
           ]
         : []),
-      {
-        href: core.http.basePath.prepend(`/app/visualize#/`),
-        onClick: (e) => {
-          core.application.navigateToApp('visualize', { path: '/' });
-          e.preventDefault();
-        },
-        text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-          defaultMessage: 'Visualize',
-        }),
-      },
+      ...(!state.byValueMode
+        ? [
+            {
+              href: core.http.basePath.prepend(`/app/visualize#/`),
+              onClick: (e) => {
+                core.application.navigateToApp('visualize', { path: '/' });
+                e.preventDefault();
+              },
+              text: i18n.translate('xpack.lens.breadcrumbsTitle', {
+                defaultMessage: 'Visualize',
+              }),
+            },
+          ]
+        : []),
       {
         text: state.persistedDoc
           ? state.byValueMode
-            ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'By Value' })
+            ? i18n.translate('xpack.lens.breadcrumbsByValue', {
+                defaultMessage: 'Edit Visualization',
+              })
             : state.persistedDoc.title
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
@@ -366,6 +372,12 @@ export function App({
   ) => {
     if (!lastKnownDoc) {
       return;
+    }
+
+    if (saveProps.newCopyOnSave && !state.byValueMode) {
+      if (embeddableEditorIncomingState?.embeddableId) {
+        embeddableEditorIncomingState.embeddableId = undefined;
+      }
     }
 
     const doc = {
