@@ -138,6 +138,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
             {}
           ),
         };
+        // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
         agg.array.push(field);
         agg.hash[fieldName] = field;
         return agg;
@@ -152,6 +153,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
       };
+      // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);
       agg.hash[fieldName] = field;
       return agg;
