@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal';
-import { Link } from '../link';
 import { Paginate } from '../paginate';
+import { RouterContext } from '../router';
 import { ComponentStrings } from '../../../i18n';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
@@ -78,6 +78,8 @@ export class WorkpadLoader extends React.PureComponent {
   componentWillUnmount() {
     this._isMounted = false;
   }
+
+  static contextType = RouterContext;
 
   // create new empty workpad
   createWorkpad = async () => {
@@ -182,17 +184,17 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
+          const router = this.context;
           const workpadName = getDisplayName(name, workpad, loadedWorkpad);
 
           return (
-            <Link
+            <EuiLink
+              onClick={() => router.navigateTo('loadWorkpad', { id: workpad.id })}
               data-test-subj="canvasWorkpadLoaderWorkpad"
-              name="loadWorkpad"
-              params={{ id: workpad.id }}
               aria-label={strings.getLoadWorkpadArialLabel()}
             >
               {workpadName}
-            </Link>
+            </EuiLink>
           );
         },
       },

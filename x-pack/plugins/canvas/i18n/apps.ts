@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Link } from './link';
+import { i18n } from '@kbn/i18n';
+
+export const AppStrings = {
+  ExportApp: {
+    getEditWorkpadLabel: () =>
+      i18n.translate('xpack.canvas.export.editWorkpadLabel', {
+        defaultMessage: 'Edit Workpad',
+      }),
+  },
+};

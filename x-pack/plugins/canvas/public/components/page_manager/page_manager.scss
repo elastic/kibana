@@ -88,17 +88,6 @@
     color: $euiColorDarkShade;
   }
 
-  .canvasPageManager__pagePreview {
-    @include euiBottomShadowSmall;
-    position: relative;
-    overflow: hidden;
-    color: $euiTextColor;
-
-    .canvasPositionable {
-      position: absolute;
-    }
-  }
-
   .canvasPageManager__controls {
     position: absolute;
     right: $euiSizeS;

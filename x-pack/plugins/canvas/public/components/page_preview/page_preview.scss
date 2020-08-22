@@ -1,0 +1,14 @@
+.canvasPagePreview {
+  @include euiBottomShadowSmall;
+  position: relative;
+  overflow: hidden;
+  color: $euiTextColor;
+
+  .canvasPositionable {
+    position: absolute;
+  }
+}
+
+.canvasPagePreview__stage {
+  color: $euiTextColor;
+}

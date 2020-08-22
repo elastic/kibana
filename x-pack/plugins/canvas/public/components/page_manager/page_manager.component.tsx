@@ -8,11 +8,8 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DragDropContext, Droppable, Draggable, DragDropContextProps } from 'react-beautiful-dnd';
-// @ts-expect-error untyped dependency
-import Style from 'style-it';
 
 import { ConfirmModal } from '../confirm_modal';
-import { Link } from '../link';
 import { PagePreview } from '../page_preview';
 
 import { ComponentStrings } from '../../../i18n';
@@ -28,8 +25,6 @@ export interface Props {
   onRemovePage: (pageId: string) => void;
   pages: CanvasPage[];
   selectedPage?: string;
-  workpadCSS?: string;
-  workpadId: string;
 }
 
 interface State {
@@ -46,8 +41,6 @@ export class PageManager extends Component<Props, State> {
     onRemovePage: PropTypes.func.isRequired,
     pages: PropTypes.array.isRequired,
     selectedPage: PropTypes.string,
-    workpadCSS: PropTypes.string,
-    workpadId: PropTypes.string.isRequired,
   };
 
   constructor(props: Props) {
@@ -155,7 +148,7 @@ export class PageManager extends Component<Props, State> {
   };
 
   renderPage = (page: CanvasPage, i: number) => {
-    const { isWriteable, selectedPage, workpadId, workpadCSS } = this.props;
+    const { isWriteable, selectedPage } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -182,18 +175,12 @@ export class PageManager extends Component<Props, State> {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <Link
-                  name="loadWorkpad"
-                  params={{ id: workpadId, page: pageNumber }}
-                  aria-label={strings.getPageNumberAriaLabel(pageNumber)}
-                >
-                  {Style.it(
-                    workpadCSS,
-                    <div>
-                      <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
-                    </div>
-                  )}
-                </Link>
+                <PagePreview
+                  height={100}
+                  page={page}
+                  pageNumber={pageNumber}
+                  onRemove={this.onConfirmRemove}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

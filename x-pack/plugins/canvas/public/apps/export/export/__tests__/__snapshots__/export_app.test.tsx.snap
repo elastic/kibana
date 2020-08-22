@@ -38,18 +38,17 @@ exports[`<ExportApp /> renders as expected 1`] = `
       <div
         className="canvasLayout__stageHeader"
       >
-        <Link
-          name="loadWorkpad"
-          params={
-            Object {
-              "id": "my-workpad-abcd",
-            }
-          }
+        <EuiLink
+          onClick={[Function]}
         >
-          <div>
-            Link
-          </div>
-        </Link>
+          <button
+            className="euiLink euiLink--primary"
+            onClick={[Function]}
+            type="button"
+          >
+            Edit Workpad
+          </button>
+        </EuiLink>
       </div>
       <div
         className="canvasExport__stageContent"
@@ -108,18 +107,17 @@ exports[`<ExportApp /> renders as expected 2`] = `
       <div
         className="canvasLayout__stageHeader"
       >
-        <Link
-          name="loadWorkpad"
-          params={
-            Object {
-              "id": "my-workpad-abcd",
-            }
-          }
+        <EuiLink
+          onClick={[Function]}
         >
-          <div>
-            Link
-          </div>
-        </Link>
+          <button
+            className="euiLink euiLink--primary"
+            onClick={[Function]}
+            type="button"
+          >
+            Edit Workpad
+          </button>
+        </EuiLink>
       </div>
       <div
         className="canvasExport__stageContent"

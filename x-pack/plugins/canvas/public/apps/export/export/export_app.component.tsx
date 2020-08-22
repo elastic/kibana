@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
+import { EuiLink } from '@elastic/eui';
+
 // @ts-expect-error untyped library
 import Style from 'style-it';
+
 // @ts-expect-error untyped local
 import { WorkpadPage } from '../../../components/workpad_page';
-import { Link } from '../../../components/link';
+import { RouterContext } from '../../../components/router';
+
+import { AppStrings } from '../../../../i18n';
 import { CanvasWorkpad } from '../../../../types';
 
 interface Props {
@@ -19,20 +24,27 @@ interface Props {
   initializeWorkpad: () => void;
 }
 
+const { ExportApp: strings } = AppStrings;
+
 export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWorkpad }) => {
   const { id, pages, height, width } = workpad;
   const activePage = pages[selectedPageIndex];
   const pageElementCount = activePage.elements.length;
+  const router = useContext(RouterContext);
 
   useEffect(() => initializeWorkpad());
+
+  if (!router) {
+    return <div>Router Undefined</div>;
+  }
 
   return (
     <div className="canvasExport" data-shared-page={selectedPageIndex + 1}>
       <div className="canvasExport__stage">
         <div className="canvasLayout__stageHeader">
-          <Link name="loadWorkpad" params={{ id }}>
-            Edit Workpad
-          </Link>
+          <EuiLink onClick={() => router.navigateTo('loadWorkpad', { id })}>
+            {strings.getEditWorkpadLabel()}
+          </EuiLink>
         </div>
         {Style.it(
           workpad.css,

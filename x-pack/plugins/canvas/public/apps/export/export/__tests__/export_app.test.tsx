@@ -7,6 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { ExportApp } from '../export_app.component';
+import { RouterContext } from '../../../../components/router';
 import { CanvasWorkpad } from '../../../../../types';
 
 jest.mock('style-it', () => ({
@@ -15,10 +16,6 @@ jest.mock('style-it', () => ({
 
 jest.mock('../../../../components/workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,
-}));
-
-jest.mock('../../../../components/link', () => ({
-  Link: (props: any) => <div>Link</div>,
 }));
 
 describe('<ExportApp />', () => {
@@ -37,12 +34,16 @@ describe('<ExportApp />', () => {
     } as any) as CanvasWorkpad;
 
     const page1 = mount(
-      <ExportApp workpad={sampleWorkpad} selectedPageIndex={0} initializeWorkpad={() => {}} />
+      <RouterContext.Provider value={{ navigateTo: () => {} }}>
+        <ExportApp workpad={sampleWorkpad} selectedPageIndex={0} initializeWorkpad={() => {}} />
+      </RouterContext.Provider>
     );
     expect(page1).toMatchSnapshot();
 
     const page2 = mount(
-      <ExportApp workpad={sampleWorkpad} selectedPageIndex={1} initializeWorkpad={() => {}} />
+      <RouterContext.Provider value={{ navigateTo: () => {} }}>
+        <ExportApp workpad={sampleWorkpad} selectedPageIndex={1} initializeWorkpad={() => {}} />
+      </RouterContext.Provider>
     );
     expect(page2).toMatchSnapshot();
   });

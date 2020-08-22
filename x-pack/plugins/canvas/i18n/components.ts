@@ -565,13 +565,6 @@ export const ComponentStrings = {
       }),
   },
   PageManager: {
-    getPageNumberAriaLabel: (pageNumber: number) =>
-      i18n.translate('xpack.canvas.pageManager.pageNumberAriaLabel', {
-        defaultMessage: 'Load page number {pageNumber}',
-        values: {
-          pageNumber,
-        },
-      }),
     getAddPageTooltip: () =>
       i18n.translate('xpack.canvas.pageManager.addPageTooltip', {
         defaultMessage: 'Add a new page to this workpad',
@@ -587,6 +580,22 @@ export const ComponentStrings = {
     getConfirmRemoveButtonLabel: () =>
       i18n.translate('xpack.canvas.pageManager.removeButtonLabel', {
         defaultMessage: 'Remove',
+      }),
+  },
+  PagePreview: {
+    getPageNumberAriaLabel: (pageNumber: number) =>
+      i18n.translate('xpack.canvas.pagePreview.pageNumberAriaLabel', {
+        defaultMessage: 'Load page number {pageNumber}',
+        values: {
+          pageNumber,
+        },
+      }),
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.pagePreview.errorMessage', {
+        defaultMessage: 'PAGE PREVIEW ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   PagePreviewPageControls: {

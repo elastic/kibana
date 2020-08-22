@@ -9,12 +9,15 @@ import { connect } from 'react-redux';
 // @ts-expect-error untyped local
 import * as pageActions from '../../state/actions/pages';
 import { canUserWrite } from '../../state/selectors/app';
-import { isWriteable } from '../../state/selectors/workpad';
+import { isWriteable, getWorkpad } from '../../state/selectors/workpad';
+import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { PagePreview as Component } from './page_preview.component';
 import { State } from '../../../types';
 
 const mapStateToProps = (state: State) => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
+  workpadId: getWorkpad(state).id,
+  workpadCSS: getWorkpad(state).css || DEFAULT_WORKPAD_CSS,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
