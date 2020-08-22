@@ -261,16 +261,18 @@ describe('Lens App', () => {
 
     instance = mount(<App {...args} />);
 
-    const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
-    expect(topNavMenuConfig).toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveButton)
-    );
-    expect(topNavMenuConfig).not.toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveAsButton)
-    );
-    expect(topNavMenuConfig).not.toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
-    );
+    await act(async () => {
+      const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
+      expect(topNavMenuConfig).toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveButton)
+      );
+      expect(topNavMenuConfig).not.toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveAsButton)
+      );
+      expect(topNavMenuConfig).not.toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+      );
+    });
   });
 
   it('Renders Save and Return and Save As in by reference mode when originatingApp is provided', async () => {
@@ -282,16 +284,18 @@ describe('Lens App', () => {
 
     instance = mount(<App {...args} />);
 
-    const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
-    expect(topNavMenuConfig).toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
-    );
-    expect(topNavMenuConfig).toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveAsButton)
-    );
-    expect(topNavMenuConfig).not.toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveButton)
-    );
+    await act(async () => {
+      const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
+      expect(topNavMenuConfig).toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+      );
+      expect(topNavMenuConfig).toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveAsButton)
+      );
+      expect(topNavMenuConfig).not.toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveButton)
+      );
+    });
   });
 
   it('Renders Save and Return and Save As in create by value mode', async () => {
@@ -300,21 +304,29 @@ describe('Lens App', () => {
     args.featureFlagConfig = { allowByValueEmbeddables: true };
     args.embeddableEditorIncomingState = {
       originatingApp: 'ultraDashboard',
-      valueInput: { whatchaGonnaDo: 'with all these values', id: 'allTheseValuesInYourValueInput' },
+      valueInput: {
+        id: 'whatchaGonnaDoWith',
+        attributes: {
+          allTheseReferences: 'all these references in your value Input',
+          references: [],
+        },
+      },
     };
 
     instance = mount(<App {...args} />);
 
-    const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
-    expect(topNavMenuConfig).toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
-    );
-    expect(topNavMenuConfig).toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveAsButton)
-    );
-    expect(topNavMenuConfig).not.toContainEqual(
-      expect.objectContaining(navMenuItems.expectedSaveButton)
-    );
+    await act(async () => {
+      const topNavMenuConfig = instance.find(TopNavMenu).prop('config');
+      expect(topNavMenuConfig).toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+      );
+      expect(topNavMenuConfig).toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveAsButton)
+      );
+      expect(topNavMenuConfig).not.toContainEqual(
+        expect.objectContaining(navMenuItems.expectedSaveButton)
+      );
+    });
   });
 
   it('sets breadcrumbs when the document title changes', async () => {
@@ -336,7 +348,7 @@ describe('Lens App', () => {
       references: [],
     });
     await act(async () => {
-      instance.setProps({ docId: '1234' });
+      instance.setProps({ savedObjectId: '1234' });
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
@@ -360,11 +372,11 @@ describe('Lens App', () => {
     (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
       id: '1234',
       title: 'Daaaaaaadaumching!',
-      expression: 'valid expression',
       state: {
         query: 'fake query',
-        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        filters: [],
       },
+      references: [{}, {}],
     });
     await act(async () => {
       instance.setProps({ savedObjectId: '1234' });
@@ -624,7 +636,7 @@ describe('Lens App', () => {
 
         expect(args.docStorage.save).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: undefined,
+            savedObjectId: undefined,
             title: 'hello there',
           })
         );
@@ -645,7 +657,7 @@ describe('Lens App', () => {
 
         expect(args.docStorage.save).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: undefined,
+            savedObjectId: undefined,
             title: 'hello there',
           })
         );
@@ -716,7 +728,7 @@ describe('Lens App', () => {
 
         expect(args.docStorage.save).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: undefined,
+            savedObjectId: undefined,
             title: 'hello there',
           })
         );

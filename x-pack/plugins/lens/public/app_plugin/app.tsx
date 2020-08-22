@@ -12,6 +12,7 @@ import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
 import { History } from 'history';
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
+import { EuiBreadcrumb } from '@elastic/eui';
 import {
   Query,
   DataPublicPluginStart,
@@ -269,7 +270,7 @@ export function App({
               text: i18n.translate('xpack.lens.breadcrumbsTitle', {
                 defaultMessage: 'Visualize',
               }),
-            },
+            } as EuiBreadcrumb,
           ]
         : []),
       {
