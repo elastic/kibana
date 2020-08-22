@@ -79,7 +79,6 @@ export class IndexPattern implements IIndexPattern {
   private onNotification: OnNotification;
   private onError: OnError;
   private apiClient: IIndexPatternsApiClient;
-  private uiSettingsValues: IUiSettingsValues;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -145,15 +144,18 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormatter = this.fieldFormats.getType(mapping.id);
+    /*
+    const FieldFormatter = this.fieldFormats.getType(mapping.id, mapping.params);
 
     return (
       FieldFormatter &&
       new FieldFormatter(
         mapping.params,
-        (key: string) => this.uiSettingsValues[key]?.userValue || this.uiSettingsValues[key]?.value
+        (key: string) => this.c[key]?.userValue || this.uiSettingsValues[key]?.value
       )
     );
+    */
+    return this.fieldFormats.getInstance(mapping.id, mapping.params);
   }
 
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
