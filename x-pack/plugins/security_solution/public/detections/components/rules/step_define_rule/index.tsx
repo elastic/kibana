@@ -51,7 +51,7 @@ import * as i18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues?: DefineStepRule | null;
+  defaultValues: DefineStepRule;
 }
 
 export const stepDefineDefaultValue: DefineStepRule = {
@@ -108,9 +108,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const initialState = defaultValues ?? {
-    ...stepDefineDefaultValue,
-    index: indicesConfig ?? [],
+  const initialState = {
+    ...defaultValues,
+    index: defaultValues.index.length ? defaultValues.index : indicesConfig,
   };
   const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
   const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
