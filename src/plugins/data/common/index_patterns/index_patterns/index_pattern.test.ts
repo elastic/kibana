@@ -32,7 +32,7 @@ import { fieldFormatsMock } from '../../field_formats/mocks';
 
 class MockFieldFormatter {}
 
-fieldFormatsMock.getType = jest.fn().mockImplementation(() => MockFieldFormatter);
+fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');

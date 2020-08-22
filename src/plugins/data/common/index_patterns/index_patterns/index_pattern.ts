@@ -120,7 +120,6 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.uiSettingsValues = uiSettingsValues;
 
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
@@ -144,18 +143,12 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    /*
-    const FieldFormatter = this.fieldFormats.getType(mapping.id, mapping.params);
-
-    return (
-      FieldFormatter &&
-      new FieldFormatter(
-        mapping.params,
-        (key: string) => this.c[key]?.userValue || this.uiSettingsValues[key]?.value
-      )
-    );
-    */
-    return this.fieldFormats.getInstance(mapping.id, mapping.params);
+    try {
+      return this.fieldFormats.getInstance(mapping.id, mapping.params);
+      // todo catch particular error, not all
+    } catch {
+      return undefined;
+    }
   }
 
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
