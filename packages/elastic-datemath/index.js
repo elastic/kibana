@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import moment from 'moment';
+const moment = require('moment');
 
 const unitsMap = {
   ms: { weight: 1, type: 'fixed', base: 1 },
@@ -151,7 +151,7 @@ function parseDateMath(mathString, time, roundUp) {
   return dateTime;
 }
 
-export default {
+module.exports = {
   parse: parse,
   unitsMap: Object.freeze(unitsMap),
   units: Object.freeze(units),
