@@ -31,6 +31,7 @@ export function getIndexPatternFieldList(
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
     unknownTypes.push({
+      displayName: String(unknownFieldName),
       name: String(unknownFieldName),
       type: 'unknown',
     } as IndexPatternField);
