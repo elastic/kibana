@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './aliases';
+import moment from 'moment';
 
-export * from './indices';
-
-export * from './mappings';
-
-export * from './templates';
-
-export { DataStreamFromEs, Health, DataStream, DataStreamIndex } from './data_streams';
-
-export * from './component_templates';
+export const humanizeTimeStamp = (timeStamp: number): string =>
+  moment(timeStamp).format('MMMM Do, YYYY h:mm:ss A');
