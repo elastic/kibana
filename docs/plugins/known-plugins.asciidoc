@@ -33,6 +33,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
 * https://github.com/aaronoah/kibana_calendar_vis[Calendar Visualization] (aaronoah)
 * https://github.com/elo7/cohort[Cohort analysis] (elo7)
+* https://github.com/synapticielfactory/kibana_cohort[Cohort Analysis Kibana New Platform] (synapticielfactory)
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
 * https://github.com/JuanCarniglia/dendrogram_vis[Dendrogram] (JuanCarniglia)
 * https://github.com/dlumbrer/kbn_dotplot[Dotplot] (dlumbrer)
