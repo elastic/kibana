@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { ReactElement } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
-export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
+interface Props {
+  header: ReactElement<any>;
+  minLabel: string | number;
+  maxLabel: string | number;
+  propertyLabel: string;
+  fieldLabel: string;
+}
+
+export function RangedStyleLegendRow({
+  header,
+  minLabel,
+  maxLabel,
+  propertyLabel,
+  fieldLabel,
+}: Props) {
   return (
     <div>
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
@@ -39,11 +52,3 @@ export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel
     </div>
   );
 }
-
-RangedStyleLegendRow.propTypes = {
-  header: PropTypes.node.isRequired,
-  minLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  maxLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  propertyLabel: PropTypes.string.isRequired,
-  fieldLabel: PropTypes.string.isRequired,
-};
