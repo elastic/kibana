@@ -91,7 +91,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
   } = processorOutput!;
 
   return (
-    <>
+    <div data-test-subj="processorOutputTabContent">
       <EuiText>
         <p>{i18nTexts.tabDescription}</p>
       </EuiText>
@@ -212,6 +212,6 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
           </EuiAccordion>
         </>
       )}
-    </>
+    </div>
   );
 };

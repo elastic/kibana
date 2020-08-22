@@ -79,7 +79,13 @@ export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ process
 
   return (
     <EuiToolTip position="top" content={<p>{label}</p>}>
-      <EuiIcon color={iconColor} type={icon} aria-label={label} size="s" />
+      <EuiIcon
+        color={iconColor}
+        type={icon}
+        aria-label={label}
+        size="s"
+        data-test-subj="processorStatusIcon"
+      />
     </EuiToolTip>
   );
 };

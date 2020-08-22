@@ -11,7 +11,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
 
-import { uiMetricService, apiService } from '../../../../../services';
+import { uiMetricService, apiService } from '../../../services';
 
 type HttpResponse = Record<string, any> | any[];
 

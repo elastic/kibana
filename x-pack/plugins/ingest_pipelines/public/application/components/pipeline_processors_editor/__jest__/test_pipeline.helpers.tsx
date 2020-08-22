@@ -10,9 +10,14 @@ import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mock
 
 import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
-import { stubWebWorker } from '../../../../../../../../../test_utils/stub_web_worker';
-import { ProcessorsEditorContextProvider, Props } from '../../../';
+import { registerTestBed, TestBed } from '../../../../../../../test_utils';
+import { stubWebWorker } from '../../../../../../../test_utils/stub_web_worker';
+import {
+  ProcessorsEditorContextProvider,
+  Props,
+  GlobalOnFailureProcessorsEditor,
+  ProcessorsEditor,
+} from '../';
 import { TestPipelineActions } from '../';
 
 import {
@@ -20,9 +25,26 @@ import {
   uiMetricService,
   documentationService,
   apiService,
-} from '../../../../../services';
+} from '../../../services';
 
 stubWebWorker();
+
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -40,6 +62,17 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('react-virtualized', () => {
+  const original = jest.requireActual('react-virtualized');
+
+  return {
+    ...original,
+    AutoSizer: ({ children }: { children: any }) => (
+      <div>{children({ height: 500, width: 500 })}</div>
+    ),
+  };
+});
+
 const history = scopedHistoryMock.create();
 history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
@@ -52,6 +85,7 @@ const appServices = {
   api: apiService,
   notifications: notificationServiceMock.createSetupContract(),
   history,
+  uiSettings: {},
 };
 
 const testBedSetup = registerTestBed<TestSubject>(
@@ -59,6 +93,7 @@ const testBedSetup = registerTestBed<TestSubject>(
     <KibanaContextProvider services={appServices}>
       <ProcessorsEditorContextProvider {...props}>
         <TestPipelineActions />
+        <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
       </ProcessorsEditorContextProvider>
     </KibanaContextProvider>
   ),
@@ -96,6 +131,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
+    clickProcessorOutputTab() {
+      act(() => {
+        find('outputTab').simulate('click');
+      });
+      component.update();
+    },
+
     async clickRefreshOutputButton() {
       await act(async () => {
         find('refreshOutputButton').simulate('click');
@@ -122,6 +164,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         jsonString,
       });
     },
+
+    async clickProcessor(processorSelector: string) {
+      await act(async () => {
+        find(`${processorSelector}.manageItemButton`).simulate('click');
+      });
+      component.update();
+    },
   };
 };
 
@@ -147,4 +196,11 @@ type TestSubject =
   | 'viewOutputButton'
   | 'pipelineExecutionError'
   | 'euiFlyoutCloseButton'
-  | 'documentsTab';
+  | 'processorStatusIcon'
+  | 'documentsTab'
+  | 'manageItemButton'
+  | 'processorSettingsForm'
+  | 'configurationTab'
+  | 'outputTab'
+  | 'processorOutputTabContent'
+  | string;
