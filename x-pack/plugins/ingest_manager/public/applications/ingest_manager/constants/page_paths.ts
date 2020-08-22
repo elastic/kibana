@@ -53,7 +53,7 @@ export const PAGE_ROUTING_PATHS = {
   fleet_agent_details_events: '/fleet/agents/:agentId',
   fleet_agent_details_details: '/fleet/agents/:agentId/details',
   fleet_enrollment_tokens: '/fleet/enrollment-tokens',
-  data_streams: '/datasets',
+  data_streams: '/data-streams',
 };
 
 export const pagePathGetters: {
@@ -80,5 +80,5 @@ export const pagePathGetters: {
   fleet_agent_details: ({ agentId, tabId }) =>
     `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}`,
   fleet_enrollment_tokens: () => '/fleet/enrollment-tokens',
-  data_streams: () => '/datasets',
+  data_streams: () => '/data-streams',
 };
