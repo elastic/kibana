@@ -22,7 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  FieldFormatNotFoundError,
+} from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
@@ -145,9 +150,12 @@ export class IndexPattern implements IIndexPattern {
   private deserializeFieldFormatMap(mapping: any) {
     try {
       return this.fieldFormats.getInstance(mapping.id, mapping.params);
-      // todo catch particular error, not all
-    } catch {
-      return undefined;
+    } catch (err) {
+      if (err instanceof FieldFormatNotFoundError) {
+        return undefined;
+      } else {
+        throw err;
+      }
     }
   }
 
