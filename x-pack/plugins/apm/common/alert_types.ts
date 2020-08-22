@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 export enum AlertType {
   ErrorRate = 'apm.error_rate',
   TransactionDuration = 'apm.transaction_duration',
+  TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
 }
 
 export const ALERT_TYPES_CONFIG = {
@@ -30,6 +31,24 @@ export const ALERT_TYPES_CONFIG = {
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
       defaultMessage: 'Transaction duration',
+    }),
+    actionGroups: [
+      {
+        id: 'threshold_met',
+        name: i18n.translate(
+          'xpack.apm.transactionDurationAlert.thresholdMet',
+          {
+            defaultMessage: 'Threshold met',
+          }
+        ),
+      },
+    ],
+    defaultActionGroupId: 'threshold_met',
+    producer: 'apm',
+  },
+  [AlertType.TransactionDurationAnomaly]: {
+    name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
+      defaultMessage: 'Transaction duration anomaly',
     }),
     actionGroups: [
       {

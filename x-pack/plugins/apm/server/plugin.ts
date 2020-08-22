@@ -83,6 +83,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       registerApmAlerts({
         alerts: plugins.alerts,
         actions: plugins.actions,
+        ml: plugins.ml,
         config$: mergedConfig$,
       });
     }

@@ -16,6 +16,8 @@ import {
   ML_ERRORS,
 } from '../../../common/anomaly_detection';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { MlPluginSetup } from '../../../../ml/server';
 
 export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
 
@@ -136,16 +138,19 @@ function transformResponseToServiceAnomalies(
 }
 
 export async function getMLJobIds(
-  ml: Required<Setup>['ml'],
+  ml: {
+    anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
+  },
   environment?: string
 ) {
   const response = await getMlJobsWithAPMGroup(ml);
+
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
   const mlJobs = response.jobs.filter(
     (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
   );
-  if (environment) {
+  if (environment && environment !== ENVIRONMENT_ALL) {
     const matchingMLJob = mlJobs.find(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );

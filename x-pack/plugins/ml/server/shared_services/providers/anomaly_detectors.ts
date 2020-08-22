@@ -23,7 +23,13 @@ export function getAnomalyDetectorsProvider({
 }: SharedServicesChecks): AnomalyDetectorsProvider {
   return {
     anomalyDetectorsProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+      //  APM is using this service in anomaly alert, kibana alerting doesn't provide request object
+      // So we are adding a dummy request for now
+      // TODO: Remove this once kibana alerting provides request object
+      const hasMlCapabilities =
+        request.params !== 'DummyKibanaRequest'
+          ? getHasMlCapabilities(request)
+          : (_caps: string[]) => Promise.resolve();
       return {
         async jobs(jobId?: string) {
           isFullLicense();

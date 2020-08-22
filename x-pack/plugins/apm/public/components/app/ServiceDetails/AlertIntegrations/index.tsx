@@ -35,10 +35,11 @@ const CREATE_THRESHOLD_ALERT_PANEL_ID = 'create_threshold';
 interface Props {
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
+  canReadAnomalies: boolean;
 }
 
 export function AlertIntegrations(props: Props) {
-  const { canSaveAlerts, canReadAlerts } = props;
+  const { canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
 
   const plugin = useApmPluginContext();
 
@@ -105,6 +106,21 @@ export function AlertIntegrations(props: Props) {
             setAlertType(AlertType.TransactionDuration);
           },
         },
+        ...(canReadAnomalies
+          ? [
+              {
+                name: i18n.translate(
+                  'xpack.apm.serviceDetails.alertsMenu.transactionDurationAnomaly',
+                  {
+                    defaultMessage: 'Transaction duration anomaly',
+                  }
+                ),
+                onClick: () => {
+                  setAlertType(AlertType.TransactionDurationAnomaly);
+                },
+              },
+            ]
+          : []),
         {
           name: i18n.translate(
             'xpack.apm.serviceDetails.alertsMenu.errorRate',
