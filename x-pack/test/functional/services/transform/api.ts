@@ -89,7 +89,14 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       const transformIds = transforms.map((t: { id: string }) => t.id);
 
       await asyncForEach(transformIds, async (transformId: string) => {
-        await esSupertest.post(`/_transform/${transformId}/_stop?force=true`).expect(200);
+        await retry.waitForWithTimeout(
+          `stop transform and receive 200`,
+          2 * 60 * 1000,
+          async () => {
+            await esSupertest.post(`/_transform/${transformId}/_stop?force=true`).expect(200);
+            return true;
+          }
+        );
         await this.waitForTransformState(transformId, 'stopped');
         await esSupertest.delete(`/_transform/${transformId}`).expect(200);
         await this.waitForTransformNotToExist(transformId);

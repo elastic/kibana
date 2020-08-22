@@ -73,6 +73,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 200 with success:false for unauthorized user', async () => {
+        await transform.api.waitForTransformStateNotToBe(transformId, 'stopped');
+
         const reqBody: StopTransformsRequestSchema = [{ id: transformId, state: 'started' }];
         const { body } = await supertest
           .post(`/api/transform/stop_transforms`)
