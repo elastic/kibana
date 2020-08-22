@@ -25,6 +25,7 @@ import {
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
+import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 const ID = 'hostsQuery';
 
@@ -153,7 +154,7 @@ export const useAllHost = ({
               }
             },
             error: (msg) => {
-              if (msg.message !== 'Aborted') {
+              if (!(msg instanceof AbortError)) {
                 notifications.toasts.addDanger({ title: i18n.FAIL_ALL_HOST, text: msg.message });
               }
             },
