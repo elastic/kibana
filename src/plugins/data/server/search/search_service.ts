@@ -133,7 +133,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => {
-    this.logger.info(`Register strategy ${name}`);
+    this.logger.debug(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
