@@ -12,7 +12,7 @@ import { shallow, ReactWrapper } from 'enzyme';
 
 import { mountWithAsyncContext, mockKibanaContext } from '../../../__mocks__';
 
-import { LoadingState, EmptyState, ErrorState } from '../empty_states';
+import { LoadingState, EmptyState } from './components';
 import { EngineTable } from './engine_table';
 
 import { EngineOverview } from './';

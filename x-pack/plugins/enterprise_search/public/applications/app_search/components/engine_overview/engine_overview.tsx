@@ -22,8 +22,7 @@ import { KibanaContext, IKibanaContext } from '../../../index';
 import EnginesIcon from '../../assets/engine.svg';
 import MetaEnginesIcon from '../../assets/meta_engine.svg';
 
-import { LoadingState, EmptyState, ErrorState } from '../empty_states';
-import { EngineOverviewHeader } from '../engine_overview_header';
+import { EngineOverviewHeader, LoadingState, EmptyState } from './components';
 import { EngineTable } from './engine_table';
 
 import './engine_overview.scss';
