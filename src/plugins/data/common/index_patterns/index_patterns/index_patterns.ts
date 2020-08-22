@@ -188,7 +188,6 @@ export class IndexPatternsService {
     const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(spec.id, {
-      getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
@@ -208,7 +207,6 @@ export class IndexPatternsService {
     const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(id, {
-      getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,

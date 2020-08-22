@@ -89,10 +89,6 @@ const patternCache = {
   clearAll: jest.fn(),
 };
 
-const config = {
-  get: jest.fn(),
-};
-
 const apiClient = {
   _getUrl: jest.fn(),
   getFieldsForTimePattern: jest.fn(),
@@ -102,7 +98,6 @@ const apiClient = {
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern(id, {
-    getConfig: (cfg: any) => config.get(cfg),
     savedObjectsClient: savedObjectsClient as any,
     apiClient,
     patternCache,
@@ -391,7 +386,6 @@ describe('IndexPattern', () => {
     });
     // Create a normal index pattern
     const pattern = new IndexPattern('foo', {
-      getConfig: (cfg: any) => config.get(cfg),
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
@@ -406,7 +400,6 @@ describe('IndexPattern', () => {
 
     // Create the same one - we're going to handle concurrency
     const samePattern = new IndexPattern('foo', {
-      getConfig: (cfg: any) => config.get(cfg),
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
