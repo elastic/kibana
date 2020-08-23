@@ -95,27 +95,26 @@ export class AttributeService<
         : undefined;
     if (!useRefType) {
       return { attributes: newAttributes } as ValType;
-    } else {
-      try {
-        if (savedObjectId) {
-          await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-          return { savedObjectId } as RefType;
-        } else {
-          const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
-          return { savedObjectId: savedItem.id } as RefType;
-        }
-      } catch (error) {
-        this.toasts.addDanger({
-          title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
-            defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
-            values: {
-              errorMessage: error.message,
-            },
-          }),
-          'data-test-subj': 'saveDashboardFailure',
-        });
-        return Promise.reject({ error });
+    }
+    try {
+      if (savedObjectId) {
+        await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+        return { savedObjectId } as RefType;
+      } else {
+        const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
+        return { savedObjectId: savedItem.id } as RefType;
       }
+    } catch (error) {
+      this.toasts.addDanger({
+        title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
+          defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
+          values: {
+            errorMessage: error.message,
+          },
+        }),
+        'data-test-subj': 'saveDashboardFailure',
+      });
+      return Promise.reject({ error });
     }
   }
 

@@ -70,6 +70,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
   }
 
   public async execute({ embeddable }: AddToLibraryActionContext) {
+    debugger;
     if (!isReferenceOrValueEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
