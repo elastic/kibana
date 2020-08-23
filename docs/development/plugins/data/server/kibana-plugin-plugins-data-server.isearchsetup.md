@@ -15,7 +15,11 @@ export interface ISearchSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-server.isearchsetup.aggs.md) | <code>AggsSetup</code> |  |
+<<<<<<< HEAD
 |  [registerSearchStrategy](./kibana-plugin-plugins-data-server.isearchsetup.registersearchstrategy.md) | <code>(name: string, strategy: ISearchStrategy) =&gt; void</code> | Extension point exposed for other plugins to register their own search strategies. |
 |  [setDefaultSearchStrategy](./kibana-plugin-plugins-data-server.isearchsetup.setdefaultsearchstrategy.md) | <code>(name: string) =&gt; void</code> |  |
+=======
+|  [registerSearchStrategy](./kibana-plugin-plugins-data-server.isearchsetup.registersearchstrategy.md) | <code>&lt;SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse&gt;(name: string, strategy: ISearchStrategy&lt;SearchStrategyRequest, SearchStrategyResponse&gt;) =&gt; void</code> | Extension point exposed for other plugins to register their own search strategies. |
+>>>>>>> 6dbc4be8f7f418315a96532562fad683c7a493d4
 |  [usage](./kibana-plugin-plugins-data-server.isearchsetup.usage.md) | <code>SearchUsage</code> | Used internally for telemetry |
 

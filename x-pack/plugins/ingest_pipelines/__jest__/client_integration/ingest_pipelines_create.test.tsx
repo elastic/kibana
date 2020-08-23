@@ -201,7 +201,7 @@ describe('<PipelinesCreate />', () => {
         const { actions, exists, find, waitFor } = testBed;
 
         await act(async () => {
-          actions.clickTestPipelineButton();
+          actions.clickAddDocumentsButton();
           await waitFor('testPipelineFlyout');
         });
 
