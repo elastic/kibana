@@ -12,7 +12,8 @@ import getPort from 'get-port';
 export const getHttpProxyServer = async (
   defaultKibanaTargetUrl: string,
   kbnTestServerConfig: any,
-  log: ToolingLog
+  log: ToolingLog,
+  retry: any
 ): Promise<http.Server> => {
   const proxy = httpProxy.createProxyServer({ secure: false, selfHandleResponse: false });
 
@@ -31,32 +32,18 @@ export const getHttpProxyServer = async (
     }
   });
 
-  let attempts = 0;
-  let isSuccess = false;
-
-  let freePort;
-  while (!isSuccess && attempts < 100) {
-    freePort = await getPort({ port: proxyPort });
+  await retry.waitForWithTimeout('start proxy server', 60 * 1000, async () => {
+    const freePort = await getPort({ port: proxyPort });
     log.info('freePort ', freePort, 'getHttpProxyServer');
-    if (freePort === proxyPort) {
-      isSuccess = true;
-    } else {
-      attempts++;
+    if (freePort !== proxyPort) {
       log.info('retry listening proxy on port', proxyPort, 'getHttpProxyServer');
-      await delay(10000);
+    } else {
+      proxyServer.listen(proxyPort);
     }
-  }
-
-  if (freePort === proxyPort) {
-    proxyServer.listen(proxyPort);
-  }
+    return proxyServer.listening;
+  });
   return proxyServer;
 };
-
-async function delay(ms: number) {
-  // return await for better async stack trace support in case of errors.
-  return await new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export const getProxyPort = (kbnTestServerConfig: any): number => {
   const proxyUrl = kbnTestServerConfig

@@ -13,13 +13,15 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
   const configService = getService('config');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const retry = getService('retry');
   describe('Actions', () => {
     let httpServer: http.Server;
     before(async () => {
       httpServer = await getHttpProxyServer(
         kibanaServer.resolveUrl('/'),
         configService.get('kbnTestServer.serverArgs'),
-        log
+        log,
+        retry
       );
     });
     loadTestFile(require.resolve('./builtin_action_types/email'));
@@ -39,6 +41,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
+
     after(() => {
       if (httpServer.listening) {
         httpServer.close();
