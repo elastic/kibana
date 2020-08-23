@@ -9,7 +9,7 @@ import {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
-} from '../../../common/search_strategy/security_solution';
+} from '../../../common/search_strategy/timeline';
 import { securitySolutionTimelineFactory } from './factory';
 import { SecuritySolutionTimelineFactory } from './factory/types';
 

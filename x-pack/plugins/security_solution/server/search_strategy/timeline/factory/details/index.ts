@@ -8,31 +8,27 @@ import { getOr, merge } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import {
-  HostsStrategyResponse,
-  HostDetailsStrategyResponse,
-  HostsQueries,
-  HostsRequestOptions,
-  HostOverviewRequestOptions,
-} from '../../../../../common/search_strategy/security_solution/hosts';
-
-import { HostAggEsData } from '../../../../lib/hosts/types';
+  FactoryQueryTypes,
+  TimelineDetailsStrategyResponse,
+  TimelineDetailsQueries,
+  TimelineDetailsRequestOptions,
+} from '../../../../../common/search_strategy/timeline';
 
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../types';
 import { buildTimelineDetailsQuery } from './dsl/query.timeline_details.dsl';
 import { getDataFromHits } from './helpers';
 
-export const timelineDetails: SecuritySolutionTimelineFactory<'timeline_details'> = {
-  buildDsl: (options: HostOverviewRequestOptions) => {
+export const timelineDetails: SecuritySolutionTimelineFactory<TimelineDetailsQueries.timelineDetails> = {
+  buildDsl: (options: TimelineDetailsRequestOptions) => {
     const { indexName, eventId, docValueFields = [] } = options;
     return buildTimelineDetailsQuery(indexName, eventId, docValueFields);
   },
   parse: async (
-    options: HostOverviewRequestOptions,
-    response: IEsSearchResponse<HostAggEsData>
-  ): Promise<HostDetailsStrategyResponse> => {
+    options: TimelineDetailsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<TimelineDetailsStrategyResponse> => {
     const { indexName, eventId, docValueFields = [] } = options;
     const sourceData = getOr({}, 'hits.hits.0._source', response.rawResponse);
     const hitsData = getOr({}, 'hits.hits.0', response.rawResponse);
@@ -44,6 +40,7 @@ export const timelineDetails: SecuritySolutionTimelineFactory<'timeline_details'
     const data = getDataFromHits(merge(sourceData, hitsData));
 
     return {
+      ...response,
       data,
       inspect,
     };
@@ -51,8 +48,8 @@ export const timelineDetails: SecuritySolutionTimelineFactory<'timeline_details'
 };
 
 export const timelineDetailsFactory: Record<
-  HostsQueries,
+  TimelineDetailsQueries,
   SecuritySolutionTimelineFactory<FactoryQueryTypes>
 > = {
-  timeline_details: timelineDetails,
+  [TimelineDetailsQueries.timelineDetails]: timelineDetails,
 };

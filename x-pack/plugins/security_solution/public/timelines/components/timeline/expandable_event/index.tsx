@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
-import { DetailItem } from '../../../../graphql/types';
+import { DetailItem } from '../../../../../common/search_strategy/timeline';
 import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { OnUpdateColumns } from '../events';

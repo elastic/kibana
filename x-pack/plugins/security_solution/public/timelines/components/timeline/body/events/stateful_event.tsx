@@ -11,7 +11,8 @@ import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { useTimelineDetails } from '../../../../containers/details';
-import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
+import { DetailItem } from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -136,7 +137,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   const divElement = useRef<HTMLDivElement | null>(null);
   const [loading, detailsData] = useTimelineDetails({
     docValueFields,
-    sourceId: 'default',
     indexName: event._index!,
     eventId: event._id,
     executeQuery: !!expanded[event._id],

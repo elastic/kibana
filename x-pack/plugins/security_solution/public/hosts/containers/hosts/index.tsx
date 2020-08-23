@@ -22,6 +22,7 @@ import {
   HostsRequestOptions,
   HostsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution';
+
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';

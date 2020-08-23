@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
+import { FactoryQueryTypes } from '../../../../common/search_strategy/timeline';
 
 import { timelineDetailsFactory } from './details';
 import { SecuritySolutionTimelineFactory } from './types';

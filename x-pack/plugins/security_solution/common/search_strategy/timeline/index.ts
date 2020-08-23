@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
-  HostDetailsStrategyResponse,
-  HostOverviewRequestOptions,
-  HostsQueries,
-  HostsRequestOptions,
-  HostsStrategyResponse,
-} from './hosts';
-export * from './hosts';
+  TimelineDetailsQueries,
+  TimelineDetailsRequestOptions,
+  TimelineDetailsStrategyResponse,
+} from './details';
+export * from './details';
 export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = HostsQueries;
+export type FactoryQueryTypes = TimelineDetailsQueries;
 
 export interface Inspect {
   dsl: string[];
@@ -77,7 +76,7 @@ export interface DocValueFields {
   format: string;
 }
 
-export interface RequestBasicOptions {
+export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
@@ -95,14 +94,10 @@ export interface RequestOptionsPaginated extends RequestBasicOptions {
   sortField?: SortField;
 }
 
-export type StrategyResponseType<T extends FactoryQueryTypes> = T extends 'host_all'
-  ? HostsStrategyResponse
-  : T extends 'host_details'
-  ? HostDetailsStrategyResponse
-  : never;
+export type StrategyResponseType<
+  T extends FactoryQueryTypes
+> = T extends TimelineDetailsQueries.timelineDetails ? TimelineDetailsStrategyResponse : never;
 
-export type StrategyRequestType<T extends FactoryQueryTypes> = T extends 'host_all'
-  ? HostsRequestOptions
-  : T extends 'host_details'
-  ? HostOverviewRequestOptions
-  : never;
+export type StrategyRequestType<
+  T extends FactoryQueryTypes
+> = T extends TimelineDetailsQueries.timelineDetails ? TimelineDetailsRequestOptions : never;

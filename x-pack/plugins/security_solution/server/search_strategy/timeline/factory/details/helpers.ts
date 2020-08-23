@@ -6,7 +6,7 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
-import { DetailItem } from '../../../../graphql/types';
+import { DetailItem } from '../../../../../common/search_strategy/timeline';
 import { baseCategoryFields } from '../../../../utils/beat_schema/8.0.0';
 
 export const getFieldCategory = (field: string): string => {

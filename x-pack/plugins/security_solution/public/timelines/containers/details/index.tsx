@@ -11,10 +11,14 @@ import deepEqual from 'fast-deep-equal';
 
 import { inputsModel } from '../../../common/store';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { DetailItem } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { DocValueFields } from '../../../common/containers/source';
-
+import {
+  DocValueFields,
+  DetailItem,
+  TimelineDetailsQueries,
+  TimelineDetailsRequestOptions,
+  TimelineDetailsStrategyResponse,
+} from '../../../../common/search_strategy/timeline';
 export interface EventsArgs {
   detailsData: DetailItem[] | null;
   loading: boolean;
@@ -25,21 +29,17 @@ export interface TimelineDetailsProps {
   indexName: string;
   eventId: string;
   executeQuery: boolean;
-  sourceId: string;
 }
 
 const getDetailsEvent = memoizeOne(
   (variables: string, detail: DetailItem[]): DetailItem[] => detail
 );
 
-type TimelineDetailsRequestOptions = TimelineDetailsProps & { defaultIndex: string[] };
-
 export const useTimelineDetails = ({
   docValueFields,
   indexName,
   eventId,
   executeQuery,
-  sourceId,
 }: TimelineDetailsProps): [boolean, EventsArgs['detailsData']] => {
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
@@ -52,10 +52,9 @@ export const useTimelineDetails = ({
     defaultIndex,
     docValueFields,
     executeQuery,
-    sourceId,
     indexName,
     eventId,
-    factoryQueryType: 'timeline_details',
+    factoryQueryType: TimelineDetailsQueries.timelineDetails,
   });
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
@@ -70,7 +69,7 @@ export const useTimelineDetails = ({
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<TimelineDetailsRequestOptions, HostsStrategyResponse>(request, {
+          .search<TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse>(request, {
             strategy: 'securitySolutionTimelineSearchStrategy',
             signal: abortCtrl.current.signal,
           })
@@ -115,7 +114,6 @@ export const useTimelineDetails = ({
         ...prevRequest,
         defaultIndex,
         docValueFields,
-        sourceId,
         indexName,
         eventId,
       };
@@ -124,7 +122,7 @@ export const useTimelineDetails = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, eventId, indexName, sourceId]);
+  }, [defaultIndex, docValueFields, eventId, indexName]);
 
   useEffect(() => {
     if (executeQuery) timelineDetailsSearch(timelineDetailsRequest);

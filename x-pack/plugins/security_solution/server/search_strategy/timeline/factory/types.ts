@@ -9,7 +9,7 @@ import {
   FactoryQueryTypes,
   StrategyRequestType,
   StrategyResponseType,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../common/search_strategy/timeline';
 
 export interface SecuritySolutionTimelineFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => unknown;
