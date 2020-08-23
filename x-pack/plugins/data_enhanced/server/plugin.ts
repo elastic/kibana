@@ -44,7 +44,11 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       )
     );
 
-    deps.data.search.setDefaultSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+    deps.data.__enhance({
+      search: {
+        defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
+      },
+    });
   }
 
   public start(core: CoreStart) {}

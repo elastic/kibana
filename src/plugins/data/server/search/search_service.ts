@@ -25,7 +25,7 @@ import {
   PluginInitializerContext,
   RequestHandlerContext,
 } from '../../../../core/server';
-import { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
+import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
 
@@ -88,13 +88,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(core);
 
     return {
-      aggs: this.aggsService.setup({ registerFunction }),
-      registerSearchStrategy: this.registerSearchStrategy,
-      setDefaultSearchStrategy: (name: string) => {
-        if (this.searchStrategies.hasOwnProperty(name)) {
-          this.defaultSearchStrategyName = name;
+      __enhance: (enhancements: SearchEnhancements) => {
+        if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
+          this.defaultSearchStrategyName = enhancements.defaultStrategy;
         }
       },
+      aggs: this.aggsService.setup({ registerFunction }),
+      registerSearchStrategy: this.registerSearchStrategy,
       usage,
     };
   }
