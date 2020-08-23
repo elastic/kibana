@@ -5,20 +5,26 @@
  */
 
 import { useState } from 'react';
-import { SnapshotMetricInput } from '../../../../common/http_api/snapshot_api';
+import {
+  SnapshotMetricInput,
+  SnapshotCustomMetricInput,
+} from '../../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export const useInventoryAlertPrefill = () => {
   const [nodeType, setNodeType] = useState<InventoryItemType>('host');
   const [filterQuery, setFilterQuery] = useState<string | undefined>();
   const [metric, setMetric] = useState<SnapshotMetricInput>({ type: 'cpu' });
+  const [customMetrics, setCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
 
   return {
     nodeType,
     filterQuery,
     metric,
+    customMetrics,
     setNodeType,
     setFilterQuery,
     setMetric,
+    setCustomMetrics,
   };
 };
