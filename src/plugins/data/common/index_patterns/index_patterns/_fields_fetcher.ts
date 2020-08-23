@@ -37,7 +37,7 @@ export const createFieldsFetcher = (
     fetchForWildcard: (pattern: string, options: GetFieldsOptions = {}) => {
       return apiClient.getFieldsForWildcard({
         pattern,
-        metaFields: metaFields.join('&'),
+        metaFields,
         type: options.type,
         params: options.params || {},
       });
