@@ -104,7 +104,8 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     fieldFormats: fieldFormatsMock,
     onNotification: () => {},
     onError: () => {},
-    uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+    shortDotsEnable: false,
+    metaFields: [],
   });
 
   setDocsourcePayload(id, payload);
@@ -392,7 +393,8 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
-      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+      shortDotsEnable: false,
+      metaFields: [],
     });
     await pattern.init();
 
@@ -406,7 +408,8 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
-      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+      shortDotsEnable: false,
+      metaFields: [],
     });
     await samePattern.init();
 

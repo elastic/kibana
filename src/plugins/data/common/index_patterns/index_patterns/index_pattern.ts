@@ -43,11 +43,6 @@ import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
-interface IUiSettingsValues {
-  [key: string]: any;
-  shortDotsEnable: any;
-  metaFields: any;
-}
 
 interface IndexPatternDeps {
   savedObjectsClient: SavedObjectsClientCommon;
@@ -56,7 +51,8 @@ interface IndexPatternDeps {
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
-  uiSettingsValues: IUiSettingsValues;
+  shortDotsEnable: boolean;
+  metaFields: string[];
 }
 
 export class IndexPattern implements IIndexPattern {
@@ -116,7 +112,8 @@ export class IndexPattern implements IIndexPattern {
       fieldFormats,
       onNotification,
       onError,
-      uiSettingsValues,
+      shortDotsEnable = false,
+      metaFields = [],
     }: IndexPatternDeps
   ) {
     this.id = id;
@@ -126,14 +123,14 @@ export class IndexPattern implements IIndexPattern {
     this.onNotification = onNotification;
     this.onError = onError;
 
-    this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
-    this.metaFields = uiSettingsValues.metaFields;
+    this.shortDotsEnable = shortDotsEnable;
+    this.metaFields = metaFields;
 
     this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
 
     this.apiClient = apiClient;
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
-    this.flattenHit = flattenHitWrapper(this, uiSettingsValues.metaFields);
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
+    this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
       this,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -510,10 +507,8 @@ export class IndexPattern implements IIndexPattern {
             fieldFormats: this.fieldFormats,
             onNotification: this.onNotification,
             onError: this.onError,
-            uiSettingsValues: {
-              shortDotsEnable: this.shortDotsEnable,
-              metaFields: this.metaFields,
-            },
+            shortDotsEnable: this.shortDotsEnable,
+            metaFields: this.metaFields,
           });
 
           return samePattern.init().then(() => {

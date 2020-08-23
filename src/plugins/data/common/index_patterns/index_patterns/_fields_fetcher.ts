@@ -24,7 +24,7 @@ import { GetFieldsOptions, IIndexPatternsApiClient } from '../types';
 export const createFieldsFetcher = (
   indexPattern: IndexPattern,
   apiClient: IIndexPatternsApiClient,
-  metaFields: string
+  metaFields: string[] = []
 ) => {
   const fieldFetcher = {
     fetch: (options: GetFieldsOptions) => {
@@ -37,7 +37,7 @@ export const createFieldsFetcher = (
     fetchForWildcard: (pattern: string, options: GetFieldsOptions = {}) => {
       return apiClient.getFieldsForWildcard({
         pattern,
-        metaFields,
+        metaFields: metaFields.toString(),
         type: options.type,
         params: options.params || {},
       });
