@@ -796,7 +796,7 @@ export interface IEsSearchResponse extends IKibanaSearchResponse {
     isPartial?: boolean;
     isRunning?: boolean;
     // (undocumented)
-    rawResponse: SearchResponse<Source>;
+    rawResponse: SearchResponse<any>;
 }
 
 // Warning: (ae-missing-release-tag) "IFieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
