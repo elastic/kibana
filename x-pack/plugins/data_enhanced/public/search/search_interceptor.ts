@@ -20,7 +20,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
 
   /**
-   * @param deps `SearchInterceptorDeps`
+   * @internal
    */
   constructor(deps: SearchInterceptorDeps) {
     super(deps, deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT));

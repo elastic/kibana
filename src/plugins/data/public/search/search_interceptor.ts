@@ -72,14 +72,16 @@ export class SearchInterceptor {
   protected application!: CoreStart['application'];
 
   /**
-   * This class should be instantiated with a `searchTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
-   * @param application  The `core.application` service
-   * @param searchTimeout Timeout for running search requests
+   * @internal
    */
-  constructor(protected readonly deps: SearchInterceptorDeps, protected searchTimeout?: number) {
+  protected searchTimeout?: number;
+
+  /*
+   * @internal
+   */
+  constructor(protected readonly deps: SearchInterceptorDeps, searchTimeout?: number) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
+    this.searchTimeout = searchTimeout;
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
@@ -92,6 +94,9 @@ export class SearchInterceptor {
       .subscribe(this.hideToast);
   }
 
+  /**
+   * @internal
+   */
   protected setSearchTimeout(timeout?: number) {
     this.searchTimeout = timeout;
   }
@@ -104,6 +109,9 @@ export class SearchInterceptor {
     return this.pendingCount$.asObservable();
   }
 
+  /**
+   * @internal
+   */
   protected runSearch(
     request: IEsSearchRequest,
     signal: AbortSignal,
@@ -149,6 +157,9 @@ export class SearchInterceptor {
     });
   }
 
+  /**
+   * @internal
+   */
   protected setupTimers(options?: ISearchOptions) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
