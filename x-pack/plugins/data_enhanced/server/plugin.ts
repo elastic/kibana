@@ -19,6 +19,7 @@ import {
 } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { getUiSettings } from './ui_settings';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -34,6 +35,8 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
 
   public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
+
+    core.uiSettings.register(getUiSettings());
 
     deps.data.search.registerSearchStrategy(
       ES_SEARCH_STRATEGY,

@@ -68,16 +68,13 @@ export class SearchInterceptor {
   protected application!: CoreStart['application'];
 
   /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
+   * This class should be instantiated with a `searchTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
    * @param toasts The `core.notifications.toasts` service
    * @param application  The `core.application` service
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   * @param searchTimeout Timeout for running search requests
    */
-  constructor(
-    protected readonly deps: SearchInterceptorDeps,
-    protected readonly requestTimeout?: number
-  ) {
+  constructor(protected readonly deps: SearchInterceptorDeps, protected searchTimeout?: number) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
@@ -89,6 +86,10 @@ export class SearchInterceptor {
     this.getPendingCount$()
       .pipe(filter((count) => count === 0))
       .subscribe(this.hideToast);
+  }
+
+  protected setSearchTimeout(timeout?: number) {
+    this.searchTimeout = timeout;
   }
 
   /**
@@ -148,7 +149,7 @@ export class SearchInterceptor {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = timer(this.requestTimeout);
+    const timeout$ = timer(this.searchTimeout);
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
     });

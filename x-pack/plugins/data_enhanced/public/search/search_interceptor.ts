@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, EMPTY, timer, from } from 'rxjs';
+import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import {
@@ -17,14 +17,23 @@ import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private uiSettingsSub: Subscription;
+
   /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
    * @param deps `SearchInterceptorDeps`
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
-  constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
-    super(deps, requestTimeout);
+  constructor(deps: SearchInterceptorDeps) {
+    super(deps, deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT));
+
+    this.uiSettingsSub = deps.uiSettings
+      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
+      .subscribe((timeout: number) => {
+        this.setSearchTimeout(timeout);
+      });
+  }
+
+  public stop() {
+    this.uiSettingsSub.unsubscribe();
   }
 
   /**
