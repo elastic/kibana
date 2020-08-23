@@ -12,16 +12,16 @@ import fetch from 'node-fetch';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
-  CreateAgentConfigRequest,
-  CreateAgentConfigResponse,
-  CreatePackageConfigRequest,
-  CreatePackageConfigResponse,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
+  CreatePackagePolicyRequest,
+  CreatePackagePolicyResponse,
   GetPackagesResponse,
   PostAgentEnrollRequest,
   AGENT_API_ROUTES,
-  AGENT_CONFIG_API_ROUTES,
+  AGENT_POLICY_API_ROUTES,
   EPM_API_ROUTES,
-  PACKAGE_CONFIG_API_ROUTES,
+  PACKAGE_POLICY_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
@@ -50,7 +50,7 @@ export async function indexHostsAndAlerts(
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
-  const realPolicies: Record<string, CreatePackageConfigResponse['item']> = {};
+  const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
@@ -83,7 +83,7 @@ async function indexHostDocs(
   numDocs: number,
   client: Client,
   kbnClient: KbnClient,
-  realPolicies: Record<string, CreatePackageConfigResponse['item']>,
+  realPolicies: Record<string, CreatePackagePolicyResponse['item']>,
   epmEndpointPackage: GetPackagesResponse['response'][0],
   metadataIndex: string,
   policyResponseIndex: string,
@@ -118,7 +118,7 @@ async function indexHostDocs(
       enrolledAgent = await fleetEnrollAgentForHost(
         kbnClient,
         hostMetadata!,
-        realPolicies[appliedPolicyId].config_id
+        realPolicies[appliedPolicyId].policy_id
       );
     }
 
@@ -195,24 +195,29 @@ const createPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
   endpointPackageVersion: string
-): Promise<CreatePackageConfigResponse['item']> => {
-  // Create Agent Configuration first
-  const newAgentconfigData: CreateAgentConfigRequest['body'] = {
-    name: `Config for ${policyName}`,
+): Promise<CreatePackagePolicyResponse['item']> => {
+  // Create Agent Policy first
+  const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
+    name: `Policy for ${policyName}`,
     description: '',
     namespace: 'default',
   };
-  const agentConfig = (await kbnClient.request({
-    path: AGENT_CONFIG_API_ROUTES.CREATE_PATTERN,
-    method: 'POST',
-    body: newAgentconfigData,
-  })) as AxiosResponse<CreateAgentConfigResponse>;
+  let agentPolicy;
+  try {
+    agentPolicy = (await kbnClient.request({
+      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      method: 'POST',
+      body: newAgentPolicyData,
+    })) as AxiosResponse<CreateAgentPolicyResponse>;
+  } catch (error) {
+    throw new Error(`create policy ${error}`);
+  }
 
   // Create Package Configuration
-  const newPackageConfigData: CreatePackageConfigRequest['body'] = {
+  const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
     name: policyName,
     description: 'Protect the worlds data',
-    config_id: agentConfig.data.item.id,
+    policy_id: agentPolicy.data.item.id,
     enabled: true,
     output_id: '',
     inputs: [
@@ -234,12 +239,12 @@ const createPolicy = async (
       version: endpointPackageVersion,
     },
   };
-  const packageConfig = (await kbnClient.request({
-    path: PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN,
+  const packagePolicy = (await kbnClient.request({
+    path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
     method: 'POST',
-    body: newPackageConfigData,
-  })) as AxiosResponse<CreatePackageConfigResponse>;
-  return packageConfig.data.item;
+    body: newPackagePolicyData,
+  })) as AxiosResponse<CreatePackagePolicyResponse>;
+  return packagePolicy.data.item;
 };
 
 const getEndpointPackageInfo = async (
@@ -262,7 +267,7 @@ const getEndpointPackageInfo = async (
 const fleetEnrollAgentForHost = async (
   kbnClient: KbnClient,
   endpointHost: HostMetadata,
-  agentConfigId: string
+  agentPolicyId: string
 ): Promise<undefined | PostAgentEnrollResponse['item']> => {
   // Get Enrollement key for host's applied policy
   const enrollmentApiKey = await kbnClient
@@ -270,7 +275,7 @@ const fleetEnrollAgentForHost = async (
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       method: 'GET',
       query: {
-        kuery: `fleet-enrollment-api-keys.config_id:"${agentConfigId}"`,
+        kuery: `fleet-enrollment-api-keys.policy_id:"${agentPolicyId}"`,
       },
     })
     .then((apiKeysResponse) => {
@@ -278,7 +283,7 @@ const fleetEnrollAgentForHost = async (
 
       if (!apiKey) {
         return Promise.reject(
-          new Error(`no API enrolment key found for agent config id ${agentConfigId}`)
+          new Error(`no API enrolment key found for agent policy id ${agentPolicyId}`)
         );
       }
 
@@ -403,7 +408,7 @@ const fleetEnrollAgentForHost = async (
               subtype: 'CONFIG',
               timestamp: new Date().toISOString(),
               agent_id: action.agent_id,
-              config_id: agentConfigId,
+              policy_id: agentPolicyId,
               message: `endpoint generator: Endpoint Started`,
             };
           }),
