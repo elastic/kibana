@@ -35,6 +35,8 @@ import {
   Embeddable,
   IContainer,
   Adapters,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
@@ -47,6 +49,8 @@ import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
+import { SavedObjectAttributes } from '../../../../core/types';
+import { AttributeService } from '../../../dashboard/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -77,9 +81,15 @@ export interface VisualizeOutput extends EmbeddableOutput {
   visTypeName: string;
 }
 
+export type VisualizeSavedObjectAttributes = SavedObjectAttributes & { title: string };
+
+export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
+export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
+export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput>
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -95,11 +105,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
+  private attributeService: AttributeService;
 
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
+    attributeService: AttributeService,
     parent?: IContainer
   ) {
     super(
@@ -120,6 +132,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
+    this.attributeService = attributeService;
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -383,4 +396,18 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public supportedTriggers(): TriggerId[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
+
+  inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
+    return this.attributeService.inputIsRefType(input);
+  };
+
+  getInputAsValueType = async (): Promise<VisualizeByValueInput> => {
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsValueType(input);
+  };
+
+  getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsRefType(input, { showSaveModal: true });
+  };
 }

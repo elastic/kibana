@@ -28,7 +28,13 @@ import {
   IContainer,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
+import {
+  VisualizeByReferenceInput,
+  VisualizeByValueInput,
+  VisualizeEmbeddable,
+  VisualizeInput,
+  VisualizeOutput, VisualizeSavedObjectAttributes,
+} from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../vis';
 import {
@@ -43,13 +49,16 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { AttributeService } from '../../../dashboard/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
 }
 
 export interface VisualizeEmbeddableFactoryDeps {
-  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector' | 'embeddable'>>;
+  start: StartServicesGetter<
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard'>
+  >;
 }
 
 export class VisualizeEmbeddableFactory
@@ -61,6 +70,12 @@ export class VisualizeEmbeddableFactory
       VisualizationAttributes
     > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+
+  private attributeService?: AttributeService<
+    VisualizeSavedObjectAttributes,
+    VisualizeByValueInput,
+    VisualizeByReferenceInput
+  >;
 
   public readonly savedObjectMetaData: SavedObjectMetaData<VisualizationAttributes> = {
     name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -108,6 +123,7 @@ export class VisualizeEmbeddableFactory
   public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
+    attributeService: AttributeService,
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
@@ -117,7 +133,7 @@ export class VisualizeEmbeddableFactory
       const visState = convertToSerializedVis(savedObject);
       const vis = new Vis(savedObject.visState.type, visState);
       await vis.setState(visState);
-      return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
+      return createVisEmbeddableFromObject(this.deps)(vis, input, attributeService, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
@@ -139,5 +155,16 @@ export class VisualizeEmbeddableFactory
       });
       return undefined;
     }
+  }
+
+  private async getAttributeService() {
+    if (!this.attributeService) {
+      this.attributeService = await this.deps.getAttributeService<
+        SavedObjectAttributes,
+        VisualizeByValueInput,
+        VisualizeByReferenceInput
+      >(this.type);
+    }
+    return this.attributeService!;
   }
 }
