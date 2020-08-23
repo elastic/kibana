@@ -34,7 +34,7 @@ import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../kbn_field_types/types';
 import { UI_SETTINGS } from '../constants';
-import { FieldFormatNotFoundError } from '..';
+import { FieldFormatNotFoundError } from '../field_formats';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
