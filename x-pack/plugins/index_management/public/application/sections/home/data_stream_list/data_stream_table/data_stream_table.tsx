@@ -13,13 +13,16 @@ import { ScopedHistory } from 'kibana/public';
 import { DataStream } from '../../../../../../common/types';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { encodePathForReactRouter } from '../../../../services/routing';
+import { DataHealth } from '../../../../components';
 import { Section } from '../../../home';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
+import { humanizeTimeStamp } from '../humanize_time_stamp';
 
 interface Props {
   dataStreams?: DataStream[];
   reload: () => {};
   history: ScopedHistory;
+  includeStats: boolean;
   filters?: string;
 }
 
@@ -28,76 +31,118 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   reload,
   history,
   filters,
+  includeStats,
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
 
-  const columns: Array<EuiBasicTableColumn<DataStream>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.nameColumnTitle', {
-        defaultMessage: 'Name',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (name: DataStream['name'], item: DataStream) => {
-        return (
-          <EuiLink
-            data-test-subj="nameLink"
-            {...reactRouterNavigate(history, {
-              pathname: `/${Section.DataStreams}/${encodePathForReactRouter(name)}`,
-            })}
-          >
-            {name}
-          </EuiLink>
-        );
-      },
-    },
-    {
-      field: 'indices',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indicesColumnTitle', {
-        defaultMessage: 'Indices',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (indices: DataStream['indices'], dataStream) => (
+  const columns: Array<EuiBasicTableColumn<DataStream>> = [];
+
+  columns.push({
+    field: 'name',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.nameColumnTitle', {
+      defaultMessage: 'Name',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (name: DataStream['name'], item: DataStream) => {
+      return (
         <EuiLink
-          data-test-subj="indicesLink"
+          data-test-subj="nameLink"
           {...reactRouterNavigate(history, {
-            pathname: '/indices',
-            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
-              dataStream.name
-            )}`,
+            pathname: `/${Section.DataStreams}/${encodePathForReactRouter(name)}`,
           })}
         >
-          {indices.length}
+          {name}
         </EuiLink>
-      ),
+      );
     },
-    {
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {
-        defaultMessage: 'Actions',
+  });
+
+  columns.push({
+    field: 'health',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.healthColumnTitle', {
+      defaultMessage: 'Health',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (health: DataStream['health']) => {
+      return <DataHealth health={health} />;
+    },
+  });
+
+  if (includeStats) {
+    columns.push({
+      field: 'maxTimeStamp',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
+        defaultMessage: 'Last updated',
       }),
-      actions: [
-        {
-          name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteText', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDecription', {
-            defaultMessage: 'Delete this data stream',
-          }),
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: ({ name }: DataStream) => {
-            setDataStreamsToDelete([name]);
-          },
-          isPrimary: true,
-          'data-test-subj': 'deleteDataStream',
+      width: '300px',
+      truncateText: true,
+      sortable: true,
+      render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
+        maxTimeStamp
+          ? humanizeTimeStamp(maxTimeStamp)
+          : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
+              defaultMessage: 'Never',
+            }),
+    });
+
+    columns.push({
+      field: 'storageSize',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+        defaultMessage: 'Storage size',
+      }),
+      truncateText: true,
+      sortable: true,
+    });
+  }
+
+  columns.push({
+    field: 'indices',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indicesColumnTitle', {
+      defaultMessage: 'Indices',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (indices: DataStream['indices'], dataStream) => (
+      <EuiLink
+        data-test-subj="indicesLink"
+        {...reactRouterNavigate(history, {
+          pathname: '/indices',
+          search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
+            dataStream.name
+          )}`,
+        })}
+      >
+        {indices.length}
+      </EuiLink>
+    ),
+  });
+
+  columns.push({
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteText', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDecription', {
+          defaultMessage: 'Delete this data stream',
+        }),
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: ({ name }: DataStream) => {
+          setDataStreamsToDelete([name]);
         },
-      ],
-    },
-  ];
+        isPrimary: true,
+        'data-test-subj': 'deleteDataStream',
+      },
+    ],
+  });
 
   const pagination = {
     initialPageSize: 20,
