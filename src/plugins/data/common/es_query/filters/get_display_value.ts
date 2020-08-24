@@ -28,7 +28,7 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
   if (!indexPattern || !indexPattern.getFormatterForField || !key) return;
 
   const field = indexPattern.fields.find((f) => f.name === key);
-  if (!field && (indexPattern.fields as any).getByName) {
+  if (!field) {
     throw new Error(
       i18n.translate('data.filter.filterBar.fieldNotFound', {
         defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
