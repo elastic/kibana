@@ -29,6 +29,21 @@ describe('manifest_manager', () => {
             'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           type: 'add',
         },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
       ]);
     });
 
@@ -47,6 +62,21 @@ describe('manifest_manager', () => {
         {
           id:
             'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          type: 'add',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
           type: 'add',
         },
       ]);
