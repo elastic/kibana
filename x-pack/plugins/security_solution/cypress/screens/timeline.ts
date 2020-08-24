@@ -39,6 +39,8 @@ export const TIMELINE = (id: string) => {
   return `[data-test-subj="title-${id}"]`;
 };
 
+export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiProgress';
+
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
