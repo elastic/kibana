@@ -13,4 +13,6 @@ export interface IJoin {
   toDescriptor(): JoinDescriptor;
 
   getSourceMetaDataRequestId(): string;
+
+  getSourceFormattersDataRequestId(): string;
 }
