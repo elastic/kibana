@@ -16,6 +16,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { FlashMessages } from '../../../shared/flash_messages';
 import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
@@ -88,6 +89,7 @@ export const EngineOverview: React.FC = () => {
 
       <EngineOverviewHeader />
       <EuiPageContent panelPaddingSize="s" className="engineOverview">
+        <FlashMessages />
         <EuiPageContentHeader>
           <EuiTitle size="s">
             <h2>
