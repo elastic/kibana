@@ -5,7 +5,7 @@
  */
 
 import { encode } from 'rison-node';
-import { SearchResponse } from 'src/plugins/data/public';
+import { SearchResponse } from 'elasticsearch';
 import {
   FetchData,
   FetchDataParams,
@@ -87,7 +87,7 @@ async function fetchLogsOverview(
   dataPlugin: InfraClientStartDeps['data']
 ): Promise<StatsAndSeries> {
   return new Promise((resolve, reject) => {
-    let esResponse: SearchResponse = {};
+    let esResponse: SearchResponse<any> | undefined;
 
     dataPlugin.search
       .search({
@@ -104,8 +104,8 @@ async function fetchLogsOverview(
         (response) => (esResponse = response.rawResponse),
         (error) => reject(error),
         () => {
-          if (esResponse.aggregations) {
-            resolve(processLogsOverviewAggregations(esResponse.aggregations));
+          if (esResponse?.aggregations) {
+            resolve(processLogsOverviewAggregations(esResponse!.aggregations));
           } else {
             resolve({ stats: {}, series: {} });
           }

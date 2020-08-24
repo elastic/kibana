@@ -28,6 +28,7 @@ describe('http resources service', () => {
         csp: {
           rules: [defaultCspRules],
         },
+        plugins: { initialize: false },
       });
     }, 30000);
 
