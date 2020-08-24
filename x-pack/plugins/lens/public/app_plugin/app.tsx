@@ -99,7 +99,7 @@ export function App({
         toDate: currentRange.to,
       },
       originatingApp,
-      filters: [],
+      filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
     };
   });
@@ -328,9 +328,7 @@ export function App({
           ...s,
           isSaveModalVisible: false,
           originatingApp:
-            saveProps.newCopyOnSave && !saveProps.returnToOrigin
-              ? undefined
-              : currentOriginatingApp,
+            newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));

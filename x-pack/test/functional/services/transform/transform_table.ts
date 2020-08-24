@@ -95,8 +95,19 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async waitForRefreshButtonLoaded() {
+      await testSubjects.existOrFail('~transformRefreshTransformListButton', {
+        timeout: 10 * 1000,
+      });
+      await testSubjects.existOrFail('transformRefreshTransformListButton loaded', {
+        timeout: 30 * 1000,
+      });
+    }
+
     public async refreshTransformList() {
-      await testSubjects.click('transformRefreshTransformListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~transformRefreshTransformListButton');
+      await this.waitForRefreshButtonLoaded();
       await this.waitForTransformsToLoad();
     }
 

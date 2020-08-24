@@ -28,6 +28,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
     loadTestFile(require.resolve('./resolver/entity_id'));
     loadTestFile(require.resolve('./resolver/tree'));
+    loadTestFile(require.resolve('./resolver/children'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./artifacts'));

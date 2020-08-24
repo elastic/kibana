@@ -14,16 +14,16 @@ import { CreatePackageConfigFrom } from './types';
 const findStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo
-): Array<RegistryStream & { dataset: { name: string } }> => {
-  const streams: Array<RegistryStream & { dataset: { name: string } }> = [];
+): Array<RegistryStream & { data_stream: { dataset: string } }> => {
+  const streams: Array<RegistryStream & { data_stream: { dataset: string } }> = [];
 
   (packageInfo.datasets || []).forEach((dataset) => {
     (dataset.streams || []).forEach((stream) => {
       if (stream.input === inputType) {
         streams.push({
           ...stream,
-          dataset: {
-            name: dataset.name,
+          data_stream: {
+            dataset: dataset.name,
           },
         });
       }

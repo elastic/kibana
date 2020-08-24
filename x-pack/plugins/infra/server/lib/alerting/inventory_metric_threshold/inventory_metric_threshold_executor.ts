@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first, get } from 'lodash';
+import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
@@ -56,11 +56,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   for (const item of inventoryItems) {
     const alertInstance = services.alertInstanceFactory(`${item}`);
     // AND logic; all criteria must be across the threshold
-    const shouldAlertFire = results.every((result) => result[item].shouldFire);
+    const shouldAlertFire = results.every((result) =>
+      // Grab the result of the most recent bucket
+      last(result[item].shouldFire)
+    );
 
     // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
     // whole alert is in a No Data/Error state
-    const isNoData = results.some((result) => result[item].isNoData);
+    const isNoData = results.some((result) => last(result[item].isNoData));
     const isError = results.some((result) => result[item].isError);
 
     const nextState = isError

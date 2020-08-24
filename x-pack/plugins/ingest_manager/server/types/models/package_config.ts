@@ -4,6 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { isValidNamespace } from '../../../common';
+
+export const NamespaceSchema = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    if (!isValidNamespace(value)) {
+      return 'Namespace contains invalid characters';
+    }
+  },
+});
 
 const ConfigRecordSchema = schema.recordOf(
   schema.string(),
@@ -16,7 +26,7 @@ const ConfigRecordSchema = schema.recordOf(
 const PackageConfigBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: schema.string({ minLength: 1 }),
+  namespace: NamespaceSchema,
   config_id: schema.string(),
   enabled: schema.boolean(),
   package: schema.maybe(
@@ -45,7 +55,7 @@ const PackageConfigBaseSchema = {
         schema.object({
           id: schema.string(),
           enabled: schema.boolean(),
-          dataset: schema.object({ name: schema.string(), type: schema.string() }),
+          data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
             schema.recordOf(

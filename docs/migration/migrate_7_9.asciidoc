@@ -1,0 +1,736 @@
+[[breaking-changes-7.9]]
+== Breaking changes in 7.9
+++++
+<titleabbrev>7.9</titleabbrev>
+++++
+
+This page discusses the breaking changes that you need to be aware of when migrating
+your application to Kibana 7.9.
+
+* <<user-facing-changes-79, Breaking changes for users>>
+* <<general-plugin-API-changes-79, Breaking changes for plugin developers>>
+
+
+
+[float]
+[[user-facing-changes-79]]
+=== Breaking changes for users
+
+// The following section is re-used in the Installation and Upgrade Guide
+
+// tag::notable-breaking-changes[]
+
+[float]
+[[breaking_kibana_keystore]]
+==== `kibana.keystore` moved from the data folder to the config folder
+
+`kibana.keystore` has moved from the configured `path.data`
+folder to `<root>/config` for archive distributions and `/etc/kibana` for
+package distributions. If a pre-existing keystore exists in the data directory,
+that path will continue to be used.
+
+*via https://github.com/elastic/kibana/pull/57856[#57856]*
+
+// end::notable-breaking-changes[]
+
+[float]
+[[general-plugin-API-changes-79]]
+=== Breaking changes for plugin developers
+
+[[breaking_79_actions_api]]
+.aborted$ event fixed and completed$ event added to `KibanaRequest`
+[%collapsible]
+====
+
+The `request.events.aborted$` Observable will now properly wait for the
+response to be sent before completing.
+
+A new `request.events.completed$` API is available that will emit once
+a request has been completely handled or aborted.
+
+*via https://github.com/elastic/kibana/pull/73898[#73898]*
+
+====
+
+[[breaking_79_management_api]]
+.The Management API has a new interface
+[%collapsible]
+====
+
+A public `setup` contract has been reduced to just `register`. A
+new interface, `sections`, which is a map of management sections provided by the plugin,
+replaces `getSection`. Public start interfaces have been removed as all
+registration should occur in the `setup` lifecycle.
+
+*via https://github.com/elastic/kibana/pull/71144[#71144]*
+
+====
+
+[[breaking_79_fields_with_no_value]]
+.Filters from fields with no values are now allowed
+[%collapsible]
+====
+
+Kibana now allows the creation of filters from fields
+with a null or undefined value.
+
+*via https://github.com/elastic/kibana/pull/70936[#70936]*
+
+====
+
+[[breaking_79_http_interceptors]]
+.The `onPreAuth` and `onPreRouting` http interceptors are now separate
+[%collapsible]
+====
+
+The `onPreAuth` interceptor has been renamed to `onPreRouting` to better
+reflect its place in the execution order&mdash;it is now called right before the route lookup step.
+A new `onPreAuth` interceptor is executed before the `Auth` lifecycle step,
+but after the `onPreRouting` step.
+
+*via https://github.com/elastic/kibana/pull/70775[#70775]*
+
+====
+
+[[breaking_79_metric_service]]
+.The Metrics API moved to start
+[%collapsible]
+====
+
+The Metric service API exposed from the `setup` contract has been moved
+to the `start` lifecycle.
+
+*via https://github.com/elastic/kibana/pull/69787[#69787]*
+
+====
+
+[[breaking_79_field_formats_removed]]
+.`fieldFormats` removed from `AggConfig` and `AggConfigs`
+[%collapsible]
+====
+
+`AggConfig` has been updated to no longer return a field format
+instance for the field it is aggregating on. As a result, the `fieldFormatter` and
+`fieldOwnFormatter` methods have been removed. Additionally, the `getFormat` method
+has been removed from each individual agg type.
+
+If you need to access a field format instance, use the newly-added
+`AggConfig.toSerializedFieldFormat` or `AggType.toSerializedFormat`
+to retrieve the serializable representation of the field's format,
+and then pass it to the `deserialize` method from the field formats service
+to get the actual format instance.
+
+```diff
+class MyPlugin {
+  async start(core, { data }) {
+    const { indexPatterns, fieldFormats, search } = data;
+    const indexPattern = await indexPatterns.get('myId');
+    const agg = {
+      type: 'terms',
+      params: { field: 'machine.os.keyword' },
+    };
+    const aggConfigs = search.aggs.createAggConfigs(indexPattern, [agg]);
+    const termsAgg = aggConfigs.aggs[0];
+-    const formatter = termsAgg.type.getFormat(termsAgg);
+-    // or
+-    const formatter = termsAgg.fieldFormatter('text');
++    const formatter = fieldFormats.deserialize(termsAgg.toSerializedFieldFormat());
++    // or
++    const formatter = fieldFormats.deserialize(termsAgg.type.getSerializedFormat(termsAgg));
+     const formattedValue = formatter.convert('myValue');
+  }
+}
+```
+
+In addition, the legacy formatting helpers that were exported from
+`ui/visualize/loader/pipeline_helpers/utilities` have been removed.
+If your plugin imports from this directory, please update your code to use
+the `fieldFormats` service directly.
+
+*via https://github.com/elastic/kibana/pull/69762[#69762]*
+
+====
+
+[[breaking_79_encrypted_saved_objects]]
+.New API adds support for migrations for an `EncryptedSavedObject`
+[%collapsible]
+====
+
+A new `createMigration` API on the `EncryptedSavedObjectsPluginSetup`
+facilitates defining a migration for an EncryptedSavedObject type.
+
+**Defining migrations**
+
+`EncryptedSavedObjects` rely on standard `SavedObject migrations`,
+but due to the additional complexity introduced by the need to decrypt and
+reencrypt the migrated document, there are some caveats to how we support this.
+Most of this complexity is abstracted away by the plugin, and all you need to do is leverage our API.
+
+The `EncryptedSavedObjects` Plugin _SetupContract_ exposes a `createMigration`
+API that facilitates defining a migration for your EncryptedSavedObject type.
+
+The `createMigration` function takes four arguments:
+
+|===
+|Argument|Description|Type|
+
+|`isMigrationNeededPredicate`|A predicate that is called for each document,
+prior to being decrypted, which confirms whether a document requires migration or not.
+This predicate is important as the decryption step is costly, and we would rather not decrypt and re-encrypt a document if we can avoid it.|function|
+|`migration`|A migration function which will migrate each decrypted document from the old shape to the new one.|function|
+|`inputType`|Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the input (the document prior to migration). If this type isn't provided, we'll assume the input doc follows the registered type. |object|
+|`migratedType`| Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the output (the document after migration). If this type isn't provided, we'll assume the migrated doc follows the registered type.|object|
+|===
+
+**Example: Migrating a Value**
+
+```ts
+encryptedSavedObjects.registerType({
+  type: 'alert',
+  attributesToEncrypt: new Set(['apiKey']),
+  attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+});
+
+const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+    return doc.consumer === 'alerting' || doc.consumer === undefined;
+  },
+  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+    const {
+      attributes: { consumer },
+    } = doc;
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        consumer: consumer === 'alerting' || !consumer ? 'alerts' : consumer,
+      },
+    };
+  }
+);
+```
+
+In the above example, you can see the following:
+
+* In `shouldBeMigrated`, we limit the migrated alerts to those whose `consumer` field equals `alerting` or is undefined.
+* In the migration function, we migrate the value of `consumer` to the value
+we want (`alerts` or `unknown`, depending on the current value). In this function,
+we can assume that only documents with a `consumer` of `alerting` or `undefined` will be passed in, but it's still safest not to, and so we use the current `consumer` as the default when needed.
+* Note that we haven't passed in any type definitions. This is because we can rely on the registered type, as the migration is changing a value and not the shape of the object.
+
+An EncryptedSavedObject migration is a normal SavedObjects migration,
+so we can plug it into the underlying SavedObject just like any other kind of migration:
+
+```typescript
+savedObjects.registerType({
+    name: 'alert',
+    hidden: true,
+    namespaceType: 'single',
+    migrations: {
+        // apply this migration in 7.9.0
+       '7.9.0': migration790,
+    },
+    mappings: {
+        //...
+    },
+});
+```
+
+**Example: Migating a Type**
+
+If your migration needs to change the type, for example,
+by removing an encrypted field, you will have to specify the legacy type for the input.
+
+```ts
+encryptedSavedObjects.registerType({
+  type: 'alert',
+  attributesToEncrypt: new Set(['apiKey']),
+  attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+});
+
+const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+    return doc.consumer === 'alerting' || doc.consumer === undefined;
+  },
+  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+    const {
+      attributes: { legacyEncryptedField, ...attributes },
+    } = doc;
+    return {
+      ...doc,
+      attributes: {
+        ...attributes
+      },
+    };
+  },
+  {
+    type: 'alert',
+    attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
+    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+  }
+);
+```
+
+This example shows how we provide a legacy type that describes the input that needs to be decrypted.
+The migration function will default to using the registered type to encrypt the migrated
+document after the migration is applied.
+
+If you need to migrate between two legacy types, you can specify both types at once:
+
+```ts
+encryptedSavedObjects.registerType({
+  type: 'alert',
+  attributesToEncrypt: new Set(['apiKey']),
+  attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+});
+
+const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+    // ...
+  },
+  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+    // ...
+  },
+  // legacy input type
+  {
+    type: 'alert',
+    attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
+    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+  },
+  // legacy migration type
+  {
+    type: 'alert',
+    attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
+    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy', 'legacyEncryptedField']),
+  }
+);
+```
+*via https://github.com/elastic/kibana/pull/69513[#69513]*
+
+====
+
+[[breaking_79_canvas]]
+.Canvas templates now stored as saved objects
+[%collapsible]
+====
+
+Previously, workpad templates were added through the Canvas API client side.
+Workpad templates are now stored as saved objects, so an API is no longer required for adding them.
+You can add templates through `SavedObject` management.
+
+*via https://github.com/elastic/kibana/pull/69438[#69438]*
+
+====
+
+[[breaking_79_typescript]]
+.Search Typescript improved
+[%collapsible]
+====
+
+The front end search strategy concept is now deprecated and the
+following API methods were removed from the `data.search` plugin:
+
+ * `registerSearchStrategy`
+ * `getSearchStrategy`
+
+*via https://github.com/elastic/kibana/pull/69333[#69333]*
+
+====
+
+[[breaking_79_doclinks]]
+.DocLinks API moved from `setup` to `start`
+[%collapsible]
+====
+
+The docLinks service API exposed from the `setup` contract has been moved to the `start` lifecycle.
+
+*via https://github.com/elastic/kibana/pull/68745[#68745]*
+
+====
+
+[[breaking_79_plugin_api]]
+.Plugin API added for customizing the logging configuration
+[%collapsible]
+====
+
+Plugins can now customize the logging configuration on the fly.
+
+```ts
+import { of } from 'rxjs';
+core.logging.configure(of(
+  {
+    appenders: {
+      myCustomAppender: { ... },
+    },
+    loggers: [
+      { context: 'subcontext', appenders: ['myCustomAppender'], level: 'warn' }
+    ]
+  }
+))
+```
+
+*via https://github.com/elastic/kibana/pull/68704[#68704]*
+
+====
+
+[[breaking_79_developer_guide]]
+.Developer guide restructured
+[%collapsible]
+====
+
+The <<development,developer guide>> includes the following improvements:
+
+* Migrates CONTRIBUTING.md content into AsciiDoc
+* Moves CONTRIBUTING content into the developer guide
+* Removes https://github.com/elastic/kibana/issues/67782[outdated content]
+* Creates
+https://github.com/elastic/kibana/issues/41833#issuecomment-646195319[the structure proposed
+in this issue]
+
+*via https://github.com/elastic/kibana/pull/67764[#67764]*
+
+====
+
+[[breaking_79_es_api]]
+.{es} API exposed from `setup` contract is deprecated
+[%collapsible]
+====
+
+The {es} API exposed from the `setup` contract is not available
+and will be deleted without notice. Use the core start API instead.
+
+```typescript
+// before
+setup(core: CoreSetup) {
+   core.elasticsearch.dataClient(...)
+   core.elasticsearch.adminClient(...)
+}
+// after
+setup(core: CoreSetup) {
+   core.elasticsearch.legacy.client(...)
+}
+```
+
+*via https://github.com/elastic/kibana/pull/67596[#67596]*
+
+====
+
+[[breaking_79_API_docs]]
+.API reference docs available for state_containers and state_sync
+[%collapsible]
+====
+
+The API reference docs for `state_sync` and `state_containers` are now available:
+
+* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
+* https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
+
+*via https://github.com/elastic/kibana/pull/67354[#67354]*
+
+====
+
+[[breaking_79_es_request]]
+.Elasticsearch client exposed via request context marked as deprecated
+[%collapsible]
+====
+
+The Elasticsearch service no longer provides separate `data` and `admin` clients.
+The Elasticsearch service client is marked as deprecated and is superseded by a new one.
+
+```diff
+// in route handler
+router.get(
+...
+async function handler (context) {
+---  return await context.elasticsearch.adminClient.callAsInternalUser('endpoint');
++++  return await context.elasticsearch.legacy.client.callAsInternalUser('endpoint');
+})
+// in plugin
+setup(core){
+  return {
+    async search(id) {
+---     return await context.elasticsearch.adminClient.callAsInternalUser('endpoint', id);
++++     return await context.elasticsearch.legacy.client.callAsInternalUser('endpoint', id);
+    }
+  }
+}
+```
+
+*via https://github.com/elastic/kibana/pull/67319[#67319]*
+
+
+====
+
+[[breaking_79_licensing]]
+.Licensing now uses {es} from `start` contract
+[%collapsible]
+====
+
+The licensing plugin API exposed from the `setup` contract
+is deprecated in favor of `start` contract counterparts:
+
+```js
+// before
+setup(core, plugins){
+   plugins.licensing.license$.pipe(...)
+}
+
+// after
+start(core, plugins){
+   plugins.licensing.license$.pipe(...)
+}
+```
+
+*via https://github.com/elastic/kibana/pull/67291[#67291]*
+
+====
+
+[[breaking_79_actions_type]]
+.The Actions SavedObject type `action` is now a hidden type
+[%collapsible]
+====
+
+Interaction with the Actions SavedObject type requires
+you to tell your `SavedObjectsClient` to include
+the `action` hidden type as follows:
+
+```ts
+core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] })
+```
+
+Do not circumvent the authorization model by accessing these objects directly.
+Use `AlertsClient` instead.
+
+*via https://github.com/elastic/kibana/pull/67109[#67109]*
+
+====
+
+[[breaking_79_saved_objects_client]]
+.Saved objects now include support for hidden types
+[%collapsible]
+====
+
+**Saved objects**
+
+The SavedObjectClient's `getScopedClient`, `createScopedRepository` and
+`createInternalRepository` can now take a list of types to include in the underlying repository.
+
+You can use this to create a client that has access to hidden types:
+
+```ts
+core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['hiddenType'] })
+```
+
+This creates a `SavedObjects` client scoped to a user by the specified
+request with access to a hidden type called `hiddenType`.
+
+**Encrypted saved objects**
+
+The `EncryptedSavedObject` plugin no longer exposes a single client as part of its
+`start` contract. Instead it exposes a `getClient` API that exposes the client API.
+The `getClient` can also specify a list of hidden types to gain access to which are hidden by default.
+
+For example, given a {kib} platform plugin that has specified `encryptedSavedObjects` as a `Setup` dependency:
+
+```ts
+const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient(['hiddenType']);
+return encryptedSavedObjectsClient.getDecryptedAsInternalUser('hiddenType',  '123',   { namespace: 'some-namespace' });
+```
+
+*via https://github.com/elastic/kibana/pull/66879[#66879]*
+
+====
+
+[[breaking_79_alerting_api]]
+.The `alerting` plugin was renamed `alerts` to follow the {kib} styleguide
+[%collapsible]
+====
+
+This includes the following API changes:
+
+* Changed actions `BASE_ALERT_API_PATH` to ` '/api/alerts'` because according to the styleguide, it should keep the structure `/api/plugin_id`
+* Changed endpoint `/api/alert/_find` just to `/api/alerts/_find`
+* Changed `/types` to `/list_alert_types`
+* Changed POST `/api/alert` to POST `/api/alerts/alert`
+* Changed GET `/api/alert/{id}` to GET `/api/alerts/alert/{id}`
+* Changed PUT  `/api/alert/{id}` to PUT `/api/alerts/alert/{id}`
+* Changed DELETE `/api/alert/{id}` to DELETE `/api/alerts/alert/{id}`
+* Changed GET  `/api/alert/{id}/state` to GET `/api/alerts/alert/{id}/state`
+* Changed POST `/api/alert/{id}/_enable` to POST `/api/alerts/alert/{id}/_enable`
+* Changed POST `/api/alert/{id}/_disable` to POST `/api/alerts/alert/{id}/_disable`
+* Changed POST `/api/alert/{id}/_mute_all` to POST `/api/alerts/alert/{id}/_mute_all`
+* Changed POST `/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute` to POST `/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`
+* Changed POST `/api/alert/{id}/_unmute_all` to POST `/api/alerts/alert/{id}/_unmute_all`
+* Changed POST `/api/alert/{id}/_update_api_key` to POST `/api/alerts/alert/{id}/_update_api_key`
+* Changed POST `/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute` to POST `/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`
+
+*via https://github.com/elastic/kibana/pull/66838[#66838]*
+
+
+====
+
+[[breaking_79_new_management_api]]
+.The new platform API is now implemented in Management
+[%collapsible]
+====
+
+This change:
+
+* Refactors out use of `registerLegacyApp` and uses react-router-dom for routing.
+* Implements a landing page and sidebar in the Management plugin.
+* Removes the legacy API from `src/plugins/management/public/plugin.ts` and related code.
+
+*via https://github.com/elastic/kibana/pull/66781[#66781]*
+
+====
+
+[[breaking_79_alert_hidden]]
+.The Alerting SavedObject type `alert` is now a hidden type
+[%collapsible]
+====
+
+Interaction with the Alerting SavedObject type requires you
+to tell your `SavedObjectsClient` to include the `alert` hidden
+type as follows:
+
+``` ts
+core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert'] })
+```
+
+Do not circumvent the authorization model by accessing these objects directly.
+Use AlertsClient instead.
+
+*via https://github.com/elastic/kibana/pull/66719[#66719]*
+
+====
+
+[[breaking_79_oss_features]]
+.Open source features registration moved to Kibana platform
+[%collapsible]
+====
+
+{kib} now allows the `getFeatures` plugin method to be called within the `start` lifecycle.
+
+*via https://github.com/elastic/kibana/pull/66524[#66524]*
+
+====
+
+[[breaking_79_so_registration]]
+.SavedObject registration in the legacy platform is not supported
+[%collapsible]
+====
+
+
+To use SavedObjects, you must move your plugin to the {kib} platform.
+
+```js
+// before in the legacy plugin
+export default function ({ Plugin }) {
+  new Plugin({
+    id: 'my-plugin',
+    uiExports: {
+      mappings: {
+        'my-plugin-so': {
+          properties: {...},
+        },
+      },
+   },
+}),
+// in the Kibana platform plugin
+export class MyPlugin implements Plugin {
+  constructor(context: PluginInitializerContext) {}
+  setup(core: CoreSetup) {
+    core.savedObjects.registerType({
+      name: 'my-plugin-so',
+      mappings: {...}
+    });
+  }
+}
+```
+
+*via https://github.com/elastic/kibana/pull/66203[#66203]*
+
+
+====
+
+[[breaking_79_cross_links]]
+.Cross-links are now handled automatically
+[%collapsible]
+====
+
+Links from one application to another are now automatically handled by the {kib} platform
+to perform the navigation without a full page refresh and the need to
+manually add a click handler to call `application.navigateToApp`.
+
+You can disable this behavior by adding the `data-disable-core-navigation`
+attribute on the link (`a`) element or any of its parent.
+
+This feature is not enabled for legacy applications.
+
+*via https://github.com/elastic/kibana/pull/65164[#65164]*
+
+====
+
+[[breaking_79_field_formatters]]
+.Field format editors API migrated to Kibana Platform
+[%collapsible]
+====
+
+Field format editors (used by index pattern management) are no longer added
+via the field formatters registry, `ui/registry/field_format_editors`. They
+are now added via the `indexPatternManagement` plugin.
+
+*via https://github.com/elastic/kibana/pull/65026[#65026]*
+
+====
+
+[[breaking_79_expressions]]
+.The `expressions` plugin has a new set of helpers
+[%collapsible]
+====
+
+The `expressions` plugin introduces a set of helpers that make it easier to
+manipulate expression ASTs. Refer to https://github.com/elastic/kibana/pull/64395[this PR]
+for more detailed examples.
+
+```ts
+// also available on `expressions/public/server`
+import {
+  buildExpression,
+  buildExpressionFunction
+} from '../../src/plugins/expressions/public';
+
+// `buildExpression` takes an expression string, AST, or array of `buildExpressionFunction`
+const exp = buildExpression([
+  // `buildExpressionFunction` takes an expression function name, and object of args
+  buildExpressionFunction('myFn', { hello: [true] });
+]);
+
+const anotherFn = buildExpressionFunction('anotherFn', { world: [false] });
+exp.functions.push(anotherFn);
+fn.replaceArgument('world', [true]);
+
+exp.toAst(); // prints the latest AST
+
+// you can get added type-safety by providing a generic type argument:
+const exp = buildExpression([
+  buildExpressionFunction<MyFnExpressionFunctionDefinition>('myFn', { hello: [true] });
+]);
+const fns = exp.findFunction<MyFnExpressionFunctionDefinition>('myFn');
+```
+*via https://github.com/elastic/kibana/pull/64395[#64395]*
+
+====
+
+[[breaking_79_mount]]
+.Mount `ui/new_platform` applications in same div structure as Core
+[%collapsible]
+====
+
+Applications that are mounted via the `core.application.register`
+interface from the legacy `ui/new_platform` module are now mounted inside a
+new `div` inside of the `<div class="application />` node rather than directly inside that node.
+This makes the legacy bridge consistent with how true {kib} platform applications are mounted.
+
+*via https://github.com/elastic/kibana/pull/63930[#63930]*
+====

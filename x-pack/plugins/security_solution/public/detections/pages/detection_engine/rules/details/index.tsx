@@ -21,11 +21,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
-import { useWindowSize } from 'react-use';
 
-import { globalHeaderHeightPx } from '../../../../../app/home';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -66,7 +63,6 @@ import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
-import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../../../common/components/events_viewer/events_viewer';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { State } from '../../../../../common/store';
 import { InputsRange } from '../../../../../common/store/inputs/model';
@@ -75,21 +71,17 @@ import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_o
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { DEFAULT_INDEX_PATTERN, FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../shared_imports';
-import {
-  getEventsViewerBodyHeight,
-  MIN_EVENTS_VIEWER_BODY_HEIGHT,
-} from '../../../../../timelines/components/timeline/body/helpers';
-import { footerHeight } from '../../../../../timelines/components/timeline/footer';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
@@ -167,12 +159,10 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-  const { height: windowHeight } = useWindowSize();
   const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
-  const hasMlPermissions =
-    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   // persist rule until refresh is complete
@@ -364,12 +354,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal
-            globalFullScreen={globalFullScreen}
-            show={showGlobalFilters({ globalFullScreen, graphEventId })}
-          >
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -507,17 +494,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     timelineId={TimelineId.detectionsRulesDetailsPage}
                     canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
-                    eventsViewerBodyHeight={
-                      globalFullScreen
-                        ? getEventsViewerBodyHeight({
-                            footerHeight,
-                            headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
-                            kibanaChromeHeight: globalHeaderHeightPx,
-                            otherContentHeight: FILTERS_GLOBAL_HEIGHT,
-                            windowHeight,
-                          })
-                        : MIN_EVENTS_VIEWER_BODY_HEIGHT
-                    }
                     hasIndexWrite={hasIndexWrite ?? false}
                     from={from}
                     loading={loading}
@@ -542,7 +518,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

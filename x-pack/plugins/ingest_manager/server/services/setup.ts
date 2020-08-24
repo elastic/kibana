@@ -26,107 +26,97 @@ import { packageConfigService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
+import { awaitIfPending } from './setup_utils';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
-// the promise which tracks the setup
-let setupIngestStatus: Promise<void> | undefined;
-// default resolve & reject to guard against "undefined is not a function" errors
-let onSetupResolve = () => {};
-let onSetupReject = (error: Error) => {};
+export interface SetupStatus {
+  isIntialized: true | undefined;
+}
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
-) {
-  // installation in progress
-  if (setupIngestStatus) {
-    await setupIngestStatus;
-  } else {
-    // create the initial promise
-    setupIngestStatus = new Promise((res, rej) => {
-      onSetupResolve = res;
-      onSetupReject = rej;
-    });
-  }
-  try {
-    const [installedPackages, defaultOutput, config] = await Promise.all([
-      // packages installed by default
-      ensureInstalledDefaultPackages(soClient, callCluster),
-      outputService.ensureDefaultOutput(soClient),
-      agentConfigService.ensureDefaultAgentConfig(soClient),
-      ensureDefaultIndices(callCluster),
-      settingsService.getSettings(soClient).catch((e: any) => {
-        if (e.isBoom && e.output.statusCode === 404) {
-          const http = appContextService.getHttpSetup();
-          const serverInfo = http.getServerInfo();
-          const basePath = http.basePath;
+): Promise<SetupStatus> {
+  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+}
 
-          const cloud = appContextService.getCloud();
-          const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-          const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-          const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
-          const defaultUrl = url.format({
-            protocol: serverInfo.protocol,
-            hostname: serverInfo.hostname,
-            port: serverInfo.port,
-            pathname: basePath.serverBasePath,
-          });
+async function createSetupSideEffects(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<SetupStatus> {
+  const [installedPackages, defaultOutput, config] = await Promise.all([
+    // packages installed by default
+    ensureInstalledDefaultPackages(soClient, callCluster),
+    outputService.ensureDefaultOutput(soClient),
+    agentConfigService.ensureDefaultAgentConfig(soClient),
+    ensureDefaultIndices(callCluster),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        const http = appContextService.getHttpSetup();
+        const serverInfo = http.getServerInfo();
+        const basePath = http.basePath;
 
-          return settingsService.saveSettings(soClient, {
-            agent_auto_upgrade: true,
-            package_auto_upgrade: true,
-            kibana_url: cloudUrl || flagsUrl || defaultUrl,
-          });
-        }
+        const cloud = appContextService.getCloud();
+        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+        const defaultUrl = url.format({
+          protocol: serverInfo.protocol,
+          hostname: serverInfo.hostname,
+          port: serverInfo.port,
+          pathname: basePath.serverBasePath,
+        });
 
-        return Promise.reject(e);
-      }),
-    ]);
-
-    // ensure default packages are added to the default conifg
-    const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
-    if (!configWithPackageConfigs) {
-      throw new Error('Config not found');
-    }
-    if (
-      configWithPackageConfigs.package_configs.length &&
-      typeof configWithPackageConfigs.package_configs[0] === 'string'
-    ) {
-      throw new Error('Config not found');
-    }
-    for (const installedPackage of installedPackages) {
-      const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-        (packageName) => installedPackage.name === packageName
-      );
-      if (!packageShouldBeInstalled) {
-        continue;
+        return settingsService.saveSettings(soClient, {
+          agent_auto_upgrade: true,
+          package_auto_upgrade: true,
+          kibana_url: cloudUrl || flagsUrl || defaultUrl,
+        });
       }
 
-      const isInstalled = configWithPackageConfigs.package_configs.some(
-        (d: PackageConfig | string) => {
-          return typeof d !== 'string' && d.package?.name === installedPackage.name;
-        }
-      );
+      return Promise.reject(e);
+    }),
+  ]);
 
-      if (!isInstalled) {
-        await addPackageToConfig(
-          soClient,
-          callCluster,
-          installedPackage,
-          configWithPackageConfigs,
-          defaultOutput
-        );
-      }
+  // ensure default packages are added to the default conifg
+  const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
+  if (!configWithPackageConfigs) {
+    throw new Error('Config not found');
+  }
+  if (
+    configWithPackageConfigs.package_configs.length &&
+    typeof configWithPackageConfigs.package_configs[0] === 'string'
+  ) {
+    throw new Error('Config not found');
+  }
+  for (const installedPackage of installedPackages) {
+    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+      (packageName) => installedPackage.name === packageName
+    );
+    if (!packageShouldBeInstalled) {
+      continue;
     }
 
-    // if everything works, resolve/succeed
-    onSetupResolve();
-  } catch (error) {
-    // if anything errors, reject/fail
-    onSetupReject(error);
+    const isInstalled = configWithPackageConfigs.package_configs.some(
+      (d: PackageConfig | string) => {
+        return typeof d !== 'string' && d.package?.name === installedPackage.name;
+      }
+    );
+
+    if (!isInstalled) {
+      await addPackageToConfig(
+        soClient,
+        callCluster,
+        installedPackage,
+        configWithPackageConfigs,
+        defaultOutput
+      );
+    }
   }
+
+  return { isIntialized: true };
 }
 
 export async function setupFleet(

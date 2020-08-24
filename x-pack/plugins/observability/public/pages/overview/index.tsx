@@ -113,44 +113,46 @@ export const OverviewPage = ({ routeParams }: Props) => {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {showDataSections && (
-            <EuiFlexGroup direction="column">
-              {hasData.infra_logs && (
-                <EuiFlexItem grow={false}>
-                  <LogsSection
-                    absoluteTime={absoluteTime}
-                    relativeTime={relativeTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasData.infra_metrics && (
-                <EuiFlexItem grow={false}>
-                  <MetricsSection
-                    absoluteTime={absoluteTime}
-                    relativeTime={relativeTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasData.apm && (
-                <EuiFlexItem grow={false}>
-                  <APMSection
-                    absoluteTime={absoluteTime}
-                    relativeTime={relativeTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-              {hasData.uptime && (
-                <EuiFlexItem grow={false}>
-                  <UptimeSection
-                    absoluteTime={absoluteTime}
-                    relativeTime={relativeTime}
-                    bucketSize={bucketSize?.intervalString}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column">
+                {hasData.infra_logs && (
+                  <EuiFlexItem grow={false}>
+                    <LogsSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+                {hasData.infra_metrics && (
+                  <EuiFlexItem grow={false}>
+                    <MetricsSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+                {hasData.apm && (
+                  <EuiFlexItem grow={false}>
+                    <APMSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+                {hasData.uptime && (
+                  <EuiFlexItem grow={false}>
+                    <UptimeSection
+                      absoluteTime={absoluteTime}
+                      relativeTime={relativeTime}
+                      bucketSize={bucketSize?.intervalString}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           )}
 
           {/* Empty sections */}

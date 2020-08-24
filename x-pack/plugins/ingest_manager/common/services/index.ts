@@ -10,3 +10,4 @@ export { storedPackageConfigsToAgentInputs } from './package_configs_to_agent_in
 export { configToYaml } from './config_to_yaml';
 export { isPackageLimited, doesAgentConfigAlreadyIncludePackage } from './limited_package';
 export { decodeCloudId } from './decode_cloud_id';
+export { isValidNamespace } from './is_valid_namespace';

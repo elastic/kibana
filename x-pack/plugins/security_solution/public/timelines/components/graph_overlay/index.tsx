@@ -41,8 +41,8 @@ import { Resolver } from '../../../resolver/view';
 
 import * as i18n from './translations';
 
-const OverlayContainer = styled.div<{ bodyHeight?: number }>`
-  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
+const OverlayContainer = styled.div`
+  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -57,7 +57,6 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 `;
 
 interface OwnProps {
-  bodyHeight?: number;
   graphEventId?: string;
   timelineId: string;
   timelineType: TimelineType;
@@ -104,7 +103,6 @@ const Navigation = ({
 );
 
 const GraphOverlayComponent = ({
-  bodyHeight,
   graphEventId,
   status,
   timelineId,
@@ -166,7 +164,7 @@ const GraphOverlayComponent = ({
   ]);
 
   return (
-    <OverlayContainer bodyHeight={bodyHeight}>
+    <OverlayContainer>
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

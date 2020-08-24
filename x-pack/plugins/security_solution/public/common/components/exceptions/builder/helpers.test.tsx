@@ -654,7 +654,7 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it removes entry corresponding to "nestedEntryIndex"', () => {
+    test('it removes nested entry of "entryIndex" with corresponding parent index', () => {
       const payloadItem: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
         entries: [
@@ -664,10 +664,10 @@ describe('Exception builder helpers', () => {
           },
         ],
       };
-      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 1);
+      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 0);
       const expected: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
-        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryExistsMock() }] }],
+        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryMatchAnyMock() }] }],
       };
       expect(output).toEqual(expected);
     });

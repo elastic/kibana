@@ -33,8 +33,8 @@
           "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "infrastructure-ui-source": "ddc0ecb18383f6b26101a2fadb2dab0c",
-          "ingest-agent-configs": "d9a5cbdce8e937f674a7b376c47a34a1",
-          "ingest-package-configs": "c0fe6347b0eebcbf421841669e3acd31",
+          "ingest-agent-policies": "d9a5cbdce8e937f674a7b376c47a34a1",
+          "ingest-package-policies": "c0fe6347b0eebcbf421841669e3acd31",
           "ingest-outputs": "0e57221778a7153c8292edf154099036",
           "ingest_manager_settings": "c5b0749b4ab03c582efd4c14cb8f132c",
           "inventory-view": "88fc7e12fd1b45b6f0787323ce4f18d2",
@@ -2066,7 +2066,7 @@
             }
           }
         },
-        "ingest-agent-configs": {
+        "ingest-agent-policies": {
           "properties": {
             "datasources": {
               "type": "keyword"
@@ -2103,7 +2103,7 @@
             }
           }
         },
-        "ingest-package-configs": {
+        "ingest-package-policies": {
           "properties": {
             "config_id": {
               "type": "keyword"
@@ -2597,7 +2597,7 @@
               },
               "type": "text"
             },
-            "ingest-agent-configs": {
+            "ingest-agent-policies": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -2606,7 +2606,7 @@
               },
               "type": "text"
             },
-            "ingest-package-configs": {
+            "ingest-package-policies": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,

@@ -41,7 +41,7 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
-    "id": "query:okjpgs",
+    "id": "query:OKJpgs",
     "source": {
       "query": {
         "title": "OKJpgs",

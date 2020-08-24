@@ -27,6 +27,8 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 const getColumns = (setupMode, alerts) => {
   const columns = [
@@ -37,7 +39,7 @@ const getColumns = (setupMode, alerts) => {
       field: 'name',
       render: (name, kibana) => {
         let setupModeStatus = null;
-        if (setupMode && setupMode.enabled) {
+        if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
           const list = get(setupMode, 'data.byUuid', {});
           const uuid = get(kibana, 'kibana.uuid');
           const status = list[uuid] || {};
@@ -164,7 +166,7 @@ export class KibanaInstances extends PureComponent {
     let setupModeCallOut = null;
     // Merge the instances data with the setup data if enabled
     const instances = this.props.instances || [];
-    if (setupMode.enabled && setupMode.data) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       // We want to create a seamless experience for the user by merging in the setup data
       // and the node data from monitoring indices in the likely scenario where some instances
       // are using MB collection and some are using no collection

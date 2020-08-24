@@ -18,19 +18,33 @@ import {
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
+  SearchUsage,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
+import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
 
-export interface AsyncSearchResponse<T> {
+interface AsyncSearchResponse<T> {
   id: string;
   is_partial: boolean;
   is_running: boolean;
   response: SearchResponse<T>;
 }
 
+interface EnhancedEsSearchResponse extends IEsSearchResponse {
+  is_partial: boolean;
+  is_running: boolean;
+}
+
+function isEnhancedEsSearchResponse(
+  response: IEsSearchResponse
+): response is EnhancedEsSearchResponse {
+  return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
+}
+
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
+  config$: Observable<SharedGlobalConfig>,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   const search = async (
     context: RequestHandlerContext,
@@ -42,9 +56,24 @@ export const enhancedEsSearchStrategyProvider = (
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    return request.indexType === 'rollup'
-      ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options);
+    try {
+      const response =
+        request.indexType === 'rollup'
+          ? await rollupSearch(caller, { ...request, params }, options)
+          : await asyncSearch(caller, { ...request, params }, options);
+
+      if (
+        usage &&
+        (!isEnhancedEsSearchResponse(response) || (!response.is_partial && !response.is_running))
+      ) {
+        usage.trackSuccess(response.rawResponse.took);
+      }
+
+      return response;
+    } catch (e) {
+      if (usage) usage.trackError();
+      throw e;
+    }
   };
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
@@ -76,8 +105,15 @@ async function asyncSearch(
   const method = request.id ? 'GET' : 'POST';
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
-  // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
+  // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+  const batchedReduceSize = request.id ? undefined : 64;
+
+  const query = toSnakeCase({
+    waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+    keepAlive: '1m', // Extend the TTL for this search request by one minute
+    ...(batchedReduceSize && { batchedReduceSize }),
+    ...queryParams,
+  });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
