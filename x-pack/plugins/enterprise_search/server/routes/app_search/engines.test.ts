@@ -68,7 +68,7 @@ describe('engine routes', () => {
         ).andReturnError();
       });
 
-      it('should return 404 with a message', async () => {
+      it('should return 502 with a message', async () => {
         await mockRouter.callRoute(mockRequest);
 
         expect(mockRouter.response.customError).toHaveBeenCalledWith({
@@ -88,7 +88,7 @@ describe('engine routes', () => {
         ).andReturnInvalidData();
       });
 
-      it('should return 404 with a message', async () => {
+      it('should return 502 with a message', async () => {
         await mockRouter.callRoute(mockRequest);
 
         expect(mockRouter.response.customError).toHaveBeenCalledWith({
