@@ -20,6 +20,7 @@ import { TileLayer } from '../../classes/layers/tile_layer/tile_layer';
 import { EMSTMSSource } from '../../classes/sources/ems_tms_source';
 import { VectorTileLayer } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
 import { getIsEmsEnabled, getToasts } from '../../kibana_services';
+import { INITIAL_LAYERS_KEY } from '../../../common/constants';
 import { getKibanaTileMap } from '../../meta';
 
 export function getInitialLayers(layerListJSON, initialLayers = []) {
@@ -51,12 +52,12 @@ export function getInitialLayersFromUrlParam() {
     return [];
   }
   const mapAppParams = new URLSearchParams(locationSplit[1]);
-  if (!mapAppParams.has('initialLayers')) {
+  if (!mapAppParams.has(INITIAL_LAYERS_KEY)) {
     return [];
   }
 
   try {
-    let mapInitLayers = mapAppParams.get('initialLayers');
+    let mapInitLayers = mapAppParams.get(INITIAL_LAYERS_KEY);
     if (mapInitLayers[mapInitLayers.length - 1] === '#') {
       mapInitLayers = mapInitLayers.substr(0, mapInitLayers.length - 1);
     }

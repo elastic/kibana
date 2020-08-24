@@ -164,7 +164,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // result in a 404 error.
     await this.ensureAuthorized(type, 'update', namespace, args, 'addToNamespacesUpdate');
 
-    return await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async deleteFromNamespaces(
@@ -177,7 +178,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
     await this.ensureAuthorized(type, 'delete', namespaces, args, 'deleteFromNamespaces');
 
-    return await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async bulkUpdate<T = unknown>(

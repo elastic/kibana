@@ -67,11 +67,10 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <div
-                aria-hidden="true"
-                className="euiButton__icon"
+                className="euiButtonContent__icon"
                 data-euiicon-type="trash"
                 size="m"
               />
@@ -92,7 +91,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButtonEmpty__content"
+              className="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 className="euiButtonEmpty__text"

@@ -24,7 +24,7 @@ import {
   useBreadcrumbs,
   usePagination,
   useGetEnrollmentAPIKeys,
-  useGetAgentConfigs,
+  useGetAgentPolicies,
   sendGetOneEnrollmentAPIKey,
   useCore,
   sendDeleteOneEnrollmentAPIKey,
@@ -165,12 +165,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     kuery: search.trim() !== '' ? search : undefined,
   });
-  const agentConfigsRequest = useGetAgentConfigs({
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
 
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
   const items = enrollmentAPIKeysRequest?.data?.list ?? [];
@@ -198,13 +198,13 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'config_id',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.configTitle', {
-        defaultMessage: 'Agent config',
+      field: 'policy_id',
+      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.policyTitle', {
+        defaultMessage: 'Agent policy',
       }),
-      render: (configId: string) => {
-        const config = agentConfigs.find((c) => c.id === configId);
-        const value = config ? config.name : configId;
+      render: (policyId: string) => {
+        const agentPolicy = agentPolicies.find((c) => c.id === policyId);
+        const value = agentPolicy ? agentPolicy.name : policyId;
         return (
           <span className="eui-textTruncate" title={value}>
             {value}
@@ -255,7 +255,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     <>
       {flyoutOpen && (
         <NewEnrollmentTokenFlyout
-          agentConfigs={agentConfigs}
+          agentPolicies={agentPolicies}
           onClose={() => {
             setFlyoutOpen(false);
             enrollmentAPIKeysRequest.sendRequest();

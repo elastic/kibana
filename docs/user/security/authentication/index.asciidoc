@@ -59,8 +59,6 @@ For more information, refer to <<authentication-security-settings, authenticatio
 
 To successfully log in to {kib}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native, LDAP, or Active Directory security realm that is provided by {es}. The basic authentication provider uses a {kib} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
 
-The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of {kib} when using the basic authentication provider clears the session cookies from the browser, but does not invalidate the session cookie for reuse.
-
 NOTE: You can configure only one Basic provider per {kib} instance.
 
 For more information about basic authentication and built-in users, see
@@ -70,8 +68,6 @@ For more information about basic authentication and built-in users, see
 ==== Token authentication
 
 Token authentication allows users to log in using the same {kib} provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {es}. The token authentication provider is built on {es} token APIs.
-
-The session cookies that are issued by the token authentication provider are stateful, and logging out of {kib} invalidates the session cookies for reuse.
 
 Prior to configuring {kib}, ensure token support is enabled in {es}. See the {ref}/security-api-get-token.html[{es} token API] documentation for more information.
 
@@ -181,26 +177,6 @@ Basic authentication is supported _only_ if the `basic` authentication provider 
 
 To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
 
-[float]
-[[security-saml-and-long-urls]]
-===== SAML and long URLs
-
-At the beginning of the SAML handshake, {kib} stores the initial URL in the session cookie, so it can redirect the user back to that URL after successful SAML authentication.
-If the URL is long, the session cookie might exceed the maximum size supported by the browser--typically 4KB for all cookies per domain. When this happens, the session cookie is truncated,
-or dropped completely, and you might experience sporadic failures during SAML authentication.
-
-To remedy this issue, you can decrease the maximum
-size of the URL that {kib} is allowed to store during the SAML handshake. The default value is 2KB.
-
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.security.authc.providers:
-  saml.saml1:
-    order: 0
-    realm: saml1
-    maxRedirectURLSize: 1kb
---------------------------------------------------------------------------------
-
 [[oidc]]
 ==== OpenID Connect single sign-on
 
@@ -263,11 +239,11 @@ The following sections apply both to <<saml>> and <<oidc>>
 ===== Access and refresh tokens
 
 Once the user logs in to {kib} Single Sign-On, either using SAML or OpenID Connect, {es} issues access and refresh tokens
-that {kib} encrypts and stores them in its own session cookie. This way, the user isn't redirected to the Identity Provider
-for every request that requires authentication. It also means that the {kib} session depends on the <<security-ui-settings,
+that {kib} encrypts and stores as a part of its own session. This way, the user isn't redirected to the Identity Provider
+for every request that requires authentication. It also means that the {kib} session depends on the <<security-session-and-cookie-settings,
 `xpack.security.session.idleTimeout` and `xpack.security.session.lifespan`>> settings, and the user is automatically logged
-out if the session expires. An access token that is stored in the session cookie can expire, in which case {kib} will
-automatically renew it with a one-time-use refresh token and store it in the same cookie.
+out if the session expires. An access token that is stored in the session can expire, in which case {kib} will
+automatically renew it with a one-time-use refresh token and store it in the same session.
 
 {kib} can only determine if an access token has expired if it receives a request that requires authentication. If both access
 and refresh tokens have already expired (for example, after 24 hours of inactivity), {kib} initiates a new "handshake" and
@@ -280,8 +256,7 @@ indicates that both access and refresh tokens are expired. Reloading the current
 [float]
 ===== Local and global logout
 
-During logout, both the {kib} session cookie and access/refresh token pair are invalidated. Even if the cookie has been
-leaked, it can't be re-used after logout. This is known as "local" logout.
+During logout, both the {kib} session and {es} access/refresh token pair are invalidated. This is known as "local" logout.
 
 {kib} can also initiate a "global" logout or _Single Logout_ if it's supported by the external authentication provider and not
 explicitly disabled by {es}. In this case, the user is redirected to the external authentication provider for log out of

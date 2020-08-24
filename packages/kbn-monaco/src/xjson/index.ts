@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { registerGrammarChecker } from './language';
-
+/**
+ * This import registers the XJSON monaco language contribution
+ */
+import './language';
 import { ID } from './constants';
 
-export const XJsonLang = { registerGrammarChecker, ID };
+export const XJsonLang = { ID };
