@@ -21,7 +21,6 @@ import Fs from 'fs';
 import { promisify } from 'util';
 
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
-import { registerCspCollector } from './server/lib/csp_usage_collector';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
@@ -52,11 +51,6 @@ export default function (kibana) {
         // Stop the server startup with a fatal error
         throw err;
       }
-    },
-
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      registerCspCollector(usageCollection, server);
     },
   });
 }
