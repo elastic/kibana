@@ -35,12 +35,16 @@ const uiSettings: Record<string, unknown> = {
 
 const mockCore = {
   application: {
-    capabilities: {},
+    capabilities: {
+      apm: {},
+    },
     currentAppId$: new Observable(),
   },
   chrome: {
     docTitle: { change: () => {} },
     setBreadcrumbs: () => {},
+    setHelpExtension: () => {},
+    setBadge: () => {},
   },
   docLinks: {
     DOC_LINK_VERSION: '0',

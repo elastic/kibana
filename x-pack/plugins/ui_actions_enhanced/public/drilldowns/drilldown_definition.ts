@@ -107,6 +107,15 @@ export interface DrilldownDefinition<
   getDisplayName: () => string;
 
   /**
+   * isCompatible during execution
+   * Could be used to prevent drilldown from execution
+   */
+  isCompatible?(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): Promise<boolean>;
+
+  /**
    * Implements the "navigation" action of the drilldown. This happens when
    * user clicks something in the UI that executes a trigger to which this
    * drilldown was attached.

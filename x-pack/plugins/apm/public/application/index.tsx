@@ -30,7 +30,11 @@ import { LocationProvider } from '../context/LocationContext';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { ApmPluginSetupDeps } from '../plugin';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
+import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { setHelpExtension } from '../setHelpExtension';
 import { px, units } from '../style/variables';
+import { setReadonlyBadge } from '../updateBadge';
 
 const MainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -61,7 +65,7 @@ function App() {
   );
 }
 
-function ApmAppRoot({
+export function ApmAppRoot({
   core,
   deps,
   history,
@@ -118,12 +122,25 @@ function ApmAppRoot({
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
+
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element, history }: AppMountParameters,
   config: ConfigSchema
 ) => {
+  // render APM feedback link in global help menu
+  setHelpExtension(core);
+  setReadonlyBadge(core);
+
+  createCallApmApi(core.http);
+
+  // Automatically creates static index pattern and stores as saved object
+  createStaticIndexPattern().catch((e) => {
+    // eslint-disable-next-line no-console
+    console.log('Error creating static index pattern', e);
+  });
+
   ReactDOM.render(
     <ApmAppRoot core={core} deps={deps} history={history} config={config} />,
     element

@@ -12,7 +12,9 @@ exports[`Home component should render services 1`] = `
       },
       "core": Object {
         "application": Object {
-          "capabilities": Object {},
+          "capabilities": Object {
+            "apm": Object {},
+          },
           "currentAppId$": Observable {
             "_isScalar": false,
           },
@@ -21,7 +23,9 @@ exports[`Home component should render services 1`] = `
           "docTitle": Object {
             "change": [Function],
           },
+          "setBadge": [Function],
           "setBreadcrumbs": [Function],
+          "setHelpExtension": [Function],
         },
         "docLinks": Object {
           "DOC_LINK_VERSION": "0",
@@ -68,7 +72,9 @@ exports[`Home component should render traces 1`] = `
       },
       "core": Object {
         "application": Object {
-          "capabilities": Object {},
+          "capabilities": Object {
+            "apm": Object {},
+          },
           "currentAppId$": Observable {
             "_isScalar": false,
           },
@@ -77,7 +83,9 @@ exports[`Home component should render traces 1`] = `
           "docTitle": Object {
             "change": [Function],
           },
+          "setBadge": [Function],
           "setBreadcrumbs": [Function],
+          "setHelpExtension": [Function],
         },
         "docLinks": Object {
           "DOC_LINK_VERSION": "0",
