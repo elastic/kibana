@@ -35,7 +35,7 @@
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps", "legacy/plugins/maps"],
     "xpack.ml": ["plugins/ml", "legacy/plugins/ml"],
-    "xpack.monitoring": ["plugins/monitoring", "legacy/plugins/monitoring"],
+    "xpack.monitoring": ["plugins/monitoring"],
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.reporting": ["plugins/reporting"],

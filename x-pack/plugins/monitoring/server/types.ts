@@ -77,7 +77,6 @@ export interface LegacyShimDependencies {
 }
 
 export interface IBulkUploader {
-  setKibanaStatusGetter: (getter: () => string | undefined) => void;
   getKibanaStats: () => any;
 }
 
