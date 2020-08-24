@@ -89,15 +89,11 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       const transformIds = transforms.map((t: { id: string }) => t.id);
 
       await asyncForEach(transformIds, async (transformId: string) => {
-        await retry.waitForWithTimeout(
-          `stop transform and receive 200`,
-          2 * 60 * 1000,
-          async () => {
-            await esSupertest.post(`/_transform/${transformId}/_stop?force=true`).expect(200);
-            return true;
-          }
-        );
+        await esSupertest
+          .post(`/_transform/${transformId}/_stop?force=true&wait_for_completion`)
+          .expect(200);
         await this.waitForTransformState(transformId, 'stopped');
+
         await esSupertest.delete(`/_transform/${transformId}`).expect(200);
         await this.waitForTransformNotToExist(transformId);
       });
@@ -190,6 +186,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         }
       });
     },
+
     async waitForTransformNotToExist(transformId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${transformId}' to exist`, 5 * 1000, async () => {
         if (await this.getTransform(transformId, 404)) {
