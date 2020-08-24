@@ -647,7 +647,7 @@ export class JobCreator {
     return this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === true;
   }
 
-  public set perParttionStopOnWarn(enabled: boolean) {
+  public set perPartitionStopOnWarn(enabled: boolean) {
     this._initPerPartitionCategorization();
     this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }
