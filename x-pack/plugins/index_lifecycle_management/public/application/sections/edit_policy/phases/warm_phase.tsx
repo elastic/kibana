@@ -25,8 +25,9 @@ import {
   OptionalLabel,
   ErrableFormRow,
   SetPriorityInput,
-  NodeAllocation,
+  // NodeAllocation,
   MinAgeInput,
+  // DataAllocation,
 } from '../components';
 
 import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
@@ -145,13 +146,13 @@ export class WarmPhase extends PureComponent<Props> {
 
                 <EuiSpacer />
 
-                <NodeAllocation<WarmPhaseInterface>
+                {/* <NodeAllocation<WarmPhaseInterface>
                   phase={warmProperty}
                   setPhaseData={setPhaseData}
                   errors={errors}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
-                />
+                /> */}
 
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
