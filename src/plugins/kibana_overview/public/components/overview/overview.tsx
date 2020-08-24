@@ -116,7 +116,7 @@ export const Overview: FC = () => {
             <EuiTitle size="s">
               <h2 id="homOverview__gettingStartedTitle">
                 <FormattedMessage
-                  id="home.overview.gettingStartedTitle"
+                  id="kibanaOverview.gettingStartedTitle"
                   defaultMessage="Getting started with Kibana"
                 />
               </h2>
@@ -127,7 +127,7 @@ export const Overview: FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="home.overview.gettingStartedDescription"
+                  id="kibanaOverview.gettingStartedDescription"
                   defaultMessage="Kibana gives you the freedom to select the way you give shape to your data. With its interactive visualizations, start with one question and see where it leads you."
                 />
               </p>
@@ -156,7 +156,7 @@ export const Overview: FC = () => {
               onClick={createAppNavigationHandler('app/management/kibana/indexPatterns')}
             >
               <FormattedMessage
-                id="home.overview.gettingStarted.addDataButtonLabel"
+                id="kibanaOverview.gettingStarted.addDataButtonLabel"
                 defaultMessage="Begin by adding data"
               />
             </EuiButton>
@@ -189,84 +189,96 @@ export const Overview: FC = () => {
     );
   };
 
-  const renderApps = () => {
+  const renderNormal = () => {
     const mainApps = ['dashboard', 'discover'];
     const otherApps = Object.keys(apps).filter((appId) => !mainApps.includes(appId));
+
     return (
-      <section aria-labelledby="homOverview__appsSectionTitle">
-        <EuiScreenReaderOnly>
-          <EuiTitle>
-            <h2 id="homOverview__appsSectionTitle">
-              <FormattedMessage
-                id="home.overview.appsSection.title"
-                defaultMessage="Explore these apps"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiScreenReaderOnly>
-        <EuiFlexGroup>{mainApps.map(renderAppCard)}</EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup>{otherApps.map(renderAppCard)}</EuiFlexGroup>
-      </section>
-    );
-  };
-
-  return (
-    <main className="homPageContainer" aria-labelledby="homPageHeader__title">
-      <header>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoKibana" size="xxl" />
-          </EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem>
-              <EuiText>Visualize & analyze</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="l">
-                <h1 id="homPageHeader__title">
-                  <FormattedMessage id="home.overview.pageHeader.title" defaultMessage="Kibana" />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexGroup>
-      </header>
-      <div className="homPageMainContainer">
-        <EuiSpacer size="l" />
-
-        {isNewKibanaInstance ? renderGettingStarted() : renderApps()}
+      <>
+        <section aria-labelledby="kibanaOveview__appsSectionTitle">
+          <EuiScreenReaderOnly>
+            <EuiTitle>
+              <h2 id="kibanaOveview__appsSectionTitle">
+                <FormattedMessage
+                  id="kibanaOverview.appsSection.title"
+                  defaultMessage="Explore these apps"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiScreenReaderOnly>
+          <EuiFlexGroup>{mainApps.map(renderAppCard)}</EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>{otherApps.map(renderAppCard)}</EuiFlexGroup>
+        </section>
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
-            <EuiTitle size="s">
-              <h2>
-                <FormattedMessage
-                  id="home.overview.kibanaNews.title"
-                  defaultMessage="Kibana news"
-                />
-              </h2>
-            </EuiTitle>
+            <section aria-labelledby="kibanaOverview__kibanaNewsSectionTitle">
+              <EuiTitle size="s">
+                <h2 className="kibanaOverview__kibanaNewsSectionTitle">
+                  <FormattedMessage
+                    id="kibanaOverview.kibanaNews.title"
+                    defaultMessage="Kibana news"
+                  />
+                </h2>
+              </EuiTitle>
+            </section>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <EuiTitle size="s">
-              <h2>
-                <FormattedMessage
-                  id="home.overview.doMoreTitle"
-                  defaultMessage="Do more with Elastic"
-                />
-              </h2>
-            </EuiTitle>
+            <section aria-labelledby="kibanaOverview__doMoreSectionTitle">
+              <EuiTitle size="s">
+                <h2 className="kibanaOverview__doMoreSectionTitle">
+                  <FormattedMessage
+                    id="kibanaOverview.doMoreTitle"
+                    defaultMessage="Do more with Elastic"
+                  />
+                </h2>
+              </EuiTitle>
+            </section>
           </EuiFlexItem>
         </EuiFlexGroup>
+      </>
+    );
+  };
+
+  return (
+    <main className="kibanaOverviewWrapper" aria-labelledby="kibanaOverviewHeader__title">
+      <header className="kibanaOverviewHeader">
+        <div className="kibanaOverviewHeader__inner">
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="logoKibana" size="xxl" />
+            </EuiFlexItem>
+            <EuiFlexGroup gutterSize="none" direction="column">
+              <EuiFlexItem>
+                <EuiText>Visualize & analyze</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="l">
+                  <h1 id="kibanaOverviewHeader__title">
+                    <FormattedMessage
+                      id="kibanaOverview.pageHeader.title"
+                      defaultMessage="Kibana"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+        </div>
+      </header>
+      <div className="kibanaOverviewContent">
+        <EuiSpacer size="l" />
+
+        {isNewKibanaInstance ? renderGettingStarted() : renderNormal()}
 
         <footer>
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
           <EuiFlexGroup
-            className="homPageFooter"
+            className="kibanaOverviewPageFooter"
             alignItems="center"
             gutterSize="s"
             justifyContent="spaceBetween"
