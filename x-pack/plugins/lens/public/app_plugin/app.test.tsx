@@ -372,7 +372,7 @@ describe('Lens App', () => {
         query: 'fake query',
         filters: [],
       },
-      references: [{}, {}],
+      references: [],
     });
     await act(async () => {
       instance.setProps({ savedObjectId: '1234' });
