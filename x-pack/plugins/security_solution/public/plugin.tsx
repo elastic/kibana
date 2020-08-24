@@ -321,7 +321,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     return {
-      resolver: resolverPluginSetup(),
+      resolver: resolverPluginSetup,
     };
   }
 

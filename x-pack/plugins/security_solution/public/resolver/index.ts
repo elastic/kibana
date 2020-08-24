@@ -3,32 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ResolverPluginSetup } from './types';
 
 /**
  * These exports are used by the plugin 'resolverTest' defined in x-pack's plugin_functional suite.
  */
-import { Provider } from 'react-redux';
-import { resolverStoreFactory } from './store/index';
-import { ResolverWithoutProviders } from './view/resolver_without_providers';
-import { ResolverPluginSetup } from './types';
 
 /**
  * Provide access to Resolver APIs.
  */
-export function resolverPluginSetup(): ResolverPluginSetup {
+export async function resolverPluginSetup(): Promise<ResolverPluginSetup> {
+  const [
+    { Provider },
+    { resolverStoreFactory },
+    { ResolverWithoutProviders },
+    { noAncestorsTwoChildren },
+  ] = await Promise.all([
+    import('react-redux'),
+    import('./store/index'),
+    import('./view/resolver_without_providers'),
+    import('./data_access_layer/mocks/no_ancestors_two_children'),
+  ]);
+
   return {
     Provider,
     storeFactory: resolverStoreFactory,
     ResolverWithoutProviders,
-    mocks: async () => {
-      const { noAncestorsTwoChildren } = await import(
-        './data_access_layer/mocks/no_ancestors_two_children'
-      );
-      return {
-        dataAccessLayer: {
-          noAncestorsTwoChildren,
-        },
-      };
+    mocks: {
+      dataAccessLayer: {
+        noAncestorsTwoChildren,
+      },
     },
   };
 }

@@ -9,18 +9,19 @@ import { Router } from 'react-router-dom';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from 'kibana/public';
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ResolverStore } from '../../../../../../../plugins/security_solution/public/resolver/types';
-import { PluginSetup as SecuritySolutionPluginSetup } from '../../../../../../../plugins/security_solution/public';
-
-type ResolverPluginSetup = SecuritySolutionPluginSetup['resolver'];
+import {
+  DataAccessLayer,
+  ResolverPluginSetup,
+} from '../../../../../../../plugins/security_solution/public/resolver/types';
 
 /**
  * Render the Resolver Test app. Returns a cleanup function.
  */
-export async function renderApp(
+export function renderApp(
   coreStart: CoreStart,
   parameters: AppMountParameters,
   resolverPluginSetup: ResolverPluginSetup
@@ -31,17 +32,11 @@ export async function renderApp(
   parameters.element.style.display = 'flex';
   parameters.element.style.flexGrow = '1';
 
-  const mocks = await resolverPluginSetup.mocks();
-  const dataAccessLayer = mocks.dataAccessLayer.noAncestorsTwoChildren().dataAccessLayer;
-  const store = resolverPluginSetup.storeFactory(dataAccessLayer);
-
   ReactDOM.render(
     <AppRoot
-      Provider={resolverPluginSetup.Provider}
-      ResolverWithoutProviders={resolverPluginSetup.ResolverWithoutProviders}
       coreStart={coreStart}
-      history={parameters.history}
-      store={store}
+      parameters={parameters}
+      resolverPluginSetup={resolverPluginSetup}
     />,
     parameters.element
   );
@@ -54,20 +49,33 @@ export async function renderApp(
 const AppRoot = React.memo(
   ({
     coreStart,
-    history,
-    store,
-    Provider,
-    ResolverWithoutProviders,
+    parameters,
+    resolverPluginSetup,
   }: {
     coreStart: CoreStart;
-    history: AppMountParameters['history'];
-    store: ResolverStore;
-    Provider: ResolverPluginSetup['Provider'];
-    ResolverWithoutProviders: ResolverPluginSetup['ResolverWithoutProviders'];
+    parameters: AppMountParameters;
+    resolverPluginSetup: ResolverPluginSetup;
   }) => {
+    const {
+      Provider,
+      storeFactory,
+      ResolverWithoutProviders,
+      mocks: {
+        dataAccessLayer: { noAncestorsTwoChildren },
+      },
+    } = resolverPluginSetup;
+    const dataAccessLayer: DataAccessLayer = useMemo(
+      () => noAncestorsTwoChildren().dataAccessLayer,
+      [noAncestorsTwoChildren]
+    );
+
+    const store = useMemo(() => {
+      return storeFactory(dataAccessLayer);
+    }, [storeFactory, dataAccessLayer]);
+
     return (
       <I18nProvider>
-        <Router history={history}>
+        <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
             <Provider store={store}>
               <Wrapper>

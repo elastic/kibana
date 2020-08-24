@@ -48,7 +48,7 @@ export type StartServices = CoreStart &
   };
 
 export interface PluginSetup {
-  resolver: ResolverPluginSetup;
+  resolver: () => Promise<ResolverPluginSetup>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
