@@ -7,13 +7,11 @@
 import http from 'http';
 import httpProxy from 'http-proxy';
 import { ToolingLog } from '@kbn/dev-utils';
-import getPort from 'get-port';
 
 export const getHttpProxyServer = async (
   defaultKibanaTargetUrl: string,
   kbnTestServerConfig: any,
-  log: ToolingLog,
-  retry: any
+  log: ToolingLog
 ): Promise<http.Server> => {
   const proxy = httpProxy.createProxyServer({ secure: false, selfHandleResponse: false });
 
