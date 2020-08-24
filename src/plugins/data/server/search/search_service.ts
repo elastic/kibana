@@ -37,11 +37,12 @@ import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
-import { IEsSearchRequest } from '../../common';
+import { IEsSearchRequest, IEsSearchResponse } from '../../common';
 
-interface StrategyMap {
-  [name: string]: ISearchStrategy;
-}
+type StrategyMap<
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+> = Record<string, ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -56,7 +57,7 @@ export interface SearchServiceStartDependencies {
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
-  private searchStrategies: StrategyMap = {};
+  private searchStrategies: StrategyMap<any, any> = {};
 
   constructor(
     private initializerContext: PluginInitializerContext,
@@ -125,7 +126,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.aggsService.stop();
   }
 
-  private registerSearchStrategy = (name: string, strategy: ISearchStrategy) => {
+  private registerSearchStrategy = <
+    SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  >(
+    name: string,
+    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
+  ) => {
     this.logger.debug(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
