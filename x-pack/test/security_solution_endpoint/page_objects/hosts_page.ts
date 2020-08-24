@@ -50,11 +50,10 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      * @param element
      * @returns Promise<string[][]>
      */
-    async getEndpointAlertResolverNodeData(dataTestSubj: string, element: string) {
+    async getEndpointEventResolverNodeData(dataTestSubj: string, element: string) {
       await testSubjects.exists(dataTestSubj);
       const Elements = await testSubjects.findAll(dataTestSubj);
       const $ = [];
-      // console.log(Elements.length);
       for (const value of Elements) {
         $.push(await value.getAttribute(element));
       }
@@ -68,7 +67,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      * @param element
      */
     async parseStyles(dataTestSubj: string, element: string) {
-      const tableData = await this.getEndpointAlertResolverNodeData(dataTestSubj, element);
+      const tableData = await this.getEndpointEventResolverNodeData(dataTestSubj, element);
       const $ = [];
       for (let i = 1; i < tableData.length; i++) {
         const eachStyle = parseStyle(tableData[i]);

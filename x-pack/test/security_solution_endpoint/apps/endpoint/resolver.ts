@@ -6,19 +6,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { deleteEventsStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deleteAlertsStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deleteMetadataStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deletePolicyStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deleteTelemetryStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'hosts', 'settings']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Endpoint Alert Resolver', function () {
+  describe('Endpoint Event Resolver', function () {
     this.tags(['ciGroup7']);
 
     before(async () => {
       await esArchiver.load('endpoint/resolver_tree/api_feature', { useCreate: true });
       await pageObjects.hosts.navigateToSecurityHostsPage();
-      await pageObjects.common.sleep(4000);
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'now';
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -26,9 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('header-page-title');
       await (await testSubjects.find('navigation-events')).click();
       await testSubjects.existOrFail('events-viewer-panel');
-      await pageObjects.common.sleep(4000);
       await (await testSubjects.findAll('investigate-in-resolver-button'))[0].click();
-      await pageObjects.common.sleep(4000);
+      await testSubjects.exists('investigate-in-resolver-button', { timeout: 4000 });
     });
 
     it('check that Resolver and Data table is loaded', async () => {
@@ -37,42 +40,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('tableHeaderCell_timestamp_1');
     });
 
-    it('resolver Table and Node data same length', async () => {
-      const $1: string[] = [];
-      const $: string[] = [];
+    it('compare resolver Nodes Table data and Data length', async () => {
+      const nodeData: string[] = [];
+      const TableData: string[] = [];
 
-      const tableData1 = await testSubjects.findAll('resolver:node-list:item');
-      for (const value of tableData1) {
+      const Table = await testSubjects.findAll('resolver:node-list:item');
+      for (const value of Table) {
         const text = await value._webElement.getText();
-        $1.push(text.split('\n')[0]);
-      }
-      await testSubjects.click('resolver:graph-controls:zoom-out');
-      const Nodes = await testSubjects.findAll('euiButton__text');
-      for (const value of Nodes) {
-        $.push(await value._webElement.getText());
-      }
-      expect($.length).to.eql($1.length);
-    });
-
-    it('compare resolver Nodes and Table data', async () => {
-      const $: string[] = [];
-      const $1: string[] = [];
-
-      const tableData = await testSubjects.findAll('resolver:node-list:item');
-      for (const value of tableData) {
-        const text = await value._webElement.getText();
-        $1.push(text.split('\n')[0]);
+        TableData.push(text.split('\n')[0]);
       }
 
       await testSubjects.click('resolver:graph-controls:zoom-out');
-      const Nodes = await testSubjects.findAll('euiButton__text');
+      const Nodes = await testSubjects.findAll('resolver:node:primary-button');
       for (const value of Nodes) {
-        $.push(await value._webElement.getText());
+        nodeData.push(await value._webElement.getText());
       }
-      for (let i = 0; i < $.length; i++) {
-        expect($1[i]).to.eql($[i]);
+      for (let i = 0; i < nodeData.length; i++) {
+        expect(TableData[i]).to.eql(nodeData[i]);
       }
-
+      expect(nodeData.length).to.eql(TableData.length);
       await testSubjects.click('resolver:graph-controls:zoom-in');
     });
 
@@ -210,7 +196,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('endpoint/resolver_tree/api_feature');
+      await deleteEventsStream(getService);
+      await deleteAlertsStream(getService);
+      await deletePolicyStream(getService);
+      await deleteMetadataStream(getService);
+      await deleteTelemetryStream(getService);
     });
   });
 }
