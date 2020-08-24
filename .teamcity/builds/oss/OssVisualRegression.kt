@@ -37,7 +37,7 @@ object OssVisualRegression : BuildType({
       }
 
       artifacts {
-        artifactRules = "+:kibana-oss.tar.gz!** => /home/agent/work/kibana-build-oss"
+        artifactRules = "+:kibana-oss.tar.gz!** => build/kibana-build-oss"
       }
     }
   }

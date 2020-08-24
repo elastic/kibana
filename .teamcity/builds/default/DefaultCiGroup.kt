@@ -36,7 +36,7 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
       }
 
       artifacts {
-        artifactRules = "+:kibana-default.tar.gz!** => /home/agent/work/kibana-build-default"
+        artifactRules = "+:kibana-default.tar.gz!** => build/kibana-build-default"
       }
     }
   }

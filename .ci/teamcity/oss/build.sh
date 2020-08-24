@@ -17,4 +17,7 @@ export KBN_NP_PLUGINS_BUILT=true
 
 tc_start_block "Build OSS Distribution"
 node scripts/build --debug --oss
+
+# Renaming the build directory to a static one, so that we can put a static one in the TeamCity artifact rules
+mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 build/oss/kibana-build-oss
 tc_end_block "Build OSS Distribution"

@@ -8,7 +8,7 @@ object OssBuild : BuildType({
   paused = true
   description = "Generates OSS Build Distribution artifact"
 
-  artifactRules = "+:build/oss/kibana-*-SNAPSHOT-linux-x86_64/**/* => kibana-oss.tar.gz"
+  artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
 
   steps {
     script {

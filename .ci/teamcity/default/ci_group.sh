@@ -6,9 +6,7 @@ source "$(dirname "${0}")/../util.sh"
 
 export CI_GROUP="$1"
 export JOB=kibana-default-ciGroup${CI_GROUP}
-export KIBANA_INSTALL_DIR="$WORKSPACE/kibana-build-default"
-
-# mv /home/agent/work/kibana-build-oss/kibana-8.0.0-SNAPSHOT-linux-x86_64/* "$KIBANA_INSTALL_DIR/"
+export KIBANA_INSTALL_DIR="$KIBANA_DIR/build/kibana-build-default"
 
 cd "$XPACK_DIR"
 
