@@ -426,9 +426,9 @@ You can test that the Frozen badge, phase filtering, and lifecycle information i
 Index Management by running this series of requests in Console:
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/index_management[indexManagement]
+- {kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
 
-WARNING: Missing README.
+Create a data stream using Console and you'll be able to view it in the UI:
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]

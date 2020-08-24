@@ -48,10 +48,13 @@ export const setUiMetricService = (_uiMetricService: UiMetricService<IndexMgmtMe
 };
 // End hack
 
-export function useLoadDataStreams() {
+export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
     path: `${API_BASE_PATH}/data_streams`,
     method: 'get',
+    query: {
+      includeStats,
+    },
   });
 }
 
@@ -263,7 +266,7 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
 }
 
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
-  const includeTypeName = doMappingsHaveType(template.template.mappings);
+  const includeTypeName = doMappingsHaveType(template.template?.mappings);
   const result = await sendRequest({
     path: `${API_BASE_PATH}/index_templates`,
     method: 'post',
