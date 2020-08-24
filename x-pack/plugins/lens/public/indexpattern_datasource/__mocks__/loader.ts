@@ -23,3 +23,7 @@ export function loadInitialState() {
   };
   return result;
 }
+
+const originalLoader = jest.requireActual('../loader');
+
+export const extractReferences = originalLoader.extractReferences;
