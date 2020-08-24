@@ -18,13 +18,14 @@
  */
 
 import React, { ReactElement } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import classNames from 'classnames';
+
+import { MountPoint } from '../../../../core/public';
+import { MountPointPortal } from '../../../kibana_react/public';
+import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
 
 export type TopNavMenuProps = StatefulSearchBarProps & {
   config?: TopNavMenuData[];
@@ -35,6 +36,25 @@ export type TopNavMenuProps = StatefulSearchBarProps & {
   showFilterBar?: boolean;
   data?: DataPublicPluginStart;
   className?: string;
+  /**
+   * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
+   *
+   * This is meant to be used with the `setHeaderActionMenu` core API.
+   *
+   * @example
+   * ```ts
+   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+   *   const topNavConfig = ...; // TopNavMenuProps
+   *   return (
+   *     <Router history=history>
+   *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
+   *       <MyRoutes />
+   *     </Router>
+   *   )
+   * }
+   * ```
+   */
+  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 };
 
 /*
@@ -92,10 +112,17 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   }
 
   function renderLayout() {
+    const { setMenuMountPoint } = props;
     const className = classNames('kbnTopNavMenu', props.className);
     return (
       <span className="kbnTopNavMenu__wrapper">
-        {renderMenu(className)}
+        {setMenuMountPoint ? (
+          <MountPointPortal setMountPoint={setMenuMountPoint}>
+            {renderMenu(className)}
+          </MountPointPortal>
+        ) : (
+          renderMenu(className)
+        )}
         {renderSearchBar()}
       </span>
     );
