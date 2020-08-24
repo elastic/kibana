@@ -85,6 +85,6 @@ describe('EnableAlertComponent', () => {
       <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
     );
 
-    expect(wrapper.find('button').prop('aria-label')).toBe('Disable down alert');
+    expect(wrapper.find('button').prop('aria-label')).toBe('Disable status alert');
   });
 });

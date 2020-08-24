@@ -32,6 +32,7 @@ import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
+import { STATUS_ALERT_COLUMN } from './translations';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -145,7 +146,7 @@ export const MonitorListComponent: ({
     {
       align: 'center' as const,
       field: '',
-      name: 'Status alert',
+      name: STATUS_ALERT_COLUMN,
       render: (item: MonitorSummary) => (
         <EnableMonitorAlert
           monitorId={item.monitor_id}
