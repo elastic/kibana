@@ -19,6 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { deepFreeze } from '../../utils';
+import { PluginName } from '../plugins';
 
 /**
  * The current status of a service at a point in time.
@@ -134,9 +135,40 @@ export interface StatusServiceSetup {
    * only depend on the statuses of {@link StatusServiceSetup.core$ | Core} or their dependencies.
    */
   overall$: Observable<ServiceStatus>;
+
+  /**
+   * Allows a plugin to specify a custom status dependent on its own criteria.
+   * Completely overrides the default inherited status.
+   *
+   * @remarks
+   * See the {@link StatusServiceSetup.derivedStatus$} API for leveraging the default status
+   * calculation that is provided by Core.
+   */
+  set(status$: Observable<ServiceStatus>): void;
+
+  /**
+   * Current status for all dependencies of the current plugin.
+   * Each key of the `Record` is a plugin id.
+   */
+  plugins$: Observable<Record<string, ServiceStatus>>;
+
+  /**
+   * The status of this plugin as derived from its dependencies.
+   *
+   * @remarks
+   * By default, plugins inherit this derived status from their dependencies.
+   * Calling {@link StatusSetup.set} overrides this default status.
+   */
+  derivedStatus$: Observable<ServiceStatus>;
 }
 
 /** @internal */
-export interface InternalStatusServiceSetup extends StatusServiceSetup {
+export interface InternalStatusServiceSetup extends Pick<StatusServiceSetup, 'core$' | 'overall$'> {
   isStatusPageAnonymous: () => boolean;
+  // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
+  plugins: {
+    set(plugin: PluginName, status$: Observable<ServiceStatus>): void;
+    getPlugins$(plugin: PluginName): Observable<Record<string, ServiceStatus>>;
+    getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus>;
+  };
 }

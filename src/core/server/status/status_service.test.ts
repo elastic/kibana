@@ -42,6 +42,12 @@ describe('StatusService', () => {
     level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
   };
+  const critical: ServiceStatus<any> = {
+    level: ServiceStatusLevels.critical,
+    summary: 'This is critical!',
+  };
+
+  const nextTick = () => new Promise((resolve) => process.nextTick(resolve));
 
   describe('setup', () => {
     describe('core$', () => {
@@ -53,6 +59,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
@@ -68,6 +75,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         const subResult1 = await setup.core$.pipe(first()).toPromise();
         const subResult2 = await setup.core$.pipe(first()).toPromise();
@@ -96,6 +104,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: savedObjects$,
           },
+          pluginDependencies: new Map(),
         });
 
         const statusUpdates: CoreStatus[] = [];
@@ -158,6 +167,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
@@ -173,6 +183,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         const subResult1 = await setup.overall$.pipe(first()).toPromise();
         const subResult2 = await setup.overall$.pipe(first()).toPromise();
@@ -201,27 +212,111 @@ describe('StatusService', () => {
           savedObjects: {
             status$: savedObjects$,
           },
+          pluginDependencies: new Map(),
         });
 
         const statusUpdates: ServiceStatus[] = [];
         const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
 
+        // Wait for ticks to ensure that duplicate events are still filtered out
+        // regardless of debouncing.
+        await nextTick();
         elasticsearch$.next(available);
+        await nextTick();
         elasticsearch$.next(available);
+        await nextTick();
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
+        await nextTick();
         savedObjects$.next(degraded);
+        await nextTick();
         savedObjects$.next(available);
+        await nextTick();
         savedObjects$.next(available);
+        await nextTick();
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
           Array [
             Object {
+              "detail": "See the status page for more information",
               "level": degraded,
+              "meta": Object {
+                "affectedServices": Object {
+                  "savedObjects": Object {
+                    "level": degraded,
+                    "summary": "This is degraded!",
+                  },
+                },
+              },
               "summary": "[savedObjects]: This is degraded!",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
+      });
+
+      it('debounces updates in dependency tree between ticks', async () => {
+        const pluginDependencies = new Map([
+          ['a', []],
+          ['b', ['a']],
+        ]);
+        const elasticsearch$ = new BehaviorSubject(available);
+        const savedObjects$ = new BehaviorSubject(available);
+        const setup = await service.setup({
+          elasticsearch: {
+            status$: elasticsearch$,
+          },
+          savedObjects: {
+            status$: savedObjects$,
+          },
+          pluginDependencies,
+        });
+
+        const pluginA$ = new BehaviorSubject(available);
+        setup.plugins.set('a', pluginA$);
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
+
+        // Wait for ticks to exhaust the microtask queue for the next debounced value
+        await nextTick();
+        pluginA$.next(degraded);
+        await nextTick();
+        elasticsearch$.next(critical);
+        await nextTick();
+        elasticsearch$.next(available);
+        await nextTick();
+        pluginA$.next(available);
+        await nextTick();
+        subscription.unsubscribe();
+
+        // Results should only include the final computed state of the depenency tree, once per tick.
+        // As updates propagate between dependencies, they will not emit any updates until the microtasks queue has
+        // been exhausted before the next tick.
+        expect(statusUpdates.map(({ level, summary }) => ({ level, summary })))
+          .toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+            Object {
+              "level": degraded,
+              "summary": "[2] services are degraded",
+            },
+            Object {
+              "level": critical,
+              "summary": "[2] services are critical",
+            },
+            Object {
+              "level": degraded,
+              "summary": "[2] services are degraded",
             },
             Object {
               "level": available,

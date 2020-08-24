@@ -17,5 +17,13 @@ export interface StatusServiceSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [core$](./kibana-plugin-core-server.statusservicesetup.core_.md) | <code>Observable&lt;CoreStatus&gt;</code> | Current status for all Core services. |
+|  [derivedStatus$](./kibana-plugin-core-server.statusservicesetup.derivedstatus_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | The status of this plugin as derived from its dependencies. |
 |  [overall$](./kibana-plugin-core-server.statusservicesetup.overall_.md) | <code>Observable&lt;ServiceStatus&gt;</code> | Overall system status for all of Kibana. |
+|  [plugins$](./kibana-plugin-core-server.statusservicesetup.plugins_.md) | <code>Observable&lt;Record&lt;string, ServiceStatus&gt;&gt;</code> | Current status for all dependencies of the current plugin. Each key of the <code>Record</code> is a plugin id. |
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [set(status$)](./kibana-plugin-core-server.statusservicesetup.set.md) | Allows a plugin to specify a custom status dependent on its own criteria. Completely overrides the default inherited status. |
 
