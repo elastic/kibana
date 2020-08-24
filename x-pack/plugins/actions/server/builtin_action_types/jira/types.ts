@@ -152,6 +152,8 @@ export interface ExternalServiceApi {
   ) => Promise<GetCreateIssueMetadataResponse>;
 }
 
+export type JiraExecutorResultData = PushToServiceResponse | GetCreateIssueMetadataResponse;
+
 export interface Fields {
   [key: string]: string | string[] | { name: string } | { key: string };
 }

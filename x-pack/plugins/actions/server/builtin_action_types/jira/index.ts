@@ -21,14 +21,15 @@ import {
   ExecutorParams,
   ExecutorSubActionPushParams,
   ExecutorSubActionCreateIssueMetadataParams,
-  GetCreateIssueMetadataResponse,
+  JiraPublicConfigurationType,
+  JiraSecretConfigurationType,
+  JiraExecutorResultData,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
 // TODO: to remove, need to support Case
 import { buildMap, mapParams } from '../case/utils';
-import { PushToServiceResponse } from './case_types';
 
 interface GetActionTypeParams {
   logger: Logger;
@@ -38,7 +39,14 @@ interface GetActionTypeParams {
 const supportedSubActions: string[] = ['pushToService', 'getCreateIssueMetadata'];
 
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
+export function getActionType(
+  params: GetActionTypeParams
+): ActionType<
+  JiraPublicConfigurationType,
+  JiraSecretConfigurationType,
+  ExecutorParams,
+  JiraExecutorResultData | {}
+> {
   const { logger, configurationUtilities } = params;
   return {
     id: '.jira',
@@ -60,16 +68,24 @@ export function getActionType(params: GetActionTypeParams): ActionType {
 // action executor
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: ActionTypeExecutorOptions<
+    JiraPublicConfigurationType,
+    JiraSecretConfigurationType,
+    ExecutorParams
+  >
+): Promise<ActionTypeExecutorResult<JiraExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
-  let data: PushToServiceResponse | GetCreateIssueMetadataResponse | null = null;
+  let data: JiraExecutorResultData | null = null;
 
-  const externalService = createExternalService({
-    config,
-    secrets,
-  });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    logger,
+    execOptions.proxySettings
+  );
 
   if (!api[subAction]) {
     const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
@@ -87,9 +103,8 @@ async function executor(
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
     const { comments, externalId, ...restParams } = pushToServiceParams;
-    const mapping = config.incidentConfiguration
-      ? buildMap(config.incidentConfiguration.mapping)
-      : null;
+    const incidentConfiguration = config.incidentConfiguration;
+    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
     const externalObject =
       config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
 
