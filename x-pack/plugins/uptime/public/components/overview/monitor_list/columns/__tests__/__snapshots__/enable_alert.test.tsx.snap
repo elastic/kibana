@@ -8,13 +8,14 @@ exports[`EnableAlertComponent renders without errors for valid props 1`] = `
     class="euiPopover__anchor"
   >
     <div
-      class="euiSwitch"
+      class="euiSwitch euiSwitch--compressed"
     >
       <button
         aria-checked="false"
         aria-label="Enable status alert"
         class="euiSwitch__button"
-        id="iee9db091-e62d-11ea-b0c7-37c62f0ac280"
+        data-test-subj="uptimeDisplayDefineConnector"
+        id="ie7f80361-e634-11ea-895d-c302e1a86fbf"
         role="switch"
         type="button"
       >
@@ -26,16 +27,7 @@ exports[`EnableAlertComponent renders without errors for valid props 1`] = `
           />
           <span
             class="euiSwitch__track"
-          >
-            <div
-              class="euiSwitch__icon"
-              data-euiicon-type="cross"
-            />
-            <div
-              class="euiSwitch__icon euiSwitch__icon--checked"
-              data-euiicon-type="check"
-            />
-          </span>
+          />
         </span>
       </button>
     </div>

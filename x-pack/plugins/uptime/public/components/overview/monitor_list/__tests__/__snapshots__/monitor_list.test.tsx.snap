@@ -1266,12 +1266,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     class="euiPopover__anchor"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch euiSwitch--compressed"
                     >
                       <button
                         aria-checked="false"
                         aria-label="Enable status alert"
                         class="euiSwitch__button"
+                        data-test-subj="uptimeDisplayDefineConnector"
                         id="generated-id"
                         role="switch"
                         type="button"
@@ -1284,16 +1285,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           />
                           <span
                             class="euiSwitch__track"
-                          >
-                            <div
-                              class="euiSwitch__icon"
-                              data-euiicon-type="cross"
-                            />
-                            <div
-                              class="euiSwitch__icon euiSwitch__icon--checked"
-                              data-euiicon-type="check"
-                            />
-                          </span>
+                          />
                         </span>
                       </button>
                     </div>
@@ -1497,12 +1489,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     class="euiPopover__anchor"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch euiSwitch--compressed"
                     >
                       <button
                         aria-checked="false"
                         aria-label="Enable status alert"
                         class="euiSwitch__button"
+                        data-test-subj="uptimeDisplayDefineConnector"
                         id="generated-id"
                         role="switch"
                         type="button"
@@ -1515,16 +1508,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           />
                           <span
                             class="euiSwitch__track"
-                          >
-                            <div
-                              class="euiSwitch__icon"
-                              data-euiicon-type="cross"
-                            />
-                            <div
-                              class="euiSwitch__icon euiSwitch__icon--checked"
-                              data-euiicon-type="check"
-                            />
-                          </span>
+                          />
                         </span>
                       </button>
                     </div>
