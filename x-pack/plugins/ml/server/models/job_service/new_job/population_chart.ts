@@ -159,6 +159,14 @@ function getPopulationSearchJsonFromConfig(
     },
   };
 
+  if (query.bool === undefined) {
+    query.bool = {
+      must: [],
+    };
+  } else if (query.bool.must === undefined) {
+    query.bool.must = [];
+  }
+
   query.bool.must.push({
     range: {
       [timeField]: {
