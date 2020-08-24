@@ -78,7 +78,7 @@ export function jobsProvider(client: IScopedClusterClient) {
             if (isRequestTimeout(error)) {
               return fillResultsWithTimeouts(results, jobId, jobIds, DATAFEED_STATE.DELETED);
             }
-            results[jobId] = { deleted: false, error };
+            results[jobId] = { deleted: false, error: error.body };
           }
         }
       } catch (error) {
@@ -90,7 +90,7 @@ export function jobsProvider(client: IScopedClusterClient) {
             DATAFEED_STATE.DELETED
           );
         }
-        results[jobId] = { deleted: false, error };
+        results[jobId] = { deleted: false, error: error.body };
       }
     }
     return results;
@@ -109,8 +109,8 @@ export function jobsProvider(client: IScopedClusterClient) {
 
         if (
           error.statusCode === 409 &&
-          error.response &&
-          error.response.includes('datafeed') === false
+          error.body.error?.reason &&
+          error.body.error.reason.includes('datafeed') === false
         ) {
           // the close job request may fail (409) if the job has failed or if the datafeed hasn't been stopped.
           // if the job has failed we want to attempt a force close.
@@ -119,13 +119,13 @@ export function jobsProvider(client: IScopedClusterClient) {
             await asInternalUser.ml.closeJob({ job_id: jobId, force: true });
             results[jobId] = { closed: true };
           } catch (error2) {
-            if (isRequestTimeout(error)) {
+            if (isRequestTimeout(error2)) {
               return fillResultsWithTimeouts(results, jobId, jobIds, JOB_STATE.CLOSED);
             }
-            results[jobId] = { closed: false, error: error2 };
+            results[jobId] = { closed: false, error: error2.body };
           }
         } else {
-          results[jobId] = { closed: false, error };
+          results[jobId] = { closed: false, error: error.body };
         }
       }
     }

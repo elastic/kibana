@@ -57,8 +57,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
         body,
         aggFieldNamePairs.map((af) => af.field)
       );
-    } catch (error) {
-      return { error };
+    } catch ({ body }) {
+      return { error: body };
     }
   }
 

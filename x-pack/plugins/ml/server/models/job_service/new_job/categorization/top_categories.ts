@@ -33,8 +33,8 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
         },
       },
     });
-    // return body?.hits?.total?.value ?? 0; // HOW DID THIS WORK?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    return body?.hits?.total ?? 0;
+    // @ts-ignore total is a object here
+    return body?.hits?.total?.value ?? 0;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {

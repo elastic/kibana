@@ -696,15 +696,15 @@ export class DataRecognizer {
           job.id = jobId;
           await this.saveJob(job);
           return { id: jobId, success: true };
-        } catch (error) {
-          return { id: jobId, success: false, error };
+        } catch ({ body }) {
+          return { id: jobId, success: false, error: body };
         }
       })
     );
   }
 
   async saveJob(job: ModuleJob) {
-    return this._asInternalUser.ml.putJob({ job_id: job.id, body: job.config });
+    return this._asInternalUser.ml.putJob({ job_id: job.id, body: {} });
   }
 
   // save the datafeeds.
@@ -716,8 +716,8 @@ export class DataRecognizer {
         try {
           await this.saveDatafeed(datafeed);
           return { id: datafeed.id, success: true, started: false };
-        } catch (error) {
-          return { id: datafeed.id, success: false, started: false, error };
+        } catch ({ body }) {
+          return { id: datafeed.id, success: false, started: false, error: body };
         }
       })
     );
@@ -764,7 +764,7 @@ export class DataRecognizer {
       } else {
         opened = false;
         result.started = false;
-        result.error = error;
+        result.error = error.body;
       }
     }
     if (opened) {
@@ -782,9 +782,9 @@ export class DataRecognizer {
           ...duration,
         });
         result.started = true;
-      } catch (error) {
+      } catch ({ body }) {
         result.started = false;
-        result.error = error;
+        result.error = body;
       }
     }
     return result;

@@ -42,8 +42,8 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
         try {
           await startDatafeed(datafeedId, start, end);
           return { started: true };
-        } catch (error) {
-          return { started: false, error };
+        } catch ({ body }) {
+          return { started: false, error: body };
         }
       } else {
         return { started: true };
@@ -66,7 +66,7 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
             results[datafeedId] = await doStart(datafeedId);
             return fillResultsWithTimeouts(results, datafeedId, datafeedIds, JOB_STATE.OPENED);
           }
-          results[datafeedId] = { started: false, error };
+          results[datafeedId] = { started: false, error: error.body };
         }
       } else {
         results[datafeedId] = {
@@ -88,7 +88,6 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
       opened = body.opened;
     } catch (error) {
       if (error.statusCode === 409) {
-        // TEST THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         opened = true;
       } else {
         throw error;

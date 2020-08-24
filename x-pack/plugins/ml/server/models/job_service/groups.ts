@@ -83,8 +83,8 @@ export function groupsProvider(client: IScopedClusterClient) {
       try {
         await asInternalUser.ml.updateJob({ job_id: jobId, body: { groups } });
         results[jobId] = { success: true };
-      } catch (error) {
-        results[jobId] = { success: false, error };
+      } catch ({ body }) {
+        results[jobId] = { success: false, error: body };
       }
     }
     return results;
