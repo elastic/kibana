@@ -29,13 +29,6 @@ interface UIMetricsSavedObjects extends SavedObjectAttributes {
   count: number;
 }
 
-type UiMetricApps = 'canvas' | 'maps';
-interface Stats {
-  key: string;
-  value: number;
-}
-type Usage = Record<UiMetricApps, Stats[]>;
-
 export function registerUiMetricUsageCollector(
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
@@ -54,7 +47,7 @@ export function registerUiMetricUsageCollector(
     },
   });
 
-  const collector = usageCollection.makeUsageCollector<Usage>({
+  const collector = usageCollection.makeUsageCollector({
     type: 'ui_metric',
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();
@@ -73,14 +66,14 @@ export function registerUiMetricUsageCollector(
           attributes: { count },
         } = rawUiMetric;
 
-        const [appName, metricType] = id.split(':') as [UiMetricApps, string];
+        const [appName, metricType] = id.split(':');
 
         const pair = { key: metricType, value: count };
         return {
           ...accum,
           [appName]: [...(accum[appName] || []), pair],
         };
-      }, {} as Usage);
+      }, {} as Record<string, Array<{ key: string; value: number }>>);
 
       return uiMetricsByAppName;
     },
