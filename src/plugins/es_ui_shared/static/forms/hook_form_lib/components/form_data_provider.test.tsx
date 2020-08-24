@@ -55,7 +55,8 @@ describe('<FormDataProvider />', () => {
       form: { setInputValue },
     } = setup() as TestBed;
 
-    expect(onFormData.mock.calls.length).toBe(1);
+    // Called twice: once when rendering the comp, once when fields have mounted and updated the form data
+    expect(onFormData.mock.calls.length).toBe(2);
 
     const [formDataInitial] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
       OnUpdateHandler
