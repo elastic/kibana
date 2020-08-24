@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -36,7 +35,6 @@ const mapping = [
 export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const config = getService('config');
 
   const mockResilient = {
     config: {
@@ -75,19 +73,12 @@ export default function resilientTest({ getService }: FtrProviderContext) {
   };
 
   let resilientSimulatorURL: string = '<could not determine kibana url>';
-  let proxyServer: any;
-  let proxyHaveBeenCalled = false;
 
   describe('IBM Resilient', () => {
     before(() => {
       resilientSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
       );
-      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
     });
 
     describe('IBM Resilient - Action Creation', () => {
@@ -538,8 +529,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          expect(proxyHaveBeenCalled).to.equal(true);
-
           expect(body).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
@@ -552,10 +541,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           });
         });
       });
-    });
-
-    after(() => {
-      proxyServer.close();
     });
   });
 }

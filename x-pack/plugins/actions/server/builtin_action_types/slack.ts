@@ -119,7 +119,7 @@ async function slackExecutor(
   let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
   if (execOptions.proxySettings) {
     proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
-    logger.info(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
+    logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
   }
 
   try {
@@ -130,8 +130,6 @@ async function slackExecutor(
     });
     result = await webhook.send(message);
   } catch (err) {
-    logger.error(`error on ${actionId} slack event: ${err.message}`);
-
     if (err.original == null || err.original.response == null) {
       return serviceErrorResult(actionId, err.message);
     }
