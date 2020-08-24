@@ -383,14 +383,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
+          expect(rowData).to.be('updateExpectedResultHere\ntrue');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\nfalse');
+          expect(rowData).to.be('updateExpectedResultHere\nfalse');
         });
       });
 
@@ -459,14 +459,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
+          expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
 
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n2015-09-18 07:00');
+          expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
         });
       });
 
