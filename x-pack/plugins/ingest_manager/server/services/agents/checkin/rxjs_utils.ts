@@ -43,52 +43,62 @@ export const toPromiseAbortable = <T>(
     }
   });
 
+function tokenBucket(maxTokens: number) {
+  let tokens = maxTokens;
+  function addToken() {
+    if (tokens < maxTokens) {
+      tokens++;
+    }
+  }
+
+  function consumeToken() {
+    tokens--;
+  }
+
+  function isTokenAvailable() {
+    return tokens > 0;
+  }
+
+  return {
+    addToken,
+    consumeToken,
+    isTokenAvailable,
+  };
+}
+
 export function createRateLimiter(
   ratelimitIntervalMs: number,
   ratelimitRequestPerInterval: number
 ) {
-  function createCurrentInterval() {
-    return {
-      startedAt: Rx.asyncScheduler.now(),
-      numRequests: 0,
-    };
-  }
+  const waitingObservers = new Map<Rx.Subscriber<any>, any>();
 
-  let currentInterval: { startedAt: number; numRequests: number } = createCurrentInterval();
-  let observers: Array<[Rx.Subscriber<any>, any]> = [];
-  let timerSubscription: Rx.Subscription | undefined;
+  const { addToken, consumeToken, isTokenAvailable } = tokenBucket(ratelimitRequestPerInterval);
 
-  function createTimeout() {
-    if (timerSubscription) {
+  function publishIfTokensAvailable() {
+    if (!isTokenAvailable()) {
       return;
     }
-    timerSubscription = Rx.asyncScheduler.schedule(() => {
-      timerSubscription = undefined;
-      currentInterval = createCurrentInterval();
-      for (const [waitingObserver, value] of observers) {
-        if (currentInterval.numRequests >= ratelimitRequestPerInterval) {
-          createTimeout();
-          continue;
-        }
-        currentInterval.numRequests++;
-        waitingObserver.next(value);
-      }
-    }, ratelimitIntervalMs);
+    const ite = waitingObservers.entries().next();
+    if (!ite.done) {
+      consumeToken();
+      waitingObservers.delete(ite.value[0]);
+      ite.value[0].next(ite.value[1]);
+      Rx.asyncScheduler.schedule(() => {
+        addToken();
+        publishIfTokensAvailable();
+      }, ratelimitIntervalMs);
+    }
   }
 
   return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
     return (observable) =>
-      new Rx.Observable<T>((observer) => {
+      new Rx.Observable<T>(function rateLimitObservable(observer) {
         const subscription = observable.subscribe({
           next(value) {
-            if (currentInterval.numRequests < ratelimitRequestPerInterval) {
-              currentInterval.numRequests++;
-              observer.next(value);
-              return;
-            }
+            waitingObservers.delete(observer);
+            waitingObservers.set(observer, value);
 
-            observers = [...observers, [observer, value]];
-            createTimeout();
+            publishIfTokensAvailable();
           },
           error(err) {
             observer.error(err);
@@ -98,8 +108,8 @@ export function createRateLimiter(
           },
         });
 
-        return () => {
-          observers = observers.filter((o) => o[0] !== observer);
+        return function unsubsribeRateLimitObserbable() {
+          waitingObservers.delete(observer);
           subscription.unsubscribe();
         };
       });
