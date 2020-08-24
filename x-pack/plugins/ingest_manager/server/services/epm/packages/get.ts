@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
@@ -72,8 +72,12 @@ export async function getLimitedPackages(options: {
   return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
 }
 
-export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+export async function getPackageSavedObjects(
+  savedObjectsClient: SavedObjectsClientContract,
+  options?: Omit<SavedObjectsFindOptions, 'type'>
+) {
   return savedObjectsClient.find<Installation>({
+    ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
   });
 }
