@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './to_mount_point';
+export { toMountPoint } from './to_mount_point';
+export { MountPointPortal } from './mount_point_portal';
