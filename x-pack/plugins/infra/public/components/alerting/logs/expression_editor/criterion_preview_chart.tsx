@@ -125,10 +125,6 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     buckets,
   });
 
-  useMount(() => {
-    getChartPreviewData();
-  });
-
   useDebounce(
     () => {
       getChartPreviewData();
@@ -195,7 +191,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
   }
 
-  const opacity = 0.3;
+  const THRESHOLD_OPACITY = 0.3;
   const groupByLabel = groupBy && groupBy.length > 0 ? groupBy.join(', ') : null;
   const dateFormatter = useDateFormatter(xMin, xMax);
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
@@ -252,7 +248,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               id="below-threshold"
               style={{
                 fill: colorTransformer(Color.color1),
-                opacity,
+                opacity: THRESHOLD_OPACITY,
               }}
               dataValues={[
                 {
@@ -271,7 +267,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               id="above-threshold"
               style={{
                 fill: colorTransformer(Color.color1),
-                opacity,
+                opacity: THRESHOLD_OPACITY,
               }}
               dataValues={[
                 {
