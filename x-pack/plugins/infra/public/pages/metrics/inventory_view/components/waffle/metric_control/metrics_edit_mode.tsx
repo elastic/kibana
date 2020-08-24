@@ -6,8 +6,8 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
-import { getCustomMetricLabel } from './get_custom_metric_label';
 import {
   EuiTheme,
   withTheme,

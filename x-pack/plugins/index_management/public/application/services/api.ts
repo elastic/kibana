@@ -47,10 +47,13 @@ export const setUiMetricService = (_uiMetricService: UiMetricService<IndexMgmtMe
 };
 // End hack
 
-export function useLoadDataStreams() {
+export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
     path: `${API_BASE_PATH}/data_streams`,
     method: 'get',
+    query: {
+      includeStats,
+    },
   });
 }
 

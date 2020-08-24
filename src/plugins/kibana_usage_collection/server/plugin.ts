@@ -37,6 +37,7 @@ import {
   registerManagementUsageCollector,
   registerOpsStatsCollector,
   registerUiMetricUsageCollector,
+  registerCspCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -56,12 +57,9 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.metric$ = new Subject<OpsMetrics>();
   }
 
-  public setup(
-    { savedObjects }: CoreSetup,
-    { usageCollection }: KibanaUsageCollectionPluginsDepsSetup
-  ) {
-    this.registerUsageCollectors(usageCollection, this.metric$, (opts) =>
-      savedObjects.registerType(opts)
+  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+    this.registerUsageCollectors(usageCollection, coreSetup, this.metric$, (opts) =>
+      coreSetup.savedObjects.registerType(opts)
     );
   }
 
@@ -79,6 +77,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
+    coreSetup: CoreSetup,
     metric$: Subject<OpsMetrics>,
     registerType: SavedObjectsRegisterType
   ) {
@@ -90,5 +89,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);
+    registerCspCollector(usageCollection, coreSetup.http);
   }
 }
