@@ -64,7 +64,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      label: field.name,
+      label: field.displayName,
       dataType: 'date',
       operationType: 'date_histogram',
       suggestedPriority,
@@ -115,7 +115,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: field.name,
+      label: field.displayName,
       sourceField: field.name,
     };
   },

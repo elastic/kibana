@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMBeat } from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { CMBeat } from '../../../../common/domain_types';
 import {
   ReturnTypeBulkAction,
   ReturnTypeGet,
   ReturnTypeList,
   ReturnTypeUpdate,
-} from '../../../../../../legacy/plugins/beats_management/common/return_types';
+} from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
+
 export class RestBeatsAdapter implements CMBeatsAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 

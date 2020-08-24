@@ -26,12 +26,12 @@ export interface Configurable<Config extends object = object, Context = object> 
   /**
    * Create default config for this item, used when item is created for the first time.
    */
-  readonly createConfig: () => Config;
+  readonly createConfig: (context: Context) => Config;
 
   /**
    * Is this config valid. Used to validate user's input before saving.
    */
-  readonly isConfigValid: (config: Config) => boolean;
+  readonly isConfigValid: (config: Config, context: Context) => boolean;
 
   /**
    * `UiComponent` to be rendered when collecting configuration for this item.

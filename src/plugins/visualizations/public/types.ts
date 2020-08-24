@@ -18,7 +18,11 @@
  */
 
 import { SavedObject } from '../../../plugins/saved_objects/public';
-import { AggConfigOptions, SearchSourceFields } from '../../../plugins/data/public';
+import {
+  AggConfigOptions,
+  SearchSourceFields,
+  TimefilterContract,
+} from '../../../plugins/data/public';
 import { SerializedVis, Vis, VisParams } from './vis';
 
 export { Vis, SerializedVis, VisParams };
@@ -60,3 +64,11 @@ export interface VisResponseValue {
   visConfig: object;
   params?: object;
 }
+
+export interface VisToExpressionAstParams {
+  timefilter: TimefilterContract;
+  timeRange?: any;
+  abortSignal?: AbortSignal;
+}
+
+export type VisToExpressionAst = (vis: Vis, params: VisToExpressionAstParams) => string;

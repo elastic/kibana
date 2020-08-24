@@ -7,13 +7,15 @@
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPolicyPageProvider } from './policy_page';
+import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { EndpointPageUtils } from './page_utils';
-import { IngestManagerCreatePackageConfig } from './ingest_manager_create_package_config_page';
+import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   endpoint: EndpointPageProvider,
   policy: EndpointPolicyPageProvider,
+  trustedApps: TrustedAppsPageProvider,
   endpointPageUtils: EndpointPageUtils,
-  ingestManagerCreatePackageConfig: IngestManagerCreatePackageConfig,
+  ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
 };
