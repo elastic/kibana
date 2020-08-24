@@ -2802,6 +2802,7 @@ export type StartServicesAccessor<TPluginsStart extends object = object, TStart 
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
+    overall$: Observable<ServiceStatus>;
 }
 
 // @public
