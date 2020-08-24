@@ -56,6 +56,11 @@ interface DecisionPathChartProps {
   maxDomain: number | undefined;
 }
 
+const DECISION_PATH_MARGIN = 125;
+const DECISION_PATH_ROW_HEIGHT = 10;
+
+const AnnotationBaselineMarker = <EuiIcon type={'empty'} size={'s'} />;
+
 export const DecisionPathChart = ({
   decisionPathData,
   predictionFieldName,
@@ -64,7 +69,6 @@ export const DecisionPathChart = ({
   baseline,
 }: DecisionPathChartProps) => {
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 4 ? 30 : 75;
   const baselineData: LineAnnotationDatum[] = useMemo(
     () => [
       {
@@ -83,7 +87,9 @@ export const DecisionPathChart = ({
   const tickFormatter = useCallback((d) => Number(d).toPrecision(3), []);
 
   return (
-    <Chart size={{ height: decisionPathData.length * heightMultiplier }}>
+    <Chart
+      size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
+    >
       <Settings theme={theme} rotation={90} />
       {baseline && (
         <LineAnnotation
@@ -91,7 +97,7 @@ export const DecisionPathChart = ({
           domainType={AnnotationDomainTypes.YDomain}
           dataValues={baselineData}
           style={baselineStyle}
-          marker={<EuiIcon type={'annotation'} />}
+          marker={AnnotationBaselineMarker}
         />
       )}
 
@@ -106,7 +112,7 @@ export const DecisionPathChart = ({
           }
         )}
         showGridLines={true}
-        position={Position.Bottom}
+        position={Position.Top}
         showOverlappingTicks
         domain={
           minDomain && maxDomain
