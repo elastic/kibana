@@ -13,6 +13,7 @@ import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic
 import { EuiLink } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
+import { stripTrailingSlash } from '../../../../common/strip_trailing_slash';
 
 import { NavContext, INavContext } from './layout';
 
@@ -78,7 +79,7 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   const { closeNavigation } = useContext(NavContext) as INavContext;
 
   const { pathname } = useLocation();
-  const currentPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  const currentPath = stripTrailingSlash(pathname);
   const isActive = currentPath === to || (isRoot && currentPath === '');
 
   const classes = classNames('enterpriseSearchNavLinks__item', className, {

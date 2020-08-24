@@ -20,7 +20,7 @@
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Route, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 
 import {
   EuiPage,
@@ -95,7 +95,7 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
           {
             id: 'home',
             name: 'Home',
-            onClick: () => history.push(''),
+            onClick: () => history.push('/home'),
             'data-test-subj': 'fooNavHome',
           },
           {
@@ -122,7 +122,8 @@ const FooApp = ({ history, context }: { history: History; context: AppMountConte
       <EuiPageSideBar>
         <Nav navigateToApp={context.core.application.navigateToApp} />
       </EuiPageSideBar>
-      <Route path="/" exact component={Home} />
+      <Route path="/" exact render={() => <Redirect to="/home" />} />
+      <Route path="/home" exact component={Home} />
       <Route path="/page-a" component={PageA} />
     </EuiPage>
   </Router>
