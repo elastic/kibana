@@ -43,7 +43,7 @@ export const getHttpProxyServer = async (
     } else {
       proxyServer.listen(proxyPort);
     }
-    return proxyServer.listening || attempts === 20;
+    return proxyServer.listening || attempts === 5;
   });
   return proxyServer;
 };
