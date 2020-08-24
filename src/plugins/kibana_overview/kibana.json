@@ -4,5 +4,5 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["navigation","data"],
-  "optionalPlugins": ["home"],
+  "optionalPlugins": ["home"]
 }
