@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlUrlGenerator, ML_TABS } from './url_generator';
+import { MlUrlGenerator, ML_PAGES } from './url_generator';
 import { ANALYSIS_CONFIG_TYPE } from './application/data_frame_analytics/common';
 
 describe('MlUrlGenerator', () => {
@@ -17,14 +17,14 @@ describe('MlUrlGenerator', () => {
     describe('Job Management Page', () => {
       it('should generate valid URL for the Anomaly Detection job management page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.ANOMALY_DETECTION,
+          page: ML_PAGES.ANOMALY_DETECTION,
         });
         expect(url).toBe('/app/ml/jobs');
       });
 
       it('should generate valid URL for the Anomaly Detection job management page for job', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.ANOMALY_DETECTION,
+          page: ML_PAGES.ANOMALY_DETECTION,
           jobId: 'fq_single_1',
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(jobId:fq_single_1)');
@@ -32,7 +32,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.ANOMALY_DETECTION,
+          page: ML_PAGES.ANOMALY_DETECTION,
           groupIds: ['farequote', 'categorization'],
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(groupIds:!(farequote,categorization))');
@@ -40,7 +40,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Data Visualizer Viewer page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.DATA_VISUALIZER_NEW_JOB,
+          page: ML_PAGES.DATA_VISUALIZER_NEW_JOB,
           index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
           globalState: {
             time: {
@@ -59,7 +59,7 @@ describe('MlUrlGenerator', () => {
     describe('Anomaly Explorer Page', () => {
       it('should generate valid URL for the Anomaly Explorer page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.ANOMALY_EXPLORER,
+          page: ML_PAGES.ANOMALY_EXPLORER,
           jobIds: ['fq_single_1'],
           mlExplorerSwimlane: { viewByFromPage: 2, viewByPerPage: 20 },
           refreshInterval: {
@@ -83,7 +83,7 @@ describe('MlUrlGenerator', () => {
       });
       it('should generate valid URL for the Anomaly Explorer page for multiple jobIds', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.ANOMALY_EXPLORER,
+          page: ML_PAGES.ANOMALY_EXPLORER,
           jobIds: ['fq_single_1', 'logs_categorization_1'],
           timeRange: {
             from: '2019-02-07T00:00:00.000Z',
@@ -100,7 +100,7 @@ describe('MlUrlGenerator', () => {
     describe('Single Metric Viewer Page', () => {
       it('should generate valid URL for the Single Metric Viewer page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.TIME_SERIES_EXPLORER,
+          page: ML_PAGES.TIME_SERIES_EXPLORER,
           jobIds: ['logs_categorization_1'],
           refreshInterval: {
             display: 'Off',
@@ -124,7 +124,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Single Metric Viewer page with extra settings', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.TIME_SERIES_EXPLORER,
+          page: ML_PAGES.TIME_SERIES_EXPLORER,
           jobIds: ['logs_categorization_1'],
           detectorIndex: 0,
           entities: { mlcategory: '2' },
@@ -158,13 +158,13 @@ describe('MlUrlGenerator', () => {
     describe('JobManagement Page', () => {
       it('should generate valid URL for the Data Frame Analytics job management page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.DATA_FRAME_ANALYTICS,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS,
         });
         expect(url).toBe('/app/ml/data_frame_analytics');
       });
       it('should generate valid URL for the Data Frame Analytics job management page with jobId', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.DATA_FRAME_ANALYTICS,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS,
           jobId: 'grid_regression_1',
         });
         expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(jobId:grid_regression_1)');
@@ -172,7 +172,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Data Frame Analytics job management page with groupIds', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.DATA_FRAME_ANALYTICS,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS,
           groupIds: ['group_1', 'group_2'],
         });
         expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(groupIds:!(group_1,group_2))');
@@ -182,7 +182,7 @@ describe('MlUrlGenerator', () => {
     describe('ExplorationPage', () => {
       it('should generate valid URL for the Data Frame Analytics exploration page for job', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
           jobId: 'grid_regression_1',
           analysisType: ANALYSIS_CONFIG_TYPE.REGRESSION,
         });
@@ -196,28 +196,28 @@ describe('MlUrlGenerator', () => {
   describe('DataVisualizer', () => {
     it('should generate valid URL for the Data Visualizer page', async () => {
       const url = await urlGenerator.createUrl({
-        page: ML_TABS.DATA_VISUALIZER,
+        page: ML_PAGES.DATA_VISUALIZER,
       });
       expect(url).toBe('/app/ml/datavisualizer');
     });
 
     it('should generate valid URL for the Data Visualizer import file page', async () => {
       const url = await urlGenerator.createUrl({
-        page: ML_TABS.DATA_VISUALIZER_FILE,
+        page: ML_PAGES.DATA_VISUALIZER_FILE,
       });
       expect(url).toBe('/app/ml/filedatavisualizer');
     });
 
     it('should generate valid URL for the Data Visualizer import by index page', async () => {
       const url = await urlGenerator.createUrl({
-        page: ML_TABS.DATA_VISUALIZER_INDEX_SELECT,
+        page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
       });
       expect(url).toBe('/app/ml/datavisualizer_index_select');
     });
 
     it('should generate valid URL for the Data Visualizer Viewer page', async () => {
       const url = await urlGenerator.createUrl({
-        page: ML_TABS.DATA_VISUALIZER_VIEWER,
+        page: ML_PAGES.DATA_VISUALIZER_VIEWER,
         index: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
         globalState: {
           time: {

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useMlUrlGenerator } from '../../../../../contexts/kibana';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { ML_TABS } from '../../../../../../url_generator';
+import { ML_PAGES } from '../../../../../../url_generator';
 
 interface Props {
   jobId: string;
@@ -23,7 +23,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
 
   const redirectToAnalyticsJobPage = async () => {
     const path = await urlGenerator.createUrl({
-      page: ML_TABS.DATA_FRAME_ANALYTICS_EXPLORATION,
+      page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
       jobId,
       analysisType,
     });

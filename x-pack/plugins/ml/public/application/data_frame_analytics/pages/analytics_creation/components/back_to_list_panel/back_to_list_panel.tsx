@@ -8,7 +8,7 @@ import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana, useMlUrlGenerator } from '../../../../../contexts/kibana';
-import { ML_TABS } from '../../../../../../url_generator';
+import { ML_PAGES } from '../../../../../../url_generator';
 
 export const BackToListPanel: FC = () => {
   const urlGenerator = useMlUrlGenerator();
@@ -19,7 +19,7 @@ export const BackToListPanel: FC = () => {
   } = useMlKibana();
 
   const redirectToAnalyticsManagementPage = async () => {
-    const url = await urlGenerator.createUrl({ page: ML_TABS.DATA_FRAME_ANALYTICS });
+    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS });
     await navigateToUrl(url);
   };
 
