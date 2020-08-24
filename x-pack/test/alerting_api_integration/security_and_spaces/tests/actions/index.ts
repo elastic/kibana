@@ -15,9 +15,8 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
   const log = getService('log');
   const retry = getService('retry');
   describe('Actions', () => {
-    let httpServer: http.Server;
     before(async () => {
-      httpServer = await getHttpProxyServer(
+      await getHttpProxyServer(
         kibanaServer.resolveUrl('/'),
         configService.get('kbnTestServer.serverArgs'),
         log,
