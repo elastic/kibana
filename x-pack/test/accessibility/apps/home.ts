@@ -68,5 +68,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.clickOnCloudTutorial();
       await a11y.testAppSnapshot();
     });
+
+    it('click on side nav to see all the side nav menu', async () => {
+      await PageObjects.home.clickOnLogo();
+      await PageObjects.home.clickOnToggleNavButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Dock the side nav', async () => {
+      await PageObjects.home.dockTheSideNav();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
+      await PageObjects.home.collapseObservabibilitySideNav();
+      await a11y.testAppSnapshot();
+    });
+
+    it('unDock the side nav', async () => {
+      await PageObjects.home.dockTheSideNav();
+      await a11y.testAppSnapshot();
+    });
   });
 }

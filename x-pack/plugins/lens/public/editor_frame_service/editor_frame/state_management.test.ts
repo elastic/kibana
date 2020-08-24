@@ -57,19 +57,16 @@ describe('editor_frame state management', () => {
       const initialState = getInitialState({
         ...props,
         doc: {
-          expression: '',
           state: {
             datasourceStates: {
               testDatasource: { internalState1: '' },
               testDatasource2: { internalState2: '' },
             },
             visualization: {},
-            datasourceMetaData: {
-              filterableIndexPatterns: [],
-            },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
+          references: [],
           title: '',
           visualizationType: 'testVis',
         },
@@ -380,9 +377,7 @@ describe('editor_frame state management', () => {
           type: 'VISUALIZATION_LOADED',
           doc: {
             id: 'b',
-            expression: '',
             state: {
-              datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
               query: { query: '', language: 'lucene' },
@@ -392,6 +387,7 @@ describe('editor_frame state management', () => {
             description: 'My lens',
             type: 'lens',
             visualizationType: 'line',
+            references: [],
           },
         }
       );
