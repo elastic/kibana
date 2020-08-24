@@ -58,8 +58,12 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => (
     } homSolutions__item`}
     grow={1}
   >
-    <a href={addBasePath(solution.path)} onClick={createAppNavigationHandler(solution.path)}>
-      <EuiPanel paddingSize="none" className={`homSolutionPanel homSolutionPanel--${solution.id}`}>
+    <a
+      className={`homSolutionPanel homSolutionPanel--${solution.id}`}
+      href={addBasePath(solution.path)}
+      onClick={createAppNavigationHandler(solution.path)}
+    >
+      <EuiPanel paddingSize="none">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={1} className={`homSolutionPanel__header`}>
             <SolutionTitle

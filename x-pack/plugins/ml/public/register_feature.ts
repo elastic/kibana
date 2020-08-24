@@ -40,7 +40,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     description: i18n.translate('xpack.ml.fileDataVisualizerDescription', {
       defaultMessage: 'Import your own CSV, NDJSON, or log file.',
     }),
-    icon: 'importAction',
+    icon: 'document',
     path: '/app/ml#/filedatavisualizer',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,

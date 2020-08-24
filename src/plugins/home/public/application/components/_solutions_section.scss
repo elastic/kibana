@@ -38,21 +38,29 @@
 }
 
 .homSolutionPanel {
-  align-items: stretch; // Necessary because element is a button
-  display: flex !important;
-  flex-direction: column;
-  overflow: hidden;
+  border-radius: $euiBorderRadius;
+  color: inherit;
+  flex: 1;
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
 
-  &:focus,
-  &:hover {
+  &:hover,
+  &:focus {
+    @include euiSlightShadowHover;
+    transform: translateY(-2px);
+
     .euiTitle {
       text-decoration: underline;
     }
   }
 
-  &:focus {
-    @include euiFocusRing('large');
-    @include euiSlightShadowHover;
+  &,
+  .euiPanel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .euiPanel {
+    overflow: hidden;
   }
 }
 

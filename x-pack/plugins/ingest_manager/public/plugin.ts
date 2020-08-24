@@ -108,7 +108,7 @@ export class IngestManagerPlugin
         description: i18n.translate('xpack.ingestManager.featureCatalogueDescription', {
           defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
         }),
-        icon: 'logstashInput',
+        icon: 'indexManagementApp',
         showOnHomePage: true,
         path: BASE_PATH,
         category: FeatureCatalogueCategory.DATA,
