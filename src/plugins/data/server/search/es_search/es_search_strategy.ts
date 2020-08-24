@@ -31,7 +31,7 @@ export const esSearchStrategyProvider = (
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
-      logger.info(`search ${request.params?.index}`);
+      logger.debug(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 

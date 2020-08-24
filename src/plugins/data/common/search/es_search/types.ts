@@ -22,16 +22,16 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
-export type ISearchRequestParams = {
+export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
-} & Search;
+} & Search<T>;
 
 export interface IEsSearchRequest extends IKibanaSearchRequest {
   params?: ISearchRequestParams;
   indexType?: string;
 }
 
-export interface IEsSearchResponse extends IKibanaSearchResponse {
+export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
   /**
    * Indicates whether async search is still in flight
    */
@@ -40,5 +40,5 @@ export interface IEsSearchResponse extends IKibanaSearchResponse {
    * Indicates whether the results returned are complete or partial
    */
   isPartial?: boolean;
-  rawResponse: SearchResponse<any>;
+  rawResponse: SearchResponse<Source>;
 }
