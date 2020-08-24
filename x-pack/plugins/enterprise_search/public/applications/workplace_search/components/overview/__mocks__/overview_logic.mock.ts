@@ -5,14 +5,13 @@
  */
 
 import { IOverviewValues } from '../overview_logic';
-import { IAccount, IOrganization, IUser } from '../../../types';
+import { IAccount, IOrganization } from '../../../types';
 
 export const mockLogicValues = {
   accountsCount: 0,
   activityFeed: [],
   canCreateContentSources: false,
   canCreateInvitations: false,
-  currentUser: {} as IUser,
   fpAccount: {} as IAccount,
   hasOrgSources: false,
   hasUsers: false,
