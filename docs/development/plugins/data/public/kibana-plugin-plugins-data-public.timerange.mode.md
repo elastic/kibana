@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-mode?: 'absolute' | 'relative';
+mode?: 'absolute' | 'relative' | 'quick';
 ```

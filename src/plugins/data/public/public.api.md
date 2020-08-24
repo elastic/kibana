@@ -1608,6 +1608,8 @@ export interface RangeFilterParams {
 // @public (undocumented)
 export interface RefreshInterval {
     // (undocumented)
+    display?: string;
+    // (undocumented)
     pause: boolean;
     // (undocumented)
     value: number;
@@ -1906,7 +1908,7 @@ export interface TimeRange {
     // (undocumented)
     from: string;
     // (undocumented)
-    mode?: 'absolute' | 'relative';
+    mode?: 'absolute' | 'relative' | 'quick';
     // (undocumented)
     to: string;
 }

@@ -15,6 +15,6 @@ export interface TimeRange
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [from](./kibana-plugin-plugins-data-server.timerange.from.md) | <code>string</code> |  |
-|  [mode](./kibana-plugin-plugins-data-server.timerange.mode.md) | <code>'absolute' &#124; 'relative'</code> |  |
+|  [mode](./kibana-plugin-plugins-data-server.timerange.mode.md) | <code>'absolute' &#124; 'relative' &#124; 'quick'</code> |  |
 |  [to](./kibana-plugin-plugins-data-server.timerange.to.md) | <code>string</code> |  |
 

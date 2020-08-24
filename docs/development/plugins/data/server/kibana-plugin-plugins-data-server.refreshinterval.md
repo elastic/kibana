@@ -14,6 +14,7 @@ export interface RefreshInterval
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [display](./kibana-plugin-plugins-data-server.refreshinterval.display.md) | <code>string</code> |  |
 |  [pause](./kibana-plugin-plugins-data-server.refreshinterval.pause.md) | <code>boolean</code> |  |
 |  [value](./kibana-plugin-plugins-data-server.refreshinterval.value.md) | <code>number</code> |  |
 
