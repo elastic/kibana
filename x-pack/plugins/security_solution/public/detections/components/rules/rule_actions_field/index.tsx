@@ -12,7 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
 import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { SelectField } from '../../../../shared_imports';
+import { SelectField, useFormContext } from '../../../../shared_imports';
 import {
   ActionForm,
   ActionType,
@@ -37,6 +37,8 @@ const FieldErrorsContainer = styled.div`
 export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
+  const form = useFormContext();
+  const { isSubmitted, isSubmitting, isValid } = form;
   const {
     http,
     triggers_actions_ui: { actionTypeRegistry },
@@ -88,26 +90,14 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   }, []);
 
   useEffect(() => {
-    if (field.form.isSubmitting || !field.errors.length) {
+    if (isSubmitting || !field.errors.length) {
       return setFieldErrors(null);
     }
-    if (
-      field.form.isSubmitted &&
-      !field.form.isSubmitting &&
-      field.form.isValid === false &&
-      field.errors.length
-    ) {
+    if (isSubmitted && !isSubmitting && isValid === false && field.errors.length) {
       const errorsString = field.errors.map(({ message }) => message).join('\n');
       return setFieldErrors(errorsString);
     }
-  }, [
-    field.form.isSubmitted,
-    field.form.isSubmitting,
-    field.isChangingValue,
-    field.form.isValid,
-    field.errors,
-    setFieldErrors,
-  ]);
+  }, [isSubmitted, isSubmitting, field.isChangingValue, isValid, field.errors, setFieldErrors]);
 
   if (!supportedActionTypes) return <></>;
 
