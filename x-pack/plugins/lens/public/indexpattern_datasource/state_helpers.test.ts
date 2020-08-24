@@ -14,7 +14,6 @@ import {
 import { operationDefinitionMap } from './operations';
 import { TermsIndexPatternColumn } from './operations/definitions/terms';
 import { DateHistogramIndexPatternColumn } from './operations/definitions/date_histogram';
-import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { AvgIndexPatternColumn } from './operations/definitions/metrics';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 

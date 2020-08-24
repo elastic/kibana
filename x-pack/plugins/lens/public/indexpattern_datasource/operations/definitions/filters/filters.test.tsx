@@ -118,6 +118,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
           aggregationRestrictions: {
             terms: {
@@ -136,6 +137,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'number',
           aggregationRestrictions: {
             terms: {
@@ -154,6 +156,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'boolean',
         })
       ).toEqual({
@@ -167,6 +170,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'ip',
         })
       ).toEqual({
@@ -182,6 +186,7 @@ describe('terms', () => {
           aggregatable: false,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
         })
       ).toEqual(undefined);
@@ -192,6 +197,7 @@ describe('terms', () => {
           aggregationRestrictions: {},
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
         })
       ).toEqual(undefined);
@@ -208,6 +214,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           type: 'boolean',
+          displayName: 'test',
           name: 'test',
         },
         columns: {},
@@ -233,6 +240,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           type: 'boolean',
+          displayName: 'test',
           name: 'test',
         },
       });
