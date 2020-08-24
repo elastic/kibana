@@ -8,6 +8,7 @@ import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { Subscription } from 'rxjs';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
@@ -17,10 +18,10 @@ const NUMBER_OF_PREVIEW = 5;
 export const CategoryStoppedPartitions: FC = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
-  const [tableRow, setTableRow] = useState<Array<{ count?: number; example: string }>>([]);
+  const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);
   const [hasStoppedPartitions, setHasStoppedPartitions] = useState(false);
 
-  let _resultsSubscription;
+  let _resultsSubscription: undefined | Subscription;
 
   const columns = useMemo(
     () => [
@@ -29,7 +30,8 @@ export const CategoryStoppedPartitions: FC = () => {
         name: i18n.translate(
           'xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsPreviewColumnName',
           {
-            defaultMessage: 'Stopped partition name',
+            defaultMessage: 'Stopped partition {count, plural, one {name} other {names}}',
+            values: { count: tableRow.length },
           }
         ),
         render: (partition: any) => (
@@ -50,6 +52,7 @@ export const CategoryStoppedPartitions: FC = () => {
 
     if (
       results?.jobs !== undefined &&
+      !Array.isArray(results?.jobs) && // if jobs is object of jobId: [partitions]
       Array.isArray(results?.jobs[jobCreator.jobId]) &&
       results.jobs[jobCreator.jobId].length > 0
     ) {
@@ -96,14 +99,14 @@ export const CategoryStoppedPartitions: FC = () => {
               defaultMessage="Stopped partitions"
             />
           </div>
-
+          <EuiSpacer size={'s'} />
           <EuiCallOut
             color={'warning'}
             size={'s'}
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout"
-                defaultMessage="There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection have stopped for some partitions for job '{jobId}' where the categorization status has changed to 'warn'."
+                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job '{jobId}' are unsuitable for categorization and are not included in the categorization or anomaly detection analysis."
                 values={{
                   jobId: jobCreator.jobId,
                 }}
