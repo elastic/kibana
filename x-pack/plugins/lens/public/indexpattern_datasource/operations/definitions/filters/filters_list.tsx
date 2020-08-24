@@ -226,7 +226,7 @@ export const FiltersList = ({
                 customDragHandle={true}
               >
                 {(provided) => (
-                  <EuiPanel className="lnsLayerPanel__panel" paddingSize="none">
+                  <EuiPanel paddingSize="none">
                     <EuiFlexGroup gutterSize="xs" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <div {...provided.dragHandleProps} className="lnsLayerPanel__dndGrab">
