@@ -43,7 +43,7 @@ export {
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
-  // API schemas - Data Streams
+  // API schemas - Data streams
   GetDataStreamsResponse,
   // API schemas - Agents
   GetAgentsResponse,

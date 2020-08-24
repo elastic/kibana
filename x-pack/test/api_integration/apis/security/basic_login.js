@@ -15,7 +15,8 @@ export default function ({ getService }) {
   const validUsername = kibanaServerConfig.username;
   const validPassword = kibanaServerConfig.password;
 
-  describe('Basic authentication', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/75707
+  describe.skip('Basic authentication', () => {
     it('should redirect non-AJAX requests to the login page if not authenticated', async () => {
       const response = await supertest.get('/abc/xyz').expect(302);
 
