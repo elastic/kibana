@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import { unit, px, truncate } from '../../../../style/variables';
 
@@ -31,9 +31,14 @@ function FilterBadgeList({ onRemove, value }: Props) {
               onRemove(val);
             }}
             onClickAriaLabel="Remove filter"
+            iconOnClick={() => {
+              onRemove(val);
+            }}
+            iconOnClickAriaLabel="Remove filter"
+            iconType="cross"
+            iconSide="right"
           >
             <BadgeText>{val}</BadgeText>
-            <EuiIcon type="cross" />
           </EuiBadge>
         </EuiFlexItem>
       ))}
