@@ -897,7 +897,7 @@ Default: `"-_index:.kibana"`
 |`string`
 |An index or index pattern. For example, `"logstash-*"`.
 
-Default: `_all`
+Default: `"_all"`
 |===
 
 *Returns:* `number`
@@ -965,7 +965,7 @@ Default: `1000`
 |`string`
 |An index or index pattern. For example, `"logstash-*"`.
 
-Default: `_all`
+Default: `"_all"`
 
 |`metaFields`
 |`string`
@@ -1026,7 +1026,7 @@ Alias: `tz`
 |`string`
 |The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.
 
-Default: `UTC`
+Default: `"UTC"`
 |===
 
 *Returns:* `datatable`
@@ -1238,7 +1238,7 @@ filters
 |`string`
 |The horizontal text alignment.
 
-Default: `left`
+Default: `"left"`
 
 |`color`
 |`string`
@@ -1280,7 +1280,7 @@ Default: `false`
 |`string`
 |The font weight. For example, `"normal"`, `"bold"`, `"bolder"`, `"lighter"`, `"100"`, `"200"`, `"300"`, `"400"`, `"500"`, `"600"`, `"700"`, `"800"`, or `"900"`.
 
-Default: `normal`
+Default: `"normal"`
 |===
 
 *Returns:* `style`
@@ -2469,7 +2469,7 @@ Alias: `shape`
 |`string`
 |Pick a shape.
 
-Default: `square`
+Default: `"square"`
 
 |`border`
 
@@ -2732,7 +2732,7 @@ Aliases: `c`, `field`
 |`string`
 |The column or field that you want to filter.
 
-Default: `@timestamp`
+Default: `"@timestamp"`
 
 |`compact`
 |`boolean`
