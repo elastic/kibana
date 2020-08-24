@@ -29,15 +29,7 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
 const configSchema = schema.object({
   overrides: schema.object(
     {
-      defaultRoute: schema.maybe(
-        schema.string({
-          validate(value) {
-            if (!value.startsWith('/')) {
-              return 'must start with a slash';
-            }
-          },
-        })
-      ),
+      defaultRoute: schema.maybe(schema.string()),
     },
     { unknowns: 'allow' }
   ),
