@@ -58,7 +58,9 @@ export const getDateRangeBucketAgg = ({
     getSerializedFormat(agg) {
       return {
         id: 'date_range',
-        params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        params: agg.params.field
+          ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+          : {},
       };
     },
     makeLabel(aggConfig) {

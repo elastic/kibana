@@ -45,6 +45,7 @@ describe('AggConfig Filters', () => {
           title: 'logstash-*',
           fields: [field],
         }),
+        getFormatterForField: () => new BytesFormat({}, getConfig),
       } as any;
 
       return new AggConfigs(

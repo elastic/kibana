@@ -15,13 +15,10 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
           "displayName": "Elastic",
           "excluded": false,
           "format": undefined,
-          "indexPattern": Object {
-            "getNonScriptedFields": [Function],
-          },
           "info": Array [],
           "name": "Elastic",
           "searchable": true,
-          "type": "name",
+          "type": "string",
         },
       ]
     }
@@ -44,9 +41,6 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
           "displayName": "timestamp",
           "excluded": false,
           "format": undefined,
-          "indexPattern": Object {
-            "getNonScriptedFields": [Function],
-          },
           "info": Array [],
           "name": "timestamp",
           "type": "date",
@@ -72,21 +66,15 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "displayName": "Elastic",
           "excluded": false,
           "format": undefined,
-          "indexPattern": Object {
-            "getNonScriptedFields": [Function],
-          },
           "info": Array [],
           "name": "Elastic",
           "searchable": true,
-          "type": "name",
+          "type": "string",
         },
         Object {
           "displayName": "timestamp",
           "excluded": false,
           "format": undefined,
-          "indexPattern": Object {
-            "getNonScriptedFields": [Function],
-          },
           "info": Array [],
           "name": "timestamp",
           "type": "date",
@@ -95,9 +83,6 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "displayName": "conflictingField",
           "excluded": false,
           "format": undefined,
-          "indexPattern": Object {
-            "getNonScriptedFields": [Function],
-          },
           "info": Array [],
           "name": "conflictingField",
           "type": "conflict",

@@ -29,6 +29,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
+import { FieldFormat } from '../..';
 
 class MockFieldFormatter {}
 
@@ -161,7 +162,6 @@ describe('IndexPattern', () => {
     test('should have expected properties on fields', function () {
       expect(indexPattern.fields[0]).toHaveProperty('displayName');
       expect(indexPattern.fields[0]).toHaveProperty('filterable');
-      expect(indexPattern.fields[0]).toHaveProperty('format');
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
     });
@@ -310,16 +310,18 @@ describe('IndexPattern', () => {
 
   describe('toSpec', () => {
     test('should match snapshot', () => {
-      indexPattern.fieldFormatMap.bytes = {
+      const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
-      };
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
     test('can restore from spec', async () => {
-      indexPattern.fieldFormatMap.bytes = {
+      const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
-      };
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
       const restoredPattern = await create(spec.id as string);
       restoredPattern.initFromSpec(spec);

@@ -72,6 +72,9 @@ describe('sibling pipeline aggs', () => {
             getByName: () => field,
             filter: () => [field],
           },
+          getFormatterForField: () => ({
+            toJSON: () => ({ id: 'bytes' }),
+          }),
         } as any;
 
         const aggConfigs = new AggConfigs(

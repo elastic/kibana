@@ -14,7 +14,7 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "type",
+    "text",
   ],
   "lang": "lang",
   "name": "name",
@@ -30,7 +30,7 @@ Object {
       "path": "path",
     },
   },
-  "type": "type",
+  "type": "string",
 }
 `;
 
@@ -48,7 +48,7 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "type",
+    "text",
   ],
   "format": Object {
     "id": "number",
@@ -70,6 +70,6 @@ Object {
       "path": "path",
     },
   },
-  "type": "type",
+  "type": "string",
 }
 `;

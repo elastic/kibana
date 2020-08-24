@@ -82,7 +82,9 @@ export const getTermsBucketAgg = () =>
       return agg.getFieldDisplayName() + ': ' + params.order.text;
     },
     getSerializedFormat(agg) {
-      const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+      const format = agg.params.field
+        ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+        : { id: undefined, params: undefined };
       return {
         id: 'terms',
         params: {

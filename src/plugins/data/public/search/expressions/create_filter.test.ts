@@ -57,6 +57,7 @@ describe('createFilter', () => {
         title: 'logstash-*',
         fields: [field],
       }),
+      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
     } as any;
 
     return new AggConfigs(

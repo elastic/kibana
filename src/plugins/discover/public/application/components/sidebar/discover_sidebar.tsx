@@ -111,8 +111,8 @@ export function DiscoverSidebar({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) => getDetails(ipField, hits, columns),
-    [hits, columns]
+    (ipField: IndexPatternField) => getDetails(ipField, hits, columns, selectedIndexPattern),
+    [hits, columns, selectedIndexPattern]
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);

@@ -281,7 +281,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    return fieldFromIndexPattern.format.getConverterFor('text');
+    return indexPattern.getFormatterForField(fieldFromIndexPattern).getConverterFor('text');
   }
 
   async loadStylePropsMeta(
