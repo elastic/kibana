@@ -6,17 +6,13 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useKibana } from '../../lib/kibana';
-import { createUseKibanaMock } from '../../mock/kibana_react';
 import { useMessagesStorage, UseMessagesStorage } from './use_messages_storage';
 
 jest.mock('../../lib/kibana');
-const useKibanaMock = useKibana as jest.Mock;
 
 describe('useLocalStorage', () => {
   beforeEach(() => {
-    const services = { ...createUseKibanaMock()().services };
-    useKibanaMock.mockImplementation(() => ({ services }));
-    services.storage.store.clear();
+    useKibana().services.storage.clear();
   });
 
   it('should return an empty array when there is no messages', async () => {

@@ -7,12 +7,12 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { useWithSource } from '../../containers/source';
 import { mockBrowserFields } from '../../containers/source/mock';
 import '../../mock/match_media';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 
@@ -60,7 +60,7 @@ jest.mock('../../../timelines/components/manage_timeline', () => {
   };
 });
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 const timelineId = TimelineId.active;
 const field = 'process.name';
 const value = 'nice';

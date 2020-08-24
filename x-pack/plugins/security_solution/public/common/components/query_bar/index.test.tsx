@@ -7,14 +7,13 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
-import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux
@@ -187,13 +186,9 @@ describe('QueryBar ', () => {
 
   describe('state', () => {
     test('clears draftQuery when filterQueryDraft has been cleared', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
@@ -231,13 +226,9 @@ describe('QueryBar ', () => {
 
   describe('#onQueryChange', () => {
     test(' is the only reference that changed when filterQueryDraft props get updated', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
@@ -382,24 +373,9 @@ describe('QueryBar ', () => {
 
   describe('SavedQueryManagementComponent state', () => {
     test('popover should hidden when "Save current query" button was clicked', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider
-            services={{
-              data: {
-                query: {
-                  savedQueries: {
-                    findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
-                    getAllSavedQueries: jest.fn().mockResolvedValue([]),
-                  },
-                },
-              },
-            }}
-          >
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
