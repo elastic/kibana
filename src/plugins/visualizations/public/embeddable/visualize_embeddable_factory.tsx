@@ -123,7 +123,6 @@ export class VisualizeEmbeddableFactory
   public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
-    attributeService: AttributeService,
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
@@ -133,7 +132,12 @@ export class VisualizeEmbeddableFactory
       const visState = convertToSerializedVis(savedObject);
       const vis = new Vis(savedObject.visState.type, visState);
       await vis.setState(visState);
-      return createVisEmbeddableFromObject(this.deps)(vis, input, attributeService, parent);
+      return createVisEmbeddableFromObject(this.deps)(
+        vis,
+        input,
+        await this.getAttributeService(),
+        parent
+      );
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
@@ -147,7 +151,12 @@ export class VisualizeEmbeddableFactory
       const visState = input.savedVis;
       const vis = new Vis(visState.type, visState);
       await vis.setState(visState);
-      return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
+      return createVisEmbeddableFromObject(this.deps)(
+        vis,
+        input,
+        await this.getAttributeService(),
+        parent
+      );
     } else {
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),
@@ -159,11 +168,13 @@ export class VisualizeEmbeddableFactory
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = await this.deps.getAttributeService<
-        SavedObjectAttributes,
-        VisualizeByValueInput,
-        VisualizeByReferenceInput
-      >(this.type);
+      this.attributeService = await this.deps
+        .start()
+        .plugins.dashboard.getAttributeService<
+          VisualizeSavedObjectAttributes,
+          VisualizeByValueInput,
+          VisualizeByReferenceInput
+        >(this.type);
     }
     return this.attributeService!;
   }

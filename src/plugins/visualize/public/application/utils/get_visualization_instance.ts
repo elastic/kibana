@@ -30,6 +30,7 @@ import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
+import { AttributeService } from '../../../../dashboard/public';
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
@@ -76,10 +77,13 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
 
 export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
-  input: VisualizeInput
+  input: VisualizeInput,
+  attributeService: AttributeService
 ) => {
   const { visualizations } = visualizeServices;
-  const visState = input.savedVis as SerializedVis;
+
+  const attributes = await attributeService.unwrapAttributes(input);
+  const visState = attributes as SerializedVis;
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {

@@ -25,6 +25,7 @@ import {
   CoreStart,
   Plugin,
   ApplicationStart,
+  SavedObjectAttributes,
 } from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
@@ -76,6 +77,11 @@ import {
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
+import { DashboardStart } from '../../dashboard/public';
+import {
+  VisualizeByReferenceInput,
+  VisualizeByValueInput,
+} from './embeddable/visualize_embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -109,6 +115,8 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
+  dashboard: DashboardStart;
+  getAttributeService: DashboardStart['getAttributeService'];
 }
 
 /**
@@ -155,7 +163,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, getAttributeService }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);

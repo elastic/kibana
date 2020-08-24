@@ -18,7 +18,13 @@
  */
 
 import { Vis } from '../types';
-import { VisualizeInput, VisualizeEmbeddable } from './visualize_embeddable';
+import {
+  VisualizeInput,
+  VisualizeEmbeddable,
+  VisualizeByValueInput,
+  VisualizeByReferenceInput,
+  VisualizeSavedObjectAttributes,
+} from './visualize_embeddable';
 import { IContainer, ErrorEmbeddable } from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
@@ -30,10 +36,12 @@ import {
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { AttributeService } from '../../../dashboard/public';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
+  attributeService: AttributeService,
   parent?: IContainer
 ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
   const savedVisualizations = getSavedVisualizationsLoader();
@@ -55,6 +63,16 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
     const indexPattern = vis.data.indexPattern;
     const indexPatterns = indexPattern ? [indexPattern] : [];
     const editable = getCapabilities().visualize.save as boolean;
+
+    if (!attributeService) {
+      const dashboard = deps.start().plugins.dashboard;
+      attributeService = await dashboard!.getAttributeService<
+        VisualizeSavedObjectAttributes,
+        VisualizeByValueInput,
+        VisualizeByReferenceInput
+      >('visualization');
+    }
+
     return new VisualizeEmbeddable(
       getTimeFilter(),
       {
@@ -66,6 +84,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
         deps,
       },
       input,
+      attributeService,
       parent
     );
   } catch (e) {
