@@ -16,7 +16,7 @@ const EmptyButton = styled(EuiButtonEmpty)`
   }
 `;
 
-const Span = styled.span`
+const StyledSpan = styled.span`
   margin-right: 8px;
 `;
 
@@ -27,7 +27,7 @@ interface Props {
 export const FingerprintCol: React.FC<Props> = ({ cert }) => {
   const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (
-      <Span data-test-subj={val} className="eui-textNoWrap">
+      <StyledSpan data-test-subj={val} className="eui-textNoWrap">
         <EuiToolTip content={val}>
           <EmptyButton>{text} </EmptyButton>
         </EuiToolTip>
@@ -41,7 +41,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
             />
           )}
         </EuiCopy>
-      </Span>
+      </StyledSpan>
     );
   };
   return (
