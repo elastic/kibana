@@ -32,7 +32,7 @@ describe('Search service', () => {
 
   beforeEach(() => {
     const mockLogger: any = {
-      info: () => {},
+      debug: () => {},
     };
     plugin = new SearchService(coreMock.createPluginInitializerContext({}), mockLogger);
     mockCoreSetup = coreMock.createSetup();
