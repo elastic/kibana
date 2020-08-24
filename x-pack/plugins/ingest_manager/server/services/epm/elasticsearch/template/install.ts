@@ -22,7 +22,6 @@ import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../pa
 
 export const installTemplates = async (
   registryPackage: RegistryPackage,
-  isUpdate: boolean,
   callCluster: CallESAsCurrentUser,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
