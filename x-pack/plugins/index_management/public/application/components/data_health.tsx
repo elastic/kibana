@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const healthToColor = (health: 'green' | 'yellow' | 'red') => {
+import React from 'react';
+import { EuiHealth } from '@elastic/eui';
+import { Health } from '../../../common/types';
+
+interface Props {
+  health: Health;
+}
+
+const healthToColor = (health: Health) => {
   switch (health) {
     case 'green':
       return 'success';
@@ -14,3 +22,7 @@ export const healthToColor = (health: 'green' | 'yellow' | 'red') => {
       return 'danger';
   }
 };
+
+export const DataHealth: React.FunctionComponent<Props> = ({ health }) => (
+  <EuiHealth color={healthToColor(health)}>{health}</EuiHealth>
+);
