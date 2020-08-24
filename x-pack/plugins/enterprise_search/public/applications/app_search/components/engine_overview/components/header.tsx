@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { sendTelemetry } from '../../../../shared/telemetry';
+import { KibanaContext, IKibanaContext } from '../../../../index';
 
 export const EngineOverviewHeader: React.FC = () => {
   const {
