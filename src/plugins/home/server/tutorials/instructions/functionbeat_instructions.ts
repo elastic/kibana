@@ -31,8 +31,10 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Functionbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Functionbeat? See the [Getting Started Guide]({link}).',
-        values: { link: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html' },
+        defaultMessage: 'First time using Functionbeat? See the [Quick Start]({link}).',
+        values: {
+          link: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
+        },
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
@@ -47,8 +49,10 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
       textPre: i18n.translate(
         'home.tutorials.common.functionbeatInstructions.install.linuxTextPre',
         {
-          defaultMessage: 'First time using Functionbeat? See the [Getting Started Guide]({link}).',
-          values: { link: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html' },
+          defaultMessage: 'First time using Functionbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
+          },
         }
       ),
       commands: [
@@ -65,7 +69,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.functionbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
-            'First time using Functionbeat? See the [Getting Started Guide]({functionbeatLink}).\n\
+            'First time using Functionbeat? See the [Quick Start]({functionbeatLink}).\n\
  1. Download the Functionbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Functionbeat`.\n\
@@ -75,7 +79,8 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
           values: {
             directoryName: '`functionbeat-{config.kibana.version}-windows`',
             folderPath: '`C:\\Program Files`',
-            functionbeatLink: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html',
+            functionbeatLink:
+              '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
             elasticLink: 'https://www.elastic.co/downloads/beats/functionbeat',
           },
         }

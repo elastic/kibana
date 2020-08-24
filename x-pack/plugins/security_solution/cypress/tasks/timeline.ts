@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
-
 import {
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
@@ -16,6 +14,7 @@ import {
   PIN_EVENT,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_CHANGES_IN_PROGRESS,
   TIMELINE_DESCRIPTION,
   TIMELINE_FIELDS_BUTTON,
   TIMELINE_INSPECT_BUTTON,
@@ -33,7 +32,7 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
-  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click().invoke('text').should('not.equal', 'Updating');
+  cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', description);
 };
 
 export const addNameToTimeline = (name: string) => {
@@ -121,4 +120,9 @@ export const removeColumn = (column: number) => {
 
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const waitForTimelineChanges = () => {
+  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
+  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
 };
