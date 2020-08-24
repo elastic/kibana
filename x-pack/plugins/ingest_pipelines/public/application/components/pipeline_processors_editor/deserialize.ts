@@ -5,7 +5,13 @@
  */
 import uuid from 'uuid';
 import { Processor } from '../../../../common/types';
-import { ProcessorInternal, VerboseTestOutput, ProcessorResult } from './types';
+import {
+  ProcessorInternal,
+  VerboseTestOutput,
+  Document,
+  ProcessorResult,
+  ProcessorResults,
+} from './types';
 
 export interface DeserializeArgs {
   processors: Processor[];
@@ -62,6 +68,33 @@ export const deserialize = ({ processors, onFailure }: DeserializeArgs): Deseria
 export interface DeserializedProcessorResult {
   [key: string]: ProcessorResult;
 }
+
+/**
+ * Find the previous state of the sample document in the pipeline
+ * This typically will be the result from the previous processor
+ * unless the previous processor had a "skipped" status
+ */
+const getProcessorInput = (
+  processorIndex: number,
+  document: ProcessorResults,
+  count = 1
+): Document | undefined => {
+  const previousProcessorIndex = processorIndex - count;
+
+  if (previousProcessorIndex >= 0) {
+    const processorResult = document.processor_results[previousProcessorIndex];
+
+    if (!processorResult.doc) {
+      const newCount = count + 1;
+      return getProcessorInput(processorIndex, document, newCount);
+    }
+
+    return processorResult.doc;
+  }
+
+  return undefined;
+};
+
 /**
  * This function takes the verbose response of the simulate API
  * and maps the results to each processor in the pipeline by the "tag" field
@@ -81,11 +114,9 @@ export const deserializeVerboseTestOutput = (
         const result = { ...currentResult };
         const resultId = result.tag;
 
+        // We skip index 0, as the first processor will not have a previous result
         if (index !== 0) {
-          // Add the result from the previous processor so that the user
-          // can easily compare current output to the previous output
-          // This may be a result from an on_failure processor
-          result.prevProcessorResult = doc.processor_results[index - 1];
+          result.processorInput = getProcessorInput(index, doc);
         }
 
         // The tag is added programatically as a way to map

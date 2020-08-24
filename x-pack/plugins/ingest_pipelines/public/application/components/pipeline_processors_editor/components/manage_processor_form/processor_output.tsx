@@ -57,9 +57,9 @@ const i18nTexts = {
     }
   ),
   prevProcessorLabel: i18n.translate(
-    'xpack.ingestPipelines.processorOutput.previousOutputCodeBlockLabel',
+    'xpack.ingestPipelines.processorOutput.processorInputCodeBlockLabel',
     {
-      defaultMessage: 'View previous processor output',
+      defaultMessage: 'Processor input',
     }
   ),
   processorIgnoredErrorLabel: i18n.translate(
@@ -83,7 +83,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
   }
 
   const {
-    prevProcessorResult,
+    processorInput,
     doc: currentResult,
     ignored_error: ignoredError,
     error,
@@ -167,28 +167,29 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
         </>
       )}
 
-      {prevProcessorResult?.doc && (
+      <EuiSpacer />
+
+      <EuiAccordion
+        id="prev_accordion"
+        buttonContent={
+          <EuiText>
+            <p>{i18nTexts.prevProcessorLabel}</p>
+          </EuiText>
+        }
+      >
         <>
           <EuiSpacer />
 
-          <EuiAccordion
-            id="prev_accordion"
-            buttonContent={
-              <EuiText>
-                <p>{i18nTexts.prevProcessorLabel}</p>
-              </EuiText>
-            }
-          >
-            <>
-              <EuiSpacer />
-
-              <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-                {JSON.stringify(prevProcessorResult.doc, null, 2)}
-              </EuiCodeBlock>
-            </>
-          </EuiAccordion>
+          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
+            {/* If there is no processorInput defined (e.g., it's the first processor), we provide the sample document */}
+            {JSON.stringify(
+              processorInput ? processorInput : documents[selectedDocumentIndex],
+              null,
+              2
+            )}
+          </EuiCodeBlock>
         </>
-      )}
+      </EuiAccordion>
 
       {ignoredError && (
         <>
