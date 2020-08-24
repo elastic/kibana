@@ -23,10 +23,12 @@ import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 import { Filter } from '../filters';
 
 function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
-  if (!indexPattern || !key) return;
+  // checking getFormatterForField exists because there is at least once case where an index pattern
+  // is an object rather than an IndexPattern class
+  if (!indexPattern || !indexPattern.getFormatterForField || !key) return;
 
   const field = indexPattern.fields.find((f) => f.name === key);
-  if (!field) {
+  if (!field && (indexPattern.fields as any).getByName) {
     throw new Error(
       i18n.translate('data.filter.filterBar.fieldNotFound', {
         defaultMessage: 'Field {key} not found in index pattern {indexPattern}',

@@ -22,7 +22,7 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:run'],
+      args: ['cypress:open'],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
