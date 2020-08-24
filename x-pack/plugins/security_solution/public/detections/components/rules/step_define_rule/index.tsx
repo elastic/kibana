@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
+import isEqual from 'lodash/isEqual';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
@@ -291,12 +291,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <FormDataProvider pathsToWatch={['index', 'ruleType']}>
             {({ index, ruleType }) => {
               if (index != null) {
-                if (deepEqual(index, indicesConfig) && indexModified) {
+                if (indexModified && isEqual(index, indicesConfig)) {
                   setIndexModified(false);
-                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
+                } else if (!indexModified && !isEqual(index, indicesConfig)) {
                   setIndexModified(true);
                 }
-                if (myStepData.index !== index) {
+                if (!isEqual(index, myStepData.index)) {
                   setMyStepData((prevValue) => ({ ...prevValue, index }));
                 }
               }
