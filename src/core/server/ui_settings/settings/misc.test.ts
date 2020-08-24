@@ -17,23 +17,26 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider } from 'src/core/server';
-import { ServiceConfigDescriptor } from '../internal_types';
+import { UiSettingsParams } from '../../../types';
+import { getMiscUiSettings } from './misc';
 
-const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
-  unused('enabled'),
-  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
-];
+describe('misc settings', () => {
+  const miscSettings = getMiscUiSettings();
 
-const configSchema = schema.object({
-  overrides: schema.object({}, { unknowns: 'allow' }),
+  const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
+    setting.schema.validate(value);
+
+  describe('truncate:maxHeight', () => {
+    const validate = getValidationFn(miscSettings['truncate:maxHeight']);
+
+    it('should only accept positive numeric values', () => {
+      expect(() => validate(127)).not.toThrow();
+      expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(
+        `"Value must be equal to or greater than [0]."`
+      );
+      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [number] but got [string]"`
+      );
+    });
+  });
 });
-
-export type UiSettingsConfigType = TypeOf<typeof configSchema>;
-
-export const config: ServiceConfigDescriptor<UiSettingsConfigType> = {
-  path: 'uiSettings',
-  schema: configSchema,
-  deprecations,
-};
