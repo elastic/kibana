@@ -25,7 +25,7 @@ export const getTrustedAppsListRouteHandler = (
     try {
       // Ensure list is created if it does not exist
       await exceptionsListService?.createTrustedAppsList();
-      const results = await exceptionsListService?.findExceptionListItem({
+      const results = await exceptionsListService.findExceptionListItem({
         listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         page,
         perPage,

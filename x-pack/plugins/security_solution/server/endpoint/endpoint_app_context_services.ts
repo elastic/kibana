@@ -55,6 +55,9 @@ export class EndpointAppContextService {
   }
 
   public getExceptionsList() {
+    if (!this.exceptionsListService) {
+      throw new Error('exceptionsListService not set');
+    }
     return this.exceptionsListService;
   }
 
