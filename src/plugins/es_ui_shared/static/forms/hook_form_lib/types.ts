@@ -102,7 +102,6 @@ export interface FieldHook<T = unknown> {
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
-  readonly form: FormHook<any>;
   getErrorsMessages: (args?: {
     validationType?: 'field' | string;
     errorCode?: string;
@@ -117,7 +116,7 @@ export interface FieldHook<T = unknown> {
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
-  __serializeOutput: (rawValue?: unknown) => unknown;
+  __serializeValue: (rawValue?: unknown) => unknown;
 }
 
 export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
@@ -154,7 +153,10 @@ export interface ValidationError<T = string> {
 export interface ValidationFuncArg<T extends FormData, V = unknown> {
   path: string;
   value: V;
-  form: FormHook<T>;
+  form: {
+    getFormData: FormHook<T>['getFormData'];
+    getFields: FormHook<T>['getFields'];
+  };
   formData: T;
   errors: readonly ValidationError[];
 }
