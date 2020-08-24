@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { FeatureProperties } from './feature_properties';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
 
 class MockTooltipProperty {
   constructor(key, value, isFilterable) {
@@ -36,6 +37,9 @@ const defaultProps = {
   layerId: `layer`,
   onCloseTooltip: () => {},
   showFilterButtons: false,
+  getFilterActions: () => {
+    return [{ id: ACTION_GLOBAL_APPLY_FILTER }];
+  },
 };
 
 const mockTooltipProperties = [
@@ -44,7 +48,7 @@ const mockTooltipProperties = [
 ];
 
 describe('FeatureProperties', () => {
-  test('should not show filter button', async () => {
+  test('should render', async () => {
     const component = shallow(
       <FeatureProperties
         {...defaultProps}
@@ -62,13 +66,35 @@ describe('FeatureProperties', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('should show only filter button for filterable properties', async () => {
+  test('should show filter button for filterable properties', async () => {
     const component = shallow(
       <FeatureProperties
         {...defaultProps}
         showFilterButtons={true}
         loadFeatureProperties={() => {
           return mockTooltipProperties;
+        }}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should show view actions button when there are available actions', async () => {
+    const component = shallow(
+      <FeatureProperties
+        {...defaultProps}
+        showFilterButtons={true}
+        loadFeatureProperties={() => {
+          return mockTooltipProperties;
+        }}
+        getFilterActions={() => {
+          return [{ id: 'drilldown1' }];
         }}
       />
     );

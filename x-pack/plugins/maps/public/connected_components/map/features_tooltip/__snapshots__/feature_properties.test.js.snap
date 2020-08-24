@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FeatureProperties should not show filter button 1`] = `
+exports[`FeatureProperties should render 1`] = `
 <table
   className="eui-yScrollWithShadows mapFeatureTooltip_table"
 >
@@ -56,7 +56,60 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 </EuiCallOut>
 `;
 
-exports[`FeatureProperties should show only filter button for filterable properties 1`] = `
+exports[`FeatureProperties should show filter button for filterable properties 1`] = `
+<table
+  className="eui-yScrollWithShadows mapFeatureTooltip_table"
+>
+  <tbody>
+    <tr
+      key="prop1"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop1
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar1",
+          }
+        }
+      />
+      <td>
+        <EuiButtonEmpty
+          aria-label="Filter on property"
+          data-test-subj="mapTooltipCreateFilterButton"
+          iconType="filter"
+          onClick={[Function]}
+          size="xs"
+          title="Filter on property"
+        />
+      </td>
+    </tr>
+    <tr
+      key="prop2"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop2
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar2",
+          }
+        }
+      />
+    </tr>
+  </tbody>
+</table>
+`;
+
+exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
 <table
   className="eui-yScrollWithShadows mapFeatureTooltip_table"
 >
@@ -91,6 +144,17 @@ exports[`FeatureProperties should show only filter button for filterable propert
               onClick={[Function]}
               size="xs"
               title="Filter on property"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonEmpty
+              aria-label="View filter actions"
+              iconType="arrowRight"
+              onClick={[Function]}
+              size="xs"
+              title="View filter actions"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

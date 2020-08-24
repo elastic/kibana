@@ -166,75 +166,47 @@ export class FeatureProperties extends React.Component {
     }
 
     const applyFilterButton = (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="filter"
-          title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
-            defaultMessage: 'Filter on property',
-          })}
-          onClick={async () => {
-            this.props.onCloseTooltip();
-            const filters = await tooltipProperty.getESFilters();
-            this.props.addFilters(filters);
-          }}
-          aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
-            defaultMessage: 'Filter on property',
-          })}
-          data-test-subj="mapTooltipCreateFilterButton"
-        />
-      </EuiFlexItem>
+      <EuiButtonEmpty
+        size="xs"
+        iconType="filter"
+        title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
+          defaultMessage: 'Filter on property',
+        })}
+        onClick={async () => {
+          this.props.onCloseTooltip();
+          const filters = await tooltipProperty.getESFilters();
+          this.props.addFilters(filters);
+        }}
+        aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
+          defaultMessage: 'Filter on property',
+        })}
+        data-test-subj="mapTooltipCreateFilterButton"
+      />
     );
 
-    const action = this.state.actions.find((action) => {
-      return action.id !== ACTION_GLOBAL_APPLY_FILTER;
-    });
-    let applyAction;
-    if (action) {
-      applyAction = (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType={action.getIconType()}
-            onClick={async () => {
-              this.props.onCloseTooltip();
-              const filters = await tooltipProperty.getESFilters();
-              this.props.addFilters(filters, action.id);
-            }}
-          >
-            {action.getDisplayName()}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      );
-    }
-
-    let showMoreFilterActions;
-    if (this.state.actions.length > 1) {
-      showMoreFilterActions = (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="arrowRight"
-            title={i18n.translate('xpack.maps.tooltip.moreActionsTitle', {
-              defaultMessage: 'More filter actions',
-            })}
-            onClick={() => {
-              this._showFilterActions(tooltipProperty);
-            }}
-            aria-label={i18n.translate('xpack.maps.tooltip.moreActionsTitle', {
-              defaultMessage: 'More filter actions',
-            })}
-          />
-        </EuiFlexItem>
-      );
-    }
-
-    return (
+    return this.state.actions.length === 0 ||
+      (this.state.actions.length === 1 &&
+        this.state.actions[0].id === ACTION_GLOBAL_APPLY_FILTER) ? (
+      <td>{applyFilterButton}</td>
+    ) : (
       <td>
         <EuiFlexGroup gutterSize="xs">
-          {applyFilterButton}
-          {applyAction}
-          {showMoreFilterActions}
+          <EuiFlexItem grow={false}>{applyFilterButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="arrowRight"
+              title={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
+                defaultMessage: 'View filter actions',
+              })}
+              onClick={() => {
+                this._showFilterActions(tooltipProperty);
+              }}
+              aria-label={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
+                defaultMessage: 'View filter actions',
+              })}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </td>
     );
