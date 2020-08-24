@@ -580,6 +580,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       })
                 }
                 exists={true}
+                hideDetails={fieldInfoUnavailable}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={filteredFieldGroups.availableFields.length}
                 isFiltered={
