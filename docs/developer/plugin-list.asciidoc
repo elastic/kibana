@@ -289,7 +289,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |<<dashboard-enhanced-plugin>>
-|Adds drilldown capabailities to dashboard.  Owned by the Kibana App team.
+|Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/dashboard_mode/README.md[dashboardMode]
