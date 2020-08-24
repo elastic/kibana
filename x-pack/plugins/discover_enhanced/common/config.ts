@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const healthToColor = (health: 'green' | 'yellow' | 'red') => {
-  switch (health) {
-    case 'green':
-      return 'success';
-    case 'yellow':
-      return 'warning';
-    case 'red':
-      return 'danger';
-  }
-};
+export interface Config {
+  actions: { exploreDataInChart: { enabled: boolean } };
+}
