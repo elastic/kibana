@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// adjust the height so it's compact for items with more features
 import {
   AnnotationDomainTypes,
   Axis,
@@ -64,6 +63,7 @@ export const DecisionPathChart = ({
   maxDomain,
   baseline,
 }: DecisionPathChartProps) => {
+  // adjust the height so it's compact for items with more features
   const heightMultiplier = Array.isArray(decisionPathData) && decisionPathData.length > 4 ? 30 : 75;
   const baselineData: LineAnnotationDatum[] = useMemo(
     () => [
@@ -80,7 +80,7 @@ export const DecisionPathChart = ({
     ],
     [baseline]
   );
-  const tickFormatter = useCallback((d) => `${Number(d).toPrecision(3)}`, []);
+  const tickFormatter = useCallback((d) => Number(d).toPrecision(3), []);
 
   return (
     <Chart size={{ height: decisionPathData.length * heightMultiplier }}>

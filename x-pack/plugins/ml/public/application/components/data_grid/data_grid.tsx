@@ -44,6 +44,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   baseline?: number;
   analysisType?: ANALYSIS_CONFIG_TYPE;
+  resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
 }
@@ -85,6 +86,7 @@ export const DataGrid: FC<Props> = memo(
       toggleChartVisibility,
       visibleColumns,
       predictionFieldName,
+      resultsField,
       analysisType,
     } = props;
     // TODO Fix row hovering + bar highlighting
@@ -103,16 +105,18 @@ export const DataGrid: FC<Props> = memo(
               const rowIndex = children?.props?.visibleRowIndex;
               const row = data[rowIndex];
               if (!row) return <div />;
-              const parsedFIArray = row.ml.feature_importance;
+              // if resultsField for some reason is not available then use ml
+              const mlResultsField = resultsField ?? 'ml';
+              const parsedFIArray = row[mlResultsField].feature_importance;
               let predictedValue: string | number | undefined;
               let topClasses: TopClasses = [];
               if (
                 predictionFieldName !== undefined &&
                 row &&
-                row.ml[predictionFieldName] !== undefined
+                row[mlResultsField][predictionFieldName] !== undefined
               ) {
-                predictedValue = row.ml[predictionFieldName];
-                topClasses = row.ml.top_classes;
+                predictedValue = row[mlResultsField][predictionFieldName];
+                topClasses = row[mlResultsField].top_classes;
               }
 
               return (

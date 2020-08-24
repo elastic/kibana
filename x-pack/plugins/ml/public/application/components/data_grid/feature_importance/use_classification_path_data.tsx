@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 import { ExtendedFeatureImportance } from './decision_path_popover';
@@ -27,15 +27,20 @@ interface RegressionDecisionPathProps {
 const FEATURE_NAME = 'feature_name';
 const FEATURE_IMPORTANCE = 'importance';
 
+export const isDecisionPathData = (decisionPathData: any): boolean => {
+  return (
+    Array.isArray(decisionPathData) &&
+    decisionPathData.length > 0 &&
+    decisionPathData[0].length === 3
+  );
+};
 export const useDecisionPathData = ({
   baseline,
   featureImportance,
   predictedValue,
 }: UseDecisionPathDataParams): { decisionPathData: DecisionPathPlotData | undefined } => {
-  const [decisionPathData, setDecisionPlotData] = useState<DecisionPathPlotData | undefined>();
-
-  useEffect(() => {
-    const result = baseline
+  const decisionPathData = useMemo(() => {
+    return baseline
       ? buildRegressionDecisionPathData({
           baseline,
           featureImportance,
@@ -45,8 +50,6 @@ export const useDecisionPathData = ({
           featureImportance,
           currentClass: predictedValue as string | undefined,
         });
-
-    setDecisionPlotData(result);
   }, [baseline, featureImportance, predictedValue]);
 
   return { decisionPathData };
@@ -152,18 +155,4 @@ export const buildClassificationDecisionPathData = ({
   ) as ExtendedFeatureImportance[];
 
   return buildDecisionPathData(filteredFeatureImportance);
-};
-
-export const findMaxMin = (
-  data: DecisionPathPlotData,
-  getter: Function
-): { max: number; min: number } => {
-  let min = Infinity;
-  let max = -Infinity;
-  data.forEach((d) => {
-    const value = getter(d);
-    if (value > max) max = value;
-    if (value < min) min = value;
-  });
-  return { max, min };
 };

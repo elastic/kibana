@@ -76,6 +76,7 @@ export interface UseIndexDataReturnType
     | 'visibleColumns'
     | 'baseline'
     | 'predictionFieldName'
+    | 'resultsField'
   > {
   renderCellValue: RenderCellValue;
 }
@@ -109,4 +110,5 @@ export interface UseDataGridReturnType {
   visibleColumns: ColumnId[];
   baseline?: number;
   predictionFieldName?: string;
+  resultsField?: string;
 }

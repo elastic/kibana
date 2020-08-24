@@ -27,6 +27,23 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
 
+export const getDependentVar = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['dependent_variable']
+  | ClassificationAnalysis['classification']['dependent_variable'] => {
+  let depVar = '';
+
+  if (isRegressionAnalysis(analysis)) {
+    depVar = analysis.regression.dependent_variable;
+  }
+
+  if (isClassificationAnalysis(analysis)) {
+    depVar = analysis.classification.dependent_variable;
+  }
+  return depVar;
+};
+
 export const getPredictionFieldName = (
   analysis: AnalysisConfig
 ):
@@ -43,4 +60,20 @@ export const getPredictionFieldName = (
     predictionFieldName = analysis.classification.prediction_field_name;
   }
   return predictionFieldName;
+};
+
+export const getDefaultPredictionFieldName = (analysis: AnalysisConfig) => {
+  return `${getDependentVar(analysis)}_prediction`;
+};
+export const getPredictedFieldName = (
+  resultsField: string,
+  analysis: AnalysisConfig,
+  forSort?: boolean
+) => {
+  // default is 'ml'
+  const predictionFieldName = getPredictionFieldName(analysis);
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : getDefaultPredictionFieldName(analysis)
+  }`;
+  return predictedField;
 };

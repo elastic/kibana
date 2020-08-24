@@ -23,6 +23,8 @@ import {
   isRegressionAnalysis,
   isClassificationAnalysis,
   getPredictionFieldName,
+  getDependentVar,
+  getPredictedFieldName,
 } from '../../../../common/util/analytics_utils';
 export type IndexPattern = string;
 
@@ -155,23 +157,6 @@ export const getAnalysisType = (analysis: AnalysisConfig): string => {
   return 'unknown';
 };
 
-export const getDependentVar = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['dependent_variable']
-  | ClassificationAnalysis['classification']['dependent_variable'] => {
-  let depVar = '';
-
-  if (isRegressionAnalysis(analysis)) {
-    depVar = analysis.regression.dependent_variable;
-  }
-
-  if (isClassificationAnalysis(analysis)) {
-    depVar = analysis.classification.dependent_variable;
-  }
-  return depVar;
-};
-
 export const getTrainingPercent = (
   analysis: AnalysisConfig
 ):
@@ -217,20 +202,6 @@ export const getNumTopFeatureImportanceValues = (
     numTopFeatureImportanceValues = analysis.classification.num_top_feature_importance_values;
   }
   return numTopFeatureImportanceValues;
-};
-
-export const getPredictedFieldName = (
-  resultsField: string,
-  analysis: AnalysisConfig,
-  forSort?: boolean
-) => {
-  // default is 'ml'
-  const predictionFieldName = getPredictionFieldName(analysis);
-  const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
-  const predictedField = `${resultsField}.${
-    predictionFieldName ? predictionFieldName : defaultPredictionField
-  }`;
-  return predictedField;
 };
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
@@ -580,4 +551,6 @@ export {
   isClassificationAnalysis,
   getPredictionFieldName,
   ANALYSIS_CONFIG_TYPE,
+  getDependentVar,
+  getPredictedFieldName,
 };

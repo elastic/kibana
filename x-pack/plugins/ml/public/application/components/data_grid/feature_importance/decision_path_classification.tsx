@@ -7,9 +7,12 @@
 import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
-import { findMaxMin, useDecisionPathData } from './use_classification_path_data';
+import d3 from 'd3';
+import { isDecisionPathData, useDecisionPathData } from './use_classification_path_data';
 import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
 import { DecisionPathChart } from './decision_path_chart';
+import { MissingDecisionPathCallout } from './missing_decision_path_callout';
+
 interface ClassificationDecisionPathProps {
   predictedValue: string | undefined;
   predictionFieldName?: string;
@@ -49,12 +52,8 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
     let maxDomain;
     let minDomain;
     // if decisionPathData has calculated cumulative path
-    if (
-      Array.isArray(decisionPathData) &&
-      decisionPathData.length > 0 &&
-      decisionPathData[0].length === 3
-    ) {
-      const { max, min } = findMaxMin(decisionPathData, (d: [string, number, number]) => d[2]);
+    if (decisionPathData && isDecisionPathData(decisionPathData)) {
+      const [min, max] = d3.extent(decisionPathData, (d: [string, number, number]) => d[2]);
       const buffer = Math.abs(max - min) * 0.1;
       maxDomain = max + buffer;
       minDomain = min - buffer;
@@ -62,7 +61,7 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
     return { maxDomain, minDomain };
   }, [decisionPathData]);
 
-  if (!decisionPathData) return <div />;
+  if (!decisionPathData) return <MissingDecisionPathCallout />;
 
   return (
     <>

@@ -25,12 +25,11 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import {
-  getIndexData,
-  getIndexFields,
-  DataFrameAnalyticsConfig,
   getPredictionFieldName,
-} from '../../../../common';
+  getDefaultPredictionFieldName,
+} from '../../../../../../../common/util/analytics_utils';
 import {
   DEFAULT_RESULTS_FIELD,
   FEATURE_IMPORTANCE,
@@ -117,7 +116,15 @@ export const useExplorationResults = (
     jobConfig?.dest.index,
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
-  const predictionFieldName = jobConfig ? getPredictionFieldName(jobConfig.analysis) : undefined;
+  const predictionFieldName = useMemo(() => {
+    if (jobConfig) {
+      return (
+        getPredictionFieldName(jobConfig.analysis) ??
+        getDefaultPredictionFieldName(jobConfig.analysis)
+      );
+    }
+    return undefined;
+  }, [jobConfig]);
 
   const getAnalyticsBaseline = useCallback(async () => {
     try {
@@ -150,11 +157,12 @@ export const useExplorationResults = (
     getAnalyticsBaseline();
   }, [jobConfig]);
 
+  const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;
   const renderCellValue = useRenderCellValue(
     indexPattern,
     dataGrid.pagination,
     dataGrid.tableItems,
-    jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD
+    resultsField
   );
 
   return {
@@ -162,5 +170,6 @@ export const useExplorationResults = (
     renderCellValue,
     baseline,
     predictionFieldName,
+    resultsField,
   };
 };
