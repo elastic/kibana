@@ -24,7 +24,7 @@ export default function (kibana) {
   let defaultVars;
 
   return new kibana.Plugin({
-    require: ['kibana'],
+    require: [],
 
     uiExports: { injectDefaultVars: () => defaultVars },
 
