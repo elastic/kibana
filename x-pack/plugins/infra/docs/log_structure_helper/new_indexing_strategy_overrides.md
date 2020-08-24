@@ -101,14 +101,14 @@ Original Managed Assets                 Overridden Managed Assets
  | is used by                            |
  |                                       | is composed_of
  |  +--------------------+               |
- +--> data stream D      |               |  +------------------------+
-    | logs-myapp-default |               +--> component template CM' |
-    ++-------------------+               |  | logs-myapp-mappings    |
-     |                                   |  +------------------------+
-     | is backed by                      |  +------------------------+
-     |                                   +--> component template CS' |
-     |  +---------+                      |  | logs-myapp-settings    |
-     +--> index W |                      |  +------------------------+
+ +--> data stream D      |               |  +-----------------------------+
+    | logs-myapp-default |               +--> component template CM'      |
+    ++-------------------+               |  | logs-myapp-default-mappings |
+     |                                   |  +-----------------------------+
+     | is backed by                      |  +-----------------------------+
+     |                                   +--> component template CS'      |
+     |  +---------+                      |  | logs-myapp-default-settings |
+     +--> index W |                      |  +-----------------------------+
      |  +---------+                      |
      |  +----------+                     | is used by
      +--> index I1 |                     |
