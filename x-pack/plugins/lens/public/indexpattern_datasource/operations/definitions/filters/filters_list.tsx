@@ -72,7 +72,7 @@ export const FilterPopover = ({
 
   const inputRef = useRef<HTMLInputElement>();
   const onQueryChange = (input: Query) => setTempFilter({ ...tempFilter, input });
-  const onLabelChange = (label: string) => setTempFilter({ ...tempFilter, label });
+  const onLabelChange = (label: string) => setTempFilter({ ...tempFilter, label: label.trim() });
   const onSubmit = (input: Query) => {
     try {
       if (input.language === SEARCH_QUERY_LANGUAGE.KUERY) {
@@ -136,7 +136,7 @@ export const FilterPopover = ({
               }
             }}
             value={tempFilter.label || ''}
-            onChange={(e) => onLabelChange(e.target.value.trim())}
+            onChange={(e) => onLabelChange(e.target.value)}
             onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
               if (keys.ENTER === key) {
                 if (tempFilter.input.query.length) {
