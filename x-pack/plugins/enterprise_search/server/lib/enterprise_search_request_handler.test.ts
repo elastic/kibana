@@ -25,6 +25,15 @@ const responseMock = {
 };
 const KibanaAuthHeader = 'Basic 123';
 
+interface IMockResponse {
+  results: object[];
+  meta?: {
+    page?: {
+      total_results: number;
+    };
+  };
+}
+
 describe('createEnterpriseSearchRequestHandler', () => {
   beforeEach(() => {
     responseMock.ok.mockClear();
@@ -100,7 +109,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
         config: mockConfig,
         log: mockLogger,
         path: '/as/credentials/collection',
-        hasValidData: (body) => {
+        hasValidData: (body?: IMockResponse) => {
           return (
             Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number'
           );
@@ -121,7 +130,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
   });
 });
 
-const makeAPICall = (handler, params = {}) => {
+const makeAPICall = (handler: Function, params = {}) => {
   return handler(
     null,
     {

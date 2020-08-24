@@ -6,13 +6,14 @@
 import fetch from 'node-fetch';
 import querystring from 'querystring';
 import { Logger } from 'src/core/server';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 import { ConfigType } from '../index';
 
-interface IAppSearchRequestParams {
+interface IAppSearchRequestParams<ResponseBody> {
   config: ConfigType;
   log: Logger;
   path: string;
-  hasValidData?: (body?: object) => boolean;
+  hasValidData?: (body?: ResponseBody) => boolean;
 }
 
 /**
@@ -23,13 +24,17 @@ interface IAppSearchRequestParams {
  * request, so the request body and request parameters, and body are simply
  * passed through.
  */
-export function createAppSearchRequestHandler({
+export function createAppSearchRequestHandler<ResponseBody>({
   config,
   log,
   path,
   hasValidData = () => true,
-}: IAppSearchRequestParams) {
-  return async (_context, request, response) => {
+}: IAppSearchRequestParams<ResponseBody>) {
+  return async (
+    _context: RequestHandlerContext,
+    request: KibanaRequest<unknown, Readonly<{}>, unknown>,
+    response: KibanaResponseFactory
+  ) => {
     try {
       const enterpriseSearchUrl = config.host as string;
       const params = querystring.stringify(request.query);

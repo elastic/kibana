@@ -9,6 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { IRouteDependencies } from '../../plugin';
 import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
+interface ICredentialsResponse {
+  results: object[];
+  meta?: {
+    page?: {
+      total_results: number;
+    };
+  };
+}
+
 export function registerCredentialsRoutes({ router, config, log }: IRouteDependencies) {
   router.get(
     {
@@ -19,11 +28,11 @@ export function registerCredentialsRoutes({ router, config, log }: IRouteDepende
         }),
       },
     },
-    createEnterpriseSearchRequestHandler({
+    createEnterpriseSearchRequestHandler<ICredentialsResponse>({
       config,
       log,
       path: '/as/credentials/collection',
-      hasValidData: (body) => {
+      hasValidData: (body?: ICredentialsResponse) => {
         return Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number';
       },
     })
