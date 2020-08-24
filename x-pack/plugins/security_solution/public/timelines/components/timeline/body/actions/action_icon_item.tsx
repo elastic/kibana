@@ -23,7 +23,7 @@ interface ActionIconItemProps {
   children?: React.ReactNode;
 }
 
-export const ActionIconItem = React.memo<ActionIconItemProps>(
+const ActionIconItemComponent = React.memo<ActionIconItemProps>(
   ({
     id,
     width = DEFAULT_ICON_BUTTON_WIDTH,
@@ -53,4 +53,6 @@ export const ActionIconItem = React.memo<ActionIconItemProps>(
   )
 );
 
-ActionIconItem.displayName = 'ActionIconItem';
+ActionIconItemComponent.displayName = 'ActionIconItemComponent';
+
+export const ActionIconItem = React.memo(ActionIconItemComponent);

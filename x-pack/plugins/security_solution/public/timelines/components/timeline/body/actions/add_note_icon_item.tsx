@@ -24,7 +24,7 @@ interface AddEventNoteActionProps {
   updateNote: UpdateNote;
 }
 
-export const AddEventNoteAction: React.FC<AddEventNoteActionProps> = ({
+const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   associateNote,
   getNotesByIds,
   noteIds,
@@ -53,3 +53,7 @@ export const AddEventNoteAction: React.FC<AddEventNoteActionProps> = ({
     />
   </ActionIconItem>
 );
+
+AddEventNoteActionComponent.displayName = 'AddEventNoteActionComponent';
+
+export const AddEventNoteAction = React.memo(AddEventNoteActionComponent);

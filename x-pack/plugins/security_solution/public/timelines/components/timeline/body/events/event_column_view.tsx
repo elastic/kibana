@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 
 import { TimelineNonEcsData, Ecs } from '../../../../../graphql/types';
 import { Note } from '../../../../../common/lib/note';
@@ -93,7 +93,8 @@ export const EventColumnView = React.memo<Props>(
     updateNote,
   }) => {
     const { timelineType, status } = useSelector<StoreState, TimelineModel>(
-      (state) => state.timeline.timelineById[timelineId]
+      (state) => state.timeline.timelineById[timelineId],
+      shallowEqual
     );
 
     const handlePinClicked = useCallback(
@@ -110,54 +111,74 @@ export const EventColumnView = React.memo<Props>(
 
     const eventType = getEventType(ecsData);
 
-    const additionalActions = [
-      <InvestigateInResolverAction
-        key="investigate-in-resolver"
-        timelineId={timelineId}
-        ecsData={ecsData}
-      />,
-      ...(timelineId !== TimelineId.active && eventType === 'signal'
-        ? [
-            <InvestigateInTimelineAction
-              key="investigate-in-timeline"
-              ecsRowData={ecsData}
-              nonEcsRowData={data}
-            />,
-          ]
-        : []),
-      ...(!isEventViewer
-        ? [
-            <AddEventNoteAction
-              key="add-event-note"
-              associateNote={associateNote}
-              getNotesByIds={getNotesByIds}
-              noteIds={eventIdToNoteIds[id] || emptyNotes}
-              showNotes={showNotes}
-              toggleShowNotes={toggleShowNotes}
-              updateNote={updateNote}
-              status={status}
-              timelineType={timelineType}
-            />,
-            <PinEventAction
-              key="pin-event"
-              onPinClicked={handlePinClicked}
-              noteIds={eventIdToNoteIds[id] || emptyNotes}
-              eventIsPinned={isEventPinned}
-              timelineType={timelineType}
-            />,
-          ]
-        : []),
-      ...(eventType === 'signal'
-        ? [
-            <AlertContextMenu
-              key="alert-context-menu"
-              ecsRowData={ecsData}
-              nonEcsRowData={data}
-              timelineId={timelineId}
-            />,
-          ]
-        : []),
-    ];
+    const additionalActions = useMemo<JSX.Element[]>(
+      () => [
+        <InvestigateInResolverAction
+          key="investigate-in-resolver"
+          timelineId={timelineId}
+          ecsData={ecsData}
+        />,
+        ...(timelineId !== TimelineId.active && eventType === 'signal'
+          ? [
+              <InvestigateInTimelineAction
+                key="investigate-in-timeline"
+                ecsRowData={ecsData}
+                nonEcsRowData={data}
+              />,
+            ]
+          : []),
+        ...(!isEventViewer
+          ? [
+              <AddEventNoteAction
+                key="add-event-note"
+                associateNote={associateNote}
+                getNotesByIds={getNotesByIds}
+                noteIds={eventIdToNoteIds[id] || emptyNotes}
+                showNotes={showNotes}
+                toggleShowNotes={toggleShowNotes}
+                updateNote={updateNote}
+                status={status}
+                timelineType={timelineType}
+              />,
+              <PinEventAction
+                key="pin-event"
+                onPinClicked={handlePinClicked}
+                noteIds={eventIdToNoteIds[id] || emptyNotes}
+                eventIsPinned={isEventPinned}
+                timelineType={timelineType}
+              />,
+            ]
+          : []),
+        ...(eventType === 'signal'
+          ? [
+              <AlertContextMenu
+                key="alert-context-menu"
+                ecsRowData={ecsData}
+                nonEcsRowData={data}
+                timelineId={timelineId}
+              />,
+            ]
+          : []),
+      ],
+      [
+        associateNote,
+        data,
+        ecsData,
+        eventIdToNoteIds,
+        eventType,
+        getNotesByIds,
+        handlePinClicked,
+        id,
+        isEventPinned,
+        isEventViewer,
+        showNotes,
+        status,
+        timelineId,
+        timelineType,
+        toggleShowNotes,
+        updateNote,
+      ]
+    );
 
     return (
       <EventsTrData data-test-subj="event-column-view">
@@ -185,25 +206,6 @@ export const EventColumnView = React.memo<Props>(
           timelineId={timelineId}
         />
       </EventsTrData>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.id === nextProps.id &&
-      prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
-      prevProps.columnHeaders === nextProps.columnHeaders &&
-      prevProps.columnRenderers === nextProps.columnRenderers &&
-      prevProps.data === nextProps.data &&
-      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
-      prevProps.expanded === nextProps.expanded &&
-      prevProps.loading === nextProps.loading &&
-      prevProps.loadingEventIds === nextProps.loadingEventIds &&
-      prevProps.isEventPinned === nextProps.isEventPinned &&
-      prevProps.onRowSelected === nextProps.onRowSelected &&
-      prevProps.selectedEventIds === nextProps.selectedEventIds &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showNotes === nextProps.showNotes &&
-      prevProps.timelineId === nextProps.timelineId
     );
   }
 );

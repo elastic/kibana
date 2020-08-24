@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
@@ -65,7 +66,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout timelineId="timeline-1" usersViewing={usersViewing} />
+              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
             </>
           )}
 

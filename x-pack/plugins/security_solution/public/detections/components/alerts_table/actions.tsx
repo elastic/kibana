@@ -126,7 +126,7 @@ export const getThresholdAggregationDataProvider = (
   return [
     {
       and: [],
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-${aggregationFieldId}-${dataProviderValue}`,
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
       name: ecsData.signal?.rule?.threshold.field,
       enabled: true,
       excluded: false,
@@ -253,7 +253,7 @@ export const sendAlertToTimelineAction = async ({
         dataProviders: [
           {
             and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-${ecsData._id}`,
+            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
             name: ecsData._id,
             enabled: true,
             excluded: false,
@@ -304,7 +304,7 @@ export const sendAlertToTimelineAction = async ({
         dataProviders: [
           {
             and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-${ecsData._id}`,
+            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
             name: ecsData._id,
             enabled: true,
             excluded: false,

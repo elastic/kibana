@@ -20,7 +20,7 @@ interface PinEventActionProps {
   timelineType: TimelineType;
 }
 
-export const PinEventAction: React.FC<PinEventActionProps> = ({
+const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   noteIds,
   onPinClicked,
   eventIsPinned,
@@ -52,3 +52,7 @@ export const PinEventAction: React.FC<PinEventActionProps> = ({
     </EventsTd>
   );
 };
+
+PinEventActionComponent.displayName = 'PinEventActionComponent';
+
+export const PinEventAction = React.memo(PinEventActionComponent);
