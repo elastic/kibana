@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaContext, IKibanaContext } from '../index';
+import { HttpLogic, IHttpLogicValues } from '../shared/http';
 import { AppLogic, IAppLogicActions, IAppLogicValues } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
 
@@ -27,6 +28,7 @@ import {
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
@@ -48,6 +50,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic) as IAppLogicValues;
   const { initializeAppData } = useActions(AppLogic) as IAppLogicActions;
+  const { errorConnecting } = useValues(HttpLogic) as IHttpLogicValues;
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -60,14 +63,18 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
       </Route>
       <Route>
         <Layout navigation={<AppSearchNav />}>
-          <Switch>
-            <Route exact path={ROOT_PATH}>
-              <Redirect to={ENGINES_PATH} />
-            </Route>
-            <Route exact path={ENGINES_PATH}>
-              <EngineOverview />
-            </Route>
-          </Switch>
+          {errorConnecting ? (
+            <ErrorConnecting />
+          ) : (
+            <Switch>
+              <Route exact path={ROOT_PATH}>
+                <Redirect to={ENGINES_PATH} />
+              </Route>
+              <Route exact path={ENGINES_PATH}>
+                <EngineOverview />
+              </Route>
+            </Switch>
+          )}
         </Layout>
       </Route>
     </Switch>
