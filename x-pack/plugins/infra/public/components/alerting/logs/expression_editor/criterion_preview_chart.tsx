@@ -150,7 +150,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
 
   const isBelow =
     threshold && threshold.comparator
-      ? [Comparator.LT, Comparator.LT_OR_EQ].includes(threshold?.comparator)
+      ? [Comparator.LT, Comparator.LT_OR_EQ].includes(threshold.comparator)
       : false;
 
   // For grouped scenarios we want to limit the groups displayed, for "isAbove" thresholds we'll show
