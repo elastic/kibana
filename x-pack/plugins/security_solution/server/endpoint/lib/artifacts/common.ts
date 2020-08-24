@@ -13,9 +13,9 @@ import {
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
-  /** List of OSs that both Exceptions **AND** Trusted Apps support */
   SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
-  GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trusted-apps',
+  SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_TRUSTED_APPS_NAME: 'endpoint-trustlist',
 };
 
 export const ManifestConstants = {

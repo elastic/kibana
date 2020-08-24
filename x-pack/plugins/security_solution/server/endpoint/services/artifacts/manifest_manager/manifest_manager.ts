@@ -26,6 +26,7 @@ import {
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { ENDPOINT_LIST_ID } from '../../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common/constants';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
@@ -91,7 +92,12 @@ export class ManifestManager {
         artifactSchemaVersion ?? 'v1',
         ENDPOINT_LIST_ID
       );
-      const artifact = await buildArtifact(exceptionList, os, artifactSchemaVersion ?? 'v1');
+      const artifact = await buildArtifact(
+        exceptionList,
+        os,
+        artifactSchemaVersion ?? 'v1',
+        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+      );
       artifacts.push(artifact);
     }
     return artifacts;
@@ -107,12 +113,12 @@ export class ManifestManager {
   ): Promise<InternalArtifactCompleteSchema[]> {
     const artifacts: InternalArtifactCompleteSchema[] = [];
 
-    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
+    for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
       const trustedApps = await getFullEndpointExceptionList(
         this.exceptionListClient,
         os,
         artifactSchemaVersion ?? 'v1',
-        'endpoint_trusted_apps' // FIXME:PT use const from pending PR
+        ENDPOINT_TRUSTED_APPS_LIST_ID
       );
       const artifact = await buildArtifact(
         trustedApps,

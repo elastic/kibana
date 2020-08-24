@@ -28,13 +28,13 @@ import {
   internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
 } from '../../schemas';
-import { ArtifactConstants } from './common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
   os: string,
   schemaVersion: string,
-  name: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME // FIXME:PT make this a required param + refactor
+  name: string
 ): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
@@ -78,7 +78,7 @@ export async function getFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string,
   schemaVersion: string,
-  listId: typeof ENDPOINT_LIST_ID | 'endpoint_trusted_apps' = ENDPOINT_LIST_ID // FIXME:PT replace with const
+  listId: typeof ENDPOINT_LIST_ID | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;

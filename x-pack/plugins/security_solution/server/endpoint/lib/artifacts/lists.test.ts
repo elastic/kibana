@@ -11,6 +11,8 @@ import { getExceptionListItemSchemaMock } from '../../../../../lists/common/sche
 import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types';
 import { buildArtifact, getFullEndpointExceptionList } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
+import { ArtifactConstants } from './common';
+import { ENDPOINT_LIST_ID } from '../../../../../lists/common';
 
 describe('buildEventTypeSignal', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -47,7 +49,12 @@ describe('buildEventTypeSignal', () => {
 
     const first = getFoundExceptionListItemSchemaMock();
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -88,7 +95,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -134,7 +146,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -182,7 +199,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -229,7 +251,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -267,7 +294,12 @@ describe('buildEventTypeSignal', () => {
     first.data[1].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -305,7 +337,12 @@ describe('buildEventTypeSignal', () => {
     first.data[0].entries = testEntries;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp).toEqual({
       entries: [expectedEndpointExceptions],
     });
@@ -329,7 +366,12 @@ describe('buildEventTypeSignal', () => {
       .mockReturnValueOnce(first)
       .mockReturnValueOnce(second);
 
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
 
     // Expect 2 exceptions, the first two calls returned the same exception list items
     expect(resp.entries.length).toEqual(2);
@@ -340,7 +382,12 @@ describe('buildEventTypeSignal', () => {
     exceptionsResponse.data = [];
     exceptionsResponse.total = 0;
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
-    const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+    const resp = await getFullEndpointExceptionList(
+      mockExceptionClient,
+      'linux',
+      'v1',
+      ENDPOINT_LIST_ID
+    );
     expect(resp.entries.length).toEqual(0);
   });
 
@@ -385,8 +432,18 @@ describe('buildEventTypeSignal', () => {
       ],
     };
 
-    const artifact1 = await buildArtifact(translatedExceptionList, 'linux', 'v1');
-    const artifact2 = await buildArtifact(translatedExceptionListReversed, 'linux', 'v1');
+    const artifact1 = await buildArtifact(
+      translatedExceptionList,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+    const artifact2 = await buildArtifact(
+      translatedExceptionListReversed,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
     expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
   });
 
@@ -430,8 +487,18 @@ describe('buildEventTypeSignal', () => {
       entries: translatedItems.reverse(),
     };
 
-    const artifact1 = await buildArtifact(translatedExceptionList, 'linux', 'v1');
-    const artifact2 = await buildArtifact(translatedExceptionListReversed, 'linux', 'v1');
+    const artifact1 = await buildArtifact(
+      translatedExceptionList,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+    const artifact2 = await buildArtifact(
+      translatedExceptionListReversed,
+      'linux',
+      'v1',
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
     expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
   });
 });
