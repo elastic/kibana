@@ -9,7 +9,7 @@ import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
-import { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+import { IRouter, RequestHandler } from 'kibana/server';
 import { httpServerMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
 import { registerTrustedAppsRoutes } from './index';
 import { TRUSTED_APPS_LIST_API } from '../../../../common/endpoint/constants';
@@ -17,22 +17,21 @@ import { GetTrustedAppsListRequest } from '../../../../common/endpoint/types';
 import { xpackMocks } from '../../../../../../mocks';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { EndpointAppContext } from '../../types';
+import { ExceptionListClient } from '../../../../../lists/server';
 
 describe('when invoking endpoint trusted apps route handlers', () => {
   let routerMock: jest.Mocked<IRouter>;
   let endpointAppContextService: EndpointAppContextService;
   let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let exceptionsListClient: ReturnType<
-    typeof createMockEndpointAppContextServiceStartContract
-  >['exceptionsListService'];
+  let exceptionsListClient: jest.Mocked<ExceptionListClient>;
   let endpointAppContext: EndpointAppContext;
 
   beforeEach(() => {
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    exceptionsListClient = startContract.exceptionsListService;
+    exceptionsListClient = startContract.exceptionsListService as jest.Mocked<ExceptionListClient>;
     endpointAppContextService.start(startContract);
     endpointAppContext = {
       ...createMockEndpointAppContext(),
@@ -46,7 +45,6 @@ describe('when invoking endpoint trusted apps route handlers', () => {
   });
 
   describe('when fetching list of trusted apps', () => {
-    let routeConfig: RouteConfig<undefined, GetTrustedAppsListRequest>;
     let routeHandler: RequestHandler<undefined, GetTrustedAppsListRequest>;
     const createListRequest = (page: number = 1, perPage: number = 20) => {
       return httpServerMock.createKibanaRequest<undefined, GetTrustedAppsListRequest>({
@@ -61,7 +59,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
 
     beforeEach(() => {
       // Get the registered List handler from the IRouter instance
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+      [, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
         path.startsWith(TRUSTED_APPS_LIST_API)
       )!;
     });
