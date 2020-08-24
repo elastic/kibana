@@ -18,16 +18,13 @@ jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
 }));
 
 const savedVis: Document = {
-  expression: 'my | expression',
   state: {
     visualization: {},
     datasourceStates: {},
-    datasourceMetaData: {
-      filterableIndexPatterns: [],
-    },
     query: { query: '', language: 'lucene' },
     filters: [],
   },
+  references: [],
   title: 'My title',
   visualizationType: '',
 };
@@ -59,13 +56,14 @@ describe('embeddable', () => {
         editUrl: '',
         editable: true,
         savedVis,
+        expression: 'my | expression',
       },
       { id: '123' }
     );
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(savedVis.expression);
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual('my | expression');
   });
 
   it('should re-render if new input is pushed', () => {
@@ -82,6 +80,7 @@ describe('embeddable', () => {
         editUrl: '',
         editable: true,
         savedVis,
+        expression: 'my | expression',
       },
       { id: '123' }
     );
@@ -110,6 +109,7 @@ describe('embeddable', () => {
         editUrl: '',
         editable: true,
         savedVis,
+        expression: 'my | expression',
       },
       { id: '123', timeRange, query, filters }
     );
@@ -117,8 +117,49 @@ describe('embeddable', () => {
 
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
       timeRange,
-      query,
+      query: [query, savedVis.state.query],
       filters,
+    });
+  });
+
+  it('should merge external context with query and filters of the saved object', () => {
+    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
+    const query: Query = { language: 'kquery', query: 'external filter' };
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+
+    const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
+      expressionRenderer,
+      getTrigger,
+      {
+        editPath: '',
+        editUrl: '',
+        editable: true,
+        savedVis: {
+          ...savedVis,
+          state: {
+            ...savedVis.state,
+            query: { language: 'kquery', query: 'saved filter' },
+            filters: [
+              { meta: { alias: 'test', negate: false, disabled: false, indexRefName: 'filter-0' } },
+            ],
+          },
+          references: [{ type: 'index-pattern', name: 'filter-0', id: 'my-index-pattern-id' }],
+        },
+        expression: 'my | expression',
+      },
+      { id: '123', timeRange, query, filters }
+    );
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
+      timeRange,
+      query: [query, { language: 'kquery', query: 'saved filter' }],
+      filters: [
+        filters[0],
+        // actual index pattern id gets injected
+        { meta: { alias: 'test', negate: false, disabled: false, index: 'my-index-pattern-id' } },
+      ],
     });
   });
 
@@ -132,6 +173,7 @@ describe('embeddable', () => {
         editUrl: '',
         editable: true,
         savedVis,
+        expression: 'my | expression',
       },
       { id: '123' }
     );
@@ -162,6 +204,7 @@ describe('embeddable', () => {
         editUrl: '',
         editable: true,
         savedVis,
+        expression: 'my | expression',
       },
       { id: '123', timeRange, query, filters }
     );
@@ -195,6 +238,7 @@ describe('embeddable', () => {
         editUrl: '',
         editable: true,
         savedVis,
+        expression: 'my | expression',
       },
       { id: '123', timeRange, query, filters }
     );

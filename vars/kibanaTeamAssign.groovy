@@ -1,6 +1,6 @@
 def loadIngestionPipeline(ingestionPipelineName, title) {
   kibanaPipeline.bash("""
-    source src/dev/ci_setup/setup_env.sh
+    source src/dev/ci_setup/setup_env.sh true
     yarn kbn bootstrap --prefer-offline
 
     . src/dev/code_coverage/shell_scripts/assign_teams.sh '${ingestionPipelineName}'

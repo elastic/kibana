@@ -36,6 +36,7 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({ processor })
               return (
                 <>
                   <formDescriptor.FieldsComponent />
+                  <EuiHorizontalRule />
                   <CommonProcessorFields />
                 </>
               );

@@ -13,7 +13,7 @@ exports[`Logs should render a default message 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation-configuration.html"
             target="_blank"
           >
             <FormattedMessage
@@ -117,7 +117,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
       values={
         Object {
           "link": <EuiLink
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation-configuration.html"
             target="_blank"
           >
             Filebeat

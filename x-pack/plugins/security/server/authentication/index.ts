@@ -6,24 +6,32 @@
 import { UnwrapPromise } from '@kbn/utility-types';
 import {
   ILegacyClusterClient,
-  CoreSetup,
   KibanaRequest,
   LoggerFactory,
+  HttpServiceSetup,
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
 import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
-import { Authenticator, ProviderSession } from './authenticator';
-import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { Session } from '../session_management';
+import { Authenticator } from './authenticator';
+import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { OIDCLogin, SAMLLogin } from './providers';
+export {
+  OIDCLogin,
+  SAMLLogin,
+  BasicAuthenticationProvider,
+  TokenAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  OIDCAuthenticationProvider,
+} from './providers';
 export {
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -39,11 +47,12 @@ export {
 interface SetupAuthenticationParams {
   auditLogger: SecurityAuditLogger;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
-  http: CoreSetup['http'];
+  http: HttpServiceSetup;
   clusterClient: ILegacyClusterClient;
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;
+  session: PublicMethodsOf<Session>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
@@ -56,6 +65,7 @@ export async function setupAuthentication({
   config,
   license,
   loggers,
+  session,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
 
@@ -71,46 +81,16 @@ export async function setupAuthentication({
     return (http.auth.get(request).state ?? null) as AuthenticatedUser | null;
   };
 
-  const isValid = (sessionValue: ProviderSession) => {
-    // ensure that this cookie was created with the current Kibana configuration
-    const { path, idleTimeoutExpiration, lifespanExpiration } = sessionValue;
-    if (path !== undefined && path !== (http.basePath.serverBasePath || '/')) {
-      authLogger.debug(`Outdated session value with path "${sessionValue.path}"`);
-      return false;
-    }
-    // ensure that this cookie is not expired
-    if (idleTimeoutExpiration && idleTimeoutExpiration < Date.now()) {
-      return false;
-    } else if (lifespanExpiration && lifespanExpiration < Date.now()) {
-      return false;
-    }
-    return true;
-  };
-
   const authenticator = new Authenticator({
     auditLogger,
-    getFeatureUsageService,
-    getCurrentUser,
+    loggers,
     clusterClient,
     basePath: http.basePath,
-    config: { session: config.session, authc: config.authc },
+    config: { authc: config.authc },
+    getCurrentUser,
+    getFeatureUsageService,
     license,
-    loggers,
-    sessionStorageFactory: await http.createCookieSessionStorageFactory({
-      encryptionKey: config.encryptionKey,
-      isSecure: config.secureCookies,
-      name: config.cookieName,
-      sameSite: config.sameSiteCookies,
-      validate: (session: ProviderSession | ProviderSession[]) => {
-        const array: ProviderSession[] = Array.isArray(session) ? session : [session];
-        for (const sess of array) {
-          if (!isValid(sess)) {
-            return { isValid: false, path: sess.path };
-          }
-        }
-        return { isValid: true };
-      },
-    }),
+    session,
   });
 
   authLogger.debug('Successfully initialized authenticator.');
@@ -145,6 +125,7 @@ export async function setupAuthentication({
       // decides what location user should be redirected to.
       return t.redirected({
         location: authenticationResult.redirectURL!,
+        ...(authenticationResult.authResponseHeaders || {}),
       });
     }
 
@@ -180,7 +161,6 @@ export async function setupAuthentication({
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
-    getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
     acknowledgeAccessAgreement: authenticator.acknowledgeAccessAgreement.bind(authenticator),
     getCurrentUser,
