@@ -81,11 +81,31 @@ describe('skipQueryForDetectionsPage', () => {
       ).toBe(true);
     });
 
+    test('It should SKIP the query when it is a timeline from a detection page without the siem-signals and the array ordering is different', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsPage,
+          defaultIndex: ['filebeat-*', 'auditbeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(true);
+    });
+
     test('It should SKIP the query when it is a timeline from a detection details page without the siem-signals', () => {
       expect(
         skipQueryForDetectionsPage({
           id: TimelineId.detectionsRulesDetailsPage,
           defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(true);
+    });
+
+    test('It should SKIP the query when it is a timeline from a detection details page without the siem-signals and the array ordering is different', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsRulesDetailsPage,
+          defaultIndex: ['filebeat-*', 'auditbeat-*'],
           defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
         })
       ).toBe(true);

@@ -32,4 +32,4 @@ export const skipQueryForDetectionsPage = ({
   defaultKibanaIndex: string[];
 }) =>
   detectionsTimelineIds.some((timelineId) => timelineId === id) &&
-  isEqual(defaultIndex, defaultKibanaIndex);
+  isEqual(defaultIndex.sort(), defaultKibanaIndex.sort());
