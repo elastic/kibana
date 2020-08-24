@@ -192,7 +192,8 @@ export class Simulator {
   }
 
   /**
-   * Find the graph container by document ID.
+   * Find the graph container by the database document ID.
+   * This better allows us to test when new data is loaded into an existing resolver
    */
   public processResolverGraph(databaseDocumentID: string): ReactWrapper {
     return this.domNodes(`[data-test-resolver-document-id="${databaseDocumentID}"]`);

@@ -9,10 +9,41 @@ import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_
 import { noResolverDataReturned } from '../data_access_layer/mocks/no_resolver_data_returned';
 import '../test_utilities/extend_jest';
 
-describe('resolver: when data has been requested', () => {
+describe('Resolver: data loading and resolution states', () => {
   let simulator: Simulator;
+  let dbDocumentId: string;
   const resolverComponentInstanceID = 'resolver-loading-state';
   const newTreeId = 'new-tree-id';
+
+  describe('When resolver is loaded with data', () => {
+    beforeEach(() => {
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = noAncestorsTwoChildren();
+
+      dbDocumentId = databaseDocumentID;
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+      });
+    });
+
+    it('should display the resolver graph', async () => {
+      await expect(
+        simulator.map(() => ({
+          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
+          resolverGraphError: simulator.testSubject('resolver:graph:error').length,
+          resolverGraph: simulator.processResolverGraph(dbDocumentId).length,
+        }))
+      ).toYieldEqualTo({
+        resolverGraphLoading: 0,
+        resolverGraphError: 0,
+        resolverGraph: 1,
+      });
+    });
+  });
 
   describe('When resolver data is being requested', () => {
     beforeEach(() => {
@@ -27,6 +58,7 @@ describe('resolver: when data has been requested', () => {
         resolverComponentInstanceID,
       });
     });
+
     it('should display a loading state', async () => {
       // Trigger a loading state by requesting data based on a new DocumentID.
       // There really is no way to do this in the view besides changing the url, so triggering the action instead

@@ -19,12 +19,7 @@ interface Metadata {
   /**
    * A record of entityIDs to be used in tests assertions.
    */
-  entityIDs: {
-    /**
-     * The entityID of the node related to the document being analyzed.
-     */
-    nonExisting: 'nonExisting';
-  };
+  entityIDs: {};
 }
 
 /**
@@ -35,8 +30,8 @@ export function noResolverDataReturned(): {
   metadata: Metadata;
 } {
   const metadata: Metadata = {
-    databaseDocumentID: '_id',
-    entityIDs: { nonExisting: 'nonExisting' }, // TODO: pointless, but explicitly documents?
+    databaseDocumentID: '_noDataID',
+    entityIDs: {},
   };
   return {
     metadata,
