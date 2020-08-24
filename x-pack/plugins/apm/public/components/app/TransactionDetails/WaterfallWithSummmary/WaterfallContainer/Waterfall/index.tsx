@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordionProps, EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { useState } from 'react';
@@ -74,9 +74,7 @@ export function Waterfall({
   waterfallItemId,
   location,
 }: Props) {
-  const [accordionState, setAccordionState] = useState<
-    EuiAccordionProps['forceState']
-  >('open');
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
@@ -92,10 +90,11 @@ export function Waterfall({
     if (!entryWaterfallTransaction) {
       return null;
     }
-
     return (
       <AccordionWaterfall
-        initialState={accordionState}
+        // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
+        key={`accordion_state_${isAccordionOpen}`}
+        isOpen={isAccordionOpen}
         item={entryWaterfallTransaction}
         level={0}
         serviceColors={serviceColors}
@@ -130,11 +129,9 @@ export function Waterfall({
           <div style={{ display: 'flex' }}>
             <EuiButtonEmpty
               style={{ zIndex: 3, position: 'absolute' }}
-              iconType={accordionState === 'open' ? 'arrowDown' : 'arrowRight'}
+              iconType={isAccordionOpen ? 'arrowDown' : 'arrowRight'}
               onClick={() => {
-                setAccordionState((currState) =>
-                  currState === 'open' ? 'closed' : 'open'
-                );
+                setIsAccordionOpen((isOpen) => !isOpen);
               }}
             />
             <Timeline

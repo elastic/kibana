@@ -6,7 +6,7 @@
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { Location } from 'history';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './WaterfallItem';
@@ -16,7 +16,7 @@ import {
 } from './waterfall_helpers/waterfall_helpers';
 
 interface AccordionWaterfallProps {
-  initialState: EuiAccordionProps['forceState'];
+  isOpen: boolean;
   item: IWaterfallItem;
   level: number;
   serviceColors: IWaterfall['serviceColors'];
@@ -32,7 +32,10 @@ interface AccordionWaterfallProps {
   onClickWaterfallItem: (item: IWaterfallItem) => void;
 }
 
-const StyledAccordion = styled(EuiAccordion)<
+const StyledAccordion = styled(EuiAccordion).withConfig({
+  shouldForwardProp: (prop) =>
+    !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
+})<
   EuiAccordionProps & {
     childrenCount: number;
     marginLeftLevel: number;
@@ -89,8 +92,11 @@ const WaterfallItemContainer = styled.div`
   left: 0;
 `;
 
+const getAccordionState = (isOpen: boolean): EuiAccordionProps['forceState'] =>
+  isOpen ? 'open' : 'closed';
+
 export function AccordionWaterfall({
-  initialState,
+  isOpen,
   item,
   level,
   serviceColors,
@@ -102,14 +108,10 @@ export function AccordionWaterfall({
   timelineMargins,
   onClickWaterfallItem,
 }: AccordionWaterfallProps) {
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(getAccordionState(isOpen));
 
-  useEffect(() => {
-    setState(initialState);
-  }, [initialState]);
-
-  const toggleAccordion = (isOpen: boolean) => {
-    const newState = isOpen ? 'open' : 'closed';
+  const toggleAccordion = (isAccordionOpen: boolean) => {
+    const newState = getAccordionState(isAccordionOpen);
     setState(newState);
   };
 
@@ -157,7 +159,7 @@ export function AccordionWaterfall({
       {children.map((child) => (
         <AccordionWaterfall
           key={child.id}
-          initialState={initialState}
+          isOpen={isOpen}
           item={child}
           level={nextLevel}
           serviceColors={serviceColors}
