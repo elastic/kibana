@@ -12,3 +12,17 @@ export const txtChangeButton = i18n.translate(
     defaultMessage: 'Change',
   }
 );
+
+export const txtTriggerPickerLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerLabel',
+  {
+    defaultMessage: 'Pick a trigger:',
+  }
+);
+
+export const txtTriggerPickerHelpText = i18n.translate(
+  'xpack.uiActionsEnhanced.components.actionWizard.helpText',
+  {
+    defaultMessage: "What's this?",
+  }
+);

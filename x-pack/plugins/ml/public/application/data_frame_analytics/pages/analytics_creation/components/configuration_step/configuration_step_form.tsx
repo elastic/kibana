@@ -213,13 +213,12 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;
-      }
-
-      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+      } else if (
+        errorMessage.includes('status_exception') &&
+        errorMessage.includes('unsupported type')
+      ) {
         unsupportedFieldsErrorMessage = errorMessage;
-      }
-
-      if (
+      } else if (
         errorMessage.includes('status_exception') &&
         errorMessage.includes('Unable to estimate memory usage as no documents')
       ) {
@@ -231,6 +230,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             },
           })
         );
+      } else {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
+            {
+              defaultMessage: 'An error occurred fetching analysis fields data.',
+            }
+          ),
+          text: errorMessage,
+        });
       }
 
       const fallbackModelMemoryLimit =

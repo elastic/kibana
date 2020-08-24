@@ -21,8 +21,10 @@ import React from 'react';
 
 import { Sheet } from '../helpers/timelion_request_handler';
 import { Panel } from './panel';
+import { ExprVisAPIEvents } from '../../../visualizations/public';
 
 interface ChartComponentProp {
+  applyFilter: ExprVisAPIEvents['applyFilter'];
   interval: string;
   renderComplete(): void;
   seriesList: Sheet;

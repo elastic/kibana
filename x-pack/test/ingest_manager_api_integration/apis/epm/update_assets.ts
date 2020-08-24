@@ -154,24 +154,49 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
-    it('should have installed the new versionized pipeline', async function () {
+    it('should have installed the new versionized pipelines', async function () {
       const res = await es.transport.request({
         method: 'GET',
         path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}`,
       });
       expect(res.statusCode).equal(200);
+      const resPipeline1 = await es.transport.request({
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
+      });
+      expect(resPipeline1.statusCode).equal(200);
     });
     it('should have removed the old versionized pipelines', async function () {
-      let res;
-      try {
-        res = await es.transport.request({
+      const res = await es.transport.request(
+        {
           method: 'GET',
           path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
-        });
-      } catch (err) {
-        res = err;
-      }
+        },
+        {
+          ignore: [404],
+        }
+      );
       expect(res.statusCode).equal(404);
+      const resPipeline1 = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+        },
+        {
+          ignore: [404],
+        }
+      );
+      expect(resPipeline1.statusCode).equal(404);
+      const resPipeline2 = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+        },
+        {
+          ignore: [404],
+        }
+      );
+      expect(resPipeline2.statusCode).equal(404);
     });
     it('should have updated the template components', async function () {
       const res = await es.transport.request({
@@ -273,6 +298,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'ingest_pipeline',
           },
           {
+            id: 'logs-all_assets.test_logs-0.2.0-pipeline1',
+            type: 'ingest_pipeline',
+          },
+          {
             id: 'logs-all_assets.test_logs',
             type: 'index_template',
           },
@@ -293,6 +322,9 @@ export default function (providerContext: FtrProviderContext) {
         version: '0.2.0',
         internal: false,
         removable: true,
+        install_version: '0.2.0',
+        install_status: 'installed',
+        install_started_at: res.attributes.install_started_at,
       });
     });
   });

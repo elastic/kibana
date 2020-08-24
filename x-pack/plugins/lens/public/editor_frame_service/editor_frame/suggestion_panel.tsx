@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _, { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -21,6 +21,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -28,7 +29,7 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
-import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
+import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
@@ -112,7 +113,7 @@ const SuggestionPreview = ({
 }: {
   onSelect: () => void;
   preview: {
-    expression?: Ast;
+    expression?: Ast | null;
     icon: IconType;
     title: string;
   };
@@ -122,30 +123,32 @@ const SuggestionPreview = ({
 }) => {
   return (
     <EuiToolTip content={preview.title}>
-      <EuiPanelFixed
-        className={classNames('lnsSuggestionPanel__button', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'lnsSuggestionPanel__button-isSelected': selected,
-        })}
-        paddingSize="none"
-        data-test-subj="lnsSuggestion"
-        onClick={onSelect}
-      >
-        {preview.expression ? (
-          <DebouncedPreviewRenderer
-            ExpressionRendererComponent={ExpressionRendererComponent}
-            expression={toExpression(preview.expression)}
-            withLabel={Boolean(showTitleAsLabel)}
-          />
-        ) : (
-          <span className="lnsSuggestionPanel__suggestionIcon">
-            <EuiIcon size="xxl" type={preview.icon} />
-          </span>
-        )}
-        {showTitleAsLabel && (
-          <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
-        )}
-      </EuiPanelFixed>
+      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+        <EuiPanelFixed
+          className={classNames('lnsSuggestionPanel__button', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'lnsSuggestionPanel__button-isSelected': selected,
+          })}
+          paddingSize="none"
+          data-test-subj="lnsSuggestion"
+          onClick={onSelect}
+        >
+          {preview.expression ? (
+            <DebouncedPreviewRenderer
+              ExpressionRendererComponent={ExpressionRendererComponent}
+              expression={toExpression(preview.expression)}
+              withLabel={Boolean(showTitleAsLabel)}
+            />
+          ) : (
+            <span className="lnsSuggestionPanel__suggestionIcon">
+              <EuiIcon size="xxl" type={preview.icon} />
+            </span>
+          )}
+          {showTitleAsLabel && (
+            <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
+          )}
+        </EuiPanelFixed>
+      </div>
     </EuiToolTip>
   );
 };
@@ -204,8 +207,8 @@ export function SuggestionPanel({
         : undefined;
 
     return { suggestions: newSuggestions, currentStateExpression: newStateExpression };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    frame,
     currentDatasourceStates,
     currentVisualizationState,
     currentVisualizationId,
@@ -213,12 +216,24 @@ export function SuggestionPanel({
     visualizationMap,
   ]);
 
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: frame.query,
+      timeRange: {
+        from: frame.dateRange.fromDate,
+        to: frame.dateRange.toDate,
+      },
+      filters: frame.filters,
+    }),
+    [frame.query, frame.dateRange.fromDate, frame.dateRange.toDate, frame.filters]
+  );
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
     const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
     return (props: ReactExpressionRendererProps) => (
-      <ExpressionRendererComponent {...props} reload$={autoRefreshFetch$} />
+      <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
     );
-  }, [plugins.data.query.timefilter.timefilter]);
+  }, [plugins.data.query.timefilter.timefilter, context]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -249,15 +264,6 @@ export function SuggestionPanel({
       });
     }
   }
-
-  const expressionContext = {
-    query: frame.query,
-    filters: frame.filters,
-    timeRange: {
-      from: frame.dateRange.fromDate,
-      to: frame.dateRange.toDate,
-    },
-  };
 
   return (
     <div className="lnsSuggestionPanel">
@@ -303,9 +309,7 @@ export function SuggestionPanel({
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
-              expression: currentStateExpression
-                ? prependKibanaContext(currentStateExpression, expressionContext)
-                : undefined,
+              expression: currentStateExpression,
               icon:
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
                   .icon || 'empty',
@@ -323,9 +327,7 @@ export function SuggestionPanel({
           return (
             <SuggestionPreview
               preview={{
-                expression: suggestion.previewExpression
-                  ? prependKibanaContext(suggestion.previewExpression, expressionContext)
-                  : undefined,
+                expression: suggestion.previewExpression,
                 icon: suggestion.previewIcon,
                 title: suggestion.title,
               }}
@@ -389,7 +391,6 @@ function getPreviewExpression(
       if (updatedLayerApis[layerId]) {
         updatedLayerApis[layerId] = datasource.getPublicAPI({
           layerId,
-          dateRange: frame.dateRange,
           state: datasourceState,
         });
       }
@@ -398,7 +399,7 @@ function getPreviewExpression(
 
   return visualization.toPreviewExpression(
     visualizableState.visualizationState,
-    suggestionFrameApi
+    suggestionFrameApi.datasourceLayers
   );
 }
 

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-export * from './aggs';
 export * from './expressions';
-export * from './tabify';
 
 export {
   ISearch,
@@ -36,13 +34,7 @@ export { getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export {
-  SearchError,
-  FetchOptions,
-  SearchRequest,
-  SearchResponse,
-  getSearchParamsFromRequest,
-} from './fetch';
+export { SearchError, FetchOptions, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 export {
   ISearchSource,

@@ -24,7 +24,7 @@ import { TemplateContext } from '../template_context';
 function generator({
   imageTag,
   imageFlavor,
-  versionTag,
+  version,
   dockerOutputDir,
   baseOSImage,
   ubiImageFlavor,
@@ -39,9 +39,9 @@ function generator({
   docker pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} -f Dockerfile . || exit 1;
+  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} | gzip -c > ${dockerOutputDir}
+  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} | gzip -c > ${dockerOutputDir}
 
   exit 0
   `);
