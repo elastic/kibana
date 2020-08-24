@@ -96,7 +96,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return this.runSearch({ id }, combinedSignal, options?.strategy);
+            return this.runSearch({ ...request, id }, combinedSignal, options?.strategy);
           })
         );
       }),
