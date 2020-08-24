@@ -10,19 +10,52 @@ import { deserializeDataStream, deserializeDataStreamList } from '../../../../co
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
+const querySchema = schema.object({
+  includeStats: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
+});
+
 export function registerGetAllRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/data_streams'), validate: false },
+    { path: addBasePath('/data_streams'), validate: { query: querySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
+
+      const includeStats = (req.query as TypeOf<typeof querySchema>).includeStats === 'true';
 
       try {
         const { data_streams: dataStreams } = await callAsCurrentUser(
           'dataManagement.getDataStreams'
         );
-        const body = deserializeDataStreamList(dataStreams);
 
-        return res.ok({ body });
+        if (includeStats) {
+          const {
+            data_streams: dataStreamsStats,
+          } = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
+            path: '/_data_stream/*/_stats',
+            method: 'GET',
+            query: {
+              human: true,
+            },
+          });
+
+          // Merge stats into data streams.
+          for (let i = 0; i < dataStreams.length; i++) {
+            const dataStream = dataStreams[i];
+
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const { store_size, maximum_timestamp } = dataStreamsStats.find(
+              ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
+            );
+
+            dataStreams[i] = {
+              ...dataStream,
+              store_size,
+              maximum_timestamp,
+            };
+          }
+        }
+
+        return res.ok({ body: deserializeDataStreamList(dataStreams) });
       } catch (error) {
         if (isEsError(error)) {
           return res.customError({
@@ -52,12 +85,28 @@ export function registerGetOneRoute({ router, license, lib: { isEsError } }: Rou
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
       try {
-        const { data_streams: dataStream } = await callAsCurrentUser(
-          'dataManagement.getDataStream',
-          { name }
-        );
+        const [
+          { data_streams: dataStream },
+          { data_streams: dataStreamsStats },
+        ] = await Promise.all([
+          callAsCurrentUser('dataManagement.getDataStream', { name }),
+          ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
+            path: `/_data_stream/${name}/_stats`,
+            method: 'GET',
+            query: {
+              human: true,
+            },
+          }),
+        ]);
 
         if (dataStream[0]) {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const { store_size, maximum_timestamp } = dataStreamsStats[0];
+          dataStream[0] = {
+            ...dataStream[0],
+            store_size,
+            maximum_timestamp,
+          };
           const body = deserializeDataStream(dataStream[0]);
           return res.ok({ body });
         }
