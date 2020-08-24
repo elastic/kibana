@@ -9,8 +9,21 @@ import { pluginInitializerContextConfigMock } from '../../../../../src/core/serv
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 
 const mockAsyncResponse = {
-  id: 'foo',
-  response: {
+  body: {
+    id: 'foo',
+    response: {
+      _shards: {
+        total: 10,
+        failed: 1,
+        skipped: 2,
+        successful: 7,
+      },
+    },
+  },
+};
+
+const mockRollupResponse = {
+  body: {
     _shards: {
       total: 10,
       failed: 1,
@@ -20,22 +33,15 @@ const mockAsyncResponse = {
   },
 };
 
-const mockRollupResponse = {
-  _shards: {
-    total: 10,
-    failed: 1,
-    skipped: 2,
-    successful: 7,
-  },
-};
-
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
   const mockLogger: any = {
-    info: () => {},
+    debug: () => {},
   };
   const mockContext = {
-    core: { elasticsearch: { legacy: { client: { callAsCurrentUser: mockApiCaller } } } },
+    core: {
+      elasticsearch: { client: { asCurrentUser: { transport: { request: mockApiCaller } } } },
+    },
   };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
@@ -58,8 +64,7 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path, body } = mockApiCaller.mock.calls[0][1];
+    const { method, path, body } = mockApiCaller.mock.calls[0][0];
     expect(method).toBe('POST');
     expect(path).toBe('/logstash-*/_async_search');
     expect(body).toEqual({ query: {} });
@@ -74,8 +79,7 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path, body } = mockApiCaller.mock.calls[0][1];
+    const { method, path, body } = mockApiCaller.mock.calls[0][0];
     expect(method).toBe('GET');
     expect(path).toBe('/_async_search/foo');
     expect(body).toEqual(undefined);
@@ -90,8 +94,7 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path } = mockApiCaller.mock.calls[0][1];
+    const { method, path } = mockApiCaller.mock.calls[0][0];
     expect(method).toBe('POST');
     expect(path).toBe('/foo-%E7%A8%8B/_async_search');
   });
@@ -108,8 +111,7 @@ describe('ES search strategy', () => {
     });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path } = mockApiCaller.mock.calls[0][1];
+    const { method, path } = mockApiCaller.mock.calls[0][0];
     expect(method).toBe('POST');
     expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
   });
@@ -123,9 +125,8 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { query } = mockApiCaller.mock.calls[0][1];
-    expect(query).toHaveProperty('wait_for_completion_timeout');
-    expect(query).toHaveProperty('keep_alive');
+    const { querystring } = mockApiCaller.mock.calls[0][0];
+    expect(querystring).toHaveProperty('wait_for_completion_timeout');
+    expect(querystring).toHaveProperty('keep_alive');
   });
 });
