@@ -94,7 +94,7 @@ export function ColorPaletteFlexItem({
               '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
             values: {
               percentage,
-              title: title.toLowerCase(),
+              title: title?.toLowerCase(),
               exp: good ? GOOD_LABEL : bad ? POOR_LABEL : AVERAGE_LABEL,
               moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
               value: good || average ? thresholds.good : thresholds.bad,
@@ -111,63 +111,5 @@ export function ColorPaletteFlexItem({
         <ColoredSpan title={hexCode} style={spanStyle} />
       </EuiToolTip>
     </EuiFlexItem>
-  );
-}
-
-interface Props {
-  title: string;
-  value: string;
-  ranks?: number[];
-  loading: boolean;
-  thresholds: { good: string; bad: string };
-}
-
-export function CoreVitalItem({
-  loading,
-  title,
-  value,
-  thresholds,
-  ranks = [100, 0, 0],
-}: Props) {
-  const palette = euiPaletteForStatus(3);
-
-  const [inFocusInd, setInFocusInd] = useState<number | null>(null);
-
-  return (
-    <>
-      <EuiStat
-        titleSize="s"
-        title={value}
-        description={title}
-        titleColor={palette[0]}
-        isLoading={loading}
-      />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="flexStart"
-        style={{ width: 340 }}
-      >
-        {palette.map((hexCode, ind) => (
-          <ColorPaletteFlexItem
-            hexCode={hexCode}
-            key={hexCode}
-            position={ind}
-            inFocus={inFocusInd !== ind && inFocusInd !== null}
-            percentage={ranks[ind]}
-            title={title}
-            thresholds={thresholds}
-          />
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <PaletteLegends
-        ranks={ranks}
-        onItemHover={(ind) => {
-          setInFocusInd(ind);
-        }}
-      />
-      <EuiSpacer size="xl" />
-    </>
   );
 }
