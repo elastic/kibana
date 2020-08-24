@@ -16,11 +16,11 @@ import { ApmPluginSetupDeps } from '../plugin';
 import {
   KibanaContextProvider,
   useUiSetting$,
+  RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { history, resetHistory } from '../utils/history';
 import 'react-vis/dist/style.css';
 import { RumHome } from '../components/app/RumDashboard/RumHome';
 import { ConfigSchema } from '../index';
@@ -70,12 +70,12 @@ function CsmApp() {
 export function CsmAppRoot({
   core,
   deps,
-  routerHistory,
+  history,
   config,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
-  routerHistory: typeof history;
+  history: AppMountParameters['history'];
   config: ConfigSchema;
 }) {
   const i18nCore = core.i18n;
@@ -86,19 +86,21 @@ export function CsmAppRoot({
     plugins,
   };
   return (
-    <ApmPluginContext.Provider value={apmPluginContextValue}>
-      <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <i18nCore.Context>
-          <Router history={routerHistory}>
-            <UrlParamsProvider>
-              <LoadingIndicatorProvider>
-                <CsmApp />
-              </LoadingIndicatorProvider>
-            </UrlParamsProvider>
-          </Router>
-        </i18nCore.Context>
-      </KibanaContextProvider>
-    </ApmPluginContext.Provider>
+    <RedirectAppLinks application={core.application}>
+      <ApmPluginContext.Provider value={apmPluginContextValue}>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <UrlParamsProvider>
+                <LoadingIndicatorProvider>
+                  <CsmApp />
+                </LoadingIndicatorProvider>
+              </UrlParamsProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
+      </ApmPluginContext.Provider>
+    </RedirectAppLinks>
   );
 }
 
@@ -109,19 +111,13 @@ export function CsmAppRoot({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element }: AppMountParameters,
+  { element, history }: AppMountParameters,
   config: ConfigSchema
 ) => {
   createCallApmApi(core.http);
 
-  resetHistory();
   ReactDOM.render(
-    <CsmAppRoot
-      core={core}
-      deps={deps}
-      routerHistory={history}
-      config={config}
-    />,
+    <CsmAppRoot core={core} deps={deps} history={history} config={config} />,
     element
   );
   return () => {
