@@ -17,23 +17,23 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider } from 'src/core/server';
-import { ServiceConfigDescriptor } from '../internal_types';
+import { UiSettingsParams } from '../../../types';
+import { getAccessibilitySettings } from './accessibility';
+import { getDateFormatSettings } from './date_formats';
+import { getMiscUiSettings } from './misc';
+import { getNavigationSettings } from './navigation';
+import { getNotificationsSettings } from './notifications';
+import { getThemeSettings } from './theme';
+import { getStateSettings } from './state';
 
-const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
-  unused('enabled'),
-  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
-];
-
-const configSchema = schema.object({
-  overrides: schema.object({}, { unknowns: 'allow' }),
-});
-
-export type UiSettingsConfigType = TypeOf<typeof configSchema>;
-
-export const config: ServiceConfigDescriptor<UiSettingsConfigType> = {
-  path: 'uiSettings',
-  schema: configSchema,
-  deprecations,
+export const getCoreSettings = (): Record<string, UiSettingsParams> => {
+  return {
+    ...getAccessibilitySettings(),
+    ...getDateFormatSettings(),
+    ...getMiscUiSettings(),
+    ...getNavigationSettings(),
+    ...getNotificationsSettings(),
+    ...getThemeSettings(),
+    ...getStateSettings(),
+  };
 };

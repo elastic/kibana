@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider } from 'src/core/server';
-import { ServiceConfigDescriptor } from '../internal_types';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import { UiSettingsParams } from '../../../types';
 
-const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
-  unused('enabled'),
-  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
-];
-
-const configSchema = schema.object({
-  overrides: schema.object({}, { unknowns: 'allow' }),
-});
-
-export type UiSettingsConfigType = TypeOf<typeof configSchema>;
-
-export const config: ServiceConfigDescriptor<UiSettingsConfigType> = {
-  path: 'uiSettings',
-  schema: configSchema,
-  deprecations,
+export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => {
+  return {
+    'accessibility:disableAnimations': {
+      name: i18n.translate('core.ui_settings.params.disableAnimationsTitle', {
+        defaultMessage: 'Disable Animations',
+      }),
+      value: false,
+      description: i18n.translate('core.ui_settings.params.disableAnimationsText', {
+        defaultMessage:
+          'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
+      }),
+      category: ['accessibility'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+  };
 };
