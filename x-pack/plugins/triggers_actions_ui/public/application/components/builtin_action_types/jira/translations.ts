@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const JIRA_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
   {
-    defaultMessage: 'Push or update Security case data to a new issue in Jira',
+    defaultMessage: 'Push or update data to a new issue in Jira',
   }
 );
 
