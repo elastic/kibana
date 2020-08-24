@@ -50,24 +50,21 @@ export function createRateLimiter(
   const waitingObservers = new Map<Rx.Subscriber<any>, any>();
 
   let tokens = ratelimitRequestPerInterval;
-  const tokenSubject = new Rx.BehaviorSubject(tokens);
+
   function addToken() {
     if (tokens < ratelimitRequestPerInterval) {
-      tokenSubject.next(++tokens);
+      tokens++;
     }
+    publishIfTokensAvailable();
   }
 
   function consumeToken() {
-    tokenSubject.next(--tokens);
+    tokens--;
   }
 
   function isTokenAvailable() {
     return tokens > 0;
   }
-
-  tokenSubject.subscribe(() => {
-    publishIfTokensAvailable();
-  });
 
   function publishIfTokensAvailable() {
     if (!isTokenAvailable()) {
