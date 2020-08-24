@@ -5,7 +5,7 @@
   "configPath": ["ui_actions_enhanced_examples"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActionsEnhanced", "data", "discover"],
+  "requiredPlugins": ["uiActions","uiActionsEnhanced", "data", "discover"],
   "optionalPlugins": [],
   "requiredBundles": [
     "kibanaUtils",

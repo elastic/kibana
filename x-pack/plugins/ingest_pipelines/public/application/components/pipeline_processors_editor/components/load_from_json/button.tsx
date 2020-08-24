@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
@@ -15,7 +15,7 @@ interface Props {
 
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.buttonLabel', {
-    defaultMessage: 'Load JSON',
+    defaultMessage: 'Import',
   }),
 };
 
@@ -24,9 +24,9 @@ export const LoadFromJsonButton: FunctionComponent<Props> = ({ onDone }) => {
     <ModalProvider onDone={onDone}>
       {(openModal) => {
         return (
-          <EuiButton size="s" onClick={openModal}>
+          <EuiButtonEmpty size="s" onClick={openModal} iconType="importAction">
             {i18nTexts.buttonLabel}
-          </EuiButton>
+          </EuiButtonEmpty>
         );
       }}
     </ModalProvider>

@@ -31,6 +31,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
+import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license';
@@ -655,20 +656,24 @@ export const Page: FC = () => {
                     <h1>{currentIndexPattern.title}</h1>
                   </EuiTitle>
                 </EuiPageContentHeaderSection>
-                {currentIndexPattern.timeFieldName !== undefined && (
-                  <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
-                    <FullTimeRangeSelector
-                      indexPattern={currentIndexPattern}
-                      query={combinedQuery}
-                      disabled={false}
-                    />
-                  </EuiPageContentHeaderSection>
-                )}
+                <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
+                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+                    {currentIndexPattern.timeFieldName !== undefined && (
+                      <EuiFlexItem grow={false}>
+                        <FullTimeRangeSelector
+                          indexPattern={currentIndexPattern}
+                          query={combinedQuery}
+                          disabled={false}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <DatePickerWrapper />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPageContentHeaderSection>
               </EuiPageContentHeader>
             </EuiFlexItem>
-            {showActionsPanel === true && (
-              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }} />
-            )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiPageContentBody>
