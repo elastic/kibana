@@ -64,8 +64,19 @@ function renderNotifications(
 ) {
   return notifications.map((notification) => {
     const context = { embeddable };
+    const iconType = notification.getIconType({ ...context, trigger: panelNotificationTrigger });
 
-    let badge = (
+    let badge = iconType ? (
+      <EuiBadge
+        data-test-subj={`embeddablePanelNotification-${notification.id}`}
+        iconType={iconType}
+        key={notification.id}
+        style={{ marginTop: '2px', marginRight: '4px' }}
+        color="hollow"
+      >
+        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
+      </EuiBadge>
+    ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
         key={notification.id}
