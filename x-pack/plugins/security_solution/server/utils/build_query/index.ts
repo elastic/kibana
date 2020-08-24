@@ -10,7 +10,7 @@ export * from './merge_fields_with_hits';
 export * from './calculate_timeseries_interval';
 
 export const assertUnreachable = (
-  x: unknown,
+  x: never,
   message: string = 'Unknown Field in switch statement'
 ): never => {
   throw new Error(`${message} ${x}`);
