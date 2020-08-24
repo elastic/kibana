@@ -81,7 +81,11 @@ export const EndpointDetailsFlyout = memo(() => {
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          {loading ? <EuiLoadingContent lines={1} /> : <h2 data-test-subj="endpointDetailsFlyoutTitle"> {details?.host?.hostname} </h2>}
+          {loading ? (
+            <EuiLoadingContent lines={1} />
+          ) : (
+            <h2 data-test-subj="endpointDetailsFlyoutTitle"> {details?.host?.hostname} </h2>
+          )}
         </EuiTitle>
       </EuiFlyoutHeader>
       {details === undefined ? (
