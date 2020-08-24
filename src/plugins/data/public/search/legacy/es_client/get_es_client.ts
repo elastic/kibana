@@ -22,17 +22,20 @@ import { default as es } from 'elasticsearch-browser/elasticsearch';
 import { CoreStart, PackageInfo } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
 
-export function getEsClient(
-  injectedMetadata: CoreStart['injectedMetadata'],
-  http: CoreStart['http'],
-  packageInfo: PackageInfo
-) {
-  const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
-  const esApiVersion = injectedMetadata.getInjectedVar('esApiVersion') as string;
-
+export function getEsClient({
+  esRequestTimeout,
+  esApiVersion,
+  http,
+  packageVersion,
+}: {
+  esRequestTimeout: number;
+  esApiVersion: string;
+  http: CoreStart['http'];
+  packageVersion: PackageInfo['version'];
+}) {
   // Use legacy es client for msearch.
   const client = es.Client({
-    host: getEsUrl(http, packageInfo),
+    host: getEsUrl(http, packageVersion),
     log: 'info',
     requestTimeout: esRequestTimeout,
     apiVersion: esApiVersion,
@@ -78,7 +81,7 @@ function wrapEsClientMethod(esClient: any, method: string, loadingCount$: Behavi
   };
 }
 
-function getEsUrl(http: CoreStart['http'], packageInfo: PackageInfo) {
+function getEsUrl(http: CoreStart['http'], packageVersion: PackageInfo['version']) {
   const a = document.createElement('a');
   a.href = http.basePath.prepend('/elasticsearch');
   const protocolPort = /https/.test(a.protocol) ? 443 : 80;
@@ -89,7 +92,7 @@ function getEsUrl(http: CoreStart['http'], packageInfo: PackageInfo) {
     protocol: a.protocol,
     pathname: a.pathname,
     headers: {
-      'kbn-version': packageInfo.version,
+      'kbn-version': packageVersion,
     },
   };
 }

@@ -41,6 +41,7 @@ export class AuditTrailClient implements Auditor {
       user: user?.username,
       space: spaceId,
       scope: this.scope,
+      requestId: this.request.id,
     });
   }
 }
