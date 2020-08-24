@@ -48,6 +48,19 @@
         }
       }
     },
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean"
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean"
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean"
+        }
+      }
+    },
     "telemetry": {
       "properties": {
         "opt_in_status": {
