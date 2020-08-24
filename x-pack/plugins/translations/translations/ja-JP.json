@@ -10609,7 +10609,6 @@
     "xpack.maps.style.customColorPaletteLabel": "カスタムカラーパレット",
     "xpack.maps.style.customColorRampLabel": "カスタマカラーランプ",
     "xpack.maps.style.fieldSelect.OriginLabel": "{fieldOrigin} からのフィールド",
-    "xpack.maps.style.heatmap.displayNameLabel": "ヒートマップスタイル",
     "xpack.maps.style.heatmap.resolutionStyleErrorMessage": "解像度パラメーターが認識されません: {resolution}",
     "xpack.maps.styles.categorical.otherCategoryLabel": "その他",
     "xpack.maps.styles.color.staticDynamicSelect.staticLabel": "塗りつぶし",
