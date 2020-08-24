@@ -16,6 +16,7 @@ import {
 import { ILayer } from '../layer';
 import { IJoin } from '../../joins/join';
 import { IVectorStyle } from '../../styles/vector/vector_style';
+import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -32,7 +33,7 @@ export interface IVectorLayer extends ILayer {
   getJoins(): IJoin[];
   getValidJoins(): IJoin[];
   getSource(): IVectorSource;
-  getStyle(): IVectorStyle;
+  getStyle(): IVectorStyle | HeatmapStyle;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
