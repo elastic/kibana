@@ -186,8 +186,12 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
               defaultMessage: 'Drag and drop to visualize.',
             })
-          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+          : exists
+          ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
               defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
+              defaultMessage: "This field doesn't have data. Drag and drop to visualize.",
             })
       }
       type="iInCircle"
@@ -217,11 +221,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             isDraggable
             isActive={infoIsOpen}
             data-test-subj={`lnsFieldListPanelField-${field.name}`}
-            onClick={() => {
-              if (exists) {
-                togglePopover();
-              }
-            }}
+            onClick={togglePopover}
             aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
               defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
               values: {
@@ -313,7 +313,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display.',
+          defaultMessage:
+            'This field is empty because it doesn’t exist in the 500 sampled documents.',
         })}
       </EuiText>
     );
