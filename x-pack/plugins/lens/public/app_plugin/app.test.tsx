@@ -300,7 +300,7 @@ describe('Lens App', () => {
     ]);
   });
 
-  it('sets originatingApp breadcrumb when the document title changes', async () => {
+  it.skip('sets originatingApp breadcrumb when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
     defaultArgs.originatingApp = 'ultraCoolDashboard';
     defaultArgs.getAppNameFromId = () => 'The Coolest Container Ever Made';
