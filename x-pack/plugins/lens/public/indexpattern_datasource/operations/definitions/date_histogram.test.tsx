@@ -254,6 +254,7 @@ describe('date_histogram', () => {
           fields: [
             {
               name: 'timestamp',
+              displayName: 'timestamp',
               aggregatable: true,
               searchable: true,
               type: 'date',
