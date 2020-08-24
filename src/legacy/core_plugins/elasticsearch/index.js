@@ -20,7 +20,6 @@ import { first } from 'rxjs/operators';
 import { Cluster } from './server/lib/cluster';
 import { createProxy } from './server/lib/create_proxy';
 import { handleESError } from './server/lib/handle_es_error';
-import { versionHealthCheck } from './lib/version_health_check';
 
 export default function (kibana) {
   let defaultVars;
@@ -91,14 +90,6 @@ export default function (kibana) {
       server.expose('handleESError', handleESError);
 
       createProxy(server);
-
-      const waitUntilHealthy = versionHealthCheck(
-        this,
-        server.logWithMetadata,
-        server.newPlatform.__internals.elasticsearch.esNodesCompatibility$
-      );
-
-      server.expose('waitUntilReady', () => waitUntilHealthy);
     },
   });
 }
