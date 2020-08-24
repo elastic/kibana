@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { SerializedFieldFormat } from '../../../../plugins/expressions/public';
+import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
@@ -80,7 +80,7 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-const getSchemas = (
+export const getSchemas = (
   vis: Vis,
   opts: {
     timeRange?: any;
@@ -269,69 +269,12 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const interval = prepareString('interval', params.interval);
     return `timelion_vis ${expression}${interval}`;
   },
-  markdown: (params) => {
-    const { markdown, fontSize, openLinksInNewTab } = params;
-    let escapedMarkdown = '';
-    if (typeof markdown === 'string' || markdown instanceof String) {
-      escapedMarkdown = escapeString(markdown.toString());
-    }
-    let expr = `markdownvis '${escapedMarkdown}' `;
-    expr += prepareValue('font', `{font size=${fontSize}}`, true);
-    expr += prepareValue('openLinksInNewTab', openLinksInNewTab);
-    return expr;
-  },
   table: (params, schemas) => {
     const visConfig = {
       ...params,
       ...buildVisConfig.table(schemas, params),
     };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
-  },
-  metric: (params, schemas) => {
-    const {
-      percentageMode,
-      useRanges,
-      colorSchema,
-      metricColorMode,
-      colorsRange,
-      labels,
-      invertColors,
-      style,
-    } = params.metric;
-    const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
-
-    // fix formatter for percentage mode
-    if (get(params, 'metric.percentageMode') === true) {
-      metrics.forEach((metric: SchemaConfig) => {
-        metric.format = { id: 'percent' };
-      });
-    }
-
-    let expr = `metricvis `;
-    expr += prepareValue('percentageMode', percentageMode);
-    expr += prepareValue('colorSchema', colorSchema);
-    expr += prepareValue('colorMode', metricColorMode);
-    expr += prepareValue('useRanges', useRanges);
-    expr += prepareValue('invertColors', invertColors);
-    expr += prepareValue('showLabels', labels && labels.show);
-    if (style) {
-      expr += prepareValue('bgFill', style.bgFill);
-      expr += prepareValue('font', `{font size=${style.fontSize}}`, true);
-      expr += prepareValue('subText', style.subText);
-      expr += prepareDimension('bucket', bucket);
-    }
-
-    if (colorsRange) {
-      colorsRange.forEach((range: any) => {
-        expr += prepareValue('colorRange', `{range from=${range.from} to=${range.to}}`, true);
-      });
-    }
-
-    metrics.forEach((metric: SchemaConfig) => {
-      expr += prepareDimension('metric', metric);
-    });
-
-    return expr;
   },
   tagcloud: (params, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = params;
@@ -387,14 +330,6 @@ const buildVisConfig: BuildVisConfigFunction = {
       // and removing all metrics from the dimensions except the last set.
       const metricsPerBucket = metrics.length / buckets.length;
       visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
-    }
-    return visConfig;
-  },
-  metric: (schemas) => {
-    const visConfig = { dimensions: {} } as any;
-    visConfig.dimensions.metrics = schemas.metric;
-    if (schemas.group) {
-      visConfig.dimensions.bucket = schemas.group[0];
     }
     return visConfig;
   },
@@ -507,39 +442,46 @@ export const buildPipeline = async (
   }
   pipeline += '| ';
 
-  // request handler
-  if (vis.type.requestHandler === 'courier') {
-    pipeline += `esaggs
+  if (vis.type.toExpressionAst) {
+    const visAst = await vis.type.toExpressionAst(vis, params);
+    pipeline += formatExpression(visAst);
+  } else {
+    // request handler
+    if (vis.type.requestHandler === 'courier') {
+      pipeline += `esaggs
     ${prepareString('index', indexPattern!.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', vis.data.aggs!.aggs)} | `;
-  }
+    }
 
-  const schemas = getSchemas(vis, {
-    timeRange: params.timeRange,
-    timefilter: params.timefilter,
-  });
-  if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name]({ title, ...vis.params }, schemas, uiState);
-  } else if (vislibCharts.includes(vis.type.name)) {
-    const visConfig = { ...vis.params };
-    visConfig.dimensions = await buildVislibDimensions(vis, params);
+    const schemas = getSchemas(vis, {
+      timeRange: params.timeRange,
+      timefilter: params.timefilter,
+    });
+    if (buildPipelineVisFunction[vis.type.name]) {
+      pipeline += buildPipelineVisFunction[vis.type.name](
+        { title, ...vis.params },
+        schemas,
+        uiState
+      );
+    } else if (vislibCharts.includes(vis.type.name)) {
+      const visConfig = { ...vis.params };
+      visConfig.dimensions = await buildVislibDimensions(vis, params);
 
-    pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visConfig)}`;
-  } else if (vis.type.toExpression) {
-    pipeline += await vis.type.toExpression(vis, params);
-  } else {
-    const visConfig = { ...vis.params };
-    visConfig.dimensions = schemas;
-    pipeline += `visualization type='${vis.type.name}'
+      pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visConfig)}`;
+    } else {
+      const visConfig = { ...vis.params };
+      visConfig.dimensions = schemas;
+      pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
-    if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)} `;
-      if (vis.data.aggs) {
-        pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+      if (indexPattern) {
+        pipeline += `${prepareString('index', indexPattern.id)} `;
+        if (vis.data.aggs) {
+          pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+        }
       }
     }
   }

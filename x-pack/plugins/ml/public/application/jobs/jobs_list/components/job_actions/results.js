@@ -51,7 +51,7 @@ export function ResultLinks({ jobs }) {
         <EuiToolTip position="bottom" content={openJobsInSingleMetricViewerText}>
           <EuiButtonIcon
             href={getLink('timeseriesexplorer', jobs)}
-            iconType="stats"
+            iconType="visLine"
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
             isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
@@ -62,7 +62,7 @@ export function ResultLinks({ jobs }) {
       <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
         <EuiButtonIcon
           href={getLink('explorer', jobs)}
-          iconType="tableOfContents"
+          iconType="visTable"
           aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
           isDisabled={jobActionsDisabled === true}

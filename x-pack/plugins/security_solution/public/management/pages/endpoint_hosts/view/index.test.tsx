@@ -8,6 +8,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
 import { EndpointList } from './index';
+import '../../../../common/mock/match_media.ts';
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -72,7 +73,7 @@ describe('when on the list page', () => {
     beforeEach(async () => {
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
-        endpointPackageConfigs: mockPolicyResultList({ total: 3 }).items,
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
       });
     });
     afterEach(() => {
@@ -139,14 +140,17 @@ describe('when on the list page', () => {
           });
 
           // Make sure that the first policy id in the host result is not set as non-existent
-          const ingestPackageConfigs = mockPolicyResultList({ total: 1 }).items;
-          ingestPackageConfigs[0].id = firstPolicyID;
+          const ingestPackagePolicies = mockPolicyResultList({ total: 1 }).items;
+          ingestPackagePolicies[0].id = firstPolicyID;
 
           setEndpointListApiMockImplementation(coreStart.http, {
             endpointsResults: hostListData,
-            endpointPackageConfigs: ingestPackageConfigs,
+            endpointPackagePolicies: ingestPackagePolicies,
           });
         });
+      });
+      afterEach(() => {
+        jest.clearAllMocks();
       });
 
       it('should display rows in the table', async () => {
@@ -242,10 +246,86 @@ describe('when on the list page', () => {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/75721
+  describe.skip('when polling on Endpoint List', () => {
+    beforeEach(async () => {
+      await reactTestingLibrary.act(() => {
+        const hostListData = mockEndpointResultList({ total: 4 }).hosts;
+
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: hostListData,
+        });
+
+        const pollInterval = 10;
+        store.dispatch({
+          type: 'userUpdatedEndpointListRefreshOptions',
+          payload: {
+            autoRefreshInterval: pollInterval,
+          },
+        });
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should update data after some time', async () => {
+      let renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      });
+      const total = await renderResult.findAllByTestId('endpointListTableTotal');
+      expect(total[0].textContent).toEqual('4 Hosts');
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: mockEndpointResultList({ total: 1 }).hosts,
+      });
+
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('appRequestedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      });
+
+      renderResult = render();
+
+      const updatedTotal = await renderResult.findAllByTestId('endpointListTableTotal');
+      expect(updatedTotal[0].textContent).toEqual('1 Host');
+    });
+  });
+
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
     let agentId: string;
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+    const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        host_status,
+        metadata: { host, ...details },
+      } = mockEndpointDetailsApiResult();
+
+      hostDetails = {
+        host_status,
+        metadata: {
+          ...details,
+          host: {
+            ...host,
+            id: '1',
+          },
+        },
+      };
+
+      agentId = hostDetails.metadata.elastic.agent.id;
+
+      const policy = docGenerator.generatePolicyPackagePolicy();
+      policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [hostDetails],
+        endpointPackagePolicies: [policy],
+        policyResponse: mockedPolicyResponse,
+      });
+    };
 
     const createPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
@@ -312,32 +392,7 @@ describe('when on the list page', () => {
     };
 
     beforeEach(async () => {
-      const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        host_status,
-        metadata: { host, ...details },
-      } = mockEndpointDetailsApiResult();
-
-      hostDetails = {
-        host_status,
-        metadata: {
-          ...details,
-          host: {
-            ...host,
-            id: '1',
-          },
-        },
-      };
-
-      agentId = hostDetails.metadata.elastic.agent.id;
-
-      const policy = docGenerator.generatePolicyPackageConfig();
-      policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
-
-      setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: [hostDetails],
-        endpointPackageConfigs: [policy],
-      });
+      mockEndpointListApi();
 
       reactTestingLibrary.act(() => {
         history.push('/endpoints?selected_endpoint=1');
@@ -406,9 +461,6 @@ describe('when on the list page', () => {
 
     it('should display Success overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.success);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Success');
 
@@ -419,10 +471,8 @@ describe('when on the list page', () => {
     });
 
     it('should display Warning overall policy status', async () => {
+      mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.warning));
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.warning);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Warning');
 
@@ -433,10 +483,8 @@ describe('when on the list page', () => {
     });
 
     it('should display Failed overall policy status', async () => {
+      mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.failure));
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.failure);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Failed');
 
@@ -447,10 +495,8 @@ describe('when on the list page', () => {
     });
 
     it('should display Unknown overall policy status', async () => {
+      mockEndpointListApi(createPolicyResponse('' as HostPolicyResponseActionStatus));
       const renderResult = await renderAndWaitForData();
-      reactTestingLibrary.act(() => {
-        dispatchServerReturnedEndpointPolicyResponse('' as HostPolicyResponseActionStatus);
-      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Unknown');
 

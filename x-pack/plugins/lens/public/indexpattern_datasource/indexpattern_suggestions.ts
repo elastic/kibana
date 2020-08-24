@@ -481,11 +481,19 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const layer = state.layers[layerId];
   const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
+  const currentFields = state.indexPatterns[state.currentIndexPatternId].fields;
+  const firstBucketLabel =
+    currentFields.find((field) => field.name === layer.columns[firstBucket].sourceField)
+      ?.displayName || '';
+  const secondBucketLabel =
+    currentFields.find((field) => field.name === layer.columns[secondBucket].sourceField)
+      ?.displayName || '';
+
   return buildSuggestion({
     state,
     layerId,
     updatedLayer,
-    label: getNestedTitle([layer.columns[secondBucket], layer.columns[firstBucket]]),
+    label: getNestedTitle([secondBucketLabel, firstBucketLabel]),
     changeType: 'reorder',
   });
 }
@@ -544,12 +552,12 @@ function createMetricSuggestion(
   });
 }
 
-function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
+function getNestedTitle([outerBucketLabel, innerBucketLabel]: string[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
     defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: innerBucket.sourceField,
-      outerOperation: outerBucket.sourceField,
+      innerOperation: innerBucketLabel,
+      outerOperation: outerBucketLabel,
     },
   });
 }

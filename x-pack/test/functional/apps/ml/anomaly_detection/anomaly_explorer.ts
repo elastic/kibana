@@ -79,24 +79,26 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.cleanMlIndices();
         });
 
-        it('loads from job list row link', async () => {
+        it('opens a job from job list link', async () => {
+          await ml.testExecution.logTestStep('navigate to job list');
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
 
+          await ml.testExecution.logTestStep('open job in anomaly explorer');
           await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id);
           const rows = await ml.jobTable.parseJobTable();
           expect(rows.filter((row) => row.id === testData.jobConfig.job_id)).to.have.length(1);
 
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
-          await ml.common.waitForMlLoadingIndicatorToDisappear();
+          await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
         });
 
-        it('pre-fills the job selection', async () => {
+        it('displays job results', async () => {
+          await ml.testExecution.logTestStep('pre-fills the job selection');
           await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
-        });
 
-        it('displays the influencers list', async () => {
+          await ml.testExecution.logTestStep('displays the influencers list');
           await ml.anomalyExplorer.assertInfluencerListExists();
           for (const influencerBlock of testData.expected.influencers) {
             await ml.anomalyExplorer.assertInfluencerFieldExists(influencerBlock.field);
@@ -111,23 +113,26 @@ export default function ({ getService }: FtrProviderContext) {
               );
             }
           }
-        });
 
-        it('displays the swimlanes', async () => {
+          await ml.testExecution.logTestStep('displays the swimlanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
-        });
 
-        it('displays the anomalies table', async () => {
+          await ml.testExecution.logTestStep('should display the annotations panel');
+          await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+
+          await ml.testExecution.logTestStep('displays the anomalies table');
           await ml.anomaliesTable.assertTableExists();
-        });
 
-        it('anomalies table is not empty', async () => {
+          await ml.testExecution.logTestStep('anomalies table is not empty');
           await ml.anomaliesTable.assertTableNotEmpty();
         });
 
-        // should be the last step because it navigates away from the Anomaly Explorer page
-        it('should allow to attach anomaly swimlane embeddable to the dashboard', async () => {
+        it('adds swim lane embeddable to a dashboard', async () => {
+          // should be the last step because it navigates away from the Anomaly Explorer page
+          await ml.testExecution.logTestStep(
+            'should allow to attach anomaly swimlane embeddable to the dashboard'
+          );
           await ml.anomalyExplorer.openAddToDashboardControl();
           await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
         });

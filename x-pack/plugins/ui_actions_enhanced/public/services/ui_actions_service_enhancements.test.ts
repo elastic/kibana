@@ -75,5 +75,18 @@ describe('UiActionsService', () => {
         'Action factory [actionFactoryId = UNKNOWN_ID] does not exist.'
       );
     });
+
+    test('isCompatible from definition is used on registered factory', async () => {
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
+
+      service.registerActionFactory({
+        ...factoryDefinition1,
+        isCompatible: () => Promise.resolve(false),
+      });
+
+      await expect(
+        service.getActionFactory(factoryDefinition1.id).isCompatible({ triggers: [] })
+      ).resolves.toBe(false);
+    });
   });
 });
