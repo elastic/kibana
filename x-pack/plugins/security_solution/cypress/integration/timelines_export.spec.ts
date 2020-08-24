@@ -10,6 +10,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { TIMELINES_URL } from '../urls/navigation';
 
+const EXPECTED_EXPORTED_TIMELINE_PATH = 'cypress/test_files/expected_timelines_export.ndjson';
+
 describe('Export timelines', () => {
   before(() => {
     esArchiverLoad('timeline');
@@ -23,13 +25,14 @@ describe('Export timelines', () => {
 
   it('Exports a custom timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
-
     waitForTimelinesPanelToBeLoaded();
-
     exportFirstTimeline();
 
-    cy.wait('@export').then((xhr) => {
-      cy.wrap(xhr.status).should('eql', 200);
+    cy.wait('@export').then((response) => {
+      cy.wrap(response.status).should('eql', 200);
+      cy.readFile(EXPECTED_EXPORTED_TIMELINE_PATH).then(($expectedExportedJson) => {
+        cy.wrap(response.xhr.responseText).should('eql', $expectedExportedJson);
+      });
     });
   });
 });
