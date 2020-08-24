@@ -91,6 +91,7 @@ describe('usage collector handle es response data', () => {
 
   it('should handle cases where the version workpad might not have variables', () => {
     const workpad = cloneDeep(workpads[0]);
+    // @ts-ignore
     workpad.variables = undefined;
 
     const mockWorkpadsOld = [workpad];
