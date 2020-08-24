@@ -71,6 +71,65 @@ Errors could be handled as follows:
 - Errors occurring in steps 1 to 5 cause the procedure to fail and the newly created override assets to be deleted.
 - A mapping conflict in step 6 could cause a data stream rollover instead.
 
+```
+Original Managed Assets                 Overridden Managed Assets
+
+
++------------+                          +--------------------+
+| template T |                          | template T'        |
+| logs-myapp |                          | logs-myapp-default |
+++-----------+                          ++-------------------+
+ |                                       |
+ | has default_pipeline                  | has default_pipeline
+ |                                       |
+ |  +------------------+                 |  +----------------------------------+
+ +--> pipeline P1      |                 +--> pipeline P'                      |
+ |  | logs-myapp-1.0.0 |                 |  | logs-myapp-default-1.0.0-local-1 |
+ |  +------------------+                 |  ++---------------------------------+
+ |                                       |   |
+ | is composed_of                        |   | contains processors
+ |                                       |   |
+ |  +-----------------------+            |   |  +--------------------------+    +--------------------------+
+ +--> component template CM |            |   +--> pipeline processor Pr0   +----> pipeline P1'             |
+ |  | logs-myapp-mappings   |            |      +--------------------------+    | logs-myapp-default-1.0.0 |
+ |  +-----------------------+            |      | Refinement processor Pr1 |    +--------------------------+
+ |  +-----------------------+    =>      |      +--------------------------+
+ +--> component template CS |            |      | Refinement processor Pr2 |
+ |  | logs-myapp-settings   |            |      +--------------------------+
+ |  +-----------------------+            |      | ...                      |
+ |                                       |      +--------------------------+
+ | is used by                            |
+ |                                       | is composed_of
+ |  +--------------------+               |
+ +--> data stream D      |               |  +------------------------+
+    | logs-myapp-default |               +--> component template CM' |
+    ++-------------------+               |  | logs-myapp-mappings    |
+     |                                   |  +------------------------+
+     | is backed by                      |  +------------------------+
+     |                                   +--> component template CS' |
+     |  +---------+                      |  | logs-myapp-settings    |
+     +--> index W |                      |  +------------------------+
+     |  +---------+                      |
+     |  +----------+                     | is used by
+     +--> index I1 |                     |
+     |  +----------+                     |  +--------------------+
+     |  +----------+                     +--> data stream D      |
+     +--> index I2 |                        | logs-myapp-default |
+        +----------+                        ++-------------------+
+                                             |
+                                             | is backed by
+                                             |
+                                             |  +---------+
+                                             +--> index W |
+                                             |  +---------+
+                                             |  +----------+
+                                             +--> index I1 |
+                                             |  +----------+
+                                             |  +----------+
+                                             +--> index I2 |
+                                                +----------+
+```
+
 ### Subsequently changing overrides
 
 Given the same situation as in "Creating initial overrides", but also
