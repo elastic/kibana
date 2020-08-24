@@ -35,7 +35,7 @@ export type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
 export const variableSet: ExpressionFunctionVarSet = {
   name: 'var_set',
   help: i18n.translate('expressions.functions.varset.help', {
-    defaultMessage: 'Updates kibana global context',
+    defaultMessage: 'Updates the Kibana global context.',
   }),
   args: {
     name: {
@@ -43,14 +43,14 @@ export const variableSet: ExpressionFunctionVarSet = {
       aliases: ['_'],
       required: true,
       help: i18n.translate('expressions.functions.varset.name.help', {
-        defaultMessage: 'Specify name of the variable',
+        defaultMessage: 'Specify the name of the variable.',
       }),
     },
     value: {
       aliases: ['val'],
       help: i18n.translate('expressions.functions.varset.val.help', {
         defaultMessage:
-          'Specify value for the variable. If not provided input context will be used',
+          'Specify the value for the variable. When unspecified, the input context is used.',
       }),
     },
   },
