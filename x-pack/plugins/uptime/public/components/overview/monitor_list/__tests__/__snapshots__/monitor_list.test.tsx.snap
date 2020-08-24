@@ -1059,17 +1059,17 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Status alert_5"
               role="columnheader"
               scope="col"
-              style="width:100px"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignRight"
+                class="euiTableCellContent euiTableCellContent--alignCenter"
               >
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Actions
+                  Status alert
                 </span>
               </div>
             </th>
@@ -1247,32 +1247,53 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </td>
             <td
-              class="euiTableRowCell euiTableRowCell--hasActions"
+              class="euiTableRowCell"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Status alert
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiTableCellContent__hoverItem"
+                  class="euiPopover euiPopover--anchorDownCenter"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorDownCenter"
+                    class="euiPopover__anchor"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiSwitch"
                     >
                       <button
-                        aria-label="Enable down alert"
-                        class="euiButtonIcon euiButtonIcon--primary"
-                        data-test-subj="uptimeDisplayDefineConnector"
-                        style="margin-right:10px"
+                        aria-checked="false"
+                        aria-label="Enable status alert"
+                        class="euiSwitch__button"
+                        id="generated-id"
+                        readonly=""
+                        role="switch"
                         type="button"
                       >
-                        <div
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          data-euiicon-type="bell"
-                        />
+                        <span
+                          class="euiSwitch__body"
+                        >
+                          <span
+                            class="euiSwitch__thumb"
+                          />
+                          <span
+                            class="euiSwitch__track"
+                          >
+                            <div
+                              class="euiSwitch__icon"
+                              data-euiicon-type="cross"
+                            />
+                            <div
+                              class="euiSwitch__icon euiSwitch__icon--checked"
+                              data-euiicon-type="check"
+                            />
+                          </span>
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -1457,32 +1478,53 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </td>
             <td
-              class="euiTableRowCell euiTableRowCell--hasActions"
+              class="euiTableRowCell"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Status alert
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiTableCellContent__hoverItem"
+                  class="euiPopover euiPopover--anchorDownCenter"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorDownCenter"
+                    class="euiPopover__anchor"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiSwitch"
                     >
                       <button
-                        aria-label="Enable down alert"
-                        class="euiButtonIcon euiButtonIcon--primary"
-                        data-test-subj="uptimeDisplayDefineConnector"
-                        style="margin-right:10px"
+                        aria-checked="false"
+                        aria-label="Enable status alert"
+                        class="euiSwitch__button"
+                        id="generated-id"
+                        readonly=""
+                        role="switch"
                         type="button"
                       >
-                        <div
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          data-euiicon-type="bell"
-                        />
+                        <span
+                          class="euiSwitch__body"
+                        >
+                          <span
+                            class="euiSwitch__thumb"
+                          />
+                          <span
+                            class="euiSwitch__track"
+                          >
+                            <div
+                              class="euiSwitch__icon"
+                              data-euiicon-type="cross"
+                            />
+                            <div
+                              class="euiSwitch__icon euiSwitch__icon--checked"
+                              data-euiicon-type="check"
+                            />
+                          </span>
+                        </span>
                       </button>
                     </div>
                   </div>
