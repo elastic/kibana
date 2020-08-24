@@ -25,9 +25,8 @@ import {
   OptionalLabel,
   ErrableFormRow,
   SetPriorityInput,
-  // NodeAllocation,
+  NodeAllocation,
   MinAgeInput,
-  // DataAllocation,
 } from '../components';
 
 import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
