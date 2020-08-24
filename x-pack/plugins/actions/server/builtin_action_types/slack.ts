@@ -91,12 +91,12 @@ function valdiateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureWhitelistedHostname(url.hostname);
-  } catch (whitelistError) {
+    configurationUtilities.ensureHostnameAllowed(url.hostname);
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }

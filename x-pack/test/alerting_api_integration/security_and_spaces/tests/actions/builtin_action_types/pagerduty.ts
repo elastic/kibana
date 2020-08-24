@@ -106,7 +106,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should return unsuccessfully when default pagerduty url is not whitelisted', async () => {
+    it('should return unsuccessfully when default pagerduty url is not present in allowedHosts', async () => {
       await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
@@ -121,7 +121,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });
