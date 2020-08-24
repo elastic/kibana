@@ -48,10 +48,8 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
 
   class LoginPage {
     async login(user: string, pwd: string) {
-      if (
-        process.env.VM === 'ubuntu18_deb_oidc' ||
-        process.env.VM === 'ubuntu16_deb_desktop_saml'
-      ) {
+      const loginType = process.env.VM || '';
+      if (loginType.includes('oidc') || loginType.includes('saml')) {
         await samlLogin(user, pwd);
         return;
       }
