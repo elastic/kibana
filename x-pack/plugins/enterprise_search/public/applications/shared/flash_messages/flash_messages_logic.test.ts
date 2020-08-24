@@ -11,6 +11,7 @@ import { FlashMessagesLogic, IFlashMessage } from './flash_messages_logic';
 describe('FlashMessagesLogic', () => {
   const DEFAULT_VALUES = {
     messages: [],
+    queuedMessages: [],
     historyListener: null,
   };
 
@@ -58,6 +59,27 @@ describe('FlashMessagesLogic', () => {
     });
   });
 
+  describe('setQueuedMessages()', () => {
+    it('sets an array of messages', () => {
+      const queuedMessage = { type: 'error', message: 'You deleted a thing' } as IFlashMessage;
+
+      FlashMessagesLogic.mount();
+      FlashMessagesLogic.actions.setQueuedMessages(queuedMessage);
+
+      expect(FlashMessagesLogic.values.queuedMessages).toEqual([queuedMessage]);
+    });
+  });
+
+  describe('clearQueuedMessages()', () => {
+    it('sets queued messages back to an empty array', () => {
+      FlashMessagesLogic.mount();
+      FlashMessagesLogic.actions.setQueuedMessages('test' as any);
+      FlashMessagesLogic.actions.clearQueuedMessages();
+
+      expect(FlashMessagesLogic.values.queuedMessages).toEqual([]);
+    });
+  });
+
   describe('history listener logic', () => {
     describe('setHistoryListener()', () => {
       it('sets the historyListener value', () => {
@@ -71,7 +93,10 @@ describe('FlashMessagesLogic', () => {
     describe('listenToHistory()', () => {
       it('listens for history changes and clears messages on change', () => {
         FlashMessagesLogic.mount();
+        FlashMessagesLogic.actions.setQueuedMessages(['queuedMessages'] as any);
         jest.spyOn(FlashMessagesLogic.actions, 'clearMessages');
+        jest.spyOn(FlashMessagesLogic.actions, 'setMessages');
+        jest.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
 
         const mockListener = jest.fn(() => jest.fn());
@@ -84,6 +109,8 @@ describe('FlashMessagesLogic', () => {
         const mockHistoryChange = (mockListener.mock.calls[0] as any)[0];
         mockHistoryChange();
         expect(FlashMessagesLogic.actions.clearMessages).toHaveBeenCalled();
+        expect(FlashMessagesLogic.actions.setMessages).toHaveBeenCalledWith(['queuedMessages']);
+        expect(FlashMessagesLogic.actions.clearQueuedMessages).toHaveBeenCalled();
       });
     });
 

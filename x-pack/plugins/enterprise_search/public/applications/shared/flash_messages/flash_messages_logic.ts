@@ -18,21 +18,27 @@ export interface IFlashMessage {
 
 export interface IFlashMessagesLogicValues {
   messages: IFlashMessage[];
+  queuedMessages: IFlashMessage[];
   historyListener: Function | null;
 }
 export interface IFlashMessagesLogicActions {
   setMessages(messages: IFlashMessage | IFlashMessage[]): void;
   clearMessages(): void;
+  setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): void;
+  clearQueuedMessages(): void;
   listenToHistory(history: History): void;
   setHistoryListener(historyListener: Function): void;
 }
 
+const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
+  !Array.isArray(messages) ? [messages] : messages;
+
 export const FlashMessagesLogic = kea({
   actions: (): IFlashMessagesLogicActions => ({
-    setMessages: (messages) => ({
-      messages: !Array.isArray(messages) ? [messages] : messages,
-    }),
+    setMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearMessages: () => null,
+    setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
+    clearQueuedMessages: () => null,
     listenToHistory: (history) => history,
     setHistoryListener: (historyListener) => ({ historyListener }),
   }),
@@ -44,6 +50,13 @@ export const FlashMessagesLogic = kea({
         clearMessages: () => [],
       },
     ],
+    queuedMessages: [
+      [],
+      {
+        setQueuedMessages: (_, { messages }) => messages,
+        clearQueuedMessages: () => [],
+      },
+    ],
     historyListener: [
       null,
       {
@@ -53,9 +66,11 @@ export const FlashMessagesLogic = kea({
   }),
   listeners: ({ values, actions }): Partial<IFlashMessagesLogicActions> => ({
     listenToHistory: (history) => {
-      // On React Router navigation, clear flash messages
+      // On React Router navigation, clear previous flash messages and load any queued messages
       const unlisten = history.listen(() => {
         actions.clearMessages();
+        actions.setMessages(values.queuedMessages);
+        actions.clearQueuedMessages();
       });
       actions.setHistoryListener(unlisten);
     },
