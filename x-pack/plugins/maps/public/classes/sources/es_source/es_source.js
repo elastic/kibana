@@ -11,7 +11,7 @@ import {
   getTimeFilter,
   getSearchService,
 } from '../../../kibana_services';
-import { createExtentFilter } from '../../../elasticsearch_geo_utils';
+import { createExtentFilter } from '../../../../common/elasticsearch_geo_utils';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';

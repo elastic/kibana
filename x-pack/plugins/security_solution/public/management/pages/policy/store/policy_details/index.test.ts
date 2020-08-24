@@ -36,7 +36,7 @@ describe('policy details: ', () => {
       created_by: '',
       updated_at: '',
       updated_by: '',
-      config_id: '',
+      policy_id: '',
       enabled: true,
       output_id: '',
       inputs: [
@@ -213,7 +213,7 @@ describe('policy details: ', () => {
       expect(JSON.parse(lastPutCallPayload.body as string)).toEqual({
         name: '',
         description: '',
-        config_id: '',
+        policy_id: '',
         enabled: true,
         output_id: '',
         inputs: [

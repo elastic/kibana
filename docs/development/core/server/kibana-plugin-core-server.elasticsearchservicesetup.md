@@ -15,5 +15,5 @@ export interface ElasticsearchServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly createClient: (type: string, clientConfig?: Partial&lt;LegacyElasticsearchClientConfig&gt;) =&gt; ILegacyCustomClusterClient;</code><br/><code>        readonly client: ILegacyClusterClient;</code><br/><code>    }</code> |  |
+|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly config$: Observable&lt;ElasticsearchConfig&gt;;</code><br/><code>        readonly createClient: (type: string, clientConfig?: Partial&lt;LegacyElasticsearchClientConfig&gt;) =&gt; ILegacyCustomClusterClient;</code><br/><code>        readonly client: ILegacyClusterClient;</code><br/><code>    }</code> |  |
 

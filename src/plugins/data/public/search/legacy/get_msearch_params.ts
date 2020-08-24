@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { GetConfigFn } from '../../../common';
 import { getIgnoreThrottled, getMaxConcurrentShardRequests } from '../fetch';
 
-export function getMSearchParams(config: IUiSettingsClient) {
+export function getMSearchParams(getConfig: GetConfigFn) {
   return {
     rest_total_hits_as_int: true,
-    ignore_throttled: getIgnoreThrottled(config),
-    max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
+    ignore_throttled: getIgnoreThrottled(getConfig),
+    max_concurrent_shard_requests: getMaxConcurrentShardRequests(getConfig),
   };
 }

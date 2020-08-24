@@ -50,7 +50,7 @@ export async function getPackages(
   return packageList;
 }
 
-// Get package names for packages which cannot have more than one package config on an agent config
+// Get package names for packages which cannot have more than one package policy on an agent policy
 // Assume packages only export one config template for now
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;

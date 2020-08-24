@@ -221,7 +221,7 @@ export class Simulator {
   }
 
   /**
-   * This manually runs the animation frames tied to a configurable timestamp in the future
+   * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
     this.sideEffectSimulator.controls.time = time;
