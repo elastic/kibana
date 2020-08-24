@@ -13,7 +13,6 @@ export const security = (kibana: Record<string, any>) =>
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana'],
     configPrefix: 'xpack.security',
-    uiExports: { hacks: ['plugins/security/hacks/legacy'] },
     config: (Joi: Root) =>
       Joi.object({ enabled: Joi.boolean().default(true) })
         .unknown()

@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 
+import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -35,6 +36,7 @@ const mapping = [
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const config = getService('config');
 
   const mockServiceNow = {
     config: {
@@ -72,12 +74,21 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   };
 
   let servicenowSimulatorURL: string = '<could not determine kibana url>';
+  let proxyServer: any;
+  let proxyHaveBeenCalled = false;
 
-  describe('ServiceNow', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/75522
+  describe.skip('ServiceNow', () => {
     before(() => {
       servicenowSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );
+
+      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
+        proxyHaveBeenCalled = true;
+      });
+      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
+      proxyServer.listen(Number(proxyUrl.port));
     });
 
     describe('ServiceNow - Action Creation', () => {
@@ -448,6 +459,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
+          expect(proxyHaveBeenCalled).to.equal(true);
 
           expect(result).to.eql({
             status: 'ok',
@@ -461,6 +473,10 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
         });
       });
+    });
+
+    after(() => {
+      proxyServer.close();
     });
   });
 }

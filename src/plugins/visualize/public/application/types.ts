@@ -44,7 +44,7 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
-import { ConfigSchema } from '../../config';
+import { DashboardStart } from '../../../dashboard/public';
 
 export type PureVisState = SavedVisState;
 
@@ -111,7 +111,7 @@ export interface VisualizeServices extends CoreStart {
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
-  featureFlagConfig: ConfigSchema;
+  dashboard: DashboardStart;
 }
 
 export interface SavedVisInstance {
@@ -120,6 +120,14 @@ export interface SavedVisInstance {
   savedSearch?: SavedObject;
   embeddableHandler: VisualizeEmbeddableContract;
 }
+
+export interface ByValueVisInstance {
+  vis: Vis;
+  savedSearch?: SavedObject;
+  embeddableHandler: VisualizeEmbeddableContract;
+}
+
+export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
 export interface IEditorController {
   render(props: EditorRenderProps): void;

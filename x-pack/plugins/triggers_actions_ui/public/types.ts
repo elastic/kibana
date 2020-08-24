@@ -12,10 +12,20 @@ import {
   SanitizedAlert as Alert,
   AlertAction,
   AlertTaskState,
+  AlertStatus,
+  AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
 } from '../../alerts/common';
-export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFrameworkHealth };
+export {
+  Alert,
+  AlertAction,
+  AlertTaskState,
+  AlertStatus,
+  AlertInstanceStatus,
+  RawAlertInstance,
+  AlertingFrameworkHealth,
+};
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;

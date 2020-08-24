@@ -7,13 +7,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import {
-  Datasource,
-  DatasourcePublicAPI,
-  FramePublicAPI,
-  Visualization,
-  DatasourceMetaData,
-} from '../../types';
+import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -26,6 +20,7 @@ import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { EditorFrameStartPlugins } from '../service';
+import { initializeDatasources, createDatasourceLayers } from './state_helpers';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -45,8 +40,9 @@ export interface EditorFrameProps {
   filters: Filter[];
   savedQuery?: SavedQuery;
   onChange: (arg: {
-    filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+    filterableIndexPatterns: string[];
     doc: Document;
+    isSaveable: boolean;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -62,51 +58,34 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   // Initialize current datasource and all active datasources
-  useEffect(() => {
-    // prevents executing dispatch on unmounted component
-    let isUnmounted = false;
-    if (!allLoaded) {
-      Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
-        if (
-          state.datasourceStates[datasourceId] &&
-          state.datasourceStates[datasourceId].isLoading
-        ) {
-          datasource
-            .initialize(state.datasourceStates[datasourceId].state || undefined)
-            .then((datasourceState) => {
-              if (!isUnmounted) {
+  useEffect(
+    () => {
+      // prevents executing dispatch on unmounted component
+      let isUnmounted = false;
+      if (!allLoaded) {
+        initializeDatasources(props.datasourceMap, state.datasourceStates, props.doc?.references)
+          .then((result) => {
+            if (!isUnmounted) {
+              Object.entries(result).forEach(([datasourceId, { state: datasourceState }]) => {
                 dispatch({
                   type: 'UPDATE_DATASOURCE_STATE',
                   updater: datasourceState,
                   datasourceId,
                 });
-              }
-            })
-            .catch(onError);
-        }
-      });
-    }
-    return () => {
-      isUnmounted = true;
-    };
-  }, [allLoaded]);
+              });
+            }
+          })
+          .catch(onError);
+      }
+      return () => {
+        isUnmounted = true;
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allLoaded, onError]
+  );
 
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
-  Object.keys(props.datasourceMap)
-    .filter((id) => state.datasourceStates[id] && !state.datasourceStates[id].isLoading)
-    .forEach((id) => {
-      const datasourceState = state.datasourceStates[id].state;
-      const datasource = props.datasourceMap[id];
-
-      const layers = datasource.getLayers(datasourceState);
-      layers.forEach((layer) => {
-        datasourceLayers[layer] = props.datasourceMap[id].getPublicAPI({
-          state: datasourceState,
-          layerId: layer,
-          dateRange: props.dateRange,
-        });
-      });
-    });
+  const datasourceLayers = createDatasourceLayers(props.datasourceMap, state.datasourceStates);
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
@@ -156,83 +135,90 @@ export function EditorFrame(props: EditorFrameProps) {
     },
   };
 
-  useEffect(() => {
-    if (props.doc) {
-      dispatch({
-        type: 'VISUALIZATION_LOADED',
-        doc: props.doc,
-      });
-    } else {
-      dispatch({
-        type: 'RESET',
-        state: getInitialState(props),
-      });
-    }
-  }, [props.doc]);
+  useEffect(
+    () => {
+      if (props.doc) {
+        dispatch({
+          type: 'VISUALIZATION_LOADED',
+          doc: {
+            ...props.doc,
+            state: {
+              ...props.doc.state,
+              visualization: props.doc.visualizationType
+                ? props.visualizationMap[props.doc.visualizationType].initialize(
+                    framePublicAPI,
+                    props.doc.state.visualization
+                  )
+                : props.doc.state.visualization,
+            },
+          },
+        });
+      } else {
+        dispatch({
+          type: 'RESET',
+          state: getInitialState(props),
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.doc]
+  );
 
   // Initialize visualization as soon as all datasources are ready
-  useEffect(() => {
-    if (allLoaded && state.visualization.state === null && activeVisualization) {
-      const initialVisualizationState = activeVisualization.initialize(framePublicAPI);
-      dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        visualizationId: activeVisualization.id,
-        newState: initialVisualizationState,
-      });
-    }
-  }, [allLoaded, activeVisualization, state.visualization.state]);
+  useEffect(
+    () => {
+      if (allLoaded && state.visualization.state === null && activeVisualization) {
+        const initialVisualizationState = activeVisualization.initialize(framePublicAPI);
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: activeVisualization.id,
+          newState: initialVisualizationState,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allLoaded, activeVisualization, state.visualization.state]
+  );
 
   // The frame needs to call onChange every time its internal state changes
-  useEffect(() => {
-    const activeDatasource =
-      state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
-        ? props.datasourceMap[state.activeDatasourceId]
-        : undefined;
+  useEffect(
+    () => {
+      const activeDatasource =
+        state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+          ? props.datasourceMap[state.activeDatasourceId]
+          : undefined;
 
-    if (!activeDatasource || !activeVisualization) {
-      return;
-    }
+      if (!activeDatasource || !activeVisualization) {
+        return;
+      }
 
-    const indexPatterns: DatasourceMetaData['filterableIndexPatterns'] = [];
-    Object.entries(props.datasourceMap)
-      .filter(([id, datasource]) => {
-        const stateWrapper = state.datasourceStates[id];
-        return (
-          stateWrapper &&
-          !stateWrapper.isLoading &&
-          datasource.getLayers(stateWrapper.state).length > 0
-        );
-      })
-      .forEach(([id, datasource]) => {
-        indexPatterns.push(
-          ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
-        );
-      });
-
-    const doc = getSavedObjectFormat({
-      activeDatasources: Object.keys(state.datasourceStates).reduce(
-        (datasourceMap, datasourceId) => ({
-          ...datasourceMap,
-          [datasourceId]: props.datasourceMap[datasourceId],
-        }),
-        {}
-      ),
-      visualization: activeVisualization,
-      state,
-      framePublicAPI,
-    });
-
-    props.onChange({ filterableIndexPatterns: indexPatterns, doc });
-  }, [
-    activeVisualization,
-    state.datasourceStates,
-    state.visualization,
-    props.query,
-    props.dateRange,
-    props.filters,
-    props.savedQuery,
-    state.title,
-  ]);
+      props.onChange(
+        getSavedObjectFormat({
+          activeDatasources: Object.keys(state.datasourceStates).reduce(
+            (datasourceMap, datasourceId) => ({
+              ...datasourceMap,
+              [datasourceId]: props.datasourceMap[datasourceId],
+            }),
+            {}
+          ),
+          visualization: activeVisualization,
+          state,
+          framePublicAPI,
+        })
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      activeVisualization,
+      state.datasourceStates,
+      state.visualization,
+      props.query,
+      props.dateRange,
+      props.filters,
+      props.savedQuery,
+      state.title,
+    ]
+  );
 
   return (
     <RootDragDropProvider>

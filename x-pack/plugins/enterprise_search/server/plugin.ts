@@ -19,9 +19,14 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
+import {
+  ENTERPRISE_SEARCH_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+} from '../common/constants';
 import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
-import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
+import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
@@ -64,13 +69,13 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register space/feature control
      */
     features.registerFeature({
-      id: 'enterpriseSearch',
-      name: 'Enterprise Search',
+      id: ENTERPRISE_SEARCH_PLUGIN.ID,
+      name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
       icon: 'logoEnterpriseSearch',
-      navLinkId: 'appSearch', // TODO - remove this once functional tests no longer rely on navLinkId
-      app: ['kibana', 'appSearch', 'workplaceSearch'], // TODO: 'enterpriseSearch'
-      catalogue: ['appSearch', 'workplaceSearch'], // TODO: 'enterpriseSearch'
+      navLinkId: APP_SEARCH_PLUGIN.ID, // TODO - remove this once functional tests no longer rely on navLinkId
+      app: ['kibana', APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
+      catalogue: [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
       privileges: null,
     });
 
@@ -100,7 +105,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const router = http.createRouter();
     const dependencies = { router, config, log: this.logger };
 
-    registerPublicUrlRoute(dependencies);
+    registerConfigDataRoute(dependencies);
     registerEnginesRoute(dependencies);
     registerWSOverviewRoute(dependencies);
 

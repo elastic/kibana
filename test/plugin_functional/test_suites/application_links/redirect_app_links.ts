@@ -24,7 +24,7 @@ import '../../plugins/core_app_status/public/types';
 
 declare global {
   interface Window {
-    __nonReloadedFlag?: boolean;
+    _nonReloadedFlag?: boolean;
   }
 }
 
@@ -33,7 +33,6 @@ const getPathWithHash = (absoluteUrl: string) => {
   return `${parsed.path}${parsed.hash ?? ''}`;
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
@@ -41,13 +40,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const setNonReloadedFlag = () => {
     return browser.executeAsync(async (cb) => {
-      window.__nonReloadedFlag = true;
+      window._nonReloadedFlag = true;
       cb();
     });
   };
   const wasReloaded = () => {
     return browser.executeAsync<boolean>(async (cb) => {
-      const reloaded = window.__nonReloadedFlag !== true;
+      const reloaded = window._nonReloadedFlag !== true;
       cb(reloaded);
     });
   };

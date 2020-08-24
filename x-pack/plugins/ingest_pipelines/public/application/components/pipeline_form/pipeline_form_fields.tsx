@@ -10,7 +10,7 @@ import { EuiSpacer, EuiSwitch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
-import { getUseField, getFormRow, Field, useKibana } from '../../../shared_imports';
+import { getUseField, getFormRow, Field } from '../../../shared_imports';
 
 import {
   ProcessorsEditorContextProvider,
@@ -45,8 +45,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   hasVersion,
   onEditorFlyoutOpen,
 }) => {
-  const { services } = useKibana();
-
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
   return (
@@ -123,9 +121,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
       <ProcessorsEditorContextProvider
         onFlyoutOpen={onEditorFlyoutOpen}
-        links={{ esDocsBasePath: services.documentation.getEsDocsBasePath() }}
-        api={services.api}
-        toasts={services.notifications.toasts}
         onUpdate={onProcessorsUpdate}
         value={{ processors, onFailure }}
       >
@@ -134,16 +129,13 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <ProcessorsHeader onLoadJson={onLoadJson} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__container">
               <ProcessorsEditor />
-            </EuiFlexItem>
-            <EuiFlexItem>
+
               <EuiSpacer size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+
               <OnFailureProcessorsTitle />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+
               <GlobalOnFailureProcessorsEditor />
             </EuiFlexItem>
           </EuiFlexGroup>

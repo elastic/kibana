@@ -125,6 +125,7 @@ export function FieldEditor({
           color={initialField.color}
           iconSide="right"
           className={classNames('gphFieldEditor__badge', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldEditor__badge--disabled': isDisabled,
           })}
           onClickAriaLabel={badgeDescription}
