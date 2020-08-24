@@ -128,7 +128,7 @@ class TimelineQueryComponent extends QueryTemplate<
         query={timelineQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
-        skip={skipQueryForDetectionsPage(id, defaultIndex)}
+        skip={skipQueryForDetectionsPage({ id, defaultIndex, defaultKibanaIndex })}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {

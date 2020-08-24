@@ -8,47 +8,119 @@ import { TimelineId } from '../../../common/types/timeline';
 import { skipQueryForDetectionsPage } from './helpers';
 
 describe('skipQueryForDetectionsPage', () => {
-  test('Make sure to NOT skip the query when it is not a timeline from a detection pages', () => {
-    expect(skipQueryForDetectionsPage(TimelineId.active, ['auditbeat-*', 'filebeat-*'])).toBe(
-      false
-    );
-    expect(
-      skipQueryForDetectionsPage(TimelineId.hostsPageEvents, ['auditbeat-*', 'filebeat-*'])
-    ).toBe(false);
-    expect(
-      skipQueryForDetectionsPage(TimelineId.hostsPageExternalAlerts, ['auditbeat-*', 'filebeat-*'])
-    ).toBe(false);
-    expect(
-      skipQueryForDetectionsPage(TimelineId.networkPageExternalAlerts, [
-        'auditbeat-*',
-        'filebeat-*',
-      ])
-    ).toBe(false);
+  describe('Make sure to NOT skip the query when it is not a timeline from a detection pages', () => {
+    test('It should NOT skip the query when it is on the active page and both the defaultIndex and the Kibana index matches each other', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.active,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT skip the query when it is on the active page and both the defaultIndex and the Kibana index do NOT match each other', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.active,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT skip the query when it is on the hosts page events and both the defaultIndex and the Kibana index matches each other', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.hostsPageEvents,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT skip the query when it is on the hosts page events and both the defaultIndex and the Kibana index do not match each other', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.hostsPageEvents,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT skip the query when it is on the network external events page and both the defaultIndex and the Kibana index matches each other', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.networkPageExternalAlerts,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT skip the query when it is on the network external events page and both the defaultIndex and the Kibana index do not match each other', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.networkPageExternalAlerts,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*'],
+        })
+      ).toBe(false);
+    });
   });
 
-  test('Make sure to SKIP the query when it is a timeline from a detection pages without the siem-signals', () => {
-    expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsPage, ['auditbeat-*', 'filebeat-*'])
-    ).toBe(true);
-    expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsRulesDetailsPage, [
-        'auditbeat-*',
-        'filebeat-*',
-      ])
-    ).toBe(true);
+  describe('Make sure to SKIP and not SKIP the query when it is a timeline from a detection pages without the siem-signals', () => {
+    test('It should SKIP the query when it is a timeline from a detection page without the siem-signals', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsPage,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(true);
+    });
+
+    test('It should SKIP the query when it is a timeline from a detection details page without the siem-signals', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsRulesDetailsPage,
+          defaultIndex: ['auditbeat-*', 'filebeat-*'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(true);
+    });
   });
 
-  test('Make sure to NOT skip the query when it is a timeline from a detection pages with the siem-signals', () => {
-    expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsPage, [
-        'auditbeat-*',
-        '.siem-signals-rainbow-butterfly',
-      ])
-    ).toBe(false);
-    expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsRulesDetailsPage, [
-        '.siem-signals-rainbow-butterfly',
-      ])
-    ).toBe(false);
+  describe('Make sure to NOT skip the query when it is a timeline from a detection pages with the siem-signals', () => {
+    test('It should NOT SKIP the query when it is a timeline from a detection page with the siem-signals', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsPage,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', '.siem-signals-default'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT SKIP the query when it is a timeline from a detection page with the siem-signals and it is named something else', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsPage,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'some-other-signals-name'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(false);
+    });
+
+    test('It should NOT skip the query when it is a timeline from a detection details page with the siem-signals and it is named something else', () => {
+      expect(
+        skipQueryForDetectionsPage({
+          id: TimelineId.detectionsRulesDetailsPage,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'some-other-signals-name'],
+          defaultKibanaIndex: ['auditbeat-*', 'filebeat-*'],
+        })
+      ).toBe(false);
+    });
   });
 });
