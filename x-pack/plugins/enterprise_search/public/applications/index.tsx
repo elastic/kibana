@@ -22,6 +22,7 @@ import {
 } from 'src/core/public';
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
+import { FlashMessagesProvider } from './shared/flash_messages';
 import { HttpProvider } from './shared/http';
 import { IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
@@ -69,6 +70,7 @@ export const renderApp = (
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
             <HttpProvider http={core.http} errorConnecting={errorConnecting} />
+            <FlashMessagesProvider history={params.history} />
             <Router history={params.history}>
               <App {...initialData} />
             </Router>

@@ -6,3 +6,4 @@
 
 export { FlashMessages } from './flash_messages';
 export { FlashMessagesLogic } from './flash_messages_logic';
+export { FlashMessagesProvider } from './flash_messages_provider';
