@@ -559,8 +559,9 @@ export interface ResolverPluginSetup {
 
   /**
    * A collection of mock objects that can be used in examples or in testing.
+   * Returned async to allow the mock data to be bundled separately from production code.
    */
-  mocks: {
+  mocks: () => Promise<{
     /**
      * Mock `DataAccessLayer`s. All of Resolver's HTTP access is provided by a `DataAccessLayer`.
      */
@@ -570,5 +571,5 @@ export interface ResolverPluginSetup {
        */
       noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
     };
-  };
+  }>;
 }
