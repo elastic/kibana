@@ -35,7 +35,7 @@ if (appState.sessionId) {
 // If this is a restored session, the server will immediately return saved results.
 // In the case where there is no saved result for a given request, or if the results have expired, `search` will throw an error with a meaningful error code.
 const request = buildKibanaRequest(...);
-request.id = searchService.session.get();
+request.sessionId = searchService.session.get();
 const response$ = await searchService.search(request);
 
 // Calling `sendToBackground`, creates a saved object for this session, allowing the user to navigate away.
