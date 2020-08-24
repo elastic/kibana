@@ -28,6 +28,8 @@ export const DefineAlertConnectors = () => {
           aria-label={ENABLE_STATUS_ALERT}
           onChange={onButtonClick}
           checked={false}
+          compressed={!isMonitorPage}
+          data-test-subj={'uptimeDisplayDefineConnector'}
         />
       }
       isOpen={isPopoverOpen}

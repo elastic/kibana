@@ -14,7 +14,7 @@ exports[`EnableAlertComponent renders without errors for valid props 1`] = `
         aria-checked="false"
         aria-label="Enable status alert"
         class="euiSwitch__button"
-        id="ie7650441-e60a-11ea-a83e-431658924549"
+        id="iee9db091-e62d-11ea-b0c7-37c62f0ac280"
         role="switch"
         type="button"
       >
