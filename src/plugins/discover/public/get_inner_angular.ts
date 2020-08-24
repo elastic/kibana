@@ -57,14 +57,10 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../kibana_legacy/public';
-import { createDiscoverSidebarDirective } from './application/components/sidebar';
-import { createHitsCounterDirective } from '././application/components/hits_counter';
-import { createLoadingSpinnerDirective } from '././application/components/loading_spinner/loading_spinner';
-import { createTimechartHeaderDirective } from './application/components/timechart_header';
 import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
-import { createSkipBottomButtonDirective } from './application/components/skip_bottom_button';
+import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -88,11 +84,9 @@ export function getInnerAngularModule(
 export function getInnerAngularModuleEmbeddable(
   name: string,
   core: CoreStart,
-  deps: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  deps: DiscoverStartPlugins
 ) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
-  return module;
+  return initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
 }
 
 let initialized = false;
@@ -154,11 +148,7 @@ export function initializeInnerAngularModule(
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverSidebar', createDiscoverSidebarDirective)
-    .directive('skipBottomButton', createSkipBottomButtonDirective)
-    .directive('hitsCounter', createHitsCounterDirective)
-    .directive('loadingSpinner', createLoadingSpinnerDirective)
-    .directive('timechartHeader', createTimechartHeaderDirective)
+    .directive('discoverLegacy', createDiscoverLegacyDirective)
     .directive('contextErrorMessage', createContextErrorMessageDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
