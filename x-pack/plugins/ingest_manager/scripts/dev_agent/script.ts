@@ -104,6 +104,7 @@ async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promi
         ip: '127.0.0.1',
         system: `${os.type()} ${os.release()}`,
         memory: os.totalmem(),
+        elastic: { agent: { version: '8.0.0' } },
       },
       user_provided: {
         dev_agent_version: '0.0.1',
