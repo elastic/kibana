@@ -9882,7 +9882,6 @@
     "xpack.lens.editorFrame.quickFunctionsLabel": "快选函数",
     "xpack.lens.editorFrame.requiredDimensionWarningLabel": "所需尺寸",
     "xpack.lens.editorFrame.suggestionPanelTitle": "建议",
-    "xpack.lens.editorFrame.tooltipContent": "Lens 为公测版，可能会进行更改。 设计和代码相对于正式发行版功能还不够成熟，将按原样提供，且不提供任何保证。公测版功能不受正式发行版功能支持 SLA 的约束",
     "xpack.lens.embeddable.failure": "无法显示可视化",
     "xpack.lens.embeddableDisplayName": "lens",
     "xpack.lens.excludeValueButtonAriaLabel": "排除 {value}",
