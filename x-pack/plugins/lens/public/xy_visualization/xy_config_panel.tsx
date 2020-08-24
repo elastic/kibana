@@ -106,6 +106,59 @@ const valueLabelsPositioningOptions: Array<{
   },
 ];
 
+function getValueLabelsConfiguration({
+  state,
+  frame,
+  setState,
+}: VisualizationToolbarProps<State>): Required<State['displayValues']> & {
+  shouldValueLabelsBeEnabled: boolean;
+  disabledValueLabelsMessage: string;
+  onValueDisplayVisibilitySettingsChange: (enabled: boolean) => void;
+} {
+  const isBarChartType = state?.layers.some((layer) => layer.seriesType.includes('bar'));
+  const isHistogram = state?.layers.some((layer) => {
+    if (!layer.xAccessor) {
+      return false;
+    }
+    const xAxisOperation = frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(
+      layer.xAccessor
+    );
+    return Boolean(
+      xAxisOperation &&
+        xAxisOperation.isBucketed &&
+        xAxisOperation.scale &&
+        xAxisOperation.scale !== 'ordinal'
+    );
+  });
+  const shouldEnableValueLabels = isBarChartType && !isHistogram;
+  const showLabels = Boolean(shouldEnableValueLabels && state?.displayValues?.showLabels);
+
+  const onValueDisplayVisibilitySettingsChange = (enabled: boolean): void => {
+    setState({
+      ...state,
+      displayValues: {
+        ...state.displayValues,
+        showLabels: enabled,
+      },
+    });
+  };
+
+  return {
+    shouldValueLabelsBeEnabled: isBarChartType && !isHistogram,
+    disabledValueLabelsMessage: isHistogram
+      ? i18n.translate('xpack.lens.xyChart.valueLabelsDisabledHelpText.histogram', {
+          defaultMessage: 'This setting only applies to non-time related bar charts.',
+        })
+      : i18n.translate('xpack.lens.xyChart.valueLabelsDisabledHelpText.nonBarTypes', {
+          defaultMessage: 'This setting only applies to bar type of charts.',
+        }),
+    showLabels,
+    fontSize: state?.displayValues?.fontSize || 10,
+    position: state?.displayValues?.position || 'inside',
+    onValueDisplayVisibilitySettingsChange,
+  };
+}
+
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
   const horizontalOnly = isHorizontalChart(state.layers);
@@ -258,42 +311,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
-  const onValueDisplayVisibilitySettingsChange = (enabled: boolean): void => {
-    setState({
-      ...state,
-      displayValues: {
-        ...state.displayValues,
-        showLabels: enabled,
-      },
-    });
-  };
-
-  const isBarChartType = state?.layers.some((layer) => layer.seriesType.includes('bar'));
-  const isHistogram = state?.layers.every((layer) => {
-    if (!layer.xAccessor) {
-      return false;
-    }
-    const xAxisOperation = frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(
-      layer.xAccessor
-    );
-    return Boolean(
-      xAxisOperation &&
-        xAxisOperation.isBucketed &&
-        xAxisOperation.scale &&
-        xAxisOperation.scale !== 'ordinal'
-    );
-  });
-  const shouldEnableValueLabels = isBarChartType && !isHistogram;
-  const showValueLabels = Boolean(shouldEnableValueLabels && state?.displayValues?.showLabels);
-  const valueLabelsPositioning = state?.displayValues?.position || 'inside';
-
-  const valueLabelsDisabledMessage = isHistogram
-    ? i18n.translate('xpack.lens.xyChart.valueLabelsDisabledHelpText.histogram', {
-        defaultMessage: 'This setting only applies to non-time related bar charts.',
-      })
-    : i18n.translate('xpack.lens.xyChart.valueLabelsDisabledHelpText.nonBarTypes', {
-        defaultMessage: 'This setting only applies to bar type of charts.',
-      });
+  const {
+    shouldValueLabelsBeEnabled,
+    disabledValueLabelsMessage,
+    showLabels,
+    position: valueLabelsPosition,
+    onValueDisplayVisibilitySettingsChange,
+  } = getValueLabelsConfiguration(props);
 
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
@@ -434,7 +458,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           >
             <EuiToolTip
               anchorClassName="eui-displayBlock"
-              content={!shouldEnableValueLabels && valueLabelsDisabledMessage}
+              content={!shouldValueLabelsBeEnabled && disabledValueLabelsMessage}
             >
               <EuiSwitch
                 data-test-subj="lnsshowShowValueLabelsSwitch"
@@ -443,8 +467,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                   defaultMessage: 'Value Labels Display',
                 })}
                 onChange={({ target }) => onValueDisplayVisibilitySettingsChange(target.checked)}
-                checked={showValueLabels}
-                disabled={!shouldEnableValueLabels}
+                checked={showLabels}
+                disabled={!shouldValueLabelsBeEnabled}
               />
             </EuiToolTip>
           </EuiFormRow>
@@ -455,7 +479,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               defaultMessage: 'Value Labels size',
             })}
           >
-            <ValueLabelFontSizeInput {...props} disabled={!shouldEnableValueLabels} />
+            <ValueLabelFontSizeInput
+              {...props}
+              disabled={!shouldValueLabelsBeEnabled || !showLabels}
+            />
           </EuiFormRow>
           <EuiFormRow
             display="columnCompressed"
@@ -472,10 +499,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               buttonSize="compressed"
               options={valueLabelsPositioningOptions}
               idSelected={
-                valueLabelsPositioningOptions.find(({ value }) => value === valueLabelsPositioning)!
-                  .id
+                valueLabelsPositioningOptions.find(({ value }) => value === valueLabelsPosition)!.id
               }
-              isDisabled={!shouldEnableValueLabels || !showValueLabels}
+              isDisabled={!shouldValueLabelsBeEnabled || !showLabels}
               onChange={(optionId) => {
                 const newMode = valueLabelsPositioningOptions.find(({ id }) => id === optionId)!
                   .value;
@@ -614,7 +640,6 @@ const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
   const { state, setState, layerId, accessor } = props;
-  const shouldEnableValueLabels = state?.layers.some((layer) => layer.seriesType.includes('bar'));
 
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -624,7 +649,12 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
   };
   const axisMode = layerConfig?.axisMode || 'auto';
 
-  const showValueLabels = (shouldEnableValueLabels && layerConfig?.showValueLabels) ?? false;
+  const {
+    shouldValueLabelsBeEnabled,
+    showLabels,
+    disabledValueLabelsMessage,
+    onValueDisplayVisibilitySettingsChange,
+  } = getValueLabelsConfiguration(props);
 
   const createNewYAxisConfigsWithValue = useCallback(
     <K extends keyof YConfig, V extends YConfig[K]>(prop: K, newValue: V) => {
@@ -698,22 +728,21 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           defaultMessage: 'Show Value Labels',
         })}
       >
-        <EuiSwitch
-          data-test-subj="lnsshowShowValueLabelsSwitch"
-          showLabel={false}
-          label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
-            defaultMessage: 'Show Value Labels',
-          })}
-          onChange={({ target }) => {
-            const newYAxisConfigs = createNewYAxisConfigsWithValue(
-              'showValueLabels',
-              target.checked
-            );
-            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
-          }}
-          checked={showValueLabels}
-          disabled={!shouldEnableValueLabels}
-        />
+        <EuiToolTip
+          anchorClassName="eui-displayBlock"
+          content={!shouldValueLabelsBeEnabled && disabledValueLabelsMessage}
+        >
+          <EuiSwitch
+            data-test-subj="lnsshowShowValueLabelsSwitch"
+            showLabel={false}
+            label={i18n.translate('xpack.lens.xyChart.showValueLabels.label', {
+              defaultMessage: 'Show Value Labels',
+            })}
+            onChange={({ target }) => onValueDisplayVisibilitySettingsChange(target.checked)}
+            checked={showLabels}
+            disabled={!shouldValueLabelsBeEnabled}
+          />
+        </EuiToolTip>
       </EuiFormRow>
     </EuiForm>
   );
