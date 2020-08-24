@@ -25,8 +25,8 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  *
  * @example
  *
- * const handleOnClick = useNavigateToAppEventHandler('ingestManager', {path: '#/configs'})
- * return <EuiLink onClick={handleOnClick}>See configs</EuiLink>
+ * const handleOnClick = useNavigateToAppEventHandler('ingestManager', {path: '#/policies'})
+ * return <EuiLink onClick={handleOnClick}>See policies</EuiLink>
  */
 export const useNavigateToAppEventHandler = <S = unknown>(
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */

@@ -7,8 +7,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
 import {
-  AGENT_CONFIG_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
-  AGENT_CONFIG_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
 } from '../common';
 export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
 export {
@@ -39,11 +39,11 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
-      agentConfigRolloutRateLimitIntervalMs: schema.number({
-        defaultValue: AGENT_CONFIG_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+      agentPolicyRolloutRateLimitIntervalMs: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
       }),
-      agentConfigRolloutRateLimitRequestPerInterval: schema.number({
-        defaultValue: AGENT_CONFIG_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+      agentPolicyRolloutRateLimitRequestPerInterval: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
       }),
     }),
   }),
@@ -51,7 +51,7 @@ export const config = {
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 
-export { PackageConfigServiceInterface } from './services/package_config';
+export { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

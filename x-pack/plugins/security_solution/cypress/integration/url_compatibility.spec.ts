@@ -18,7 +18,7 @@ const ABSOLUTE_DATE = {
   startTime: '2019-08-01T20:03:29.186Z',
 };
 
-describe('URL compatibility', () => {
+describe.skip('URL compatibility', () => {
   it('Redirects to Detection alerts from old Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
 
