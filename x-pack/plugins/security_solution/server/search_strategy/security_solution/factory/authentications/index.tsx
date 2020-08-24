@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { getOr } from 'lodash/fp';
+
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
+import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
+import {
+  AuthenticationsQuery,
+  AuthenticationsEdges,
+  AuthenticationsRequestOptions,
+  AuthenticationsStrategyResponse,
+} from '../../../../../common/search_strategy/security_solution/authentications';
+
+import { inspectStringifyObject } from '../../../../utils/build_query';
+import { SecuritySolutionFactory } from '../types';
+import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
+import { formatAuthenticationData } from './helpers';
+import { AuthenticationHit, AuthenticationBucket } from '../../../../lib/authentications/types';
+
+export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authentications> = {
+  buildDsl: (options: AuthenticationsRequestOptions) => {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
+    return buildAuthenticationQuery(options);
+  },
+  parse: async (
+    options: AuthenticationsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<AuthenticationsStrategyResponse> => {
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.user_count.value', response);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const hits: AuthenticationHit[] = getOr(
+      [],
+      'aggregations.group_by_users.buckets',
+      response
+    ).map((bucket: AuthenticationBucket) => ({
+      _id: getOr(
+        `${bucket.key}+${bucket.doc_count}`,
+        'failures.lastFailure.hits.hits[0].id',
+        bucket
+      ),
+      _source: {
+        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
+        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
+      },
+      user: bucket.key,
+      failures: bucket.failures.doc_count,
+      successes: bucket.successes.doc_count,
+    }));
+    const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
+      formatAuthenticationData(options.fields, hit, auditdFieldsMap)
+    );
+
+    const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
+    const inspect = {
+      dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
+      response: [inspectStringifyObject(response)],
+    };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
+    return {
+      ...response,
+      inspect,
+      edges,
+      totalCount,
+      pageInfo: {
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
+      },
+    };
+  },
+};
+
+export const authenticationFactory: Record<
+  AuthenticationsQuery,
+  SecuritySolutionFactory<FactoryQueryTypes>
+> = {
+  [AuthenticationsQuery.authentications]: authentications,
+};

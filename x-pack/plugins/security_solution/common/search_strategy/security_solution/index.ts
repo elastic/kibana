@@ -13,10 +13,15 @@ import {
   HostsRequestOptions,
   HostsStrategyResponse,
 } from './hosts';
+import {
+  AuthenticationsQuery,
+  AuthenticationsRequestOptions,
+  AuthenticationsStrategyResponse,
+} from './authentications';
 export * from './hosts';
 export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = HostsQueries;
+export type FactoryQueryTypes = HostsQueries | AuthenticationsQuery;
 
 export interface Inspect {
   dsl: string[];
@@ -78,12 +83,101 @@ export interface DocValueFields {
   format: string;
 }
 
+export interface SearchResponse<T> {
+  took: number;
+  timed_out: boolean;
+  _scroll_id?: string;
+  _shards: ShardsResponse;
+  hits: {
+    total: TotalValue | number;
+    max_score: number;
+    hits: Array<{
+      _index: string;
+      _type: string;
+      _id: string;
+      _score: number;
+      _source: T;
+      _version?: number;
+      _explanation?: Explanation;
+      fields?: string[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      highlight?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      inner_hits?: any;
+      matched_queries?: string[];
+      sort?: string[];
+    }>;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  aggregations?: any;
+}
+
+export interface Explanation {
+  value: number;
+  description: string;
+  details: Explanation[];
+}
+
+export interface TotalValue {
+  value: number;
+  relation: string;
+}
+export interface ShardsResponse {
+  total: number;
+  successful: number;
+  failed: number;
+  skipped: number;
+}
+
+export type SearchHit = SearchResponse<object>['hits']['hits'][0];
+
+export interface TotalHit {
+  value: number;
+  relation: string;
+}
+
+export interface Hit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+}
+
+export interface Hits<T, U> {
+  hits: {
+    total: T;
+    max_score: number | null;
+    hits: U[];
+  };
+}
+
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
+}
+
+export interface SourceConfiguration {
+  /** The field mapping to use for this source */
+  fields: SourceFields;
+}
+
+/** A mapping of semantic fields to their document counterparts */
+export interface SourceFields {
+  /** The field to identify a container by */
+  container: string;
+  /** The fields to identify a host by */
+  host: string;
+  /** The fields that may contain the log event message. The first field found win. */
+  message: string[];
+  /** The field to identify a pod by */
+  pod: string;
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker: string;
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp: string;
 }
 
 export interface RequestOptions extends RequestBasicOptions {
@@ -100,10 +194,14 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
+  : T extends AuthenticationsQuery.authentications
+  ? AuthenticationsStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
+  : T extends AuthenticationsQuery.authentications
+  ? AuthenticationsRequestOptions
   : never;
