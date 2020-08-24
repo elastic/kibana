@@ -21,6 +21,7 @@ interface Props {
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   errors: IErrorObject;
+  documentCount?: number;
 }
 
 export const Criteria: React.FC<Props> = ({
@@ -29,6 +30,7 @@ export const Criteria: React.FC<Props> = ({
   updateCriterion,
   removeCriterion,
   errors,
+  documentCount,
 }) => {
   if (!criteria) return null;
   return (
@@ -45,6 +47,7 @@ export const Criteria: React.FC<Props> = ({
               removeCriterion={removeCriterion}
               canDelete={criteria.length > 1}
               errors={errors[idx.toString()] as IErrorObject}
+              documentCount={documentCount}
             />
           );
         })}

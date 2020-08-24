@@ -8,8 +8,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiPopover,
   EuiSelect,
   EuiFieldNumber,
@@ -56,47 +54,42 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
     values: { value },
   });
 
-  const documentCountSuffix = i18n.translate('xpack.infra.logs.alertFlyout.documentCountSuffix', {
-    defaultMessage: '{value, plural, one {occurs} other {occur}}',
-    values: { value },
-  });
-
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="comparator"
-          button={
-            <EuiExpression
-              description={documentCountPrefix}
-              uppercase={true}
-              value={comparator ? ComparatorToi18nMap[comparator] : ''}
-              isActive={isComparatorPopoverOpen}
-              onClick={() => setComparatorPopoverOpenState(true)}
-            />
-          }
-          isOpen={isComparatorPopoverOpen}
-          closePopover={() => setComparatorPopoverOpenState(false)}
-          ownFocus
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-        >
-          <div>
-            <EuiPopoverTitle>{documentCountPrefix}</EuiPopoverTitle>
-            <EuiSelect
-              compressed
-              value={comparator}
-              onChange={(e) => updateCount({ comparator: e.target.value as Comparator })}
-              options={getComparatorOptions()}
-            />
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
+    <>
+      <EuiPopover
+        id="comparator"
+        button={
+          <EuiExpression
+            description={documentCountPrefix}
+            uppercase={true}
+            value={comparator ? ComparatorToi18nMap[comparator] : ''}
+            isActive={isComparatorPopoverOpen}
+            onClick={() => setComparatorPopoverOpenState(true)}
+            display="columns"
+          />
+        }
+        isOpen={isComparatorPopoverOpen}
+        closePopover={() => setComparatorPopoverOpenState(false)}
+        ownFocus
+        panelPaddingSize="s"
+        anchorPosition="downLeft"
+        display="block"
+      >
+        <div>
+          <EuiPopoverTitle>{documentCountPrefix}</EuiPopoverTitle>
+          <EuiSelect
+            compressed
+            value={comparator}
+            onChange={(e) => updateCount({ comparator: e.target.value as Comparator })}
+            options={getComparatorOptions()}
+          />
+        </div>
+      </EuiPopover>
 
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="comparator"
-          button={
+      <EuiPopover
+        id="comparator"
+        button={
+          <>
             <EuiExpression
               description={value}
               uppercase={true}
@@ -104,33 +97,31 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
               isActive={isValuePopoverOpen}
               onClick={() => setIsValuePopoverOpen(true)}
               color={errors.value.length === 0 ? 'secondary' : 'danger'}
+              display="columns"
             />
-          }
-          isOpen={isValuePopoverOpen}
-          closePopover={() => setIsValuePopoverOpen(false)}
-          ownFocus
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-        >
-          <div>
-            <EuiPopoverTitle>{documentCountValue}</EuiPopoverTitle>
-            <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
-              <EuiFieldNumber
-                compressed
-                value={value}
-                onChange={(e) => {
-                  const number = parseInt(e.target.value, 10);
-                  updateCount({ value: number ? number : undefined });
-                }}
-              />
-            </EuiFormRow>
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiExpression description={documentCountSuffix} value="" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </>
+        }
+        isOpen={isValuePopoverOpen}
+        closePopover={() => setIsValuePopoverOpen(false)}
+        ownFocus
+        panelPaddingSize="s"
+        anchorPosition="downLeft"
+        display="block"
+      >
+        <div>
+          <EuiPopoverTitle>{documentCountValue}</EuiPopoverTitle>
+          <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+            <EuiFieldNumber
+              compressed
+              value={value}
+              onChange={(e) => {
+                const number = parseInt(e.target.value, 10);
+                updateCount({ value: number ? number : undefined });
+              }}
+            />
+          </EuiFormRow>
+        </div>
+      </EuiPopover>
+    </>
   );
 };

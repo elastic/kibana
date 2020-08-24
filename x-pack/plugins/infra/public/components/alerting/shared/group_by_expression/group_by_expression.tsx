@@ -7,13 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiExpression,
-} from '@elastic/eui';
+import { EuiPopoverTitle, EuiPopover, EuiExpression } from '@elastic/eui';
 import { GroupBySelector } from './selector';
 
 interface Props {
@@ -49,37 +43,35 @@ export const GroupByExpression: React.FC<Props> = ({
   const labelProp = label ?? DEFAULT_GROUP_BY_LABEL;
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="groupByExpression"
-          button={
-            <EuiExpression
-              description={labelProp}
-              uppercase={true}
-              value={expressionValue}
-              isActive={isPopoverOpen}
-              onClick={() => setIsPopoverOpen(true)}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-          ownFocus
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-        >
-          <div style={{ zIndex: 11000 }}>
-            <EuiPopoverTitle>{labelProp}</EuiPopoverTitle>
-            <GroupBySelector
-              selectedGroups={selectedGroups}
-              onChange={onChange}
-              fields={fields}
-              label={labelProp}
-              placeholder={EVERYTHING_PLACEHOLDER}
-            />
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPopover
+      id="groupByExpression"
+      button={
+        <EuiExpression
+          description={labelProp}
+          uppercase={true}
+          value={expressionValue}
+          isActive={isPopoverOpen}
+          onClick={() => setIsPopoverOpen(true)}
+          display="columns"
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      ownFocus
+      panelPaddingSize="s"
+      anchorPosition="downLeft"
+      display="block"
+    >
+      <div style={{ zIndex: 11000 }}>
+        <EuiPopoverTitle>{labelProp}</EuiPopoverTitle>
+        <GroupBySelector
+          selectedGroups={selectedGroups}
+          onChange={onChange}
+          fields={fields}
+          label={labelProp}
+          placeholder={EVERYTHING_PLACEHOLDER}
+        />
+      </div>
+    </EuiPopover>
   );
 };

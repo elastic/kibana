@@ -27,12 +27,11 @@ import {
   ComparatorToi18nMap,
 } from '../../../../../common/alerting/logs/types';
 
-const firstCriterionFieldPrefix = i18n.translate(
-  'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
-  {
-    defaultMessage: 'with',
-  }
-);
+const firstCriterionFieldPrefix = (documentCount: number = 0) =>
+  i18n.translate('xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix', {
+    defaultMessage: '{documentCount, plural, one {occurs with} other {occur with}}',
+    values: { documentCount },
+  });
 
 const successiveCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.successiveCriterionFieldPrefix',
@@ -94,6 +93,7 @@ interface Props {
   removeCriterion: (idx: number) => void;
   canDelete: boolean;
   errors: IErrorObject;
+  documentCount?: number;
 }
 
 export const Criterion: React.FC<Props> = ({
@@ -104,6 +104,7 @@ export const Criterion: React.FC<Props> = ({
   removeCriterion,
   canDelete,
   errors,
+  documentCount,
 }) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
@@ -149,108 +150,107 @@ export const Criterion: React.FC<Props> = ({
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="criterion-field"
-              button={
-                <EuiExpression
-                  description={
-                    idx === 0 ? firstCriterionFieldPrefix : successiveCriterionFieldPrefix
-                  }
-                  uppercase={true}
-                  value={criterion.field}
-                  isActive={isFieldPopoverOpen}
-                  color={errors.field.length === 0 ? 'secondary' : 'danger'}
-                  onClick={() => setIsFieldPopoverOpen(true)}
-                />
+        <EuiPopover
+          id="criterion-field"
+          button={
+            <EuiExpression
+              description={
+                idx === 0
+                  ? firstCriterionFieldPrefix(documentCount)
+                  : successiveCriterionFieldPrefix
               }
-              isOpen={isFieldPopoverOpen}
-              closePopover={() => setIsFieldPopoverOpen(false)}
-              ownFocus
-              panelPaddingSize="s"
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
-                <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
+              uppercase={true}
+              value={criterion.field}
+              isActive={isFieldPopoverOpen}
+              color={errors.field.length === 0 ? 'secondary' : 'danger'}
+              onClick={() => setIsFieldPopoverOpen(true)}
+              display="columns"
+            />
+          }
+          isOpen={isFieldPopoverOpen}
+          closePopover={() => setIsFieldPopoverOpen(false)}
+          ownFocus
+          panelPaddingSize="s"
+          anchorPosition="downLeft"
+          display="block"
+        >
+          <div>
+            <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
+            <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
+              <EuiSelect
+                compressed
+                value={criterion.field}
+                onChange={handleFieldChange}
+                options={fieldOptions}
+              />
+            </EuiFormRow>
+          </div>
+        </EuiPopover>
+
+        <EuiPopover
+          id="criterion-comparator-value"
+          button={
+            <EuiExpression
+              description={
+                ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
+                  ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
+                  : ComparatorToi18nMap[criterion.comparator]
+              }
+              uppercase={true}
+              value={criterion.value}
+              isActive={isComparatorPopoverOpen}
+              color={
+                errors.comparator.length === 0 && errors.value.length === 0 ? 'secondary' : 'danger'
+              }
+              onClick={() => setIsComparatorPopoverOpen(true)}
+              display="columns"
+            />
+          }
+          isOpen={isComparatorPopoverOpen}
+          closePopover={() => setIsComparatorPopoverOpen(false)}
+          ownFocus
+          panelPaddingSize="s"
+          anchorPosition="downLeft"
+          display="block"
+        >
+          <div>
+            <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
+            <EuiFlexGroup gutterSize="l">
+              <EuiFlexItem grow={false}>
+                <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
                   <EuiSelect
                     compressed
-                    value={criterion.field}
-                    onChange={handleFieldChange}
-                    options={fieldOptions}
+                    value={criterion.comparator}
+                    onChange={(e) =>
+                      updateCriterion(idx, { comparator: e.target.value as Comparator })
+                    }
+                    options={compatibleComparatorOptions}
                   />
                 </EuiFormRow>
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="criterion-comparator-value"
-              button={
-                <EuiExpression
-                  description={
-                    ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
-                      ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
-                      : ComparatorToi18nMap[criterion.comparator]
-                  }
-                  uppercase={true}
-                  value={criterion.value}
-                  isActive={isComparatorPopoverOpen}
-                  color={
-                    errors.comparator.length === 0 && errors.value.length === 0
-                      ? 'secondary'
-                      : 'danger'
-                  }
-                  onClick={() => setIsComparatorPopoverOpen(true)}
-                />
-              }
-              isOpen={isComparatorPopoverOpen}
-              closePopover={() => setIsComparatorPopoverOpen(false)}
-              ownFocus
-              panelPaddingSize="s"
-              anchorPosition="downLeft"
-            >
-              <div>
-                <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
-                <EuiFlexGroup gutterSize="l">
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
-                      <EuiSelect
-                        compressed
-                        value={criterion.comparator}
-                        onChange={(e) =>
-                          updateCriterion(idx, { comparator: e.target.value as Comparator })
-                        }
-                        options={compatibleComparatorOptions}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
-                      {fieldInfo?.type === 'number' ? (
-                        <EuiFieldNumber
-                          compressed
-                          value={criterion.value as number | undefined}
-                          onChange={(e) => {
-                            const number = parseInt(e.target.value, 10);
-                            updateCriterion(idx, { value: number ? number : undefined });
-                          }}
-                        />
-                      ) : (
-                        <EuiFieldText
-                          compressed
-                          value={criterion.value}
-                          onChange={(e) => updateCriterion(idx, { value: e.target.value })}
-                        />
-                      )}
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                  {fieldInfo?.type === 'number' ? (
+                    <EuiFieldNumber
+                      compressed
+                      value={criterion.value as number | undefined}
+                      onChange={(e) => {
+                        const number = parseInt(e.target.value, 10);
+                        updateCriterion(idx, { value: number ? number : undefined });
+                      }}
+                    />
+                  ) : (
+                    <EuiFieldText
+                      compressed
+                      value={criterion.value}
+                      onChange={(e) => updateCriterion(idx, { value: e.target.value })}
+                    />
+                  )}
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </EuiPopover>
       </EuiFlexItem>
       {canDelete && (
         <EuiFlexItem grow={false}>

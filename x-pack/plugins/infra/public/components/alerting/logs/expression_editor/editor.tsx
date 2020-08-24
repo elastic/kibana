@@ -227,6 +227,7 @@ export const Editor: React.FC<Props> = (props) => {
         updateCriterion={updateCriterion}
         removeCriterion={removeCriterion}
         errors={errors.criteria as IErrorObject}
+        documentCount={alertParams.count?.value}
       />
 
       <ForLastExpression
@@ -235,6 +236,7 @@ export const Editor: React.FC<Props> = (props) => {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         errors={errors as { [key: string]: string[] }}
+        display="fullWidth"
       />
 
       <GroupByExpression
