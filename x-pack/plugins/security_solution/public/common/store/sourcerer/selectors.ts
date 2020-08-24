@@ -9,10 +9,8 @@ import { ManageSourceGroupById, SourceGroupsType } from './model';
 
 export const activeSourceGroupIdSelector = ({ sourcerer }: State): SourceGroupsType =>
   sourcerer.activeSourceGroupId;
-export const availableIndexPatternsSelector = ({ sourcerer }: State): string[] =>
-  sourcerer.availableIndexPatterns;
-export const availableSourceGroupIdsSelector = ({ sourcerer }: State): SourceGroupsType[] =>
-  sourcerer.availableSourceGroupIds;
+export const kibanaIndexPatternsSelector = ({ sourcerer }: State): string[] =>
+  sourcerer.kibanaIndexPatterns;
 export const isIndexPatternsLoadingSelector = ({ sourcerer }: State): boolean =>
   sourcerer.isIndexPatternsLoading;
 export const sourceGroupsSelector = ({ sourcerer }: State): ManageSourceGroupById =>

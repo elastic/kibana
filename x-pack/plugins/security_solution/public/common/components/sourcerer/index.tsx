@@ -15,24 +15,31 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import {
+  EuiSelectableOption,
+  EuiSelectableOptionCheckedType,
+} from '@elastic/eui/src/components/selectable/selectable_option';
 import { useManageSource } from '../../containers/sourcerer';
 import * as i18n from './translations';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
 import { ADD_INDEX_PATH } from '../../../../common/constants';
-
+const ON: EuiSelectableOptionCheckedType = 'on';
 export const MaybeSourcerer = React.memo(() => {
   const {
     activeSourceGroupId,
-    availableIndexPatterns,
+    kibanaIndexPatterns,
     getManageSourceGroupById,
     isIndexPatternsLoading,
-    updateSourceGroupIndicies,
+    updateSourceGroupIndices,
   } = useManageSource();
-  const { defaultPatterns, indexPatterns: selectedOptions, loading: loadingIndices } = useMemo(
-    () => getManageSourceGroupById(activeSourceGroupId),
-    [getManageSourceGroupById, activeSourceGroupId]
-  );
+  const {
+    scopePatterns,
+    selectedPatterns: selectedOptions,
+    loading: loadingIndices,
+  } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
+    getManageSourceGroupById,
+    activeSourceGroupId,
+  ]);
 
   const loading = useMemo(() => loadingIndices || isIndexPatternsLoading, [
     isIndexPatternsLoading,
@@ -41,9 +48,9 @@ export const MaybeSourcerer = React.memo(() => {
 
   const onChangeIndexPattern = useCallback(
     (newIndexPatterns: string[]) => {
-      updateSourceGroupIndicies(activeSourceGroupId, newIndexPatterns);
+      updateSourceGroupIndices(activeSourceGroupId, newIndexPatterns);
     },
-    [activeSourceGroupId, updateSourceGroupIndicies]
+    [activeSourceGroupId, updateSourceGroupIndices]
   );
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -66,19 +73,28 @@ export const MaybeSourcerer = React.memo(() => {
     [setPopoverIsOpenCb]
   );
   const options: EuiSelectableOption[] = useMemo(
-    () =>
-      availableIndexPatterns.map((title, id) => ({
+    () => [
+      ...scopePatterns.map((title, id) => ({
         label: title,
         key: `${title}-${id}`,
         value: title,
-        checked: selectedOptions.includes(title) ? 'on' : undefined,
+        checked: selectedOptions.includes(title) ? ON : undefined,
       })),
-    [availableIndexPatterns, selectedOptions]
+      ...kibanaIndexPatterns
+        .filter((title) => !scopePatterns.includes(title))
+        .map((title, id) => ({
+          label: title,
+          key: `${title}-${id}`,
+          value: title,
+          checked: selectedOptions.includes(title) ? ON : undefined,
+        })),
+    ],
+    [kibanaIndexPatterns, scopePatterns, selectedOptions]
   );
   const unSelectableOptions: EuiSelectableOption[] = useMemo(
     () =>
-      defaultPatterns
-        .filter((title) => !availableIndexPatterns.includes(title))
+      []
+        .filter((title) => !kibanaIndexPatterns.includes(title))
         .map((title, id) => ({
           label: title,
           key: `${title}-${id}`,
@@ -86,7 +102,7 @@ export const MaybeSourcerer = React.memo(() => {
           disabled: true,
           checked: undefined,
         })),
-    [availableIndexPatterns, defaultPatterns]
+    [kibanaIndexPatterns]
   );
   const renderOption = useCallback(
     (option, searchValue) => (

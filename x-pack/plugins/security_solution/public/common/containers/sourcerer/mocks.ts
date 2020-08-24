@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityPageName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourceDefaults } from './index';
+import { sourcererModel } from '../../store/sourcerer';
 
 export const mockPatterns = [
   'auditbeat-*',
@@ -14,32 +15,12 @@ export const mockPatterns = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+  'journalbeat-*',
 ];
 
-export const mockSourceGroups = {
-  [SecurityPageName.default]: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'blobbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'winlogbeat-*',
-  ],
-  [SecurityPageName.host]: [
-    'apm-*-transaction*',
-    'endgame-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-};
+export const mockSourceGroups = sourcererModel.sourceGroupSettings;
 
-export const mockSourceSelections = {
-  [SecurityPageName.default]: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  [SecurityPageName.host]: ['endgame-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-};
-export const mockSource = (testId: SecurityPageName.default | SecurityPageName.host) => ({
+export const mockSource = (testId: SourcererScopeName.default | SourcererScopeName.host) => ({
   data: {
     source: {
       id: 'default',
@@ -50,7 +31,7 @@ export const mockSource = (testId: SecurityPageName.default | SecurityPageName.h
             category: '_id',
             description: 'Each document has an _id that uniquely identifies it',
             example: 'Y-6TfmcB0WOhS6qyMv3s',
-            indexes: mockSourceSelections[testId],
+            indexes: mockSourceGroups[testId],
             name: '_id',
             searchable: true,
             type: 'string',
@@ -69,11 +50,11 @@ export const mockSource = (testId: SecurityPageName.default | SecurityPageName.h
   stale: false,
 });
 
-export const mockSourceGroup = (testId: SecurityPageName.default | SecurityPageName.host) => {
-  const indexes = mockSourceSelections[testId];
+export const mockSourceGroup = (testId: SourcererScopeName.default | SourcererScopeName.host) => {
+  const indexes = mockSourceGroups[testId];
   return {
-    ...getSourceDefaults(testId, mockPatterns),
-    defaultPatterns: mockSourceGroups[testId],
+    ...getSourceDefaults(testId, mockSourceGroups[testId]),
+    scopePatterns: mockSourceGroups[testId],
     browserFields: {
       _id: {
         fields: {
@@ -107,7 +88,7 @@ export const mockSourceGroup = (testId: SecurityPageName.default | SecurityPageN
       ],
       title: indexes.join(),
     },
-    indexPatterns: indexes,
+    selectedPatterns: indexes,
     indicesExist: true,
     loading: false,
   };

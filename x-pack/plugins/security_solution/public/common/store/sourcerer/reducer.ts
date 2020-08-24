@@ -8,7 +8,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   setActiveSourceGroupId,
-  setAvailableIndexPatterns,
+  setKibanaIndexPatterns,
   setIsIndexPatternsLoading,
   setIsSourceLoading,
   setSource,
@@ -23,9 +23,9 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     activeSourceGroupId: payload,
   }))
-  .case(setAvailableIndexPatterns, (state, { payload }) => ({
+  .case(setKibanaIndexPatterns, (state, { payload }) => ({
     ...state,
-    availableIndexPatterns: payload,
+    kibanaIndexPatterns: payload,
   }))
   .case(setIsIndexPatternsLoading, (state, { payload }) => ({
     ...state,
@@ -42,18 +42,15 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     },
   }))
-  .case(setSource, (state, { id, defaultIndex, payload }) => ({
+  .case(setSource, (state, { id, payload }) => ({
     ...state,
     sourceGroups: {
       ...state.sourceGroups,
       [id]: {
-        ...getSourceDefaults(id, defaultIndex),
+        ...getSourceDefaults(id, payload.selectedPatterns),
         ...state.sourceGroups[id],
         ...payload,
       },
     },
-    availableSourceGroupIds: state.availableSourceGroupIds.includes(id)
-      ? state.availableSourceGroupIds
-      : [...state.availableSourceGroupIds, id],
   }))
   .build();

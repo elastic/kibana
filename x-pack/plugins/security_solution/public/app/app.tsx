@@ -54,13 +54,13 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
             <ReduxStoreProvider store={store}>
               <ApolloProvider client={apolloClient}>
                 <ApolloClientContext.Provider value={apolloClient}>
-                  <ManageSource>
-                    <ThemeProvider theme={theme}>
-                      <MlCapabilitiesProvider>
-                        <PageRouter history={history}>{children}</PageRouter>
-                      </MlCapabilitiesProvider>
-                    </ThemeProvider>
-                  </ManageSource>
+                  <ThemeProvider theme={theme}>
+                    <MlCapabilitiesProvider>
+                      <PageRouter history={history}>
+                        <ManageSource>{children}</ManageSource>
+                      </PageRouter>
+                    </MlCapabilitiesProvider>
+                  </ThemeProvider>
                   <ErrorToastDispatcher />
                   <GlobalToaster />
                 </ApolloClientContext.Provider>

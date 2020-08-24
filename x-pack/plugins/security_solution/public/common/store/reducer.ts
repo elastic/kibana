@@ -9,7 +9,7 @@ import { combineReducers, PreloadedState, AnyAction, Reducer } from 'redux';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererReducer, initialSourcererState } from './sourcerer';
+import { sourcererReducer, sourcererModel } from './sourcerer';
 
 import { HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginReducer } from '../../network/store';
@@ -36,7 +36,7 @@ export const createInitialState = (
     dragAndDrop: initialDragAndDropState,
     ...pluginsInitState,
     inputs: createInitialInputsState(),
-    sourcerer: initialSourcererState,
+    sourcerer: sourcererModel.initialSourcererState,
   };
   return preloadedState;
 };

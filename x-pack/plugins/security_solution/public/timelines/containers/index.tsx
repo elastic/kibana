@@ -57,6 +57,7 @@ export interface OwnProps extends QueryTemplateProps {
   limit: number;
   sortField: SortField;
   fields: string[];
+  sourcererIndexPatterns?: string[];
   startDate: string;
   queryDeduplication: string;
 }
@@ -97,9 +98,10 @@ class TimelineQueryComponent extends QueryTemplate<
       startDate,
       queryDeduplication,
     } = this.props;
-    const defaultKibanaIndex = SOURCERER_FEATURE_FLAG_ON
-      ? sourcererIndexPatterns
-      : kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+    const defaultKibanaIndex =
+      SOURCERER_FEATURE_FLAG_ON && sourcererIndexPatterns != null
+        ? sourcererIndexPatterns
+        : kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex =
       indexPattern == null || (indexPattern != null && indexPattern.title === '')
         ? [

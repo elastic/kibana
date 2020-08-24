@@ -27,7 +27,7 @@ import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
-import { initialSourcererState } from '../store/sourcerer';
+import { initialSourcererState } from '../store/sourcerer/model';
 
 export const mockGlobalState: State = {
   app: {

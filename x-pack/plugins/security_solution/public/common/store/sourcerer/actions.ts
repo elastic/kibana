@@ -12,7 +12,6 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourc
 
 export const setSource = actionCreator<{
   id: SourceGroupsType;
-  defaultIndex: string[];
   payload: ManageSourceInit;
 }>('SET_SOURCE');
 
@@ -24,8 +23,8 @@ export const setActiveSourceGroupId = actionCreator<{ payload: SourceGroupsType 
   'SET_ACTIVE_SOURCE_GROUP_ID'
 );
 
-export const setAvailableIndexPatterns = actionCreator<{ payload: string[] }>(
-  'SET_AVAILABLE_INDEX_PATTERNS'
+export const setKibanaIndexPatterns = actionCreator<{ payload: string[] }>(
+  'SET_KIBANA_INDEX_PATTERNS'
 );
 
 export const setIsIndexPatternsLoading = actionCreator<{ payload: boolean }>(

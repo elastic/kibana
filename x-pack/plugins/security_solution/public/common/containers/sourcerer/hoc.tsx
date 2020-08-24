@@ -6,11 +6,16 @@
 import React, { useMemo } from 'react';
 import { useManageSource } from './index';
 
-export const withSourcerer = (BaseComponent: JSX.Element) => (props: unknown) => {
+interface PassedProps extends React.PropsWithChildren<unknown> {
+  sourcererIndexPatterns: string[];
+}
+export const withSourcerer = (BaseComponent: React.ComponentType<PassedProps>) => (
+  props: unknown
+) => {
   const { activeSourceGroupId, getManageSourceGroupById } = useManageSource();
-  const { indexPatterns } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
+  const { selectedPatterns } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
     getManageSourceGroupById,
     activeSourceGroupId,
   ]);
-  return <BaseComponent {...props} sourcererIndexPatterns={indexPatterns} />;
+  return <BaseComponent {...props} sourcererIndexPatterns={selectedPatterns} />;
 };
