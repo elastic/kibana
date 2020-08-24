@@ -10,7 +10,10 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
-import { ensureInstalledDefaultPackages } from './epm/packages/install';
+import {
+  ensureInstalledDefaultPackages,
+  ensurePackagesCompletedInstall,
+} from './epm/packages/install';
 import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
   packageToPackagePolicy,
@@ -51,6 +54,7 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient),
+    ensurePackagesCompletedInstall(soClient, callCluster),
     ensureDefaultIndices(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
