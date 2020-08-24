@@ -23,7 +23,11 @@ import classNames from 'classnames';
 import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import { suggestionsListRequiredBottomSpace, suggestionsListRequiredWidth } from './constants';
+import {
+  suggestionsListRequiredBottomSpace,
+  suggestionsListRequiredTopOffset,
+  suggestionsListRequiredWidth,
+} from './constants';
 
 interface Props {
   index: number | null;
@@ -138,7 +142,7 @@ export const StyledSuggestionsComponent = styled(SuggestionsComponent)`
       documentHeight - (queryBarRect.top + queryBarRect.height) >
       suggestionsListRequiredBottomSpace;
     const verticalListPosition = isSuggestionsListFittable
-      ? `top: ${window.scrollY + queryBarRect.bottom}px;`
+      ? `top: ${window.scrollY + queryBarRect.bottom - suggestionsListRequiredTopOffset}px;`
       : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
 
     return `left: ${queryBarRect.left}px;

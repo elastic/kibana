@@ -19,3 +19,4 @@
 
 export const suggestionsListRequiredWidth = 600;
 export const suggestionsListRequiredBottomSpace = 250;
+export const suggestionsListRequiredTopOffset = 2;
