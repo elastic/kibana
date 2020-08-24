@@ -205,7 +205,7 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity } = this.props;
+    const { showCharts, severity, stoppedPartitions } = this.props;
 
     const {
       annotations,
@@ -298,6 +298,23 @@ export class Explorer extends React.Component {
 
           <div className={mainColumnClasses}>
             <EuiSpacer size="m" />
+
+            {stoppedPartitions && (
+              <EuiCallOut
+                size={'s'}
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.explorer.stoppedPartitionsExistCallout"
+                    defaultMessage="There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection have stopped for some partitions in {jobsWithStoppedPartitions, plural, one {job} other {jobs}} [{stoppedPartitions}] where the categorization status has changed to warn."
+                    values={{
+                      jobsWithStoppedPartitions: stoppedPartitions.length,
+                      stoppedPartitions: stoppedPartitions.join(', '),
+                    }}
+                  />
+                }
+              />
+            )}
+
             <AnomalyTimeline
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}
