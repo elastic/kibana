@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('discover');
 
       await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();

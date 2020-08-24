@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
-        'doc_table:legacyTable': true,
+        'doc_table:legacy': true,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();

@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('security/discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'doc_table:legacyTable': true,
+        'doc_table:legacy': true,
       });
       await PageObjects.settings.navigateTo();
     });

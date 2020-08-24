@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': true });
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({});
     });

@@ -115,7 +115,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: getServices().uiSettings.get('doc_table:legacyTable', true)
+    template: getServices().uiSettings.get('doc_table:legacy', true)
       ? indexTemplate
       : indexTemplateGrid,
     reloadOnSearch: false,
@@ -315,7 +315,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
   $scope.useShortDots = config.get('shortDots:enable', false);
-  $scope.useNewGrid = config.get('doc_table:legacyTable', false);
+  $scope.useNewGrid = config.get('doc_table:legacy', false);
   $scope.showTimeCol =
     !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
