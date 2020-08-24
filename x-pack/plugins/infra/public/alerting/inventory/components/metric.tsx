@@ -69,6 +69,7 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
             setAggFieldPopoverOpen(true);
           }}
           color={errors.metric?.length ? 'danger' : 'secondary'}
+          display="columns"
         />
       }
       isOpen={aggFieldPopoverOpen}
@@ -76,6 +77,7 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
         setAggFieldPopoverOpen(false);
       }}
       withTitle
+      display="block"
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >

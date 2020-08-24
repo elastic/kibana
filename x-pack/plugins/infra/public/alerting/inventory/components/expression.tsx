@@ -31,7 +31,6 @@ import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
-import { euiStyled } from '../../../../../observability/public';
 import {
   ThresholdExpression,
   ForLastExpression,
@@ -274,15 +273,13 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </h4>
       </EuiText>
-      <StyledExpression>
-        <StyledExpressionRow>
-          <NodeTypeExpression
-            options={nodeTypes}
-            value={alertParams.nodeType || 'host'}
-            onChange={updateNodeType}
-          />
-        </StyledExpressionRow>
-      </StyledExpression>
+
+      <NodeTypeExpression
+        options={nodeTypes}
+        value={alertParams.nodeType || 'host'}
+        onChange={updateNodeType}
+      />
+
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
         alertParams.criteria.map((e, idx) => {
@@ -308,6 +305,7 @@ export const Expressions: React.FC<Props> = (props) => {
         errors={emptyError}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
       />
 
       <div>
@@ -407,16 +405,6 @@ interface ExpressionRowProps {
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
   alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
 }
-
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -4px;
-`;
-
-const StyledExpression = euiStyled.div`
-  padding: 0 4px;
-`;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const {
@@ -522,42 +510,30 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow>
-          <StyledExpressionRow>
-            <StyledExpression>
-              <MetricExpression
-                metric={{
-                  value: selectedMetricValue,
-                  text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
-                }}
-                metrics={
-                  ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
-                    value: SnapshotMetricType;
-                    text: string;
-                  }>
-                }
-                onChange={updateMetric}
-                errors={errors}
-              />
-            </StyledExpression>
-            <StyledExpression>
-              <ThresholdExpression
-                thresholdComparator={comparator || Comparator.GT}
-                threshold={threshold}
-                onChangeSelectedThresholdComparator={updateComparator}
-                onChangeSelectedThreshold={updateThreshold}
-                errors={errors}
-              />
-            </StyledExpression>
-            {metric && (
-              <div
-                style={{
-                  alignSelf: 'center',
-                }}
-              >
-                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
-              </div>
-            )}
-          </StyledExpressionRow>
+          <MetricExpression
+            metric={{
+              value: selectedMetricValue,
+              text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
+            }}
+            metrics={
+              ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
+                value: SnapshotMetricType;
+                text: string;
+              }>
+            }
+            onChange={updateMetric}
+            errors={errors}
+          />
+
+          <ThresholdExpression
+            thresholdComparator={comparator || Comparator.GT}
+            threshold={threshold}
+            onChangeSelectedThresholdComparator={updateComparator}
+            onChangeSelectedThreshold={updateThreshold}
+            errors={errors}
+            display="fullWidth"
+            metricUnit={metric && metricUnit[metric]?.label}
+          />
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>

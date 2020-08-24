@@ -54,12 +54,14 @@ export const NodeTypeExpression = ({
           onClick={() => {
             setAggTypePopoverOpen(true);
           }}
+          display="columns"
         />
       }
       isOpen={aggTypePopoverOpen}
       closePopover={() => {
         setAggTypePopoverOpen(false);
       }}
+      display="block"
       ownFocus
       withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
