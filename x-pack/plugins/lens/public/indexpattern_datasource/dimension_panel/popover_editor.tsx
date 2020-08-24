@@ -378,6 +378,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
 
               {!hideGrouping && (
                 <BucketNestingEditor
+                  fieldMap={fieldMap}
                   layer={state.layers[props.layerId]}
                   columnId={props.columnId}
                   setColumns={(columnOrder) => {

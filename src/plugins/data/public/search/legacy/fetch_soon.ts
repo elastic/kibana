@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { callClient } from './call_client';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
+import { SearchRequest } from '../index';
 import { UI_SETTINGS } from '../../../common';
 
 /**
@@ -53,7 +54,7 @@ let requestsToFetch: SearchRequest[] = [];
 let requestOptions: FetchOptions[] = [];
 
 // The in-progress fetch (if there is one)
-let fetchInProgress: Promise<SearchResponse> | null = null;
+let fetchInProgress: any = null;
 
 /**
  * Delay fetching for a given amount of time, while batching up the requests to be fetched.
@@ -67,7 +68,7 @@ async function delayedFetch(
   options: FetchOptions,
   fetchHandlers: FetchHandlers,
   ms: number
-) {
+): Promise<SearchResponse<any>> {
   if (ms === 0) {
     return callClient([request], [options], fetchHandlers)[0];
   }
@@ -75,7 +76,10 @@ async function delayedFetch(
   const i = requestsToFetch.length;
   requestsToFetch = [...requestsToFetch, request];
   requestOptions = [...requestOptions, options];
-  const responses: SearchResponse[] = await (fetchInProgress =
+
+  // Note: the typescript here only worked because `SearchResponse` was `any`
+  // Since this code is legacy, I'm leaving the any here.
+  const responses: any[] = await (fetchInProgress =
     fetchInProgress ||
     delay(() => {
       const response = callClient(requestsToFetch, requestOptions, fetchHandlers);

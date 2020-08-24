@@ -78,7 +78,6 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
-    '<rootDir>/src/dev/jest/setup/default_timeout.js',
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
