@@ -19,7 +19,6 @@
 import { first } from 'rxjs/operators';
 import { Cluster } from './server/lib/cluster';
 import { createProxy } from './server/lib/create_proxy';
-import { handleESError } from './server/lib/handle_es_error';
 
 export default function (kibana) {
   let defaultVars;
@@ -86,8 +85,6 @@ export default function (kibana) {
 
         clusters.clear();
       });
-
-      server.expose('handleESError', handleESError);
 
       createProxy(server);
     },
