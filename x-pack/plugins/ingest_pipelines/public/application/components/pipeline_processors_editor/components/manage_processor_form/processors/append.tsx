@@ -21,6 +21,7 @@ const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
   value: {
+    defaultValue: [],
     type: FIELD_TYPES.COMBO_BOX,
     deserializer: to.arrayOfStrings,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.valueFieldLabel', {
