@@ -170,8 +170,10 @@ export const requiredFieldsForActions = [
   'signal.rule.from',
   'signal.rule.language',
   'signal.rule.query',
+  'signal.rule.name',
   'signal.rule.to',
   'signal.rule.id',
+  'signal.rule.index',
   'signal.original_event.kind',
   'signal.original_event.module',
 
