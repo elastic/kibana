@@ -47,14 +47,20 @@ interface ExpressionRowProps {
   setAlertParams(id: number, params: MetricExpression): void;
 }
 
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -4px;
-`;
-
 const StyledExpression = euiStyled.div`
   padding: 0 4px;
+  & .euiExpression {
+    transition-duration: 0s;
+  }
+`;
+
+const StyledExpressionRow = euiStyled(EuiFlexGroup)<{ isExpanded: boolean }>`
+  display: ${(props) => (props.isExpanded ? 'inline' : 'flex')};
+  flex-wrap: wrap;
+  margin: 0 -4px;
+  & ${StyledExpression} {
+    ${(props) => (props.isExpanded ? 'padding: 0' : '')};
+  }
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
@@ -121,6 +127,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     return threshold;
   }, [threshold, isMetricPct]);
 
+  const expressionDisplay = useMemo(() => (isExpanded ? 'fullWidth' : 'inline'), [isExpanded]);
+
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
@@ -134,12 +142,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <StyledExpressionRow>
+          <StyledExpressionRow isExpanded={isExpanded}>
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
                 aggType={aggType}
                 onChangeSelectedAggType={updateAggType}
+                display={expressionDisplay}
               />
             </StyledExpression>
             {aggType !== 'count' && (
@@ -154,6 +163,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
+                  display={expressionDisplay}
                 />
               </StyledExpression>
             )}
@@ -165,6 +175,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 onChangeSelectedThresholdComparator={updateComparator}
                 onChangeSelectedThreshold={updateThreshold}
                 errors={errors}
+                display={expressionDisplay}
               />
             </StyledExpression>
             {isMetricPct && (

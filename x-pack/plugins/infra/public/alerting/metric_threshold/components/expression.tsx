@@ -274,6 +274,11 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
         alertParams.criteria.map((e, idx) => {
+          const conditionIsIncomplete =
+            errors[idx] &&
+            Object.entries(errors[idx])
+              .filter(([key]) => !key.startsWith('threshold'))
+              .some(([, errorList]) => errorList?.length > 0);
           return (
             <ExpressionRow
               canDelete={(alertParams.criteria && alertParams.criteria.length > 1) || false}
@@ -293,6 +298,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 source={source}
                 filterQuery={alertParams.filterQueryText}
                 groupBy={alertParams.groupBy}
+                showCompleteExpressionPrompt={conditionIsIncomplete}
               />
             </ExpressionRow>
           );

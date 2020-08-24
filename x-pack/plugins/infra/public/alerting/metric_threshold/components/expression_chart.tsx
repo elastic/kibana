@@ -18,7 +18,7 @@ import {
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiEmptyPrompt, EuiLoadingChart } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -44,6 +44,7 @@ interface Props {
   expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
+  showCompleteExpressionPrompt: boolean;
   filterQuery?: string;
   groupBy?: string | string[];
 }
@@ -67,6 +68,7 @@ export const ExpressionChart: React.FC<Props> = ({
   source,
   filterQuery,
   groupBy,
+  showCompleteExpressionPrompt,
 }) => {
   const { loading, data } = useMetricsExplorerChartData(
     expression,
@@ -84,28 +86,49 @@ export const ExpressionChart: React.FC<Props> = ({
   };
   const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
-    const firstSeries = data ? first(data.series) : null;
+    const firstSeries = data && !showCompleteExpressionPrompt ? first(data.series) : null;
     return firstSeries && firstSeries.rows.length > 0
       ? niceTimeFormatter([
           (first(firstSeries.rows) as any).timestamp,
           (last(firstSeries.rows) as any).timestamp,
         ])
       : (value: number) => `${value}`;
-  }, [data]);
+  }, [data, showCompleteExpressionPrompt]);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
 
+  if (showCompleteExpressionPrompt) {
+    return (
+      <EuiEmptyPrompt
+        iconType="visBarVertical"
+        body={
+          <EuiText color="subdued" data-test-subj="noChartData">
+            <FormattedMessage
+              id="xpack.infra.metrics.alerts.completeTheExpressionmessage"
+              defaultMessage="Complete the expression to generate a preview."
+            />
+          </EuiText>
+        }
+      />
+    );
+  }
+
   if (loading || !data) {
     return (
-      <EmptyContainer>
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.infra.metrics.alerts.loadingMessage"
-            defaultMessage="Loading"
-          />
-        </EuiText>
-      </EmptyContainer>
+      <EuiEmptyPrompt
+        body={
+          <>
+            <EuiLoadingChart size="xl" mono />
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.loadingMessage"
+                defaultMessage="Loading"
+              />
+            </EuiText>
+          </>
+        }
+      />
     );
   }
 
@@ -116,14 +139,16 @@ export const ExpressionChart: React.FC<Props> = ({
   const firstSeries = first(data.series);
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
-      <EmptyContainer>
-        <EuiText color="subdued" data-test-subj="noChartData">
-          <FormattedMessage
-            id="xpack.infra.metrics.alerts.noDataMessage"
-            defaultMessage="Oops, no chart data available"
-          />
-        </EuiText>
-      </EmptyContainer>
+      <EuiEmptyPrompt
+        body={
+          <EuiText color="subdued" data-test-subj="noChartData">
+            <FormattedMessage
+              id="xpack.infra.metrics.alerts.noDataMessage"
+              defaultMessage="Oops, no chart data available."
+            />
+          </EuiText>
+        }
+      />
     );
   }
 
@@ -310,20 +335,6 @@ export const ExpressionChart: React.FC<Props> = ({
     </>
   );
 };
-
-const EmptyContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    {children}
-  </div>
-);
 
 const ChartContainer: React.FC = ({ children }) => (
   <div
