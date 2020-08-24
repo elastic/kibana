@@ -498,11 +498,11 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchResponse extends IKibanaSearchResponse {
+export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
     isPartial?: boolean;
     isRunning?: boolean;
     // (undocumented)
-    rawResponse: SearchResponse<any>;
+    rawResponse: SearchResponse<Source>;
 }
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -689,19 +689,19 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
-    registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
+    registerSearchStrategy: <SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse>(name: string, strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>) => void;
     usage?: SearchUsage;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface ISearchStart {
+export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
     // Warning: (ae-forgotten-export) The symbol "AggsStart" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     aggs: AggsStart;
-    getSearchStrategy: (name: string) => ISearchStrategy;
+    getSearchStrategy: (name: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
     // Warning: (ae-forgotten-export) The symbol "RequestHandlerContext" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -711,11 +711,11 @@ export interface ISearchStart {
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ISearchStrategy {
+export interface ISearchStrategy<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> {
     // (undocumented)
     cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
     // (undocumented)
-    search: (context: RequestHandlerContext, request: IEsSearchRequest, options?: ISearchOptions) => Promise<IEsSearchResponse>;
+    search: (context: RequestHandlerContext, request: SearchStrategyRequest, options?: ISearchOptions) => Promise<SearchStrategyResponse>;
 }
 
 // @public (undocumented)
@@ -862,7 +862,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
     };
     // (undocumented)
     start(core: CoreStart): {
-        search: ISearchStart;
+        search: ISearchStart<import(".").IEsSearchRequest, import(".").IEsSearchResponse<any>>;
         fieldFormats: {
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
