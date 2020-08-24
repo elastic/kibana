@@ -1,0 +1,129 @@
+{
+  "type": "index",
+  "value": {
+    "index": "lens_rolled_up_data",
+    "mappings": {
+      "_meta": {
+        "_rollup": {
+          "lens_rolled_up_data": {
+            "cron": "0 * * * * ?",
+            "rollup_index": "lens_rolled_up_data",
+            "groups": {
+              "date_histogram": {
+                "fixed_interval": "60m",
+                "field": "@timestamp",
+                "time_zone": "UTC"
+              },
+              "terms": {
+                "fields": ["geo.src", "ip"]
+              }
+            },
+            "id": "lens_rolled_up_data",
+            "metrics": [
+              {
+                "field": "bytes",
+                "metrics": ["sum", "max"]
+              }
+            ],
+            "index_pattern": "lens_raw",
+            "timeout": "20s",
+            "page_size": 1000
+          }
+        },
+        "rollup-version": "8.0.0"
+      },
+      "dynamic_templates": [
+        {
+          "strings": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "date_histograms": {
+            "path_match": "*.date_histogram.timestamp",
+            "mapping": {
+              "type": "date"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "properties": {
+            "date_histogram": {
+              "properties": {
+                "_count": {
+                  "type": "long"
+                },
+                "interval": {
+                  "type": "keyword"
+                },
+                "time_zone": {
+                  "type": "keyword"
+                },
+                "timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
+        },
+        "_rollup": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "bytes": {
+          "properties": {
+            "max": {
+              "properties": {
+                "value": {
+                  "type": "float"
+                }
+              }
+            },
+            "sum": {
+              "properties": {
+                "value": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        },
+        "geo": {
+          "properties": {
+            "src": {
+              "properties": {
+                "terms": {
+                  "properties": {
+                    "_count": {
+                      "type": "long"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    }
+  }
+}

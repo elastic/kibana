@@ -599,7 +599,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
-                showExistenceFetchError={fieldInfoUnavailable}
+                showExistenceFetchError={existenceFetchFailed}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}

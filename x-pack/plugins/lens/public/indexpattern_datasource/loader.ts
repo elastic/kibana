@@ -91,7 +91,7 @@ export async function loadIndexPatterns({
         timeFieldName,
         fieldFormatMap,
         fields: newFields,
-        hasRestrictions: !!typeMeta?.aggs
+        hasRestrictions: !!typeMeta?.aggs,
       };
 
       return {
@@ -410,59 +410,3 @@ function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
   const layers = Object.values(layerMap);
   return layers.length === 1 && layers[0].columnOrder.length === 0;
 }
-<<<<<<< HEAD
-=======
-
-function fromSavedObject(
-  savedObject: SimpleSavedObject<SavedIndexPatternAttributes>
-): IndexPattern {
-  const { id, attributes, type } = savedObject;
-  const indexPattern = {
-    ...attributes,
-    id,
-    type,
-    title: attributes.title,
-    fields: (JSON.parse(attributes.fields) as IFieldType[])
-      .filter(
-        (field) =>
-          !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
-      )
-      .concat(documentField) as IndexPatternField[],
-    typeMeta: attributes.typeMeta
-      ? (JSON.parse(attributes.typeMeta) as IndexPatternTypeMeta)
-      : undefined,
-    fieldFormatMap: attributes.fieldFormatMap ? JSON.parse(attributes.fieldFormatMap) : undefined,
-  };
-
-  const { typeMeta } = indexPattern;
-  if (!typeMeta) {
-    return { ...indexPattern, hasRestrictions: false };
-  }
-
-  const newFields = [...(indexPattern.fields as IndexPatternField[])];
-
-  if (typeMeta.aggs) {
-    const aggs = Object.keys(typeMeta.aggs);
-    newFields.forEach((field, index) => {
-      const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
-      aggs.forEach((agg) => {
-        const restriction = typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
-        if (restriction) {
-          restrictionsObj[agg] = restriction;
-        }
-      });
-      if (Object.keys(restrictionsObj).length) {
-        newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
-      }
-    });
-  }
-
-  return {
-    id: indexPattern.id,
-    title: indexPattern.title,
-    timeFieldName: indexPattern.timeFieldName || undefined,
-    fields: newFields,
-    hasRestrictions: true,
-  };
-}
->>>>>>> fix some rollup related bugs
