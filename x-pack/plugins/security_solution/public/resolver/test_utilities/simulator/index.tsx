@@ -17,6 +17,7 @@ import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
+import { ResolverTree } from '../../../../common/endpoint/types';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -146,6 +147,30 @@ export class Simulator {
       .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
   }
 
+  public requestNewTree(documentIdToFetch: string) {
+    this.store.dispatch({
+      type: 'appRequestedResolverData',
+      payload: documentIdToFetch,
+    });
+  }
+
+  public resolveNewTree(result: ResolverTree, fetchedDocumentID: string) {
+    this.store.dispatch({
+      type: 'serverReturnedResolverData',
+      payload: {
+        result,
+        databaseDocumentID: fetchedDocumentID,
+      },
+    });
+  }
+
+  public failToReturnTree(databaseDocumentID: string) {
+    this.store.dispatch({
+      type: 'serverFailedToReturnResolverData',
+      payload: databaseDocumentID,
+    });
+  }
+
   /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
@@ -164,6 +189,13 @@ export class Simulator {
         }, 0);
       });
     }
+  }
+
+  /**
+   * Find the graph container by document ID.
+   */
+  public processResolverGraph(databaseDocumentID: string): ReactWrapper {
+    return this.domNodes(`[data-test-resolver-document-id="${databaseDocumentID}"]`);
   }
 
   /**
