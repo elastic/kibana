@@ -48,6 +48,7 @@ import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { DashboardStart } from '../../dashboard/public';
 import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
 import {
   setUISettings,
@@ -67,6 +68,7 @@ export interface VisualizePluginStartDependencies {
   embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
   uiActions: UiActionsStart;
 }
 
@@ -75,10 +77,6 @@ export interface VisualizePluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
-}
-
-export interface FeatureFlagConfig {
-  showNewVisualizeFlow: boolean;
 }
 
 export class VisualizePlugin
@@ -171,7 +169,6 @@ export class VisualizePlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
-
         const services: VisualizeServices = {
           ...coreStart,
           history,
@@ -198,7 +195,7 @@ export class VisualizePlugin
           savedObjectsPublic: pluginsStart.savedObjects,
           scopedHistory: params.history,
           restorePreviousUrl,
-          featureFlagConfig: this.initializerContext.config.get<FeatureFlagConfig>(),
+          dashboard: pluginsStart.dashboard,
         };
 
         params.element.classList.add('visAppWrapper');

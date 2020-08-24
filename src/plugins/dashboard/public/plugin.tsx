@@ -85,6 +85,12 @@ import {
   ACTION_UNLINK_FROM_LIBRARY,
   UnlinkFromLibraryActionContext,
   UnlinkFromLibraryAction,
+  ACTION_ADD_TO_LIBRARY,
+  AddToLibraryActionContext,
+  AddToLibraryAction,
+  ACTION_LIBRARY_NOTIFICATION,
+  LibraryNotificationActionContext,
+  LibraryNotificationAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -97,11 +103,6 @@ import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
-import {
-  ACTION_LIBRARY_NOTIFICATION,
-  LibraryNotificationActionContext,
-  LibraryNotificationAction,
-} from './application/actions/library_notification_action';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -162,6 +163,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
+    [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
   }
@@ -414,6 +416,7 @@ export class DashboardPlugin
     const {
       uiActions,
       data: { indexPatterns, search },
+      embeddable,
     } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
@@ -432,6 +435,9 @@ export class DashboardPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
+      const addToLibraryAction = new AddToLibraryAction();
+      uiActions.registerAction(addToLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
       const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
@@ -464,8 +470,10 @@ export class DashboardPlugin
         new AttributeService(
           type,
           core.savedObjects.client,
+          core.overlays,
           core.i18n.Context,
-          core.notifications.toasts
+          core.notifications.toasts,
+          embeddable.getEmbeddableFactory
         ),
     };
   }
