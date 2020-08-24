@@ -118,6 +118,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
           aggregationRestrictions: {
             terms: {
@@ -136,6 +137,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'number',
           aggregationRestrictions: {
             terms: {
@@ -154,6 +156,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'boolean',
         })
       ).toEqual({
@@ -167,6 +170,7 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'ip',
         })
       ).toEqual({
@@ -182,6 +186,7 @@ describe('terms', () => {
           aggregatable: false,
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
         })
       ).toEqual(undefined);
@@ -192,6 +197,7 @@ describe('terms', () => {
           aggregationRestrictions: {},
           searchable: true,
           name: 'test',
+          displayName: 'test',
           type: 'string',
         })
       ).toEqual(undefined);
@@ -209,6 +215,7 @@ describe('terms', () => {
           searchable: true,
           type: 'boolean',
           name: 'test',
+          displayName: 'test',
         },
         columns: {},
       });
@@ -234,6 +241,7 @@ describe('terms', () => {
           searchable: true,
           type: 'boolean',
           name: 'test',
+          displayName: 'test',
         },
       });
       expect(termsColumn.params).toEqual(

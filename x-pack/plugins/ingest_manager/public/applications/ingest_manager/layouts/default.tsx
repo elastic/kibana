@@ -96,7 +96,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
                     <FormattedMessage
                       id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
-                      defaultMessage="Datasets"
+                      defaultMessage="Data streams"
                     />
                   </EuiTab>
                 </EuiTabs>
