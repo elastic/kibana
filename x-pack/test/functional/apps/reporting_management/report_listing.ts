@@ -5,19 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-const getTableTextFromElement = async (tableEl: WebElementWrapper) => {
-  const rows = await tableEl.findAllByCssSelector('tbody tr');
-  return (
-    await Promise.all(
-      rows.map(async (row) => {
-        return await row.getVisibleText();
-      })
-    )
-  ).join('\n');
-};
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'reporting']);
@@ -28,8 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75044
-  describe.skip('Listing of Reports', function () {
+  describe('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
       await esArchiver.load('empty_kibana');
@@ -69,60 +56,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Paginates historical reports', async () => {
-      // wait for first row of page 1
-      await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
-
-      const previousButton = await testSubjects.find('pagination-button-previous');
-
       // previous CAN NOT be clicked
+      const previousButton = await testSubjects.find('pagination-button-previous');
       expect(await previousButton.getAttribute('disabled')).to.be('true');
 
-      // scan page 1
-      let tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
-      const PAGE_CONTENT_1 = `[Logs] File Type Scatter Plot\nvisualization\n2020-04-21 @ 07:01 PM\ntest_user\nCompleted at 2020-04-21 @ 07:02 PM
-[Logs] File Type Scatter Plot\nvisualization\n2020-04-21 @ 07:01 PM\ntest_user\nCompleted at 2020-04-21 @ 07:02 PM
-[Logs] Heatmap\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-[Logs] Heatmap\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-[Flights] Flight Delays\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-[Flights] Flight Delays\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
-pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
-[Flights] Flight Cancellations\nvisualization\n2020-04-21 @ 06:59 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
-[Flights] Markdown Instructions\nvisualization\n2020-04-21 @ 06:59 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM`;
-      expect(tableText).to.be(PAGE_CONTENT_1);
+      await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3'); // find first row of page 1
 
-      // click page 2
-      await testSubjects.click('pagination-button-1');
+      await testSubjects.click('pagination-button-1'); // click page 2
+      await testSubjects.find('checkboxSelectRow-k9a9uc4x0gpe1457b16wthc8'); // wait for first row of page 2
 
-      // wait for first row of page 2
-      await testSubjects.find('checkboxSelectRow-k9a9uc4x0gpe1457b16wthc8');
+      await testSubjects.click('pagination-button-2'); // click page 3
+      await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5'); // wait for first row of page 3
 
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
-
-      // scan page 2
-      tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
-      const PAGE_CONTENT_2 = `[eCommerce] Revenue Tracking\ncanvas workpad\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
-[Logs] Web Traffic\ncanvas workpad\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
-[Flights] Overview\ncanvas workpad\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
-[eCommerce] Revenue Dashboard\ndashboard\n2020-04-21 @ 06:57 PM\ntest_user\nCompleted at 2020-04-21 @ 06:58 PM
-[Logs] Web Traffic\ndashboard\n2020-04-21 @ 06:57 PM\ntest_user\nCompleted at 2020-04-21 @ 06:58 PM
-[Flights] Global Flight Dashboard\ndashboard\n2020-04-21 @ 06:56 PM\ntest_user\nCompleted at 2020-04-21 @ 06:57 PM
-[Flights] Global Flight Dashboard\ndashboard\n2020-04-21 @ 06:56 PM\ntest_user\nCompleted at 2020-04-21 @ 06:57 PM
-report4csv\n2020-04-21 @ 06:55 PM\ntest_user\nCompleted at 2020-04-21 @ 06:56 PM - Max size reached\nreport3csv\n2020-04-21 @ 06:55 PM
-test_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached\nreport2csv\n2020-04-21 @ 06:54 PM\ntest_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached`;
-      expect(tableText).to.be(PAGE_CONTENT_2);
-
-      // click page 3
-      await testSubjects.click('pagination-button-2');
-
-      // wait for first row of page 3
-      await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5');
-
-      // scan page 3
-      tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
-      const PAGE_CONTENT_3 = `report1csv\n2020-04-21 @ 06:54 PM\ntest_user\nCompleted at 2020-04-21 @ 06:54 PM - Max size reached`;
-      expect(tableText).to.be(PAGE_CONTENT_3);
     });
   });
 };

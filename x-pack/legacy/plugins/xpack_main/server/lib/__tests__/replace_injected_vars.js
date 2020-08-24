@@ -14,6 +14,7 @@ const buildRequest = (path = '/app/kibana') => {
   const get = sinon.stub();
 
   return {
+    app: {},
     path,
     route: { settings: {} },
     headers: {},
