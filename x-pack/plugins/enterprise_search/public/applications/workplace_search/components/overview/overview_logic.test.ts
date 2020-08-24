@@ -31,14 +31,13 @@ describe('OverviewLogic', () => {
 
   describe('setServerData', () => {
     const feed = [{ foo: 'bar' }] as any;
-    const user = { firstName: 'Joe', email: 'e@e.e', name: 'Joe Jo', color: 'pearl' };
     const account = {
-      name: 'Jane doe',
       id: '1243',
+      groups: ['Default'],
       isAdmin: true,
+      isCurated: false,
       canCreatePersonalSources: true,
-      groups: [],
-      supportEligible: true,
+      viewedOnboardingPage: false,
     };
     const org = { name: 'ACME', defaultOrgName: 'Org' };
 
@@ -47,7 +46,6 @@ describe('OverviewLogic', () => {
       activityFeed: feed,
       canCreateContentSources: true,
       canCreateInvitations: true,
-      currentUser: user,
       fpAccount: account,
       hasOrgSources: true,
       hasUsers: true,
@@ -70,7 +68,6 @@ describe('OverviewLogic', () => {
     it('will set server values', () => {
       expect(OverviewLogic.values.organization).toEqual(org);
       expect(OverviewLogic.values.isFederatedAuth).toEqual(false);
-      expect(OverviewLogic.values.currentUser).toEqual(user);
       expect(OverviewLogic.values.fpAccount).toEqual(account);
       expect(OverviewLogic.values.canCreateInvitations).toEqual(true);
       expect(OverviewLogic.values.hasUsers).toEqual(true);

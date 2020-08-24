@@ -21,12 +21,14 @@ import {
   EditorFrameInstance,
   EditorFrameStart,
 } from '../types';
+import { Document } from '../persistence/saved_object_store';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { persistedStateToExpression } from './editor_frame/state_helpers';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -59,6 +61,21 @@ export class EditorFrameService {
   private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
   private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
 
+  /**
+   * This method takes a Lens saved object as returned from the persistence helper,
+   * initializes datsources and visualization and creates the current expression.
+   * This is an asynchronous process and should only be triggered once for a saved object.
+   * @param doc parsed Lens saved object
+   */
+  private async documentToExpression(doc: Document) {
+    const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+      collectAsyncDefinitions(this.datasources),
+      collectAsyncDefinitions(this.visualizations),
+    ]);
+
+    return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
+  }
+
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,
     plugins: EditorFrameSetupPlugins
@@ -74,6 +91,7 @@ export class EditorFrameService {
         coreHttp: coreStart.http,
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
+        documentToExpression: this.documentToExpression.bind(this),
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
       };
@@ -88,7 +106,7 @@ export class EditorFrameService {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
       },
       registerVisualization: (visualization) => {
-        this.visualizations.push(visualization as Visualization<unknown, unknown>);
+        this.visualizations.push(visualization as Visualization<unknown>);
       },
     };
   }

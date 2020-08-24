@@ -23,18 +23,20 @@ import { esSearchStrategyProvider } from './es_search_strategy';
 
 describe('ES search strategy', () => {
   const mockLogger: any = {
-    info: () => {},
+    debug: () => {},
   };
   const mockApiCaller = jest.fn().mockResolvedValue({
-    _shards: {
-      total: 10,
-      failed: 1,
-      skipped: 2,
-      successful: 7,
+    body: {
+      _shards: {
+        total: 10,
+        failed: 1,
+        skipped: 2,
+        successful: 7,
+      },
     },
   });
   const mockContext = {
-    core: { elasticsearch: { legacy: { client: { callAsCurrentUser: mockApiCaller } } } },
+    core: { elasticsearch: { client: { asCurrentUser: { search: mockApiCaller } } } },
   };
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
@@ -55,8 +57,7 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('search');
-    expect(mockApiCaller.mock.calls[0][1]).toEqual({
+    expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       timeout: '0ms',
       ignoreUnavailable: true,
@@ -71,8 +72,7 @@ describe('ES search strategy', () => {
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
     expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('search');
-    expect(mockApiCaller.mock.calls[0][1]).toEqual({
+    expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       restTotalHitsAsInt: true,
     });

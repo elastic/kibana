@@ -33,7 +33,17 @@ interface Props {
   onData: FormSubmitHandler<MyForm>;
 }
 
+let formHook: FormHook<any> | null = null;
+
+const onFormHook = (_form: FormHook<any>) => {
+  formHook = _form;
+};
+
 describe('use_form() hook', () => {
+  beforeEach(() => {
+    formHook = null;
+  });
+
   describe('form.submit() & config.onSubmit()', () => {
     const onFormData = jest.fn();
 
@@ -125,12 +135,6 @@ describe('use_form() hook', () => {
     });
 
     test('should not build the object if the form is not valid', async () => {
-      let formHook: FormHook<MyForm> | null = null;
-
-      const onFormHook = (_form: FormHook<MyForm>) => {
-        formHook = _form;
-      };
-
       const TestComp = ({ onForm }: { onForm: (form: FormHook<MyForm>) => void }) => {
         const { form } = useForm<MyForm>({ defaultValue: { username: 'initialValue' } });
         const validator: ValidationFunc = ({ value }) => {
@@ -141,7 +145,7 @@ describe('use_form() hook', () => {
 
         useEffect(() => {
           onForm(form);
-        }, [form]);
+        }, [onForm, form]);
 
         return (
           <Form form={form}>
@@ -294,6 +298,147 @@ describe('use_form() hook', () => {
         title: defaultValue.title,
         subTitle: 'hasBeenOverridden',
         'user.name': defaultValue.user.name,
+      });
+    });
+  });
+
+  describe('form.reset()', () => {
+    const defaultValue = {
+      username: 'defaultValue',
+      deeply: { nested: { value: 'defaultValue' } },
+    };
+
+    type RestFormTest = typeof defaultValue;
+
+    const TestComp = ({ onForm }: { onForm: (form: FormHook<any>) => void }) => {
+      const { form } = useForm<RestFormTest>({
+        defaultValue,
+        options: { stripEmptyFields: false },
+      });
+
+      useEffect(() => {
+        onForm(form);
+      }, [onForm, form]);
+
+      return (
+        <Form form={form}>
+          <UseField
+            path="username"
+            config={{ defaultValue: 'configDefaultValue' }}
+            data-test-subj="userNameField"
+          />
+          <UseField
+            path="city"
+            config={{ defaultValue: 'configDefaultValue' }}
+            defaultValue="inlineDefaultValue"
+            data-test-subj="cityField"
+          />
+          <UseField path="deeply.nested.value" data-test-subj="deeplyNestedField" />
+        </Form>
+      );
+    };
+
+    const setup = registerTestBed(TestComp, {
+      defaultProps: { onForm: onFormHook },
+      memoryRouter: { wrapComponent: false },
+    });
+
+    test('should put back the defaultValue for each field', async () => {
+      const {
+        form: { setInputValue },
+      } = setup() as TestBed;
+
+      if (!formHook) {
+        throw new Error(
+          `formHook is not defined. Use the onForm() prop to update the reference to the form hook.`
+        );
+      }
+
+      let formData: Partial<RestFormTest> = {};
+
+      await act(async () => {
+        formData = formHook!.getFormData();
+      });
+      expect(formData).toEqual({
+        username: 'defaultValue',
+        city: 'inlineDefaultValue',
+        deeply: { nested: { value: 'defaultValue' } },
+      });
+
+      setInputValue('userNameField', 'changedValue');
+      setInputValue('cityField', 'changedValue');
+      setInputValue('deeplyNestedField', 'changedValue');
+
+      await act(async () => {
+        formData = formHook!.getFormData();
+      });
+      expect(formData).toEqual({
+        username: 'changedValue',
+        city: 'changedValue',
+        deeply: { nested: { value: 'changedValue' } },
+      });
+
+      await act(async () => {
+        formHook!.reset();
+      });
+
+      await act(async () => {
+        formData = formHook!.getFormData();
+      });
+      expect(formData).toEqual({
+        username: 'defaultValue',
+        city: 'inlineDefaultValue', // Inline default value is correctly kept after resetting
+        deeply: { nested: { value: 'defaultValue' } },
+      });
+    });
+
+    test('should allow to pass a new "defaultValue" object for the fields', async () => {
+      const {
+        form: { setInputValue },
+      } = setup() as TestBed;
+
+      if (!formHook) {
+        throw new Error(
+          `formHook is not defined. Use the onForm() prop to update the reference to the form hook.`
+        );
+      }
+
+      setInputValue('userNameField', 'changedValue');
+      setInputValue('cityField', 'changedValue');
+      setInputValue('deeplyNestedField', 'changedValue');
+
+      let formData: Partial<RestFormTest> = {};
+
+      await act(async () => {
+        formHook!.reset({
+          defaultValue: {
+            city: () => 'newDefaultValue', // A function can also be passed
+            deeply: { nested: { value: 'newDefaultValue' } },
+          },
+        });
+      });
+      await act(async () => {
+        formData = formHook!.getFormData();
+      });
+      expect(formData).toEqual({
+        username: 'configDefaultValue', // Back to the config defaultValue as no value was provided when resetting
+        city: 'newDefaultValue',
+        deeply: { nested: { value: 'newDefaultValue' } },
+      });
+
+      // Make sure all field are back to the config defautlValue, even when we have a UseField with inline prop "defaultValue"
+      await act(async () => {
+        formHook!.reset({
+          defaultValue: {},
+        });
+      });
+      await act(async () => {
+        formData = formHook!.getFormData();
+      });
+      expect(formData).toEqual({
+        username: 'configDefaultValue',
+        city: 'configDefaultValue', // Inline default value **is not** kept after resetting with undefined "city" value
+        deeply: { nested: { value: '' } }, // Fallback to empty string as no config was provided
       });
     });
   });
