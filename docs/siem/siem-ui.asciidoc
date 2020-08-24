@@ -1,20 +1,20 @@
 [role="xpack"]
 [[siem-ui]]
-== Using the SIEM UI
+== Using Elastic Security
 
-The SIEM app is a highly interactive workspace for security analysts. It is
-designed to be discoverable, clickable, draggable and droppable, expandable and
-collapsible, resizable, moveable, and so forth. You start with an overview. Then
-you can use the interactive UI to drill down into areas of interest.
+Elastic Security is a highly interactive workspace designed for security
+analysts. It provides a clear overview of events and alerts from your
+environment, and you can use the interactive UI to drill down into areas of
+interest.
 
 [float]
 [[hosts-ui]]
 === Hosts
 
-The Hosts view provides key metrics regarding host-related security events, and
-data tables and widgets that let you interact with the Timeline Event Viewer.
+The Hosts page provides key metrics regarding host-related security events, and
+data tables and histograms that let you interact with the Timeline Event Viewer.
 You can drill down for deeper insights, and drag and drop items of interest from
-the Hosts view tables to Timeline for further investigation.
+the Hosts page to Timeline for further investigation.
 
 [role="screenshot"]
 image::siem/images/hosts-ui.png[]
@@ -24,11 +24,8 @@ image::siem/images/hosts-ui.png[]
 [[network-ui]]
 === Network
 
-The Network view provides key network activity metrics, facilitates
-investigation time enrichment, and provides network event tables that enable
-interaction with the Timeline. You can drill down for deeper insights, and drag
-and drop items of interest from the Network view to Timeline for further
-investigation.
+The Network page displays key network activity metrics in an interactive map,
+and provides network event tables that enable interaction with Timeline.
 
 [role="screenshot"]
 image::siem/images/network-ui.png[]
@@ -38,14 +35,13 @@ image::siem/images/network-ui.png[]
 === Detections (beta)
 
 The Detections feature automatically searches for threats and creates 
-signals when they are detected. Signal detection rules define the conditions 
-for creating signals. The SIEM app comes with prebuilt rules that search for 
-suspicious activity on your network and hosts. Additionally, you can
+alerts when they are detected. Detection rules define the conditions 
+for when alerts are created. Elastic Security comes with prebuilt rules that
+search for suspicious activity on your network and hosts. Additionally, you can
 create your own rules.
 
-See {security-guide}/detection-engine-overview.html[Detections] in the SIEM 
-Guide for information on managing detection rules and signals via the UI 
-or the Detections API.
+See {security-guide}/detection-engine-overview.html[Detections] for information
+on managing detection rules and alerts.
 
 [role="screenshot"]
 image::siem/images/detections-ui.png[]
@@ -54,14 +50,14 @@ image::siem/images/detections-ui.png[]
 [[cases-ui]]
 === Cases (beta)
 
-Cases are used to open and track security issues directly in SIEM. 
+Cases are used to open and track security issues directly in Elastic Security. 
 Cases list the original reporter and all users who contribute to a case
 (`participants`). Case comments support Markdown syntax, and allow linking to
 saved Timelines. Additionally, you can send cases to external systems from
-within SIEM (currently ServiceNow and Jira).
+within Elastic Security.
 
 For information about opening, updating, and closing cases, see
-{security-guide}/cases-overview.html[Cases] in the SIEM Guide.
+{security-guide}/cases-overview.html[Cases] in the Elastic Security Guide.
 
 [role="screenshot"]
 image::siem/images/cases-ui.png[]
@@ -73,31 +69,31 @@ image::siem/images/cases-ui.png[]
 Timeline is your workspace for threat hunting and alert investigations. 
 
 [role="screenshot"]
-image::siem/images/timeline-ui.png[SIEM Timeline]
+image::siem/images/timeline-ui.png[Elastic Security Timeline]
 
 You can drag objects of interest into the Timeline Event Viewer to create
 exactly the query filter you need. You can drag items from table widgets within
 Hosts and Network pages, or even from within Timeline itself.
 
-A timeline is responsive and persists as you move through the SIEM app
+A timeline is responsive and persists as you move through Elastic Security
 collecting data. 
 
-See the {security-guide}[Security Guide] for more details on data sources and an
-overview of UI elements and capabilities.
+For detailed information about Timeline, see
+{security-guide}/timelines-ui.html[Investigating events in Timeline].
 
 [float]
 [[sample-workflow]]
 === Sample workflow
 
 An analyst notices a suspicious user ID that warrants further investigation, and
-clicks a url that links to the SIEM app. 
+clicks a URL that links to Elastic Security. 
 
-The analyst uses the tables, widgets, and filtering and search capabilities in
-the SIEM app to get to the bottom of the alert. The analyst can drag items of
-interest to the timeline for further analysis.
+The analyst uses the tables, histograms, and filtering and search capabilities in
+Elastic Security to get to the bottom of the alert. The analyst can drag items of
+interest to Timeline for further analysis.
 
-Within the timeline, the analyst can investigate further--drilling down,
-searching, and filtering--and add notes and pin items of interest. 
+Within Timeline, the analyst can investigate further - drilling down,
+searching, and filtering - and add notes and pin items of interest. 
 
 The analyst can name the timeline, write summary notes, and share it with others
 if appropriate.

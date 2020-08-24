@@ -38,7 +38,10 @@ import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
+import {
+  getSelectedIdFromUrl,
+  getGroupQueryText,
+} from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
 
 function getItemIdToExpandedRowMap(
@@ -99,22 +102,31 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   // Query text/job_id based on url but only after getAnalytics is done first
   // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
-  const [selectedJobIdFromUrlInitialized, setSelectedJobIdFromUrlInitialized] = useState(false);
+  const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
   useEffect(() => {
-    if (selectedJobIdFromUrlInitialized === false && analytics.length > 0) {
-      const selectedJobIdFromUrl = getSelectedJobIdFromUrl(window.location.href);
-      if (selectedJobIdFromUrl !== undefined) {
-        setSelectedJobIdFromUrlInitialized(true);
-        setSearchQueryText(selectedJobIdFromUrl);
+    if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
+      const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
+      let queryText = '';
+
+      if (groupIds !== undefined) {
+        queryText = getGroupQueryText(groupIds);
+      } else if (jobId !== undefined) {
+        queryText = jobId;
       }
+
+      setSelectedIdFromUrlInitialized(true);
+      setSearchQueryText(queryText);
     }
-  }, [selectedJobIdFromUrlInitialized, analytics]);
+  }, [selectedIdFromUrlInitialized, analytics]);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: () => getAnalytics(true),
-  });
+  useRefreshAnalyticsList(
+    {
+      isLoading: setIsLoading,
+      onRefresh: () => getAnalytics(true),
+    },
+    isManagementTable
+  );
 
   const { columns, modals } = useColumns(
     expandedRowItemIds,
@@ -262,6 +274,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <>
       {modals}
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {analyticsStats && (

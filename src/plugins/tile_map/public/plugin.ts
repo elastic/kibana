@@ -34,8 +34,7 @@ import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';
 import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setQueryService } from './services';
-import { setKibanaLegacy } from './services';
+import { setFormatService, setQueryService, setKibanaLegacy } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export interface TileMapConfigType {
