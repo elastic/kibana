@@ -32,19 +32,13 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
       }
       return accumulator;
     }, {});
-    console.log('indexesAliasIndices', indexesAliasIndices);
     const responsesIndexFields: IndexFieldDescriptor[][] = await Promise.all(
-      Object.values(indexesAliasIndices).map((indicesByGroup) => {
-        console.log('indicesByGroup', indicesByGroup);
-        return indexPatternsService.getFieldsForWildcard({
+      Object.values(indexesAliasIndices).map((indicesByGroup) =>
+        indexPatternsService.getFieldsForWildcard({
           pattern: indicesByGroup,
-        });
-      })
+        })
+      )
     );
-    console.log('responsesIndexFields', {
-      r1: responsesIndexFields[0].length,
-    });
-    console.log('!!!!!!!', responsesIndexFields[0][0]);
     return formatIndexFields(
       responsesIndexFields,
       Object.keys(indexesAliasIndices) as IndexAlias[]

@@ -6,6 +6,8 @@
 
 import { BrowserFields, DocValueFields } from '../../containers/sourcerer/format';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { SourcererState } from './reducer';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 export type ErrorModel = Error[];
 
@@ -47,3 +49,19 @@ export interface SourcererModel {
   isIndexPatternsLoading: boolean;
   sourceGroups: ManageSourceGroupById;
 }
+
+export const initialSourcererState: SourcererState = {
+  activeSourceGroupId: SecurityPageName.default,
+  availableIndexPatterns: [],
+  availableSourceGroupIds: [],
+  isIndexPatternsLoading: true,
+  sourceGroups: {},
+};
+
+export const sourceGroupSettings = {
+  [SecurityPageName.default]: DEFAULT_INDEX_PATTERN,
+  // [SecurityPageName.host]: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
+  // [SecurityPageName.detections]: [DEFAULT_SIGNALS_INDEX],
+  // [SecurityPageName.timeline]: DEFAULT_INDEX_PATTERN,
+  // [SecurityPageName.network]: ['auditbeat-*', 'filebeat-*', 'packetbeat-*'],
+};

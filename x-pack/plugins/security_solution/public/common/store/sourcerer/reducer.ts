@@ -13,27 +13,10 @@ import {
   setIsSourceLoading,
   setSource,
 } from './actions';
-import { SourcererModel, SecurityPageName } from './model';
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import { initialSourcererState, SourcererModel } from './model';
 import { getSourceDefaults } from '../../containers/sourcerer';
 
 export type SourcererState = SourcererModel;
-
-export const initialSourcererState: SourcererState = {
-  activeSourceGroupId: SecurityPageName.default,
-  availableIndexPatterns: [],
-  availableSourceGroupIds: [],
-  isIndexPatternsLoading: true,
-  sourceGroups: {},
-};
-
-export const sourceGroupSettings = {
-  [SecurityPageName.default]: DEFAULT_INDEX_PATTERN,
-  // [SecurityPageName.host]: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  // [SecurityPageName.detections]: [DEFAULT_SIGNALS_INDEX],
-  // [SecurityPageName.timeline]: DEFAULT_INDEX_PATTERN,
-  // [SecurityPageName.network]: ['auditbeat-*', 'filebeat-*', 'packetbeat-*'],
-};
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
   .case(setActiveSourceGroupId, (state, { payload }) => ({

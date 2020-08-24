@@ -24,14 +24,7 @@ import {
   getIndexFields,
   indicesExistOrDataTemporarilyUnavailable,
 } from './format';
-import { fetchIndexFields } from './async';
-import {
-  initialSourcererState,
-  sourceGroupSettings,
-  sourcererActions,
-  sourcererModel,
-  sourcererSelectors,
-} from '../../store/sourcerer';
+import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { SecurityPageName } from '../../store/sourcerer/model';
 
 export interface UseSourceManager extends Omit<sourcererModel.SourcererModel, 'sourceGroups'> {
@@ -60,9 +53,8 @@ export const getSourceDefaults = (id: sourcererModel.SourceGroupsType, defaultIn
   indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
   loading: true,
 });
-
-const { sourceGroups: foo, ...rest } = initialSourcererState;
-const popopopop: UseSourceManager = {
+const { sourceGroups: foo, ...rest } = sourcererModel.initialSourcererState;
+const initialSourcererManager: UseSourceManager = {
   ...rest,
   getManageSourceGroupById: (id: sourcererModel.SourceGroupsType) => getSourceDefaults(id, []),
   initializeSourceGroup: () => noop,
@@ -223,19 +215,26 @@ export const useSourceManager = (): UseSourceManager => {
               },
             },
           });
-          const ip = await fetchIndexFields({ indexPatternsService, selectedPatterns });
-
           if (isSubscribed) {
             dispatch(
               sourcererActions.setSource({
                 id,
                 defaultIndex: selectedPatterns,
                 payload: {
-                  browserFields: getBrowserFields(selectedPatterns.join(), ip),
-                  docValueFields: getDocValueFields(selectedPatterns.join(), ip),
+                  browserFields: getBrowserFields(
+                    defaultIndex.join(),
+                    get('data.source.status.indexFields', result)
+                  ),
+                  docValueFields: getDocValueFields(
+                    defaultIndex.join(),
+                    get('data.source.status.indexFields', result)
+                  ),
                   errorMessage: null,
                   id,
-                  indexPattern: getIndexFields(selectedPatterns.join(), ip),
+                  indexPattern: getIndexFields(
+                    defaultIndex.join(),
+                    get('data.source.status.indexFields', result)
+                  ),
                   indexPatterns: selectedPatterns,
                   indicesExist: indicesExistOrDataTemporarilyUnavailable(
                     get('data.source.status.indicesExist', result)
@@ -275,7 +274,6 @@ export const useSourceManager = (): UseSourceManager => {
       dispatch,
       getDefaultIndex,
       sourceGroups,
-      indexPatternsService,
       setIsSourceLoading,
     ]
   );
@@ -316,7 +314,7 @@ export const useSourceManager = (): UseSourceManager => {
     if (!isIndexPatternsLoading) {
       initializeSourceGroup(
         SecurityPageName.default,
-        sourceGroupSettings[SecurityPageName.default],
+        sourcererModel.sourceGroupSettings[SecurityPageName.default],
         true
       );
     }
@@ -334,7 +332,7 @@ export const useSourceManager = (): UseSourceManager => {
   };
 };
 
-const ManageSourceContext = createContext<UseSourceManager>(popopopop);
+const ManageSourceContext = createContext<UseSourceManager>(initialSourcererManager);
 
 export const useManageSource = () => useContext(ManageSourceContext);
 

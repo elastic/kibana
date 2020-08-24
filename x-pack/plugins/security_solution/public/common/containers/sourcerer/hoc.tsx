@@ -6,7 +6,7 @@
 import React, { useMemo } from 'react';
 import { useManageSource } from './index';
 
-export const withSourcerer = (BaseComponent: React.ReactNode) => (props) => {
+export const withSourcerer = (BaseComponent: JSX.Element) => (props: unknown) => {
   const { activeSourceGroupId, getManageSourceGroupById } = useManageSource();
   const { indexPatterns } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
     getManageSourceGroupById,
