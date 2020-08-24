@@ -27,12 +27,7 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
 ];
 
 const configSchema = schema.object({
-  overrides: schema.object(
-    {
-      defaultRoute: schema.maybe(schema.string()),
-    },
-    { unknowns: 'allow' }
-  ),
+  overrides: schema.object({}, { unknowns: 'allow' }),
 });
 
 export type UiSettingsConfigType = TypeOf<typeof configSchema>;
