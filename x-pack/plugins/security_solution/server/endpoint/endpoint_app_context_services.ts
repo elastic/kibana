@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
-import { getPackageConfigCreateCallback } from './ingest_integration';
+import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { ExceptionListClient } from '../../../lists/server';
 
@@ -42,8 +42,8 @@ export class EndpointAppContextService {
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
-        'packageConfigCreate',
-        getPackageConfigCreateCallback(dependencies.logger, this.manifestManager)
+        'packagePolicyCreate',
+        getPackagePolicyCreateCallback(dependencies.logger, this.manifestManager)
       );
     }
   }
