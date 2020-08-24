@@ -122,7 +122,11 @@ const ExceptionEntriesComponent = ({
             return (
               <ValueBadgeGroup gutterSize="xs">
                 {values.map((value) => {
-                  return <EuiBadge color="#DDD">{value}</EuiBadge>;
+                  return (
+                    <EuiBadge color="#DDD" key={value}>
+                      {value}
+                    </EuiBadge>
+                  );
                 })}
               </ValueBadgeGroup>
             );
