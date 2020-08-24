@@ -20,14 +20,15 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
+import { SearchResponse } from 'elasticsearch';
 import { getOverlays } from '../../services';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
-import { ShardFailureResponse, ShardFailureRequest } from './shard_failure_types';
+import { ShardFailureRequest } from './shard_failure_types';
 
 interface Props {
   request: ShardFailureRequest;
-  response: ShardFailureResponse;
+  response: SearchResponse<any>;
   title: string;
 }
 

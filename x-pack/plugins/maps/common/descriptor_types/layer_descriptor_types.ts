@@ -38,36 +38,3 @@ export type LayerDescriptor = {
 export type VectorLayerDescriptor = LayerDescriptor & {
   style: VectorStyleDescriptor;
 };
-
-export type RangeFieldMeta = {
-  min: number;
-  max: number;
-  delta: number;
-  isMinOutsideStdRange?: boolean;
-  isMaxOutsideStdRange?: boolean;
-};
-
-export type Category = {
-  key: string;
-  count: number;
-};
-
-export type CategoryFieldMeta = {
-  categories: Category[];
-};
-
-export type GeometryTypes = {
-  isPointsOnly: boolean;
-  isLinesOnly: boolean;
-  isPolygonsOnly: boolean;
-};
-
-export type StyleMetaDescriptor = {
-  geometryTypes?: GeometryTypes;
-  fieldMeta: {
-    [key: string]: {
-      range: RangeFieldMeta;
-      categories: CategoryFieldMeta;
-    };
-  };
-};
