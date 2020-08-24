@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http from 'http';
 import { getHttpProxyServer } from '../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -12,14 +13,13 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
   const configService = getService('config');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
-  const retry = getService('retry');
   describe('Actions', () => {
+    let proxyServer: http.Server | undefined;
     before(async () => {
       await getHttpProxyServer(
         kibanaServer.resolveUrl('/'),
         configService.get('kbnTestServer.serverArgs'),
-        log,
-        retry
+        log
       );
     });
     loadTestFile(require.resolve('./builtin_action_types/email'));
@@ -39,5 +39,11 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
+
+    after(() => {
+      if (proxyServer) {
+        proxyServer.close();
+      }
+    });
   });
 }

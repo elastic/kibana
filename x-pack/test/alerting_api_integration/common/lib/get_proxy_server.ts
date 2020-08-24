@@ -32,13 +32,7 @@ export const getHttpProxyServer = async (
     }
   });
 
-  const freePort = await getPort({ port: proxyPort });
-  log.info('freePort ', freePort, 'getHttpProxyServer');
-  if (freePort !== proxyPort) {
-    log.info('retry listening proxy on port', proxyPort, 'getHttpProxyServer');
-  } else {
-    proxyServer.listen(proxyPort);
-  }
+  proxyServer.listen(proxyPort);
 
   return proxyServer;
 };

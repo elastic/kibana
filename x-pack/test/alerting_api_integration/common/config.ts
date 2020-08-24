@@ -17,7 +17,6 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
-  proxyPort?: number;
 }
 
 // test.not-enabled is specifically not enabled
@@ -59,8 +58,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
-    // if options.proxyPort is defined than use it for a proxy service in other case try to use port from range 4000 till 4100
-    const proxyPort = options.proxyPort ?? (await getPort({ port: getPort.makeRange(3000, 3100) }));
+    const proxyPort =
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6300) }));
     const actionsProxyUrl = options.enableActionsProxy
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
