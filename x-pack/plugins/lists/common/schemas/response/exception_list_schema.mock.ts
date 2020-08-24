@@ -47,7 +47,7 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   version: VERSION,
 });
 
-export const getTrustedAppsSchemaMock = (): ExceptionListSchema => {
+export const getTrustedAppsListSchemaMock = (): ExceptionListSchema => {
   return {
     ...getExceptionListSchemaMock(),
     description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
