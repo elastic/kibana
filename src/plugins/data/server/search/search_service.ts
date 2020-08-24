@@ -133,12 +133,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => {
-    this.logger.info(`Register strategy ${name}`);
+    this.logger.debug(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
   private getSearchStrategy = (name: string): ISearchStrategy => {
-    this.logger.info(`Get strategy ${name}`);
+    this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);
