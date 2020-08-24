@@ -22,7 +22,7 @@ exports[`FingerprintCol renders expected elements for valid props 1`] = `
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
             class="euiButtonEmpty__text"
@@ -61,7 +61,7 @@ exports[`FingerprintCol renders expected elements for valid props 1`] = `
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
             class="euiButtonEmpty__text"

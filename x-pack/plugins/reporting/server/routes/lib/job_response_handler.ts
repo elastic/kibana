@@ -6,8 +6,8 @@
 
 import { kibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../../';
-import { AuthenticatedUser } from '../../../../security/server';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
+import { ReportingUser } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
 import { jobsQueryFactory } from './jobs_query';
 
@@ -27,7 +27,7 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
   return async function jobResponseHandler(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    user: AuthenticatedUser | null,
+    user: ReportingUser,
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
@@ -71,7 +71,7 @@ export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
   return async function deleteJobResponseHander(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    user: AuthenticatedUser | null,
+    user: ReportingUser,
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;

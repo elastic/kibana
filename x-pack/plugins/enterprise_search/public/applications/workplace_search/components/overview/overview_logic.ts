@@ -8,7 +8,7 @@ import { HttpSetup } from 'src/core/public';
 
 import { kea } from 'kea';
 
-import { IAccount, IOrganization, IUser } from '../../types';
+import { IAccount, IOrganization } from '../../types';
 import { IFlashMessagesProps, IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
@@ -26,7 +26,6 @@ export interface IOverviewServerData {
   activityFeed: IFeedActivity[];
   organization: IOrganization;
   isFederatedAuth: boolean;
-  currentUser: IUser;
   fpAccount: IAccount;
 }
 
@@ -61,12 +60,6 @@ export const OverviewLogic = kea({
       true,
       {
         setServerData: (_, { isFederatedAuth }) => isFederatedAuth,
-      },
-    ],
-    currentUser: [
-      {} as IUser,
-      {
-        setServerData: (_, { currentUser }) => currentUser,
       },
     ],
     fpAccount: [
