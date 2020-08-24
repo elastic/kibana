@@ -47,7 +47,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
+        fontconfig freetype google-noto-fonts-core google-noto-cjk-fonts shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
       {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
     done; \
@@ -57,11 +57,6 @@ RUN for iter in {1..10}; do \
 RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
 RUN echo "37f2c1f0372a45554f1b89924fbb134fc24c3756efaedf11e07f599494e0eff9  /usr/local/bin/dumb-init" | sha256sum -c -
 RUN chmod +x /usr/local/bin/dumb-init
-
-RUN cd /usr/local/share/fonts/ \
-&& curl-L -o "https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc" \
-&& fc-cache -f -v \
-&& cd -
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
