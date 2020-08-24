@@ -17,23 +17,26 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider } from 'src/core/server';
-import { ServiceConfigDescriptor } from '../internal_types';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { UiSettingsParams } from '../types';
 
-const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
-  unused('enabled'),
-  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
-];
-
-const configSchema = schema.object({
-  overrides: schema.object({}, { unknowns: 'allow' }),
-});
-
-export type UiSettingsConfigType = TypeOf<typeof configSchema>;
-
-export const config: ServiceConfigDescriptor<UiSettingsConfigType> = {
-  path: 'uiSettings',
-  schema: configSchema,
-  deprecations,
+export const getMiscUiSettings = (): Record<string, UiSettingsParams> => {
+  return {
+    'truncate:maxHeight': {
+      name: i18n.translate('core.ui_settings.params.maxCellHeightTitle', {
+        defaultMessage: 'Maximum table cell height',
+      }),
+      value: 115,
+      description: i18n.translate('core.ui_settings.params.maxCellHeightText', {
+        defaultMessage:
+          'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+      }),
+      schema: schema.number({ min: 0 }),
+    },
+    buildNum: {
+      readonly: true,
+      schema: schema.maybe(schema.number()),
+    },
+  };
 };
