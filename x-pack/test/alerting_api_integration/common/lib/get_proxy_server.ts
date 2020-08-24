@@ -32,15 +32,18 @@ export const getHttpProxyServer = async (
     }
   });
 
+  let attempts = 0;
+
   await retry.waitForWithTimeout('start proxy server', 60 * 1000, async () => {
     const freePort = await getPort({ port: proxyPort });
     log.info('freePort ', freePort, 'getHttpProxyServer');
     if (freePort !== proxyPort) {
       log.info('retry listening proxy on port', proxyPort, 'getHttpProxyServer');
+      attempts++;
     } else {
       proxyServer.listen(proxyPort);
     }
-    return proxyServer.listening;
+    return proxyServer.listening || attempts === 20;
   });
   return proxyServer;
 };
