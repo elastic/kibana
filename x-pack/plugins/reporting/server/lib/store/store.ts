@@ -7,7 +7,11 @@
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { CreateJobBaseParams, CreateJobBaseParamsEncryptedFields } from '../../types';
+import {
+  CreateJobBaseParams,
+  CreateJobBaseParamsEncryptedFields,
+  ReportingUser,
+} from '../../types';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { Report } from './report';
@@ -140,7 +144,7 @@ export class ReportingStore {
 
   public async addReport(
     type: string,
-    username: string | null,
+    user: ReportingUser,
     payload: CreateJobBaseParams & CreateJobBaseParamsEncryptedFields
   ): Promise<Report> {
     const timestamp = indexTimestamp(this.indexInterval);
@@ -151,7 +155,7 @@ export class ReportingStore {
       _index: index,
       payload,
       jobtype: type,
-      created_by: username,
+      created_by: user ? user.username : false,
       ...this.jobSettings,
     });
 

@@ -11,7 +11,7 @@ import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CancellationToken } from '../../../plugins/reporting/common';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { JobStatus } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
@@ -163,6 +163,8 @@ export type ReportingSetup = object;
 /*
  * Internal Types
  */
+
+export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
