@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../embeddable_plugin';
+import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { DASHBOARD_CONTAINER_TYPE } from '..';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -35,14 +34,25 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   public readonly order = 1;
 
   public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
-    return 'Library';
+    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
+      throw new IncompatibleActionError();
+    }
+    return i18n.translate('dashboard.panel.LibraryNotification', {
+      defaultMessage: 'Library',
+    });
   }
 
   public getIconType({ embeddable }: LibraryNotificationActionContext) {
+    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
+      throw new IncompatibleActionError();
+    }
     return 'folderCheck';
   }
 
   public getDisplayNameTooltip = ({ embeddable }: LibraryNotificationActionContext) => {
+    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
+      throw new IncompatibleActionError();
+    }
     return i18n.translate('dashboard.panel.libraryNotification.toolTip', {
       defaultMessage:
         'This panel is linked to a Library item. Editing the panel might affect other dashboards.',
@@ -50,7 +60,11 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   };
 
   public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
-    return true;
+    return Boolean(
+      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+        isReferenceOrValueEmbeddable(embeddable) &&
+        embeddable.inputIsRefType(embeddable.getInput())
+    );
   };
 
   public execute = async () => {};
