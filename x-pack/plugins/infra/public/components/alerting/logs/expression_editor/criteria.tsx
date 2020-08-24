@@ -44,9 +44,8 @@ export const Criteria: React.FC<Props> = ({
       <EuiFlexItem grow>
         {criteria.map((criterion, idx) => {
           return (
-            <>
+            <React.Fragment key={idx}>
               <Criterion
-                key={idx}
                 idx={idx}
                 fields={fields}
                 criterion={criterion}
@@ -56,13 +55,12 @@ export const Criteria: React.FC<Props> = ({
                 errors={errors[idx.toString()] as IErrorObject}
               />
               <CriterionPreview
-                key={`${idx}-chart-preview`}
                 alertParams={alertParams}
                 context={context}
                 chartCriterion={criterion}
                 sourceId={sourceId}
               />
-            </>
+            </React.Fragment>
           );
         })}
       </EuiFlexItem>
