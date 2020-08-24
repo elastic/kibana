@@ -58,7 +58,7 @@ export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown
     return defaultValue;
   }
 
-  throw new Error(`Unexpected config key: ${key}`);
+  throw new TypeError(`Unexpected config key: ${key}`);
 };
 
 export const createUseUiSetting$Mock = () => {
