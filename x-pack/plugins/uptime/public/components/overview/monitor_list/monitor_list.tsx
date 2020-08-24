@@ -147,6 +147,7 @@ export const MonitorListComponent: ({
       align: 'center' as const,
       field: '',
       name: STATUS_ALERT_COLUMN,
+      width: '150px',
       render: (item: MonitorSummary) => (
         <EnableMonitorAlert
           monitorId={item.monitor_id}

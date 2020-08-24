@@ -1062,6 +1062,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_Status alert_5"
               role="columnheader"
               scope="col"
+              style="width:150px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -1248,6 +1249,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
+              style="width:150px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1271,7 +1273,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         aria-label="Enable status alert"
                         class="euiSwitch__button"
                         id="generated-id"
-                        readonly=""
                         role="switch"
                         type="button"
                       >
@@ -1479,6 +1480,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
+              style="width:150px"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1502,7 +1504,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         aria-label="Enable status alert"
                         class="euiSwitch__button"
                         id="generated-id"
-                        readonly=""
                         role="switch"
                         type="button"
                       >
