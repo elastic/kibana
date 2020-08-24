@@ -20,12 +20,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { ShardFailureOpenModalButton, ShardFailureRequest, ShardFailureResponse } from '../../ui';
+import { SearchResponse } from 'elasticsearch';
+import { ShardFailureOpenModalButton } from '../../ui';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
-import { SearchRequest, SearchResponse } from '..';
+import { SearchRequest } from '..';
 
-export function handleResponse(request: SearchRequest, response: SearchResponse) {
+export function handleResponse(request: SearchRequest, response: SearchResponse<any>) {
   if (response.timed_out) {
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
@@ -53,11 +54,7 @@ export function handleResponse(request: SearchRequest, response: SearchResponse)
       <>
         {description}
         <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton
-          request={request.body as ShardFailureRequest}
-          response={response as ShardFailureResponse}
-          title={title}
-        />
+        <ShardFailureOpenModalButton request={request.body} response={response} title={title} />
       </>
     );
 
