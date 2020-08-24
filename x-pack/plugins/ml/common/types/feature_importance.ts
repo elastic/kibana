@@ -5,7 +5,7 @@
  */
 
 export interface ClassFeatureImportance {
-  class_name: string;
+  class_name: string | boolean;
   importance: number;
 }
 export interface FeatureImportance {

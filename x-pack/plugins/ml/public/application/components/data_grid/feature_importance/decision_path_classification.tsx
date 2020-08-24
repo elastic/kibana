@@ -14,11 +14,15 @@ import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
 
 interface ClassificationDecisionPathProps {
-  predictedValue: string | undefined;
+  predictedValue: string | boolean;
   predictionFieldName?: string;
   featureImportance: FeatureImportance[];
   topClasses: TopClasses;
 }
+
+// cast to 'True' | 'False' | value to match Eui display
+const getStr = (v: string | boolean): string =>
+  typeof v === 'boolean' ? (v ? 'True' : 'False') : v;
 
 export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = ({
   featureImportance,
@@ -26,28 +30,32 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   topClasses,
   predictionFieldName,
 }) => {
-  const [currentClass, setCurrentClass] = useState<string>(topClasses[0].class_name);
+  const [currentClass, setCurrentClass] = useState<string>(getStr(topClasses[0].class_name));
   const { decisionPathData } = useDecisionPathData({
     featureImportance,
     predictedValue: currentClass,
   });
-  const options = useMemo(
-    () =>
-      Array.isArray(topClasses) && typeof predictedValue === 'string'
-        ? topClasses.map((c) => ({
-            value: c.class_name,
+  const options = useMemo(() => {
+    const predictionValueStr = getStr(predictedValue);
+
+    return Array.isArray(topClasses)
+      ? topClasses.map((c) => {
+          const className = getStr(c.class_name);
+          return {
+            value: className,
             inputDisplay:
-              c.class_name === predictedValue ? (
+              className === predictionValueStr ? (
                 <EuiHealth color="success" style={{ lineHeight: 'inherit' }}>
-                  {c.class_name}
+                  {className}
                 </EuiHealth>
               ) : (
-                c.class_name
+                className
               ),
-          }))
-        : undefined,
-    [topClasses, predictedValue]
-  );
+          };
+        })
+      : undefined;
+  }, [topClasses, predictedValue]);
+
   const domain = useMemo(() => {
     let maxDomain;
     let minDomain;
