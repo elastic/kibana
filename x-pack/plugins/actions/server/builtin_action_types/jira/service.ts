@@ -35,6 +35,8 @@ const COMMENT_URL = `comment`;
 
 const VIEW_INCIDENT_URL = `browse`;
 
+const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-fields'];
+
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
@@ -262,6 +264,8 @@ export const createExternalService = (
           axios: axiosInstance,
           method: 'get',
           url: createIssueMetadataUrl,
+          logger,
+          proxySettings,
         });
 
         const issueTypes = res.data.projects[0]?.issuetypes ?? [];
@@ -307,6 +311,8 @@ export const createExternalService = (
           axios: axiosInstance,
           method: 'get',
           url: getIssueTypesUrl,
+          logger,
+          proxySettings,
         });
 
         const issueTypes = issueTypeRes.data.values;
@@ -316,6 +322,8 @@ export const createExternalService = (
             axios: axiosInstance,
             method: 'get',
             url: createGetIssueTypeFieldsUrl(issueType.id),
+            logger,
+            proxySettings,
           });
           const fields = fieldsRes.data.values;
 
@@ -357,6 +365,8 @@ export const createExternalService = (
         axios: axiosInstance,
         method: 'get',
         url: capabilitiesUrl,
+        logger,
+        proxySettings,
       });
 
       return { ...res.data };

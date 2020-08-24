@@ -8,7 +8,7 @@ import axios from 'axios';
 
 import { createExternalService } from './service';
 import * as utils from '../lib/axios_utils';
-import { ExternalService } from '../case/types';
+import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -138,7 +138,13 @@ describe('Jira service', () => {
       }));
 
       const res = await service.createIncident({
-        incident: { summary: 'title', description: 'desc' },
+        incident: {
+          summary: 'title',
+          description: 'desc',
+          labels: [],
+          issueType: 'Task',
+          priority: 'High',
+        },
       });
 
       expect(res).toEqual({
@@ -159,7 +165,13 @@ describe('Jira service', () => {
       }));
 
       await service.createIncident({
-        incident: { summary: 'title', description: 'desc' },
+        incident: {
+          summary: 'title',
+          description: 'desc',
+          labels: [],
+          issueType: 'Task',
+          priority: 'High',
+        },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -185,7 +197,13 @@ describe('Jira service', () => {
 
       expect(
         service.createIncident({
-          incident: { summary: 'title', description: 'desc' },
+          incident: {
+            summary: 'title',
+            description: 'desc',
+            labels: [],
+            issueType: 'Task',
+            priority: 'High',
+          },
         })
       ).rejects.toThrow('[Action][Jira]: Unable to create incident. Error: An error has occurred');
     });
@@ -203,7 +221,13 @@ describe('Jira service', () => {
 
       const res = await service.updateIncident({
         incidentId: '1',
-        incident: { summary: 'title', description: 'desc' },
+        incident: {
+          summary: 'title',
+          description: 'desc',
+          labels: [],
+          issueType: 'Task',
+          priority: 'High',
+        },
       });
 
       expect(res).toEqual({
@@ -225,7 +249,13 @@ describe('Jira service', () => {
 
       await service.updateIncident({
         incidentId: '1',
-        incident: { summary: 'title', description: 'desc' },
+        incident: {
+          summary: 'title',
+          description: 'desc',
+          labels: [],
+          issueType: 'Task',
+          priority: 'High',
+        },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -245,7 +275,13 @@ describe('Jira service', () => {
       expect(
         service.updateIncident({
           incidentId: '1',
-          incident: { summary: 'title', description: 'desc' },
+          incident: {
+            summary: 'title',
+            description: 'desc',
+            labels: [],
+            issueType: 'Task',
+            priority: 'High',
+          },
         })
       ).rejects.toThrow(
         '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred'
@@ -265,8 +301,7 @@ describe('Jira service', () => {
 
       const res = await service.createComment({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1' },
-        field: 'comments',
+        comment: { comment: 'comment', commentId: 'comment-1', updatedAt: null },
       });
 
       expect(res).toEqual({
@@ -287,8 +322,7 @@ describe('Jira service', () => {
 
       await service.createComment({
         incidentId: '1',
-        comment: { comment: 'comment', commentId: 'comment-1' },
-        field: 'my_field',
+        comment: { comment: 'comment', commentId: 'comment-1', updatedAt: null },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -308,8 +342,7 @@ describe('Jira service', () => {
       expect(
         service.createComment({
           incidentId: '1',
-          comment: { comment: 'comment', commentId: 'comment-1' },
-          field: 'comments',
+          comment: { comment: 'comment', commentId: 'comment-1', updatedAt: null },
         })
       ).rejects.toThrow(
         '[Action][Jira]: Unable to create comment at incident with id 1. Error: An error has occurred'
