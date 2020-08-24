@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
+import isEqual from 'lodash/fp/isEqual';
 import { TimelineId } from '../../../common/types/timeline';
 
 export const detectionsTimelineIds = [
