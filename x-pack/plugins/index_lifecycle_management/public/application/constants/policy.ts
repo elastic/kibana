@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './types';
+import {
+  SerializedPhase,
+  ColdPhase,
+  DeletePhase,
+  HotPhase,
+  WarmPhase,
+} from '../services/policies/types';
 
 export const defaultNewHotPhase: HotPhase = {
   phaseEnabled: true,
@@ -46,4 +52,9 @@ export const defaultNewDeletePhase: DeletePhase = {
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',
   waitForSnapshotPolicy: '',
+};
+
+export const serializedPhaseInitialization: SerializedPhase = {
+  min_age: '0ms',
+  actions: {},
 };

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { serializedPhaseInitialization } from '../../constants';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { HotPhase, SerializedHotPhase, serializedPhaseInitialization } from './types';
+import { HotPhase, SerializedHotPhase } from './types';
 import {
   maximumAgeRequiredMessage,
   maximumDocumentsRequiredMessage,
@@ -27,15 +28,12 @@ const hotPhaseInitialization: HotPhase = {
   selectedMaxDocuments: '',
 };
 
-export const hotPhaseFromES = (phaseSerializedOrUndefined?: SerializedHotPhase): HotPhase => {
+export const hotPhaseFromES = (phaseSerialized?: SerializedHotPhase): HotPhase => {
   const phase: HotPhase = { ...hotPhaseInitialization };
 
-  if (!phaseSerializedOrUndefined) {
+  if (phaseSerialized === undefined || phaseSerialized === null) {
     return phase;
   }
-
-  // after ! check it's safe to cast type as a serialized phase
-  const phaseSerialized = phaseSerializedOrUndefined as SerializedHotPhase;
 
   phase.phaseEnabled = true;
 

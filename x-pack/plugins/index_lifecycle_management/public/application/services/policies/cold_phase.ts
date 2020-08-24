@@ -5,12 +5,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import {
-  AllocateAction,
-  ColdPhase,
-  SerializedColdPhase,
-  serializedPhaseInitialization,
-} from './types';
+import { serializedPhaseInitialization } from '../../constants';
+import { AllocateAction, ColdPhase, SerializedColdPhase } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 import {
   numberRequiredMessage,
@@ -28,14 +24,11 @@ const coldPhaseInitialization: ColdPhase = {
   phaseIndexPriority: '',
 };
 
-export const coldPhaseFromES = (phaseSerializedOrUndefined?: SerializedColdPhase): ColdPhase => {
+export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhase => {
   const phase = { ...coldPhaseInitialization };
-  if (!phaseSerializedOrUndefined) {
+  if (phaseSerialized === undefined || phaseSerialized === null) {
     return phase;
   }
-
-  // after ! check it's safe to cast type as a serialized phase
-  const phaseSerialized = phaseSerializedOrUndefined as SerializedColdPhase;
 
   phase.phaseEnabled = true;
 

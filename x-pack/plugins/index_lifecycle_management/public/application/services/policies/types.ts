@@ -30,11 +30,6 @@ export interface SerializedPhase {
   };
 }
 
-export const serializedPhaseInitialization: SerializedPhase = {
-  min_age: '0ms',
-  actions: {},
-};
-
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
     rollover?: {

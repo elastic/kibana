@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Policy, PolicyFromES, serializedPhaseInitialization, SerializedPolicy } from './types';
-
-import { hotPhaseFromES, hotPhaseToES } from './hot_phase';
-import { warmPhaseFromES, warmPhaseToES } from './warm_phase';
-import { coldPhaseFromES, coldPhaseToES } from './cold_phase';
-import { deletePhaseFromES, deletePhaseToES } from './delete_phase';
 import {
   defaultNewColdPhase,
   defaultNewDeletePhase,
   defaultNewHotPhase,
   defaultNewWarmPhase,
-} from './default_new_policy';
+  serializedPhaseInitialization,
+} from '../../constants';
+
+import { Policy, PolicyFromES, SerializedPolicy } from './types';
+
+import { hotPhaseFromES, hotPhaseToES } from './hot_phase';
+import { warmPhaseFromES, warmPhaseToES } from './warm_phase';
+import { coldPhaseFromES, coldPhaseToES } from './cold_phase';
+import { deletePhaseFromES, deletePhaseToES } from './delete_phase';
 
 export const splitSizeAndUnits = (field: string): { size: string; units: string } => {
   let size = '';

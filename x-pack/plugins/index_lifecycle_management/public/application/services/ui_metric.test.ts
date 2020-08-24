@@ -9,9 +9,9 @@ import {
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_FREEZE_INDEX,
-} from '../constants/ui_metric';
-
-import { defaultNewWarmPhase, defaultNewColdPhase } from './policies/default_new_policy';
+  defaultNewWarmPhase,
+  defaultNewColdPhase,
+} from '../constants/';
 
 import { getUiMetricsForPhases } from './ui_metric';
 jest.mock('ui/new_platform');

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DeletePhase, SerializedDeletePhase, serializedPhaseInitialization } from './types';
+import { serializedPhaseInitialization } from '../../constants';
+import { DeletePhase, SerializedDeletePhase } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 import {
   numberRequiredMessage,
@@ -19,16 +20,11 @@ const deletePhaseInitialization: DeletePhase = {
   waitForSnapshotPolicy: '',
 };
 
-export const deletePhaseFromES = (
-  phaseSerializedOrUndefined?: SerializedDeletePhase
-): DeletePhase => {
+export const deletePhaseFromES = (phaseSerialized?: SerializedDeletePhase): DeletePhase => {
   const phase = { ...deletePhaseInitialization };
-  if (!phaseSerializedOrUndefined) {
+  if (phaseSerialized === undefined || phaseSerialized === null) {
     return phase;
   }
-
-  // after ! check it's safe to cast type as a serialized phase
-  const phaseSerialized = phaseSerializedOrUndefined as SerializedDeletePhase;
 
   phase.phaseEnabled = true;
   if (phaseSerialized.min_age) {

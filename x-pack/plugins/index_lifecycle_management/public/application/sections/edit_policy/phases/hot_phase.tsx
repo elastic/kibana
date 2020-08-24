@@ -17,7 +17,9 @@ import {
   EuiFormRow,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
+
 import { HotPhase as HotPhaseInterface, Phases } from '../../../services/policies/types';
+import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 import {
   LearnMoreLink,
@@ -26,7 +28,93 @@ import {
   ErrableFormRow,
   SetPriorityInput,
 } from '../components';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+
+const maxSizeStoredUnits = [
+  {
+    value: 'gb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel', {
+      defaultMessage: 'gigabytes',
+    }),
+  },
+  {
+    value: 'mb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
+      defaultMessage: 'megabytes',
+    }),
+  },
+  {
+    value: 'b',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.bytesLabel', {
+      defaultMessage: 'bytes',
+    }),
+  },
+  {
+    value: 'kb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.kilobytesLabel', {
+      defaultMessage: 'kilobytes',
+    }),
+  },
+  {
+    value: 'tb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.terabytesLabel', {
+      defaultMessage: 'terabytes',
+    }),
+  },
+  {
+    value: 'pb',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.petabytesLabel', {
+      defaultMessage: 'petabytes',
+    }),
+  },
+];
+
+const maxAgeUnits = [
+  {
+    value: 'd',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.daysLabel', {
+      defaultMessage: 'days',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.hoursLabel', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'm',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.minutesLabel', {
+      defaultMessage: 'minutes',
+    }),
+  },
+  {
+    value: 's',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.secondsLabel', {
+      defaultMessage: 'seconds',
+    }),
+  },
+  {
+    value: 'ms',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.millisecondsLabel', {
+      defaultMessage: 'milliseconds',
+    }),
+  },
+  {
+    value: 'micros',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel', {
+      defaultMessage: 'microseconds',
+    }),
+  },
+  {
+    value: 'nanos',
+    text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel', {
+      defaultMessage: 'nanoseconds',
+    }),
+  },
+];
+const hotProperty = propertyof<Phases>('hot');
+const phaseProperty = (propertyName: keyof HotPhaseInterface) =>
+  propertyof<HotPhaseInterface>(propertyName);
 
 interface Props {
   errors?: PhaseValidationErrors<HotPhaseInterface>;
@@ -39,15 +127,6 @@ interface Props {
 export class HotPhase extends PureComponent<Props> {
   render() {
     const { setPhaseData, phaseData, isShowingErrors, errors, setWarmPhaseOnRollover } = this.props;
-
-    const hotPhaseProperty = propertyof<Phases>('hot');
-    const selectedMaxSizeStoredProperty = propertyof<HotPhaseInterface>('selectedMaxSizeStored');
-    const selectedMaxSizeStoredUnitsProperty = propertyof<HotPhaseInterface>(
-      'selectedMaxSizeStoredUnits'
-    );
-    const selectedMaxDocumentsProperty = propertyof<HotPhaseInterface>('selectedMaxDocuments');
-    const selectedMaxAgeProperty = propertyof<HotPhaseInterface>('selectedMaxAge');
-    const selectedMaxAgeUnitsProperty = propertyof<HotPhaseInterface>('selectedMaxAgeUnits');
 
     return (
       <Fragment>
@@ -120,7 +199,7 @@ export class HotPhase extends PureComponent<Props> {
               <EuiFlexGroup>
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    id={`${hotPhaseProperty}-${selectedMaxSizeStoredProperty}`}
+                    id={`${hotProperty}-${phaseProperty('selectedMaxSizeStored')}`}
                     label={i18n.translate(
                       'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel',
                       {
@@ -131,10 +210,10 @@ export class HotPhase extends PureComponent<Props> {
                     errors={errors?.selectedMaxSizeStored}
                   >
                     <EuiFieldNumber
-                      id={`${hotPhaseProperty}-${selectedMaxSizeStoredProperty}`}
+                      id={`${hotProperty}-${phaseProperty('selectedMaxSizeStored')}`}
                       value={phaseData.selectedMaxSizeStored}
                       onChange={(e) => {
-                        setPhaseData(selectedMaxSizeStoredProperty, e.target.value);
+                        setPhaseData(phaseProperty('selectedMaxSizeStored'), e.target.value);
                       }}
                       min={1}
                     />
@@ -142,7 +221,7 @@ export class HotPhase extends PureComponent<Props> {
                 </EuiFlexItem>
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    id={`${hotPhaseProperty}-${selectedMaxSizeStoredUnitsProperty}`}
+                    id={`${hotProperty}-${phaseProperty('selectedMaxSizeStoredUnits')}`}
                     hasEmptyLabelSpace
                     isShowingErrors={isShowingErrors}
                     errors={errors?.selectedMaxSizeStoredUnits}
@@ -156,46 +235,9 @@ export class HotPhase extends PureComponent<Props> {
                       )}
                       value={phaseData.selectedMaxSizeStoredUnits}
                       onChange={(e) => {
-                        setPhaseData(selectedMaxSizeStoredUnitsProperty, e.target.value);
+                        setPhaseData(phaseProperty('selectedMaxSizeStoredUnits'), e.target.value);
                       }}
-                      options={[
-                        {
-                          value: 'gb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel', {
-                            defaultMessage: 'gigabytes',
-                          }),
-                        },
-                        {
-                          value: 'mb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
-                            defaultMessage: 'megabytes',
-                          }),
-                        },
-                        {
-                          value: 'b',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.bytesLabel', {
-                            defaultMessage: 'bytes',
-                          }),
-                        },
-                        {
-                          value: 'kb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.kilobytesLabel', {
-                            defaultMessage: 'kilobytes',
-                          }),
-                        },
-                        {
-                          value: 'tb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.terabytesLabel', {
-                            defaultMessage: 'terabytes',
-                          }),
-                        },
-                        {
-                          value: 'pb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.petabytesLabel', {
-                            defaultMessage: 'petabytes',
-                          }),
-                        },
-                      ]}
+                      options={maxSizeStoredUnits}
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>
@@ -204,7 +246,7 @@ export class HotPhase extends PureComponent<Props> {
               <EuiFlexGroup>
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    id={`${hotPhaseProperty}-${selectedMaxDocumentsProperty}`}
+                    id={`${hotProperty}-${phaseProperty('selectedMaxDocuments')}`}
                     label={i18n.translate(
                       'xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel',
                       {
@@ -215,10 +257,10 @@ export class HotPhase extends PureComponent<Props> {
                     errors={errors?.selectedMaxDocuments}
                   >
                     <EuiFieldNumber
-                      id={`${hotPhaseProperty}-${selectedMaxDocumentsProperty}`}
+                      id={`${hotProperty}-${phaseProperty('selectedMaxDocuments')}`}
                       value={phaseData.selectedMaxDocuments}
                       onChange={(e) => {
-                        setPhaseData(selectedMaxDocumentsProperty, e.target.value);
+                        setPhaseData(phaseProperty('selectedMaxDocuments'), e.target.value);
                       }}
                       min={1}
                     />
@@ -229,7 +271,7 @@ export class HotPhase extends PureComponent<Props> {
               <EuiFlexGroup>
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    id={`${hotPhaseProperty}-${selectedMaxAgeProperty}`}
+                    id={`${hotProperty}-${phaseProperty('selectedMaxAge')}`}
                     label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
                       defaultMessage: 'Maximum age',
                     })}
@@ -237,10 +279,10 @@ export class HotPhase extends PureComponent<Props> {
                     errors={errors?.selectedMaxAge}
                   >
                     <EuiFieldNumber
-                      id={`${hotPhaseProperty}-${selectedMaxAgeProperty}`}
+                      id={`${hotProperty}-${phaseProperty('selectedMaxAge')}`}
                       value={phaseData.selectedMaxAge}
                       onChange={(e) => {
-                        setPhaseData(selectedMaxAgeProperty, e.target.value);
+                        setPhaseData(phaseProperty('selectedMaxAge'), e.target.value);
                       }}
                       min={1}
                     />
@@ -248,7 +290,7 @@ export class HotPhase extends PureComponent<Props> {
                 </EuiFlexItem>
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    id={`${hotPhaseProperty}-${selectedMaxAgeUnitsProperty}`}
+                    id={`${hotProperty}-${phaseProperty('selectedMaxAgeUnits')}`}
                     hasEmptyLabelSpace
                     isShowingErrors={isShowingErrors}
                     errors={errors?.selectedMaxAgeUnits}
@@ -262,61 +304,9 @@ export class HotPhase extends PureComponent<Props> {
                       )}
                       value={phaseData.selectedMaxAgeUnits}
                       onChange={(e) => {
-                        setPhaseData(selectedMaxAgeUnitsProperty, e.target.value);
+                        setPhaseData(phaseProperty('selectedMaxAgeUnits'), e.target.value);
                       }}
-                      options={[
-                        {
-                          value: 'd',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.daysLabel', {
-                            defaultMessage: 'days',
-                          }),
-                        },
-                        {
-                          value: 'h',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.hoursLabel', {
-                            defaultMessage: 'hours',
-                          }),
-                        },
-                        {
-                          value: 'm',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.minutesLabel', {
-                            defaultMessage: 'minutes',
-                          }),
-                        },
-                        {
-                          value: 's',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.secondsLabel', {
-                            defaultMessage: 'seconds',
-                          }),
-                        },
-                        {
-                          value: 'ms',
-                          text: i18n.translate(
-                            'xpack.indexLifecycleMgmt.hotPhase.millisecondsLabel',
-                            {
-                              defaultMessage: 'milliseconds',
-                            }
-                          ),
-                        },
-                        {
-                          value: 'micros',
-                          text: i18n.translate(
-                            'xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel',
-                            {
-                              defaultMessage: 'microseconds',
-                            }
-                          ),
-                        },
-                        {
-                          value: 'nanos',
-                          text: i18n.translate(
-                            'xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel',
-                            {
-                              defaultMessage: 'nanoseconds',
-                            }
-                          ),
-                        },
-                      ]}
+                      options={maxAgeUnits}
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>
@@ -327,7 +317,7 @@ export class HotPhase extends PureComponent<Props> {
         <SetPriorityInput<HotPhaseInterface>
           errors={errors}
           phaseData={phaseData}
-          phase={hotPhaseProperty}
+          phase={hotProperty}
           isShowingErrors={isShowingErrors}
           setPhaseData={setPhaseData}
         />

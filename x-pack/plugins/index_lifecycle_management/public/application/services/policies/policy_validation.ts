@@ -11,6 +11,8 @@ import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
 import { ColdPhase, DeletePhase, HotPhase, Phase, Policy, PolicyFromES, WarmPhase } from './types';
 
+export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
+
 export const numberRequiredMessage = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.numberRequiredError',
   {
@@ -165,4 +167,25 @@ export const validatePolicy = (
   ];
 };
 
-export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
+export const findFirstError = (errors?: ValidationErrors): string | undefined => {
+  if (!errors) {
+    return;
+  }
+
+  if (errors.policyName.length > 0) {
+    return propertyof<ValidationErrors>('policyName');
+  }
+
+  if (Object.keys(errors.hot).length > 0) {
+    return `${propertyof<ValidationErrors>('hot')}.${Object.keys(errors.hot)[0]}`;
+  }
+  if (Object.keys(errors.warm).length > 0) {
+    return `${propertyof<ValidationErrors>('warm')}.${Object.keys(errors.warm)[0]}`;
+  }
+  if (Object.keys(errors.cold).length > 0) {
+    return `${propertyof<ValidationErrors>('cold')}.${Object.keys(errors.cold)[0]}`;
+  }
+  if (Object.keys(errors.delete).length > 0) {
+    return `${propertyof<ValidationErrors>('delete')}.${Object.keys(errors.delete)[0]}`;
+  }
+};

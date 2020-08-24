@@ -27,18 +27,22 @@ import {
 } from '@elastic/eui';
 
 import { toasts } from '../../services/notification';
-import { findFirstError } from '../../services/find_errors';
-import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
 
-import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
 import { Policy, PolicyFromES } from '../../services/policies/types';
-import { validatePolicy, ValidationErrors } from '../../services/policies/policy_validation';
+import {
+  validatePolicy,
+  ValidationErrors,
+  findFirstError,
+} from '../../services/policies/policy_validation';
 import { savePolicy } from '../../services/policies/policy_save';
 import {
   deserializePolicy,
   getPolicyByName,
   initializeNewPolicy,
 } from '../../services/policies/policy_serialization';
+
+import { ErrableFormRow, LearnMoreLink, PolicyJsonFlyout } from './components';
+import { ColdPhase, DeletePhase, HotPhase, WarmPhase } from './phases';
 
 interface Props {
   policies: PolicyFromES[];
@@ -185,91 +189,87 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
 
             <EuiSpacer />
 
-            <Fragment>
-              {isNewPolicy ? null : (
-                <Fragment>
-                  <Fragment>
-                    <EuiText>
-                      <p>
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
-                            defaultMessage="You are editing an existing policy"
-                          />
-                        </strong>
-                        .{' '}
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                          defaultMessage="Any changes you make will affect the indices that are
+            {isNewPolicy ? null : (
+              <Fragment>
+                <EuiText>
+                  <p>
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
+                        defaultMessage="You are editing an existing policy"
+                      />
+                    </strong>
+                    .{' '}
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
+                      defaultMessage="Any changes you make will affect the indices that are
                               attached to this policy. Alternatively, you can save these changes in
                               a new policy."
-                        />
-                      </p>
-                    </EuiText>
-                    <EuiSpacer />
-                  </Fragment>
-
-                  <EuiFormRow>
-                    <EuiSwitch
-                      data-test-subj="saveAsNewSwitch"
-                      style={{ maxWidth: '100%' }}
-                      checked={saveAsNew}
-                      onChange={(e) => {
-                        setSaveAsNew(e.target.checked);
-                      }}
-                      label={
-                        <span>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
-                            defaultMessage="Save as new policy"
-                          />
-                        </span>
-                      }
                     />
-                  </EuiFormRow>
-                </Fragment>
-              )}
+                  </p>
+                </EuiText>
+                <EuiSpacer />
 
-              {saveAsNew || isNewPolicy ? (
-                <EuiDescribedFormGroup
-                  title={
-                    <div>
-                      <span className="eui-displayInlineBlock eui-alignMiddle">
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="saveAsNewSwitch"
+                    style={{ maxWidth: '100%' }}
+                    checked={saveAsNew}
+                    onChange={(e) => {
+                      setSaveAsNew(e.target.checked);
+                    }}
+                    label={
+                      <span>
                         <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.nameLabel"
-                          defaultMessage="Name"
+                          id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                          defaultMessage="Save as new policy"
                         />
                       </span>
-                    </div>
-                  }
-                  titleSize="s"
-                  fullWidth
-                >
-                  <ErrableFormRow
-                    id={'policyName'}
-                    label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
-                      defaultMessage: 'Policy name',
-                    })}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors?.policyName}
-                    helpText={
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage"
-                        defaultMessage="A policy name cannot start with an underscore and cannot contain a question mark or a space."
-                      />
                     }
-                  >
-                    <EuiFieldText
-                      data-test-subj="policyNameField"
-                      value={policy.name}
-                      onChange={(e) => {
-                        setPolicy({ ...policy, name: e.target.value });
-                      }}
+                  />
+                </EuiFormRow>
+              </Fragment>
+            )}
+
+            {saveAsNew || isNewPolicy ? (
+              <EuiDescribedFormGroup
+                title={
+                  <div>
+                    <span className="eui-displayInlineBlock eui-alignMiddle">
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.nameLabel"
+                        defaultMessage="Name"
+                      />
+                    </span>
+                  </div>
+                }
+                titleSize="s"
+                fullWidth
+              >
+                <ErrableFormRow
+                  id={'policyName'}
+                  label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
+                    defaultMessage: 'Policy name',
+                  })}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors?.policyName}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage"
+                      defaultMessage="A policy name cannot start with an underscore and cannot contain a question mark or a space."
                     />
-                  </ErrableFormRow>
-                </EuiDescribedFormGroup>
-              ) : null}
-            </Fragment>
+                  }
+                >
+                  <EuiFieldText
+                    data-test-subj="policyNameField"
+                    value={policy.name}
+                    onChange={(e) => {
+                      setPolicy({ ...policy, name: e.target.value });
+                    }}
+                  />
+                </ErrableFormRow>
+              </EuiDescribedFormGroup>
+            ) : null}
 
             <EuiSpacer />
 

@@ -13,14 +13,12 @@ import {
   UIM_CONFIG_FREEZE_INDEX,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
-} from '../constants/ui_metric';
-
-import { Phases } from './policies/types';
-import {
   defaultNewColdPhase,
   defaultNewHotPhase,
   defaultNewWarmPhase,
-} from './policies/default_new_policy';
+} from '../constants';
+
+import { Phases } from './policies/types';
 
 export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
 
