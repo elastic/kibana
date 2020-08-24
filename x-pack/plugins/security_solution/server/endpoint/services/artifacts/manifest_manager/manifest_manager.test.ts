@@ -6,7 +6,7 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
 
 import { getManifestManagerMock, ManifestManagerMockType } from './manifest_manager.mock';
@@ -92,8 +92,8 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager cannot dispatch incomplete (uncompressed) artifact', async () => {
-      const packageConfigService = createPackageConfigServiceMock();
-      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const packagePolicyService = createPackagePolicyServiceMock();
+      const manifestManager = getManifestManagerMock({ packagePolicyService });
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
@@ -102,8 +102,8 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can dispatch manifest', async () => {
-      const packageConfigService = createPackageConfigServiceMock();
-      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const packagePolicyService = createPackagePolicyServiceMock();
+      const manifestManager = getManifestManagerMock({ packagePolicyService });
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
@@ -117,10 +117,10 @@ describe('manifest_manager', () => {
       expect(dispatchErrors).toEqual([]);
 
       // 2 policies updated... 1 is already up-to-date
-      expect(packageConfigService.update.mock.calls.length).toEqual(2);
+      expect(packagePolicyService.update.mock.calls.length).toEqual(2);
 
       expect(
-        packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+        packagePolicyService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: '1.0.1',
         schema_version: 'v1',
@@ -150,8 +150,8 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager fails to dispatch on conflict', async () => {
-      const packageConfigService = createPackageConfigServiceMock();
-      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const packagePolicyService = createPackagePolicyServiceMock();
+      const manifestManager = getManifestManagerMock({ packagePolicyService });
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
@@ -160,7 +160,7 @@ describe('manifest_manager', () => {
 
       newManifest.bumpSemanticVersion();
 
-      packageConfigService.update.mockRejectedValueOnce({ status: 409 });
+      packagePolicyService.update.mockRejectedValueOnce({ status: 409 });
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       expect(dispatchErrors).toEqual([{ status: 409 }]);
     });
