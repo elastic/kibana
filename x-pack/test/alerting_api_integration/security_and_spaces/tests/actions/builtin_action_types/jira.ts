@@ -78,7 +78,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
   let proxyServer: any;
   let proxyHaveBeenCalled = false;
 
-  describe('Jira', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/75722
+  describe.skip('Jira', () => {
     before(() => {
       jiraSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
