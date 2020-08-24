@@ -162,7 +162,7 @@ describe('replaceInjectedVars uiExport', () => {
     };
     const request = buildRequest();
     const server = mockServer();
-    delete server.plugins.security;
+    delete server.newPlatform.setup.plugins.security;
     server.plugins.xpack_main.info.isAvailable.returns(false);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
@@ -191,7 +191,6 @@ function mockServer() {
       },
     },
     plugins: {
-      security: {},
       xpack_main: {
         getFeatures: () => [
           {
