@@ -8,3 +8,4 @@ export { createMockServer } from './create_mock_server';
 export { createMockReportingCore, createMockConfigSchema } from './create_mock_reportingplugin';
 export { createMockBrowserDriverFactory } from './create_mock_browserdriverfactory';
 export { createMockLayoutInstance } from './create_mock_layoutinstance';
+export { createMockLevelLogger } from './create_mock_levellogger';
