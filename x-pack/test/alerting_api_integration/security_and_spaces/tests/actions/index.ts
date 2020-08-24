@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
 import { getHttpProxyServer } from '../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
