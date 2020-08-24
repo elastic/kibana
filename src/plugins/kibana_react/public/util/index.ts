@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './react_mount';
+export * from './to_mount_point';
