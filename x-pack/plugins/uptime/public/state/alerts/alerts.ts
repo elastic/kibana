@@ -14,7 +14,7 @@ import { AsyncInitState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
 import {
   createAlert,
-  disableAnomalyAlert,
+  disableAlertById,
   fetchAlertRecords,
   fetchConnectors,
   fetchMonitorAlertRecords,
@@ -33,18 +33,25 @@ export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
 export const createAlertAction = createAsyncAction<NewAlertParams, Alert | null>('CREATE ALERT');
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
-export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult>('GET ALERTS');
+export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult | null>('GET ALERTS');
+
 export const getAnomalyAlertAction = createAsyncAction<MonitorIdParam, Alert>(
   'GET EXISTING ALERTS'
 );
-export const deleteAlertAction = createAsyncAction<{ alertId: string }, any>('DELETE ALERTS');
+export const deleteAlertAction = createAsyncAction<{ alertId: string }, string | null>(
+  'DELETE ALERTS'
+);
+export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, any>(
+  'DELETE ANOMALY ALERT'
+);
 
 interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
   newAlert: AsyncInitState<Alert>;
   alerts: AsyncInitState<AlertsResult>;
   anomalyAlert: AsyncInitState<Alert>;
-  alertDeletion: AsyncInitState<boolean>;
+  alertDeletion: AsyncInitState<string>;
+  anomalyAlertDeletion: AsyncInitState<boolean>;
 }
 
 const initialState = {
@@ -53,6 +60,7 @@ const initialState = {
   alerts: asyncInitState(),
   anomalyAlert: asyncInitState(),
   alertDeletion: asyncInitState(),
+  anomalyAlertDeletion: asyncInitState(),
 };
 
 export const alertsReducer = handleActions<AlertState>(
@@ -62,9 +70,26 @@ export const alertsReducer = handleActions<AlertState>(
     ...handleAsyncAction<AlertState>('alerts', getMonitorAlertsAction),
     ...handleAsyncAction<AlertState>('anomalyAlert', getAnomalyAlertAction),
     ...handleAsyncAction<AlertState>('alertDeletion', deleteAlertAction),
+    ...handleAsyncAction<AlertState>('anomalyAlertDeletion', deleteAnomalyAlertAction),
   },
   initialState
 );
+
+const showAlertDisabledSuccess = () => {
+  kibanaService.core.notifications.toasts.addSuccess(
+    i18n.translate('xpack.uptime.overview.alerts.disabled.success', {
+      defaultMessage: 'Alert successfully disabled!',
+    })
+  );
+};
+
+const showAlertDisabledFailed = (err: Error) => {
+  kibanaService.core.notifications.toasts.addError(err, {
+    title: i18n.translate('xpack.uptime.overview.alerts.disabled.failed', {
+      defaultMessage: 'Alert cannot be disabled!',
+    }),
+  });
+};
 
 export function* fetchAlertsEffect() {
   yield takeLatest(
@@ -72,25 +97,30 @@ export function* fetchAlertsEffect() {
     fetchEffectFactory(fetchAlertRecords, getAnomalyAlertAction.success, getAnomalyAlertAction.fail)
   );
 
-  yield takeLatest(deleteAlertAction.get, function* (action: Action<{ alertId: string }>) {
+  yield takeLatest(deleteAnomalyAlertAction.get, function* (action: Action<{ alertId: string }>) {
     try {
-      yield call(disableAnomalyAlert, action.payload);
-      yield put(createAlertAction.success(null));
-      yield put(deleteAlertAction.success(action.payload.alertId));
-      kibanaService.core.notifications.toasts.addSuccess(
-        i18n.translate('xpack.uptime.overview.alerts.disabled.success', {
-          defaultMessage: 'Alert successfully disabled!',
-        })
-      );
+      yield call(disableAlertById, action.payload);
+      yield put(deleteAnomalyAlertAction.success(action.payload.alertId));
+      showAlertDisabledSuccess();
       const monitorId = yield select(monitorIdSelector);
       yield put(getAnomalyAlertAction.get({ monitorId }));
+    } catch (err) {
+      showAlertDisabledFailed(err);
+      yield put(deleteAnomalyAlertAction.fail(err));
+    }
+  });
+
+  yield takeLatest(deleteAlertAction.get, function* (action: Action<{ alertId: string }>) {
+    try {
+      yield call(disableAlertById, action.payload);
+      // clear previous state
+      yield put(createAlertAction.success(null));
+      yield put(deleteAlertAction.success(action.payload.alertId));
+
+      showAlertDisabledSuccess();
       yield put(getMonitorAlertsAction.get());
     } catch (err) {
-      kibanaService.core.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.uptime.overview.alerts.disabled.failed', {
-          defaultMessage: 'Alert cannot be disabled!',
-        }),
-      });
+      showAlertDisabledFailed(err);
       yield put(deleteAlertAction.fail(err));
     }
   });
@@ -129,6 +159,7 @@ export function* fetchAlertsEffect() {
 
 export const connectorsSelector = ({ alerts }: AppState) => alerts.connectors;
 export const newAlertSelector = ({ alerts }: AppState) => alerts.newAlert;
-export const anomalyAlertSelector = ({ alerts }: AppState) => alerts.anomalyAlert;
 export const alertsSelector = ({ alerts }: AppState) => alerts.alerts;
 export const isAlertDeletedSelector = ({ alerts }: AppState) => alerts.alertDeletion;
+
+export const anomalyAlertSelector = ({ alerts }: AppState) => alerts.anomalyAlert;

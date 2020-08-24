@@ -5,15 +5,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiSwitch, EuiText } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
+import { ENABLE_STATUS_ALERT } from './translations';
 
-interface Props {
-  btnContent: JSX.Element;
-}
-export const DefineAlertConnectors = ({ btnContent }: Props) => {
+export const DefineAlertConnectors = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((val) => !val);
@@ -24,17 +22,14 @@ export const DefineAlertConnectors = ({ btnContent }: Props) => {
   return (
     <EuiPopover
       button={
-        isMonitorPage ? (
-          btnContent
-        ) : (
-          <EuiButtonIcon
-            aria-label={'Enable down alert'}
-            style={{ marginRight: 10 }}
-            iconType={'bell'}
-            onClick={onButtonClick}
-            data-test-subj={'uptimeDisplayDefineConnector'}
-          />
-        )
+        <EuiSwitch
+          readOnly={true}
+          label={ENABLE_STATUS_ALERT}
+          showLabel={!!isMonitorPage}
+          aria-label={ENABLE_STATUS_ALERT}
+          onChange={onButtonClick}
+          checked={false}
+        />
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

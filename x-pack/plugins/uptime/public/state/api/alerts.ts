@@ -93,6 +93,6 @@ export const fetchAlertRecords = async ({ monitorId }: MonitorIdParam): Promise<
   return alerts.data.find((alert: Alert) => alert.params.monitorId === monitorId);
 };
 
-export const disableAnomalyAlert = async ({ alertId }: { alertId: string }) => {
+export const disableAlertById = async ({ alertId }: { alertId: string }) => {
   return await apiService.delete(API_URLS.ALERT + alertId);
 };

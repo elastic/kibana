@@ -7,19 +7,39 @@ exports[`EnableAlertComponent renders without errors for valid props 1`] = `
   <div
     class="euiPopover__anchor"
   >
-    <button
-      aria-label="Enable down alert"
-      class="euiButtonIcon euiButtonIcon--primary"
-      data-test-subj="uptimeDisplayDefineConnector"
-      style="margin-right:10px"
-      type="button"
+    <div
+      class="euiSwitch"
     >
-      <div
-        aria-hidden="true"
-        class="euiButtonIcon__icon"
-        data-euiicon-type="bell"
-      />
-    </button>
+      <button
+        aria-checked="false"
+        aria-label="Enable status alert"
+        class="euiSwitch__button"
+        id="i73543741-e607-11ea-9a0c-85486555c4ba"
+        readonly=""
+        role="switch"
+        type="button"
+      >
+        <span
+          class="euiSwitch__body"
+        >
+          <span
+            class="euiSwitch__thumb"
+          />
+          <span
+            class="euiSwitch__track"
+          >
+            <div
+              class="euiSwitch__icon"
+              data-euiicon-type="cross"
+            />
+            <div
+              class="euiSwitch__icon euiSwitch__icon--checked"
+              data-euiicon-type="check"
+            />
+          </span>
+        </span>
+      </button>
+    </div>
   </div>
 </div>
 `;
