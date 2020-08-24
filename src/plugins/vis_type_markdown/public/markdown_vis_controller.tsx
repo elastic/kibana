@@ -22,7 +22,7 @@ import { Markdown } from '../../kibana_react/public';
 import { MarkdownVisParams } from './types';
 
 interface MarkdownVisComponentProps extends MarkdownVisParams {
-  renderComplete: () => {};
+  renderComplete: () => void;
 }
 
 /**
@@ -80,7 +80,14 @@ class MarkdownVisComponent extends React.Component<MarkdownVisComponentProps> {
  * The way React works, this wrapper nearly brings no overhead, but allows us
  * to use proper lifecycle methods in the actual component.
  */
-export function MarkdownVisWrapper(props: any) {
+
+export interface MarkdownVisWrapperProps {
+  visParams: MarkdownVisParams;
+  fireEvent: (event: any) => void;
+  renderComplete: () => void;
+}
+
+export function MarkdownVisWrapper(props: MarkdownVisWrapperProps) {
   return (
     <MarkdownVisComponent
       fontSize={props.visParams.fontSize}

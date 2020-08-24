@@ -6,12 +6,12 @@
 
 import {
   INGEST_API_EPM_PACKAGES,
-  sendGetPackageConfig,
+  sendGetPackagePolicy,
   sendGetEndpointSecurityPackage,
-  sendGetEndpointSpecificPackageConfigs,
+  sendGetEndpointSpecificPackagePolicies,
 } from './ingest';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
-import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
 import { policyListApiPathHandlers } from '../test_mock_utils';
 
 describe('ingest service', () => {
@@ -21,22 +21,22 @@ describe('ingest service', () => {
     http = httpServiceMock.createStartContract();
   });
 
-  describe('sendGetEndpointSpecificPackageConfigs()', () => {
+  describe('sendGetEndpointSpecificPackagePolicies()', () => {
     it('auto adds kuery to api request', async () => {
-      await sendGetEndpointSpecificPackageConfigs(http);
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs', {
+      await sendGetEndpointSpecificPackagePolicies(http);
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies', {
         query: {
-          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         },
       });
     });
     it('supports additional KQL to be defined on input for query params', async () => {
-      await sendGetEndpointSpecificPackageConfigs(http, {
+      await sendGetEndpointSpecificPackagePolicies(http, {
         query: { kuery: 'someValueHere', page: 1, perPage: 10 },
       });
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs', {
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies', {
         query: {
-          kuery: `someValueHere and ${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `someValueHere and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           perPage: 10,
           page: 1,
         },
@@ -44,14 +44,14 @@ describe('ingest service', () => {
     });
   });
 
-  describe('sendGetPackageConfig()', () => {
+  describe('sendGetPackagePolicy()', () => {
     it('builds correct API path', async () => {
-      await sendGetPackageConfig(http, '123');
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs/123', undefined);
+      await sendGetPackagePolicy(http, '123');
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies/123', undefined);
     });
     it('supports http options', async () => {
-      await sendGetPackageConfig(http, '123', { query: { page: 1 } });
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs/123', {
+      await sendGetPackagePolicy(http, '123', { query: { page: 1 } });
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies/123', {
         query: {
           page: 1,
         },

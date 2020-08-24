@@ -103,11 +103,13 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   };
 
   getInputAsValueType = async (): Promise<BookByValueInput> => {
-    return this.attributeService.getInputAsValueType(this.input);
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsValueType(input);
   };
 
   getInputAsRefType = async (): Promise<BookByReferenceInput> => {
-    return this.attributeService.getInputAsRefType(this.input, { showSaveModal: true });
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsRefType(input, { showSaveModal: true });
   };
 
   public render(node: HTMLElement) {

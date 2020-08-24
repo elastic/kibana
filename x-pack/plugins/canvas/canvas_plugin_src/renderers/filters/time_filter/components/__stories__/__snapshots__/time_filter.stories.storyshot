@@ -34,18 +34,16 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
-                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
                 <span
-                  className="euiButtonEmpty__content"
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButtonEmpty__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
                   />
@@ -122,18 +120,16 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
-                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
                 <span
-                  className="euiButtonEmpty__content"
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButtonEmpty__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
                   />
@@ -250,18 +246,16 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
-                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
                 <span
-                  className="euiButtonEmpty__content"
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButtonEmpty__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
                   />
@@ -338,18 +332,16 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
-                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
                 <span
-                  className="euiButtonEmpty__content"
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButtonEmpty__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
                   />
@@ -426,18 +418,16 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
-                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
                 <span
-                  className="euiButtonEmpty__content"
+                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    className="euiButtonEmpty__icon"
+                    className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
                   />
