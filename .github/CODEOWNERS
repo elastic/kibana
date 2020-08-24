@@ -2,6 +2,9 @@
 # Identify which groups will be pinged by changes to different parts of the codebase.
 # For more info, see https://help.github.com/articles/about-codeowners/
 
+# Design
+**/*.scss  @elastic/kibana-design
+
 # App
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
@@ -219,9 +222,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
-
-# Design
-**/*.scss  @elastic/kibana-design
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
