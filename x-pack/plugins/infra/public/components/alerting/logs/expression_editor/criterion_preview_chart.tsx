@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useMount, useDebounce } from 'react-use';
+import { useDebounce } from 'react-use';
 import {
   ScaleType,
   AnnotationDomainTypes,
