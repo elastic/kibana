@@ -14360,8 +14360,6 @@
     "xpack.reporting.screencapture.waitingForRenderComplete": "レンダリングの完了を待っています",
     "xpack.reporting.screencapture.waitingForRenderedElements": "レンダリングされた {itemsCount} 個の要素が DOM に入るのを待っています",
     "xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel": "印刷用に最適化",
-    "xpack.reporting.selfCheck.ok": "レポートプラグイン自己チェックOK!",
-    "xpack.reporting.selfCheck.warning": "レポートプラグイン自己チェックで警告が発生しました: {err}",
     "xpack.reporting.serverConfig.autoSet.sandboxDisabled": "Chromiumサンドボックスは保護が強化されていますが、{osName} OSではサポートされていません。自動的に'{configKey}: true'を設定しています。",
     "xpack.reporting.serverConfig.autoSet.sandboxEnabled": "Chromiumサンドボックスは保護が強化され、{osName} OSでサポートされています。自動的にChromiumサンドボックスを有効にしています。",
     "xpack.reporting.serverConfig.invalidServerHostname": "Kibana構成で「server.host:\"0\"」が見つかりました。これはReportingと互換性がありません。レポートが動作するように、「{configKey}:0.0.0.0」が自動的に構成になります。設定を「server.host:0.0.0.0」に変更するか、kibana.ymlに「{configKey}:0.0.0.0'」を追加して、このメッセージが表示されないようにすることができます。",
