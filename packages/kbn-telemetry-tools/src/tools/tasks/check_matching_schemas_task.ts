@@ -31,7 +31,7 @@ export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: bo
 
       if (root.parsedCollections) {
         const differences = checkMatchingMapping(root.parsedCollections, esMapping);
-        root.esMappingDiffs = Object.keys(differences?.properties);
+        root.esMappingDiffs = Object.keys(differences);
         if (root.esMappingDiffs.length && throwOnDiff) {
           throw Error(
             `The following changes must be persisted in ${fullPath} file. Use '--fix' to update.\n${JSON.stringify(
