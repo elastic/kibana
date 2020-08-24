@@ -50,20 +50,6 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('#getPersistableState', () => {
-    it('should persist the internal state', () => {
-      const expectedState: DatatableVisualizationState = {
-        layers: [
-          {
-            layerId: 'baz',
-            columns: ['a', 'b', 'c'],
-          },
-        ],
-      };
-      expect(datatableVisualization.getPersistableState(expectedState)).toEqual(expectedState);
-    });
-  });
-
   describe('#getLayerIds', () => {
     it('return the layer ids', () => {
       const state: DatatableVisualizationState = {
@@ -340,7 +326,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const expression = datatableVisualization.toExpression({ layers: [layer] }, frame) as Ast;
+      const expression = datatableVisualization.toExpression(
+        { layers: [layer] },
+        frame.datasourceLayers
+      ) as Ast;
       const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
 
       expect(tableArgs).toHaveLength(1);
