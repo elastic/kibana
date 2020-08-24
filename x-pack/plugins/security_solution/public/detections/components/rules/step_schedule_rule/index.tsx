@@ -22,7 +22,7 @@ interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
 
-export const stepScheduleDefaultValue: ScheduleStepRule = {
+const stepScheduleDefaultValue: ScheduleStepRule = {
   interval: '5m',
   from: '1m',
 };

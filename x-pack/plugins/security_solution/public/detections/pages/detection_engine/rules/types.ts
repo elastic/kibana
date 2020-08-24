@@ -52,7 +52,7 @@ export interface RuleStepsData {
 
 export type RuleStepsFormData = {
   [K in keyof RuleStepsData]: {
-    data: RuleStepsData[K];
+    data: RuleStepsData[K] | undefined;
     isValid: boolean;
   };
 };

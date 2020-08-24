@@ -21,25 +21,15 @@ import { displaySuccessToast, useStateToaster } from '../../../../../common/comp
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserInfo } from '../../../../components/user_info';
 import { AccordionTitle } from '../../../../components/rules/accordion_title';
-import {
-  StepDefineRule,
-  stepDefineDefaultValue,
-} from '../../../../components/rules/step_define_rule';
+import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
-import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
-import {
-  StepScheduleRule,
-  stepScheduleDefaultValue,
-} from '../../../../components/rules/step_schedule_rule';
-import {
-  StepRuleActions,
-  stepActionsDefaultValue,
-} from '../../../../components/rules/step_rule_actions';
+import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
+import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import { redirectToDetections, getActionMessageParams, userHasNoPermissions } from '../helpers';
 import { RuleStep, RuleStepsData, RuleStepsFormData, RuleStepsFormHooks } from '../types';
-import { formatRule } from './helpers';
+import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 
@@ -111,10 +101,10 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.ruleActions]: null,
   });
   const stepsData = useRef<RuleStepsFormData>({
-    [RuleStep.defineRule]: { isValid: false, data: stepDefineDefaultValue },
-    [RuleStep.aboutRule]: { isValid: false, data: stepAboutDefaultValue },
-    [RuleStep.scheduleRule]: { isValid: false, data: stepScheduleDefaultValue },
-    [RuleStep.ruleActions]: { isValid: false, data: stepActionsDefaultValue },
+    [RuleStep.defineRule]: { isValid: false, data: undefined },
+    [RuleStep.aboutRule]: { isValid: false, data: undefined },
+    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
+    [RuleStep.ruleActions]: { isValid: false, data: undefined },
   });
   const [isStepRuleInReadOnlyView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
     [RuleStep.defineRule]: false,
@@ -123,10 +113,8 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.ruleActions]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
-  const defineStepData = stepsData.current[RuleStep.defineRule].data;
-  const actionMessageParams = useMemo(() => getActionMessageParams(defineStepData.ruleType), [
-    defineStepData.ruleType,
-  ]);
+  const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
+  const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const history = useHistory();
 
   const setStepData = useCallback(
@@ -150,20 +138,22 @@ const CreateRulePageComponent: React.FC = () => {
             openCloseAccordion(stepsRuleOrder[stepRuleIdx + 1]);
             setActiveStep(stepsRuleOrder[stepRuleIdx + 1]);
           }
-        } else if (
-          stepRuleIdx === 3 &&
-          stepsData.current[RuleStep.defineRule].isValid &&
-          stepsData.current[RuleStep.aboutRule].isValid &&
-          stepsData.current[RuleStep.scheduleRule].isValid
-        ) {
-          setRule(
-            formatRule(
-              stepsData.current[RuleStep.defineRule].data,
-              stepsData.current[RuleStep.aboutRule].data,
-              stepsData.current[RuleStep.scheduleRule].data,
-              stepsData.current[RuleStep.ruleActions].data
-            )
-          );
+        } else if (stepRuleIdx === 3) {
+          const defineStep = stepsData.current[RuleStep.defineRule];
+          const aboutStep = stepsData.current[RuleStep.aboutRule];
+          const scheduleStep = stepsData.current[RuleStep.scheduleRule];
+          const actionsStep = stepsData.current[RuleStep.ruleActions];
+
+          if (
+            stepIsValid(defineStep) &&
+            stepIsValid(aboutStep) &&
+            stepIsValid(scheduleStep) &&
+            stepIsValid(actionsStep)
+          ) {
+            setRule(
+              formatRule(defineStep.data, aboutStep.data, scheduleStep.data, actionsStep.data)
+            );
+          }
         }
       }
     },
@@ -274,8 +264,8 @@ const CreateRulePageComponent: React.FC = () => {
     [isStepRuleInReadOnlyView, activeStep]
   );
 
-  if (isSaved) {
-    const ruleName = stepsData.current[RuleStep.aboutRule].data.name;
+  const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
+  if (isSaved && ruleName) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
     history.replace(getRulesUrl());
     return null;

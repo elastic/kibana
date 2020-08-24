@@ -51,10 +51,10 @@ import * as i18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues: DefineStepRule;
+  defaultValues: DefineStepRule | undefined;
 }
 
-export const stepDefineDefaultValue: DefineStepRule = {
+const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
   machineLearningJobId: '',
@@ -108,9 +108,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const initialState = {
-    ...defaultValues,
-    index: defaultValues.index.length ? defaultValues.index : indicesConfig,
+  const initialState = defaultValues ?? {
+    ...stepDefineDefaultValue,
+    index: indicesConfig,
   };
   const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
   const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);

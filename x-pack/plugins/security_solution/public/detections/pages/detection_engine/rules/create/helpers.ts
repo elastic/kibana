@@ -26,6 +26,7 @@ import {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
+  RuleStepsFormData,
 } from '../types';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -47,6 +48,10 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
   }
   return timeObj;
 };
+
+export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
+  formData: T
+): formData is { [K in keyof T]: Exclude<T[K], undefined> } => formData.isValid && !!formData.data;
 
 export interface RuleFields {
   anomalyThreshold: unknown;
