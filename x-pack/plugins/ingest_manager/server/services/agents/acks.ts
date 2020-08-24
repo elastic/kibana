@@ -18,7 +18,7 @@ import {
   AgentEventSOAttributes,
   AgentSOAttributes,
   AgentActionSOAttributes,
-  FullAgentConfig,
+  FullAgentPolicy,
 } from '../../types';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -70,35 +70,35 @@ export async function acknowledgeAgentActions(
     await forceUnenrollAgent(soClient, agent.id);
   }
 
-  const config = getLatestConfigIfUpdated(agent, actions);
+  const agentPolicy = getLatestAgentPolicyIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(config ? [buildUpdateAgentConfig(agent.id, config)] : []),
+    ...(agentPolicy ? [buildUpdateAgentPolicy(agent.id, agentPolicy)] : []),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
 
   return actions;
 }
 
-function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce<null | FullAgentConfig>((acc, action) => {
+function getLatestAgentPolicyIfUpdated(agent: Agent, actions: AgentAction[]) {
+  return actions.reduce<null | FullAgentPolicy>((acc, action) => {
     if (action.type !== 'CONFIG_CHANGE') {
       return acc;
     }
     const data = action.data || {};
 
-    if (data?.config?.id !== agent.config_id) {
+    if (data?.config?.id !== agent.policy_id) {
       return acc;
     }
 
-    const currentRevision = (acc && acc.revision) || agent.config_revision || 0;
+    const currentRevision = (acc && acc.revision) || agent.policy_revision || 0;
 
     return data?.config?.revision > currentRevision ? data?.config : acc;
   }, null);
 }
 
-function buildUpdateAgentConfig(agentId: string, config: FullAgentConfig) {
-  const packages = config.inputs.reduce<string[]>((acc, input) => {
+function buildUpdateAgentPolicy(agentId: string, agentPolicy: FullAgentPolicy) {
+  const packages = agentPolicy.inputs.reduce<string[]>((acc, input) => {
     const packageName = input.meta?.package?.name;
     if (packageName && acc.indexOf(packageName) < 0) {
       return [packageName, ...acc];
@@ -110,7 +110,7 @@ function buildUpdateAgentConfig(agentId: string, config: FullAgentConfig) {
     type: AGENT_SAVED_OBJECT_TYPE,
     id: agentId,
     attributes: {
-      config_revision: config.revision,
+      policy_revision: agentPolicy.revision,
       packages,
     },
   };
