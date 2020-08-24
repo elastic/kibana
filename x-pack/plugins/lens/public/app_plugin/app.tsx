@@ -13,6 +13,7 @@ import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/
 import { History } from 'history';
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { Optional } from '@kbn/utility-types';
 import {
   Query,
   DataPublicPluginStart,
@@ -41,9 +42,12 @@ import {
   SavedQuery,
 } from '../../../../../src/plugins/data/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
-import { LensByValueInput } from '../editor_frame_service/embeddable/embeddable';
+import {
+  LensByValueInput,
+  LensEmbeddableInput,
+} from '../editor_frame_service/embeddable/embeddable';
 
-interface State {
+interface LensAppState {
   indicateNoData: boolean;
   isLoading: boolean;
   byValueMode: boolean;
@@ -52,6 +56,7 @@ interface State {
   originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
+  embeddableId?: string;
 
   // Properties needed to interface with TopNav
   dateRange: {
@@ -72,12 +77,8 @@ export interface LensAppProps {
   storage: IStorageWrapper;
   savedObjectId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (
-    savedObjectId?: string,
-    documentByValue?: Document,
-    returnToOrigin?: boolean,
-    newlyCreated?: boolean
-  ) => void;
+  redirectTo: (savedObjectId?: string) => void;
+  redirectToOrigin?: (input?: Optional<LensEmbeddableInput, 'id'>) => void;
   embeddableEditorIncomingState?: EmbeddableEditorState;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
@@ -93,6 +94,7 @@ export function App({
   savedObjectId,
   docStorage,
   redirectTo,
+  redirectToOrigin,
   embeddableEditorIncomingState,
   navigation,
   onAppLeave,
@@ -100,7 +102,7 @@ export function App({
   featureFlagConfig,
   getAppNameFromId,
 }: LensAppProps) {
-  const [state, setState] = useState<State>(() => {
+  const [state, setState] = useState<LensAppState>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       isLoading: !!savedObjectId || !!embeddableEditorIncomingState?.valueInput,
@@ -389,11 +391,14 @@ export function App({
     };
 
     const addedToLibrary = state.byValueMode && saveToLibrary;
+
     const newlyCreated =
       saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.byValueMode);
-    if (state.byValueMode && !saveToLibrary) {
-      await setState((s: State) => ({ ...s, persistedDoc: doc }));
-      redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, newlyCreated);
+
+    if (state.byValueMode && !saveToLibrary && redirectToOrigin) {
+      await setState((s: LensAppState) => ({ ...s, persistedDoc: doc }));
+      const { savedObjectId: id, type, ...attributes } = doc;
+      redirectToOrigin({ attributes });
     } else {
       await checkForDuplicateTitle(
         {
@@ -428,8 +433,10 @@ export function App({
             persistedDoc: newDoc,
             lastKnownDoc: newDoc,
           }));
-          if (savedObjectId !== newSavedObjectId || saveProps.returnToOrigin) {
-            redirectTo(newSavedObjectId, undefined, saveProps.returnToOrigin, newlyCreated);
+          if (saveProps.returnToOrigin && redirectToOrigin) {
+            redirectToOrigin(newlyCreated ? { savedObjectId: newSavedObjectId } : undefined);
+          } else if (savedObjectId !== newSavedObjectId) {
+            redirectTo(newSavedObjectId);
           }
         })
         .catch((e) => {
@@ -518,7 +525,9 @@ export function App({
                           defaultMessage: 'cancel',
                         }),
                         run: () => {
-                          redirectTo(undefined, undefined, true, false);
+                          if (redirectToOrigin) {
+                            redirectToOrigin();
+                          }
                         },
                         testId: 'lnsApp_cancelButton',
                       },

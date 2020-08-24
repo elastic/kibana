@@ -100,6 +100,7 @@ import {
   ACTION_ADD_TO_LIBRARY,
   AddToLibraryActionContext,
 } from './application/actions/add_to_library_action';
+import { AttributeServiceOptions } from './attribute_service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -152,7 +153,7 @@ export interface DashboardStart {
     R extends SavedObjectEmbeddableInput
   >(
     type: string,
-    customSaveMethod?: (attributes: A, savedObjectId?: string) => Promise<{ id: string }>
+    options?: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -459,7 +460,7 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type, customSaveMethod) =>
+      getAttributeService: (type, options) =>
         new AttributeService(
           type,
           core.savedObjects.client,
@@ -467,7 +468,7 @@ export class DashboardPlugin
           core.i18n.Context,
           core.notifications.toasts,
           embeddable.getEmbeddableFactory,
-          customSaveMethod
+          options
         ),
     };
   }

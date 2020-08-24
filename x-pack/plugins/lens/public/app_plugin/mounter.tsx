@@ -12,6 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
+import { Optional } from '@kbn/utility-types';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -19,9 +20,10 @@ import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_te
 import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { Document, SavedObjectIndexStore } from '../persistence';
+import { SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
+import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -49,36 +51,32 @@ export async function mountApp(
       http: core.http,
     })
   );
-  const redirectTo = (
-    routeProps: RouteComponentProps<{ id?: string }>,
-    savedObjectId?: string,
-    document?: Document,
-    returnToOrigin?: boolean,
-    newlyCreated?: boolean
-  ) => {
-    if (!savedObjectId && !newlyCreated && !returnToOrigin) {
+
+  const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
+    if (!savedObjectId) {
       routeProps.history.push('/');
-    } else if (savedObjectId && !embeddableEditorIncomingState?.originatingApp && !returnToOrigin) {
+    } else {
       routeProps.history.push(`/edit/${savedObjectId}`);
-    } else if (!!embeddableEditorIncomingState?.originatingApp && returnToOrigin) {
-      if (savedObjectId) {
-        routeProps.history.push(`/edit/${savedObjectId}`);
-      }
-      if (newlyCreated && stateTransfer) {
-        const input = savedObjectId ? { savedObjectId } : { attributes: document };
-        stateTransfer.navigateToWithEmbeddablePackage(
-          embeddableEditorIncomingState?.originatingApp,
-          {
-            state: {
-              embeddableId: embeddableEditorIncomingState.embeddableId,
-              type: LENS_EMBEDDABLE_TYPE,
-              input,
-            },
-          }
-        );
-      } else {
-        coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
-      }
+    }
+  };
+
+  const redirectToOrigin = (
+    routeProps: RouteComponentProps<{ id?: string }>,
+    input?: Optional<LensEmbeddableInput, 'id'>
+  ) => {
+    if (!embeddableEditorIncomingState?.originatingApp) {
+      throw new Error('redirectToOrigin called without an originating app');
+    }
+    if (stateTransfer && input) {
+      stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+        state: {
+          embeddableId: embeddableEditorIncomingState.embeddableId,
+          type: LENS_EMBEDDABLE_TYPE,
+          input,
+        },
+      });
+    } else {
+      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
     }
   };
 
@@ -95,8 +93,9 @@ export async function mountApp(
         savedObjectId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
         featureFlagConfig={featureFlagConfig}
-        redirectTo={(savedObjectId, documentByValue, returnToOrigin, newlyCreated) =>
-          redirectTo(routeProps, savedObjectId, documentByValue, returnToOrigin, newlyCreated)
+        redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
+        redirectToOrigin={(input?: Optional<LensEmbeddableInput, 'id'>) =>
+          redirectToOrigin(routeProps, input)
         }
         embeddableEditorIncomingState={embeddableEditorIncomingState}
         getAppNameFromId={stateTransfer?.getAppNameFromId}

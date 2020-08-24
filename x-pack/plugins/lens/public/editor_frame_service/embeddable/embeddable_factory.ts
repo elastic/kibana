@@ -102,13 +102,21 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         LensSavedObjectAttributes,
         LensByValueInput,
         LensByReferenceInput
-      >(this.type, async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
-        const savedDoc = await savedObjectStore.save({
-          ...attributes,
-          savedObjectId,
-          type: this.type,
-        });
-        return { id: savedDoc.savedObjectId };
+      >(this.type, {
+        customSaveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
+          const savedDoc = await savedObjectStore.save({
+            ...attributes,
+            savedObjectId,
+            type: this.type,
+          });
+          return { id: savedDoc.savedObjectId };
+        },
+        customUnwrapMethod: (savedObject) => {
+          return {
+            ...savedObject.attributes,
+            references: savedObject.references,
+          };
+        },
       });
     }
 

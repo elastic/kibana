@@ -27,6 +27,8 @@ import {
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
+import { Optional } from '@kbn/utility-types';
+import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
@@ -161,14 +163,8 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn(
-        (
-          savedObjectId?: string,
-          documentByValue?: Document,
-          returnToOrigin?: boolean,
-          newlyCreated?: boolean
-        ) => {}
-      ),
+      redirectTo: jest.fn((savedObjectId?: string) => {}),
+      redirectToOrigin: jest.fn((input?: Optional<LensEmbeddableInput, 'id'>) => {}),
       onAppLeave: jest.fn(),
       history: createMemoryHistory(),
       featureFlagConfig: { showNewLensFlow: true },
@@ -357,7 +353,7 @@ describe('Lens App', () => {
     ]);
   });
 
-  it.skip('sets originatingApp breadcrumb when the document title changes', async () => {
+  it('sets originatingApp breadcrumb when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
     defaultArgs.embeddableEditorIncomingState = { originatingApp: 'ultraCoolDashboard' };
     defaultArgs.getAppNameFromId = () => 'The Coolest Container Ever Made';
@@ -641,7 +637,7 @@ describe('Lens App', () => {
           })
         );
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
 
         inst.setProps({ savedObjectId: 'aaa' });
 
@@ -662,7 +658,7 @@ describe('Lens App', () => {
           })
         );
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
 
         inst.setProps({ savedObjectId: 'aaa' });
 
@@ -733,7 +729,7 @@ describe('Lens App', () => {
           })
         );
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true, true);
+        expect(args.redirectToOrigin).toHaveBeenCalledWith({ savedObjectId: 'aaa' });
       });
 
       it('saves app filters and does not save pinned filters', async () => {

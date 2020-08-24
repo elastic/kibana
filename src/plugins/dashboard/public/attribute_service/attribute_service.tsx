@@ -35,7 +35,6 @@ import {
   I18nStart,
   NotificationsStart,
   OverlayStart,
-  SavedObject,
 } from '../../../../core/public';
 import {
   SavedObjectSaveModal,
@@ -51,8 +50,13 @@ import {
  * can also be used as a higher level wrapper to transform an embeddable input shape that references a saved object
  * into an embeddable input shape that contains that saved object's attributes by value.
  */
+export interface AttributeServiceOptions<A extends { title: string }> {
+  customSaveMethod?: (attributes: A, savedObjectId?: string) => Promise<{ id: string }>;
+  customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
+}
+
 export class AttributeService<
-  SavedObjectAttributes extends { title: string; references?: SavedObject['references'] },
+  SavedObjectAttributes extends { title: string },
   ValType extends EmbeddableInput & {
     attributes: SavedObjectAttributes;
   },
@@ -67,10 +71,7 @@ export class AttributeService<
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
-    private customSaveMethod?: (
-      attributes: SavedObjectAttributes,
-      savedObjectId?: string
-    ) => Promise<{ id: string }>
+    private options?: AttributeServiceOptions<SavedObjectAttributes>
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
@@ -86,7 +87,9 @@ export class AttributeService<
       const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
         SavedObjectAttributes
       >(this.type, input.savedObjectId);
-      return { ...savedObject.attributes, references: savedObject.references };
+      return this.options?.customUnwrapMethod
+        ? this.options?.customUnwrapMethod(savedObject)
+        : { ...savedObject.attributes };
     }
     return input.attributes;
   }
@@ -105,12 +108,12 @@ export class AttributeService<
     } else {
       try {
         if (savedObjectId) {
-          if (this.customSaveMethod) await this.customSaveMethod(newAttributes);
+          if (this.options?.customSaveMethod) await this.options.customSaveMethod(newAttributes);
           else await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
           return { savedObjectId } as RefType;
         } else {
-          const savedItem = this.customSaveMethod
-            ? await this.customSaveMethod(newAttributes, savedObjectId)
+          const savedItem = this.options?.customSaveMethod
+            ? await this.options.customSaveMethod(newAttributes, savedObjectId)
             : await this.savedObjectsClient.create(this.type, newAttributes);
           return { savedObjectId: savedItem.id } as RefType;
         }
