@@ -5909,7 +5909,7 @@
     "xpack.canvas.pageConfig.transitionLabel": "トランジション",
     "xpack.canvas.pageConfig.transitionPreviewLabel": "プレビュー",
     "xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel": "なし",
-    "xpack.canvas.pageManager.pageNumberAriaLabel": "ページ {pageNumber} を読み込む",
+    "xpack.canvas.pagePreview.pageNumberAriaLabel": "ページ {pageNumber} を読み込む",
     "xpack.canvas.pagePreviewPageControls.clonePageAriaLabel": "ページのクローンを作成",
     "xpack.canvas.pagePreviewPageControls.clonePageTooltip": "クローンを作成",
     "xpack.canvas.pagePreviewPageControls.deletePageAriaLabel": "ページを削除",

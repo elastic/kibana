@@ -5911,7 +5911,7 @@
     "xpack.canvas.pageConfig.transitionLabel": "切换",
     "xpack.canvas.pageConfig.transitionPreviewLabel": "预览",
     "xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel": "无",
-    "xpack.canvas.pageManager.pageNumberAriaLabel": "加载页码 {pageNumber}",
+    "xpack.canvas.pagePreview.pageNumberAriaLabel": "加载页码 {pageNumber}",
     "xpack.canvas.pagePreviewPageControls.clonePageAriaLabel": "克隆页面",
     "xpack.canvas.pagePreviewPageControls.clonePageTooltip": "克隆",
     "xpack.canvas.pagePreviewPageControls.deletePageAriaLabel": "删除页面",
