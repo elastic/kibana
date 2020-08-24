@@ -21,7 +21,7 @@ export enum EnabledActionTypes {
   Any = '*',
 }
 
-enum AllowingField {
+enum AllowListingField {
   url = 'url',
   hostname = 'hostname',
 }
@@ -35,8 +35,8 @@ export interface ActionsConfigurationUtilities {
   ensureActionTypeEnabled: (actionType: string) => void;
 }
 
-function allowingErrorMessage(field: AllowingField, value: string) {
-  return i18n.translate('xpack.actions.urlallowedHostsConfigurationError', {
+function allowListErrorMessage(field: AllowListingField, value: string) {
+  return i18n.translate('xpack.actions.urlAllowedHostsConfigurationError', {
     defaultMessage:
       'target {field} "{value}" is not added to the Kibana config xpack.actions.allowedHosts',
     values: {
@@ -94,12 +94,12 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
-        throw new Error(allowingErrorMessage(AllowingField.url, uri));
+        throw new Error(allowListErrorMessage(AllowListingField.url, uri));
       }
     },
     ensureHostnameAllowed(hostname: string) {
       if (!isHostnameAllowed(hostname)) {
-        throw new Error(allowingErrorMessage(AllowingField.hostname, hostname));
+        throw new Error(allowListErrorMessage(AllowListingField.hostname, hostname));
       }
     },
     ensureActionTypeEnabled(actionType: string) {
