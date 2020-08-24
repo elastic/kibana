@@ -82,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.eql('realm');
     });
 
     describe('initiating SPNEGO', () => {
@@ -140,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: 'kerberos',
+            authentication_type: 'realm',
           });
       });
 

@@ -145,6 +145,7 @@ export default function ({ getService }) {
         'authentication_realm',
         'lookup_realm',
         'authentication_provider',
+        'authentication_type',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
     });
@@ -187,6 +188,7 @@ export default function ({ getService }) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
       });
