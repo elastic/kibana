@@ -4,28 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiEmptyPrompt, EuiButton, EuiLoadingContent } from '@elastic/eui';
-import { ErrorStatePrompt } from '../../../shared/error_state';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
-jest.mock('../../../shared/telemetry', () => ({
+jest.mock('../../../../shared/telemetry', () => ({
   sendTelemetry: jest.fn(),
   SendAppSearchTelemetry: jest.fn(),
 }));
-import { sendTelemetry } from '../../../shared/telemetry';
+import { sendTelemetry } from '../../../../shared/telemetry';
 
-import { ErrorState, EmptyState, LoadingState } from './';
-
-describe('ErrorState', () => {
-  it('renders', () => {
-    const wrapper = shallow(<ErrorState />);
-
-    expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
-  });
-});
+import { EmptyState } from './';
 
 describe('EmptyState', () => {
   it('renders', () => {
@@ -42,13 +33,5 @@ describe('EmptyState', () => {
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalled();
     (sendTelemetry as jest.Mock).mockClear();
-  });
-});
-
-describe('LoadingState', () => {
-  it('renders', () => {
-    const wrapper = shallow(<LoadingState />);
-
-    expect(wrapper.find(EuiLoadingContent)).toHaveLength(2);
   });
 });
