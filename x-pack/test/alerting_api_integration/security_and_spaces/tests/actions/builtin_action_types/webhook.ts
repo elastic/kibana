@@ -191,7 +191,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('ok');
     });
 
-    it('should handle target webhooks that are not whitelisted', async () => {
+    it('should handle target webhooks that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
@@ -203,13 +203,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             password: 'mypassphrase',
           },
           config: {
-            url: 'http://a.none.whitelisted.webhook/endpoint',
+            url: 'http://a.none.allowedHosts.webhook/endpoint',
           },
         })
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/is not whitelisted in the Kibana config/);
+      expect(result.message).to.match(/is not added to the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {

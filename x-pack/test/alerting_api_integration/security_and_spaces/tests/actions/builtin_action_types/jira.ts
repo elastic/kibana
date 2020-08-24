@@ -176,7 +176,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a jira action with a non whitelisted apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -196,7 +196,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });

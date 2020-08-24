@@ -4600,7 +4600,7 @@
     "xpack.actions.serverSideErrors.predefinedActionUpdateDisabled": "不允许更新预配置的操作 {id}。",
     "xpack.actions.serverSideErrors.unavailableLicenseErrorMessage": "操作类型 {actionTypeId} 已禁用，因为许可证信息当前不可用。",
     "xpack.actions.serverSideErrors.unavailableLicenseInformationErrorMessage": "操作不可用 - 许可信息当前不可用。",
-    "xpack.actions.urlWhitelistConfigurationError": "目标 {field}“{value}”在 Kibana 配置 xpack.actions.whitelistedHosts 中未列入白名单",
+    "xpack.actions.urlAllowedHostsConfigurationError": "目标 {field}“{value}”在 Kibana 配置 xpack.actions.allowedHosts 中未列入白名单",
     "xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle": "阈值已达到",
     "xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel": "告警超过阈值的日期。",
     "xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel": "超过阈值的组。",

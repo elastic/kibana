@@ -4599,7 +4599,7 @@
     "xpack.actions.serverSideErrors.predefinedActionUpdateDisabled": "あらかじめ構成されたアクション{id}は更新できません。",
     "xpack.actions.serverSideErrors.unavailableLicenseErrorMessage": "現時点でライセンス情報を入手できないため、アクションタイプ {actionTypeId} は無効です。",
     "xpack.actions.serverSideErrors.unavailableLicenseInformationErrorMessage": "グラフを利用できません。現在ライセンス情報が利用できません。",
-    "xpack.actions.urlWhitelistConfigurationError": "target {field} \"{value}\" は Kibana 構成 xpack.actions.whitelistedHosts にはホワイトリスト化されていません。",
+    "xpack.actions.urlAllowedHostsConfigurationError": "target {field} \"{value}\" は Kibana 構成 xpack.actions.allowedHosts にはホワイトリスト化されていません。",
     "xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle": "しきい値一致",
     "xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel": "アラートがしきい値を超えた日付。",
     "xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel": "しきい値を超えたグループ。",

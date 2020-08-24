@@ -94,7 +94,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should respond with a 400 Bad Request when creating a slack action with a non whitelisted webhookUrl', async () => {
+    it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
       await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
@@ -111,7 +111,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });
