@@ -326,6 +326,9 @@ export function XYChart({
     );
   };
 
+  const VALUE_LABELS_ARE_INSIDE = displayValues?.position === 'inside';
+  const VALUE_LABELS_FONTSIZE = displayValues.fontSize || 10;
+
   return (
     <Chart>
       <Settings
@@ -339,19 +342,34 @@ export function XYChart({
         theme={{
           ...chartTheme,
           ...{
+            chartMargins: {
+              ...chartTheme.chartMargins,
+              ...(!VALUE_LABELS_ARE_INSIDE && {
+                top: shouldRotate ? chartTheme.chartMargins?.top : VALUE_LABELS_FONTSIZE,
+                right: shouldRotate ? 1.5 * VALUE_LABELS_FONTSIZE : chartTheme.chartMargins?.right,
+              }),
+            },
             barSeriesStyle: {
               ...chartTheme.barSeriesStyle,
               displayValue: {
                 ...chartTheme.axes?.tickLabelStyle,
-                fontSize: displayValues.fontSize,
-                fill: displayValues.position === 'inside' ? 'white' : 'black',
-                offsetX: shouldRotate ? (displayValues.position === 'inside' ? +5 : -15) : 0,
-                offsetY: shouldRotate ? 0 : displayValues.position === 'inside' ? -5 : +10,
+                fontSize: VALUE_LABELS_FONTSIZE,
+                fill: VALUE_LABELS_ARE_INSIDE ? 'white' : 'black',
+                offsetX: shouldRotate
+                  ? VALUE_LABELS_ARE_INSIDE
+                    ? VALUE_LABELS_FONTSIZE
+                    : -(2 * VALUE_LABELS_FONTSIZE)
+                  : 0,
+                offsetY: shouldRotate
+                  ? 0
+                  : VALUE_LABELS_ARE_INSIDE
+                  ? -VALUE_LABELS_FONTSIZE
+                  : VALUE_LABELS_FONTSIZE,
               },
             },
           },
         }}
-        baseTheme={chartBaseTheme}
+        // baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => xAxisFormatter.convert(d.value),
         }}
@@ -562,8 +580,8 @@ export function XYChart({
                   valueFormatter: (d: any): string => associatedAxes?.formatter.convert(d) || '',
                   showValueLabel: shouldShowValueLabel,
                   isAlternatingValueLabel: false,
-                  isValueContainedInElement: true,
-                  hideClippedValue: true,
+                  isValueContainedInElement: VALUE_LABELS_ARE_INSIDE,
+                  hideClippedValue: VALUE_LABELS_ARE_INSIDE,
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;

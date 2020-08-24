@@ -30,6 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumberProps } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
   VisualizationDimensionEditorProps,
@@ -267,9 +268,32 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
-  const shouldEnableValueLabels = state?.layers.some((layer) => layer.seriesType.includes('bar'));
+  const isBarChartType = state?.layers.some((layer) => layer.seriesType.includes('bar'));
+  const isHistogram = state?.layers.every((layer) => {
+    if (!layer.xAccessor) {
+      return false;
+    }
+    const xAxisOperation = frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(
+      layer.xAccessor
+    );
+    return Boolean(
+      xAxisOperation &&
+        xAxisOperation.isBucketed &&
+        xAxisOperation.scale &&
+        xAxisOperation.scale !== 'ordinal'
+    );
+  });
+  const shouldEnableValueLabels = isBarChartType && !isHistogram;
   const showValueLabels = Boolean(shouldEnableValueLabels && state?.displayValues?.showLabels);
   const valueLabelsPositioning = state?.displayValues?.position || 'inside';
+
+  const valueLabelsDisabledMessage = isHistogram
+    ? i18n.translate('xpack.lens.xyChart.valueLabelsDisabledHelpText.histogram', {
+        defaultMessage: 'This setting only applies to non-time related bar charts.',
+      })
+    : i18n.translate('xpack.lens.xyChart.valueLabelsDisabledHelpText.nonBarTypes', {
+        defaultMessage: 'This setting only applies to bar type of charts.',
+      });
 
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
@@ -408,16 +432,21 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               defaultMessage: 'Value Labels Display',
             })}
           >
-            <EuiSwitch
-              data-test-subj="lnsshowShowValueLabelsSwitch"
-              showLabel={false}
-              label={i18n.translate('xpack.lens.xyChart.valueLabels.showlabels', {
-                defaultMessage: 'Value Labels Display',
-              })}
-              onChange={({ target }) => onValueDisplayVisibilitySettingsChange(target.checked)}
-              checked={showValueLabels}
-              disabled={!shouldEnableValueLabels}
-            />
+            <EuiToolTip
+              anchorClassName="eui-displayBlock"
+              content={!shouldEnableValueLabels && valueLabelsDisabledMessage}
+            >
+              <EuiSwitch
+                data-test-subj="lnsshowShowValueLabelsSwitch"
+                showLabel={false}
+                label={i18n.translate('xpack.lens.xyChart.valueLabels.showlabels', {
+                  defaultMessage: 'Value Labels Display',
+                })}
+                onChange={({ target }) => onValueDisplayVisibilitySettingsChange(target.checked)}
+                checked={showValueLabels}
+                disabled={!shouldEnableValueLabels}
+              />
+            </EuiToolTip>
           </EuiFormRow>
           <EuiFormRow
             display="columnCompressed"
@@ -426,20 +455,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               defaultMessage: 'Value Labels size',
             })}
           >
-            <EuiFieldNumber
-              value={state?.displayValues?.fontSize || 10}
-              onChange={({ target }) =>
-                setState({
-                  ...state,
-                  displayValues: {
-                    ...state.displayValues,
-                    showLabels: true,
-                    fontSize: Number(target.value),
-                  },
-                })
-              }
-              disabled={!shouldEnableValueLabels}
-            />
+            <ValueLabelFontSizeInput {...props} disabled={!shouldEnableValueLabels} />
           </EuiFormRow>
           <EuiFormRow
             display="columnCompressed"
@@ -598,9 +614,6 @@ const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
   const { state, setState, layerId, accessor } = props;
-  // const horizontalOnly = isHorizontalChart(state.layers);
-  // const chartHasMoreThanOneSeries =
-  // state.layers.length > 1 || state.layers.some(({ splitAccessor }) => splitAccessor);
   const shouldEnableValueLabels = state?.layers.some((layer) => layer.seriesType.includes('bar'));
 
   const index = state.layers.findIndex((l) => l.layerId === layerId);
@@ -717,6 +730,38 @@ const tooltipContent = {
     defaultMessage:
       'Individual series cannot be custom colored when the layer includes a “Break down by.“',
   }),
+};
+
+const ValueLabelFontSizeInput = ({
+  state,
+  setState,
+  disabled,
+}: VisualizationToolbarProps<State> & { disabled: boolean }) => {
+  const [fontSize, setFontSize] = useState(state?.displayValues?.fontSize || 10);
+
+  const updateFontSizeInState = React.useMemo(
+    () =>
+      debounce((value: string) => {
+        setState({
+          ...state,
+          displayValues: {
+            ...state.displayValues,
+            showLabels: true,
+            fontSize: Number(value),
+          },
+        });
+      }, 256),
+    [state, setState]
+  );
+
+  const handleFontSize: EuiFieldNumberProps['onChange'] = ({ target }) => {
+    setFontSize(Number(target.value));
+    if (!Number.isNaN(target.value) || target.value !== '') {
+      updateFontSizeInState(target.value);
+    }
+  };
+
+  return <EuiFieldNumber value={fontSize} onChange={handleFontSize} disabled={disabled} />;
 };
 
 const ColorPicker = ({
