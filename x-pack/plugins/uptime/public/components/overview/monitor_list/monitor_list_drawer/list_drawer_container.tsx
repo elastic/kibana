@@ -32,7 +32,7 @@ export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
 
   const dispatch = useDispatch();
 
-  const { data: alerts } = useSelector(alertsSelector);
+  const { data: alerts, loading: alertsLoading } = useSelector(alertsSelector);
 
   const hasAlert = (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
 
@@ -49,7 +49,7 @@ export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
     <MonitorListDrawerComponent
       monitorDetails={monitorDetails}
       summary={summary}
-      loading={isLoading}
+      loading={isLoading || alertsLoading}
     />
   );
 };

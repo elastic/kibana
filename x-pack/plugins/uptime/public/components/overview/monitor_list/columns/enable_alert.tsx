@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../../../../state/selectors';
@@ -19,7 +19,12 @@ import {
 } from '../../../../state/alerts/alerts';
 import { MONITOR_ROUTE } from '../../../../../common/constants';
 import { DefineAlertConnectors } from './define_connectors';
-import { DISABLE_DOWN_ALERT, ENABLE_DOWN_ALERT } from './translations';
+import {
+  DISABLE_LABEL,
+  DISABLE_STATUS_ALERT,
+  ENABLE_LABEL,
+  ENABLE_STATUS_ALERT,
+} from './translations';
 
 interface Props {
   monitorId: string;
@@ -90,7 +95,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
       enableAlert();
     }
   };
-  const btnLabel = hasAlert ? DISABLE_DOWN_ALERT : ENABLE_DOWN_ALERT;
+  const btnLabel = hasAlert ? DISABLE_STATUS_ALERT : ENABLE_STATUS_ALERT;
 
   const MonitorPageAlertBtn = (
     <EuiButtonEmpty
@@ -110,17 +115,18 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
         <EuiLoadingSpinner />
       ) : (
         <EuiToolTip content={btnLabel}>
-          <EuiButtonIcon
+          <EuiButtonEmpty
             aria-label={btnLabel}
             onClick={onAlertClick}
             iconType={hasAlert ? 'bellSlash' : 'bell'}
-            size="m"
             data-test-subj={
               hasAlert
                 ? 'uptimeDisableSimpleDownAlert' + monitorId
                 : 'uptimeEnableSimpleDownAlert' + monitorId
             }
-          />
+          >
+            {hasAlert ? DISABLE_LABEL : ENABLE_LABEL}
+          </EuiButtonEmpty>
         </EuiToolTip>
       )}
     </div>

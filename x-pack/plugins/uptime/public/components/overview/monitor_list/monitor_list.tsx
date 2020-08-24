@@ -143,19 +143,15 @@ export const MonitorListComponent: ({
       ),
     },
     {
-      name: 'Actions',
-      width: '100px',
-      actions: [
-        {
-          name: 'Alert',
-          render: (item: MonitorSummary) => (
-            <EnableMonitorAlert
-              monitorId={item.monitor_id}
-              monitorName={item.state.monitor.name || item.monitor_id}
-            />
-          ),
-        },
-      ],
+      align: 'center' as const,
+      field: '',
+      name: 'Status alert',
+      render: (item: MonitorSummary) => (
+        <EnableMonitorAlert
+          monitorId={item.monitor_id}
+          monitorName={item.state.monitor.name || item.monitor_id}
+        />
+      ),
     },
     {
       align: 'right' as const,
