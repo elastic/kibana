@@ -315,11 +315,11 @@ describe('Lens App', () => {
     (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
       id: '1234',
       title: 'Daaaaaaadaumching!',
-      expression: 'valid expression',
       state: {
         query: 'fake query',
-        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        filters: [],
       },
+      references: [],
     });
     await act(async () => {
       instance.setProps({ docId: '1234' });
