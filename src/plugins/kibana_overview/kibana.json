@@ -5,5 +5,4 @@
   "ui": true,
   "requiredPlugins": ["navigation","data"],
   "optionalPlugins": ["home"],
-  "requiredBundles": ["home"]
 }
