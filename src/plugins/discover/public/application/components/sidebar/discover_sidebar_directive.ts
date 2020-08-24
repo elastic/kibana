@@ -29,6 +29,5 @@ export function createDiscoverSidebarDirective(reactDirective: any) {
     ['onRemoveField', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
-    ['state', { watchDepth: 'reference' }],
   ]);
 }
