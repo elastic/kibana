@@ -25,17 +25,16 @@ function FilterBadgeList({ onRemove, value }: Props) {
     <EuiFlexGrid gutterSize="s">
       {value.map((val) => (
         <EuiFlexItem key={val} grow={false}>
-          <button
-            type="button"
+          <EuiBadge
+            color="hollow"
             onClick={() => {
               onRemove(val);
             }}
+            onClickAriaLabel="Remove filter"
           >
-            <EuiBadge color="hollow">
-              <BadgeText>{val}</BadgeText>
-              <EuiIcon type="cross" />
-            </EuiBadge>
-          </button>
+            <BadgeText>{val}</BadgeText>
+            <EuiIcon type="cross" />
+          </EuiBadge>
         </EuiFlexItem>
       ))}
     </EuiFlexGrid>
