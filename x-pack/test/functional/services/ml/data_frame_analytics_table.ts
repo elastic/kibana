@@ -109,12 +109,19 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string) {
+    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
       await this.waitForAnalyticsToLoad();
       const searchBarInput = await this.getAnalyticsSearchInput();
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
       await this.assertAnalyticsSearchInputValue(filter);
+
+      const rows = await this.parseAnalyticsTable();
+      const filteredRows = rows.filter((row) => row.id === filter);
+      expect(filteredRows).to.have.length(
+        expectedRowCount,
+        `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+      );
     }
 
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {

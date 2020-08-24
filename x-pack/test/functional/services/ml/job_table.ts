@@ -158,12 +158,19 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string) {
+    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
       await this.waitForJobsToLoad();
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+
+      const rows = await this.parseJobTable();
+      const filteredRows = rows.filter((row) => row.id === filter);
+      expect(filteredRows).to.have.length(
+        expectedRowCount,
+        `Filtered AD job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+      );
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
