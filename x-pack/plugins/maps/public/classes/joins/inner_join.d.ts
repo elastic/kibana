@@ -17,4 +17,6 @@ export class InnerJoin implements IJoin {
   toDescriptor(): JoinDescriptor;
 
   getSourceMetaDataRequestId(): string;
+
+  getSourceFormattersDataRequestId(): string;
 }

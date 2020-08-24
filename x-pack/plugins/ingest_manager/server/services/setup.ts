@@ -26,116 +26,101 @@ import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
+import { awaitIfPending } from './setup_utils';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
-// the promise which tracks the setup
-let setupIngestStatus: Promise<void> | undefined;
-// default resolve & reject to guard against "undefined is not a function" errors
-let onSetupResolve = () => {};
-let onSetupReject = (error: Error) => {};
+export interface SetupStatus {
+  isIntialized: true | undefined;
+}
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
-) {
-  // installation in progress
-  if (setupIngestStatus) {
-    await setupIngestStatus;
-  } else {
-    // create the initial promise
-    setupIngestStatus = new Promise((res, rej) => {
-      onSetupResolve = res;
-      onSetupReject = rej;
-    });
+): Promise<SetupStatus> {
+  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+}
+
+async function createSetupSideEffects(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<SetupStatus> {
+  const [installedPackages, defaultOutput, defaultAgentPolicy] = await Promise.all([
+    // packages installed by default
+    ensureInstalledDefaultPackages(soClient, callCluster),
+    outputService.ensureDefaultOutput(soClient),
+    agentPolicyService.ensureDefaultAgentPolicy(soClient),
+    ensureDefaultIndices(callCluster),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        const http = appContextService.getHttpSetup();
+        const serverInfo = http.getServerInfo();
+        const basePath = http.basePath;
+
+        const cloud = appContextService.getCloud();
+        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+        const defaultUrl = url.format({
+          protocol: serverInfo.protocol,
+          hostname: serverInfo.hostname,
+          port: serverInfo.port,
+          pathname: basePath.serverBasePath,
+        });
+
+        return settingsService.saveSettings(soClient, {
+          agent_auto_upgrade: true,
+          package_auto_upgrade: true,
+          kibana_url: cloudUrl || flagsUrl || defaultUrl,
+        });
+      }
+
+      return Promise.reject(e);
+    }),
+  ]);
+
+  // ensure default packages are added to the default conifg
+  const agentPolicyWithPackagePolicies = await agentPolicyService.get(
+    soClient,
+    defaultAgentPolicy.id,
+    true
+  );
+  if (!agentPolicyWithPackagePolicies) {
+    throw new Error('Policy not found');
   }
-  try {
-    const [installedPackages, defaultOutput, defaultAgentPolicy] = await Promise.all([
-      // packages installed by default
-      ensureInstalledDefaultPackages(soClient, callCluster),
-      outputService.ensureDefaultOutput(soClient),
-      agentPolicyService.ensureDefaultAgentPolicy(soClient),
-      ensureDefaultIndices(callCluster),
-      settingsService.getSettings(soClient).catch((e: any) => {
-        if (e.isBoom && e.output.statusCode === 404) {
-          const http = appContextService.getHttpSetup();
-          const serverInfo = http.getServerInfo();
-          const basePath = http.basePath;
-
-          const cloud = appContextService.getCloud();
-          const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-          const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-          const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
-          const defaultUrl = url.format({
-            protocol: serverInfo.protocol,
-            hostname: serverInfo.hostname,
-            port: serverInfo.port,
-            pathname: basePath.serverBasePath,
-          });
-
-          return settingsService.saveSettings(soClient, {
-            agent_auto_upgrade: true,
-            package_auto_upgrade: true,
-            kibana_url: cloudUrl || flagsUrl || defaultUrl,
-          });
-        }
-
-        return Promise.reject(e);
-      }),
-    ]);
-
-    // ensure default packages are added to the default conifg
-    const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-      soClient,
-      defaultAgentPolicy.id,
-      true
+  if (
+    agentPolicyWithPackagePolicies.package_policies.length &&
+    typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
+  ) {
+    throw new Error('Policy not found');
+  }
+  for (const installedPackage of installedPackages) {
+    const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
+      (packageName) => installedPackage.name === packageName
     );
-    if (!agentPolicyWithPackagePolicies) {
-      throw new Error('Policy not found');
+    if (!packageShouldBeInstalled) {
+      continue;
     }
-    if (
-      agentPolicyWithPackagePolicies.package_policies.length &&
-      typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
-    ) {
-      throw new Error('Policy not found');
-    }
-    for (const installedPackage of installedPackages) {
-      const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
-        (packageName) => installedPackage.name === packageName
-      );
-      if (!packageShouldBeInstalled) {
-        continue;
+
+    const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
+      (d: PackagePolicy | string) => {
+        return typeof d !== 'string' && d.package?.name === installedPackage.name;
       }
+    );
 
-      const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
-        (d: PackagePolicy | string) => {
-          return typeof d !== 'string' && d.package?.name === installedPackage.name;
-        }
+    if (!isInstalled) {
+      await addPackageToAgentPolicy(
+        soClient,
+        callCluster,
+        installedPackage,
+        agentPolicyWithPackagePolicies,
+        defaultOutput
       );
-
-      if (!isInstalled) {
-        await addPackageToAgentPolicy(
-          soClient,
-          callCluster,
-          installedPackage,
-          agentPolicyWithPackagePolicies,
-          defaultOutput
-        );
-      }
     }
-
-    // if everything works, resolve/succeed
-    onSetupResolve();
-  } catch (error) {
-    // if anything errors, reject/fail
-    onSetupReject(error);
   }
 
-  // be sure to return the promise because it has the resolved/rejected status attached to it
-  // otherwise, we effectively return success every time even if there are errors
-  // because `return undefined` -> `Promise.resolve(undefined)` in an `async` function
-  return setupIngestStatus;
+  return { isIntialized: true };
 }
 
 export async function setupFleet(
