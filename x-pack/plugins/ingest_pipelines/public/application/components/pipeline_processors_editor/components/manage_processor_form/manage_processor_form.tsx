@@ -24,10 +24,12 @@ import {
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
+import { useTestPipelineContext } from '../../context';
 import { getProcessorDescriptor } from '../shared';
 
 import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
+import { ProcessorOutput } from './processor_output';
 
 export interface Props {
   isOnFailure: boolean;
@@ -53,7 +55,7 @@ const cancelButtonLabel = i18n.translate(
   { defaultMessage: 'Cancel' }
 );
 
-export type TabType = 'configuration';
+export type TabType = 'configuration' | 'output';
 
 interface Tab {
   id: TabType;
@@ -69,6 +71,12 @@ const tabs: Tab[] = [
         defaultMessage: 'Configuration',
       }
     ),
+  },
+  {
+    id: 'output',
+    name: i18n.translate('xpack.ingestPipelines.settingsFormOnFailureFlyout.outputTabTitle', {
+      defaultMessage: 'Output',
+    }),
   },
 ];
 
@@ -102,6 +110,28 @@ const getFlyoutTitle = (isOnFailure: boolean, isExistingProcessor: boolean) => {
 
 export const ManageProcessorForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
+    const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+    const {
+      testOutputPerProcessor,
+      config: { selectedDocumentIndex, documents },
+    } = testPipelineData;
+
+    const processorOutput =
+      processor &&
+      testOutputPerProcessor &&
+      testOutputPerProcessor[selectedDocumentIndex][processor.id];
+
+    const updateSelectedDocument = (index: number) => {
+      setCurrentTestPipelineData({
+        type: 'updateActiveDocument',
+        payload: {
+          config: {
+            selectedDocumentIndex: index,
+          },
+        },
+      });
+    };
+
     useEffect(
       () => {
         onOpen();
@@ -111,7 +141,20 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
 
     const [activeTab, setActiveTab] = useState<TabType>('configuration');
 
-    const flyoutContent = <ProcessorSettingsFields processor={processor} />;
+    let flyoutContent: React.ReactNode;
+
+    if (activeTab === 'output') {
+      flyoutContent = (
+        <ProcessorOutput
+          processorOutput={processorOutput}
+          documents={documents!}
+          selectedDocumentIndex={selectedDocumentIndex}
+          updateSelectedDocument={updateSelectedDocument}
+        />
+      );
+    } else {
+      flyoutContent = <ProcessorSettingsFields processor={processor} />;
+    }
 
     return (
       <Form data-test-subj="processorSettingsForm" form={form}>
@@ -156,6 +199,10 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
                       isSelected={tab.id === activeTab}
                       key={tab.id}
                       data-test-subj={`${tab.id}Tab`}
+                      disabled={
+                        (tab.id === 'output' && Boolean(testOutputPerProcessor) === false) ||
+                        Boolean(processorOutput) === false
+                      }
                     >
                       {tab.name}
                     </EuiTab>

@@ -22,6 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
+import type { TimeRange, Query, Filter } from '../../../../data/common';
 
 export interface EmbeddableError {
   name: string;
@@ -55,7 +56,20 @@ export interface EmbeddableInput {
    */
   disableTriggers?: boolean;
 
-  [key: string]: unknown;
+  /**
+   * Time range of the chart.
+   */
+  timeRange?: TimeRange;
+
+  /**
+   * Visualization query string used to narrow down results.
+   */
+  query?: Query;
+
+  /**
+   * Visualization filters used to narrow down results.
+   */
+  filters?: Filter[];
 }
 
 export interface EmbeddableOutput {

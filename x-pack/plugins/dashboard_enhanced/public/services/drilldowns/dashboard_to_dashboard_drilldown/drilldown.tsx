@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
 import {
   DashboardUrlGenerator,
   DashboardUrlGeneratorState,
@@ -23,7 +24,8 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public';
 import { StartDependencies } from '../../../plugin';
-import { Config } from './types';
+import { Config, FactoryContext } from './types';
+import { SearchInput } from '../../../../../../../src/plugins/discover/public';
 
 export interface Params {
   start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
@@ -31,7 +33,7 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, ApplyGlobalFilterActionContext> {
+  implements Drilldown<Config, typeof APPLY_FILTER_TRIGGER, FactoryContext> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
@@ -59,6 +61,10 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
+  public supportedTriggers(): Array<typeof APPLY_FILTER_TRIGGER> {
+    return [APPLY_FILTER_TRIGGER];
+  }
+
   public readonly getHref = async (
     config: Config,
     context: ApplyGlobalFilterActionContext
@@ -84,7 +90,7 @@ export class DashboardToDashboardDrilldown
     };
 
     if (context.embeddable) {
-      const input = context.embeddable.getInput();
+      const input = context.embeddable.getInput() as Readonly<SearchInput>;
       if (isQuery(input.query) && config.useCurrentFilters) state.query = input.query;
 
       // if useCurrentDashboardDataRange is enabled, then preserve current time range

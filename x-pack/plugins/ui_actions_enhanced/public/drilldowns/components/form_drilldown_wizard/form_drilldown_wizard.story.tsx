@@ -7,13 +7,25 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { FormDrilldownWizard } from './index';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+
+const otherProps = {
+  supportedTriggers: [
+    'VALUE_CLICK_TRIGGER',
+    'SELECT_RANGE_TRIGGER',
+    'FILTER_TRIGGER',
+  ] as TriggerId[],
+  getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
+  onSelectedTriggersChange: () => {},
+  actionFactoryContext: { triggers: [] as TriggerId[] },
+};
 
 const DemoEditName: React.FC = () => {
   const [name, setName] = React.useState('');
 
   return (
     <>
-      <FormDrilldownWizard name={name} onNameChange={setName} actionFactoryContext={{}} />{' '}
+      <FormDrilldownWizard name={name} onNameChange={setName} {...otherProps} />{' '}
       <div>name: {name}</div>
     </>
   );
@@ -21,9 +33,9 @@ const DemoEditName: React.FC = () => {
 
 storiesOf('components/FormDrilldownWizard', module)
   .add('default', () => {
-    return <FormDrilldownWizard actionFactoryContext={{}} />;
+    return <FormDrilldownWizard {...otherProps} />;
   })
   .add('[name=foobar]', () => {
-    return <FormDrilldownWizard name={'foobar'} actionFactoryContext={{}} />;
+    return <FormDrilldownWizard name={'foobar'} {...otherProps} />;
   })
   .add('can edit name', () => <DemoEditName />);

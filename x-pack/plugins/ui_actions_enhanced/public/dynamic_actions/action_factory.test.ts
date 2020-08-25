@@ -19,12 +19,13 @@ const def: ActionFactoryDefinition = {
     getDisplayName: () => name,
     enhancements: {},
   }),
+  supportedTriggers: () => [],
 };
 
 describe('License & ActionFactory', () => {
   test('no license requirements', async () => {
     const factory = new ActionFactory(def, () => licensingMock.createLicense());
-    expect(await factory.isCompatible({})).toBe(true);
+    expect(await factory.isCompatible({ triggers: [] })).toBe(true);
     expect(factory.isCompatibleLicence()).toBe(true);
   });
 
@@ -32,7 +33,15 @@ describe('License & ActionFactory', () => {
     const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
       licensingMock.createLicense()
     );
-    expect(await factory.isCompatible({})).toBe(true);
+    expect(await factory.isCompatible({ triggers: [] })).toBe(true);
+    expect(factory.isCompatibleLicence()).toBe(false);
+  });
+
+  test('licence has expired', async () => {
+    const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
+      licensingMock.createLicense({ license: { type: 'gold', status: 'expired' } })
+    );
+    expect(await factory.isCompatible({ triggers: [] })).toBe(true);
     expect(factory.isCompatibleLicence()).toBe(false);
   });
 
@@ -40,7 +49,7 @@ describe('License & ActionFactory', () => {
     const factory = new ActionFactory({ ...def, minimalLicense: 'gold' }, () =>
       licensingMock.createLicense({ license: { type: 'gold' } })
     );
-    expect(await factory.isCompatible({})).toBe(true);
+    expect(await factory.isCompatible({ triggers: [] })).toBe(true);
     expect(factory.isCompatibleLicence()).toBe(true);
   });
 });

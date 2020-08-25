@@ -360,9 +360,11 @@ export {
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
-  SearchResponse,
   SearchSourceFields,
   SortDirection,
+  // expression functions and types
+  EsdslExpressionFunctionDefinition,
+  EsRawResponseExpressionTypeDefinition,
 } from './search';
 
 // Search namespace

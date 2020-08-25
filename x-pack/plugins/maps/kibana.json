@@ -4,7 +4,6 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
-    "alerts",
     "licensing",
     "features",
     "inspector",
@@ -17,7 +16,7 @@
     "embeddable",
     "mapsLegacy",
     "usageCollection",
-    "triggers_actions_ui"
+    "share"
   ],
   "ui": true,
   "server": true,
