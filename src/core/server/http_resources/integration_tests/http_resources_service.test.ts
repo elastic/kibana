@@ -17,7 +17,7 @@
  * under the License.
  */
 import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('http resources service', () => {
   describe('register', () => {

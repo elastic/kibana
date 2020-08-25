@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { setup } from '../../../../test_utils/public/http_test_setup';
+import { setup } from '../../../../core/test_helpers/http_test_setup';
 
 jest.doMock('ui/new_platform', () => ({
   npSetup: {

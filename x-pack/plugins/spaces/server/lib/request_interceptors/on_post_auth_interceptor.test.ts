@@ -20,7 +20,7 @@ import {
   loggingSystemMock,
   coreMock,
 } from '../../../../../../src/core/server/mocks';
-import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
+import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
 import { SpacesService } from '../../spaces_service';
 import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
 const { startES } = kbnTestServer.createTestServers({

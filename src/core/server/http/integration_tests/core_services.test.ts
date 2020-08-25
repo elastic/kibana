@@ -30,7 +30,7 @@ import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
 
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { InternalElasticsearchServiceStart } from '../../elasticsearch';
 
 interface User {
