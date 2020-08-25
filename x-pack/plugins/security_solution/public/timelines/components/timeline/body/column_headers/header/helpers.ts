@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { Direction } from '../../../../../../graphql/types';
-import { assertUnreachable } from '../../../../../../common/lib/helpers';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { Sort, SortDirection } from '../../sort';
 
