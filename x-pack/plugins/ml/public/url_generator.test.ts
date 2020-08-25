@@ -159,13 +159,13 @@ describe('MlUrlGenerator', () => {
     describe('JobManagement Page', () => {
       it('should generate valid URL for the Data Frame Analytics job management page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.DATA_FRAME_ANALYTICS,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
         });
         expect(url).toBe('/app/ml/data_frame_analytics');
       });
       it('should generate valid URL for the Data Frame Analytics job management page with jobId', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.DATA_FRAME_ANALYTICS,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
           jobId: 'grid_regression_1',
         });
         expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(jobId:grid_regression_1)');
@@ -173,7 +173,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Data Frame Analytics job management page with groupIds', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.DATA_FRAME_ANALYTICS,
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
           groupIds: ['group_1', 'group_2'],
         });
         expect(url).toBe('/app/ml/data_frame_analytics?mlManagement=(groupIds:!(group_1,group_2))');

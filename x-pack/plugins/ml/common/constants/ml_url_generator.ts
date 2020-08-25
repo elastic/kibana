@@ -10,7 +10,7 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_JOBS_MANAGE: 'jobs',
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
-  DATA_FRAME_ANALYTICS: 'data_frame_analytics',
+  DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   /**
    * Page: Data Visualizer

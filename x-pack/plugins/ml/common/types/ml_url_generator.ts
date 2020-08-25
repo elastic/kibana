@@ -137,7 +137,7 @@ export interface DataFrameAnalyticsQueryState {
 }
 
 export interface DataFrameAnalyticsUrlState extends DataFrameAnalyticsQueryState {
-  page: typeof ML_PAGES.DATA_FRAME_ANALYTICS;
+  page: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
 }
 
 export interface DataVisualizerUrlState {

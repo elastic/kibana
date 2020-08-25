@@ -18,7 +18,7 @@ export const BackToListPanel: FC = () => {
   } = useMlKibana();
 
   const redirectToAnalyticsManagementPage = async () => {
-    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS });
+    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
     await navigateToUrl(url);
   };
 

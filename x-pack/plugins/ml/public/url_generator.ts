@@ -58,7 +58,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return this.createExplorerUrl(mlUrlGeneratorState as ExplorerUrlState);
       case ML_PAGES.SINGLE_METRIC_VIEWER:
         return this.createSingleMetricViewerUrl(mlUrlGeneratorState as TimeSeriesExplorerUrlState);
-      case ML_PAGES.DATA_FRAME_ANALYTICS:
+      case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
         return this.createDataframeAnalyticsUrl(mlUrlGeneratorState as DataFrameAnalyticsUrlState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return this.createDataframeAnalyticsExplorationUrl(
@@ -245,7 +245,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
    * Creates URL to the DataFrameAnalytics page
    */
   private createDataframeAnalyticsUrl(mlUrlGeneratorState: DataFrameAnalyticsUrlState): string {
-    let url = `${this.params.appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS}`;
+    let url = `${this.params.appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`;
     const { params } = MlUrlGenerator.extractParams<DataFrameAnalyticsUrlState>(
       mlUrlGeneratorState
     );
