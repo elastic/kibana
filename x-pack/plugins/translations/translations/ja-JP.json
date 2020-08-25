@@ -4909,7 +4909,6 @@
     "xpack.apm.registerTransactionDurationAlertType.variables.serviceName": "サービス名",
     "xpack.apm.registerTransactionDurationAlertType.variables.transactionType": "トランザクションタイプ",
     "xpack.apm.rum.dashboard.backend": "バックエンド",
-    "xpack.apm.rum.dashboard.dateTime.label": "日付/時刻",
     "xpack.apm.rum.dashboard.frontend": "フロントエンド",
     "xpack.apm.rum.dashboard.overall.label": "全体",
     "xpack.apm.rum.dashboard.pageLoadDistribution.label": "ページ読み込み分布",
