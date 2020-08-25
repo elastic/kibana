@@ -14,7 +14,7 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FiltersList } from './filters_list';
 import { DataType } from '../../../../types';
 
-const searchQueryLabel = i18n.translate('xpack.lens.indexPattern.filters', {
+const searchQueryLabel = i18n.translate('xpack.lens.indexPattern.searchQuery', {
   defaultMessage: 'Search query',
 });
 
@@ -22,6 +22,16 @@ export interface Filter {
   input: Query;
   label?: string;
 }
+
+const defaultSearchQuery: Filter = {
+  input: {
+    query: '*',
+    language: 'kuery',
+  },
+  label: i18n.translate('xpack.lens.indexPattern.searchQuery', {
+    defaultMessage: '* – all records',
+  }),
+};
 
 export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'filters';
@@ -32,9 +42,7 @@ export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn 
 
 export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = {
   type: 'filters',
-  displayName: i18n.translate('xpack.lens.indexPattern.filters', {
-    defaultMessage: 'Filters',
-  }),
+  displayName: searchQueryLabel,
   priority: 3, // Higher than any metric
   getPossibleOperationForField: ({ type }) => {
     if (type === 'document') {
@@ -68,7 +76,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
     type: 'filters',
     schema: 'segment',
     params: {
-      filters: column.params.filters.length > 0 ? column.params.filters : undefined,
+      filters: column.params.filters.length > 0 ? column.params.filters : [defaultSearchQuery],
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {

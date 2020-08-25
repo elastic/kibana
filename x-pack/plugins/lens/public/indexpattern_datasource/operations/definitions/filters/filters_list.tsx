@@ -155,7 +155,9 @@ export const FilterPopover = ({
                 ? (tempFilter.input.query as string)
                 : defaultPlaceholderMessage
             }
-            prepend="Label*" // todo: is this tooltip?
+            prepend={i18n.translate('xpack.lens.indexPattern.filters.label', {
+              defaultMessage: 'Label',
+            })}
             aria-label={i18n.translate('xpack.lens.indexPattern.filters.label.aria-message', {
               defaultMessage: 'Label for your filter',
             })}
@@ -213,7 +215,7 @@ export const FiltersList = ({
   return (
     <div>
       <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="s">
+        <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
           {filters?.map((filter: Filter, idx: number) => {
             const { input, label } = filter;
             const id = `${JSON.stringify(input.query)}_${label}`;
@@ -227,7 +229,7 @@ export const FiltersList = ({
               >
                 {(provided) => (
                   <EuiPanel paddingSize="none">
-                    <EuiFlexGroup gutterSize="xs" alignItems="center">
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <div {...provided.dragHandleProps} className="lnsLayerPanel__dndGrab">
                           <EuiIcon
@@ -272,7 +274,7 @@ export const FiltersList = ({
                           aria-label={i18n.translate(
                             'xpack.lens.indexPattern.filters.deleteSearchQuery',
                             {
-                              defaultMessage: 'Delete filter',
+                              defaultMessage: 'Delete search query',
                             }
                           )}
                         />
