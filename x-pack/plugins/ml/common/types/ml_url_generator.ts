@@ -122,7 +122,7 @@ export interface TimeSeriesExplorerUrlState
   /**
    * ML App Page
    */
-  page: typeof ML_PAGES.TIME_SERIES_EXPLORER;
+  page: typeof ML_PAGES.SINGLE_METRIC_VIEWER;
   jobIds: JobId[];
   timeRange?: TimeRange;
   detectorIndex?: number;

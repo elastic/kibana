@@ -56,7 +56,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         );
       case ML_PAGES.ANOMALY_EXPLORER:
         return this.createExplorerUrl(mlUrlGeneratorState as ExplorerUrlState);
-      case ML_PAGES.TIME_SERIES_EXPLORER:
+      case ML_PAGES.SINGLE_METRIC_VIEWER:
         return this.createSingleMetricViewerUrl(mlUrlGeneratorState as TimeSeriesExplorerUrlState);
       case ML_PAGES.DATA_FRAME_ANALYTICS:
         return this.createDataframeAnalyticsUrl(mlUrlGeneratorState as DataFrameAnalyticsUrlState);
@@ -169,7 +169,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     detectorIndex,
     entities,
   }: TimeSeriesExplorerUrlState): string {
-    let url = `${this.params.appBasePath}/${ML_PAGES.TIME_SERIES_EXPLORER}`;
+    let url = `${this.params.appBasePath}/${ML_PAGES.SINGLE_METRIC_VIEWER}`;
     const queryState: TimeSeriesExplorerGlobalState = {
       ml: {
         jobIds,

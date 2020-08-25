@@ -9,7 +9,7 @@ export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
 export const ML_PAGES = {
   ANOMALY_DETECTION: 'jobs',
   ANOMALY_EXPLORER: 'explorer',
-  TIME_SERIES_EXPLORER: 'timeseriesexplorer',
+  SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS: 'data_frame_analytics',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   /**

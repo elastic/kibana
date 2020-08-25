@@ -101,7 +101,7 @@ describe('MlUrlGenerator', () => {
     describe('Single Metric Viewer Page', () => {
       it('should generate valid URL for the Single Metric Viewer page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.TIME_SERIES_EXPLORER,
+          page: ML_PAGES.SINGLE_METRIC_VIEWER,
           jobIds: ['logs_categorization_1'],
           refreshInterval: {
             display: 'Off',
@@ -125,7 +125,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Single Metric Viewer page with extra settings', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.TIME_SERIES_EXPLORER,
+          page: ML_PAGES.SINGLE_METRIC_VIEWER,
           jobIds: ['logs_categorization_1'],
           detectorIndex: 0,
           entities: { mlcategory: '2' },
