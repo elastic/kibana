@@ -19,9 +19,8 @@ describe('FrameHeading', () => {
         function: 'Main.func2',
         module: 'main',
       };
-      const isLibraryFrame = false;
       const result = renderWithTheme(
-        <FrameHeading isLibraryFrame={isLibraryFrame} stackframe={stackframe} />
+        <FrameHeading isLibraryFrame={false} stackframe={stackframe} />
       );
 
       expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -39,12 +38,8 @@ describe('FrameHeading', () => {
           function: 'Main.func2',
           module: 'main',
         };
-        const isLibraryFrame = true;
         const result = renderWithTheme(
-          <FrameHeading
-            isLibraryFrame={isLibraryFrame}
-            stackframe={stackframe}
-          />
+          <FrameHeading isLibraryFrame={true} stackframe={stackframe} />
         );
 
         expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -65,9 +60,11 @@ describe('FrameHeading', () => {
         module: 'org.apache.catalina.connector',
         function: 'flushByteBuffer',
       };
-      const isLibraryFrame = false;
       const result = renderWithTheme(
-        <FrameHeading isLibraryFrame={isLibraryFrame} stackframe={stackframe} />
+        <FrameHeading
+          isLibraryFrame={stackframe.library_frame}
+          stackframe={stackframe}
+        />
       );
 
       expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -78,7 +75,25 @@ describe('FrameHeading', () => {
 
   describe('with a .NET stackframe', () => {
     describe('with a classname', () => {
-      it.todo('renders');
+      it('renders', () => {
+        const stackframe: IStackframe = {
+          classname: 'OpbeansDotnet.Controllers.CustomersController',
+          exclude_from_grouping: false,
+          filename: '/src/opbeans-dotnet/Controllers/CustomersController.cs',
+          abs_path: '/src/opbeans-dotnet/Controllers/CustomersController.cs',
+          line: { number: 23 },
+          module:
+            'opbeans-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null',
+          function: 'Get',
+        };
+        const result = renderWithTheme(
+          <FrameHeading isLibraryFrame={false} stackframe={stackframe} />
+        );
+
+        expect(result.getByTestId('FrameHeading').textContent).toEqual(
+          'OpbeansDotnet.Controllers.CustomersController in Get in /src/opbeans-dotnet/Controllers/CustomersController.cs at line 23'
+        );
+      });
     });
 
     describe('with no classname', () => {
@@ -92,12 +107,8 @@ describe('FrameHeading', () => {
           module:
             'Microsoft.EntityFrameworkCore, Version=2.2.6.0, Culture=neutral, PublicKeyToken=adb9793829ddae60',
         };
-        const isLibraryFrame = false;
         const result = renderWithTheme(
-          <FrameHeading
-            isLibraryFrame={isLibraryFrame}
-            stackframe={stackframe}
-          />
+          <FrameHeading isLibraryFrame={false} stackframe={stackframe} />
         );
 
         expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -117,9 +128,11 @@ describe('FrameHeading', () => {
         line: { number: 120 },
         function: 'callbackTrampoline',
       };
-      const isLibraryFrame = false;
       const result = renderWithTheme(
-        <FrameHeading isLibraryFrame={isLibraryFrame} stackframe={stackframe} />
+        <FrameHeading
+          isLibraryFrame={stackframe.library_frame}
+          stackframe={stackframe}
+        />
       );
 
       expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -128,11 +141,49 @@ describe('FrameHeading', () => {
     });
 
     describe('with a classname', () => {
-      it.todo('renders');
+      it('renders', () => {
+        const stackframe: IStackframe = {
+          classname: 'TCPConnectWrap',
+          exclude_from_grouping: false,
+          library_frame: true,
+          filename: 'internal/stream_base_commons.js',
+          abs_path: 'internal/stream_base_commons.js',
+          line: { number: 205 },
+          function: 'onStreamRead',
+        };
+        const result = renderWithTheme(
+          <FrameHeading
+            isLibraryFrame={stackframe.library_frame}
+            stackframe={stackframe}
+          />
+        );
+
+        expect(result.getByTestId('FrameHeading').textContent).toEqual(
+          'at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)'
+        );
+      });
     });
 
     describe('with no classname and no function', () => {
-      it.todo('renders');
+      it('renders', () => {
+        const stackframe: IStackframe = {
+          exclude_from_grouping: false,
+          library_frame: true,
+          filename: 'internal/stream_base_commons.js',
+          abs_path: 'internal/stream_base_commons.js',
+          line: { number: 205 },
+        };
+        const result = renderWithTheme(
+          <FrameHeading
+            isLibraryFrame={stackframe.library_frame}
+            stackframe={stackframe}
+          />
+        );
+
+        expect(result.getByTestId('FrameHeading').textContent).toEqual(
+          'at internal/stream_base_commons.js:205'
+        );
+      });
     });
   });
 
@@ -158,9 +209,11 @@ describe('FrameHeading', () => {
         },
         vars: { request: "<WSGIRequest: POST '/api/orders'>" },
       };
-      const isLibraryFrame = false;
       const result = renderWithTheme(
-        <FrameHeading isLibraryFrame={isLibraryFrame} stackframe={stackframe} />
+        <FrameHeading
+          isLibraryFrame={stackframe.library_frame}
+          stackframe={stackframe}
+        />
       );
 
       expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -186,9 +239,11 @@ describe('FrameHeading', () => {
           post: ['    end\n', '  end\n'],
         },
       };
-      const isLibraryFrame = false;
       const result = renderWithTheme(
-        <FrameHeading isLibraryFrame={isLibraryFrame} stackframe={stackframe} />
+        <FrameHeading
+          isLibraryFrame={stackframe.library_frame}
+          stackframe={stackframe}
+        />
       );
 
       expect(result.getByTestId('FrameHeading').textContent).toEqual(
@@ -212,22 +267,16 @@ describe('FrameHeading', () => {
         line: { number: 319, column: 3842 },
         function: 'unstable_runWithPriority',
       };
-      const isLibraryFrame = false;
       const result = renderWithTheme(
-        <FrameHeading isLibraryFrame={isLibraryFrame} stackframe={stackframe} />
+        <FrameHeading
+          isLibraryFrame={stackframe.library_frame}
+          stackframe={stackframe}
+        />
       );
 
       expect(result.getByTestId('FrameHeading').textContent).toEqual(
         'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)'
       );
-    });
-
-    describe('with a classname', () => {
-      it.todo('renders');
-    });
-
-    describe('with no classname and no function', () => {
-      it.todo('renders');
     });
   });
 });
