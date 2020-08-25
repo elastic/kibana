@@ -236,7 +236,6 @@
     "@kbn/eslint-import-resolver-kibana": "2.0.0",
     "@kbn/eslint-plugin-eslint": "1.0.0",
     "@kbn/expect": "1.0.0",
-    "@kbn/ops-inspector": "1.0.0",
     "@kbn/optimizer": "1.0.0",
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/release-notes": "1.0.0",
