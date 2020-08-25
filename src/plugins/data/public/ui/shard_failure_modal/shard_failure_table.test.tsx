@@ -24,7 +24,7 @@ import { ShardFailure } from './shard_failure_types';
 
 describe('ShardFailureTable', () => {
   it('renders matching snapshot given valid properties', () => {
-    const failures = shardFailureResponse._shards.failures as ShardFailure[];
+    const failures = (shardFailureResponse._shards as any).failures as ShardFailure[];
     const component = shallowWithIntl(<ShardFailureTable failures={failures} />);
     expect(component).toMatchSnapshot();
   });

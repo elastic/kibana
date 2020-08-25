@@ -25,6 +25,7 @@ import {
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public';
 import { StartDependencies } from '../../../plugin';
 import { Config, FactoryContext } from './types';
+import { SearchInput } from '../../../../../../../src/plugins/discover/public';
 
 export interface Params {
   start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
@@ -89,7 +90,7 @@ export class DashboardToDashboardDrilldown
     };
 
     if (context.embeddable) {
-      const input = context.embeddable.getInput();
+      const input = context.embeddable.getInput() as Readonly<SearchInput>;
       if (isQuery(input.query) && config.useCurrentFilters) state.query = input.query;
 
       // if useCurrentDashboardDataRange is enabled, then preserve current time range

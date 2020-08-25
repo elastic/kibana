@@ -25,7 +25,6 @@ import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
 import {
-  LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
@@ -306,19 +305,6 @@ export function getLayerById(layerId: string | null, state: MapStoreState): ILay
     return layerId === layer.getId();
   });
 }
-
-export const getFittableLayers = createSelector(getLayerList, (layerList) => {
-  return layerList.filter((layer) => {
-    // These are the only layer-types that implement bounding-box retrieval reliably
-    // This will _not_ work if Maps will allow register custom layer types
-    const isFittable =
-      layer.getType() === LAYER_TYPE.VECTOR ||
-      layer.getType() === LAYER_TYPE.BLENDED_VECTOR ||
-      layer.getType() === LAYER_TYPE.HEATMAP;
-
-    return isFittable && layer.isVisible();
-  });
-});
 
 export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>
   layers.filter((layer) => !layer.visible).map((layer) => layer.id)
