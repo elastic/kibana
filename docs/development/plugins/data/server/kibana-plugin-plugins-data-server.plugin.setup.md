@@ -8,6 +8,7 @@
 
 ```typescript
 setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressions, usageCollection }: DataPluginSetupDependencies): {
+        __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
             register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
@@ -25,6 +26,7 @@ setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressio
 <b>Returns:</b>
 
 `{
+        __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
             register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
