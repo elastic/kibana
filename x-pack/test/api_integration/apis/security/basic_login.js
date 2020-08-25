@@ -196,7 +196,7 @@ export default function ({ getService }) {
           'authentication_type',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
-        expect(apiResponse.body.authentication_provider).to.eql('__http__');
+        expect(apiResponse.body.authentication_provider).to.eql('basic');
         expect(apiResponse.body.authentication_realm).to.eql({
           name: 'reserved',
           type: 'reserved',
