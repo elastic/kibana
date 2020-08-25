@@ -42,8 +42,3 @@ export {
   UnlinkFromLibraryActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
 } from './unlink_from_library_action';
-export {
-  LibraryNotificationActionContext,
-  LibraryNotificationAction,
-  ACTION_LIBRARY_NOTIFICATION,
-} from './library_notification_action';
