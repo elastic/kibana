@@ -10,6 +10,7 @@ import {
   AxisConfig,
   Chart,
   LineAnnotation,
+  LineAnnotationStyle,
   LineAnnotationDatum,
   LineSeries,
   PartialTheme,
@@ -22,26 +23,45 @@ import { EuiIcon } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { DecisionPathPlotData } from './use_classification_path_data';
 
-const baselineStyle = {
+const { euiColorFullShade, euiColorMediumShade } = euiVars;
+const axisColor = euiColorMediumShade;
+
+const baselineStyle: LineAnnotationStyle = {
   line: {
     strokeWidth: 1,
-    stroke: 'gray',
-    opacity: 1,
+    stroke: euiColorFullShade,
+    opacity: 0.75,
   },
   details: {
-    fontSize: 12,
     fontFamily: 'Arial',
+    fontSize: 10,
     fontStyle: 'bold',
-    fill: 'gray',
+    fill: euiColorMediumShade,
     padding: 0,
   },
 };
 
 const axes: RecursivePartial<AxisConfig> = {
+  axisLineStyle: {
+    stroke: axisColor,
+  },
   tickLabelStyle: {
-    fontSize: 12,
+    fontSize: 10,
+    fill: axisColor,
+  },
+  tickLineStyle: {
+    stroke: axisColor,
+  },
+  gridLineStyle: {
+    horizontal: {
+      dash: [1, 2],
+    },
+    vertical: {
+      strokeWidth: 0,
+    },
   },
 };
 const theme: PartialTheme = {
@@ -58,8 +78,8 @@ interface DecisionPathChartProps {
 
 const DECISION_PATH_MARGIN = 125;
 const DECISION_PATH_ROW_HEIGHT = 10;
-
-const AnnotationBaselineMarker = <EuiIcon type={'empty'} size={'s'} />;
+const NUM_PRECISION = 3;
+const AnnotationBaselineMarker = <EuiIcon type="dot" size="m" />;
 
 export const DecisionPathChart = ({
   decisionPathData,
@@ -72,7 +92,7 @@ export const DecisionPathChart = ({
   const baselineData: LineAnnotationDatum[] = useMemo(
     () => [
       {
-        dataValue: baseline ? parseFloat(baseline.toPrecision(3)) : undefined,
+        dataValue: baseline ? baseline : undefined,
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
           {
@@ -84,7 +104,7 @@ export const DecisionPathChart = ({
     ],
     [baseline]
   );
-  const tickFormatter = useCallback((d) => Number(d).toPrecision(3), []);
+  const tickFormatter = useCallback((d) => Number(d).toPrecision(NUM_PRECISION), []);
 
   return (
     <Chart
@@ -98,6 +118,7 @@ export const DecisionPathChart = ({
           dataValues={baselineData}
           style={baselineStyle}
           marker={AnnotationBaselineMarker}
+          header={baseline.toPrecision(NUM_PRECISION)}
         />
       )}
 
