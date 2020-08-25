@@ -15672,7 +15672,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel": "調査ガイド",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError": "名前が必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText": "ルール調査ガイドを追加...",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError": "深刻度が必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.addFalsePositiveDescription": "誤検出の例を追加します",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.addReferenceDescription": "参照URLを追加します",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.advancedSettingsButton": "高度な設定",
