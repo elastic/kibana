@@ -11,10 +11,10 @@ import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/comm
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import {
-  AuthenticationsQuery,
   AuthenticationsEdges,
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
+  AuthenticationsQuery,
 } from '../../../../../common/search_strategy/security_solution/authentications';
 
 import { inspectStringifyObject } from '../../../../utils/build_query';
@@ -28,6 +28,7 @@ export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authe
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
+
     return buildAuthenticationQuery(options);
   },
   parse: async (

@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mergeFieldsWithHit } from '../../../../utils/build_query';
-import {
-  AuthenticationHit,
-  AuthenticationsEdges,
-} from '../../../../../common/search_strategy/security_solution/authentications';
+import { AuthenticationsEdges } from '../../../../../common/search_strategy/security_solution/authentications';
+import { AuthenticationHit } from '../../../../lib/authentications/types';
 
 export const formatAuthenticationData = (
   fields: readonly string[],

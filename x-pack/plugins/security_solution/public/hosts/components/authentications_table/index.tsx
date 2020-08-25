@@ -11,7 +11,6 @@ import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { AuthenticationsEdges } from '../../../graphql/types';
 import { State } from '../../../common/store';
 import {
   DragEffects,
@@ -27,6 +26,7 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
+import { AuthenticationsEdges } from '../../../../common/search_strategy/security_solution/authentications';
 
 const tableType = hostsModel.HostsTableType.authentications;
 

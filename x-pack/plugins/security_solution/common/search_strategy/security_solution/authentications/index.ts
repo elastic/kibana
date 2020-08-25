@@ -5,17 +5,7 @@
  */
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import {
-  CursorType,
-  Inspect,
-  Hit,
-  Maybe,
-  PageInfoPaginated,
-  RequestOptionsPaginated,
-  SearchHit,
-  SourceConfiguration,
-  TotalHit,
-} from '..';
+import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '..';
 
 export enum AuthenticationsQuery {
   authentications = 'authentications',
@@ -32,8 +22,7 @@ export interface AuthenticationsStrategyResponse extends IEsSearchResponse {
 }
 
 export interface AuthenticationsRequestOptions extends RequestOptionsPaginated {
-  fields: readonly string[];
-  sourceConfiguration: SourceConfiguration;
+  defaultIndex: string[];
 }
 
 export interface AuthenticationsEdges {
@@ -61,7 +50,7 @@ export interface UserEcsFields {
 
   id?: Maybe<string[] | string>;
 
-  name?: Maybe<string[] | string>;
+  name?: Maybe<string[]>;
 
   full_name?: Maybe<string[] | string>;
 
@@ -83,7 +72,7 @@ export interface LastSourceHost {
 export interface SourceEcsFields {
   bytes?: Maybe<number[] | number>;
 
-  ip?: Maybe<string[] | string>;
+  ip?: string[] | null;
 
   port?: Maybe<number[] | number>;
 
@@ -125,7 +114,7 @@ export interface HostEcsFields {
 
   mac?: Maybe<string[] | string>;
 
-  name?: Maybe<string[] | string>;
+  name?: Maybe<string[]>;
 
   os?: Maybe<OsEcsFields>;
 
@@ -144,51 +133,4 @@ export interface OsEcsFields {
   version?: Maybe<string[] | string>;
 
   kernel?: Maybe<string[] | string>;
-}
-
-export interface AuthenticationHit extends Hit {
-  _source: {
-    '@timestamp': string;
-    lastSuccess?: LastSourceHost;
-    lastFailure?: LastSourceHost;
-  };
-  user: string;
-  failures: number;
-  successes: number;
-  cursor?: string;
-  sort: StringOrNumber[];
-}
-
-type StringOrNumber = string | number;
-
-export interface AuthenticationBucket {
-  key: {
-    user_uid: string;
-  };
-  doc_count: number;
-  failures: {
-    doc_count: number;
-  };
-  successes: {
-    doc_count: number;
-  };
-  authentication: {
-    hits: {
-      total: TotalHit;
-      hits: ArrayLike<AuthenticationHit>;
-    };
-  };
-}
-
-export interface AuthenticationData extends SearchHit {
-  sort: string[];
-  aggregations: {
-    process_count: {
-      value: number;
-    };
-    group_by_process: {
-      after_key: string;
-      buckets: AuthenticationBucket[];
-    };
-  };
 }

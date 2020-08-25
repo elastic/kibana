@@ -24,24 +24,20 @@ export const auditdFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const buildQuery = ({
-  fields,
   filterQuery,
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
   docValueFields,
-  sourceConfiguration: {
-    fields: { timestamp },
-  },
 }: AuthenticationsRequestOptions) => {
-  const esFields = reduceFields(fields, { ...hostFieldsMap, ...sourceFieldsMap });
+  const esFields = reduceFields([], { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.category': 'authentication' } },
     {
       range: {
-        [timestamp]: {
+        '@timestamp': {
           gte: from,
           lte: to,
           format: 'strict_date_optional_time',
