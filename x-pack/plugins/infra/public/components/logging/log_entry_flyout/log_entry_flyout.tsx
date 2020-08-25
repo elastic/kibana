@@ -41,22 +41,22 @@ export const LogEntryFlyout = ({
 }: LogEntryFlyoutProps) => {
   const createFilterHandler = useCallback(
     (field: LogEntriesItemField) => () => {
-      const filter = `${field.field}:"${field.value}"`;
-      let target;
-
-      if (flyoutItem && flyoutItem.key) {
-        const timestampMoment = moment(flyoutItem.key.time);
-        if (timestampMoment.isValid()) {
-          target = {
-            time: timestampMoment.valueOf(),
-            tiebreaker: flyoutItem.key.tiebreaker,
-          };
-        }
+      if (!flyoutItem) {
+        return;
       }
 
-      // `setFilter` can only be called if there is a `flyoutItem`. We can
-      // safely assume here it won't me `undefined`
-      setFilter(filter, flyoutItem!.id, target);
+      const filter = `${field.field}:"${field.value}"`;
+      const timestampMoment = moment(flyoutItem.key.time);
+      let target;
+
+      if (timestampMoment.isValid()) {
+        target = {
+          time: timestampMoment.valueOf(),
+          tiebreaker: flyoutItem.key.tiebreaker,
+        };
+      }
+
+      setFilter(filter, flyoutItem.id, target);
     },
     [flyoutItem, setFilter]
   );
