@@ -25,6 +25,10 @@ export interface PostPackagePolicyParams {
 
 export const postMonitorConfig = createAction<PostPackagePolicyParams>('POST MONITOR CONFIG');
 
+export const postMonitorConfigSuccess = createAction('POST MONITOR CONFIG SUCCESS');
+
+export const postMonitorConfigFail = createAction<Error>('POST MONITOR CONFIG FAIL');
+
 export const showEditMonitorFlyout = createAction('SHOW EDIT MONITOR FLYOUT');
 
 export const hideEditMonitorFlyout = createAction('HIDE EDIT MONITOR FLYOUT');

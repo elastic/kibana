@@ -15,6 +15,8 @@ import {
   getImAgentPolicyDetail,
   getImAgentPolicyDetailSuccess,
   getImAgentPolicyDetailFail,
+  postMonitorConfigSuccess,
+  postMonitorConfigFail,
 } from '../actions/central_management';
 import { AgentPolicyPage } from '../actions/central_management';
 import { AgentPolicy } from '../../../../ingest_manager/common';
@@ -25,9 +27,10 @@ export interface CentralManagementState {
   agentPolicyDetail?: AgentPolicy;
   agentPolicyDetailError?: Error;
   isEditFlyoutVisible: boolean;
-  loading: boolean;
   loadingAgentPolicies: boolean;
   loadingAgentPolicyDetail: boolean;
+  savingConfiguration: boolean;
+  saveConfigurationError?: Error;
 }
 
 const initialState: CentralManagementState = {
@@ -35,16 +38,27 @@ const initialState: CentralManagementState = {
     items: [],
   },
   isEditFlyoutVisible: false,
-  loading: false,
   loadingAgentPolicies: false,
   loadingAgentPolicyDetail: false,
+  savingConfiguration: false,
 };
 
 export const centralManagementReducer = handleActions<CentralManagementState, any>(
   {
-    [String(postMonitorConfig)]: (state) => {
-      return { ...state, loading: true };
-    },
+    [String(postMonitorConfig)]: (state) => ({
+      ...state,
+      savingConfiguration: true,
+    }),
+    [String(postMonitorConfigSuccess)]: (state) => ({
+      ...state,
+      savingConfiguration: false,
+      saveConfigurationError: undefined,
+    }),
+    [String(postMonitorConfigFail)]: (state, action) => ({
+      ...state,
+      savingConfiguration: false,
+      saveConfigurationError: action.payload,
+    }),
     [String(showEditMonitorFlyout)]: (state) => ({
       ...state,
       isEditFlyoutVisible: true,

@@ -5,7 +5,8 @@
  */
 
 import { Action } from 'redux-actions';
-import { takeLatest, call } from 'redux-saga/effects';
+import { takeLatest, call, put } from 'redux-saga/effects';
+import { i18n } from '@kbn/i18n';
 import { fetchTags } from '../api/tags';
 import { fetchEffectFactory } from './fetch_effect';
 import { getTags, getTagsSuccess, getTagsFail } from '../actions/tags';
@@ -25,6 +26,9 @@ import {
   getImAgentPolicyDetailFail,
 } from '../actions/central_management';
 import { CENTRAL_CONFIG } from '../../../common/constants';
+import { postMonitorConfigSuccess } from '../actions/central_management';
+import { kibanaService } from '../kibana_service';
+import { postMonitorConfigFail } from '../actions/central_management';
 
 function* mapFieldsToConfig(fields: PostPackagePolicyParams): any {
   return {
@@ -76,6 +80,20 @@ function* mapFieldsToConfig(fields: PostPackagePolicyParams): any {
   };
 }
 
+export function* postSuccessMessage(res: any) {
+  if (res.success && res.item?.inputs?.[0]?.streams?.[0]?.vars?.name?.value) {
+    return i18n.translate('xpack.uptime.centralManagement.successMessage.withDetail', {
+      defaultMessage: '{name} saved',
+      values: {
+        name: res.item.inputs[0].streams[0].vars.name.value,
+      },
+    });
+  }
+  return i18n.translate('xpack.uptime.centralManagement.successMessage', {
+    defaultMessage: 'Configuration saved',
+  });
+}
+
 export function* performImTasks() {
   yield takeLatest(String(getTags), fetchEffectFactory(fetchTags, getTagsSuccess, getTagsFail));
   yield takeLatest(
@@ -96,9 +114,14 @@ export function* performMonitorConfigPost() {
   yield takeLatest(String(postMonitorAction), function* (action: Action<PostPackagePolicyParams>) {
     try {
       const payload = yield mapFieldsToConfig(action.payload);
-      yield call(postMonitorConfig, payload);
+      const postResult = yield call(postMonitorConfig, payload);
+      yield put(postMonitorConfigSuccess(postResult));
+      kibanaService.core.notifications.toasts.addSuccess(yield postSuccessMessage(postResult));
     } catch (e) {
-      console.error(e);
+      kibanaService.core.notifications.toasts.addError(e, {
+        title: 'Error saving policy',
+      });
+      yield put(postMonitorConfigFail(e));
     }
   });
 }
