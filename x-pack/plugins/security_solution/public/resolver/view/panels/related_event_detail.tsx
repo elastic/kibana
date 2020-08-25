@@ -24,6 +24,19 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
 
 /**
+ * Seed word/non-word boundaries with zero-width spaces so they break/wrap nicely
+ *
+ * @param potentiallyLongString A string to seed with zero-width spaces so it wraps nicely
+ */
+function addWordBreakSpaces(potentiallyLongString: string): string {
+  // Seed boundaries beetween word and non-word characters with Zero-width spaces to allow for text to be wrapped when it overflow its container.
+
+  return potentiallyLongString.replace(/(\w\W)|(\W\w)/g, (boundary: string) => {
+    return `${boundary[0]}\u200b${boundary[1]}`;
+  });
+}
+
+/**
  * A helper function to turn objects into EuiDescriptionList entries.
  * This reflects the strategy of more or less "dumping" metadata for related processes
  * in description lists with little/no 'prettification'. This has the obvious drawback of
@@ -42,10 +55,10 @@ const objectToDescriptionListEntries = function* (
   const nextPrefix = prefix.length ? `${prefix}.` : '';
   for (const [metaKey, metaValue] of Object.entries(obj)) {
     if (typeof metaValue === 'number' || typeof metaValue === 'string') {
-      yield { title: nextPrefix + metaKey, description: `${metaValue}` };
+      yield { title: addWordBreakSpaces(nextPrefix + metaKey), description: `${metaValue}` };
     } else if (metaValue instanceof Array) {
       yield {
-        title: nextPrefix + metaKey,
+        title: addWordBreakSpaces(nextPrefix + metaKey),
         description: metaValue
           .filter((arrayEntry) => {
             return typeof arrayEntry === 'number' || typeof arrayEntry === 'string';
@@ -62,7 +75,7 @@ const objectToDescriptionListEntries = function* (
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 8em;
-    word-break: break-all;
+    word-break: break-word;
   }
   &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
     max-width: calc(100% - 8.5em);
