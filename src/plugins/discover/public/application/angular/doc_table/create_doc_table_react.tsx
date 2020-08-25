@@ -91,17 +91,17 @@ export function DocTableLegacy(renderProps: any) {
                 sorting="sort"
                 columns="columns"
                 infinite-scroll="true"
-                filter="filterQuery"
+                filter="onFilter"
                 data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
                 data-test-subj="discoverDocTable"
                 minimum-visible-rows="minimumVisibleRows"
                 render-complete
-                on-add-column="addColumn"
+                on-add-column="onAddColumn"
                 on-change-sort-order="setSortOrder"
                 on-move-column="moveColumn"
-                on-remove-column="removeColumn"></doc_table>`,
+                on-remove-column="onRemoveColumn"></doc_table>`,
     },
     () => getServices().getEmbeddableInjector()
   );

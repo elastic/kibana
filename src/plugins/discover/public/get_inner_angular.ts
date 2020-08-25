@@ -40,7 +40,6 @@ import { createTableRowDirective } from './application/angular/doc_table/compone
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
-import { CollapsibleSidebarProvider } from './application/angular/directives/collapsible_sidebar/collapsible_sidebar';
 // @ts-ignore
 import { FixedScrollProvider } from './application/angular/directives/fixed_scroll';
 // @ts-ignore
@@ -143,9 +142,7 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('icon', (reactDirective) => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverLegacy', createDiscoverLegacyDirective)
