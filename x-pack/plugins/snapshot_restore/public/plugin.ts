@@ -64,7 +64,7 @@ export class SnapshotRestoreUIPlugin {
       home.featureCatalogue.register({
         id: PLUGIN.id,
         title: i18n.translate('xpack.snapshotRestore.featureCatalogueTitle', {
-          defaultMessage: 'Store & recover backups',
+          defaultMessage: 'Back up and restore',
         }),
         description: i18n.translate('xpack.snapshotRestore.featureCatalogueDescription', {
           defaultMessage:
