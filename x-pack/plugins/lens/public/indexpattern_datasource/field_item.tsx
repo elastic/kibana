@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiKeyboardAccessible,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
@@ -40,6 +39,7 @@ import {
   esQuery,
   IIndexPattern,
 } from '../../../../../src/plugins/data/public';
+import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
@@ -100,7 +100,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     isLoading: false,
   });
 
-  const wrappableName = wrapOnDot(field.name)!;
+  const wrappableName = wrapOnDot(field.displayName)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
     ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
@@ -177,15 +177,38 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     field,
     indexPattern.id,
   ]);
+  const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
+  const lensInfoIcon = (
+    <EuiIconTip
+      anchorClassName="lnsFieldItem__infoIcon"
+      content={
+        hideDetails
+          ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
+              defaultMessage: 'Drag and drop to visualize.',
+            })
+          : exists
+          ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
+              defaultMessage: "This field doesn't have data. Drag and drop to visualize.",
+            })
+      }
+      type="iInCircle"
+      color="subdued"
+      size="s"
+    />
+  );
   return (
     <EuiPopover
+      ownFocus
       id="lnsFieldListPanel__field"
       className="lnsFieldItem__popoverAnchor"
       display="block"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
-          label={field.name}
+          label={field.displayName}
           value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
@@ -193,47 +216,23 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             exists ? 'exists' : 'missing'
           }`}
         >
-          <EuiKeyboardAccessible>
-            <div
-              className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
-              data-test-subj={`lnsFieldListPanelField-${field.name}`}
-              onClick={() => {
-                if (exists) {
-                  togglePopover();
-                }
-              }}
-              onKeyPress={(event) => {
-                if (exists && event.key === 'ENTER') {
-                  togglePopover();
-                }
-              }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-              })}
-            >
-              <LensFieldIcon type={field.type as DataType} />
-
-              <span className="lnsFieldItem__name" title={field.name}>
-                {wrappableHighlightableFieldName}
-              </span>
-
-              <EuiIconTip
-                anchorClassName="lnsFieldItem__infoIcon"
-                content={
-                  hideDetails
-                    ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
-                        defaultMessage: 'Drag and drop to visualize.',
-                      })
-                    : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                        defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-                      })
-                }
-                type="iInCircle"
-                color="subdued"
-                size="s"
-              />
-            </div>
-          </EuiKeyboardAccessible>
+          <FieldButton
+            className="lnsFieldItem__info"
+            isDraggable
+            isActive={infoIsOpen}
+            data-test-subj={`lnsFieldListPanelField-${field.name}`}
+            onClick={togglePopover}
+            aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
+              defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+              values: {
+                fieldName: field.displayName,
+                fieldType: field.type,
+              },
+            })}
+            fieldIcon={lensFieldIcon}
+            fieldName={wrappableHighlightableFieldName}
+            fieldInfoIcon={lensInfoIcon}
+          />
         </DragDrop>
       }
       isOpen={infoIsOpen}
@@ -314,7 +313,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     return (
       <EuiText size="s">
         {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-          defaultMessage: 'No data to display.',
+          defaultMessage:
+            'This field is empty because it doesn’t exist in the 500 sampled documents.',
         })}
       </EuiText>
     );
