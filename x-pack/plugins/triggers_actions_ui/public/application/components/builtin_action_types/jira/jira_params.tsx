@@ -117,7 +117,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>Incident</h3>
+        <h3>
+          {i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.jira.title', {
+            defaultMessage: 'Issue',
+          })}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       {isLoadingIssueTypes && <EuiLoadingSpinner size="m" />}
@@ -172,6 +176,27 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 </EuiFlexGroup>
               )}
               <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                error={errors.title}
+                isInvalid={errors.title.length > 0 && title !== undefined}
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.titleFieldLabel',
+                  {
+                    defaultMessage: 'Summary',
+                  }
+                )}
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'title'}
+                  inputTargetValue={title}
+                  errors={errors.title as string[]}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
               {hasLabels && (
                 <>
                   <EuiFlexGroup>
@@ -181,7 +206,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                         label={i18n.translate(
                           'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
                           {
-                            defaultMessage: 'Labels',
+                            defaultMessage: 'Labels (optional)',
                           }
                         )}
                       >
@@ -216,26 +241,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   <EuiSpacer size="m" />
                 </>
               )}
-              <EuiFormRow
-                fullWidth
-                error={errors.title}
-                isInvalid={errors.title.length > 0 && title !== undefined}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.titleFieldLabel',
-                  {
-                    defaultMessage: 'Summary',
-                  }
-                )}
-              >
-                <TextFieldWithMessageVariables
-                  index={index}
-                  editAction={editSubActionProperty}
-                  messageVariables={messageVariables}
-                  paramsProperty={'title'}
-                  inputTargetValue={title}
-                  errors={errors.title as string[]}
-                />
-              </EuiFormRow>
               {hasDescription && (
                 <TextAreaWithMessageVariables
                   index={index}
@@ -246,7 +251,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   label={i18n.translate(
                     'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
                     {
-                      defaultMessage: 'Description',
+                      defaultMessage: 'Description (optional)',
                     }
                   )}
                   errors={errors.description as string[]}
