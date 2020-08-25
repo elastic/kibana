@@ -78,6 +78,34 @@
             }
           }
         },
+        "dev_tools": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
         "discover": {
           "properties": {
             "clicks_total": {
@@ -134,7 +162,63 @@
             }
           }
         },
+        "kibana": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
         "management": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "short_url_redirect": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -218,34 +302,6 @@
             }
           }
         },
-        "dev_tools": {
-          "properties": {
-            "clicks_total": {
-              "type": "long"
-            },
-            "clicks_7_days": {
-              "type": "long"
-            },
-            "clicks_30_days": {
-              "type": "long"
-            },
-            "clicks_90_days": {
-              "type": "long"
-            },
-            "minutes_on_screen_total": {
-              "type": "float"
-            },
-            "minutes_on_screen_7_days": {
-              "type": "float"
-            },
-            "minutes_on_screen_30_days": {
-              "type": "float"
-            },
-            "minutes_on_screen_90_days": {
-              "type": "float"
-            }
-          }
-        },
         "apm": {
           "properties": {
             "clicks_total": {
@@ -274,7 +330,63 @@
             }
           }
         },
+        "csm": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
         "canvas": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "dashboard_mode": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -415,6 +527,34 @@
           }
         },
         "metrics": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "infra": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -666,6 +806,34 @@
             }
           }
         },
+        "security_capture_url": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
         "security_logged_out": {
           "properties": {
             "clicks_total": {
@@ -751,6 +919,34 @@
           }
         },
         "security_overwritten_session": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -974,6 +1170,34 @@
             }
           }
         },
+        "siem": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
         "space_selector": {
           "properties": {
             "clicks_total": {
@@ -1003,34 +1227,6 @@
           }
         },
         "uptime": {
-          "properties": {
-            "clicks_total": {
-              "type": "long"
-            },
-            "clicks_7_days": {
-              "type": "long"
-            },
-            "clicks_30_days": {
-              "type": "long"
-            },
-            "clicks_90_days": {
-              "type": "long"
-            },
-            "minutes_on_screen_total": {
-              "type": "float"
-            },
-            "minutes_on_screen_7_days": {
-              "type": "float"
-            },
-            "minutes_on_screen_30_days": {
-              "type": "float"
-            },
-            "minutes_on_screen_90_days": {
-              "type": "float"
-            }
-          }
-        },
-        "enterprise_search": {
           "properties": {
             "clicks_total": {
               "type": "long"
