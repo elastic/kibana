@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
-import { sendTelemetry } from '../../../shared/telemetry';
+jest.mock('../../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
+import { sendTelemetry } from '../../../../shared/telemetry';
 
-import { EngineOverviewHeader } from '../engine_overview_header';
+import { EngineOverviewHeader } from './';
 
 describe('EngineOverviewHeader', () => {
   it('renders', () => {

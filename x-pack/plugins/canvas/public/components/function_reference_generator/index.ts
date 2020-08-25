@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EngineOverviewHeader } from './engine_overview_header';
+export { FunctionReferenceGenerator } from './function_reference_generator';

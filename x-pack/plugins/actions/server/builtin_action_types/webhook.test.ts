@@ -176,7 +176,7 @@ describe('config validation', () => {
 `);
   });
 
-  test('config validation passes when kibana config whitelists the url', () => {
+  test('config validation passes when kibana config url does not present in allowedHosts', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
@@ -192,13 +192,13 @@ describe('config validation', () => {
     });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (_) => {
-          throw new Error(`target url is not whitelisted`);
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not present in allowedHosts`);
         },
       },
     });
@@ -215,7 +215,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not whitelisted"`
+      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
     );
   });
 });
