@@ -106,6 +106,7 @@ interface BackgroundSessionAttributes extends SavedObjectAttributes {
   expiration: string;
   idMapping: { [key: string]: string };
   url: string; // TODO
+  metadata: { [key: string]: any } // TODO
 }
 ```
 
@@ -187,7 +188,7 @@ interface ISessionService {
     * @returns a filtered list of BackgroundSessionAttributes objects.
     * @throws Throws an error in OSS.
     */
-   list: () => BackgroundSessionAttributes[]
+   list: (options: SavedObjectsFindOptions) => BackgroundSessionAttributes[]
 }
 ```
 
@@ -279,6 +280,7 @@ interface ISessionService {
     * @param url TODO: is the URL provided here? How?
     * @returns The stored `BackgroundSessionAttributes` object
     * @throws Throws an error in OSS.
+    * @internal (Consumers should use searchInterceptor.sendToBackground())
     */
   store: (
     request: KibanaRequest,
@@ -315,7 +317,7 @@ interface ISessionService {
   ) => Promise<boolean>
 
    /**
-    * Mark a session as and all associated searchIds as canceled.
+    * Get a list of background session objects.
     * @param request 
     * @param sessionId
     * @returns success status
