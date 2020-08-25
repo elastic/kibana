@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { getFieldFormatsRegistry } from '../../../../../src/plugins/data/public/test_utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { setSetupServices, setStartServices } from './set_services';
 import {

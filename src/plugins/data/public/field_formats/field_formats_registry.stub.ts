@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from 'kibana/public';
-import { DataPublicPluginStart, fieldFormats } from '../../plugins/data/public';
-import { deserializeFieldFormat } from '../../plugins/data/public/field_formats/utils/deserialize';
-import { baseFormattersPublic } from '../../plugins/data/public';
+
+import { CoreSetup } from 'src/core/public';
+import { deserializeFieldFormat } from './utils/deserialize';
+import { baseFormattersPublic } from './constants';
+import { DataPublicPluginStart, fieldFormats } from '..';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();

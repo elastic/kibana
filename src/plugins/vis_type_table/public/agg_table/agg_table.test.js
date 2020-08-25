@@ -24,7 +24,7 @@ import 'angular-mocks';
 import sinon from 'sinon';
 import { round } from 'lodash';
 
-import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { getFieldFormatsRegistry } from '../../../data/public/test_utils';
 import { coreMock } from '../../../../core/public/mocks';
 import { initAngularBootstrap } from '../../../kibana_legacy/public';
 import { setUiSettings } from '../../../data/public/services';
