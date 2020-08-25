@@ -79,7 +79,7 @@ export class IndexPattern implements IIndexPattern {
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
   private getConfig: UiSettingsCommon['get'];
-  private sourceFilters?: SourceFilter[];
+  public sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -508,11 +508,12 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
-      sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters), // samePattern.sourceFilters,
+      // sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters), // samePattern.sourceFilters,
+      sourceFilters: this.sourceFilters,
       fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
       type: this.type,
-      typeMeta: this.mapping.typeMeta._serialize!(this.typeMeta),
-      fields: this.mapping.fields._serialize!(this.fields),
+      typeMeta: this.typeMeta,
+      fields: this.fields,
     };
   }
 

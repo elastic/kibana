@@ -19,11 +19,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-
-import { ScriptedFieldItem } from '../../types';
+import { IndexPatternField } from '../../../../../../../../plugins/data/public';
 
 interface DeleteScritpedFieldConfirmationModalProps {
-  field: ScriptedFieldItem;
+  field: IndexPatternField;
   hideDeleteConfirmationModal: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;

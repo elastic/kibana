@@ -21,15 +21,16 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { Table } from '../table';
-import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
 
-const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
+const items: IndexPatternField[] = [
+  { name: '1', lang: 'Elastic', script: '' } as IndexPatternField,
+];
 
 describe('Table', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPattern;
 
   beforeEach(() => {
     indexPattern = getIndexPatternMock({

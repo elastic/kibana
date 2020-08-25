@@ -9,8 +9,9 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from 'kibana/server';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import { IFieldType, IndexPatternAttributes } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   LAYER_TYPE,
@@ -64,7 +65,9 @@ function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: num
   }, {});
 }
 
-function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
+function getIndexPatternsWithGeoFieldCount(
+  indexPatterns: Array<SavedObjectsFindResult<IndexPatternAttributes>>
+) {
   const fieldLists = indexPatterns.map((indexPattern) =>
     indexPattern.attributes && indexPattern.attributes.fields
       ? JSON.parse(indexPattern.attributes.fields)
@@ -112,7 +115,7 @@ function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
 }
 
 function isFieldGeoShape(
-  indexPatterns: IIndexPattern[],
+  indexPatterns: Array<SavedObjectsFindResult<IndexPatternAttributes>>,
   indexPatternId: string,
   geoField: string | undefined
 ): boolean {
@@ -120,10 +123,11 @@ function isFieldGeoShape(
     return false;
   }
 
-  const matchIndexPattern = indexPatterns.find((indexPattern: IIndexPattern) => {
-    return indexPattern.id === indexPatternId;
-  });
-
+  const matchIndexPattern = indexPatterns.find(
+    (indexPattern: SavedObjectsFindResult<IndexPatternAttributes>) => {
+      return indexPattern.id === indexPatternId;
+    }
+  );
   if (!matchIndexPattern) {
     return false;
   }
@@ -140,7 +144,10 @@ function isFieldGeoShape(
   return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
 }
 
-function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescriptor): boolean {
+function isGeoShapeAggLayer(
+  indexPatterns: Array<SavedObjectsFindResult<IndexPatternAttributes>>,
+  layer: LayerDescriptor
+): boolean {
   if (layer.sourceDescriptor === null) {
     return false;
   }
@@ -176,7 +183,7 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
 
 function getGeoShapeAggCount(
   layerLists: LayerDescriptor[][],
-  indexPatterns: IIndexPattern[]
+  indexPatterns: Array<SavedObjectsFindResult<IndexPatternAttributes>>
 ): number {
   const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
     const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
@@ -204,7 +211,7 @@ export function buildMapsTelemetry({
   settings,
 }: {
   mapSavedObjects: MapSavedObject[];
-  indexPatternSavedObjects: IIndexPattern[];
+  indexPatternSavedObjects: Array<SavedObjectsFindResult<IndexPatternAttributes>>;
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
   const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
@@ -275,18 +282,20 @@ async function getMapSavedObjects(savedObjectsClient: SavedObjectsClientContract
 }
 
 async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
-  const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
-  return _.get(indexPatternSavedObjects, 'saved_objects', []);
+  const indexPatternSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
+    type: 'index-pattern',
+  });
+  return indexPatternSavedObjects.saved_objects || [];
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
   // @ts-ignore
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: IIndexPattern[] = (await getIndexPatternSavedObjects(
+  const indexPatternSavedObjects = await getIndexPatternSavedObjects(
     // @ts-ignore
     savedObjectsClient
-  )) as IIndexPattern[];
+  );
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };

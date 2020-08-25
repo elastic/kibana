@@ -21,12 +21,13 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DeleteScritpedFieldConfirmationModal } from './confirmation_modal';
+import { IndexPatternField } from '../../../../../../../data/public';
 
 describe('DeleteScritpedFieldConfirmationModal', () => {
   test('should render normally', () => {
     const component = shallow(
       <DeleteScritpedFieldConfirmationModal
-        field={{ name: '', script: '', lang: '' }}
+        field={{ name: '', script: '', lang: '' } as IndexPatternField}
         deleteField={() => {}}
         hideDeleteConfirmationModal={() => {}}
       />

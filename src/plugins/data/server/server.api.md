@@ -577,8 +577,6 @@ export interface IFieldType {
 // @public (undocumented)
 export interface IIndexPattern {
     // (undocumented)
-    [key: string]: any;
-    // (undocumented)
     fieldFormatMap?: Record<string, {
         id: string;
         params: unknown;

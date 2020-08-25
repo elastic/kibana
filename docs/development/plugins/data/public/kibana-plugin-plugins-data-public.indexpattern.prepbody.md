@@ -8,12 +8,30 @@
 
 ```typescript
 prepBody(): {
-        [key: string]: any;
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: SourceFilter[] | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: TypeMeta | undefined;
+        fields: IIndexPatternFieldList & {
+            toSpec: () => FieldSpec[];
+        };
     };
 ```
 <b>Returns:</b>
 
 `{
-        [key: string]: any;
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: SourceFilter[] | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: TypeMeta | undefined;
+        fields: IIndexPatternFieldList & {
+            toSpec: () => FieldSpec[];
+        };
     }`
 

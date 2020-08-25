@@ -38,6 +38,8 @@ export interface IIndexPattern {
       params: unknown;
     }
   >;
+  // todo
+  // sourceFilters?: string[];
 }
 
 /**

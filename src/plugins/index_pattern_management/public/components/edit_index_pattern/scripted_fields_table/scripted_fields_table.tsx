@@ -25,12 +25,11 @@ import {
 } from '../../../scripting_languages';
 
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
-import { ScriptedFieldItem } from './types';
 
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 
 interface ScriptedFieldsTableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   fieldFilter?: string;
   scriptedFieldLanguageFilter?: string;
   helpers: {
@@ -43,9 +42,9 @@ interface ScriptedFieldsTableProps {
 
 interface ScriptedFieldsTableState {
   deprecatedLangsInUse: string[];
-  fieldToDelete: ScriptedFieldItem | undefined;
+  fieldToDelete: IndexPatternField | undefined;
   isDeleteConfirmationModalVisible: boolean;
-  fields: ScriptedFieldItem[];
+  fields: IndexPatternField[];
 }
 
 export class ScriptedFieldsTable extends Component<
@@ -75,7 +74,7 @@ export class ScriptedFieldsTable extends Component<
     const supportedLangs = getSupportedScriptingLanguages();
 
     for (const field of fields) {
-      const lang: string = field.lang;
+      const lang: string = field.lang!;
       if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
         deprecatedLangsInUse.push(lang);
       }
@@ -112,7 +111,7 @@ export class ScriptedFieldsTable extends Component<
     return filteredFields;
   };
 
-  startDeleteField = (field: ScriptedFieldItem) => {
+  startDeleteField = (field: IndexPatternField) => {
     this.setState({ fieldToDelete: field, isDeleteConfirmationModalVisible: true });
   };
 
@@ -124,7 +123,7 @@ export class ScriptedFieldsTable extends Component<
     const { indexPattern, onRemoveField } = this.props;
     const { fieldToDelete } = this.state;
 
-    indexPattern.removeScriptedField(fieldToDelete);
+    indexPattern.removeScriptedField(fieldToDelete!.name);
 
     if (onRemoveField) {
       onRemoveField();

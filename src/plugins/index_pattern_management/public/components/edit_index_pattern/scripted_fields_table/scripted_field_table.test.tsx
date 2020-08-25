@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern } from '../../../../../../plugins/data/common/index_patterns';
+import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -59,10 +59,10 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
 
 describe('ScriptedFieldsTable', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPattern;
 
   beforeEach(() => {
     indexPattern = getIndexPatternMock({
@@ -165,7 +165,9 @@ describe('ScriptedFieldsTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
-    component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
+    component
+      .instance()
+      .startDeleteField({ name: 'ScriptedField', lang: '', script: '' } as IndexPatternField);
     await component.update();
 
     // Ensure the modal is visible
@@ -176,17 +178,21 @@ describe('ScriptedFieldsTable', () => {
     const removeScriptedField = jest.fn();
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
-        indexPattern={{
-          ...indexPattern,
-          removeScriptedField,
-        }}
+        indexPattern={
+          ({
+            ...indexPattern,
+            removeScriptedField,
+          } as unknown) as IndexPattern
+        }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
       />
     );
 
     await component.update(); // Fire `componentWillMount()`
-    component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
+    component
+      .instance()
+      .startDeleteField({ name: 'ScriptedField', lang: '', script: '' } as IndexPatternField);
 
     await component.update();
     await component.instance().deleteField();
