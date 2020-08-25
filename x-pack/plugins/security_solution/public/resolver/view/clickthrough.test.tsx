@@ -10,6 +10,7 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
+import { Vector2, AABB } from '../types';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -162,6 +163,11 @@ describe('Resolver, when analyzing a tree that has two related events for the or
   });
 
   describe('when it has loaded', () => {
+    let originBounds: AABB;
+    let firstChildBounds: AABB;
+    let secondChildBounds: AABB;
+    let edgeStartingCoordinates: Vector2[];
+    let edgeTerminalCoordinates: Vector2[];
     beforeEach(async () => {
       await expect(
         simulator.map(() => ({
@@ -176,6 +182,31 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         graphErrorElements: 0,
         originNodeButton: 1,
       });
+
+      originBounds = computedNodeBoundaries(entityIDs.origin);
+      firstChildBounds = computedNodeBoundaries(entityIDs.firstChild);
+      secondChildBounds = computedNodeBoundaries(entityIDs.secondChild);
+      edgeStartingCoordinates = computedEdgeStartingCoordinates();
+      edgeTerminalCoordinates = computedEdgeTerminalCoordinates();
+    });
+
+    it('should have one and only one outgoing edge from the origin node', () => {
+      // This winnows edges to the one(s) that "start" under the origin node
+      const edgesThatStartUnderneathOrigin = edgeStartingCoordinates.filter(
+        coordinateBoundaryFilter(originBounds)
+      );
+      expect(edgesThatStartUnderneathOrigin).toHaveLength(1);
+    });
+    it('leaf nodes should each have one and only one incoming edge', () => {
+      const edgesThatTerminateUnderneathFirstChild = edgeTerminalCoordinates.filter(
+        coordinateBoundaryFilter(firstChildBounds)
+      );
+      expect(edgesThatTerminateUnderneathFirstChild).toHaveLength(1);
+
+      const edgesThatTerminateUnderneathSecondChild = edgeTerminalCoordinates.filter(
+        coordinateBoundaryFilter(secondChildBounds)
+      );
+      expect(edgesThatTerminateUnderneathSecondChild).toHaveLength(1);
     });
 
     it('should render a related events button', async () => {
