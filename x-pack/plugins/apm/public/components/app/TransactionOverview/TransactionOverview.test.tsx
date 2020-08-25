@@ -4,25 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
+  fireEvent,
+  getByText,
   queryByLabelText,
   render,
-  getByText,
-  getByDisplayValue,
-  queryByDisplayValue,
-  fireEvent,
 } from '@testing-library/react';
 import { omit } from 'lodash';
-import { history } from '../../../../utils/history';
-import { TransactionOverview } from '..';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
-import * as useFetcherHook from '../../../../hooks/useFetcher';
-import { fromQuery } from '../../../shared/Links/url_helpers';
+import React from 'react';
 import { Router } from 'react-router-dom';
-import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { TransactionOverview } from './';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { UrlParamsProvider } from '../../../context/UrlParamsContext';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import * as useFetcherHook from '../../../hooks/useFetcher';
+import * as useServiceTransactionTypesHook from '../../../hooks/useServiceTransactionTypes';
+import { history } from '../../../utils/history';
+import { fromQuery } from '../../shared/Links/url_helpers';
 
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
@@ -85,7 +83,7 @@ describe('TransactionOverview', () => {
   const FILTER_BY_TYPE_LABEL = 'Transaction type';
 
   describe('when transactionType is selected and multiple transaction types are given', () => {
-    it('should render dropdown with transaction types', () => {
+    it('renders a radio group with transaction types', () => {
       const { container } = setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
@@ -94,9 +92,8 @@ describe('TransactionOverview', () => {
         },
       });
 
-      // secondType is selected in the dropdown
-      expect(queryByDisplayValue(container, 'secondType')).not.toBeNull();
-      expect(queryByDisplayValue(container, 'firstType')).toBeNull();
+      expect(getByText(container, 'firstType')).toBeInTheDocument();
+      expect(getByText(container, 'secondType')).toBeInTheDocument();
 
       expect(getByText(container, 'firstType')).not.toBeNull();
     });
@@ -110,22 +107,19 @@ describe('TransactionOverview', () => {
         },
       });
 
-      expect(queryByDisplayValue(container, 'firstType')).toBeNull();
+      expect(history.location.search).toEqual('?transactionType=secondType');
+      expect(getByText(container, 'firstType')).toBeInTheDocument();
+      expect(getByText(container, 'secondType')).toBeInTheDocument();
 
-      fireEvent.change(getByDisplayValue(container, 'secondType'), {
-        target: { value: 'firstType' },
-      });
+      fireEvent.click(getByText(container, 'firstType'));
 
       expect(history.push).toHaveBeenCalled();
-
-      getByDisplayValue(container, 'firstType');
-
-      expect(queryByDisplayValue(container, 'firstType')).not.toBeNull();
+      expect(history.location.search).toEqual('?transactionType=firstType');
     });
   });
 
   describe('when a transaction type is selected, and there are no other transaction types', () => {
-    it('should not render a dropdown with transaction types', () => {
+    it('does not render a radio group with transaction types', () => {
       const { container } = setup({
         serviceTransactionTypes: ['firstType'],
         urlParams: {
