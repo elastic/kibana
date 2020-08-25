@@ -98,7 +98,7 @@ export class SpacesClient {
           `SpacesClient.getAll(), using RBAC. returning 403/Forbidden. Not authorized for any spaces for ${purpose} purpose.`
         );
         this.auditLogger.spacesAuthorizationFailure(username, 'getAll');
-        throw Boom.forbidden();
+        return [];
       }
 
       this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized as string[]);
