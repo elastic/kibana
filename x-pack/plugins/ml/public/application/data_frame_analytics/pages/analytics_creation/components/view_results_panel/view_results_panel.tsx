@@ -21,7 +21,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
   const urlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
-  const redirectToAnalyticsJobPage = async () => {
+  const redirectToAnalyticsExplorationPage = async () => {
     const path = await urlGenerator.createUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
       jobId,
@@ -44,7 +44,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
             defaultMessage: 'View results for the analytics job.',
           }
         )}
-        onClick={redirectToAnalyticsJobPage}
+        onClick={redirectToAnalyticsExplorationPage}
         data-test-subj="analyticsWizardViewResultsCard"
       />
     </Fragment>
