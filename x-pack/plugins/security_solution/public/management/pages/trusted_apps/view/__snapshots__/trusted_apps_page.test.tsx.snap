@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TrustedAppsPage rendering 1`] = `
+<AdministrationListPage
+  beta={true}
+  subtitle={
+    <FormattedMessage
+      defaultMessage="View and configure trusted applications"
+      id="xpack.securitySolution.trustedapps.list.pageSubTitle"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Trusted Applications"
+      id="xpack.securitySolution.trustedapps.list.pageTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;

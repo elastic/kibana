@@ -38,7 +38,7 @@ describe('alterColumn', () => {
         const arbitraryRowIndex = 6;
 
         expect(newColumn.name).not.toBe(originalColumn.name);
-        expect(newColumn.type).not.toBe(originalColumn.type);
+        expect(newColumn.meta.type).not.toBe(originalColumn.meta.type);
         expect(typeof dateToString.rows[arbitraryRowIndex].timeISO).toBe('string');
         expect(new Date(dateToString.rows[arbitraryRowIndex].timeISO)).toEqual(
           new Date(testTable.rows[arbitraryRowIndex].time)
@@ -60,7 +60,7 @@ describe('alterColumn', () => {
       it('converts the column to the specified type', () => {
         const dateToString = fn(testTable, { column: 'time', type: 'string', name: 'timeISO' });
 
-        expect(typeof dateToString.columns[timeColumnIndex].type).toBe('string');
+        expect(typeof dateToString.columns[timeColumnIndex].meta.type).toBe('string');
         expect(typeof dateToString.rows[timeColumnIndex].timeISO).toBe('string');
         expect(new Date(dateToString.rows[timeColumnIndex].timeISO)).toEqual(
           new Date(testTable.rows[timeColumnIndex].time)
@@ -69,10 +69,10 @@ describe('alterColumn', () => {
 
       it('does not change column if type is not specified', () => {
         const unconvertedColumn = fn(testTable, { column: 'price', name: 'foo' });
-        const originalType = testTable.columns[priceColumnIndex].type;
+        const originalType = testTable.columns[priceColumnIndex].meta.type;
         const arbitraryRowIndex = 2;
 
-        expect(unconvertedColumn.columns[priceColumnIndex].type).toBe(originalType);
+        expect(unconvertedColumn.columns[priceColumnIndex].meta.type).toBe(originalType);
         expect(typeof unconvertedColumn.rows[arbitraryRowIndex].foo).toBe(originalType);
       });
 
@@ -99,7 +99,7 @@ describe('alterColumn', () => {
         const arbitraryRowIndex = 5;
 
         expect(newColumn.name).not.toBe(originalColumn.name);
-        expect(newColumn.type).not.toBe(originalColumn.type);
+        expect(newColumn.meta.type).not.toBe(originalColumn.meta.type);
         expect(typeof overwriteName.rows[arbitraryRowIndex].name).toBe('string');
         expect(new Date(overwriteName.rows[arbitraryRowIndex].name)).toEqual(
           new Date(testTable.rows[arbitraryRowIndex].time)
@@ -122,7 +122,7 @@ describe('alterColumn', () => {
       const numberToString = fn(testTable, { column: 'price', type: 'string' });
 
       expect(numberToString.columns[priceColumnIndex]).toHaveProperty('name', 'price');
-      expect(numberToString.columns[priceColumnIndex]).toHaveProperty('type', 'string');
+      expect(numberToString.columns[priceColumnIndex].meta).toHaveProperty('type', 'string');
 
       expect(typeof numberToString.rows[arbitraryRowIndex].price).toBe('string');
       expect(numberToString.rows[arbitraryRowIndex].price).toBe(
@@ -132,7 +132,7 @@ describe('alterColumn', () => {
       const stringToNumber = fn(numberToString, { column: 'price', type: 'number' });
 
       expect(stringToNumber.columns[priceColumnIndex]).toHaveProperty('name', 'price');
-      expect(stringToNumber.columns[priceColumnIndex]).toHaveProperty('type', 'number');
+      expect(stringToNumber.columns[priceColumnIndex].meta).toHaveProperty('type', 'number');
 
       expect(typeof stringToNumber.rows[arbitraryRowIndex].price).toBe('number');
 
@@ -146,7 +146,7 @@ describe('alterColumn', () => {
       const dateToString = fn(testTable, { column: 'time', type: 'string' });
 
       expect(dateToString.columns[timeColumnIndex]).toHaveProperty('name', 'time');
-      expect(dateToString.columns[timeColumnIndex]).toHaveProperty('type', 'string');
+      expect(dateToString.columns[timeColumnIndex].meta).toHaveProperty('type', 'string');
 
       expect(typeof dateToString.rows[arbitraryRowIndex].time).toBe('string');
       expect(new Date(dateToString.rows[arbitraryRowIndex].time)).toEqual(
@@ -156,7 +156,7 @@ describe('alterColumn', () => {
       const stringToDate = fn(dateToString, { column: 'time', type: 'date' });
 
       expect(stringToDate.columns[timeColumnIndex]).toHaveProperty('name', 'time');
-      expect(stringToDate.columns[timeColumnIndex]).toHaveProperty('type', 'date');
+      expect(stringToDate.columns[timeColumnIndex].meta).toHaveProperty('type', 'date');
       expect(new Date(stringToDate.rows[timeColumnIndex].time)).toBeInstanceOf(Date);
 
       expect(new Date(stringToDate.rows[timeColumnIndex].time)).toEqual(
@@ -169,7 +169,7 @@ describe('alterColumn', () => {
       const arbitraryRowIndex = 1;
 
       expect(dateToNumber.columns[timeColumnIndex]).toHaveProperty('name', 'time');
-      expect(dateToNumber.columns[timeColumnIndex]).toHaveProperty('type', 'number');
+      expect(dateToNumber.columns[timeColumnIndex].meta).toHaveProperty('type', 'number');
 
       expect(typeof dateToNumber.rows[arbitraryRowIndex].time).toBe('number');
       expect(dateToNumber.rows[arbitraryRowIndex].time).toEqual(
@@ -179,7 +179,7 @@ describe('alterColumn', () => {
       const numberToDate = fn(dateToNumber, { column: 'time', type: 'date' });
 
       expect(numberToDate.columns[timeColumnIndex]).toHaveProperty('name', 'time');
-      expect(numberToDate.columns[timeColumnIndex]).toHaveProperty('type', 'date');
+      expect(numberToDate.columns[timeColumnIndex].meta).toHaveProperty('type', 'date');
 
       expect(new Date(numberToDate.rows[arbitraryRowIndex].time)).toBeInstanceOf(Date);
       expect(new Date(numberToDate.rows[arbitraryRowIndex].time)).toEqual(
@@ -192,7 +192,7 @@ describe('alterColumn', () => {
       const arbitraryRowIndex = 7;
 
       expect(booleanToNumber.columns[inStockColumnIndex]).toHaveProperty('name', 'in_stock');
-      expect(booleanToNumber.columns[inStockColumnIndex]).toHaveProperty('type', 'number');
+      expect(booleanToNumber.columns[inStockColumnIndex].meta).toHaveProperty('type', 'number');
 
       expect(typeof booleanToNumber.rows[arbitraryRowIndex].in_stock).toBe('number');
       expect(booleanToNumber.rows[arbitraryRowIndex].in_stock).toEqual(
@@ -202,7 +202,7 @@ describe('alterColumn', () => {
       const numberToBoolean = fn(booleanToNumber, { column: 'in_stock', type: 'boolean' });
 
       expect(numberToBoolean.columns[inStockColumnIndex]).toHaveProperty('name', 'in_stock');
-      expect(numberToBoolean.columns[inStockColumnIndex]).toHaveProperty('type', 'boolean');
+      expect(numberToBoolean.columns[inStockColumnIndex].meta).toHaveProperty('type', 'boolean');
 
       expect(typeof numberToBoolean.rows[arbitraryRowIndex].in_stock).toBe('boolean');
       expect(numberToBoolean.rows[arbitraryRowIndex].in_stock).toEqual(
@@ -216,7 +216,7 @@ describe('alterColumn', () => {
 
       expect(stringToNull.columns[nameColumnIndex]).toHaveProperty('name', 'name');
 
-      expect(stringToNull.columns[nameColumnIndex]).toHaveProperty('type', 'null');
+      expect(stringToNull.columns[nameColumnIndex].meta).toHaveProperty('type', 'null');
 
       expect(stringToNull.rows[arbitraryRowIndex].name).toBe(null);
     });

@@ -50,7 +50,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
 
-  describe('vega chart in visualize app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/75699
+  describe.skip('vega chart in visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();

@@ -145,7 +145,10 @@ const processGroupByResults = (
   });
 };
 
-const buildFiltersFromCriteria = (params: LogDocumentCountAlertParams, timestampField: string) => {
+export const buildFiltersFromCriteria = (
+  params: Omit<LogDocumentCountAlertParams, 'count'>,
+  timestampField: string
+) => {
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
@@ -193,8 +196,8 @@ const buildFiltersFromCriteria = (params: LogDocumentCountAlertParams, timestamp
   return { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters };
 };
 
-const getGroupedESQuery = (
-  params: LogDocumentCountAlertParams,
+export const getGroupedESQuery = (
+  params: Omit<LogDocumentCountAlertParams, 'count'>,
   sourceConfiguration: InfraSource['configuration'],
   index: string
 ): object | undefined => {
@@ -253,8 +256,8 @@ const getGroupedESQuery = (
   };
 };
 
-const getUngroupedESQuery = (
-  params: LogDocumentCountAlertParams,
+export const getUngroupedESQuery = (
+  params: Omit<LogDocumentCountAlertParams, 'count'>,
   sourceConfiguration: InfraSource['configuration'],
   index: string
 ): object => {
