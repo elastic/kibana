@@ -39,6 +39,7 @@ import {
   SourceFilter,
   TypeMeta,
   UiSettingsCommon,
+  IndexPatternAttrs,
 } from '../types';
 import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
@@ -72,7 +73,7 @@ export class IndexPattern implements IIndexPattern {
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
-  public attributes: any;
+  public attributes?: IndexPatternAttrs;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -143,7 +144,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = new FieldList(this, [], this.onUnknownType);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
@@ -211,15 +212,15 @@ export class IndexPattern implements IIndexPattern {
       return [];
     }
     return specs.map((spec) => {
-      return { ...spec, displayName: this.getFieldSpecDisplayName(spec.name) };
+      return { ...spec, customLabel: this.getFieldSpecCustomLabel(spec.name) };
     });
   }
-  private getFieldSpecDisplayName(name: string) {
+  private getFieldSpecCustomLabel(name: string) {
     const displayNameMap = this.attributes?.fields;
     if (!displayNameMap || !displayNameMap[name]) {
-      return '';
+      return;
     }
-    return displayNameMap[name].displayName || '';
+    return displayNameMap[name].displayName;
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
@@ -378,7 +379,6 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields.add({
       name,
-      displayName: this.getFieldSpecDisplayName(name),
       script,
       type: fieldType,
       scripted: true,
@@ -387,6 +387,7 @@ export class IndexPattern implements IIndexPattern {
       searchable: true,
       count: 0,
       readFromDocValues: false,
+      shortDotsEnable: this.shortDotsEnable,
     });
 
     await this.save();
@@ -478,6 +479,18 @@ export class IndexPattern implements IIndexPattern {
         ? fieldMapping._serialize(this[fieldName])
         : this[fieldName];
     });
+
+    const attribFields = {} as any;
+    for (const field of this.fields) {
+      if (field.customLabel) {
+        attribFields[field.name] = { displayName: field.customLabel };
+      }
+    }
+    if (Object.keys(attribFields).length) {
+      body.attributes = { fields: attribFields };
+    } else {
+      delete body.attributes;
+    }
 
     return body;
   }

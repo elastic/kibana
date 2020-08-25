@@ -23,6 +23,7 @@ import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../../field_formats';
 import { IFieldType } from './types';
 import { OnNotification, FieldSpec } from '../types';
+import { shortenDottedString } from '../../utils';
 
 import { IndexPattern } from '../index_patterns';
 
@@ -30,18 +31,11 @@ export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
   readonly indexPattern: IndexPattern;
-  readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(
-    indexPattern: IndexPattern,
-    spec: FieldSpec,
-    displayName: string,
-    onNotification: OnNotification
-  ) {
+  constructor(indexPattern: IndexPattern, spec: FieldSpec, onNotification: OnNotification) {
     this.indexPattern = indexPattern;
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
-    this.displayName = spec.displayName ? spec.displayName : displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
     if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
@@ -82,6 +76,14 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  public get customLabel() {
+    return this.spec.customLabel;
+  }
+
+  public set customLabel(label) {
+    this.spec.customLabel = label;
+  }
+
   public get conflictDescriptions() {
     return this.spec.conflictDescriptions;
   }
@@ -93,6 +95,14 @@ export class IndexPatternField implements IFieldType {
   // read only attrs
   public get name() {
     return this.spec.name;
+  }
+
+  public get displayName() {
+    return this.spec.customLabel
+      ? this.spec.customLabel
+      : this.spec.shortDotsEnable
+      ? shortenDottedString(this.spec.name)
+      : this.spec.name;
   }
 
   public get type() {
@@ -161,6 +171,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
+      customLabel: this.customLabel,
     };
   }
 
@@ -178,6 +189,8 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
+      customLabel: this.customLabel,
+      shortDotsEnable: this.spec.shortDotsEnable,
       format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || undefined,
     };
   }

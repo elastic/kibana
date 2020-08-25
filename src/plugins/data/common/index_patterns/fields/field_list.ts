@@ -22,7 +22,6 @@ import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
 import { OnNotification, FieldSpec } from '../types';
 import { IndexPattern } from '../index_patterns';
-import { shortenDottedString } from '../../utils';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
@@ -40,7 +39,6 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
 export type CreateIndexPatternFieldList = (
   indexPattern: IndexPattern,
   specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
   onNotification?: OnNotification
 ) => IIndexPatternFieldList;
 
@@ -48,7 +46,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   private byName: FieldMap = new Map();
   private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;
-  private shortDotsEnable: boolean;
   private onNotification: OnNotification;
   private setByName = (field: IndexPatternField) => this.byName.set(field.name, field);
   private setByGroup = (field: IndexPatternField) => {
@@ -58,22 +55,9 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     this.groups.get(field.type)!.set(field.name, field);
   };
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
-  private calcDisplayName = (field: IFieldType) => {
-    if (field.displayName) {
-      return field.displayName;
-    }
-    return this.shortDotsEnable ? shortenDottedString(field.name) : field.name;
-  };
-
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[] = [],
-    shortDotsEnable = false,
-    onNotification = () => {}
-  ) {
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], onNotification = () => {}) {
     super();
     this.indexPattern = indexPattern;
-    this.shortDotsEnable = shortDotsEnable;
     this.onNotification = onNotification;
 
     specs.map((field) => this.add(field));
@@ -85,12 +69,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     ...(this.groups.get(type) || new Map()).values(),
   ];
   public readonly add = (field: FieldSpec) => {
-    const newField = new IndexPatternField(
-      this.indexPattern,
-      field,
-      this.calcDisplayName(field),
-      this.onNotification
-    );
+    const newField = new IndexPatternField(this.indexPattern, field, this.onNotification);
     this.push(newField);
     this.setByName(newField);
     this.setByGroup(newField);
@@ -105,12 +84,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   };
 
   public readonly update = (field: FieldSpec) => {
-    const newField = new IndexPatternField(
-      this.indexPattern,
-      field,
-      this.calcDisplayName(field),
-      this.onNotification
-    );
+    const newField = new IndexPatternField(this.indexPattern, field, this.onNotification);
     const index = this.findIndex((f) => f.name === newField.name);
     this.splice(index, 1, newField);
     this.setByName(newField);

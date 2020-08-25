@@ -19,7 +19,6 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
 
 import {
   EuiBasicTable,
@@ -211,8 +210,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: get(indexPattern, ['fieldFormatMap', spec.name, 'type', 'id']),
-      displayName: get(indexPattern, ['attributes', 'fields', spec.name, 'displayName'], ''),
+      fieldFormatId: indexPattern.fieldFormatMap[spec.name]?.type?.id,
+      displayName: indexPattern.attributes?.fields[spec.name]?.displayName || '',
       fieldFormatParams: format.params(),
     });
   }
@@ -846,12 +845,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     } else {
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
-    const attrFields = indexPattern.attributes?.fields;
-    const prevDisplayName =
-      attrFields && attrFields[field.name] ? attrFields[field.name].displayName : '';
-    if (prevDisplayName !== displayName) {
-      field.displayName = displayName;
-      set(indexPattern, ['attributes', 'fields', field.name, 'displayName'], displayName);
+
+    if (field.customLabel !== displayName) {
+      field.customLabel = displayName;
       indexPattern.fields.update(field);
     }
 
