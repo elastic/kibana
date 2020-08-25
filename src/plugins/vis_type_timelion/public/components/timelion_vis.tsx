@@ -38,6 +38,7 @@ function TimelionVisComponent(props: TimelionVisComponentProp) {
   return (
     <div className="timVis">
       <ChartComponent
+        applyFilter={props.vis.API.events.applyFilter}
         seriesList={props.visData.sheet[0]}
         renderComplete={props.renderComplete}
         interval={props.vis.getState().params.interval}

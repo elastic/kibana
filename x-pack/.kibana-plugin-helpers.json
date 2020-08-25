@@ -19,7 +19,6 @@
     "legacy/plugins/**/*",
     "legacy/server/**/*",
     "typings/**/*",
-    "webpackShims/*",
     "!**/README.md",
     "!__tests__",
     "!__tests__/**/*",

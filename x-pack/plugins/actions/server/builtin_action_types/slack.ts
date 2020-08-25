@@ -6,11 +6,14 @@
 
 import { URL } from 'url';
 import { curry } from 'lodash';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import HttpProxyAgent from 'http-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
 import {
@@ -20,6 +23,7 @@ import {
   ExecutorType,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { getProxyAgent } from './lib/get_proxy_agent';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -49,9 +53,11 @@ const ParamsSchema = schema.object({
 
 // customizing executor is only used for tests
 export function getActionType({
+  logger,
   configurationUtilities,
-  executor = slackExecutor,
+  executor = curry(slackExecutor)({ logger }),
 }: {
+  logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): SlackActionType {
@@ -85,12 +91,12 @@ function valdiateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureWhitelistedHostname(url.hostname);
-  } catch (whitelistError) {
+    configurationUtilities.ensureHostnameAllowed(url.hostname);
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -99,6 +105,7 @@ function valdiateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
+  { logger }: { logger: Logger },
   execOptions: SlackActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -109,8 +116,18 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
 
+  let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
+  if (execOptions.proxySettings) {
+    proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
+    logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
+  }
+
   try {
-    const webhook = new IncomingWebhook(webhookUrl);
+    // https://slack.dev/node-slack-sdk/webhook
+    // node-slack-sdk use Axios inside :)
+    const webhook = new IncomingWebhook(webhookUrl, {
+      agent: proxyAgent,
+    });
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
@@ -143,6 +160,8 @@ async function slackExecutor(
         },
       }
     );
+    logger.error(`error on ${actionId} slack action: ${errMessage}`);
+
     return errorResult(actionId, errMessage);
   }
 

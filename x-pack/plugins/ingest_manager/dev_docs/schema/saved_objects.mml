@@ -1,11 +1,11 @@
 classDiagram
-  agent_configs "1" -- "*"  package_configs
-  agent_configs "1" -- "*"  enrollment_api_keys
-  agent_configs "1" -- "*"  agents : is used
-  agent_configs "*" -- "*"  outputs
+  agent_policies "1" -- "*"  package_policies
+  agent_policies "1" -- "*"  enrollment_api_keys
+  agent_policies "1" -- "*"  agents : is used
+  agent_policies "*" -- "*"  outputs
   agents "1" -- "*"  agent_events
   agents "1" -- "*"  agent_events
-  package "1" -- "*"  package_configs
+  package "1" -- "*"  package_policies
 
   class package {
     installed
@@ -14,11 +14,11 @@ classDiagram
 	class agents {
 		status
     access_api_key_id
-    config_id
+    policy_id
     last_checkin
     local_metadata
     user_provided_metadata
-    actions // Encrypted  contains new agent config
+    actions // Encrypted  contains new agent policy
     default_api_key // Encrypted
 
 	}
@@ -28,7 +28,7 @@ classDiagram
     subtype
     agent_id
     action_id
-    config_id
+    policy_id
     stream_id
     timestamp
     message
@@ -36,18 +36,18 @@ classDiagram
     data
   }
 
-  class agent_configs {
-    package_configs // package_config ids
+  class agent_policies {
+    package_policies // package_policy ids
     name
     namespace
     description
     status
   }
 
-	class package_configs {
+	class package_policies {
     name
     namespace
-    config_id
+    policy_id
     enabled
     package
     output_id
@@ -64,7 +64,7 @@ classDiagram
 	}
 
   class enrollment_api_keys {
-    config_id
+    policy_id
     api_key_id
     api_key // Encrypted
   }

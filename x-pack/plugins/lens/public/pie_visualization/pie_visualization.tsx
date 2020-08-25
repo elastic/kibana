@@ -31,7 +31,7 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
-export const pieVisualization: Visualization<PieVisualizationState, PieVisualizationState> = {
+export const pieVisualization: Visualization<PieVisualizationState> = {
   id: 'lnsPie',
 
   visualizationTypes: [
@@ -90,8 +90,6 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions: suggestions,
 

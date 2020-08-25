@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuditMessageBase } from '../../../../../ml/public';
 import { MlError } from '../ml/types';
+import { MlSummaryJob } from '../../../../../ml/public';
 
 export interface Group {
   id: string;
@@ -98,28 +98,6 @@ export interface MlSetupArgs {
   prefix?: string;
 }
 
-/**
- * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
- */
-export interface JobSummary {
-  auditMessage?: AuditMessageBase;
-  datafeedId: string;
-  datafeedIndices: string[];
-  datafeedState: string;
-  description: string;
-  earliestTimestampMs?: number;
-  latestResultsTimestampMs?: number;
-  groups: string[];
-  hasDatafeed: boolean;
-  id: string;
-  isSingleMetricViewerJob: boolean;
-  jobState: string;
-  latestTimestampMs?: number;
-  memory_status: string;
-  nodeName?: string;
-  processed_record_count: number;
-}
-
 export interface Detector {
   detector_description: string;
   function: string;
@@ -133,10 +111,10 @@ export interface CustomURL {
 }
 
 /**
- * Representation of an ML Job as used by the SIEM App -- a composition of ModuleJob and JobSummary
+ * Representation of an ML Job as used by the Security Solution App -- a composition of ModuleJob and MlSummaryJob
  * that includes necessary metadata like moduleName, defaultIndexPattern, etc.
  */
-export interface SiemJob extends JobSummary {
+export interface SecurityJob extends MlSummaryJob {
   moduleId: string;
   defaultIndexPattern: string;
   isCompatible: boolean;
@@ -144,7 +122,7 @@ export interface SiemJob extends JobSummary {
   isElasticJob: boolean;
 }
 
-export interface AugmentedSiemJobFields {
+export interface AugmentedSecurityJobFields {
   moduleId: string;
   defaultIndexPattern: string;
   isCompatible: boolean;

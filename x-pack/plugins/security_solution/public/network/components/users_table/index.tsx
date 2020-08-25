@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
   Direction,
@@ -26,7 +27,6 @@ import {
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
-import { assertUnreachable } from '../../../common/lib/helpers';
 const tableType = networkModel.IpDetailsTableType.users;
 
 interface OwnProps {

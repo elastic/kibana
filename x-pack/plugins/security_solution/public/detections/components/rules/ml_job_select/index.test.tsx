@@ -8,14 +8,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MlJobSelect } from './index';
-import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useFormFieldMock } from '../../../../common/mock';
-jest.mock('../../../../common/components/ml_popover/hooks/use_siem_jobs');
+jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
 jest.mock('../../../../common/lib/kibana');
 
 describe('MlJobSelect', () => {
   beforeAll(() => {
-    (useSiemJobs as jest.Mock).mockReturnValue([false, []]);
+    (useSecurityJobs as jest.Mock).mockReturnValue({ loading: false, jobs: [] });
   });
 
   it('renders correctly', () => {
