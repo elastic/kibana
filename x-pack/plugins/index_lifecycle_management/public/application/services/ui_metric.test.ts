@@ -5,14 +5,13 @@
  */
 
 import {
-  PHASE_INDEX_PRIORITY,
   UIM_CONFIG_COLD_PHASE,
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_FREEZE_INDEX,
-} from '../constants';
-
-import { defaultColdPhase, defaultWarmPhase } from '../store/defaults';
+  defaultNewWarmPhase,
+  defaultNewColdPhase,
+} from '../constants/';
 
 import { getUiMetricsForPhases } from './ui_metric';
 jest.mock('ui/new_platform');
@@ -22,9 +21,10 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         cold: {
+          min_age: '0ms',
           actions: {
             set_priority: {
-              priority: defaultColdPhase[PHASE_INDEX_PRIORITY],
+              priority: parseInt(defaultNewColdPhase.phaseIndexPriority, 10),
             },
           },
         },
@@ -36,9 +36,10 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         warm: {
+          min_age: '0ms',
           actions: {
             set_priority: {
-              priority: defaultWarmPhase[PHASE_INDEX_PRIORITY],
+              priority: parseInt(defaultNewWarmPhase.phaseIndexPriority, 10),
             },
           },
         },
@@ -50,9 +51,10 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         warm: {
+          min_age: '0ms',
           actions: {
             set_priority: {
-              priority: defaultWarmPhase[PHASE_INDEX_PRIORITY] + 1,
+              priority: parseInt(defaultNewWarmPhase.phaseIndexPriority, 10) + 1,
             },
           },
         },
@@ -64,10 +66,11 @@ describe('getUiMetricsForPhases', () => {
     expect(
       getUiMetricsForPhases({
         cold: {
+          min_age: '0ms',
           actions: {
             freeze: {},
             set_priority: {
-              priority: defaultColdPhase[PHASE_INDEX_PRIORITY],
+              priority: parseInt(defaultNewColdPhase.phaseIndexPriority, 10),
             },
           },
         },
