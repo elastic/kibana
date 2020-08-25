@@ -23,7 +23,7 @@ interface Metadata {
 }
 
 /**
- * A simple mock dataAccessLayer possible that returns a tree with 0 ancestors and 2 direct children. 1 related event is returned. The parameter to `entities` is ignored.
+ * A simple mock dataAccessLayer that rejects on any data requests.
  */
 export function noResolverDataReturned(): {
   dataAccessLayer: DataAccessLayer;
