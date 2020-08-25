@@ -25,7 +25,6 @@ describe('test actions handlers schema', () => {
       NewAgentActionSchema.validate({
         type: 'CONFIG_CHANGE',
         data: 'data',
-        sent_at: '2020-03-14T19:45:02.620Z',
       })
     ).toBeTruthy();
   });
@@ -34,7 +33,6 @@ describe('test actions handlers schema', () => {
     expect(() => {
       NewAgentActionSchema.validate({
         data: 'data',
-        sent_at: '2020-03-14T19:45:02.620Z',
       });
     }).toThrowError();
   });
@@ -55,7 +53,6 @@ describe('test actions handlers', () => {
         action: {
           type: 'CONFIG_CHANGE',
           data: 'data',
-          sent_at: '2020-03-14T19:45:02.620Z',
         },
       },
       params: {
@@ -68,7 +65,6 @@ describe('test actions handlers', () => {
     const agentAction = ({
       type: 'CONFIG_CHANGE',
       id: 'action1',
-      sent_at: '2020-03-14T19:45:02.620Z',
       timestamp: '2019-01-04T14:32:03.36764-05:00',
       created_at: '2020-03-14T19:45:02.620Z',
     } as unknown) as AgentAction;

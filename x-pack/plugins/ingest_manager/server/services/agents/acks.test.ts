@@ -39,7 +39,7 @@ describe('test agent acks services', () => {
         attributes: {
           type: 'CONFIG_CHANGE',
           agent_id: 'id',
-          sent_at: '2020-03-14T19:45:02.620Z',
+          acknowledged_at: '2020-03-14T19:45:02.620Z',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
           created_at: '2020-03-14T19:45:02.620Z',
         },
@@ -56,7 +56,7 @@ describe('test agent acks services', () => {
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
-              sent_at: '2020-03-14T19:45:02.620Z',
+              acknowledged_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               created_at: '2020-03-14T19:45:02.620Z',
             },
@@ -70,6 +70,7 @@ describe('test agent acks services', () => {
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
+        not_acknowledged_actions: [],
       } as unknown) as Agent,
       [
         {
@@ -86,7 +87,7 @@ describe('test agent acks services', () => {
         type: 'CONFIG_CHANGE',
         id: 'action1',
         agent_id: 'id',
-        sent_at: '2020-03-14T19:45:02.620Z',
+        acknowledged_at: '2020-03-14T19:45:02.620Z',
         timestamp: '2019-01-04T14:32:03.36764-05:00',
         created_at: '2020-03-14T19:45:02.620Z',
       } as unknown) as AgentAction,
@@ -112,7 +113,7 @@ describe('test agent acks services', () => {
         attributes: {
           type: 'CONFIG_CHANGE',
           agent_id: 'id',
-          sent_at: '2020-03-14T19:45:02.620Z',
+          acknowledged_at: '2020-03-14T19:45:02.620Z',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
           created_at: '2020-03-14T19:45:02.620Z',
           data: JSON.stringify({
@@ -193,7 +194,7 @@ describe('test agent acks services', () => {
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
-              sent_at: '2020-03-14T19:45:02.620Z',
+              acknowledged_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               created_at: '2020-03-14T19:45:02.620Z',
             },
@@ -208,6 +209,7 @@ describe('test agent acks services', () => {
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
         policy_id: 'policy1',
+        not_acknowledged_actions: ['actionNotAcknowledged:id', 'action1'],
       } as unknown) as Agent,
       [
         {
@@ -224,6 +226,9 @@ describe('test agent acks services', () => {
     expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "not_acknowledged_actions": Array [
+            "actionNotAcknowledged:id",
+          ],
           "packages": Array [
             "system",
           ],
@@ -254,7 +259,7 @@ describe('test agent acks services', () => {
         attributes: {
           type: 'CONFIG_CHANGE',
           agent_id: 'id',
-          sent_at: '2020-03-14T19:45:02.620Z',
+          acknowledged_at: '2020-03-14T19:45:02.620Z',
           timestamp: '2019-01-04T14:32:03.36764-05:00',
           created_at: '2020-03-14T19:45:02.620Z',
           data: JSON.stringify({
@@ -335,7 +340,7 @@ describe('test agent acks services', () => {
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
-              sent_at: '2020-03-14T19:45:02.620Z',
+              acknowledged_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               created_at: '2020-03-14T19:45:02.620Z',
             },
@@ -351,6 +356,7 @@ describe('test agent acks services', () => {
         type: AGENT_TYPE_PERMANENT,
         policy_id: 'policy1',
         policy_revision: 100,
+        not_acknowledged_actions: [],
       } as unknown) as Agent,
       [
         {
@@ -363,7 +369,7 @@ describe('test agent acks services', () => {
       ]
     );
     expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(1);
+    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(2);
   });
 
   it('should fail for actions that cannot be found on agent actions list', async () => {
@@ -388,6 +394,7 @@ describe('test agent acks services', () => {
         ({
           id: 'id',
           type: AGENT_TYPE_PERMANENT,
+          not_acknowledged_actions: [],
         } as unknown) as Agent,
         [
           ({
@@ -418,7 +425,7 @@ describe('test agent acks services', () => {
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
-              sent_at: '2020-03-14T19:45:02.620Z',
+              acknowledged_at: '2020-03-14T19:45:02.620Z',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               created_at: '2020-03-14T19:45:02.620Z',
             },
@@ -433,6 +440,7 @@ describe('test agent acks services', () => {
         ({
           id: 'id',
           type: AGENT_TYPE_PERMANENT,
+          not_acknowledged_actions: [],
         } as unknown) as Agent,
         [
           ({
