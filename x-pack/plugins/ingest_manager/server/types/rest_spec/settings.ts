@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { isDiffPathProtocol } from '../../../common';
 
 export const GetSettingsRequestSchema = {};
 
@@ -11,7 +12,15 @@ export const PutSettingsRequestSchema = {
   body: schema.object({
     agent_auto_upgrade: schema.maybe(schema.boolean()),
     package_auto_upgrade: schema.maybe(schema.boolean()),
-    kibana_url: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+    kibana_url: schema.maybe(
+      schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+        validate: (value) => {
+          if (isDiffPathProtocol(value)) {
+            return 'URL protocol and path must be the same';
+          }
+        },
+      })
+    ),
     kibana_ca_sha256: schema.maybe(schema.string()),
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
   }),

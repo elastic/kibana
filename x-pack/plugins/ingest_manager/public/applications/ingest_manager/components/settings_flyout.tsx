@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import { useComboInput, useCore, useGetSettings, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
+import { isDiffPathProtocol } from '../../../../common/';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
@@ -36,6 +37,13 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useCore();
   const kibanaUrlInput = useComboInput([], (value) => {
+    if (value.length === 0) {
+      return [
+        i18n.translate('xpack.ingestManager.settings.kibanaUrlEmptyError', {
+          defaultMessage: 'At least one URL is required',
+        }),
+      ];
+    }
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
         i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
@@ -43,10 +51,10 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         }),
       ];
     }
-    if (value.length === 0) {
+    if (isDiffPathProtocol(value)) {
       return [
-        i18n.translate('xpack.ingestManager.settings.kibanaUrlEmptyError', {
-          defaultMessage: 'At least one URL is required',
+        i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
+          defaultMessage: 'URL protocol and path must be the same',
         }),
       ];
     }
