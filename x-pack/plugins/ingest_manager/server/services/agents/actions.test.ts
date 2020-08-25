@@ -17,7 +17,6 @@ describe('test agent actions services', () => {
       agent_id: 'agentid',
       type: 'CONFIG_CHANGE',
       data: { content: 'data' },
-      sent_at: '2020-03-14T19:45:02.620Z',
       created_at: '2020-03-14T19:45:02.620Z',
     };
     mockSavedObjectsClient.create.mockReturnValue(
@@ -32,6 +31,5 @@ describe('test agent actions services', () => {
     expect(createdAction).toBeDefined();
     expect(createdAction?.type).toEqual(newAgentAction.type);
     expect(createdAction?.data).toEqual(JSON.stringify(newAgentAction.data));
-    expect(createdAction?.sent_at).toEqual(newAgentAction.sent_at);
   });
 });

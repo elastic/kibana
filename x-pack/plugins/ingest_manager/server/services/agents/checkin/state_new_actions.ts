@@ -134,7 +134,10 @@ async function createAgentActionFromAgentPolicy(
     type: 'CONFIG_CHANGE',
     data: { config: newAgentPolicy } as any,
     created_at: new Date().toISOString(),
-    sent_at: undefined,
+  });
+
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
+    not_acknowledged_actions: [...agent.not_acknowledged_actions, policyChangeAction.id],
   });
 
   return [policyChangeAction];

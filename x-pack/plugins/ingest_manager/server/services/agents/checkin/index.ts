@@ -44,7 +44,7 @@ export async function agentCheckin(
   }
 
   // Check if some actions are not acknowledged
-  let actions = await getAgentActionsForCheckin(soClient, agent.id);
+  let actions = await getAgentActionsForCheckin(soClient, agent);
   if (actions.length > 0) {
     return { actions };
   }

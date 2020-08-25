@@ -24,6 +24,7 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
     access_api_key: undefined,
     status: undefined,
     packages: so.attributes.packages ?? [],
+    not_acknowledged_actions: so.attributes.not_acknowledged_actions ?? [],
   };
 }
 

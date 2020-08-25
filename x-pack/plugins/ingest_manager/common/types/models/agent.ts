@@ -25,22 +25,22 @@ export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE'
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
-  sent_at?: string;
 }
 
 export interface AgentAction extends NewAgentAction {
   id: string;
   agent_id: string;
   created_at: string;
+  acknowledged_at?: string;
 }
 
 export interface AgentActionSOAttributes {
   type: AgentActionType;
-  sent_at?: string;
   timestamp?: string;
   created_at: string;
   agent_id: string;
   data?: string;
+  acknowledged_at?: string;
 }
 
 export interface NewAgentEvent {
@@ -103,9 +103,11 @@ export interface Agent extends AgentBase {
   access_api_key?: string;
   status?: string;
   packages: string[];
+  not_acknowledged_actions: string[];
 }
 
 export interface AgentSOAttributes extends AgentBase {
   current_error_events?: string;
   packages?: string[];
+  not_acknowledged_actions?: string[];
 }

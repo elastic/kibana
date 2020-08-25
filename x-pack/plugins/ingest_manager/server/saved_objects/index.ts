@@ -78,6 +78,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         updated_at: { type: 'date' },
         current_error_events: { type: 'text', index: false },
         packages: { type: 'keyword' },
+        not_acknowledged_actions: { type: 'keyword', index: false },
       },
     },
     migrations: {
@@ -96,8 +97,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         agent_id: { type: 'keyword' },
         type: { type: 'keyword' },
         data: { type: 'binary' },
-        sent_at: { type: 'date' },
         created_at: { type: 'date' },
+        acknowledged_at: { type: 'date' },
       },
     },
   },
@@ -351,11 +352,12 @@ export function registerEncryptedSavedObjects(
       'unenrolled_at',
       'unenrollment_started_at',
       'packages',
+      'not_acknowledged_actions',
     ]),
   });
   encryptedSavedObjects.registerType({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['data']),
-    attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
+    attributesToExcludeFromAAD: new Set(['agent_id', 'acknowledged_at', 'type', 'created_at']),
   });
 }

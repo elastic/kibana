@@ -73,8 +73,17 @@ export async function acknowledgeAgentActions(
   const agentPolicy = getLatestAgentPolicyIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(agentPolicy ? [buildUpdateAgentPolicy(agent.id, agentPolicy)] : []),
-    ...buildUpdateAgentActionSentAt(actionIds),
+    {
+      type: AGENT_SAVED_OBJECT_TYPE,
+      id: agent.id,
+      attributes: {
+        ...(agentPolicy ? buildUpdateAgentPolicy(agent.id, agentPolicy) : {}),
+        not_acknowledged_actions: agent.not_acknowledged_actions.filter(
+          (actionId) => !actionIds.includes(actionId)
+        ),
+      },
+    },
+    ...buildUpdateAgentActionAcknowledgedAt(actionIds),
   ]);
 
   return actions;
@@ -107,24 +116,20 @@ function buildUpdateAgentPolicy(agentId: string, agentPolicy: FullAgentPolicy) {
   }, []);
 
   return {
-    type: AGENT_SAVED_OBJECT_TYPE,
-    id: agentId,
-    attributes: {
-      policy_revision: agentPolicy.revision,
-      packages,
-    },
+    policy_revision: agentPolicy.revision,
+    packages,
   };
 }
 
-function buildUpdateAgentActionSentAt(
+function buildUpdateAgentActionAcknowledgedAt(
   actionsIds: string[],
-  sentAt: string = new Date().toISOString()
+  acknowledgedAt: string = new Date().toISOString()
 ) {
   return actionsIds.map((actionId) => ({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     id: actionId,
     attributes: {
-      sent_at: sentAt,
+      acknowledged_at: acknowledgedAt,
     },
   }));
 }
