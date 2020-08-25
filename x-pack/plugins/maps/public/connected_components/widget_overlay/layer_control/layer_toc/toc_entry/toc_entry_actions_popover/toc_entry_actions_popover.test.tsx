@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
-import { AbstractStyle, IStyle } from '../../../../../../classes/styles/style';
+import { IStyle } from '../../../../../../classes/styles/style';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
@@ -17,7 +17,15 @@ let supportsFitToBounds: boolean;
 
 class MockSource extends AbstractSource implements ISource {}
 
-class MockStyle extends AbstractStyle implements IStyle {}
+class MockStyle implements IStyle {
+  renderEditor() {
+    return null;
+  }
+
+  getType() {
+    return 'mockStyle';
+  }
+}
 
 class LayerMock extends AbstractLayer implements ILayer {
   constructor() {
@@ -25,7 +33,7 @@ class LayerMock extends AbstractLayer implements ILayer {
       type: 'mySourceType',
     };
     const source = new MockSource(sourceDescriptor);
-    const style = new MockStyle({ type: 'myStyleType' });
+    const style = new MockStyle();
     const layerDescriptor = {
       id: 'testLayer',
       sourceDescriptor,
