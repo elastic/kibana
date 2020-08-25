@@ -27,7 +27,7 @@ export type FieldProps = {
   name: string;
 };
 
-type FieldOptions = Array<EuiSelectableOption<{ value?: string }>>;
+type FieldOptions = Array<EuiSelectableOption<{ value: string }>>;
 
 function sortByLabel(a: EuiSelectableOption, b: EuiSelectableOption): number {
   return a.label.localeCompare(b.label);
@@ -107,7 +107,9 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
     });
   };
 
-  _onSelect = (options: FieldOptions) => {
+  _onSelect = (selectableOptions: EuiSelectableOption[]) => {
+    // EUI team to remove casting: https://github.com/elastic/eui/issues/3966
+    const options = selectableOptions as FieldOptions;
     const checkedFields: string[] = options
       .filter((option) => {
         return option.checked === 'on';
