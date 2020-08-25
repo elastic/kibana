@@ -7,17 +7,15 @@
 import React from 'react';
 import { EuiPageContent, EuiSpacer, EuiLoadingContent } from '@elastic/eui';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { EngineOverviewHeader } from '../engine_overview_header';
-
-import './empty_states.scss';
+import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
+import { EngineOverviewHeader } from './header';
 
 export const LoadingState: React.FC = () => {
   return (
     <>
       <SetPageChrome isRoot />
       <EngineOverviewHeader />
-      <EuiPageContent className="emptyState">
+      <EuiPageContent paddingSize="l">
         <EuiLoadingContent lines={5} />
         <EuiSpacer size="xxl" />
         <EuiLoadingContent lines={4} />

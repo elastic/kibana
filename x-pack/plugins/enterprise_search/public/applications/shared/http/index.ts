@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LoadingState } from './loading_state';
-export { EmptyState } from './empty_state';
-export { ErrorState } from './error_state';
+export { HttpLogic, IHttpLogicValues, IHttpLogicActions } from './http_logic';
+export { HttpProvider } from './http_provider';
