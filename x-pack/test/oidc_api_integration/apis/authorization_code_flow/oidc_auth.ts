@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.be('realm');
     });
 
     describe('initiating handshake', () => {
@@ -233,6 +234,9 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
 
@@ -284,6 +288,9 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         expect(apiResponse.body.username).to.be('user2');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
 

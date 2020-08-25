@@ -15,8 +15,7 @@ export default function ({ getService }) {
   const validUsername = kibanaServerConfig.username;
   const validPassword = kibanaServerConfig.password;
 
-  // Failing: See https://github.com/elastic/kibana/issues/75707
-  describe.skip('Basic authentication', () => {
+  describe('Basic authentication', () => {
     it('should redirect non-AJAX requests to the login page if not authenticated', async () => {
       const response = await supertest.get('/abc/xyz').expect(302);
 
@@ -148,6 +147,12 @@ export default function ({ getService }) {
         'authentication_type',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
+      expect(apiResponse.body.authentication_provider).to.eql('__http__');
+      expect(apiResponse.body.authentication_realm).to.eql({
+        name: 'reserved',
+        type: 'reserved',
+      });
+      expect(apiResponse.body.authentication_type).to.be('realm');
     });
 
     describe('with session cookie', () => {
@@ -191,6 +196,12 @@ export default function ({ getService }) {
           'authentication_type',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
+        expect(apiResponse.body.authentication_provider).to.eql('__http__');
+        expect(apiResponse.body.authentication_realm).to.eql({
+          name: 'reserved',
+          type: 'reserved',
+        });
+        expect(apiResponse.body.authentication_type).to.be('realm');
       });
 
       it('should extend cookie on every successful non-system API call', async () => {

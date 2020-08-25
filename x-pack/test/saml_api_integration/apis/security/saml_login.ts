@@ -60,6 +60,9 @@ export default function ({ getService }: FtrProviderContext) {
     ]);
 
     expect(apiResponse.body.username).to.be(username);
+    expect(apiResponse.body.authentication_realm).to.eql({ name: 'saml1', type: 'saml' });
+    expect(apiResponse.body.authentication_provider).to.eql('saml');
+    expect(apiResponse.body.authentication_type).to.be('token');
   }
 
   describe('SAML authentication', () => {
@@ -92,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.be('realm');
     });
 
     describe('initiating handshake', () => {
