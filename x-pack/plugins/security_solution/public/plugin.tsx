@@ -320,7 +320,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     return {
-      resolver: () => import('./resolver'),
+      resolver: async () => {
+        const { resolverPluginSetup } = await import('./resolver');
+        return resolverPluginSetup();
+      },
     };
   }
 

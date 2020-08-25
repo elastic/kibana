@@ -16,7 +16,7 @@ import { noAncestorsTwoChildren } from './data_access_layer/mocks/no_ancestors_t
 /**
  * Provide access to Resolver APIs.
  */
-export async function resolverPluginSetup(): ResolverPluginSetup {
+export function resolverPluginSetup(): ResolverPluginSetup {
   return {
     Provider,
     storeFactory: resolverStoreFactory,
