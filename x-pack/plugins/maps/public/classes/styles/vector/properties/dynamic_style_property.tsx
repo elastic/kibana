@@ -11,7 +11,6 @@ import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
   FIELD_ORIGIN,
-  LAYER_STYLE_TYPE,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -90,11 +89,8 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   getRangeFieldMeta() {
-    const style = this._layer.getStyle();
-    if (style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-      return null;
-    }
-    const styleMeta = (style as IVectorStyle).getStyleMeta();
+    const style = this._layer.getStyle() as IVectorStyle;
+    const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
     const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
 
@@ -118,11 +114,8 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   getCategoryFieldMeta() {
-    const style = this._layer.getStyle();
-    if (style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-      return null;
-    }
-    const styleMeta = (style as IVectorStyle).getStyleMeta();
+    const style = this._layer.getStyle() as IVectorStyle;
+    const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
     const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
 
