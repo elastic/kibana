@@ -868,6 +868,7 @@ export class VectorLayer extends AbstractLayer {
         data: EMPTY_FEATURE_COLLECTION,
       });
     } else if (mbSource.type !== 'geojson') {
+      // Recreate source when existing source is not geojson. This can occur when layer changes from tile layer to vector layer.
       this.getMbLayerIds().forEach((mbLayerId) => {
         if (mbMap.getLayer(mbLayerId)) {
           mbMap.removeLayer(mbLayerId);

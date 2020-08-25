@@ -9,7 +9,7 @@ import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
 import { Logger } from 'src/core/server';
-import { Feature, FeatureCollection, GeoJsonProperties, Polygon } from 'geojson';
+import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
@@ -64,9 +64,6 @@ export async function getTile({
           },
         },
       };
-
-      // http://localhost:5601/veq/api/maps/mvt/getTile?x=0&y=0&z=0&geometryFieldName=coordinates&index=world_countries_v1&fields=_id&requestBody=(_source:(excludes:!()),docvalue_fields:!(),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),script_fields:(),size:10000,stored_fields:!(%27*%27))
-
       requestBody.query.bool.filter.push(geoShapeFilter);
 
       const esSearchQuery = {
@@ -124,7 +121,7 @@ export async function getTile({
         const featureCollection = hitsToGeoJson(
           // @ts-expect-error
           result.hits.hits,
-          (hit: GeoJsonProperties) => {
+          (hit: Record<string, unknown>) => {
             return flattenHit(geometryFieldName, hit);
           },
           geometryFieldName,

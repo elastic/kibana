@@ -18,7 +18,7 @@ export function clampToLonBounds(lon: number): number;
 
 export function hitsToGeoJson(
   hits: any[],
-  flattenHit: (geojsonProperties: GeoJsonProperties) => GeoJsonProperties,
+  flattenHit: (elasticSearchHit: Record<string, unknown>) => GeoJsonProperties,
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE,
   epochMillisFields: string[]

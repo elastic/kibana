@@ -13,12 +13,12 @@
 // todo: Ideally, this should adapt/reuse from https://github.com/elastic/kibana/blob/52b42a81faa9dd5c102b9fbb9a645748c3623121/src/plugins/data/common/index_patterns/index_patterns/flatten_hit.ts#L26
 import { GeoJsonProperties } from 'geojson';
 
-export function flattenHit(geometryField: string, hit: GeoJsonProperties): GeoJsonProperties {
+export function flattenHit(geometryField: string, hit: Record<string, unknown>): GeoJsonProperties {
   const flat: GeoJsonProperties = {};
   if (hit) {
-    flattenSource(flat, '', hit._source, geometryField);
+    flattenSource(flat, '', hit._source as Record<string, unknown>, geometryField);
     if (hit.fields) {
-      flattenFields(flat, hit.fields);
+      flattenFields(flat, hit.fields as Array<Record<string, unknown>>);
     }
 
     // Attach meta fields
@@ -31,7 +31,7 @@ export function flattenHit(geometryField: string, hit: GeoJsonProperties): GeoJs
 function flattenSource(
   accum: GeoJsonProperties,
   path: string,
-  properties: GeoJsonProperties = {},
+  properties: Record<string, unknown> = {},
   geometryField: string
 ): GeoJsonProperties {
   accum = accum || {};
@@ -42,7 +42,12 @@ function flattenSource(
       if (geometryField === newKey) {
         value = properties[key]; // do not deep-copy the geometry
       } else if (properties[key] !== null && typeof value === 'object' && !Array.isArray(value)) {
-        value = flattenSource(accum, newKey, properties[key], geometryField);
+        value = flattenSource(
+          accum,
+          newKey,
+          properties[key] as Record<string, unknown>,
+          geometryField
+        );
       } else {
         value = properties[key];
       }
@@ -52,7 +57,7 @@ function flattenSource(
   return accum;
 }
 
-function flattenFields(accum: GeoJsonProperties = {}, fields: GeoJsonProperties[]) {
+function flattenFields(accum: GeoJsonProperties = {}, fields: Array<Record<string, unknown>>) {
   accum = accum || {};
   for (const key in fields) {
     if (fields.hasOwnProperty(key)) {

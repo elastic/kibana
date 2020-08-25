@@ -97,7 +97,6 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epoc
     delete properties[geoFieldName];
 
     //create new geojson Feature for every individual geojson geometry.
-    //todo: Consider using GeometryCollection instead.
     for (let j = 0; j < tmpGeometriesAccumulator.length; j++) {
       features.push({
         type: 'Feature',
