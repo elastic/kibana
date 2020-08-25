@@ -190,6 +190,8 @@ export const Kv: FunctionComponent = () => {
 
       <UseField component={Field} config={fieldsConfig.trim_key} path="fields.trim_key" />
 
+      <UseField component={Field} config={fieldsConfig.trim_value} path="fields.trim_value" />
+
       <UseField
         component={ToggleField}
         config={fieldsConfig.strip_brackets}
