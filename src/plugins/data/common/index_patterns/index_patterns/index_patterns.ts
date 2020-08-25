@@ -190,10 +190,8 @@ export class IndexPatternsService {
   async specToIndexPattern(spec: IndexPatternSpec) {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(spec.id, {
-      getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
@@ -201,7 +199,8 @@ export class IndexPatternsService {
       onNotification: this.onNotification,
       onError: this.onError,
       onUnsupportedTimePattern: this.onUnsupportedTimePattern,
-      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
+      shortDotsEnable,
+      metaFields,
     });
 
     indexPattern.initFromSpec(spec);
@@ -211,10 +210,8 @@ export class IndexPatternsService {
   async make(id?: string): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const uiSettingsValues = await this.config.getAll();
 
     const indexPattern = new IndexPattern(id, {
-      getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
@@ -222,7 +219,8 @@ export class IndexPatternsService {
       onNotification: this.onNotification,
       onError: this.onError,
       onUnsupportedTimePattern: this.onUnsupportedTimePattern,
-      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
+      shortDotsEnable,
+      metaFields,
     });
 
     return indexPattern.init();
