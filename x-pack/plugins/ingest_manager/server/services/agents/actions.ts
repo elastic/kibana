@@ -9,7 +9,7 @@ import { Agent, AgentAction, AgentActionSOAttributes } from '../../../common/typ
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { savedObjectToAgentAction } from './saved_objects';
 import { appContextService } from '../app_context';
-import { nodeTypes } from '../../../../../../src/plugins/data/common/es_query/kuery/node_types';
+import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 export async function createAgentAction(
   soClient: SavedObjectsClientContract,
