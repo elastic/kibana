@@ -6,7 +6,6 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-
 import { useKibana } from '../../../../common/lib/kibana';
 import { EndpointState } from '../types';
 import {
@@ -14,7 +13,6 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
 import { State } from '../../../../common/store';
-
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
