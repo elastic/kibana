@@ -21,7 +21,7 @@ export const help: FunctionHelp<FunctionFactory<typeof rounddate>> = {
   args: {
     format: i18n.translate('xpack.canvas.functions.rounddate.args.formatHelpText', {
       defaultMessage:
-        'The {MOMENTJS} format to use for bucketing. For example, {example} would round each date to months. See {url}.',
+        'The {MOMENTJS} format to use for bucketing. For example, {example} rounds to months. See {url}.',
       values: {
         example: '`"YYYY-MM"`',
         MOMENTJS,
