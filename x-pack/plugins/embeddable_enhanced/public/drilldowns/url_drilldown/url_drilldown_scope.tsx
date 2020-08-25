@@ -78,6 +78,10 @@ interface UrlDrilldownContextScope {
 }
 
 export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilldownContextScope {
+  function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
+    if (val && typeof val === 'object' && 'embeddable' in val) return true;
+    return false;
+  }
   if (!hasEmbeddable(contextScopeInput))
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
@@ -86,8 +90,8 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
   const embeddable = contextScopeInput.embeddable;
   const input = embeddable.getInput();
   const output = embeddable.getOutput();
-  function isSavedObjectId(savedObjectId: unknown): savedObjectId is string {
-    return typeof savedObjectId === 'string';
+  function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
+    return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
   }
   function getIndexPatternIds(): string[] {
     function hasIndexPatterns(
@@ -109,8 +113,7 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
       id: input.id,
       title: output.title ?? input.title,
       savedObjectId:
-        output.savedObjectId ??
-        (isSavedObjectId(input.savedObjectId) ? input.savedObjectId : undefined),
+        output.savedObjectId ?? (hasSavedObjectId(input) ? input.savedObjectId : undefined),
       query: input.query,
       timeRange: input.timeRange,
       filters: input.filters,
@@ -120,11 +123,6 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
   };
 }
 
-function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
-  if (val && typeof val === 'object' && 'embeddable' in val) return true;
-  return false;
-}
-
 /**
  * URL drilldown event scope,
  * available as: {{event.key}}, {{event.from}}
@@ -132,15 +130,14 @@ function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
 type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTriggerEventScope;
 type EventScopeInput = ActionContext;
 interface ValueClickTriggerEventScope {
-  key: string;
-  value: string;
+  key?: string;
+  value?: string | number | boolean;
   negate: boolean;
 }
-
 interface RangeSelectTriggerEventScope {
-  key: string;
-  from: string;
-  to: string;
+  key?: string;
+  from?: string | number;
+  to?: string | number;
 }
 
 export async function getEventScope(
@@ -163,9 +160,9 @@ async function getEventScopeFromRangeSelectTriggerContext(
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return cleanEmptyKeys({
-    key: toStringOrUndefined(column?.meta?.aggConfigParams?.field)!,
-    from: toStringOrUndefined(range[0])!,
-    to: toStringOrUndefined(range[range.length - 1])!,
+    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+    from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
+    to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
   });
 }
 
@@ -182,8 +179,8 @@ async function getEventScopeFromValueClickTriggerContext(
   );
   const column = table.columns[columnIndex];
   return cleanEmptyKeys({
-    key: toStringOrUndefined(column?.meta?.aggConfigParams?.field)!,
-    value: toStringOrUndefined(value)!,
+    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+    value: toPrimitiveOrUndefined(value) as string | number | boolean,
     negate,
   });
 }
@@ -209,10 +206,11 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
   }
 }
 
-function toStringOrUndefined(v: unknown): string | undefined {
-  if (typeof v === 'string') return v;
+function toPrimitiveOrUndefined(v: unknown): string | number | boolean | undefined {
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'string') return v;
   if (typeof v === 'object' && v instanceof Date) return v.toISOString();
-  return typeof v === 'undefined' ? v : String(v);
+  if (typeof v === 'undefined' || v === null) return undefined;
+  return String(v);
 }
 
 function cleanEmptyKeys<T extends Record<string, any>>(obj: T): T {
@@ -273,10 +271,8 @@ function GetSingleValuePopup({
       const column = table.columns[columnIndex];
       return {
         point,
-        id: toStringOrUndefined(column?.meta?.aggConfigParams?.field)!,
-        label: `${toStringOrUndefined(column?.meta?.aggConfigParams?.field)!}:${toStringOrUndefined(
-          value
-        )!}`,
+        id: column?.meta?.aggConfigParams?.field ?? '',
+        label: `${column?.meta?.aggConfigParams?.field ?? ''}:${toPrimitiveOrUndefined(value)}`,
       };
     })
     .filter((value) => Boolean(value.id));

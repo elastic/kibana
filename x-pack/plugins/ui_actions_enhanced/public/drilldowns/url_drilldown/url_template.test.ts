@@ -111,6 +111,14 @@ describe('date helper', () => {
     expect(compile(url, { time: 'fake' })).toMatchInlineSnapshot(`"https://elastic.co/fake"`);
   });
 
+  test("doesn't throw on boolean or number", () => {
+    const url = 'https://elastic.co/{{date time}}';
+    expect(compile(url, { time: false })).toMatchInlineSnapshot(`"https://elastic.co/false"`);
+    expect(compile(url, { time: 24 })).toMatchInlineSnapshot(
+      `"https://elastic.co/1970-01-01T00:00:00.024Z"`
+    );
+  });
+
   test('works with ISO string', () => {
     const url = 'https://elastic.co/{{date time}}';
     expect(compile(url, { time: date.toISOString() })).toMatchInlineSnapshot(
