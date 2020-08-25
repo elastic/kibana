@@ -23,6 +23,7 @@ import {
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel } from '../../types';
 import { DashboardPanelState } from '../embeddable';
+import { EmbeddableInput } from '../../../../embeddable/public';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {
@@ -93,7 +94,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
       something: 'hi!',
       id: '123',
       savedObjectId: 'savedObjectId',
-    },
+    } as EmbeddableInput,
     type: 'search',
   };
 
@@ -127,7 +128,7 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
     explicitInput: {
       id: '123',
       something: 'hi!',
-    },
+    } as EmbeddableInput,
     type: 'search',
   };
 

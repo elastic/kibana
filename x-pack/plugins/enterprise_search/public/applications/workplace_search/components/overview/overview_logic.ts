@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
-
 import { kea } from 'kea';
+import { HttpLogic } from '../../../shared/http';
 
 import { IAccount, IOrganization } from '../../types';
 import { IFlashMessagesProps, IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
@@ -32,13 +31,11 @@ export interface IOverviewServerData {
 export interface IOverviewActions {
   setServerData(serverData: IOverviewServerData): void;
   setFlashMessages(flashMessages: IFlashMessagesProps): void;
-  setHasErrorConnecting(hasErrorConnecting: boolean): void;
-  initializeOverview({ http }: { http: HttpSetup }): void;
+  initializeOverview(): void;
 }
 
 export interface IOverviewValues extends IOverviewServerData {
   dataLoading: boolean;
-  hasErrorConnecting: boolean;
   flashMessages: IFlashMessagesProps;
 }
 
@@ -46,8 +43,7 @@ export const OverviewLogic = kea({
   actions: (): IOverviewActions => ({
     setServerData: (serverData) => serverData,
     setFlashMessages: (flashMessages) => ({ flashMessages }),
-    setHasErrorConnecting: (hasErrorConnecting) => ({ hasErrorConnecting }),
-    initializeOverview: ({ http }) => ({ http }),
+    initializeOverview: () => null,
   }),
   reducers: (): TKeaReducers<IOverviewValues, IOverviewActions> => ({
     organization: [
@@ -138,24 +134,13 @@ export const OverviewLogic = kea({
       true,
       {
         setServerData: () => false,
-        setHasErrorConnecting: () => false,
-      },
-    ],
-    hasErrorConnecting: [
-      false,
-      {
-        setHasErrorConnecting: (_, { hasErrorConnecting }) => hasErrorConnecting,
       },
     ],
   }),
   listeners: ({ actions }): Partial<IOverviewActions> => ({
-    initializeOverview: async ({ http }: { http: HttpSetup }) => {
-      try {
-        const response = await http.get('/api/workplace_search/overview');
-        actions.setServerData(response);
-      } catch (error) {
-        actions.setHasErrorConnecting(true);
-      }
+    initializeOverview: async () => {
+      const response = await HttpLogic.values.http.get('/api/workplace_search/overview');
+      actions.setServerData(response);
     },
   }),
 } as IKeaParams<IOverviewValues, IOverviewActions>) as IKeaLogic<IOverviewValues, IOverviewActions>;
