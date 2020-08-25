@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
@@ -223,32 +224,33 @@ describe('StepAboutRuleComponent', () => {
       .first()
       .simulate('change', { target: { value: '80' } });
 
-    wrapper.find('[data-test-subj="about-continue"]').first().simulate('click').update();
-    await waitFor(() => {
-      const expected: Omit<AboutStepRule, 'isNew'> = {
-        author: [],
-        isAssociatedToEndpointList: false,
-        isBuildingBlock: false,
-        license: '',
-        ruleNameOverride: '',
-        timestampOverride: '',
-        description: 'Test description text',
-        falsePositives: [''],
-        name: 'Test name text',
-        note: '',
-        references: [''],
-        riskScore: { value: 80, mapping: [], isMappingChecked: false },
-        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: 'none', name: 'none', reference: 'none' },
-            technique: [],
-          },
-        ],
-      };
-      expect(stepDataMock.mock.calls[1][1]).toEqual(expected);
+    await act(async () => {
+      wrapper.find('[data-test-subj="about-continue"]').first().simulate('click').update();
     });
+
+    const expected: Omit<AboutStepRule, 'isNew'> = {
+      author: [],
+      isAssociatedToEndpointList: false,
+      isBuildingBlock: false,
+      license: '',
+      ruleNameOverride: '',
+      timestampOverride: '',
+      description: 'Test description text',
+      falsePositives: [''],
+      name: 'Test name text',
+      note: '',
+      references: [''],
+      riskScore: { value: 80, mapping: [], isMappingChecked: false },
+      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      tags: [],
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ],
+    };
+    expect(stepDataMock.mock.calls[1][1]).toEqual(expected);
   });
 });

@@ -120,14 +120,6 @@ export const schema: FormSchema = {
     mapping: {},
     isMappingChecked: {},
   },
-  riskScore: {
-    value: {
-      type: FIELD_TYPES.RANGE,
-      serializer: (input: string) => Number(input),
-    },
-    mapping: {},
-    isMappingChecked: {},
-  },
   references: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel',
