@@ -130,16 +130,8 @@ describe('createEnterpriseSearchRequestHandler', () => {
 });
 
 const makeAPICall = (handler: Function, params = {}) => {
-  return handler(
-    null,
-    {
-      headers: {
-        authorization: KibanaAuthHeader,
-      },
-      ...params,
-    },
-    responseMock
-  );
+  const request = { headers: { authorization: KibanaAuthHeader }, ...params };
+  return handler(null, request, responseMock);
 };
 
 const EnterpriseSearchAPI = {
