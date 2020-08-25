@@ -10,7 +10,6 @@ import moment from 'moment';
 import { encode, RisonValue } from 'rison-node';
 import { stringify } from 'query-string';
 import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
@@ -34,6 +33,7 @@ import {
 } from './use_log_entry_rate_results_url_state';
 import { LogEntryFlyout, LogEntryFlyoutProps } from '../../../components/logging/log_entry_flyout';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -47,6 +47,7 @@ export const PAGINATION_DEFAULTS = {
 export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
+  const navigateToApp = useKibana().services.application?.navigateToApp;
 
   const { sourceId } = useLogSourceContext();
 
@@ -84,7 +85,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     lastChangedTime: Date.now(),
   }));
 
-  const history = useHistory();
   const linkToLogStream = useCallback<LogEntryFlyoutProps['setFilter']>(
     (filter, id, timeKey) => {
       const params = {
@@ -103,9 +103,10 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
         }),
       };
 
-      history.push(`/stream?${stringify(params)}`);
+      // eslint-disable-next-line no-unused-expressions
+      navigateToApp?.('logs', { path: `/stream?${stringify(params)}` });
     },
-    [history, queryTimeRange]
+    [queryTimeRange, navigateToApp]
   );
 
   const bucketDuration = useMemo(
