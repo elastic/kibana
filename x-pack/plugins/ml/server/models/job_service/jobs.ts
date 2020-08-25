@@ -56,7 +56,7 @@ export function jobsProvider(client: IScopedClusterClient) {
   const calMngr = new CalendarManager(client);
 
   async function forceDeleteJob(jobId: string) {
-    return asInternalUser.ml.deleteJob({ job_id: jobId, force: true });
+    return asInternalUser.ml.deleteJob({ job_id: jobId, force: true, wait_for_completion: false });
   }
 
   async function deleteJobs(jobIds: string[]) {

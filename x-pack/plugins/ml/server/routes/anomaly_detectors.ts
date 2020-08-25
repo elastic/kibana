@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RequestParams } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -20,6 +21,7 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
+
 /**
  * Routes for the anomaly detectors
  */
@@ -277,7 +279,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { job_id: string; force?: boolean } = {
+        const options: RequestParams.MlCloseJob = {
           job_id: request.params.jobId,
         };
         const force = request.query.force;
@@ -315,14 +317,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { job_id: string; force?: boolean } = {
+        const options: RequestParams.MlDeleteJob = {
           job_id: request.params.jobId,
+          wait_for_completion: false,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
-        const { body } = await client.asInternalUser.ml.closeJob(options);
+        const { body } = await client.asInternalUser.ml.deleteJob(options);
         return response.ok({
           body,
         });

@@ -90,7 +90,7 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const { body } = await this._asInternalUser.ml.getFilters();
+      const { body } = await this._asInternalUser.ml.getFilters({ size: 1000 });
       return body.filters;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -102,7 +102,7 @@ export class FilterManager {
       const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
         this._asInternalUser.ml.getJobs(),
-        this._asInternalUser.ml.getFilters(),
+        this._asInternalUser.ml.getFilters({ size: 1000 }),
       ]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.

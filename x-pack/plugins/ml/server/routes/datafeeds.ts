@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestParams } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -247,7 +248,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { datafeed_id: string; force?: boolean } = {
+        const options: RequestParams.MlDeleteDatafeed = {
           datafeed_id: request.params.jobId,
         };
         const force = request.query.force;

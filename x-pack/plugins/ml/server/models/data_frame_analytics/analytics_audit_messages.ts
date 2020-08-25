@@ -68,27 +68,23 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       });
     }
 
-    try {
-      const { body } = await asInternalUser.search({
-        index: ML_NOTIFICATION_INDEX_PATTERN,
-        ignore_unavailable: true,
-        rest_total_hits_as_int: true,
-        size: SIZE,
-        body: {
-          sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
-          query,
-        },
-      });
+    const { body } = await asInternalUser.search({
+      index: ML_NOTIFICATION_INDEX_PATTERN,
+      ignore_unavailable: true,
+      rest_total_hits_as_int: true,
+      size: SIZE,
+      body: {
+        sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
+        query,
+      },
+    });
 
-      let messages = [];
-      if (body.hits.total !== 0) {
-        messages = body.hits.hits.map((hit: Message) => hit._source);
-        messages.reverse();
-      }
-      return messages;
-    } catch (e) {
-      throw e;
+    let messages = [];
+    if (body.hits.total !== 0) {
+      messages = body.hits.hits.map((hit: Message) => hit._source);
+      messages.reverse();
     }
+    return messages;
   }
 
   return {

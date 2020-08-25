@@ -43,7 +43,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const { body } = await this._asInternalUser.ml.getCalendars();
+    const { body } = await this._asInternalUser.ml.getCalendars({ size: 1000 });
 
     const events: CalendarEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars;

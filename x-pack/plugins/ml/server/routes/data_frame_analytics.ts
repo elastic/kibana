@@ -81,7 +81,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getDataFrameAnalytics();
+        const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({ size: 1000 });
         return response.ok({
           body,
         });
@@ -113,7 +113,6 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        // });
         const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
           id: analyticsId,
         });
@@ -143,7 +142,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getDataFrameAnalyticsStats();
+        const { body } = await client.asInternalUser.ml.getDataFrameAnalyticsStats({ size: 1000 });
         return response.ok({
           body,
         });

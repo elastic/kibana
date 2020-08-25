@@ -15,7 +15,8 @@ import {
 export type InputData = any[];
 
 export function fileDataVisualizerProvider({ asInternalUser }: IScopedClusterClient) {
-  async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
+  async function analyzeFile(data: InputData, overrides: InputOverrides): Promise<AnalysisResult> {
+    overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
     const { body } = await asInternalUser.ml.findFileStructure<FindFileStructureResponse>({
       body: data,
       ...overrides,

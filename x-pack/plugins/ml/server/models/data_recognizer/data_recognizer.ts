@@ -1066,7 +1066,7 @@ export class DataRecognizer {
           job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
         }
       } catch (error) {
-        mlLog.warn(`Data recognizer could not estimate model memory limit ${error}`);
+        mlLog.warn(`Data recognizer could not estimate model memory limit ${error.body}`);
       }
     }
 
