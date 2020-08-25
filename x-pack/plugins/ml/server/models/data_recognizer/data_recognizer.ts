@@ -704,7 +704,7 @@ export class DataRecognizer {
   }
 
   async saveJob(job: ModuleJob) {
-    return this._asInternalUser.ml.putJob({ job_id: job.id, body: {} });
+    return this._asInternalUser.ml.putJob({ job_id: job.id, body: job.config });
   }
 
   // save the datafeeds.
