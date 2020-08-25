@@ -157,7 +157,7 @@ export const Enrich: FunctionComponent = () => {
           helpText: (
             <FormattedMessage
               id="xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameHelpText"
-              defaultMessage="Name of the {enrichPolicyLink}"
+              defaultMessage="Name of the {enrichPolicyLink}."
               values={{
                 enrichPolicyLink: (
                   <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
@@ -182,7 +182,7 @@ export const Enrich: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldHelpText',
           {
-            defaultMessage: 'Field used to contain enrich data',
+            defaultMessage: 'Field used to contain enrich data.',
           }
         )}
         validations={[targetFieldValidator]}
@@ -202,7 +202,7 @@ export const Enrich: FunctionComponent = () => {
           helpText: (
             <FormattedMessage
               id="xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldHelpText"
-              defaultMessage="Operator used to match the geo-shape of incoming documents to enrich documents. Only used for {geoMatchPolicyLink}"
+              defaultMessage="Operator used to match the geo-shape of incoming documents to enrich documents. Only used for {geoMatchPolicyLink}."
               values={{
                 geoMatchPolicyLink: (
                   <EuiLink
