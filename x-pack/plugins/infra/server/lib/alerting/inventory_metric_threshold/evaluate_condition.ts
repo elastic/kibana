@@ -129,7 +129,7 @@ const getData = async (
         const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
         acc[nodeName] = values;
       } else {
-        acc[name] = m && m.value;
+        acc[nodeName] = m && m.value;
       }
       return acc;
     }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
