@@ -25,19 +25,6 @@ export const asArrayIfExists: WrapArrayIfExitts = (value) =>
 export type ValueOf<T> = T[keyof T];
 
 /**
- * Unreachable Assertion helper for scenarios like exhaustive switches
- *
- * @param x Unreachable field
- * @param message Message of error thrown
- */
-export const assertUnreachable = (
-  x: never,
-  message = 'Unknown Field in switch statement'
-): never => {
-  throw new Error(`${message}: ${x}`);
-};
-
-/**
  * Global variables
  */
 
