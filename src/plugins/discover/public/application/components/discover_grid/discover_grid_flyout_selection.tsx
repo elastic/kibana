@@ -58,7 +58,7 @@ export function DiscoverGridFlyoutSelection({
                 <h2>
                   <EuiIcon type="folderOpen" size="l" />{' '}
                   {i18n.translate('discover.grid.tableRow.selectedDocuments', {
-                    defaultMessage: 'Selected hits',
+                    defaultMessage: 'Selected records',
                   })}
                 </h2>
               </EuiTitle>
@@ -68,7 +68,7 @@ export function DiscoverGridFlyoutSelection({
         <EuiFlyoutBody>
           <h2 className="euiScreenReaderOnly" id="documentSelectionAriaLabel">
             {i18n.translate('discover.grid.documentSelectionAriaLabel', {
-              defaultMessage: 'Document Selection',
+              defaultMessage: 'Records selection',
             })}
           </h2>
           {selected.length > 0 &&
