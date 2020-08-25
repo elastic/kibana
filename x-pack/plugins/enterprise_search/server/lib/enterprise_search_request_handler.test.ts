@@ -6,7 +6,7 @@
 
 import { mockConfig, mockLogger } from '../__mocks__';
 
-import { createEnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
+import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
 jest.mock('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,7 +19,12 @@ const responseMock = {
 };
 const KibanaAuthHeader = 'Basic 123';
 
-describe('createEnterpriseSearchRequestHandler', () => {
+describe('EnterpriseSearchRequestHandler', () => {
+  const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({
+    config: mockConfig,
+    log: mockLogger,
+  }) as any;
+
   beforeEach(() => {
     jest.clearAllMocks();
     fetchMock.mockReset();
@@ -33,9 +38,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
 
     EnterpriseSearchAPI.mockReturn(responseBody);
 
-    const requestHandler = createEnterpriseSearchRequestHandler({
-      config: mockConfig,
-      log: mockLogger,
+    const requestHandler = enterpriseSearchRequestHandler.createRequest({
       path: '/as/credentials/collection',
     });
 
@@ -59,9 +62,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
     it('should return 502 with a message', async () => {
       EnterpriseSearchAPI.mockReturnError();
 
-      const requestHandler = createEnterpriseSearchRequestHandler({
-        config: mockConfig,
-        log: mockLogger,
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({
         path: '/as/credentials/collection',
       });
 
@@ -86,9 +87,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
 
       EnterpriseSearchAPI.mockReturn(responseBody);
 
-      const requestHandler = createEnterpriseSearchRequestHandler({
-        config: mockConfig,
-        log: mockLogger,
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({
         path: '/as/credentials/collection',
         hasValidData: (body?: any) =>
           Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
