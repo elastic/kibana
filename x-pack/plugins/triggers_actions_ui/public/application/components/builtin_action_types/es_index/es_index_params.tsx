@@ -17,6 +17,7 @@ export const IndexParamsFields = ({
   editAction,
   messageVariables,
   docLinks,
+  errors,
 }: ActionParamsProps<IndexActionParams>) => {
   const { documents } = actionParams;
 
@@ -24,8 +25,10 @@ export const IndexParamsFields = ({
     try {
       const documentsJSON = JSON.parse(updatedDocuments);
       editAction('documents', [documentsJSON], index);
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+      // set document as empty to turn on the validation for non empty valid JSON object
+      editAction('documents', [{}], index);
+    }
   };
 
   return (
@@ -34,7 +37,7 @@ export const IndexParamsFields = ({
         messageVariables={messageVariables}
         paramsProperty={'documents'}
         inputTargetValue={
-          documents && documents.length > 0 ? ((documents[0] as unknown) as string) : ''
+          documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined
         }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
@@ -48,6 +51,7 @@ export const IndexParamsFields = ({
             defaultMessage: 'Code editor',
           }
         )}
+        errors={errors.documents as string[]}
         onDocumentsChange={onDocumentsChange}
         helpText={
           <EuiLink
@@ -60,6 +64,14 @@ export const IndexParamsFields = ({
             />
           </EuiLink>
         }
+        onBlur={() => {
+          if (
+            !(documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined)
+          ) {
+            // set document as empty to turn on the validation for non empty valid JSON object
+            onDocumentsChange('{}');
+          }
+        }}
       />
     </>
   );

@@ -14,12 +14,13 @@ import { ActionVariable } from '../../types';
 interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  inputTargetValue: string;
+  inputTargetValue?: string;
   label: string;
   errors?: string[];
   areaLabel?: string;
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
+  onBlur?: () => void;
 }
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -31,6 +32,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   areaLabel,
   onDocumentsChange,
   helpText,
+  onBlur,
 }) => {
   const [cursorPosition, setCursorPosition] = useState<any>(null);
 
@@ -84,6 +86,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           onDocumentsChange(convertToJson(xjson));
         }}
         onCursorChange={(_value: any) => onClickWithMessageVariable(_value)}
+        onBlur={onBlur}
       />
     </EuiFormRow>
   );
