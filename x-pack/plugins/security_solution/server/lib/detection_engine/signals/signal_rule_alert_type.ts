@@ -187,7 +187,7 @@ export const signalRulesAlertType = ({
 
           // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
           // currently unused by the jobsSummary function.
-          const fakeRequest = { headers: {}, params: 'DummyKibanaRequest' } as KibanaRequest;
+          const fakeRequest = {} as KibanaRequest;
           const summaryJobs = await ml
             .jobServiceProvider(fakeRequest)
             .jobsSummary([machineLearningJobId]);

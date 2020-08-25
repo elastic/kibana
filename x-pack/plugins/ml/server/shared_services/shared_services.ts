@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, IClusterClient, IScopedClusterClient } from 'kibana/server';
+import { IClusterClient, IScopedClusterClient } from 'kibana/server';
+// /including KibanaRequest from 'kibana/server' causes an error
+// when being used with with instanceof
+// eslint-disable-next-line
+import { KibanaRequest } from '../../.././../../src/core/server/http';
 import { MlServerLicense } from '../lib/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
@@ -100,17 +104,17 @@ function getRequestItemsProvider(
     let scopedClient: IScopedClusterClient;
     // While https://github.com/elastic/kibana/issues/64588 exists we
     // will not receive a real request object when being called from an alert.
-    // instead a dummy request object will be supplied containing "DummyKibanaRequest"
-    if (request.params === 'DummyKibanaRequest') {
+    // instead a dummy request object will be supplied
+    if (request instanceof KibanaRequest) {
+      hasMlCapabilities = getHasMlCapabilities(request);
+      scopedClient = getClusterClient().asScoped(request);
+    } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = getClusterClient();
       scopedClient = {
         asInternalUser,
         asCurrentUser: asInternalUser,
       };
-    } else {
-      hasMlCapabilities = getHasMlCapabilities(request);
-      scopedClient = getClusterClient().asScoped(request);
     }
     return { hasMlCapabilities, scopedClient };
   };

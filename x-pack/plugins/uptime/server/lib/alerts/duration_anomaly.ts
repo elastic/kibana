@@ -39,7 +39,7 @@ const getAnomalies = async (
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const fakeRequest = { headers: {}, params: 'DummyKibanaRequest' } as KibanaRequest;
+  const fakeRequest = {} as KibanaRequest;
   const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(fakeRequest);
 
   return await getAnomaliesTableData(
