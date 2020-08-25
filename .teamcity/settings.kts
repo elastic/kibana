@@ -24,44 +24,40 @@ project {
 
 
   features {
-    feature {
-      id = "KIBANA_CLOUD_IMAGE"
-      type = "CloudImage"
-      param("subnet", "default")
-      param("growingId", "true")
-      param("agent_pool_id", "-2")
-      param("source-id", "kibana-brianseeders-")
-      param("network", "default")
-      param("preemptible", "false")
-      param("zone", "us-central1-a")
-      param("profileId", "KIBANA_CLOUD_PROFILE")
-      param("diskType", "pd-ssd")
-      param("sourceImage", "teamcity-agent-1596749170")
-//      param("sourceImageFamily", "kibana-teamcity-dev-agents")
-      param("machineCustom", "false")
-      param("maxInstances", "3")
-      param("imageType", "Image") // TODO
-      param("machineType", "n2-standard-16")
-    }
 
     feature {
-      id = "KIBANA_CLOUD_PROFILE"
+      id = "KIBANA_BRIANSEEDERS"
+      type = "CloudImage"
+      param("subnet", "teamcity")
+      param("growingId", "true")
+      param("agent_pool_id", "-2")
+      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
+      param("network", "teamcity")
+      param("preemptible", "false")
+      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
+      param("zone", "us-central1-a")
+      param("profileId", "kibana-brianseeders")
+      param("diskType", "pd-ssd")
+      param("machineCustom", "false")
+      param("maxInstances", "10")
+      param("imageType", "ImageFamily")
+      param("machineType", "n2-standard-16")
+    }
+    feature {
+      id = "kibana-brianseeders"
       type = "CloudProfile"
+      param("agentPushPreset", "")
+      param("profileId", "kibana-brianseeders")
       param("profileServerUrl", "")
-      param("system.cloud.profile_id", "KIBANA_CLOUD_PROFILE")
-//      param("agent_pool_id", "-2") // TODO currently default pool
+      param("name", "test")
       param("total-work-time", "")
       param("credentialsType", "key")
       param("description", "")
-      param("cloud-code", "google")
-      param("terminate-after-build", "true")
-      param("enabled", "true")
-      param("agentPushPreset", "")
-      param("profileId", "KIBANA_CLOUD_PROFILE")
-      param("name", "kibana-brianseeders")
       param("next-hour", "")
-      param("terminate-idle-time", "15")
-      param("secure:accessKey", "credentialsJSON:8d4330f9-319c-4600-aa2a-f41f8e78657d")
+      param("cloud-code", "google")
+      param("terminate-idle-time", "30")
+      param("enabled", "true")
+      param("secure:accessKey", "TODO")
     }
   }
 
