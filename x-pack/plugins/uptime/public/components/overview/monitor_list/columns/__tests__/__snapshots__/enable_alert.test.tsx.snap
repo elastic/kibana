@@ -15,7 +15,7 @@ exports[`EnableAlertComponent renders without errors for valid props 1`] = `
         aria-label="Enable status alert"
         class="euiSwitch__button"
         data-test-subj="uptimeDisplayDefineConnector"
-        id="ie7f80361-e634-11ea-895d-c302e1a86fbf"
+        id="defineAlertSettingsSwitch"
         role="switch"
         type="button"
       >

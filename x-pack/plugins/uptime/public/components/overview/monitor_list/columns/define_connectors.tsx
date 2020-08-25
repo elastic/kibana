@@ -25,6 +25,7 @@ export const DefineAlertConnectors = () => {
     <EuiPopover
       button={
         <EuiSwitch
+          id={'defineAlertSettingsSwitch'}
           label={ENABLE_STATUS_ALERT}
           showLabel={!!isMonitorPage}
           aria-label={ENABLE_STATUS_ALERT}

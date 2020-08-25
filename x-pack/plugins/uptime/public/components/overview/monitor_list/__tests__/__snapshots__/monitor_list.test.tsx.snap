@@ -1271,7 +1271,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         aria-label="Enable status alert"
                         class="euiSwitch__button"
                         data-test-subj="uptimeDisplayDefineConnector"
-                        id="generated-id"
+                        id="defineAlertSettingsSwitch"
                         role="switch"
                         type="button"
                       >
@@ -1494,7 +1494,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                         aria-label="Enable status alert"
                         class="euiSwitch__button"
                         data-test-subj="uptimeDisplayDefineConnector"
-                        id="generated-id"
+                        id="defineAlertSettingsSwitch"
                         role="switch"
                         type="button"
                       >

@@ -9,11 +9,10 @@ import {
   settingsObjectId,
   settingsObjectType,
 } from '../../../../plugins/uptime/server/lib/saved_objects';
-import { KibanaServerProvider } from '../../../../../test/common/services/kibana_server';
 
 const ARCHIVE = 'uptime/full_heartbeat';
 
-export const deleteUptimeSettingsObject = async (server: KibanaServerProvider) => {
+export const deleteUptimeSettingsObject = async (server: any) => {
   // delete the saved object
   try {
     await server.savedObjects.delete({

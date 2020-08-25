@@ -105,6 +105,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
         <EuiToolTip content={btnLabel}>
           <>
             <EuiSwitch
+              id={'enableDisableAlertSwitch'}
               compressed={!isMonitorPage}
               disabled={showSpinner}
               label={btnLabel}
