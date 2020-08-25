@@ -42,6 +42,7 @@ class OutputService {
     }
 
     return {
+      id: outputs.saved_objects[0].id,
       ...outputs.saved_objects[0].attributes,
     };
   }
