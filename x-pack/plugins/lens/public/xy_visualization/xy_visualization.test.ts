@@ -157,12 +157,6 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#getPersistableState', () => {
-    it('persists the state as given', () => {
-      expect(xyVisualization.getPersistableState(exampleState())).toEqual(exampleState());
-    });
-  });
-
   describe('#removeLayer', () => {
     it('removes the specified layer', () => {
       const prevState: State = {
