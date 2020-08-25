@@ -20,3 +20,33 @@ export async function getCreateIssueMetadata({
     }),
   });
 }
+
+export async function getIssueTypes({
+  http,
+  connectorId,
+}: {
+  http: HttpSetup;
+  connectorId: string;
+}): Promise<Record<string, any>> {
+  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+    body: JSON.stringify({
+      params: { subAction: 'getIssueTypes', subActionParams: {} },
+    }),
+  });
+}
+
+export async function getFieldsByIssueType({
+  http,
+  connectorId,
+  id,
+}: {
+  http: HttpSetup;
+  connectorId: string;
+  id: string;
+}): Promise<Record<string, any>> {
+  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+    body: JSON.stringify({
+      params: { subAction: 'getFieldsByIssueType', subActionParams: { id } },
+    }),
+  });
+}
