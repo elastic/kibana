@@ -56,6 +56,10 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         );
       case ML_PAGES.ANOMALY_EXPLORER:
         return this.createExplorerUrl(mlUrlGeneratorState as ExplorerUrlState);
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
+        return this.createAnomalyDetectionCreatJobSelectType(
+          mlUrlGeneratorState as MlGenericUrlState
+        );
       case ML_PAGES.SINGLE_METRIC_VIEWER:
         return this.createSingleMetricViewerUrl(mlUrlGeneratorState as TimeSeriesExplorerUrlState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
@@ -70,10 +74,8 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
         return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
-        return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
-        return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
+        return this.createIndexDataVisualizerUrl(mlUrlGeneratorState as MlGenericUrlState);
       default:
         throw new Error('Page type is not provided or unknown');
     }
@@ -109,6 +111,10 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       url
     );
     return url;
+  }
+
+  private createAnomalyDetectionCreatJobSelectType(mlGenericUrlState: MlGenericUrlState): string {
+    return this.createIndexBasedMlUrl(mlGenericUrlState);
   }
 
   /**
@@ -273,6 +279,13 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
    */
   private createDataVisualizerUrl({ page }: DataVisualizerUrlState): string {
     return `${this.params.appBasePath}/${page}`;
+  }
+
+  /**
+   * Creates URL to the Index Data Visualizer
+   */
+  private createIndexDataVisualizerUrl(mlGenericUrlState: MlGenericUrlState): string {
+    return this.createIndexBasedMlUrl(mlGenericUrlState);
   }
 
   /**
