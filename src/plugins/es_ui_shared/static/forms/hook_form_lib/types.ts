@@ -38,7 +38,7 @@ export interface FormHook<T extends FormData = FormData> {
   getFieldDefaultValue: (fieldName: string) => unknown;
   /* Returns a list of all errors in the form */
   getErrors: () => string[];
-  reset: (options?: { resetValues?: boolean; defaultValue?: FormData }) => void;
+  reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<T>;
   __addField: (field: FieldHook) => void;

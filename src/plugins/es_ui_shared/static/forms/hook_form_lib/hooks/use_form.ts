@@ -40,19 +40,26 @@ export function useForm<T extends FormData = FormData>(
   const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
     formConfig ?? {};
 
-  const formDefaultValue = useMemo<{ [key: string]: any }>(() => {
-    if (defaultValue === undefined || Object.keys(defaultValue).length === 0) {
-      return {};
-    }
+  const initDefaultValue = useCallback(
+    (_defaultValue?: Partial<T>): { [key: string]: any } => {
+      if (_defaultValue === undefined || Object.keys(_defaultValue).length === 0) {
+        return {};
+      }
 
-    const defaultValueFiltered = Object.entries(defaultValue as object)
-      .filter(({ 1: value }) => value !== undefined)
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+      const filtered = Object.entries(_defaultValue as object)
+        .filter(({ 1: value }) => value !== undefined)
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
-    return deserializer ? (deserializer(defaultValueFiltered) as any) : defaultValueFiltered;
-  }, [defaultValue, deserializer]);
+      return deserializer ? (deserializer(filtered) as any) : filtered;
+    },
+    [deserializer]
+  );
 
-  const defaultValueDeserialized = useRef(formDefaultValue);
+  const defaultValueMemoized = useMemo<{ [key: string]: any }>(() => {
+    return initDefaultValue(defaultValue);
+  }, [defaultValue, initDefaultValue]);
+
+  const defaultValueDeserialized = useRef(defaultValueMemoized);
 
   const { errorDisplayDelay, stripEmptyFields: doStripEmptyFields } = options ?? {};
   const formOptions = useMemo(
@@ -351,9 +358,7 @@ export function useForm<T extends FormData = FormData>(
       const currentFormData = { ...getFormData$().value } as FormData;
 
       if (updatedDefaultValue) {
-        defaultValueDeserialized.current = deserializer
-          ? (deserializer(updatedDefaultValue) as any)
-          : updatedDefaultValue;
+        defaultValueDeserialized.current = initDefaultValue(updatedDefaultValue);
       }
 
       Object.entries(fieldsRefs.current).forEach(([path, field]) => {
@@ -374,7 +379,7 @@ export function useForm<T extends FormData = FormData>(
       setSubmitting(false);
       setIsValid(undefined);
     },
-    [getFormData$, deserializer, getFieldDefaultValue]
+    [getFormData$, initDefaultValue, getFieldDefaultValue]
   );
 
   const form = useMemo<FormHook<T>>(() => {
@@ -424,6 +429,15 @@ export function useForm<T extends FormData = FormData>(
     removeField,
     validateFields,
   ]);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
+
+    // Whenever the "defaultValue" prop changes, reinitialize our ref
+    defaultValueDeserialized.current = defaultValueMemoized;
+  }, [defaultValueMemoized]);
 
   useEffect(() => {
     isMounted.current = true;
