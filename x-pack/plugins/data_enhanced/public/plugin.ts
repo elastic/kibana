@@ -36,6 +36,7 @@ export class DataEnhancedPlugin
       {
         http: core.http,
         uiSettings: core.uiSettings,
+        toasts: core.notifications.toasts,
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       },

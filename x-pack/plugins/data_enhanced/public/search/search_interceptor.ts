@@ -6,6 +6,7 @@
 
 import { throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
+import { debounce } from 'lodash';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -89,4 +90,19 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       })
     );
   }
+
+  // Right now we are debouncing but we will hook this up with background sessions to show only one
+  // error notification per session.
+  protected showTimeoutError = debounce(
+    (e: Error) => {
+      this.deps.toasts.addError(e, {
+        title: 'Timed out',
+        toastMessage: 'One or more queries timed out.', // TODO: Improve this message
+      });
+    },
+    60000,
+    {
+      leading: true,
+    }
+  );
 }

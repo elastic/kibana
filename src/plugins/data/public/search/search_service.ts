@@ -77,6 +77,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       {
         http,
         uiSettings,
+        toasts: notifications.toasts,
         startServices: getStartServices(),
         usageCollector: this.usageCollector!,
       },

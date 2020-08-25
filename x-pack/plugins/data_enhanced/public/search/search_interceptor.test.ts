@@ -66,6 +66,7 @@ describe('EnhancedSearchInterceptor', () => {
         startServices: mockPromise as any,
         http: mockCoreSetup.http,
         uiSettings: mockCoreSetup.uiSettings,
+        toasts: mockCoreSetup.notifications.toasts,
         usageCollector: mockUsageCollector,
       },
       1000

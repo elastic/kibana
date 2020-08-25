@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { trimEnd } from 'lodash';
+import { trimEnd, debounce } from 'lodash';
 import {
   BehaviorSubject,
   throwError,
@@ -28,10 +28,15 @@ import {
   Observable,
   NEVER,
 } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { CoreStart, CoreSetup } from 'kibana/public';
-import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
+import { catchError, finalize } from 'rxjs/operators';
+import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
+import {
+  getCombinedSignal,
+  AbortError,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
+} from '../../common';
 import { ISearchOptions } from './types';
 import { SearchUsageCollector } from './collectors';
 
@@ -39,6 +44,7 @@ export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
+  toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
 }
 
@@ -120,6 +126,12 @@ export class SearchInterceptor {
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+        catchError((e: any) => {
+          if (e.body?.attributes?.error === 'Request timed out') {
+            this.showTimeoutError(e);
+          }
+          return throwError(e);
+        }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
           cleanup();
@@ -132,10 +144,10 @@ export class SearchInterceptor {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ =
-      this.requestTimeout != null && this.requestTimeout > 0 ? timer(this.requestTimeout) : NEVER;
+    const timeout$ = (this.requestTimeout ?? 0) > 0 ? timer(this.requestTimeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
+      this.showTimeoutError(new AbortError());
     });
     this.timeoutSubscriptions.add(subscription);
 
@@ -161,6 +173,22 @@ export class SearchInterceptor {
       cleanup,
     };
   }
+
+  // Right now we are debouncing but we will hook this up with background sessions to show only one
+  // error notification per session.
+  protected showTimeoutError = debounce(
+    (e: Error) => {
+      this.deps.toasts.addError(e, {
+        title: 'Timed out',
+        toastMessage:
+          'One or more queries timed out. Upgrade to a free Basic license to allow queries to complete.', // TODO: Improve this message
+      });
+    },
+    60000,
+    {
+      leading: true,
+    }
+  );
 }
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;
