@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteUptimeSettingsObject } from '../../../functional/apps/uptime';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('uptime simple down alert', () => {
+  describe('uptime simple status alert', () => {
     const pageObjects = getPageObjects(['common', 'header', 'uptime']);
     const server = getService('kibanaServer');
     const uptimeService = getService('uptime');
@@ -56,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await uptimeService.navigation.goToUptime();
     });
 
-    it('enable simple down alert', async () => {
+    it('enable simple status alert', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await testSubjects.click('uptimeEnableSimpleDownAlert' + monitorId);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -71,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('has created a valid simple alert with expected parameters', async () => {
       let alert: any;
       await retry.tryForTime(15000, async () => {
-        const apiResponse = await supertest.get(`/api/alerts/_find?search=Simple down alert`);
+        const apiResponse = await supertest.get(`/api/alerts/_find?search=Simple status alert`);
         const alertsFromThisTest = apiResponse.body.data.filter(({ params }: { params: any }) =>
           params.search.includes(monitorId)
         );
@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    it('disable simple down alert', async () => {
+    it('disable simple status alert', async () => {
       await testSubjects.click('uptimeDisableSimpleDownAlert' + monitorId);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('uptimeEnableSimpleDownAlert' + monitorId);

@@ -60,7 +60,7 @@ export const createAlert = async ({
     alertTypeId: CLIENT_ALERT_TYPES.MONITOR_STATUS,
     schedule: { interval: '1m' },
     tags: [UPTIME_AUTO_ALERT],
-    name: `${monitorName} (Simple down alert)`,
+    name: `${monitorName} (Simple status alert)`,
   };
 
   return await apiService.post(API_URLS.CREATE_ALERT, data);

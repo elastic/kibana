@@ -8,9 +8,7 @@ import React, { useContext } from 'react';
 import { EuiCallOut, EuiListGroup, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
 import { UptimeSettingsContext } from '../../../../contexts';
-import { deleteAlertAction } from '../../../../state/alerts/alerts';
 import { Alert } from '../../../../../../triggers_actions_ui/public';
 
 interface Props {
@@ -23,25 +21,11 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
 
   const listItems: EuiListGroupItemProps[] = [];
 
-  const dispatch = useDispatch();
-
-  const deleteAlert = (alertId: string) => dispatch(deleteAlertAction.get({ alertId }));
-
   (monitorAlerts ?? []).forEach((alert, ind) => {
     listItems.push({
       label: alert.name,
       href: basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + alert.id,
       size: 's',
-      extraAction: {
-        color: 'subdued',
-        onClick: () => deleteAlert(alert.id),
-        iconType: 'trash',
-        iconSize: 's',
-        'aria-label': i18n.translate('xpack.uptime.monitorList.enabledAlerts.deleteAlert', {
-          defaultMessage: 'Delete the alert',
-        }),
-        alwaysShow: true,
-      },
       'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,
     });
   });
