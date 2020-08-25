@@ -9190,7 +9190,6 @@
     "xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel": "スタンドアロンモード",
     "xpack.ingestManager.agentEnrollment.fleetNotInitializedText": "エージェントを登録する前に、フリートを設定する必要があります。{link}",
     "xpack.ingestManager.agentEnrollment.flyoutTitle": "エージェントの追加",
-    "xpack.ingestManager.agentEnrollment.goToFleetButton": "フリートに移動します。",
     "xpack.ingestManager.agentEnrollment.managedDescription": "必要なエージェントの数に関係なく、Fleetでは、簡単に一元的に更新を管理し、エージェントにデプロイすることができます。次の手順に従い、Elasticエージェントをダウンロードし、Fleetに登録してください。",
     "xpack.ingestManager.agentEnrollment.standaloneDescription": "スタンドアロンモードで実行中のエージェントは、構成を変更したい場合には、手動で更新する必要があります。次の手順に従い、スタンドアロンモードでElasticエージェントをダウンロードし、セットアップしてください。",
     "xpack.ingestManager.agentEnrollment.stepCheckForDataDescription": "エージェントを起動した後、エージェントはデータの送信を開始します。Ingest Managerのデータセットページでは、このデータを確認できます。",

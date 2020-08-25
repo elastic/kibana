@@ -9193,7 +9193,6 @@
     "xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel": "独立模式",
     "xpack.ingestManager.agentEnrollment.fleetNotInitializedText": "注册代理前需要设置 Fleet。{link}",
     "xpack.ingestManager.agentEnrollment.flyoutTitle": "添加代理",
-    "xpack.ingestManager.agentEnrollment.goToFleetButton": "前往 Fleet。",
     "xpack.ingestManager.agentEnrollment.managedDescription": "无论是需要一个代理还是需要数以千计的代理，Fleet 允许您轻松地集中管理并部署代理的更新。按照下面的说明下载 Elastic 代理并将代理注册到 Fleet。",
     "xpack.ingestManager.agentEnrollment.standaloneDescription": "如果希望对以独立模式运行的代理进行配置更改，则需要手动更新。按照下面的说明下载并设置独立模式的 Elastic 代理。",
     "xpack.ingestManager.agentEnrollment.stepCheckForDataDescription": "启动代理后，代理应开始发送数据。您可以在采集管理器的数据集页面查看此数据。",
