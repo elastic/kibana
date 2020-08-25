@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
         authentication_provider: 'pki',
-        authentication_type: 'realm',
+        authentication_type: 'token',
       });
 
       // Cookie should be accepted.
@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: 'pki',
-          authentication_type: 'realm',
+          authentication_type: 'token',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);

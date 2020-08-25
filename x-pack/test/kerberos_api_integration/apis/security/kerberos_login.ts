@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: 'kerberos',
-            authentication_type: 'realm',
+            authentication_type: 'token',
           });
       });
 
