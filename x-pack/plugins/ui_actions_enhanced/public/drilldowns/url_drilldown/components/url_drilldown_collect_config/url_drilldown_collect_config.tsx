@@ -6,13 +6,13 @@
 
 import React, { useRef, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFormRow,
+  EuiIcon,
   EuiLink,
   EuiPopover,
-  EuiSwitch,
+  EuiCheckbox,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
@@ -137,7 +137,8 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
-        <EuiSwitch
+        <EuiCheckbox
+          id="openInNewTab"
           name="openInNewTab"
           label={txtUrlTemplateOpenInNewTab}
           checked={config.openInNewTab}
@@ -174,15 +175,11 @@ function AddVariableButton({
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          data-test-subj={`addVariable`}
-          onClick={() => {
-            setIsVariablesPopoverOpen(true);
-          }}
-          iconType="indexOpen"
-          title={txtAddVariableButtonTitle}
-          aria-label={txtAddVariableButtonTitle}
-        />
+        <EuiText size="xs">
+          <EuiLink onClick={() => setIsVariablesPopoverOpen(true)}>
+            {txtAddVariableButtonTitle} <EuiIcon type="indexOpen" />
+          </EuiLink>
+        </EuiText>
       }
       isOpen={isVariablesPopoverOpen}
       closePopover={() => setIsVariablesPopoverOpen(false)}
