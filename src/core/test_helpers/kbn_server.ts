@@ -26,16 +26,16 @@ import {
   kibanaServerTestUser,
   kibanaTestUser,
   setupUsers,
-  // @ts-ignore: implicit any for JS file
 } from '@kbn/test';
 import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
+
 import { LegacyAPICaller } from '../core/server';
-import { CliArgs, Env } from '../core/server/config';
-import { Root } from '../core/server/root';
-import KbnServer from '../legacy/server/kbn_server';
+import { CliArgs, Env } from '../server/config';
+import { Root } from '../server/root';
+import KbnServer from '../../legacy/server/kbn_server';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -53,7 +53,7 @@ const DEFAULTS_SETTINGS = {
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-  plugins: { scanDirs: [resolve(__dirname, '../legacy/core_plugins')] },
+  plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
   elasticsearch: {
     hosts: [esTestConfig.getUrl()],
     username: kibanaServerTestUser.username,

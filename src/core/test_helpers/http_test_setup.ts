@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { HttpService } from '../../core/public/http';
-import { fatalErrorsServiceMock } from '../../core/public/fatal_errors/fatal_errors_service.mock';
-import { injectedMetadataServiceMock } from '../../core/public/injected_metadata/injected_metadata_service.mock';
+import { HttpService } from '../public/http';
+import { fatalErrorsServiceMock } from '../public/fatal_errors/fatal_errors_service.mock';
+import { injectedMetadataServiceMock } from '../public/injected_metadata/injected_metadata_service.mock';
 
 export type SetupTap = (
   injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>,
