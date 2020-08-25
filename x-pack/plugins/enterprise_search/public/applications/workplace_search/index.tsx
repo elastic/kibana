@@ -17,7 +17,7 @@ import { WorkplaceSearchNav } from './components/layout/nav';
 import { SETUP_GUIDE_PATH } from './routes';
 
 import { SetupGuide } from './views/setup_guide';
-import { ErrorState } from './components/error_state';
+import { ErrorState } from './views/error_state';
 import { Overview } from './views/overview';
 
 export const WorkplaceSearch: React.FC<IInitialAppData> = () => {
