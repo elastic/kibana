@@ -28,6 +28,7 @@ import { DashboardStartDependencies, DashboardStart, DashboardSetupDependencies 
 import { DashboardServices } from './application';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { DashboardListing } from './listing/dashboard_listing';
+import { Dashboard404 } from './dashboard_404';
 import { DashboardConstants } from '..';
 
 export async function mountApp(
@@ -95,6 +96,7 @@ export async function mountApp(
               render={renderDashboard}
             />
             <Route exact path={DashboardConstants.LANDING_PAGE_PATH} component={DashboardListing} />
+            <Dashboard404 />
           </Switch>
         </KibanaContextProvider>
       </Router>
