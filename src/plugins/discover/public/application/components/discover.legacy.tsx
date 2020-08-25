@@ -148,16 +148,14 @@ export function DiscoverLegacy({
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
 
-              {resultState === 'loading' && (
-                <>
-                  {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-                  {!fetchError && (
-                    <div className="dscOverlay">
-                      <LoadingSpinner />
-                    </div>
-                  )}
-                </>
-              )}
+              <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
+                {fetchError && <DiscoverFetchError fetchError={fetchError} />}
+                {!fetchError && (
+                  <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
+                    <LoadingSpinner />
+                  </div>
+                )}
+              </span>
 
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
