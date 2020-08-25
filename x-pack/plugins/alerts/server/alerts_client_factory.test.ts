@@ -46,6 +46,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   eventLog: eventLogMock.createStart(),
 };
 const fakeRequest = ({
+  app: {},
   headers: {},
   getBasePath: () => '',
   path: '/',
