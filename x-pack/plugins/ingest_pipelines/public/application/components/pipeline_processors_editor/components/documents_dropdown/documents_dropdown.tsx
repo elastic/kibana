@@ -5,11 +5,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiSelect, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { Document } from '../../types';
 
 import './documents_dropdown.scss';
+import { TestPipelineFlyoutTab } from '../test_pipeline/test_pipeline_flyout_tabs';
 
 const i18nTexts = {
   ariaLabel: i18n.translate(
@@ -27,6 +28,12 @@ const i18nTexts = {
   buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.buttonLabel', {
     defaultMessage: 'Add documents',
   }),
+  iconButtonLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.testPipeline.iconButtonAriaLabel',
+    {
+      defaultMessage: 'Manage documents',
+    }
+  ),
 };
 
 const getDocumentOptions = (documents: Document[]) =>
@@ -39,31 +46,36 @@ interface Props {
   documents: Document[];
   selectedDocumentIndex: number;
   updateSelectedDocument: (index: number) => void;
+  openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
 export const DocumentsDropdown: FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,
+  openFlyout,
 }) => {
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="s" className="documentsDropdown">
-      <EuiFlexItem grow={false}>
-        <EuiText>
-          <span>{i18nTexts.dropdownLabel}</span>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} className="documentsDropdown__selectContainer">
-        <EuiSelect
-          compressed
-          options={getDocumentOptions(documents)}
-          value={selectedDocumentIndex}
-          onChange={(e) => {
-            updateSelectedDocument(Number(e.target.value));
-          }}
-          aria-label={i18nTexts.ariaLabel}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div className="documentsDropdown">
+      <EuiSelect
+        compressed
+        options={getDocumentOptions(documents)}
+        value={selectedDocumentIndex}
+        onChange={(e) => {
+          updateSelectedDocument(Number(e.target.value));
+        }}
+        aria-label={i18nTexts.ariaLabel}
+        append={
+          <EuiToolTip content={i18nTexts.iconButtonLabel}>
+            <EuiButtonIcon
+              iconType="gear"
+              size="s"
+              aria-label={i18nTexts.iconButtonLabel}
+              onClick={() => openFlyout('documents')}
+            />
+          </EuiToolTip>
+        }
+      />
+    </div>
   );
 };

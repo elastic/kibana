@@ -18,10 +18,13 @@ import {
 } from '@elastic/eui';
 
 import { Document } from '../../../types';
-import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
+import { TestPipelineConfig } from '../test_pipeline_flyout';
 
 interface Props {
-  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
+  handleTestPipeline: (
+    testPipelineConfig: TestPipelineConfig,
+    refreshOutputPerProcessor?: boolean
+  ) => Promise<{ isSuccessful: boolean }>;
   isRunningTest: boolean;
   cachedVerbose?: boolean;
   cachedDocuments: Document[];
@@ -36,12 +39,6 @@ export const OutputTab: React.FunctionComponent<Props> = ({
   testOutput,
 }) => {
   const [isVerboseEnabled, setIsVerboseEnabled] = useState(Boolean(cachedVerbose));
-
-  const onEnableVerbose = (isVerbose: boolean) => {
-    setIsVerboseEnabled(isVerbose);
-
-    handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
-  };
 
   let content: React.ReactNode | undefined;
 
@@ -78,14 +75,22 @@ export const OutputTab: React.FunctionComponent<Props> = ({
               />
             }
             checked={isVerboseEnabled}
-            onChange={(e) => onEnableVerbose(e.target.checked)}
+            onChange={async (e) => {
+              const isVerbose = e.target.checked;
+              setIsVerboseEnabled(isVerbose);
+
+              await handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
-            onClick={() =>
-              handleTestPipeline({ documents: cachedDocuments!, verbose: isVerboseEnabled })
+            onClick={async () =>
+              await handleTestPipeline(
+                { documents: cachedDocuments!, verbose: isVerboseEnabled },
+                true
+              )
             }
             iconType="refresh"
           >

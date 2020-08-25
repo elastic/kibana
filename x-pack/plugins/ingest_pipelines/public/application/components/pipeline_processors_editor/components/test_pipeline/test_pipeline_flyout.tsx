@@ -17,13 +17,14 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../../../shared_imports';
+import { useKibana, useForm, Form } from '../../../../../shared_imports';
 import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
 import { DeserializeResult } from '../../deserialize';
 import { Document } from '../../types';
 
 import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_flyout_tabs';
+import { documentsSchema } from './test_pipeline_flyout_tabs/documents_schema';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
@@ -31,7 +32,7 @@ export interface Props {
   processors: DeserializeResult;
 }
 
-export interface HandleTestPipelineArgs {
+export interface TestPipelineConfig {
   documents: Document[];
   verbose?: boolean;
 }
@@ -53,15 +54,24 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     config: { documents: cachedDocuments, verbose: cachedVerbose },
   } = testPipelineData;
 
+  const { form } = useForm({
+    schema: documentsSchema,
+    defaultValue: {
+      documents: cachedDocuments || '',
+    },
+  });
+
   const [selectedTab, setSelectedTab] = useState<TestPipelineFlyoutTab>(activeTab);
 
-  const [shouldTestImmediately, setShouldTestImmediately] = useState<boolean>(false);
   const [isRunningTest, setIsRunningTest] = useState<boolean>(false);
   const [testingError, setTestingError] = useState<any>(null);
   const [testOutput, setTestOutput] = useState<any>(undefined);
 
   const handleTestPipeline = useCallback(
-    async ({ documents, verbose }: HandleTestPipelineArgs) => {
+    async (
+      { documents, verbose }: TestPipelineConfig,
+      updateProcessorOutput?: boolean
+    ): Promise<{ isSuccessful: boolean }> => {
       const serializedProcessors = serialize({ pipeline: processors });
 
       setIsRunningTest(true);
@@ -77,7 +87,19 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
       if (error) {
         setTestingError(error);
-        return;
+
+        // reset the per-processor output
+        // this is needed in the scenario where the pipeline has already executed,
+        // but you modified the sample documents and there was an error on re-execution
+        setCurrentTestPipelineData({
+          type: 'updateOutputPerProcessor',
+          payload: {
+            isExecutingPipeline: false,
+            testOutputPerProcessor: undefined,
+          },
+        });
+
+        return { isSuccessful: false };
       }
 
       setCurrentTestPipelineData({
@@ -90,6 +112,12 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         },
       });
 
+      // We sometimes need to manually refresh the per-processor output
+      // e.g., when clicking the "Refresh output" button and there have been no state changes
+      if (updateProcessorOutput) {
+        updateTestOutputPerProcessor(documents, processors);
+      }
+
       setTestOutput(currentTestOutput);
 
       services.notifications.toasts.addSuccess(
@@ -101,27 +129,44 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         }
       );
 
-      setSelectedTab('output');
+      return { isSuccessful: true };
     },
-    [services.api, processors, setCurrentTestPipelineData, services.notifications.toasts]
+    [
+      processors,
+      services.api,
+      services.notifications.toasts,
+      setCurrentTestPipelineData,
+      updateTestOutputPerProcessor,
+    ]
   );
 
-  useEffect(() => {
-    if (cachedDocuments) {
-      setShouldTestImmediately(true);
+  const validateAndTestPipeline = async () => {
+    const { isValid, data } = await form.submit();
+
+    if (!isValid) {
+      return;
     }
-    // We only want to know on initial mount if there are cached documents
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const { documents } = data as { documents: Document[] };
+
+    const { isSuccessful } = await handleTestPipeline({
+      documents: documents!,
+      verbose: cachedVerbose,
+    });
+
+    if (isSuccessful) {
+      setSelectedTab('output');
+    }
+  };
 
   useEffect(() => {
-    // If the user has already tested the pipeline once,
-    // use the cached test config and automatically execute the pipeline
-    if (shouldTestImmediately) {
-      setShouldTestImmediately(false);
-      handleTestPipeline({ documents: cachedDocuments!, verbose: cachedVerbose });
+    if (cachedDocuments && activeTab === 'output') {
+      handleTestPipeline({ documents: cachedDocuments, verbose: cachedVerbose }, true);
     }
-  }, [handleTestPipeline, cachedDocuments, cachedVerbose, shouldTestImmediately]);
+    // We only want to know on initial mount if
+    // there are cached documents and we are on the output tab
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   let tabContent;
 
@@ -138,13 +183,19 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   } else {
     // default to "Documents" tab
     tabContent = (
-      <DocumentsTab
-        isRunningTest={isRunningTest}
-        handleTestPipeline={handleTestPipeline}
-        setPerProcessorOutput={updateTestOutputPerProcessor}
-        processors={processors}
-        testPipelineData={testPipelineData}
-      />
+      <Form
+        form={form}
+        data-test-subj="testPipelineForm"
+        isInvalid={form.isSubmitted && !form.isValid}
+        onSubmit={validateAndTestPipeline}
+        error={form.getErrors()}
+      >
+        <DocumentsTab
+          validateAndTestPipeline={validateAndTestPipeline}
+          isRunningTest={isRunningTest}
+          isSubmitButtonDisabled={form.isSubmitted && !form.isValid}
+        />
+      </Form>
     );
   }
 
@@ -163,9 +214,15 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody>
         <Tabs
-          onTabChange={setSelectedTab}
+          onTabChange={async (nextTab) => {
+            if (nextTab === 'output') {
+              validateAndTestPipeline();
+            } else {
+              form.reset({ defaultValue: { documents: cachedDocuments } });
+              setSelectedTab(nextTab);
+            }
+          }}
           selectedTab={selectedTab}
-          getIsDisabled={(tabId) => !testOutput && tabId === 'output'}
         />
 
         <EuiSpacer />
