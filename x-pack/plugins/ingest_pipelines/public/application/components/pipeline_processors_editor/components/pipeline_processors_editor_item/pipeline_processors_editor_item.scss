@@ -60,4 +60,9 @@
       z-index: $cancelButtonZIndex;
     }
   }
+
+  &__statusContainer {
+    // Prevent content jump when spinner renders
+    min-width: 12px;
+  }
 }

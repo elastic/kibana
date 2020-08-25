@@ -39,6 +39,7 @@ export function RumDashboard() {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={3}>
               <PageLoadDistribution />
+              <EuiSpacer size="m" />
               <PageViewsTrend />
             </EuiFlexItem>
           </EuiFlexGroup>

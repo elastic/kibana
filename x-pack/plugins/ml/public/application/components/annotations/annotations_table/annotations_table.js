@@ -9,7 +9,9 @@
  * This version supports both fetching the annotations by itself (used in the jobs list) and
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
-import _ from 'lodash';
+
+import uniq from 'lodash/uniq';
+
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 import React, { Component, Fragment } from 'react';
@@ -255,18 +257,18 @@ export class AnnotationsTable extends Component {
 
     // if the annotation is at the series level
     // then pass the partitioning field(s) and detector index to the Single Metric Viewer
-    if (_.has(annotation, 'detector_index')) {
+    if (annotation.detector_index !== undefined) {
       mlTimeSeriesExplorer.detectorIndex = annotation.detector_index;
     }
-    if (_.has(annotation, 'partition_field_value')) {
+    if (annotation.partition_field_value !== undefined) {
       entityCondition[annotation.partition_field_name] = annotation.partition_field_value;
     }
 
-    if (_.has(annotation, 'over_field_value')) {
+    if (annotation.over_field_value !== undefined) {
       entityCondition[annotation.over_field_name] = annotation.over_field_value;
     }
 
-    if (_.has(annotation, 'by_field_value')) {
+    if (annotation.by_field_value !== undefined) {
       // Note that analyses with by and over fields, will have a top-level by_field_name,
       // but the by_field_value(s) will be in the nested causes array.
       entityCondition[annotation.by_field_name] = annotation.by_field_value;
@@ -421,7 +423,7 @@ export class AnnotationsTable extends Component {
       },
     ];
 
-    const jobIds = _.uniq(annotations.map((a) => a.job_id));
+    const jobIds = uniq(annotations.map((a) => a.job_id));
     if (jobIds.length > 1) {
       columns.unshift({
         field: 'job_id',
@@ -504,7 +506,7 @@ export class AnnotationsTable extends Component {
               <EuiButtonIcon
                 onClick={() => this.openSingleMetricView(annotation)}
                 disabled={!isDrillDownAvailable}
-                iconType="stats"
+                iconType="visLine"
                 aria-label={openInSingleMetricViewerAriaLabelText}
               />
             </EuiToolTip>

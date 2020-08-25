@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigurationBlock } from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { ConfigurationBlock } from '../../../../common/domain_types';
 import {
   ReturnTypeBulkDelete,
   ReturnTypeBulkUpsert,
   ReturnTypeList,
-} from '../../../../../../legacy/plugins/beats_management/common/return_types';
+} from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { FrontendConfigBlocksAdapter } from './adapter_types';
 

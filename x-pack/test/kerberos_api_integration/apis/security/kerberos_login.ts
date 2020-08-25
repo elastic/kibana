@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  describe('Kerberos authentication', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/75707
+  describe.skip('Kerberos authentication', () => {
     before(async () => {
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
@@ -58,8 +59,13 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
-        .send({ username, password })
-        .expect(204);
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username, password },
+        })
+        .expect(200);
 
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);

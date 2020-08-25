@@ -7,6 +7,29 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionComponent } from 'react';
 
+import {
+  Append,
+  Bytes,
+  Circle,
+  Convert,
+  CSV,
+  DateProcessor,
+  DateIndexName,
+  Dissect,
+  DotExpander,
+  Drop,
+  Enrich,
+  Fail,
+  Foreach,
+  GeoIP,
+  Grok,
+  Gsub,
+  HtmlStrip,
+  Inference,
+  Join,
+  Json,
+} from '../manage_processor_form/processors';
+
 // import { SetProcessor } from './processors/set';
 // import { Gsub } from './processors/gsub';
 
@@ -23,133 +46,140 @@ type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
 
 export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   append: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Append,
     docLinkPath: '/append-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.append', {
       defaultMessage: 'Append',
     }),
   },
   bytes: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Bytes,
     docLinkPath: '/bytes-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.bytes', {
       defaultMessage: 'Bytes',
     }),
   },
   circle: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Circle,
     docLinkPath: '/ingest-circle-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.circle', {
       defaultMessage: 'Circle',
     }),
   },
   convert: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Convert,
     docLinkPath: '/convert-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.convert', {
       defaultMessage: 'Convert',
     }),
   },
   csv: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: CSV,
     docLinkPath: '/csv-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.csv', {
       defaultMessage: 'CSV',
     }),
   },
   date: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: DateProcessor,
     docLinkPath: '/date-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.date', {
       defaultMessage: 'Date',
     }),
   },
   date_index_name: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: DateIndexName,
     docLinkPath: '/date-index-name-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
-      defaultMessage: 'Date Index Name',
+      defaultMessage: 'Date index name',
     }),
   },
   dissect: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Dissect,
     docLinkPath: '/dissect-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dissect', {
       defaultMessage: 'Dissect',
     }),
   },
   dot_expander: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: DotExpander,
     docLinkPath: '/dot-expand-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dotExpander', {
-      defaultMessage: 'Dot Expander',
+      defaultMessage: 'Dot expander',
     }),
   },
   drop: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Drop,
     docLinkPath: '/drop-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.drop', {
       defaultMessage: 'Drop',
     }),
   },
   enrich: {
-    FieldsComponent: undefined, // TODO: Implement
-    docLinkPath: '/enrich-processor.html',
+    FieldsComponent: Enrich,
+    docLinkPath: '/ingest-enriching-data.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),
   },
   fail: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Fail,
     docLinkPath: '/fail-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.fail', {
       defaultMessage: 'Fail',
     }),
   },
   foreach: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Foreach,
     docLinkPath: '/foreach-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.foreach', {
       defaultMessage: 'Foreach',
     }),
   },
   geoip: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: GeoIP,
     docLinkPath: '/geoip-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.geoip', {
       defaultMessage: 'GeoIP',
     }),
   },
+  grok: {
+    FieldsComponent: Grok,
+    docLinkPath: '/grok-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
+      defaultMessage: 'Grok',
+    }),
+  },
   gsub: {
-    FieldsComponent: undefined,
+    FieldsComponent: Gsub,
     docLinkPath: '/gsub-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.gsub', {
       defaultMessage: 'Gsub',
     }),
   },
   html_strip: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: HtmlStrip,
     docLinkPath: '/htmlstrip-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.htmlStrip', {
-      defaultMessage: 'HTML Strip',
+      defaultMessage: 'HTML strip',
     }),
   },
   inference: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Inference,
     docLinkPath: '/inference-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.inference', {
       defaultMessage: 'Inference',
     }),
   },
   join: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Join,
     docLinkPath: '/join-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.join', {
       defaultMessage: 'Join',
     }),
   },
   json: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Json,
     docLinkPath: '/json-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.json', {
       defaultMessage: 'JSON',
@@ -201,7 +231,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/ingest-node-set-security-user-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.setSecurityUser', {
-      defaultMessage: 'Set Security User',
+      defaultMessage: 'Set security user',
     }),
   },
   split: {
@@ -236,14 +266,14 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/urldecode-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
-      defaultMessage: 'URL Decode',
+      defaultMessage: 'URL decode',
     }),
   },
   user_agent: {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
-      defaultMessage: 'User Agent',
+      defaultMessage: 'User agent',
     }),
   },
 
@@ -253,13 +283,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     docLinkPath: '/set-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
       defaultMessage: 'Set',
-    }),
-  },
-  grok: {
-    FieldsComponent: undefined,
-    docLinkPath: '/grok-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
-      defaultMessage: 'Grok',
     }),
   },
 };

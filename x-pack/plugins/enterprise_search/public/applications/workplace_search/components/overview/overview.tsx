@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+// TODO: Remove EuiPage & EuiPageBody before exposing full app
+
+import React, { useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActions, useValues } from 'kea';
 
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
 
 import { OverviewLogic, IOverviewActions, IOverviewValues } from './overview_logic';
-
-import { ErrorState } from '../error_state';
 
 import { Loading } from '../shared/loading';
 import { ProductButton } from '../shared/product_button';
@@ -45,13 +44,10 @@ const HEADER_DESCRIPTION = i18n.translate(
 );
 
 export const Overview: React.FC = () => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
-
   const { initializeOverview } = useActions(OverviewLogic) as IOverviewActions;
 
   const {
     dataLoading,
-    hasErrorConnecting,
     hasUsers,
     hasOrgSources,
     isOldAccount,
@@ -59,10 +55,9 @@ export const Overview: React.FC = () => {
   } = useValues(OverviewLogic) as IOverviewValues;
 
   useEffect(() => {
-    initializeOverview({ http });
+    initializeOverview();
   }, [initializeOverview]);
 
-  if (hasErrorConnecting) return <ErrorState />;
   if (dataLoading) return <Loading />;
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
