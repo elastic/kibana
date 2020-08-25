@@ -8,14 +8,14 @@ import React, { useContext } from 'react';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../shared/telemetry';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { KibanaContext, IKibanaContext } from '../../../index';
-import { CREATE_ENGINES_PATH } from '../../routes';
+import { sendTelemetry } from '../../../../shared/telemetry';
+import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
+import { KibanaContext, IKibanaContext } from '../../../../index';
+import { CREATE_ENGINES_PATH } from '../../../routes';
 
-import { EngineOverviewHeader } from '../engine_overview_header';
+import { EngineOverviewHeader } from './header';
 
-import './empty_states.scss';
+import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
   const {

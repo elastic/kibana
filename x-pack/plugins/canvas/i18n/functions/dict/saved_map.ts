@@ -11,11 +11,11 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof savedMap>> = {
   help: i18n.translate('xpack.canvas.functions.savedMapHelpText', {
-    defaultMessage: `Returns an embeddable for a saved map object`,
+    defaultMessage: `Returns an embeddable for a saved map object.`,
   }),
   args: {
     id: i18n.translate('xpack.canvas.functions.savedMap.args.idHelpText', {
-      defaultMessage: `The ID of the Saved Map Object`,
+      defaultMessage: `The ID of the saved map object`,
     }),
     center: i18n.translate('xpack.canvas.functions.savedMap.args.centerHelpText', {
       defaultMessage: `The center and zoom level the map should have`,
