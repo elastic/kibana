@@ -49,7 +49,7 @@ project {
       param("agentPushPreset", "")
       param("profileId", "kibana-brianseeders")
       param("profileServerUrl", "")
-      param("name", "test")
+      param("name", "kibana-brianseeders")
       param("total-work-time", "")
       param("credentialsType", "key")
       param("description", "")
