@@ -61,7 +61,7 @@ project {
       param("name", "kibana-brianseeders")
       param("next-hour", "")
       param("terminate-idle-time", "15")
-      param("secure:accessKey", "credentialsJSON:c3e534fa-1bbd-4c00-ae54-c640cde19189")
+      param("secure:accessKey", "credentialsJSON:8d4330f9-319c-4600-aa2a-f41f8e78657d")
     }
   }
 
