@@ -62,14 +62,14 @@ interface IndexPatternDeps {
 }
 
 export class IndexPattern implements IIndexPattern {
-  [key: string]: any;
-
   public id?: string;
   public title: string = '';
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
+  public intervalName: string | undefined;
+  public type: string | undefined;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
@@ -138,7 +138,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, onNotification);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
@@ -240,8 +240,39 @@ export class IndexPattern implements IIndexPattern {
 
     // give index pattern all of the values
     const fieldList = this.fields;
-    _.assign(this, response);
+
+    // _.assign(this, response);
+    this.title = response.title;
+    this.timeFieldName = response.timeFieldName;
+    this.intervalName = response.intervalName;
+    this.sourceFilters = response.sourceFilters;
+    this.fieldFormatMap = response.fieldFormatMap;
+    this.type = response.type;
+    this.typeMeta = response.typeMeta;
+
     this.fields = fieldList;
+
+    /*
+    title: ES_FIELD_TYPES.TEXT,
+    timeFieldName: ES_FIELD_TYPES.KEYWORD,
+    intervalName: ES_FIELD_TYPES.KEYWORD,
+    fields: 'json',
+    sourceFilters: 'json',
+    fieldFormatMap: {
+      type: ES_FIELD_TYPES.TEXT,
+      _serialize: (map = {}) => {
+        const serialized = _.transform(map, this.serializeFieldFormatMap);
+        return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
+      },
+      _deserialize: (map = '{}') => {
+        return _.mapValues(JSON.parse(map), (mapping) => {
+          return this.deserializeFieldFormatMap(mapping);
+        });
+      },
+    },
+    type: ES_FIELD_TYPES.KEYWORD,
+    typeMeta: 'json',
+  */
 
     if (!this.title && this.id) {
       this.title = this.id;
@@ -442,9 +473,10 @@ export class IndexPattern implements IIndexPattern {
   }
 
   prepBody() {
-    const body: { [key: string]: any } = {};
+    // const body: { [key: string]: any } = {};
 
     // serialize json fields
+    /*
     _.forOwn(this.mapping, (fieldMapping, fieldName) => {
       if (!fieldName || this[fieldName] == null) return;
 
@@ -452,8 +484,36 @@ export class IndexPattern implements IIndexPattern {
         ? fieldMapping._serialize(this[fieldName])
         : this[fieldName];
     });
+    */
 
-    return body;
+    /*
+    fields: 'json',
+    sourceFilters: 'json',
+    fieldFormatMap: {
+      type: ES_FIELD_TYPES.TEXT,
+      _serialize: (map = {}) => {
+        const serialized = _.transform(map, this.serializeFieldFormatMap);
+        return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
+      },
+      _deserialize: (map = '{}') => {
+        return _.mapValues(JSON.parse(map), (mapping) => {
+          return this.deserializeFieldFormatMap(mapping);
+        });
+      },
+    },
+    typeMeta: 'json',
+  */
+
+    return {
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      intervalName: this.intervalName,
+      sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters), // samePattern.sourceFilters,
+      fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
+      type: this.type,
+      typeMeta: this.mapping.typeMeta._serialize!(this.typeMeta),
+      fields: this.mapping.fields._serialize!(this.fields),
+    };
   }
 
   getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
@@ -495,20 +555,22 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async save(saveAttempts: number = 0): Promise<void | Error> {
-    if (!this.id) return;
-    const body = this.prepBody();
+    if (!this.id) return; // ensure id
+    const body = this.prepBody(); // get saved object body
     // What keys changed since they last pulled the index pattern
     const originalChangedKeys = Object.keys(body).filter(
+      // @ts-ignore
       (key) => body[key] !== this.originalBody[key]
     );
     return this.savedObjectsClient
-      .update(savedObjectType, this.id, body, { version: this.version })
+      .update(savedObjectType, this.id, body, { version: this.version }) // DO THE SAVE
       .then((resp) => {
-        this.id = resp.id;
+        this.id = resp.id; // update values in index pattern
         this.version = resp.version;
       })
       .catch((err) => {
         if (
+          // if specific error
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
@@ -527,6 +589,7 @@ export class IndexPattern implements IIndexPattern {
           });
 
           return samePattern.init().then(() => {
+            // reload index pattern
             // What keys changed from now and what the server returned
             const updatedBody = samePattern.prepBody();
 
@@ -535,6 +598,7 @@ export class IndexPattern implements IIndexPattern {
             // is the same as the original response (since that is expected
             // if we made a change in that key)
             const serverChangedKeys = Object.keys(updatedBody).filter((key) => {
+              // @ts-ignore
               return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
             });
 
@@ -559,10 +623,20 @@ export class IndexPattern implements IIndexPattern {
             }
 
             // Set the updated response on this object
+            /*
             serverChangedKeys.forEach((key) => {
               this[key] = samePattern[key];
             });
+            */
+            this.title = samePattern.title;
+            this.timeFieldName = samePattern.timeFieldName;
+            this.intervalName = samePattern.intervalName;
+            this.sourceFilters = samePattern.sourceFilters;
+            this.fieldFormatMap = samePattern.fieldFormatMap;
+            this.type = samePattern.type;
+            this.typeMeta = samePattern.typeMeta;
             this.version = samePattern.version;
+            this.fields = samePattern.fields;
 
             // Clear cache
             this.patternCache.clear(this.id!);

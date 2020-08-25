@@ -64,7 +64,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     indexPattern: IndexPattern,
     specs: FieldSpec[] = [],
     shortDotsEnable = false,
-    onNotification = () => {}
+    onNotification: OnNotification = () => {}
   ) {
     super();
     this.indexPattern = indexPattern;

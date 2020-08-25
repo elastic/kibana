@@ -25,7 +25,6 @@ import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES } from '..';
 
 export interface IIndexPattern {
-  [key: string]: any;
   fields: IFieldType[];
   title: string;
   id?: string;
