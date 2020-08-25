@@ -37,7 +37,11 @@ export function* setDynamicSettingsEffect() {
   yield takeLatest(String(setDynamicSettings), function* (action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
-        const err = new Error('Cannot fetch effect without a payload');
+        const err = new Error(
+          i18n.translate('xpack.uptime.settings.errorMessage', {
+            defaultMessage: 'Cannot fetch effect without a payload',
+          })
+        );
         yield put(setDynamicSettingsFail(err));
 
         kibanaService.core.notifications.toasts.addError(err, {
@@ -47,7 +51,11 @@ export function* setDynamicSettingsEffect() {
       }
       yield call(setDynamicSettingsAPI, { settings: action.payload });
       yield put(setDynamicSettingsSuccess(action.payload));
-      kibanaService.core.notifications.toasts.addSuccess('Settings saved!');
+      kibanaService.core.notifications.toasts.addSuccess(
+        i18n.translate('xpack.uptime.settings.saveSuccess', {
+          defaultMessage: 'Settings saved!',
+        })
+      );
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
         title: couldNotSaveSettingsText,
