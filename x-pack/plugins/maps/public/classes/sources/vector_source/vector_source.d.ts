@@ -65,7 +65,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters,
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
 
@@ -81,7 +81,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
   getUrlTemplateWithMeta(
-    searchFilters: MapFilters
+    searchFilters: VectorSourceRequestMeta
   ): Promise<{
     layerName: string;
     urlTemplate: string;

@@ -16,7 +16,7 @@ import { SearchSource } from '../../../../../../../src/plugins/data/public/searc
 import { loadIndexSettings } from './load_index_settings';
 
 import { ESSearchSource } from './es_search_source';
-import { MapFilters } from '../../../../common/descriptor_types';
+import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 describe('ESSearchSource', () => {
   it('constructor', () => {
@@ -82,7 +82,7 @@ describe('ESSearchSource', () => {
         });
       });
 
-      const searchFilters: MapFilters = {
+      const searchFilters: VectorSourceRequestMeta = {
         filters: [],
         zoom: 0,
         fieldNames: ['tooltipField', 'styleField'],
@@ -91,6 +91,13 @@ describe('ESSearchSource', () => {
           to: '15m',
           mode: 'relative',
         },
+        sourceQuery: {
+          query: '',
+          language: 'KQL',
+          queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
+        },
+        sourceMeta: null,
+        applyGlobalQuery: true,
       };
 
       it('Should only include required props', async () => {
