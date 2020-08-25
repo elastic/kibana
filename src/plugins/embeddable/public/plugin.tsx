@@ -37,6 +37,7 @@ import {
   EmbeddableFactoryProvider,
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
 } from './types';
 import { bootstrap } from './bootstrap';
 import {
@@ -80,6 +81,7 @@ export interface EmbeddableSetup {
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
+// @ts-ignore
 export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
@@ -237,7 +239,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   };
 
   private inject = (state: EmbeddableInput, references: SavedObjectReference[]) => {
-    const enhancements = state.enhanecemnts || {};
+    const enhancements = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
     let updatedInput = injectBaseEmbeddableInput(state, references);
@@ -273,9 +275,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
   };
 
-  private getEnhancement = (id: string) => {
+  private getEnhancement = (id: string): EnhancementRegistryItem => {
     return (
       this.enhancements.get(id) || {
+        id: 'unknown',
         telemetry: () => ({}),
         inject: identity,
         extract: (state: SerializableState) => {

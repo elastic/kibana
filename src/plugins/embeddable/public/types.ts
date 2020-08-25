@@ -25,7 +25,11 @@ import {
   IEmbeddable,
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
-import { PersistableStateDefinition, SerializableState } from '../../kibana_utils/common';
+import {
+  PersistableState,
+  PersistableStateDefinition,
+  SerializableState,
+} from '../../kibana_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
@@ -35,7 +39,7 @@ export interface EnhancementRegistryDefinition
   id: string;
 }
 
-export interface EnhancementRegistryItem extends PersistableStateDefinition<SerializableState> {
+export interface EnhancementRegistryItem extends PersistableState<SerializableState> {
   id: string;
 }
 
