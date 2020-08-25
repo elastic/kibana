@@ -2,8 +2,8 @@
 
 ## Terms and definitions
 
-- **asset**: An asset means an instance of a stateful Elasticsearch concept such as index, index template, data stream, ingest pipeline.
-- **managed asset**: An managed asset is an asset whose creation, update, and deletion is expected to be performed not by the user, but by a managing piece of code such as the ingest manager or a beat. Index templates are considered managed if the `managed` and `managed_by` properties of the `_meta` property are set. Data streams, indices and and ingest pipelines are considered managed if the corresponding index template is managed.
+- **asset**: An asset means an instance of a stateful Elasticsearch concept such as an index, index template, data stream, ingest pipeline.
+- **managed asset**: A managed asset is an asset whose creation, update, and deletion is expected to be performed not by the user, but by a managing piece of code such as the ingest manager or a beat. Index templates are considered managed if the `managed` and `managed_by` properties of the `_meta` property are set. Data streams, indices and and ingest pipelines are considered managed if the corresponding index template is managed.
 - **new indexing strategy**: The new indexing strategy is a naming convention for assets documented in https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/dev_docs/indexing_strategy.md.
 
 ## Goals
