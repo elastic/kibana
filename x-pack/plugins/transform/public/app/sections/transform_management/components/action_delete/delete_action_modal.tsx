@@ -51,13 +51,13 @@ export const DeleteActionModal: FC<DeleteAction> = ({
         {shouldForceDelete ? (
           <FormattedMessage
             id="xpack.transform.transformList.bulkForceDeleteModalBody"
-            defaultMessage="Are you sure you want to force delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The {count, plural, one {transform} other {transforms}} will be deleted regardless of {count, plural, one {its} other {their}} current state."
+            defaultMessage="Force delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The {count, plural, one {transform} other {transforms}} will be deleted regardless of {count, plural, one {its} other {their}} current state."
             values={{ count: items.length }}
           />
         ) : (
           <FormattedMessage
             id="xpack.transform.transformList.bulkDeleteModalBody"
-            defaultMessage="Are you sure you want to delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?"
+            defaultMessage="Delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?"
             values={{ count: items.length }}
           />
         )}
@@ -104,12 +104,12 @@ export const DeleteActionModal: FC<DeleteAction> = ({
         {items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED ? (
           <FormattedMessage
             id="xpack.transform.transformList.forceDeleteModalBody"
-            defaultMessage="Are you sure you want to force delete this transform? The transform will be deleted regardless of its current state."
+            defaultMessage="Force delete this transform? The transform will be deleted regardless of its current state."
           />
         ) : (
           <FormattedMessage
             id="xpack.transform.transformList.deleteModalBody"
-            defaultMessage="Are you sure you want to delete this transform?"
+            defaultMessage="Delete this transform?"
           />
         )}
       </p>

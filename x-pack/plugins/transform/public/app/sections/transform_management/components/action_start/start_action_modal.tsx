@@ -40,7 +40,7 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndC
         <p>
           {i18n.translate('xpack.transform.transformList.startModalBody', {
             defaultMessage:
-              'A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
+              'A transform increases search and indexing load in your cluster. Start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
             values: { count: items.length },
           })}
         </p>
