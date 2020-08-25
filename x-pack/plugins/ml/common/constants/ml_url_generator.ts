@@ -7,7 +7,7 @@
 export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
 
 export const ML_PAGES = {
-  ANOMALY_DETECTION: 'jobs',
+  ANOMALY_DETECTION_JOBS_MANAGE: 'jobs',
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS: 'data_frame_analytics',
@@ -31,10 +31,10 @@ export const ML_PAGES = {
    * Open index data visualizer viewer page
    */
   get DATA_VISUALIZER_INDEX_VIEWER() {
-    return `${this.ANOMALY_DETECTION}/new_job/${this.DATA_VISUALIZER}`;
+    return `jobs/new_job/${this.DATA_VISUALIZER}`;
   },
   get ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE() {
-    return `${this.ANOMALY_DETECTION}/new_job/step/job_type`;
+    return `jobs/new_job/step/job_type`;
   },
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',

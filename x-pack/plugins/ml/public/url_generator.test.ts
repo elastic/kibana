@@ -18,14 +18,14 @@ describe('MlUrlGenerator', () => {
     describe('Job Management Page', () => {
       it('should generate valid URL for the Anomaly Detection job management page', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.ANOMALY_DETECTION,
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
         });
         expect(url).toBe('/app/ml/jobs');
       });
 
       it('should generate valid URL for the Anomaly Detection job management page for job', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.ANOMALY_DETECTION,
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
           jobId: 'fq_single_1',
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(jobId:fq_single_1)');
@@ -33,7 +33,7 @@ describe('MlUrlGenerator', () => {
 
       it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.ANOMALY_DETECTION,
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
           groupIds: ['farequote', 'categorization'],
         });
         expect(url).toBe('/app/ml/jobs?mlManagement=(groupIds:!(farequote,categorization))');

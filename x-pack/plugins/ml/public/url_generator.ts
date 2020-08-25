@@ -50,7 +50,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
 
   public readonly createUrl = async (mlUrlGeneratorState: MlUrlGeneratorState): Promise<string> => {
     switch (mlUrlGeneratorState.page) {
-      case ML_PAGES.ANOMALY_DETECTION:
+      case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         return this.createAnomalyDetectionJobManagementUrl(
           mlUrlGeneratorState as AnomalyDetectionUrlState
         );
@@ -92,7 +92,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     mlUrlGeneratorState: AnomalyDetectionUrlState
   ): string {
     const { params } = MlUrlGenerator.extractParams<AnomalyDetectionUrlState>(mlUrlGeneratorState);
-    let url = `${this.params.appBasePath}/${ML_PAGES.ANOMALY_DETECTION}`;
+    let url = `${this.params.appBasePath}/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`;
     if (isEmpty(params)) {
       return url;
     }
