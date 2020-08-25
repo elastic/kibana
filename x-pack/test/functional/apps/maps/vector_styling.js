@@ -6,12 +6,17 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
+  const security = getService('security');
 
   describe('vector styling', () => {
     before(async () => {
+      await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
       await PageObjects.maps.loadSavedMap('document example');
+    });
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     describe('categorical styling', () => {
