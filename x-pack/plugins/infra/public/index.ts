@@ -26,3 +26,6 @@ export { FORMATTERS } from '../common/formatters';
 export { InfraFormatterType } from './lib/lib';
 
 export type InfraAppId = 'logs' | 'metrics';
+
+// Shared components
+export { LogStream } from './components/log_stream';
