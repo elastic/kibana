@@ -16,12 +16,12 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { LearnMoreLink } from './learn_more_link';
-import { ErrableFormRow } from './form_errors';
-import { useLoadNodes } from '../../../services/api';
+import { LearnMoreLink } from '../learn_more_link';
+import { ErrableFormRow } from '../form_errors';
+import { useLoadNodes } from '../../../../services/api';
 import { NodeAttrsDetails } from './node_attrs_details';
-import { ColdPhase, Phase, Phases, WarmPhase } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { ColdPhase, Phase, Phases, WarmPhase } from '../../../../services/policies/types';
+import { PhaseValidationErrors, propertyof } from '../../../../services/policies/policy_validation';
 
 const learnMoreLink = (
   <Fragment>

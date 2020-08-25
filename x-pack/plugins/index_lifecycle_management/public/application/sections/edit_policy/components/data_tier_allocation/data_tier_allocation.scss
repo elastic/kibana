@@ -1,0 +1,20 @@
+.indexLifecycleManagement__dataTierAllocation {
+  &__buttonGroup {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+
+  &__contentBox {
+    padding: 0 $euiSizeS 0 $euiSizeS;
+
+    &__descriptionPanel {
+      padding-top: $euiSizeM;
+      padding-left: $euiSizeS;
+      padding-right: $euiSizeS;
+    }
+
+    &__customAllocationPanel {
+      padding-top: $euiSizeM;
+    }
+  }
+}

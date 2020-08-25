@@ -20,7 +20,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { useLoadNodeDetails } from '../../../services/api';
+import { useLoadNodeDetails } from '../../../../services/api';
 
 interface Props {
   close: () => void;
