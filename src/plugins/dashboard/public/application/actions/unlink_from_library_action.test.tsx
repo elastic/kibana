@@ -30,7 +30,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ViewMode } from '../../../../embeddable/public';
+import { ViewMode, SavedObjectEmbeddableInput } from '../../../../embeddable/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -142,7 +142,11 @@ test('Unlink unwraps all attributes from savedObject', async () => {
     attribute4: { nestedattribute: 'hello from the nest' },
   };
 
-  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<ContactCardEmbeddable>(embeddable, {
+  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
+    ContactCardEmbeddable,
+    { attributes: unknown; id: string },
+    SavedObjectEmbeddableInput
+  >(embeddable, {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
     mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id },
   });

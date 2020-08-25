@@ -46,7 +46,9 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={(data?.backEnd?.value?.toFixed(2) ?? '-') + ' sec'}
+          title={
+            (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
+          }
           description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
@@ -54,7 +56,7 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' sec'}
+          title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' s'}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />

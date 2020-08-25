@@ -19,7 +19,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
-import { MockUiSettingsClientConstructor } from './ui_settings_service.test.mock';
+import {
+  MockUiSettingsClientConstructor,
+  getCoreSettingsMock,
+} from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { savedObjectsClientMock } from '../mocks';
@@ -58,6 +61,7 @@ describe('uiSettings', () => {
 
   afterEach(() => {
     MockUiSettingsClientConstructor.mockClear();
+    getCoreSettingsMock.mockClear();
   });
 
   describe('#setup', () => {
@@ -65,6 +69,11 @@ describe('uiSettings', () => {
       await service.setup(setupDeps);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledTimes(1);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
+    });
+
+    it('calls `getCoreSettings`', async () => {
+      await service.setup(setupDeps);
+      expect(getCoreSettingsMock).toHaveBeenCalledTimes(1);
     });
 
     describe('#register', () => {
