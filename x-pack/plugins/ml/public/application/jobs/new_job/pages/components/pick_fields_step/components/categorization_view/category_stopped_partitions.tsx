@@ -23,6 +23,7 @@ export const CategoryStoppedPartitions: FC = () => {
   const [hasStoppedPartitions, setHasStoppedPartitions] = useState(false);
   const [stoppedPartitionsError, setStoppedPartitionsError] = useState<string | undefined>();
 
+  // using ref so this Subscription instance is only intialized once
   const _resultsSubscription: undefined | Subscription = useRef();
 
   const columns = useMemo(
@@ -32,8 +33,7 @@ export const CategoryStoppedPartitions: FC = () => {
         name: i18n.translate(
           'xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsPreviewColumnName',
           {
-            defaultMessage: 'Stopped partition {count, plural, one {name} other {names}}',
-            values: { count: tableRow.length },
+            defaultMessage: 'Stopped partition names',
           }
         ),
         render: (partition: any) => (
@@ -62,10 +62,7 @@ export const CategoryStoppedPartitions: FC = () => {
         const stoppedPartitionsPreview = results.jobs[jobCreator.jobId];
         // once we have reached number of stopped partitions we wanted to show as preview
         // no need to keep fetching anymore
-        if (
-          stoppedPartitionsPreview.length >= NUMBER_OF_PREVIEW &&
-          _resultsSubscription.current !== undefined
-        ) {
+        if (stoppedPartitionsPreview.length >= NUMBER_OF_PREVIEW && !_resultsSubscription.current) {
           _resultsSubscription.current.unsubscribe();
           _resultsSubscription.current = undefined;
         }
@@ -78,7 +75,7 @@ export const CategoryStoppedPartitions: FC = () => {
       }
     } catch (e) {
       const error = extractErrorProperties(e);
-      // might get 404 because job has not been created yet
+      // might get 404 because job has not been created yet and that's ok
       if (error.statusCode !== 404) {
         setStoppedPartitionsError(error.message);
       }
@@ -91,7 +88,7 @@ export const CategoryStoppedPartitions: FC = () => {
       // subscribe to result updates
       _resultsSubscription.current = resultsLoader.subscribeToResults(setResultsWrapper);
       return () => {
-        if (_resultsSubscription) {
+        if (_resultsSubscription.current) {
           _resultsSubscription.current.unsubscribe();
         }
       };
@@ -131,7 +128,7 @@ export const CategoryStoppedPartitions: FC = () => {
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout"
-                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job '{jobId}' are unsuitable for categorization and are not included in the categorization or anomaly detection analysis."
+                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job '{jobId}' are unsuitable for categorization and have been excluded from further categorization or anomaly detection analysis."
                 values={{
                   jobId: jobCreator.jobId,
                 }}
