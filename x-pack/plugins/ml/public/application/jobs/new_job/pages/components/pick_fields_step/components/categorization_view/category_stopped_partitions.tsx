@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
+import React, { FC, useContext, useEffect, useState, useMemo, useRef } from 'react';
 import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
+import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
 const NUMBER_OF_PREVIEW = 5;
 export const CategoryStoppedPartitions: FC = () => {
@@ -20,8 +21,9 @@ export const CategoryStoppedPartitions: FC = () => {
   const jobCreator = jc as CategorizationJobCreator;
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);
   const [hasStoppedPartitions, setHasStoppedPartitions] = useState(false);
+  const [stoppedPartitionsError, setStoppedPartitionsError] = useState<string | undefined>();
 
-  let _resultsSubscription: undefined | Subscription;
+  const _resultsSubscription: undefined | Subscription = useRef();
 
   const columns = useMemo(
     () => [
@@ -48,30 +50,38 @@ export const CategoryStoppedPartitions: FC = () => {
   }
 
   async function loadCategoryStoppedPartitions() {
-    const results = await ml.results.getCategoryStoppedPartitions([jobCreator.jobId]);
+    try {
+      const results = await ml.results.getCategoryStoppedPartitions([jobCreator.jobId]);
 
-    if (
-      results?.jobs !== undefined &&
-      !Array.isArray(results?.jobs) && // if jobs is object of jobId: [partitions]
-      Array.isArray(results?.jobs[jobCreator.jobId]) &&
-      results.jobs[jobCreator.jobId].length > 0
-    ) {
-      const stoppedPartitionsPreview = results.jobs[jobCreator.jobId];
-      // once we have reached number of stopped partitions we wanted to show as preview
-      // no need to keep fetching anymore
       if (
-        stoppedPartitionsPreview.length >= NUMBER_OF_PREVIEW &&
-        _resultsSubscription !== undefined
+        results?.jobs !== undefined &&
+        !Array.isArray(results?.jobs) && // if jobs is object of jobId: [partitions]
+        Array.isArray(results?.jobs[jobCreator.jobId]) &&
+        results.jobs[jobCreator.jobId].length > 0
       ) {
-        _resultsSubscription.unsubscribe();
-        _resultsSubscription = undefined;
+        const stoppedPartitionsPreview = results.jobs[jobCreator.jobId];
+        // once we have reached number of stopped partitions we wanted to show as preview
+        // no need to keep fetching anymore
+        if (
+          stoppedPartitionsPreview.length >= NUMBER_OF_PREVIEW &&
+          _resultsSubscription.current !== undefined
+        ) {
+          _resultsSubscription.current.unsubscribe();
+          _resultsSubscription.current = undefined;
+        }
+        setHasStoppedPartitions(true);
+        setTableRow(
+          stoppedPartitionsPreview.slice(0, NUMBER_OF_PREVIEW).map((partitionName) => ({
+            partitionName,
+          }))
+        );
       }
-      setHasStoppedPartitions(true);
-      setTableRow(
-        stoppedPartitionsPreview.slice(0, NUMBER_OF_PREVIEW).map((partitionName) => ({
-          partitionName,
-        }))
-      );
+    } catch (e) {
+      const error = extractErrorProperties(e);
+      // might get 404 because job has not been created yet
+      if (error.statusCode !== 404) {
+        setStoppedPartitionsError(error.message);
+      }
     }
   }
 
@@ -79,10 +89,10 @@ export const CategoryStoppedPartitions: FC = () => {
     // only need to run this check if jobCreator.perPartitionStopOnWarn is turned on
     if (jobCreator.perPartitionCategorization && jobCreator.perPartitionStopOnWarn) {
       // subscribe to result updates
-      _resultsSubscription = resultsLoader.subscribeToResults(setResultsWrapper);
+      _resultsSubscription.current = resultsLoader.subscribeToResults(setResultsWrapper);
       return () => {
         if (_resultsSubscription) {
-          _resultsSubscription.unsubscribe();
+          _resultsSubscription.current.unsubscribe();
         }
       };
     }
@@ -90,6 +100,21 @@ export const CategoryStoppedPartitions: FC = () => {
 
   return (
     <>
+      {stoppedPartitionsError && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            color={'danger'}
+            size={'s'}
+            title={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsErrorCallout"
+                defaultMessage="An error occurred while fetching list of stopped partitions."
+              />
+            }
+          />
+        </>
+      )}
       {hasStoppedPartitions && (
         <>
           <EuiSpacer />
