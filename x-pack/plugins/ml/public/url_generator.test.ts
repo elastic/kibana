@@ -39,9 +39,9 @@ describe('MlUrlGenerator', () => {
         expect(url).toBe('/app/ml/jobs?mlManagement=(groupIds:!(farequote,categorization))');
       });
 
-      it('should generate valid URL for the Data Visualizer Viewer page', async () => {
+      it('should generate valid URL for the page for selecting the type of anomaly detection job to create', async () => {
         const url = await urlGenerator.createUrl({
-          page: ML_PAGES.DATA_VISUALIZER_NEW_JOB,
+          page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
           index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
           globalState: {
             time: {
@@ -202,21 +202,21 @@ describe('MlUrlGenerator', () => {
       expect(url).toBe('/app/ml/datavisualizer');
     });
 
-    it('should generate valid URL for the Data Visualizer import file page', async () => {
+    it('should generate valid URL for the File Data Visualizer import page', async () => {
       const url = await urlGenerator.createUrl({
         page: ML_PAGES.DATA_VISUALIZER_FILE,
       });
       expect(url).toBe('/app/ml/filedatavisualizer');
     });
 
-    it('should generate valid URL for the Data Visualizer import by index page', async () => {
+    it('should generate valid URL for the Index Data Visualizer select index pattern or saved search page', async () => {
       const url = await urlGenerator.createUrl({
         page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
       });
       expect(url).toBe('/app/ml/datavisualizer_index_select');
     });
 
-    it('should generate valid URL for the Data Visualizer Viewer page', async () => {
+    it('should generate valid URL for the Index Data Visualizer Viewer page', async () => {
       const url = await urlGenerator.createUrl({
         page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
         index: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',

@@ -18,22 +18,22 @@ export const ML_PAGES = {
   DATA_VISUALIZER: 'datavisualizer',
   /**
    * Page: Data Visualizer
-   * Create data visualizer by selecting an existing Elasticsearch index
+   * Open data visualizer by selecting a Kibana index pattern or saved search
    */
   DATA_VISUALIZER_INDEX_SELECT: 'datavisualizer_index_select',
   /**
    * Page: Data Visualizer
-   * Create data visualizer by importing log data
+   * Open data visualizer by importing data from a log file
    */
   DATA_VISUALIZER_FILE: 'filedatavisualizer',
   /**
    * Page: Data Visualizer
-   * Create a job from the index pattern
+   * Open index data visualizer viewer page
    */
   get DATA_VISUALIZER_INDEX_VIEWER() {
     return `${this.ANOMALY_DETECTION}/new_job/${this.DATA_VISUALIZER}`;
   },
-  get DATA_VISUALIZER_NEW_JOB() {
+  get ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE() {
     return `${this.ANOMALY_DETECTION}/new_job/step/job_type`;
   },
   SETTINGS: 'settings',

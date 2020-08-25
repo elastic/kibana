@@ -70,7 +70,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
         return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
-      case ML_PAGES.DATA_VISUALIZER_NEW_JOB:
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
         return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
         return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
