@@ -80,7 +80,7 @@ export const GeoIP: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.geoIPForm.fieldNameHelpText',
-          { defaultMessage: 'Field containing an IP address for the geographical lookup' }
+          { defaultMessage: 'Field containing an IP address for the geographical lookup.' }
         )}
       />
 
@@ -88,7 +88,7 @@ export const GeoIP: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.geoIPForm.targetFieldHelpText',
           {
-            defaultMessage: 'Field used to contain geo data properties',
+            defaultMessage: 'Field used to contain geo data properties.',
           }
         )}
       />

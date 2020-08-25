@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -36,7 +37,7 @@ const mapping = [
 export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const config = getService('config');
+  const configService = getService('config');
 
   const mockResilient = {
     config: {
@@ -75,19 +76,12 @@ export default function resilientTest({ getService }: FtrProviderContext) {
   };
 
   let resilientSimulatorURL: string = '<could not determine kibana url>';
-  let proxyServer: any;
-  let proxyHaveBeenCalled = false;
 
   describe('IBM Resilient', () => {
     before(() => {
       resilientSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
       );
-      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
     });
 
     describe('IBM Resilient - Action Creation', () => {
@@ -175,7 +169,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a ibm resilient action with a non whitelisted apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a ibm resilient action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -195,7 +189,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -301,6 +295,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
     describe('IBM Resilient - Executor', () => {
       let simulatedActionId: string;
+      let proxyServer: httpProxy | undefined;
+      let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/action')
@@ -316,6 +312,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             secrets: mockResilient.secrets,
           });
         simulatedActionId = body.id;
+
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {
+            proxyHaveBeenCalled = true;
+          }
+        );
       });
 
       describe('Validation', () => {
@@ -539,7 +543,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(proxyHaveBeenCalled).to.equal(true);
-
           expect(body).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
@@ -552,10 +555,12 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           });
         });
       });
-    });
 
-    after(() => {
-      proxyServer.close();
+      after(() => {
+        if (proxyServer) {
+          proxyServer.close();
+        }
+      });
     });
   });
 }
