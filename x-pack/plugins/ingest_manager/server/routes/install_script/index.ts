@@ -47,7 +47,7 @@ export const registerRoutes = ({
         }),
       ];
 
-      const script = getScript(request.params.osType, kibanaUrl);
+      const script = getScript(request.params.osType, kibanaUrl[0]);
 
       return response.ok({ body: script });
     }
