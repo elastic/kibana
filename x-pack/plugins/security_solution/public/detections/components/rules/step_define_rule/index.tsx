@@ -43,7 +43,6 @@ import {
   UseMultiFields,
   FormDataProvider,
   useForm,
-  FormSchema,
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -113,10 +112,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     index: indicesConfig,
   };
   const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
-  const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
   const [
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(myStepData.index, 'step_define_rule');
+  ] = useFetchIndexPatterns(initialState.index, RuleStep.defineRule);
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
@@ -132,10 +130,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       const { isValid, data } = await submit();
       if (isValid && setStepData) {
         setStepData(RuleStep.defineRule, data, isValid);
-        setMyStepData(data);
+        reset({ defaultValue: data }); // TODO we have to reset our form to its values post-submission
       }
     }
-  }, [setStepData, submit]);
+  }, [reset, setStepData, submit]);
 
   useEffect(() => {
     if (setForm) {
@@ -172,8 +170,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatternQueryBar}
-        schema={filterRuleFieldsForType(schema as FormSchema & RuleFields, myStepData.ruleType)}
-        data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
+        schema={filterRuleFieldsForType(
+          schema as typeof schema & RuleFields,
+          initialState.ruleType
+        )}
+        data={filterRuleFieldsForType(initialState, initialState.ruleType)}
       />
     </StepContentWrapper>
   ) : (
@@ -296,11 +297,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 } else if (!indexModified && !isEqual(index, indicesConfig)) {
                   setIndexModified(true);
                 }
-                if (!isEqual(index, myStepData.index)) {
-                  setMyStepData((prevValue) => ({ ...prevValue, index }));
-                }
               }
-
               if (ruleType !== localRuleType) {
                 setLocalRuleType(ruleType);
                 clearErrors();
