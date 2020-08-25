@@ -16,10 +16,7 @@ export function getMetricsDateHistogramParams(
     field: '@timestamp',
 
     // ensure minimum bucket size of configured interval since this is the default resolution for metric data
-    fixed_interval: `${Math.max(
-      bucketSize,
-      isNaN(metricsInterval) ? 30 : metricsInterval
-    )}s`,
+    fixed_interval: `${Math.max(bucketSize, metricsInterval)}s`,
 
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },
