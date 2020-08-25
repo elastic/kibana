@@ -18,7 +18,7 @@
  */
 import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../../../data/public';
 import { convertTimeValueToIso } from './date_conversion';
-import { EsHitRecordList } from '../context';
+import { EsHitRecordList, EsHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';
 import { EsQuerySearchAfter } from './get_es_query_search_after';
 
@@ -76,5 +76,6 @@ export async function fetchHitsInInterval(
     .setField('version', true)
     .fetch();
 
-  return response.hits ? response.hits.hits : [];
+  // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
+  return ((response.hits?.hits as unknown) as EsHitRecord[]) || [];
 }

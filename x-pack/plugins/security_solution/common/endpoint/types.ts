@@ -5,7 +5,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackageConfig, PackageConfig } from '../../../ingest_manager/common';
+import { NewPackagePolicy, PackagePolicy } from '../../../ingest_manager/common';
 import { ManifestSchema } from './schema/manifest';
 
 /**
@@ -831,14 +831,14 @@ export enum ProtectionModes {
 }
 
 /**
- * Endpoint Policy data, which extends Ingest's `PackageConfig` type
+ * Endpoint Policy data, which extends Ingest's `PackagePolicy` type
  */
-export type PolicyData = PackageConfig & NewPolicyData;
+export type PolicyData = PackagePolicy & NewPolicyData;
 
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewPackageConfig & {
+export type NewPolicyData = NewPackagePolicy & {
   inputs: [
     {
       type: 'endpoint';

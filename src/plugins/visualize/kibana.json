@@ -10,6 +10,7 @@
     "savedObjects",
     "visualizations",
     "embeddable",
+    "dashboard",
     "uiActions"
   ],
   "optionalPlugins": ["home", "share"],
