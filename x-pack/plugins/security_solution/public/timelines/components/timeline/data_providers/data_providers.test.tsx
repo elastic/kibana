@@ -15,8 +15,9 @@ import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {

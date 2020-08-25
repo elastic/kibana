@@ -269,17 +269,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const interval = prepareString('interval', params.interval);
     return `timelion_vis ${expression}${interval}`;
   },
-  markdown: (params) => {
-    const { markdown, fontSize, openLinksInNewTab } = params;
-    let escapedMarkdown = '';
-    if (typeof markdown === 'string' || markdown instanceof String) {
-      escapedMarkdown = escapeString(markdown.toString());
-    }
-    let expr = `markdownvis '${escapedMarkdown}' `;
-    expr += prepareValue('font', `{font size=${fontSize}}`, true);
-    expr += prepareValue('openLinksInNewTab', openLinksInNewTab);
-    return expr;
-  },
   table: (params, schemas) => {
     const visConfig = {
       ...params,

@@ -23,6 +23,7 @@ import { handleResponse } from './handle_response';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
+import { SearchResponse } from 'elasticsearch';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -44,7 +45,7 @@ describe('handleResponse', () => {
     const request = { body: {} };
     const response = {
       timed_out: true,
-    };
+    } as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
@@ -57,9 +58,12 @@ describe('handleResponse', () => {
     const request = { body: {} };
     const response = {
       _shards: {
-        failed: true,
+        failed: 1,
+        total: 2,
+        successful: 1,
+        skipped: 1,
       },
-    };
+    } as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
@@ -70,7 +74,7 @@ describe('handleResponse', () => {
 
   test('returns the response', () => {
     const request = {};
-    const response = {};
+    const response = {} as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
   });

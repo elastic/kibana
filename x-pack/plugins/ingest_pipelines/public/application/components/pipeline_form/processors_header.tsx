@@ -14,7 +14,7 @@ import { useKibana } from '../../../shared_imports';
 import {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
-  TestPipelineButton,
+  TestPipelineActions,
 } from '../pipeline_processors_editor';
 
 export interface Props {
@@ -23,6 +23,7 @@ export interface Props {
 
 export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { services } = useKibana();
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -30,14 +31,22 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
       justifyContent="spaceBetween"
       responsive={false}
     >
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
-              defaultMessage: 'Processors',
-            })}
-          </h3>
-        </EuiTitle>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
+                  defaultMessage: 'Processors',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LoadFromJsonButton onDone={onLoadJson} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.processorsTreeDescription"
@@ -47,6 +56,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
                 <EuiLink
                   href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
                   target="_blank"
+                  external
                 >
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
@@ -61,10 +71,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <LoadFromJsonButton onDone={onLoadJson} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TestPipelineButton />
+        <TestPipelineActions />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
