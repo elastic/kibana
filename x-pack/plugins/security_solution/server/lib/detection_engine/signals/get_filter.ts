@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
   LanguageOrUndefined,
@@ -15,7 +16,6 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
-import { assertUnreachable } from '../../../utils/build_query';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
 
