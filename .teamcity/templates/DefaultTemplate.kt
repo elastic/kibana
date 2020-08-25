@@ -35,6 +35,10 @@ object DefaultTemplate : Template({
     checkoutDir = "kibana"
   }
 
+  requirements {
+    equals("system.cloud.profile_id", "kibana-brianseeders")
+  }
+
   params {
     param("env.CI", "true")
 
