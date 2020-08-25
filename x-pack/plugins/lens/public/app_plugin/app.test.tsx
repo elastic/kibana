@@ -167,7 +167,7 @@ describe('Lens App', () => {
       redirectToOrigin: jest.fn((input?: Optional<LensEmbeddableInput, 'id'>) => {}),
       onAppLeave: jest.fn(),
       history: createMemoryHistory(),
-      featureFlagConfig: { showNewLensFlow: true },
+      featureFlagConfig: { allowByValueEmbeddables: false },
     } as unknown) as jest.Mocked<LensAppProps>;
   }
 
