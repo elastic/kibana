@@ -9852,7 +9852,6 @@
     "xpack.lens.configure.editConfig": "構成の編集",
     "xpack.lens.configure.emptyConfig": "ここにフィールドをドロップ",
     "xpack.lens.dataPanelWrapper.switchDatasource": "データソースに切り替える",
-    "xpack.lens.datatable.columns": "フィールド",
     "xpack.lens.datatable.conjunctionSign": " と ",
     "xpack.lens.datatable.expressionHelpLabel": "データベースレンダー",
     "xpack.lens.datatable.label": "データテーブル",

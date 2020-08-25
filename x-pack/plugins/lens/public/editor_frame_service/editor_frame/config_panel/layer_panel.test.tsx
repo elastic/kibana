@@ -374,7 +374,7 @@ describe('LayerPanel', () => {
     });
 
     it('should allow drag to move between groups', () => {
-      (generateId as jest.Mock).mockReturnValueOnce(`newid`);
+      (generateId as jest.Mock).mockReturnValue(`newid`);
 
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [

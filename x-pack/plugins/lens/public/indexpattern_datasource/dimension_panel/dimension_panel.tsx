@@ -128,7 +128,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
   if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
     const layer = props.state.layers[props.layerId];
-    const op = layer.columns[droppedItem.columnId];
+    const op = { ...layer.columns[droppedItem.columnId] };
     if (!props.filterOperations(op)) {
       return false;
     }
@@ -137,6 +137,16 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     delete newColumns[droppedItem.columnId];
     newColumns[props.columnId] = op;
 
+    const newColumnOrder = [...layer.columnOrder];
+    const oldIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
+    const newIndex = newColumnOrder.findIndex((c) => c === props.columnId);
+
+    if (newIndex === -1) {
+      newColumnOrder[oldIndex] = props.columnId;
+    } else {
+      newColumnOrder.splice(oldIndex, 1);
+    }
+
     // Time to replace
     props.setState({
       ...props.state,
@@ -144,7 +154,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
         ...props.state.layers,
         [props.layerId]: {
           ...layer,
-          columnOrder: layer.columnOrder.filter((id) => id !== droppedItem.columnId),
+          columnOrder: newColumnOrder,
           columns: newColumns,
         },
       },
