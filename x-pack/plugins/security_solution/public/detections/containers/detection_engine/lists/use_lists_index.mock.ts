@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUseListsConfigMock } from '../use_lists_config.mock';
+import { UseListsIndexReturn } from './use_lists_index';
 
-export const useListsConfig = jest.fn(getUseListsConfigMock);
+export const getUseListsIndexMock: () => jest.Mocked<UseListsIndexReturn> = () => ({
+  createIndex: jest.fn(),
+  indexExists: null,
+  error: null,
+  loading: false,
+});
