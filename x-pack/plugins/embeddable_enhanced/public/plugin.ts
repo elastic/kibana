@@ -31,7 +31,7 @@ import {
   urlDrilldownGlobalScopeProvider,
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
-import { UrlDrilldown } from './drilldowns/url_drilldown/url_drilldown';
+import { UrlDrilldown } from './drilldowns';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 
 declare module '../../../../src/plugins/ui_actions/public' {
