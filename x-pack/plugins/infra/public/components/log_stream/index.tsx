@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLogStream } from '../../containers/logs/log_stream';
 
-export const LogStream: React.FC = () => {
+interface LogStreamProps {
+  startTimestamp: number;
+  endTimestamp: number;
+}
+
+export const LogStream: React.FC<LogStreamProps> = ({ startTimestamp, endTimestamp }) => {
+  const { entries, fetchEntries } = useLogStream({ startTimestamp, endTimestamp });
+
+  useEffect(() => fetchEntries(), [fetchEntries]);
+
   return <span>It works!</span>;
 };
