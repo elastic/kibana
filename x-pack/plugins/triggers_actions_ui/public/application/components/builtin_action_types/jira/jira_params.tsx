@@ -90,15 +90,29 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
 
-    if (issueTypesSelectOptions.length > 0) {
+    if (!issueType && issueTypesSelectOptions.length > 0) {
       editSubActionProperty('issueType', issueTypesSelectOptions[0].value as string);
     }
 
-    if (prioritiesSelectOptions.length > 0) {
+    if (!priority && prioritiesSelectOptions.length > 0) {
       editSubActionProperty('priority', prioritiesSelectOptions[0].value as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector, issueType, fields]);
+  }, [
+    actionConnector,
+    issueType,
+    fields,
+    actionParams.subAction,
+    index,
+    savedObjectId,
+    issueTypesSelectOptions,
+    prioritiesSelectOptions,
+  ]);
+
+  useEffect(() => {
+    editAction('subActionParams', { issueType }, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector, issueType]);
 
   return (
     <Fragment>
@@ -232,7 +246,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   label={i18n.translate(
                     'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
                     {
-                      defaultMessage: 'Description (optional)',
+                      defaultMessage: 'Description',
                     }
                   )}
                   errors={errors.description as string[]}

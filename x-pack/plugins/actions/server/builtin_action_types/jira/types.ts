@@ -162,7 +162,7 @@ export type JiraExecutorResultData =
   | GetFieldsByIssueTypeResponse;
 
 export interface Fields {
-  [key: string]: string | string[] | { name: string } | { key: string };
+  [key: string]: string | string[] | { name: string } | { key: string } | { id: string };
 }
 export interface ResponseError {
   [k: string]: string;

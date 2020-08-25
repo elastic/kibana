@@ -77,7 +77,7 @@ export const createExternalService = (
     };
 
     if (incident.issueType) {
-      fields = { ...fields, issuetype: { name: incident.issueType } };
+      fields = { ...fields, issuetype: { id: incident.issueType } };
     }
 
     if (incident.description) {
@@ -163,7 +163,7 @@ export const createExternalService = (
 
     if (!incident.issueType) {
       const issueTypes = await getIssueTypes();
-      issueType = issueTypes[0]?.name ?? 'Task';
+      issueType = issueTypes[0]?.id ?? '';
     }
 
     const fields = createFields(projectKey, {
