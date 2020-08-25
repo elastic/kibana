@@ -8,7 +8,6 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { MonitoringConfig } from '../../config';
-import { LegacyServer } from '../../types';
 
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,

@@ -21,11 +21,14 @@ interface ESResponse {
 interface UuidBucket {
   key: string;
   version: {
-    buckets: VersionBucket[];
+    buckets: KeyBucket[];
+  };
+  index: {
+    buckets: KeyBucket[];
   };
 }
 
-interface VersionBucket {
+interface KeyBucket {
   key: string;
 }
 
@@ -80,23 +83,50 @@ export async function fetchStackProductUsage(
                 size: 1,
               },
             },
+            index: {
+              terms: {
+                field: '_index',
+                size: 1,
+              },
+            },
           },
         },
       },
     },
   };
+
   const response = (await callCluster('search', params)) as ESResponse;
+  if (!response.aggregations) {
+    return {
+      productName,
+      clusterUuid,
+      count: 0,
+      mbCount: 0,
+      versions: [],
+    };
+  }
+
+  const mbCount = response.aggregations.uuids.buckets.reduce((accum: number, uuidBucket) => {
+    return (
+      accum +
+      uuidBucket.index.buckets.reduce((count: number, indexBucket) => {
+        if (indexBucket.key.includes('-mb-')) {
+          count++;
+        }
+        return count;
+      }, 0)
+    );
+  }, 0);
+
+  const versions = response.aggregations.uuids.buckets.reduce((accum: string[], uuidBucket) => {
+    return [...accum, ...uuidBucket.version.buckets.map((versionBucket) => versionBucket.key)];
+  }, []);
+
   return {
     productName,
-    count: response.aggregations ? response.aggregations.uuids.buckets.length : 0,
-    versions: response.aggregations
-      ? response.aggregations.uuids.buckets.reduce((accum: string[], uuidBucket) => {
-          return [
-            ...accum,
-            ...uuidBucket.version.buckets.map((versionBucket) => versionBucket.key),
-          ];
-        }, [])
-      : [],
+    count: response.aggregations.uuids.buckets.length,
+    versions,
+    mbCount,
     clusterUuid,
   };
 }

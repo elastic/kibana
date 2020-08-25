@@ -9,4 +9,5 @@ export interface StackProductUsage {
   productName: string;
   count: number;
   versions: string[];
+  mbCount: number;
 }
