@@ -5,12 +5,8 @@
  */
 
 import { combineReducers } from 'redux';
-import { nodes } from './nodes';
 import { policies } from './policies';
-import { general } from './general';
 
 export const indexLifecycleManagement = combineReducers({
-  nodes,
   policies,
-  general,
 });
