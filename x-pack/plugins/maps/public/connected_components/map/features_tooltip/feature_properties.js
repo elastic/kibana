@@ -162,7 +162,7 @@ export class FeatureProperties extends React.Component {
 
   _renderFilterCell(tooltipProperty) {
     if (!this.props.showFilterButtons || !tooltipProperty.isFilterable()) {
-      return null;
+      return <td />;
     }
 
     const applyFilterButton = (
@@ -250,7 +250,7 @@ export class FeatureProperties extends React.Component {
     const rows = this.state.properties.map((tooltipProperty) => {
       const label = tooltipProperty.getPropertyName();
       return (
-        <tr key={label}>
+        <tr key={label} className="mapFeatureTooltip_row">
           <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">{label}</td>
           <td
             className="eui-textOverflowWrap"

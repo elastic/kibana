@@ -6,6 +6,7 @@ exports[`FeatureProperties should render 1`] = `
 >
   <tbody>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
       <td
@@ -21,8 +22,10 @@ exports[`FeatureProperties should render 1`] = `
           }
         }
       />
+      <td />
     </tr>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
       <td
@@ -38,6 +41,7 @@ exports[`FeatureProperties should render 1`] = `
           }
         }
       />
+      <td />
     </tr>
   </tbody>
 </table>
@@ -62,6 +66,7 @@ exports[`FeatureProperties should show filter button for filterable properties 1
 >
   <tbody>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
       <td
@@ -89,6 +94,7 @@ exports[`FeatureProperties should show filter button for filterable properties 1
       </td>
     </tr>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
       <td
@@ -104,6 +110,7 @@ exports[`FeatureProperties should show filter button for filterable properties 1
           }
         }
       />
+      <td />
     </tr>
   </tbody>
 </table>
@@ -115,6 +122,7 @@ exports[`FeatureProperties should show view actions button when there are availa
 >
   <tbody>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
       <td
@@ -161,6 +169,7 @@ exports[`FeatureProperties should show view actions button when there are availa
       </td>
     </tr>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
       <td
@@ -176,6 +185,7 @@ exports[`FeatureProperties should show view actions button when there are availa
           }
         }
       />
+      <td />
     </tr>
   </tbody>
 </table>

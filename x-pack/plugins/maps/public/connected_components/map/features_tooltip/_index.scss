@@ -8,6 +8,10 @@
   }
 }
 
+.mapFeatureTooltip_row {
+  border-bottom: 1px solid $euiColorLightestShade;
+}
+
 .mapFeatureTooltip_actionLinks {
   padding: $euiSizeXS;
 }
