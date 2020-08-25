@@ -5,64 +5,74 @@
  */
 
 import React from 'react';
-import { BreakdownGroup } from './BreakdownGroup';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { EuiSuperSelect } from '@elastic/eui';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
-  id: string;
-  selectedBreakdowns: BreakdownItem[];
-  onBreakdownChange: (values: BreakdownItem[]) => void;
+  selectedBreakdown: BreakdownItem;
+  onBreakdownChange: (value: BreakdownItem) => void;
 }
 
 export function BreakdownFilter({
-  id,
-  selectedBreakdowns,
+  selectedBreakdown,
   onBreakdownChange,
 }: Props) {
-  const categories: BreakdownItem[] = [
+  const NO_BREAKDOWN = 'noBreakdown';
+
+  const items: BreakdownItem[] = [
+    {
+      name: '- No breakdown -',
+      fieldName: NO_BREAKDOWN,
+      type: 'category',
+    },
     {
       name: 'Browser',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'Browser'),
       fieldName: USER_AGENT_NAME,
+      type: 'category',
     },
     {
       name: 'OS',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'OS'),
       fieldName: USER_AGENT_OS,
+      type: 'category',
     },
     {
       name: 'Device',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'Device'),
       fieldName: USER_AGENT_DEVICE,
+      type: 'category',
     },
     {
       name: 'Location',
-      type: 'category',
-      count: 0,
-      selected: selectedBreakdowns.some(({ name }) => name === 'Location'),
       fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
+      type: 'category',
     },
   ];
 
+  const options = items.map(({ name, fieldName }) => ({
+    inputDisplay: fieldName === NO_BREAKDOWN ? name : <strong>{name}</strong>,
+    value: fieldName,
+    dropdownDisplay: name,
+  }));
+
+  const onOptionChange = (value) => {
+    if (value === NO_BREAKDOWN) {
+      onBreakdownChange(null);
+    }
+    onBreakdownChange(items.find(({ fieldName }) => fieldName === value));
+  };
+
   return (
-    <BreakdownGroup
-      id={id}
-      items={categories}
-      onChange={(selValues: BreakdownItem[]) => {
-        onBreakdownChange(selValues);
-      }}
+    <EuiSuperSelect
+      fullWidth
+      compressed
+      options={options}
+      valueOfSelected={selectedBreakdown?.fieldName ?? NO_BREAKDOWN}
+      onChange={(value) => onOptionChange(value)}
     />
   );
 }
