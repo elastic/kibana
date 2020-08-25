@@ -13,12 +13,16 @@ export default function ({ getPageObjects, getService }) {
 
   describe('blended vector layer', () => {
     before(async () => {
-      await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
+      await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all'], false);
       await PageObjects.maps.loadSavedMap('blended document example');
     });
 
     afterEach(async () => {
       await inspector.close();
+      await security.testUser.restoreDefaults();
+    });
+
+    after(async () => {
       await security.testUser.restoreDefaults();
     });
 
