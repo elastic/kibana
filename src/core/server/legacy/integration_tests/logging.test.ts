@@ -28,6 +28,7 @@ import { LegacyLoggingConfig } from '../config/legacy_object_to_config_adapter';
 function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
   return kbnTestServer.createRoot({
     migrations: { skip: true }, // otherwise stuck in polling ES
+    plugins: { initialize: false },
     logging: {
       // legacy platform config
       silent: false,

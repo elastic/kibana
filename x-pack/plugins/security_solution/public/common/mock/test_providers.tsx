@@ -19,7 +19,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-import { createKibanaContextProviderMock, createStartServices } from './kibana_react';
+import {
+  createKibanaContextProviderMock,
+  createStartServicesMock,
+} from '../lib/kibana/kibana_react.mock';
 import { FieldHook, useForm } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
@@ -38,7 +41,7 @@ export const apolloClient = new ApolloClient({
 });
 
 export const apolloClientObservable = new BehaviorSubject(apolloClient);
-export const kibanaObservable = new BehaviorSubject(createStartServices());
+export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),

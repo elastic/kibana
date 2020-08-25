@@ -65,8 +65,8 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
       const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
         const newInput = await attributeService.wrapAttributes(attributes, useRefType, embeddable);
         if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
-          // Remove the savedObejctId when un-linking
-          newInput.savedObjectId = null;
+          // Set the saved object ID to null so that update input will remove the existing savedObjectId...
+          (newInput as BookByValueInput & { savedObjectId: unknown }).savedObjectId = null;
         }
         embeddable.updateInput(newInput);
         if (useRefType) {
