@@ -59,5 +59,10 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
     return subscription.unsubscribe;
   }, [subscribe, onFormData]);
 
+  if (Object.keys(formData).length === 0) {
+    // No field has mounted yet, don't render anything
+    return null;
+  }
+
   return children(formData);
 });
