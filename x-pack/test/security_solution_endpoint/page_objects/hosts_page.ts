@@ -5,6 +5,11 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { deleteEventsStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deleteAlertsStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deleteMetadataStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deletePolicyStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { deleteTelemetryStream } from '../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
@@ -67,13 +72,23 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      * @param element
      */
     async parseStyles(dataTestSubj: string, element: string) {
-      const tableData = await this.getEndpointEventResolverNodeData(dataTestSubj, element);
+      const tableData = await this.getEndpointEventResolverNodeData('resolver:node', 'style');
       const $ = [];
       for (let i = 1; i < tableData.length; i++) {
         const eachStyle = parseStyle(tableData[i]);
         $.push(eachStyle);
       }
       return $;
+    },
+    /**
+     * Deletes DataStreams from Index Management.
+     */
+    async deleteDataStreams() {
+      await deleteEventsStream(getService);
+      await deleteAlertsStream(getService);
+      await deletePolicyStream(getService);
+      await deleteMetadataStream(getService);
+      await deleteTelemetryStream(getService);
     },
   };
 }

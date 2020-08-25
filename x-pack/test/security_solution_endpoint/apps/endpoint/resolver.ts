@@ -6,11 +6,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { deleteEventsStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { deleteAlertsStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { deleteMetadataStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { deletePolicyStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { deleteTelemetryStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'hosts', 'settings']);
@@ -63,10 +58,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation Up', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await (await testSubjects.find('resolver:graph-controls:north-button')).click();
 
-      const NewNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(OriginalNodeDataStyle[i].top)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].top)
@@ -79,10 +74,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation Down', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await testSubjects.click('resolver:graph-controls:south-button');
 
-      const NewNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < NewNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].top)
@@ -95,10 +90,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation Left', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await testSubjects.click('resolver:graph-controls:east-button');
 
-      const NewNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].left)
@@ -111,9 +106,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation Right', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await testSubjects.click('resolver:graph-controls:west-button');
-      const NewNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < NewNodeDataStyle.length; i++) {
         expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].left)
@@ -126,11 +121,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation Center', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await testSubjects.click('resolver:graph-controls:east-button');
       await testSubjects.click('resolver:graph-controls:south-button');
 
-      const NewNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 0; i < NewNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].left)
@@ -140,7 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       }
       await (await testSubjects.find('resolver:graph-controls:center-button')).click();
-      const CenterNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const CenterNodeDataStyle = await pageObjects.hosts.parseStyles();
 
       for (let i = 0; i < CenterNodeDataStyle.length; i++) {
         expect(parseFloat(CenterNodeDataStyle[i].left)).to.equal(
@@ -153,10 +148,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation zoom in', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await testSubjects.click('resolver:graph-controls:zoom-in');
 
-      const NewNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
       for (let i = 1; i < NewNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].left)
@@ -175,9 +170,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Nodes navigation zoom out', async () => {
-      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
       await testSubjects.click('resolver:graph-controls:zoom-out');
-      const NewNodeDataStyle1 = await pageObjects.hosts.parseStyles('resolver:node', 'style');
+      const NewNodeDataStyle1 = await pageObjects.hosts.parseStyles();
       for (let i = 1; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
           parseFloat(NewNodeDataStyle1[i].left)
@@ -196,11 +191,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await deleteEventsStream(getService);
-      await deleteAlertsStream(getService);
-      await deletePolicyStream(getService);
-      await deleteMetadataStream(getService);
-      await deleteTelemetryStream(getService);
+      await pageObjects.hosts.deleteDataStreams();
     });
   });
 }
