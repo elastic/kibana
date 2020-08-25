@@ -5,17 +5,18 @@
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
+import sortBy from 'lodash/sortBy';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   Direction,
-  EuiButton,
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBasicTable,
   EuiInMemoryTable,
+  EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
@@ -43,6 +44,40 @@ import {
   getGroupQueryText,
 } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
+import { filterAnalytics, AnalyticsSearchBar } from './analytics_search_bar';
+import { AnalyticsEmptyPrompt } from './empty_prompt';
+
+const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [2, 5, 10, 25, 50];
+
+const filters: EuiSearchBarProps['filters'] = [
+  {
+    type: 'field_value_selection',
+    field: 'job_type',
+    name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+      defaultMessage: 'Type',
+    }),
+    multiSelect: 'or',
+    options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
+      value: val,
+      name: val,
+      view: getJobTypeBadge(val),
+    })),
+  },
+  {
+    type: 'field_value_selection',
+    field: 'state',
+    name: i18n.translate('xpack.ml.dataframe.analyticsList.statusFilter', {
+      defaultMessage: 'Status',
+    }),
+    multiSelect: 'or',
+    options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
+      value: val,
+      name: val,
+      view: getTaskStateBadge(val),
+    })),
+  },
+];
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -70,23 +105,35 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [filteredAnalytics, setFilteredAnalytics] = useState({
+    active: false,
+    items: [],
+  });
   const [searchQueryText, setSearchQueryText] = useState('');
-
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
   );
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
-
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
-  const [searchError, setSearchError] = useState<any>(undefined);
-
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-
-  const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
+  // Query text/job_id based on url but only after getAnalytics is done first
+  // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
+  const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
+  const [tableSettings, setTableSettings] = useState<{
+    pageIndex: number;
+    pageSize: number;
+    totalItemCount: number;
+    hidePerPageOptions: boolean;
+    sortField: string;
+    sortDirection: Direction;
+  }>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+    totalItemCount: 0,
+    hidePerPageOptions: false,
+    sortField: DataFrameAnalyticsListColumn.id,
+    sortDirection: 'asc',
+  });
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -100,9 +147,41 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     blockRefresh
   );
 
-  // Query text/job_id based on url but only after getAnalytics is done first
-  // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
-  const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
+  const getPageOfItems = (
+    index: number,
+    size: number,
+    sortField: string,
+    sortDirection: Direction
+  ) => {
+    let list = filteredAnalytics.active ? filteredAnalytics.items : analytics;
+    // @ts-ignore
+    list = sortBy(list, (item) => item[sortField]);
+    list = sortDirection === 'asc' ? list : list.reverse();
+    const listLength = list.length;
+
+    let pageStart = index * size;
+    if (pageStart >= listLength && listLength !== 0) {
+      // if the page start is larger than the number of items due to
+      // filters being applied or jobs being deleted, calculate a new page start
+      pageStart = Math.floor((listLength - 1) / size) * size;
+
+      setTableSettings({ ...tableSettings, pageIndex: pageStart / size });
+    }
+    return {
+      pageOfItems: list.slice(pageStart, pageStart + size),
+      totalItemCount: listLength,
+    };
+  };
+
+  const setQueryClauses = (queryClauses: any) => {
+    if (queryClauses.length) {
+      const filtered = filterAnalytics(analytics, queryClauses);
+      setFilteredAnalytics({ active: true, items: filtered });
+    } else {
+      setFilteredAnalytics({ active: false, items: [] });
+    }
+  };
+
   useEffect(() => {
     if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
       const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
@@ -118,6 +197,18 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       setSearchQueryText(queryText);
     }
   }, [selectedIdFromUrlInitialized, analytics]);
+
+  useEffect(() => {
+    if (searchQueryText !== '' && selectedIdFromUrlInitialized === true) {
+      // trigger table filtering with query for job id to trigger table filter
+      const query = EuiSearchBar.Query.parse(searchQueryText);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      setQueryClauses(clauses);
+    }
+  }, [selectedIdFromUrlInitialized, searchQueryText]);
 
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
@@ -160,34 +251,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   if (analytics.length === 0) {
     return (
       <>
-        <EuiEmptyPrompt
-          iconType="createAdvancedJob"
-          title={
-            <h2>
-              {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-                defaultMessage: 'Create your first data frame analytics job',
-              })}
-            </h2>
-          }
-          actions={
-            !isManagementTable
-              ? [
-                  <EuiButton
-                    onClick={() => setIsSourceIndexModalVisible(true)}
-                    isDisabled={disabled}
-                    color="primary"
-                    iconType="plusInCircle"
-                    fill
-                    data-test-subj="mlAnalyticsCreateFirstButton"
-                  >
-                    {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-                      defaultMessage: 'Create job',
-                    })}
-                  </EuiButton>,
-                ]
-              : []
-          }
-          data-test-subj="mlNoDataFrameAnalyticsFound"
+        <AnalyticsEmptyPrompt
+          isManagementTable={isManagementTable}
+          disabled={disabled}
+          onCreateFirstJobClick={() => setIsSourceIndexModalVisible(true)}
         />
         {isSourceIndexModalVisible === true && (
           <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
@@ -196,6 +263,22 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
+  const { pageIndex, pageSize, sortField, sortDirection } = tableSettings;
+
+  const { pageOfItems, totalItemCount } = getPageOfItems(
+    pageIndex,
+    pageSize,
+    sortField,
+    sortDirection
+  );
+
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  };
+
   const sorting = {
     sort: {
       field: sortField,
@@ -203,75 +286,23 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     },
   };
 
-  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, analytics);
-
-  const pagination = {
-    initialPageIndex: pageIndex,
-    initialPageSize: pageSize,
-    totalItemCount: analytics.length,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  };
-
-  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
-    if (search.error !== null) {
-      setSearchError(search.error.message);
-      return false;
-    }
-
-    setSearchError(undefined);
-    setSearchQueryText(search.queryText);
-    return true;
-  };
-
-  const search: EuiSearchBarProps = {
-    query: searchQueryText,
-    onChange: handleSearchOnChange,
-    box: {
-      incremental: true,
-    },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'job_type',
-        name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
-          defaultMessage: 'Type',
-        }),
-        multiSelect: 'or',
-        options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
-          value: val,
-          name: val,
-          view: getJobTypeBadge(val),
-        })),
-      },
-      {
-        type: 'field_value_selection',
-        field: 'state',
-        name: i18n.translate('xpack.ml.dataframe.analyticsList.statusFilter', {
-          defaultMessage: 'Status',
-        }),
-        multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
-          value: val,
-          name: val,
-          view: getTaskStateBadge(val),
-        })),
-      },
-    ],
-  };
-
   const onTableChange: EuiInMemoryTable<DataFrameAnalyticsListRow>['onTableChange'] = ({
-    page = { index: 0, size: 10 },
+    page = { index: 0, size: PAGE_SIZE },
     sort = { field: DataFrameAnalyticsListColumn.id, direction: 'asc' },
   }) => {
     const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-
     const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
+
+    setTableSettings({
+      ...tableSettings,
+      pageIndex: index,
+      pageSize: size,
+      sortField: field,
+      sortDirection: direction,
+    });
   };
+
+  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, analytics);
 
   return (
     <>
@@ -300,22 +331,26 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <EuiInMemoryTable
-          allowNeutralSort={false}
+        <AnalyticsSearchBar
+          filters={filters}
+          searchQueryText={searchQueryText}
+          setQueryClauses={setQueryClauses}
+        />
+        <EuiSpacer size="l" />
+        <EuiBasicTable
           className="mlAnalyticsTable"
           columns={columns}
-          error={searchError}
           hasActions={false}
           isExpandable={true}
           isSelectable={false}
-          items={analytics}
+          items={pageOfItems}
           itemId={DataFrameAnalyticsListColumn.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onTableChange={onTableChange}
+          onChange={onTableChange}
           pagination={pagination}
+          // @ts-ignore
           sorting={sorting}
-          search={search}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
           rowProps={(item) => ({
             'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
