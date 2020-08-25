@@ -9,29 +9,19 @@ import { mount } from 'enzyme';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import '../../../../common/mock/match_media';
-import { createUseKibanaMock, TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { NoCases } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
-
-let navigateToApp: jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('RecentCases', () => {
+  let navigateToApp: jest.Mock;
+
   beforeEach(() => {
-    jest.resetAllMocks();
     navigateToApp = jest.fn();
-    const kibanaMock = createUseKibanaMock()();
-    useKibanaMock.mockReturnValue({
-      ...kibanaMock,
-      services: {
-        application: {
-          navigateToApp,
-          getUrlForApp: jest.fn(),
-        },
-      },
-    });
+    useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
   it('if no cases, you should be able to create a case by clicking on the link "start a new case"', () => {
