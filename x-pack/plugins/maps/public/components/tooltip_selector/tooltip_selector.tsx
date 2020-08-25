@@ -164,7 +164,7 @@ export class TooltipSelector extends Component<Props, State> {
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.maps.tooltipSelector.emptyState.description"
-                defaultMessage="Add a tooltip field to view and create filters from field values."
+                defaultMessage="Add a tooltip field to create filters from field values."
               />
             </EuiTextColor>
           </p>
