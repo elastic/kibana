@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PolicyFromES } from '../../../public/application/services/policies/types';
+
 export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 
-export const DELETE_PHASE_POLICY = {
+export const DELETE_PHASE_POLICY: PolicyFromES = {
   version: 1,
-  modified_date: Date.now(),
+  modified_date: Date.now().toString(),
   policy: {
     phases: {
       hot: {
         min_age: '0ms',
         actions: {
-          set_priority: {
-            priority: null,
-          },
           rollover: {
             max_size: '50gb',
           },
@@ -36,6 +35,7 @@ export const DELETE_PHASE_POLICY = {
         },
       },
     },
+    name: POLICY_NAME,
   },
   name: POLICY_NAME,
 };

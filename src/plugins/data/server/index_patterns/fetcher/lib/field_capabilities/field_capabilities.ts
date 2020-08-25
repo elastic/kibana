@@ -25,10 +25,6 @@ import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response'
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
 
-export function concatIfUniq<T>(arr: T[], value: T) {
-  return arr.includes(value) ? arr : arr.concat(value);
-}
-
 /**
  *  Get the field capabilities for field in `indices`, excluding
  *  all internal/underscore-prefixed fields that are not in `metaFields`
@@ -49,8 +45,20 @@ export async function getFieldCapabilities(
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))
     .concat(metaFields)
-    .reduce(concatIfUniq, [] as string[])
-    .map<FieldDescriptor>((name) =>
+    .reduce<{ names: string[]; hash: Record<string, string> }>(
+      (agg, value) => {
+        // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
+        if (agg.hash[value] != null) {
+          return agg;
+        } else {
+          agg.hash[value] = value;
+          agg.names.push(value);
+          return agg;
+        }
+      },
+      { names: [], hash: {} }
+    )
+    .names.map<FieldDescriptor>((name) =>
       defaults({}, fieldsFromFieldCapsByName[name], {
         name,
         type: 'string',

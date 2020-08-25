@@ -58,8 +58,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
+    const proxyPort =
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6300) }));
     const actionsProxyUrl = options.enableActionsProxy
-      ? [`--xpack.actions.proxyUrl=http://localhost:${await getPort()}`]
+      ? [
+          `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          '--xpack.actions.rejectUnauthorizedCertificates=false',
+        ]
       : [];
 
     return {
@@ -85,14 +90,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
-            'localhost',
-            'some.non.existent.com',
-          ])}`,
+          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           ...actionsProxyUrl,
-          '--xpack.actions.rejectUnauthorizedCertificates=false',
 
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({

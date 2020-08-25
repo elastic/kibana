@@ -21,7 +21,11 @@ import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 let root;
 beforeAll(async () => {
-  root = kbnTestServer.createRoot({ server: { maxPayloadBytes: 100 }, migrations: { skip: true } });
+  root = kbnTestServer.createRoot({
+    server: { maxPayloadBytes: 100 },
+    migrations: { skip: true },
+    plugins: { initialize: false },
+  });
 
   await root.setup();
   await root.start();
