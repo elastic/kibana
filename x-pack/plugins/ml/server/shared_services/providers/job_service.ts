@@ -23,11 +23,6 @@ export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider 
     jobServiceProvider(request: KibanaRequest) {
       return {
         jobsSummary: async (...args) => {
-          // Removed while https://github.com/elastic/kibana/issues/64588 exists.
-          // SIEM are calling this endpoint with a dummy request object from their alerting
-          // integration and currently alerting does not supply a request object.
-          // await hasMlCapabilities(['canGetJobs']);
-
           return await getGuards(request)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])

@@ -98,6 +98,9 @@ function getRequestItemsProvider(
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
     let hasMlCapabilities: HasMlCapabilities;
     let scopedClient: IScopedClusterClient;
+    // While https://github.com/elastic/kibana/issues/64588 exists we
+    // will not receive a real request object when being called from an alert.
+    // instead a dummy request object will be supplied containing "DummyKibanaRequest"
     if (request.params === 'DummyKibanaRequest') {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = getClusterClient();

@@ -21,9 +21,6 @@ export interface ResultsServiceProvider {
 export function getResultsServiceProvider(getGuards: GetGuards): ResultsServiceProvider {
   return {
     resultsServiceProvider(request: KibanaRequest) {
-      //  Uptime is using this service in anomaly alert, kibana alerting doesn't provide request object
-      // So we are adding a dummy request for now
-      // TODO: Remove this once kibana alerting provides request object
       return {
         async getAnomaliesTableData(...args) {
           return await getGuards(request)

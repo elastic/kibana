@@ -81,10 +81,6 @@ export function getMlSystemProvider(
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
             .ok(async ({ scopedClient }) => {
-              // Removed while https://github.com/elastic/kibana/issues/64588 exists.
-              // SIEM are calling this endpoint with a dummy request object from their alerting
-              // integration and currently alerting does not supply a request object.
-
               const { asInternalUser } = scopedClient;
               const { body } = await asInternalUser.search<SearchResponse<T>>({
                 ...searchParams,
