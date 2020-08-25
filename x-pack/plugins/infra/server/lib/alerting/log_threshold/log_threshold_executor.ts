@@ -172,7 +172,7 @@ export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, 
 };
 
 export const buildFiltersFromCriteria = (
-  params: LogDocumentCountAlertParams,
+  params: Omit<LogDocumentCountAlertParams, 'count'>,
   timestampField: string
 ) => {
   const { timeSize, timeUnit, criteria } = params;
@@ -223,7 +223,7 @@ export const buildFiltersFromCriteria = (
 };
 
 export const getGroupedESQuery = (
-  params: LogDocumentCountAlertParams,
+  params: Omit<LogDocumentCountAlertParams, 'count'>,
   timestampField: string,
   index: string
 ): object | undefined => {
@@ -281,7 +281,7 @@ export const getGroupedESQuery = (
 };
 
 export const getUngroupedESQuery = (
-  params: LogDocumentCountAlertParams,
+  params: Omit<LogDocumentCountAlertParams, 'count'>,
   timestampField: string,
   index: string
 ): object => {

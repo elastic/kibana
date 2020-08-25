@@ -10,15 +10,15 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allowedHosts": Array [
+          "*",
+        ],
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
         "preconfigured": Object {},
         "rejectUnauthorizedCertificates": true,
-        "whitelistedHosts": Array [
-          "*",
-        ],
       }
     `);
   });
@@ -38,6 +38,9 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allowedHosts": Array [
+          "*",
+        ],
         "enabled": true,
         "enabledActionTypes": Array [
           "*",
@@ -53,9 +56,6 @@ describe('config validation', () => {
           },
         },
         "rejectUnauthorizedCertificates": false,
-        "whitelistedHosts": Array [
-          "*",
-        ],
       }
     `);
   });

@@ -23,6 +23,10 @@ import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
+export interface SearchEnhancements {
+  defaultStrategy: string;
+}
+
 export interface ISearchOptions {
   /**
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
@@ -49,6 +53,11 @@ export interface ISearchSetup {
    * Used internally for telemetry
    */
   usage?: SearchUsage;
+
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
 export interface ISearchStart<

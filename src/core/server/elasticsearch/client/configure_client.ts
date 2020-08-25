@@ -21,7 +21,6 @@ import { stringify } from 'querystring';
 import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
-import { isResponseError } from './errors';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
@@ -39,10 +38,8 @@ const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
   client.on('response', (error, event) => {
     if (error) {
       const errorMessage =
-        // error details for response errors provided by elasticsearch
-        isResponseError(error)
-          ? `[${event.body.error.type}]: ${event.body.error.reason}`
-          : `[${error.name}]: ${error.message}`;
+        // error details for response errors provided by elasticsearch, defaults to error name/message
+        `[${event.body?.error?.type ?? error.name}]: ${event.body?.error?.reason ?? error.message}`;
 
       logger.error(errorMessage);
     }
