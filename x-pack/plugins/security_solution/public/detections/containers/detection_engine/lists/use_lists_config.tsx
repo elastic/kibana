@@ -29,7 +29,7 @@ export const useListsConfig = (): UseListsConfigReturn => {
   const hasIndexError = indexError != null;
   const needsIndexConfiguration =
     needsIndex && (canManageIndex === false || (canManageIndex === true && hasIndexError));
-  const needsConfiguration = !enabled || canWriteIndex === false || needsIndexConfiguration;
+  const needsConfiguration = !enabled || needsIndexConfiguration;
 
   useEffect(() => {
     if (needsIndex && canManageIndex) {

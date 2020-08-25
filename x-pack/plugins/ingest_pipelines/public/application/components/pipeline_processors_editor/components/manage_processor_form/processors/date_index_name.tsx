@@ -18,7 +18,7 @@ import {
   SelectField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, isArrayOfStrings } from './shared';
+import { FieldsConfig, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
@@ -89,9 +89,7 @@ const fieldsConfig: FieldsConfig = {
     serializer: (v: string[]) => {
       return v.length ? v : undefined;
     },
-    deserializer: (v) => {
-      return isArrayOfStrings(v) ? v : [];
-    },
+    deserializer: to.arrayOfStrings,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsFieldLabel',
       {
@@ -135,7 +133,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText"
-        defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}"
+        defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}."
         values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />
     ),

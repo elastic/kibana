@@ -10,8 +10,8 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { InstallStatus, PackageInfo } from '../../../../types';
-import { useGetPackageConfigs } from '../../../../hooks';
-import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { useGetPackagePolicies } from '../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallationButton } from './installation_button';
 import { UpdateIcon } from '../../components/icons';
@@ -46,13 +46,13 @@ export const SettingsPanel = (
 ) => {
   const { name, title, removable, latestVersion, version } = props;
   const getPackageInstallStatus = useGetPackageInstallStatus();
-  const { data: packageConfigsData } = useGetPackageConfigs({
+  const { data: packagePoliciesData } = useGetPackagePolicies({
     perPage: 0,
     page: 1,
-    kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
-  const packageHasUsages = !!packageConfigsData?.total;
+  const packageHasUsages = !!packagePoliciesData?.total;
   const updateAvailable = installedVersion && installedVersion < latestVersion ? true : false;
   const isViewingOldPackage = version < latestVersion;
   // hide install/remove options if the user has version of the package is installed
@@ -185,7 +185,7 @@ export const SettingsPanel = (
               <p>
                 <InstallationButton
                   {...props}
-                  disabled={!packageConfigsData || removable === false ? true : packageHasUsages}
+                  disabled={!packagePoliciesData || removable === false ? true : packageHasUsages}
                 />
               </p>
             </EuiFlexItem>
@@ -194,7 +194,7 @@ export const SettingsPanel = (
             <p>
               <FormattedMessage
                 id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent configurations."
+                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
                 values={{
                   title,
                   strongNote: (

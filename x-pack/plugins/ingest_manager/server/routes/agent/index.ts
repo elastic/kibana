@@ -33,7 +33,7 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  getAgentStatusForConfigHandler,
+  getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
@@ -169,13 +169,13 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     getAgentEventsHandler
   );
 
-  // Get agent status for config
+  // Get agent status for policy
   router.get(
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentStatusForConfigHandler
+    getAgentStatusForAgentPolicyHandler
   );
 };
