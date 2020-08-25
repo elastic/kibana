@@ -13,6 +13,7 @@ import { ExternalUrl } from '../shared/enterprise_search_url';
  */
 export const mockKibanaContext = {
   http: httpServiceMock.createSetupContract(),
+  navigateToUrl: jest.fn(),
   setBreadcrumbs: jest.fn(),
   setDocTitle: jest.fn(),
   config: { host: 'http://localhost:3002' },

@@ -14,39 +14,54 @@ export const createMockedIndexPattern = (): IndexPattern => ({
   fields: [
     {
       name: 'timestamp',
+      displayName: 'timestampLabel',
       type: 'date',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'start_date',
+      displayName: 'start_date',
       type: 'date',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'bytes',
+      displayName: 'bytes',
       type: 'number',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'memory',
+      displayName: 'memory',
       type: 'number',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'source',
+      displayName: 'source',
       type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
+      name: 'unsupported',
+      displayName: 'unsupported',
+      type: 'geo',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'dest',
+      displayName: 'dest',
       type: 'string',
       aggregatable: true,
       searchable: true,
+      esTypes: ['keyword'],
     },
   ],
 });
@@ -58,21 +73,26 @@ export const createMockedRestrictedIndexPattern = () => ({
   fields: [
     {
       name: 'timestamp',
+      displayName: 'timestampLabel',
       type: 'date',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'bytes',
+      displayName: 'bytes',
       type: 'number',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'source',
+      displayName: 'source',
       type: 'string',
       aggregatable: true,
       searchable: true,
+      scripted: true,
+      esTypes: ['keyword'],
     },
   ],
   typeMeta: {
