@@ -27,6 +27,7 @@ import { Storage } from '../../../kibana_utils/public';
 import { DashboardStartDependencies, DashboardStart, DashboardSetupDependencies } from '../plugin';
 import { DashboardServices } from './application';
 import { KibanaContextProvider } from '../../../kibana_react/public';
+import { DashboardListing } from './listing/dashboard_listing';
 import { DashboardConstants } from '..';
 
 export async function mountApp(
@@ -75,7 +76,7 @@ export async function mountApp(
   };
 
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
-    return null;
+    return <h1>This will be a dashboard</h1>;
   };
 
   // make sure the index pattern list is up to date
@@ -85,7 +86,6 @@ export async function mountApp(
     <I18nProvider>
       <Router history={scopedHistory}>
         <KibanaContextProvider services={dashboardServices}>
-          <h1>TEST ME PLZ</h1>
           <Switch>
             <Route
               path={[
@@ -94,7 +94,7 @@ export async function mountApp(
               ]}
               render={renderDashboard}
             />
-            <Route exact path={DashboardConstants.LANDING_PAGE_PATH} component={NotFound} />
+            <Route exact path={DashboardConstants.LANDING_PAGE_PATH} component={DashboardListing} />
           </Switch>
         </KibanaContextProvider>
       </Router>

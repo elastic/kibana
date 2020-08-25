@@ -120,10 +120,6 @@ export type Setup = void;
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
-  addEmbeddableToDashboard: (options: {
-    embeddableId: string;
-    embeddableType: string;
-  }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
@@ -320,23 +316,6 @@ export class DashboardPlugin
     }
   }
 
-  private addEmbeddableToDashboard(
-    core: CoreStart,
-    { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
-  ) {
-    if (!this.getActiveUrl) {
-      throw new Error('dashboard is not ready yet.');
-    }
-
-    const lastDashboardUrl = this.getActiveUrl();
-    const dashboardUrl = addEmbeddableToDashboardUrl(
-      lastDashboardUrl,
-      embeddableId,
-      embeddableType
-    );
-    core.application.navigateToApp('dashboards', { path: dashboardUrl });
-  }
-
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications } = core;
     const {
@@ -376,7 +355,6 @@ export class DashboardPlugin
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
-      addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.initializerContext.config.get<DashboardFeatureFlagConfig>(),
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({

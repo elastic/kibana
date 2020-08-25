@@ -28,5 +28,5 @@ export const DashboardConstants = {
 };
 
 export function createDashboardEditUrl(id: string) {
-  return `${EDIT_DASHBOARD_URL}/${id}`;
+  return `${DashboardConstants.EDIT_DASHBOARD_URL}/${id}`;
 }
