@@ -28,10 +28,7 @@ import { generatePluginList } from './generate_plugin_list';
 
 const OSS_PLUGIN_DIR = Path.resolve(REPO_ROOT, 'src/plugins');
 const XPACK_PLUGIN_DIR = Path.resolve(REPO_ROOT, 'x-pack/plugins');
-const OUTPUT_PATH = Path.resolve(
-  REPO_ROOT,
-  'docs/developer/architecture/code-exploration.asciidoc'
-);
+const OUTPUT_PATH = Path.resolve(REPO_ROOT, 'docs/developer/plugin-list.asciidoc');
 
 export function runPluginListCli() {
   run(async ({ log }) => {
