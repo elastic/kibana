@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
-import { to, from } from '../shared';
+import { to, from, EDITOR_PX_HEIGHT } from '../shared';
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
@@ -64,7 +64,7 @@ export const CommonProcessorFields: FunctionComponent = () => {
         componentProps={{
           editorProps: {
             languageId: 'painless',
-            height: 75,
+            height: EDITOR_PX_HEIGHT.extraSmall,
             options: {
               lineNumbers: 'off',
               minimap: { enabled: false },

@@ -67,6 +67,13 @@ export const from = {
   undefinedIfValue: (value: any) => (v: boolean) => (v === value ? undefined : v),
 };
 
+export const EDITOR_PX_HEIGHT = {
+  extraSmall: 75,
+  small: 100,
+  medium: 200,
+  large: 300,
+};
+
 export type FieldsConfig = Record<string, FieldConfig>;
 
 export type FormFieldsComponent = FunctionComponent<{ initialFieldValues?: Record<string, any> }>;

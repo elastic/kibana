@@ -19,7 +19,7 @@ import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 
@@ -110,7 +110,7 @@ export const Grok: FunctionComponent = () => {
         config={fieldsConfig.pattern_definitions}
         componentProps={{
           editorProps: {
-            height: 200,
+            height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.grokForm.patternDefinitionsAriaLabel',
               {

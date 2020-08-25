@@ -12,7 +12,7 @@ import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared
 import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 
@@ -67,7 +67,7 @@ export const Foreach: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 200,
+            height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.foreachForm.optionsFieldAriaLabel',
               {

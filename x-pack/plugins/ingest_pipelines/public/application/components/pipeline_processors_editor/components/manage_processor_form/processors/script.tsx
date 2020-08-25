@@ -13,7 +13,7 @@ import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../..
 
 import { XJsonEditor, TextEditor } from '../field_components';
 
-import { FieldsConfig, to, from, FormFieldsComponent } from './shared';
+import { FieldsConfig, to, from, FormFieldsComponent, EDITOR_PX_HEIGHT } from './shared';
 
 const { isJsonField, emptyField } = fieldValidators;
 
@@ -147,7 +147,7 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
             component={TextEditor}
             componentProps={{
               editorProps: {
-                height: 100,
+                height: EDITOR_PX_HEIGHT.medium,
                 'aria-label': i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldAriaLabel',
                   {
@@ -169,7 +169,7 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 150,
+            height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.scriptForm.paramsFieldAriaLabel',
               {
