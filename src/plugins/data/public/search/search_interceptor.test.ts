@@ -103,6 +103,7 @@ describe('SearchInterceptor', () => {
         startServices: mockCoreSetup.getStartServices(),
         uiSettings: mockCoreSetup.uiSettings,
         http: mockCoreSetup.http,
+        toasts: mockCoreSetup.notifications.toasts,
       });
       mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
         return new Promise((resolve, reject) => {
