@@ -225,7 +225,6 @@ export const xyVisualization: Visualization<State> = {
   },
 
   removeDimension({ prevState, layerId, columnId }) {
-    debugger;
     const newLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!newLayer) {
       return prevState;

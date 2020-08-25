@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DraggedField, DraggedOperation } from './indexpattern';
+import { DataType } from '../types';
+import { DraggedField } from './indexpattern';
 import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { DataType } from '../types';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -38,15 +38,5 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
     fieldCandidate !== null &&
     'field' in fieldCandidate &&
     'indexPatternId' in fieldCandidate
-  );
-}
-
-export function isDraggedOperation(
-  operationCandidate: unknown
-): operationCandidate is DraggedOperation {
-  return (
-    typeof operationCandidate === 'object' &&
-    operationCandidate !== null &&
-    'columnId' in operationCandidate
   );
 }

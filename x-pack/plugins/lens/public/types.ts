@@ -230,6 +230,22 @@ export interface DatasourceLayerPanelProps<T> {
   setState: StateSetter<T>;
 }
 
+export interface DraggedOperation {
+  layerId: string;
+  groupId: string;
+  columnId: string;
+}
+
+export function isDraggedOperation(
+  operationCandidate: unknown
+): operationCandidate is DraggedOperation {
+  return (
+    typeof operationCandidate === 'object' &&
+    operationCandidate !== null &&
+    'columnId' in operationCandidate
+  );
+}
+
 export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   layerId: string;
   columnId: string;

@@ -15,13 +15,14 @@ import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionDropProps,
   DatasourceDimensionDropHandlerProps,
+  isDraggedOperation,
 } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { changeColumn } from '../state_helpers';
-import { isDraggedField, isDraggedOperation, hasField } from '../utils';
+import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { DateRange } from '../../../common';
