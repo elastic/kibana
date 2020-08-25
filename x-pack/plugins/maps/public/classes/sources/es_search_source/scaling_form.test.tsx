@@ -27,8 +27,8 @@ const defaultProps = {
   termFields: [],
   topHitsSplitField: null,
   topHitsSize: 1,
-  supportsMvt: false,
-  mvtDisabledReason: 'no geoshape',
+  supportsMvt: true,
+  mvtDisabledReason: null,
 };
 
 describe('scaling form', () => {
@@ -58,13 +58,12 @@ describe('scaling form', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('should include mvt', async () => {
+  test('should disable mvt option when mvt is not supported', async () => {
     const component = shallow(
       <ScalingForm
         {...defaultProps}
-        supportsMvt={true}
-        mvtDisabledReason={'this should be ignored'}
-        scalingType={SCALING_TYPES.MVT}
+        supportsMvt={false}
+        mvtDisabledReason={'Simulated mvt disabled'}
       />
     );
 
