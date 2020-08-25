@@ -134,6 +134,14 @@ export class VisEditor extends Component {
     });
   };
 
+  updateModel = () => {
+    const { params } = { ...this.props.vis.clone() };
+
+    this.setState({
+      model: params,
+    });
+  };
+
   handleCommit = () => {
     this.updateVisState();
     this.setState({ dirty: false });
@@ -219,6 +227,10 @@ export class VisEditor extends Component {
 
   componentDidMount() {
     this.props.renderComplete();
+
+    if (this.props.isEditorMode && this.props.eventEmitter) {
+      this.props.eventEmitter.on('updateEditor', this.updateModel);
+    }
   }
 
   componentDidUpdate() {
@@ -227,6 +239,10 @@ export class VisEditor extends Component {
 
   componentWillUnmount() {
     this.updateVisState.cancel();
+
+    if (this.props.isEditorMode && this.props.eventEmitter) {
+      this.props.eventEmitter.off('updateEditor', this.updateModel);
+    }
   }
 }
 
