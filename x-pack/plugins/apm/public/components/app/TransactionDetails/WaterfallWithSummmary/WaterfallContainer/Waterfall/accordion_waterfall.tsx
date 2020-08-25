@@ -92,28 +92,21 @@ const WaterfallItemContainer = styled.div`
   left: 0;
 `;
 
-const getAccordionState = (isOpen: boolean): EuiAccordionProps['forceState'] =>
-  isOpen ? 'open' : 'closed';
+export function AccordionWaterfall(props: AccordionWaterfallProps) {
+  const [isOpen, setIsOpen] = useState(props.isOpen);
 
-export function AccordionWaterfall({
-  isOpen,
-  item,
-  level,
-  serviceColors,
-  duration,
-  childrenByParentId,
-  waterfallItemId,
-  location,
-  errorsPerTransaction,
-  timelineMargins,
-  onClickWaterfallItem,
-}: AccordionWaterfallProps) {
-  const [state, setState] = useState(getAccordionState(isOpen));
-
-  const toggleAccordion = (isAccordionOpen: boolean) => {
-    const newState = getAccordionState(isAccordionOpen);
-    setState(newState);
-  };
+  const {
+    item,
+    level,
+    serviceColors,
+    duration,
+    childrenByParentId,
+    waterfallItemId,
+    location,
+    errorsPerTransaction,
+    timelineMargins,
+    onClickWaterfallItem,
+  } = props;
 
   const nextLevel = level + 1;
 
@@ -153,8 +146,8 @@ export function AccordionWaterfall({
       }
       arrowDisplay={isEmpty(children) ? 'none' : 'left'}
       initialIsOpen={true}
-      forceState={state}
-      onToggle={toggleAccordion}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={() => setIsOpen((isCurrentOpen) => !isCurrentOpen)}
     >
       {children.map((child) => (
         <AccordionWaterfall
