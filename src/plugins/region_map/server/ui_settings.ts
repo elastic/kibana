@@ -17,7 +17,26 @@
  * under the License.
  */
 
-export function getUiSettingDefaults() {
-  // wrapped in provider so that a new instance is given to each app/test
-  return {};
+import { i18n } from '@kbn/i18n';
+import { UiSettingsParams } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+
+export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
+  return {
+    'visualization:regionmap:showWarnings': {
+      name: i18n.translate('regionMap.advancedSettings.visualization.showRegionMapWarningsTitle', {
+        defaultMessage: 'Show region map warning',
+      }),
+      value: true,
+      description: i18n.translate(
+        'regionMap.advancedSettings.visualization.showRegionMapWarningsText',
+        {
+          defaultMessage:
+            'Whether the region map shows a warning when terms cannot be joined to a shape on the map.',
+        }
+      ),
+      schema: schema.boolean(),
+      category: ['visualization'],
+    },
+  };
 }
