@@ -1,8 +1,8 @@
-[[add-sample-data]]
+[[get-data-in]]
 == Add sample data
 
-{kib} has several sample data sets that you can use to explore {kib} before loading your own data.
-These sample data sets showcase a variety of use cases:
+{kib} has several sample data sets that you can use to explore {kib} before you add your own data.
+The sample data sets showcase a variety of use cases:
 
 * *eCommerce orders* includes visualizations for product-related information,
 such as cost, revenue, and price.
@@ -25,4 +25,4 @@ If you uninstall and reinstall a data set, the timestamps will change to reflect
 
 * Explore {kib} by following the <<tutorial-sample-data, sample data tutorial>>.
 
-* Learn how to load data, define index patterns, and build visualizations by <<tutorial-build-dashboard, building your own dashboard>>.
+* Learn how to load data, define index patterns, and build visualizations by <<create-your-own-dashboard, building your own dashboard>>.
