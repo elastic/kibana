@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { unit, px, truncate } from '../../../../style/variables';
 
 const BadgeText = styled.div`
@@ -20,6 +21,11 @@ interface Props {
   onRemove: (val: string) => void;
 }
 
+const removeFilterLabel = i18n.translate(
+  'xpack.apm.uifilter.badge.removeFilter',
+  { defaultMessage: 'Remove filter' }
+);
+
 function FilterBadgeList({ onRemove, value }: Props) {
   return (
     <EuiFlexGrid gutterSize="s">
@@ -30,11 +36,11 @@ function FilterBadgeList({ onRemove, value }: Props) {
             onClick={() => {
               onRemove(val);
             }}
-            onClickAriaLabel="Remove filter"
+            onClickAriaLabel={removeFilterLabel}
             iconOnClick={() => {
               onRemove(val);
             }}
-            iconOnClickAriaLabel="Remove filter"
+            iconOnClickAriaLabel={removeFilterLabel}
             iconType="cross"
             iconSide="right"
           >

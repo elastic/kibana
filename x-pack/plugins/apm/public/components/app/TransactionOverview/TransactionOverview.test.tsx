@@ -13,14 +13,14 @@ import {
 import { omit } from 'lodash';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { TransactionOverview } from '..';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import * as useFetcherHook from '../../../../hooks/useFetcher';
-import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
-import { history } from '../../../../utils/history';
-import { fromQuery } from '../../../shared/Links/url_helpers';
+import { TransactionOverview } from './';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { UrlParamsProvider } from '../../../context/UrlParamsContext';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import * as useFetcherHook from '../../../hooks/useFetcher';
+import * as useServiceTransactionTypesHook from '../../../hooks/useServiceTransactionTypes';
+import { history } from '../../../utils/history';
+import { fromQuery } from '../../shared/Links/url_helpers';
 
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
@@ -83,7 +83,7 @@ describe('TransactionOverview', () => {
   const FILTER_BY_TYPE_LABEL = 'Transaction type';
 
   describe('when transactionType is selected and multiple transaction types are given', () => {
-    it('should render radio group with transaction types', () => {
+    it('renders a radio group with transaction types', () => {
       const { container } = setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
         urlParams: {
@@ -119,7 +119,7 @@ describe('TransactionOverview', () => {
   });
 
   describe('when a transaction type is selected, and there are no other transaction types', () => {
-    it('should not render radio group with transaction types', () => {
+    it('does not render a radio group with transaction types', () => {
       const { container } = setup({
         serviceTransactionTypes: ['firstType'],
         urlParams: {
