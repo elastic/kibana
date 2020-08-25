@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import http from 'http';
 import getPort from 'get-port';
@@ -21,7 +22,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
     let simulatedActionId = '';
     let slackSimulatorURL: string = '';
     let slackServer: http.Server;
-    let proxyServer: http.Server | undefined;
+    let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...

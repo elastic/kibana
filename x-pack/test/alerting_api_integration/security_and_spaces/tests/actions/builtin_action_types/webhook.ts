@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import http from 'http';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
@@ -71,7 +72,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
-    let proxyServer: http.Server | undefined;
+    let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...

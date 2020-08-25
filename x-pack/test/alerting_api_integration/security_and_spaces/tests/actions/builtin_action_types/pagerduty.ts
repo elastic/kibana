@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
@@ -24,7 +24,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
   describe('pagerduty action', () => {
     let simulatedActionId = '';
     let pagerdutySimulatorURL: string = '<could not determine kibana url>';
-    let proxyServer: http.Server | undefined;
+    let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...

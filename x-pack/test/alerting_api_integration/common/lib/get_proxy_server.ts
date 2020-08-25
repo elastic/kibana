@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
 import httpProxy from 'http-proxy';
 
 export const getHttpProxyServer = async (
   targetUrl: string,
   kbnTestServerConfig: any,
   onProxyResHandler: (proxyRes?: unknown, req?: unknown, res?: unknown) => void
-): Promise<http.Server> => {
+): Promise<httpProxy> => {
   const proxyServer = httpProxy.createProxyServer({
     target: targetUrl,
     secure: false,

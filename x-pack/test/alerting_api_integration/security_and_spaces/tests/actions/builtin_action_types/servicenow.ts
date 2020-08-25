@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
@@ -267,7 +267,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
     describe('ServiceNow - Executor', () => {
       let simulatedActionId: string;
-      let proxyServer: http.Server | undefined;
+      let proxyServer: httpProxy | undefined;
       let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
