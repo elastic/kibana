@@ -145,7 +145,7 @@ is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_log
 matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
 pattern for raw data.
 
-. Go to *Visualize* and create a vertical bar chart.
+. Go to *Dashboard* and create a vertical bar chart.
  
 . Choose `rollup_logstash,kibana_sample_data_logs`
 as your source to see both the raw and rolled up data.
