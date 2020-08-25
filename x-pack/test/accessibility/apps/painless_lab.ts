@@ -44,5 +44,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await painlessTabsContext.click();
       await a11y.testAppSnapshot();
     });
+
+    it.skip('click on the Basic button', async () => {
+      await testSubjects.click('basicButtonDropdown');
+      await a11y.testAppSnapshot();
+    });
+
+    it.skip('click on the Filter button', async () => {
+      await testSubjects.click('filterButtonDropdown');
+      await a11y.testAppSnapshot();
+    });
+
+    it.skip('click on the Score button', async () => {
+      await testSubjects.click('scoreButtonDropdown');
+      await a11y.testAppSnapshot();
+    });
   });
 }
