@@ -1,4 +1,5 @@
-[[development-security-rbac]]
+[discrete]
+[[development-rbac]]
 ==== Role-based access control
 
 Role-based access control (RBAC) in {kib} relies upon the
@@ -7,9 +8,10 @@ that Elasticsearch exposes. This allows {kib} to define the privileges that
 {kib} wishes to grant to users, assign them to the relevant users using roles,
 and then authorize the user to perform a specific action. This is handled within
 a secured instance of the `SavedObjectsClient` and available transparently to
-consumers when using `request.getSavedObjectsClient()` or 
+consumers when using `request.getSavedObjectsClient()` or
 `savedObjects.getScopedSavedObjectsClient()`.
 
+[discrete]
 [[development-rbac-privileges]]
 ===== {kib} Privileges
 
@@ -55,6 +57,7 @@ The application is created by concatenating the prefix of `kibana-` with the val
 
 ==============================================
 
+[discrete]
 [[development-rbac-assigning-privileges]]
 ===== Assigning {kib} Privileges
 
@@ -77,9 +80,10 @@ The application is created by concatenating the prefix of `kibana-` with the val
  }
 ----------------------------------
 
-Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es} 
+Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es}
 {ref}/security-api.html#security-user-apis[user management APIs].
 
+[discrete]
 [[development-rbac-authorization]]
 ===== Authorization
 
