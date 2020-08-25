@@ -221,9 +221,12 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                 }
               }
             >
-              <styled.div>
+              <styled.div
+                data-test-subj="FrameHeading"
+              >
                 <div
                   className="c0"
+                  data-test-subj="FrameHeading"
                 >
                   <styled.span>
                     <span

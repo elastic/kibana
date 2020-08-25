@@ -39,7 +39,7 @@ function FrameHeading({ stackframe, isLibraryFrame }: Props) {
     'filename' in stackframe ? stackframe.filename : stackframe.classname;
 
   return (
-    <FileDetails>
+    <FileDetails data-test-subj="FrameHeading">
       <FileDetail>{name}</FileDetail> in{' '}
       <FileDetail>{stackframe.function}</FileDetail>
       {lineNumber > 0 && (
