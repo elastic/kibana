@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ kpis: [], timeseries: [] });
+        expect(response.body).to.eql({ timeseries: [] });
       });
     });
 
@@ -49,13 +49,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body).to.eql(expectedBreakdownWithTransactionName);
       });
-      it('returns the top 4 by percentage and sorts them by name', async () => {
+      it('returns the transaction breakdown sorted by name', async () => {
         const response = await supertest.get(
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.kpis.map((kpi: { name: string }) => kpi.name)).to.eql([
+        expect(response.body.timeseries.map((serie: { title: string }) => serie.title)).to.eql([
           'app',
           'http',
           'postgresql',
