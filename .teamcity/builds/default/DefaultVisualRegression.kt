@@ -10,7 +10,7 @@ object DefaultVisualRegression : BuildType({
 
   params {
     param("env.KBN_NP_PLUGINS_BUILT", "true")
-    password("env.PERCY_TOKEN", "credentialsJSON:1ef0e984-a184-4f1c-a9be-282182cb262d", display = ParameterDisplay.HIDDEN)
+    password("env.PERCY_TOKEN", "credentialsJSON:a1e37d40-830c-4ab6-a047-226688d2d81a", display = ParameterDisplay.HIDDEN)
   }
 
   steps {

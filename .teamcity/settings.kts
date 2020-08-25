@@ -57,7 +57,7 @@ project {
       param("cloud-code", "google")
       param("terminate-idle-time", "30")
       param("enabled", "true")
-      param("secure:accessKey", "TODO")
+      param("secure:accessKey", "credentialsJSON:447fdd4d-7129-46b7-9822-2e57658c7422")
     }
   }
 

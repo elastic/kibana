@@ -53,8 +53,8 @@ object DefaultTemplate : Template({
     param("env.branch_specifier", "%vcsroot.branch%")
 
     password("env.KIBANA_CI_STATS_CONFIG", "", display = ParameterDisplay.HIDDEN)
-    password("env.CI_STATS_TOKEN", "credentialsJSON:eead8e13-ba61-429c-9ed6-344de6260381", display = ParameterDisplay.HIDDEN)
-    password("env.CI_STATS_HOST", "credentialsJSON:f8462bff-1384-4c37-8ed7-914a6407f568", display = ParameterDisplay.HIDDEN)
+    password("env.CI_STATS_TOKEN", "credentialsJSON:ea975068-ca68-4da5-8189-ce90f4286bc0", display = ParameterDisplay.HIDDEN)
+    password("env.CI_STATS_HOST", "credentialsJSON:933ba93e-4b06-44c1-8724-8c536651f2b6", display = ParameterDisplay.HIDDEN)
   }
 
   steps {
