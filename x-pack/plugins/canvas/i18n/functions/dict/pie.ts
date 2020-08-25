@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { pie } from '../../../canvas_plugin_src/functions/common/pie';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { Position } from '../../../types';
+import { Legend } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {
-    defaultMessage: 'Configure a pie chart element.',
+    defaultMessage: 'Configures a pie chart element.',
   }),
   args: {
     font: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
@@ -38,20 +38,18 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
     }),
     legend: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
       defaultMessage:
-        'The legend position. For example, {positions}, or {BOOLEAN_FALSE}. When {BOOLEAN_FALSE}, the legend is hidden.',
+        'The legend position. For example, {legend}, or {BOOLEAN_FALSE}. When {BOOLEAN_FALSE}, the legend is hidden.',
       values: {
-        positions: Object.values(Position)
+        legend: Object.values(Legend)
           .map((position) => `\`"${position}"\``)
           .join(', '),
         BOOLEAN_FALSE,
       },
     }),
     palette: i18n.translate('xpack.canvas.functions.pie.args.paletteHelpText', {
-      defaultMessage:
-        'A {palette} object for describing the colors to use in this pie chart. See {paletteFn}.',
+      defaultMessage: 'A {palette} object for describing the colors to use in this pie chart.',
       values: {
         palette: '`palette`',
-        paletteFn: '`palette`',
       },
     }),
     radius: i18n.translate('xpack.canvas.functions.pie.args.radiusHelpText', {

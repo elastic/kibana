@@ -25,7 +25,7 @@ export const help: FunctionHelp<FunctionFactory<typeof formatdate>> = {
       defaultMessage: 'A {MOMENTJS} format. For example, {example}. See {url}.',
       values: {
         MOMENTJS,
-        example: `"MM/DD/YYYY"`,
+        example: '`"MM/DD/YYYY"`',
         url: 'https://momentjs.com/docs/#/displaying/',
       },
     }),
