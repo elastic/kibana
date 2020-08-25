@@ -100,6 +100,7 @@ export const EditMonitorFlyout: React.FC = (props) => {
   );
 };
 
+// TODO: the name needs to be updated after a successful POST
 const getDefaultPackageName = (existingNames?: string[]) => {
   let packageName: string;
   let count = 0;
