@@ -21,17 +21,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on the output button', async () => {
-      const painlessTabs = await find.byCssSelector('[data-test-subj="painlessTabs"] #output');
+      const painlessTabsOutput = await find.byCssSelector(
+        '[data-test-subj="painlessTabs"] #output'
+      );
+      await painlessTabsOutput.click();
       await a11y.testAppSnapshot();
     });
 
     it('click on the parameters button', async () => {
-      const painlessTabs = await find.byCssSelector('[data-test-subj="painlessTabs"] #parameters');
+      const painlessTabsParameters = await find.byCssSelector(
+        '[data-test-subj="painlessTabs"] #parameters'
+      );
+      await painlessTabsParameters.click();
       await a11y.testAppSnapshot();
     });
 
-    it('click on the context button', async () => {
-      const painlessTabs = await find.byCssSelector('[data-test-subj="painlessTabs"] #context');
+    // github.com/elastic/kibana/issues/75876
+    it.skip('click on the context button', async () => {
+      const painlessTabsContext = await find.byCssSelector(
+        '[data-test-subj="painlessTabs"] #context'
+      );
+      await painlessTabsContext.click();
       await a11y.testAppSnapshot();
     });
   });
