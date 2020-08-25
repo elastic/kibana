@@ -8,6 +8,7 @@ import React, { useMemo, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import {
   Direction,
   HostFields,
@@ -17,7 +18,6 @@ import {
   HostsSortField,
   OsFields,
 } from '../../../graphql/types';
-import { assertUnreachable } from '../../../common/lib/helpers';
 import { State } from '../../../common/store';
 import {
   Columns,
