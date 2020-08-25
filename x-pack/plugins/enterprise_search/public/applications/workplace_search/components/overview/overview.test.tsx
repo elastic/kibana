@@ -11,7 +11,6 @@ import { mockLogicActions, setMockValues } from './__mocks__';
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { ErrorState } from '../error_state';
 import { Loading } from '../shared/loading';
 import { ViewContentHeader } from '../shared/view_content_header';
 
@@ -26,13 +25,6 @@ describe('Overview', () => {
       const wrapper = shallow(<Overview />);
 
       expect(wrapper.find(Loading)).toHaveLength(1);
-    });
-
-    it('hasErrorConnecting', () => {
-      setMockValues({ hasErrorConnecting: true });
-      const wrapper = shallow(<Overview />);
-
-      expect(wrapper.find(ErrorState)).toHaveLength(1);
     });
   });
 

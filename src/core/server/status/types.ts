@@ -123,13 +123,20 @@ export interface StatusServiceSetup {
    * Current status for all Core services.
    */
   core$: Observable<CoreStatus>;
+
+  /**
+   * Overall system status for all of Kibana.
+   *
+   * @remarks
+   * The level of the overall status will reflect the most severe status of any core service or plugin.
+   *
+   * Exposed only for reporting purposes to outside systems and should not be used by plugins. Instead, plugins should
+   * only depend on the statuses of {@link StatusServiceSetup.core$ | Core} or their dependencies.
+   */
+  overall$: Observable<ServiceStatus>;
 }
 
 /** @internal */
 export interface InternalStatusServiceSetup extends StatusServiceSetup {
-  /**
-   * Overall system status used for HTTP API
-   */
-  overall$: Observable<ServiceStatus>;
   isStatusPageAnonymous: () => boolean;
 }
