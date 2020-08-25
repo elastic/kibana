@@ -3,11 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { spawn } from 'child_process';
-import { createInterface } from 'readline';
+import del from 'del';
+import { mkdtempSync } from 'fs';
 import { uniq } from 'lodash';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { createInterface } from 'readline';
+import { ReportingCore } from '../../..';
 import { BROWSER_TEST_COMMON_ISSUES } from '../../../../constants';
 import { LevelLogger } from '../../../lib';
+import { getBinaryPath } from '../../install';
+import { args } from './args';
 
 const maxTimeToWait = 10 * 1000;
 const browserCoolDown = 3 * 1000;
@@ -50,15 +58,25 @@ interface BrowserDiagnosticPayload {
 }
 
 export const browserTest = (
-  executablePath: string,
-  args: string[] = [],
-  logger: LevelLogger
+  core: ReportingCore,
+  logger: LevelLogger,
+  flags: string[] = []
 ): Promise<BrowserDiagnosticPayload> => {
-  let closed = false;
-  const finalArgs = uniq([...defaultArgs, ...args]);
+  const config = core.getConfig();
+  const proxy = config.get('capture', 'browser', 'chromium', 'proxy');
+  const userDataDir = mkdtempSync(join(tmpdir(), 'chromium-'));
+  const binaryPath = getBinaryPath();
+  const kbnArgs = args({
+    userDataDir,
+    viewport: { width: 800, height: 600 },
+    disableSandbox: true,
+    proxy,
+  });
+  const finalArgs = uniq([...defaultArgs, ...kbnArgs, ...flags]);
   let browserLogs = '';
+  let closed = false;
 
-  const browserProcess = spawn(executablePath, finalArgs, {
+  const browserProcess = spawn(binaryPath, finalArgs, {
     // On non-windows platforms, `detached: true` makes child process a
     // leader of a new process group, making it possible to kill child
     // process tree with `.kill(-pid)` command. @see
@@ -76,18 +94,18 @@ export const browserTest = (
       const help: BrowserDiagnosticPayload['help'] = [];
       closed = true;
       clearTimeout(timer);
-      rl.close();
-      rl.removeAllListeners();
-      browserProcess.removeAllListeners();
 
       // Sometimes logs with significant issues can creep in after browser has bound it's remote
       // debugging port, so let them flow through before SIGKILL is sent.
       await sleep(browserCoolDown);
 
+      browserProcess.removeAllListeners();
+      rl.removeAllListeners();
+      rl.close();
+
       for (const knownIssue of BROWSER_TEST_COMMON_ISSUES.keys()) {
-        if (browserLogs.includes(knownIssue)) {
-          // Not sure why TS can't figure out that `issue` here is guaranteed to be a string...
-          const helpText = BROWSER_TEST_COMMON_ISSUES.get(knownIssue) as string;
+        const helpText = BROWSER_TEST_COMMON_ISSUES.get(knownIssue);
+        if (browserLogs.includes(knownIssue) && helpText) {
           logger.warn(helpText);
           help.push(helpText);
         }
@@ -103,6 +121,13 @@ export const browserTest = (
         }
       }
 
+      logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
+
+      del(userDataDir, { force: true }).catch((error) => {
+        logger.error(`error deleting user data directory at [${userDataDir}]!`);
+        logger.error(error);
+      });
+
       return resolve({
         help,
         logs: browserLogs,
@@ -111,6 +136,7 @@ export const browserTest = (
     };
 
     const rl = createInterface({ input: browserProcess.stderr });
+
     const timer = setTimeout(
       () => cleanup(new Error(`Browser didn't bind successfully in ${maxTimeToWait} milliseconds`)),
       maxTimeToWait
@@ -119,7 +145,7 @@ export const browserTest = (
     rl.on('line', (data) => {
       logger.debug(`Browser log output: "${data}"`);
       browserLogs += data + '\n';
-      const match = data.match(/^DevTools listening on (ws:\/\/.*)$/);
+      const match = data.match(/^DevTools listening on/);
       if (match) {
         logger.debug(`Browser successfully started remote DevTools listener`);
         return cleanup();

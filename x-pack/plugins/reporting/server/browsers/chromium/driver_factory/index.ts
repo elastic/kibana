@@ -27,7 +27,6 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
-import { browserTest } from './chromium_test';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
@@ -59,17 +58,6 @@ export class HeadlessChromiumDriverFactory {
   }
 
   type = BROWSER_TYPE;
-
-  test(logger: LevelLogger) {
-    const chromiumArgs = args({
-      userDataDir: this.userDataDir,
-      viewport: { width: 800, height: 600 },
-      disableSandbox: this.browserConfig.disableSandbox,
-      proxy: this.browserConfig.proxy,
-    });
-
-    return browserTest(this.binaryPath, chromiumArgs, logger);
-  }
 
   /*
    * Return an observable to objects which will drive screenshot capture for a page

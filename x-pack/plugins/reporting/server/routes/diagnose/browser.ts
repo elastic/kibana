@@ -6,30 +6,22 @@
 
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { browserTest } from '../../browsers/chromium/driver_factory/test';
 import { LevelLogger as Logger } from '../../lib';
-
-interface BrowserResponse {
-  help: string[];
-  success: boolean;
-  logs: string;
-}
+import { DiagnosticResponse } from '../../types';
+import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
 
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
-  const setupDeps = reporting.getPluginSetupDeps();
+  const { router } = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
-  const { router } = setupDeps;
 
   router.post(
     {
       path: `${API_DIAGNOSE_URL}/browser`,
-      // Currently no supported params, but keeping it open
-      // in case the need/want arises
       validate: {},
     },
     userHandler(async (user, context, req, res) => {
-      const { browserDriverFactory } = await reporting.getPluginStartDeps();
-      const body: BrowserResponse = await browserDriverFactory.test(logger);
+      const body: DiagnosticResponse = await browserTest(reporting, logger);
 
       return res.ok({ body });
     })

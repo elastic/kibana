@@ -6,34 +6,21 @@
 
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
-import { LevelLogger as Logger } from '../../lib';
-import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
-import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { omitBlacklistedHeaders } from '../../export_types/common';
-
-interface ScreenShotResponse {
-  help: string[];
-  success: boolean;
-  logs: string;
-}
+import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
+import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
+import { LevelLogger as Logger } from '../../lib';
+import { DiagnosticResponse } from '../../types';
+import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
-  const successResponse: ScreenShotResponse = {
-    success: true,
-    help: [],
-    logs: '',
-  };
-
   router.post(
     {
       path: `${API_DIAGNOSE_URL}/screenshot`,
-      // Currently no supported params, but keeping it open
-      // in case the need/want arises
       validate: {},
     },
     userHandler(async (user, context, req, res) => {
@@ -102,15 +89,21 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
               },
             });
           }
-          return res.ok({ body: successResponse });
+          return res.ok({
+            body: {
+              success: true,
+              help: [],
+              logs: '',
+            } as DiagnosticResponse,
+          });
         })
         .catch((error) =>
           res.ok({
             body: {
               success: false,
               help: [`We couldn't screenshot your Kibana install.`],
-              logs: `${error.message}\n${error.stack}`,
-            },
+              logs: error.message,
+            } as DiagnosticResponse,
           })
         );
     })
