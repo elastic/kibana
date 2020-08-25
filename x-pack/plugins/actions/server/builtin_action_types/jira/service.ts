@@ -53,6 +53,8 @@ export const createExternalService = (
   const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/${COMMENT_URL}`;
   const createIssueMetadataUrl = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
+  const getIssueTypesOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
+  const getIssueTypeFieldsOldAPIURL = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
   const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
   const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
   const axiosInstance = axios.create({
@@ -66,8 +68,8 @@ export const createExternalService = (
   const getCommentsURL = (issueId: string) => {
     return commentUrl.replace('{issueId}', issueId);
   };
-  const createGetIssueTypeFieldsUrl = (issueTypeId: string) => {
-    return getIssueTypeFieldsUrl.replace('{issueTypeId}', issueTypeId);
+  const createGetIssueTypeFieldsUrl = (uri: string, issueTypeId: string) => {
+    return uri.replace('{issueTypeId}', issueTypeId);
   };
 
   const createFields = (key: string, incident: Incident): Fields => {
@@ -101,6 +103,25 @@ export const createExternalService = (
       return msg;
     }, '');
   };
+
+  const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
+    createMetaCapabilities.every((c) => Object.keys(capabilities?.capabilities ?? {}).includes(c));
+
+  const normalizeIssueTypes = (issueTypes: Array<{ id: string; name: string }>) =>
+    issueTypes.map((type) => ({ id: type.id, name: type.name }));
+
+  const normalizeFields = (fields: {
+    [key: string]: { allowedValues?: Array<{}>; defaultValue?: {} };
+  }) =>
+    Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
+      return {
+        ...fieldsAcc,
+        [fieldKey]: {
+          allowedValues: fields[fieldKey]?.allowedValues ?? [],
+          defaultValue: fields[fieldKey]?.defaultValue ?? {},
+        },
+      };
+    }, {});
 
   const getIncident = async (id: string) => {
     try {
@@ -255,9 +276,7 @@ export const createExternalService = (
   const getCreateIssueMetadata = async (): Promise<GetCreateIssueMetadataResponse> => {
     try {
       const capabilitiesResponse = await getCapabilities();
-
-      const capabilities = Object.keys(capabilitiesResponse?.capabilities ?? {});
-      const supportsNewAPI = createMetaCapabilities.every((c) => capabilities.includes(c));
+      const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
 
       if (!supportsNewAPI) {
         const res = await request({
@@ -321,7 +340,7 @@ export const createExternalService = (
           const fieldsRes = await request({
             axios: axiosInstance,
             method: 'get',
-            url: createGetIssueTypeFieldsUrl(issueType.id),
+            url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueType.id),
             logger,
             proxySettings,
           });
@@ -382,6 +401,64 @@ export const createExternalService = (
     }
   };
 
+  const getIssueTypes = async () => {
+    const capabilitiesResponse = await getCapabilities();
+    const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
+
+    if (!supportsNewAPI) {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: getIssueTypesOldAPIURL,
+        logger,
+        proxySettings,
+      });
+
+      const issueTypes = res.data.projects[0]?.issuetypes ?? [];
+      return normalizeIssueTypes(issueTypes);
+    } else {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: getIssueTypesUrl,
+        logger,
+        proxySettings,
+      });
+
+      const issueTypes = res.data.values;
+      return issueTypes.map((type: { name: string }) => ({ name: type.name }));
+    }
+  };
+
+  const getFieldsByIssueType = async (issueTypeId: string) => {
+    const capabilitiesResponse = await getCapabilities();
+    const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
+
+    if (!supportsNewAPI) {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
+        logger,
+        proxySettings,
+      });
+
+      const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
+      return normalizeFields(fields);
+    } else {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
+        logger,
+        proxySettings,
+      });
+
+      const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
+      return normalizeFields(fields);
+    }
+  };
+
   return {
     getIncident,
     createIncident,
@@ -390,5 +467,7 @@ export const createExternalService = (
     findIncidents,
     getCreateIssueMetadata,
     getCapabilities,
+    getIssueTypes,
+    getFieldsByIssueType,
   };
 };

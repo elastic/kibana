@@ -56,6 +56,10 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionCreateIssueMetadataParamsSchema = schema.object({});
 export const ExecutorSubActionGetCapabilitiesParamsSchema = schema.object({});
+export const ExecutorSubActionGetIssueTypesParamsSchema = schema.object({});
+export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = schema.object({
+  id: schema.string(),
+});
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
@@ -73,5 +77,13 @@ export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
     subAction: schema.literal('getCreateIssueMetadata'),
     subActionParams: ExecutorSubActionCreateIssueMetadataParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getIssueTypes'),
+    subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getFieldsByIssueType'),
+    subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
   }),
 ]);

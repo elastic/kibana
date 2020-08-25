@@ -13,6 +13,8 @@ import {
   CreateIssueMetadataHandlerArgs,
   ExternalServiceApi,
   Incident,
+  GetFieldsByIssueTypeHandlerArgs,
+  GetIssueTypesHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -36,6 +38,20 @@ const getCreateIssueMetadataHandler = async ({
   externalService,
 }: CreateIssueMetadataHandlerArgs) => {
   const res = await externalService.getCreateIssueMetadata();
+  return res;
+};
+
+const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArgs) => {
+  const res = await externalService.getIssueTypes();
+  return res;
+};
+
+const getFieldsByIssueTypeHandler = async ({
+  externalService,
+  params,
+}: GetFieldsByIssueTypeHandlerArgs) => {
+  const { id } = params;
+  const res = await externalService.getFieldsByIssueType(id);
   return res;
 };
 
@@ -166,4 +182,6 @@ export const api: ExternalServiceApi = {
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
   getCreateIssueMetadata: getCreateIssueMetadataHandler,
+  getIssueTypes: getIssueTypesHandler,
+  getFieldsByIssueType: getFieldsByIssueTypeHandler,
 };
