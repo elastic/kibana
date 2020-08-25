@@ -27,6 +27,7 @@ export interface SavedSearch {
   description?: string;
   columns: string[];
   sort: SortOrder[];
+  grid: any;
   destroy: () => void;
 }
 export interface SavedSearchLoader {

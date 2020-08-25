@@ -53,6 +53,7 @@ export function Discover({
   onRemoveColumn,
   onSetColumns,
   onSort,
+  onResize,
   opts,
   resetQuery,
   resultState,
@@ -221,6 +222,7 @@ export function Discover({
                                 <DiscoverGrid
                                   ariaLabelledBy="documentsAriaLabel"
                                   columns={state.columns}
+                                  columnsWidth={state.columnsWidth}
                                   indexPattern={indexPattern}
                                   rows={rows}
                                   sort={state.sort}
@@ -234,6 +236,7 @@ export function Discover({
                                   onRemoveColumn={onRemoveColumn}
                                   onSetColumns={onSetColumns}
                                   onSort={onSort}
+                                  onResize={onResize}
                                 />
                               </div>
                             )}

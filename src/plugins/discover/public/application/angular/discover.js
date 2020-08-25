@@ -615,6 +615,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         savedSearch.columns.length > 0
           ? savedSearch.columns
           : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+      columnsWidth:
+        savedSearch.grid && savedSearch.grid.columnsWidth
+          ? savedSearch.grid.columnsWidth
+          : undefined,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -738,6 +742,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     await $scope.updateDataSource();
 
     savedSearch.columns = $scope.state.columns;
+    savedSearch.grid = {
+      columnsWidth: $scope.state.columnsWidth,
+    };
     savedSearch.sort = $scope.state.sort;
 
     try {
@@ -1030,6 +1037,12 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.setColumns = function setColumns(columns) {
     $scope.state = { ...$scope.state, columns };
     setAppState({ columns });
+  };
+
+  $scope.setColumnsResize = (col) => {
+    const colSize = $scope.state.columnsWidth ? { ...$scope.state.columnsWidth } : {};
+    colSize[col.columnId] = Math.round(col.width);
+    setAppState({ columnsWidth: colSize });
   };
 
   $scope.scrollToTop = function () {

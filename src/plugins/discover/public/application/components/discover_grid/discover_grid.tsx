@@ -54,6 +54,7 @@ interface SortObj {
 interface Props {
   rows: ElasticSearchHit[];
   columns: string[];
+  columnsWidth: any;
   sort: SortArr[];
   ariaLabelledBy: string;
   indexPattern: IndexPattern;
@@ -67,6 +68,7 @@ interface Props {
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
   onSetColumns: (columns: string[]) => void;
+  onResize: (colSettings: { columnId: string; width: number }) => void;
 }
 
 const toolbarVisibility = {
@@ -92,12 +94,14 @@ export const DiscoverGrid = React.memo(
   ({
     rows,
     columns,
+    columnsWidth,
     sort,
     indexPattern,
     ariaLabelledBy,
     searchTitle,
     searchDescription,
     onSort,
+    onResize,
     sampleSize,
     onFilter,
     getContextAppHref,
@@ -235,8 +239,17 @@ export const DiscoverGrid = React.memo(
 
     const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
     const euiGridColumns = useMemo(
-      () => getEuiGridColumns(columns, indexPattern, showTimeCol, timeString, onSetColumns, onSort),
-      [columns, indexPattern, showTimeCol, timeString, onSetColumns, onSort]
+      () =>
+        getEuiGridColumns(
+          columns,
+          columnsWidth,
+          indexPattern,
+          showTimeCol,
+          timeString,
+          onSetColumns,
+          onSort
+        ),
+      [columns, indexPattern, showTimeCol, timeString, onSetColumns, onSort, columnsWidth]
     );
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const popoverContents = useMemo(() => getPopoverContents(), []);
@@ -309,6 +322,9 @@ export const DiscoverGrid = React.memo(
             gridStyle={gridStyle}
             schemaDetectors={schemaDetectors}
             popoverContents={popoverContents}
+            onColumnResize={(col: { columnId: string; width: number }) => {
+              onResize(col);
+            }}
           />
 
           {showDisclaimer && (

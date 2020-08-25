@@ -27,6 +27,7 @@ const geoPoint = 'geo-point';
 
 export function getEuiGridColumns(
   columns: string[],
+  columnsWidth: any = {},
   indexPattern: IndexPattern,
   showTimeCol: boolean,
   timeString: string,
@@ -38,12 +39,28 @@ export function getEuiGridColumns(
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, indexPattern, timeString, usedColumns, onSetColumns, onSort)
+      buildEuiGridColumn(
+        column,
+        columnsWidth ? columnsWidth[column] : 0,
+        indexPattern,
+        timeString,
+        usedColumns,
+        onSetColumns,
+        onSort
+      )
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(column, indexPattern, timeString, columns, onSetColumns, onSort)
+    buildEuiGridColumn(
+      column,
+      columnsWidth ? columnsWidth[column] : 0,
+      indexPattern,
+      timeString,
+      columns,
+      onSetColumns,
+      onSort
+    )
   );
 }
 
@@ -63,6 +80,7 @@ export function getVisibleColumns(
 
 export function buildEuiGridColumn(
   columnName: string,
+  columnWidth: any,
   indexPattern: IndexPattern,
   timeString: string,
   columns: string[],
@@ -100,6 +118,9 @@ export function buildEuiGridColumn(
   if (column.id === indexPattern.timeFieldName) {
     column.display = `${timeString} (${indexPattern.timeFieldName})`;
     column.initialWidth = 180;
+  }
+  if (columnWidth > 0) {
+    column.initialWidth = Number(columnWidth);
   }
   const listItems = [
     {

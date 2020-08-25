@@ -32,6 +32,7 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
       description: 'text',
       hits: 'integer',
       columns: 'keyword',
+      grid: 'object',
       sort: 'keyword',
       version: 'integer',
     };
@@ -51,6 +52,7 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
           description: 'text',
           hits: 'integer',
           columns: 'keyword',
+          grid: 'object',
           sort: 'keyword',
           version: 'integer',
         },
@@ -59,6 +61,7 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
           title: '',
           description: '',
           columns: [],
+          grid: {},
           hits: 0,
           sort: [],
           version: 1,

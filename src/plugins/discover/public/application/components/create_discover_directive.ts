@@ -39,6 +39,7 @@ export function createDiscoverDirective(reactDirective: any) {
     ['onRemoveColumn', { watchDepth: 'reference' }],
     ['onSetColumns', { watchDepth: 'reference' }],
     ['onSort', { watchDepth: 'reference' }],
+    ['onResize', { watchDepth: 'reference' }],
     ['opts', { watchDepth: 'reference' }],
     ['resetQuery', { watchDepth: 'reference' }],
     ['resultState', { watchDepth: 'reference' }],

@@ -66,6 +66,7 @@ interface SearchScope extends ng.IScope {
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
+  grid?: any;
 }
 
 interface SearchEmbeddableConfig {
@@ -243,6 +244,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       const columns = columnActions.moveColumn(searchScope.columns, columnName, newIndex);
       this.updateInput({ columns });
     };
+
+    searchScope.grid = this.savedSearch.grid ? this.savedSearch.grid : {};
 
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
