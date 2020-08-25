@@ -5,7 +5,7 @@
  */
 
 import { useMlKibana } from './kibana_context';
-import { ML_APP_URL_GENERATOR } from '../../../url_generator';
+import { ML_PAGES, ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
 
 export const useMlUrlGenerator = () => {
   const {
@@ -18,3 +18,4 @@ export const useMlUrlGenerator = () => {
 
   return getUrlGenerator(ML_APP_URL_GENERATOR);
 };
+export { ML_PAGES };

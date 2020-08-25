@@ -11,192 +11,32 @@ import {
   UrlGeneratorsDefinition,
   UrlGeneratorState,
 } from '../../../../src/plugins/share/public';
-import { TimeRange, RefreshInterval } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { JobId } from '../../reporting/common/types';
-import { ExplorerAppState } from './application/explorer/explorer_dashboard_service';
 import { MlStartDependencies } from './plugin';
-import { ANALYSIS_CONFIG_TYPE } from './application/data_frame_analytics/common';
+import { ML_PAGES, ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
+import {
+  MlUrlGeneratorState,
+  AnomalyDetectionUrlState,
+  ExplorerUrlState,
+  TimeSeriesExplorerUrlState,
+  DataFrameAnalyticsUrlState,
+  DataFrameAnalyticsExplorationUrlState,
+  DataVisualizerUrlState,
+  MlGenericUrlState,
+  AnomalyDetectionQueryState,
+  ExplorerGlobalState,
+  TimeSeriesExplorerGlobalState,
+  TimeSeriesExplorerAppState,
+  DataFrameAnalyticsExplorationQueryState,
+  DataFrameAnalyticsQueryState,
+  ExplorerAppState,
+} from '../common/types/ml_url_generator';
 
 declare module '../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
     [ML_APP_URL_GENERATOR]: UrlGeneratorState<MlUrlGeneratorState>;
   }
 }
-
-export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
-
-export const ML_PAGES = {
-  ANOMALY_DETECTION: 'jobs',
-  ANOMALY_EXPLORER: 'explorer',
-  TIME_SERIES_EXPLORER: 'timeseriesexplorer',
-  DATA_FRAME_ANALYTICS: 'data_frame_analytics',
-  DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
-  /**
-   * Page: Data Visualizer
-   */
-  DATA_VISUALIZER: 'datavisualizer',
-  /**
-   * Page: Data Visualizer
-   * Create data visualizer by selecting an existing Elasticsearch index
-   */
-  DATA_VISUALIZER_INDEX_SELECT: 'datavisualizer_index_select',
-  /**
-   * Page: Data Visualizer
-   * Create data visualizer by importing log data
-   */
-  DATA_VISUALIZER_FILE: 'filedatavisualizer',
-  /**
-   * Page: Data Visualizer
-   * Create a job from the index pattern
-   */
-  get DATA_VISUALIZER_VIEWER() {
-    return `${this.ANOMALY_DETECTION}/new_job/${this.DATA_VISUALIZER}`;
-  },
-  get DATA_VISUALIZER_NEW_JOB() {
-    return `${this.ANOMALY_DETECTION}/new_job/step/job_type`;
-  },
-  SETTINGS: 'settings',
-  CALENDARS: 'settings/calendars_list',
-  FILTERS: 'settings/filter_lists',
-} as const;
-
-export interface MlCommonGlobalState {
-  time?: TimeRange;
-}
-export interface MlCommonAppState {
-  [key: string]: any;
-}
-
-export interface MlIndexBasedSearchState {
-  index?: string;
-  savedSearchId?: string;
-}
-
-export interface MlGenericUrlState extends MlIndexBasedSearchState {
-  page: typeof ML_PAGES.DATA_VISUALIZER_VIEWER | typeof ML_PAGES.DATA_VISUALIZER_NEW_JOB;
-  globalState?: MlCommonGlobalState;
-  appState?: MlCommonAppState;
-  [key: string]: any;
-}
-
-export interface AnomalyDetectionQueryState {
-  jobId?: JobId;
-  groupIds?: string[];
-}
-
-export interface AnomalyDetectionUrlState {
-  page: typeof ML_PAGES.ANOMALY_DETECTION;
-  jobId?: JobId;
-  groupIds?: string[];
-}
-export interface ExplorerGlobalState {
-  ml: { jobIds: JobId[] };
-  time?: TimeRange;
-  refreshInterval?: RefreshInterval;
-}
-
-export interface ExplorerUrlState {
-  /**
-   * ML App Page
-   */
-  page: typeof ML_PAGES.ANOMALY_EXPLORER;
-  /**
-   * Job IDs
-   */
-  jobIds: JobId[];
-  /**
-   * Optionally set the time range in the time picker.
-   */
-  timeRange?: TimeRange;
-  /**
-   * Optionally set the refresh interval.
-   */
-  refreshInterval?: RefreshInterval;
-  /**
-   * Optionally set the query.
-   */
-  query?: any;
-  /**
-   * Optional state for the swim lane
-   */
-  mlExplorerSwimlane?: ExplorerAppState['mlExplorerSwimlane'];
-  mlExplorerFilter?: ExplorerAppState['mlExplorerFilter'];
-}
-
-export interface TimeSeriesExplorerGlobalState {
-  ml: {
-    jobIds: JobId[];
-  };
-  time?: TimeRange;
-  refreshInterval?: RefreshInterval;
-}
-
-export interface TimeSeriesExplorerAppState {
-  zoom?: {
-    from?: string;
-    to?: string;
-  };
-  mlTimeSeriesExplorer?: {
-    detectorIndex?: number;
-    entities?: Record<string, string>;
-  };
-  query?: any;
-}
-
-export interface TimeSeriesExplorerUrlState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
-    Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
-  /**
-   * ML App Page
-   */
-  page: typeof ML_PAGES.TIME_SERIES_EXPLORER;
-  jobIds: JobId[];
-  timeRange?: TimeRange;
-  detectorIndex?: number;
-  entities?: Record<string, string>;
-}
-
-export interface DataFrameAnalyticsQueryState {
-  jobId?: JobId | JobId[];
-  groupIds?: string[];
-}
-
-export interface DataFrameAnalyticsUrlState extends DataFrameAnalyticsQueryState {
-  page: typeof ML_PAGES.DATA_FRAME_ANALYTICS;
-}
-
-export interface DataVisualizerUrlState {
-  page:
-    | typeof ML_PAGES.DATA_VISUALIZER
-    | typeof ML_PAGES.DATA_VISUALIZER_FILE
-    | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT;
-}
-
-export interface DataFrameAnalyticsExplorationQueryState {
-  ml: {
-    jobId: JobId;
-    analysisType: ANALYSIS_CONFIG_TYPE;
-  };
-}
-
-export interface DataFrameAnalyticsExplorationUrlState {
-  page: typeof ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION;
-  jobId: JobId;
-  analysisType: ANALYSIS_CONFIG_TYPE;
-}
-
-/**
- * Union type of ML URL state based on page
- */
-export type MlUrlGeneratorState =
-  | AnomalyDetectionUrlState
-  | ExplorerUrlState
-  | TimeSeriesExplorerUrlState
-  | DataFrameAnalyticsUrlState
-  | DataFrameAnalyticsExplorationUrlState
-  | DataVisualizerUrlState
-  | MlGenericUrlState;
 
 interface Params {
   appBasePath: string;
@@ -232,7 +72,7 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return this.createDataVisualizerUrl(mlUrlGeneratorState as DataVisualizerUrlState);
       case ML_PAGES.DATA_VISUALIZER_NEW_JOB:
         return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
-      case ML_PAGES.DATA_VISUALIZER_VIEWER:
+      case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
         return this.createIndexBasedMlUrl(mlUrlGeneratorState as MlGenericUrlState);
       default:
         throw new Error('Page type is not provided or unknown');
@@ -444,10 +284,10 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
     let url = `${this.params.appBasePath}/${page}`;
 
     if (index !== undefined && savedSearchId === undefined) {
-      url = url + `?index=${index}`;
+      url = `${url}?index=${index}`;
     }
     if (index === undefined && savedSearchId !== undefined) {
-      url = url + `?savedSearchId=${savedSearchId}`;
+      url = `${url}?savedSearchId=${savedSearchId}`;
     }
 
     if (!isEmpty(restParams)) {

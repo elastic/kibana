@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlUrlGenerator, ML_PAGES } from './url_generator';
+import { MlUrlGenerator } from './url_generator';
+import { ML_PAGES } from '../common/constants/ml_url_generator';
 import { ANALYSIS_CONFIG_TYPE } from './application/data_frame_analytics/common';
 
 describe('MlUrlGenerator', () => {
@@ -217,7 +218,7 @@ describe('MlUrlGenerator', () => {
 
     it('should generate valid URL for the Data Visualizer Viewer page', async () => {
       const url = await urlGenerator.createUrl({
-        page: ML_PAGES.DATA_VISUALIZER_VIEWER,
+        page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
         index: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
         globalState: {
           time: {
