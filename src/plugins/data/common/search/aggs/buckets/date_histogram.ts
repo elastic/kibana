@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
 
-import { intervalOptions } from './_interval_options';
+import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -44,7 +44,7 @@ const updateTimeBuckets = (
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
   const bounds =
-    agg.params.timeRange && (agg.fieldIsTimeField() || agg.params.interval === 'auto')
+    agg.params.timeRange && (agg.fieldIsTimeField() || isAutoInterval(agg.params.interval))
       ? calculateBounds(agg.params.timeRange)
       : undefined;
   const buckets = customBuckets || agg.buckets;
@@ -149,7 +149,7 @@ export const getDateHistogramBucketAgg = ({
           return agg.getIndexPattern().timeFieldName;
         },
         onChange(agg: IBucketDateHistogramAggConfig) {
-          if (get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
+          if (isAutoInterval(get(agg, 'params.interval')) && !agg.fieldIsTimeField()) {
             delete agg.params.interval;
           }
         },
@@ -187,7 +187,7 @@ export const getDateHistogramBucketAgg = ({
           }
           return state;
         },
-        default: 'auto',
+        default: autoInterval,
         options: intervalOptions,
         write(agg, output, aggs) {
           updateTimeBuckets(agg, calculateBounds);
