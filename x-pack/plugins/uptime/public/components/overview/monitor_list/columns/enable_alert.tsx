@@ -29,7 +29,7 @@ interface Props {
 export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const dss = useSelector(selectDynamicSettings);
+  const { settings } = useSelector(selectDynamicSettings);
 
   const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
 
@@ -57,7 +57,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   }
 
   const defaultActions = (actionConnectors ?? []).filter((act) =>
-    dss.settings?.defaultConnectors?.includes(act.id)
+    settings?.defaultConnectors?.includes(act.id)
   );
 
   const enableAlert = () => {
@@ -86,7 +86,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
     setIsLoading(false);
   }, [hasAlert, deletedAlertId]);
 
-  const hasDefaultConnectors = (dss?.settings?.defaultConnectors ?? []).length > 0;
+  const hasDefaultConnectors = (settings?.defaultConnectors ?? []).length > 0;
 
   const showSpinner = isLoading || (alertsLoading && !alerts);
 

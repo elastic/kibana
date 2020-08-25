@@ -20,7 +20,7 @@ interface PageHeaderProps {
   datePicker?: boolean;
 }
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+export const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
 });
 

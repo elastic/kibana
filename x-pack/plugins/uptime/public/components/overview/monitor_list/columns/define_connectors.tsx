@@ -7,9 +7,11 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiSwitch, EuiText } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
+import { SETTINGS_LINK_TEXT } from '../../../../pages/page_header';
 
 export const DefineAlertConnectors = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -36,12 +38,15 @@ export const DefineAlertConnectors = () => {
       closePopover={closePopover}
     >
       <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>
-        To start enabling alerts, please define a default alert action connector in{' '}
+        <FormattedMessage
+          id="xpack.uptime.monitorList.defineConnector.description"
+          defaultMessage="To start enabling alerts, please define a default alert action connector in"
+        />{' '}
         <ReactRouterEuiLink
           to={SETTINGS_ROUTE + '?focusConnectorField=true'}
           data-test-subj={'uptimeSettingsLink'}
         >
-          Settings
+          {SETTINGS_LINK_TEXT}
         </ReactRouterEuiLink>
       </EuiText>
     </EuiPopover>

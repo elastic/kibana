@@ -9,8 +9,31 @@ import {
   settingsObjectId,
   settingsObjectType,
 } from '../../../../plugins/uptime/server/lib/saved_objects';
+import { KibanaServerProvider } from '../../../../../test/common/services/kibana_server';
 
 const ARCHIVE = 'uptime/full_heartbeat';
+
+export const deleteUptimeSettingsObject = async (server: KibanaServerProvider) => {
+  // delete the saved object
+  try {
+    await server.savedObjects.delete({
+      type: settingsObjectType,
+      id: settingsObjectId,
+    });
+  } catch (e) {
+    // a 404 just means the doc is already missing
+    if (e.response.status !== 404) {
+      const { status, statusText, data, headers, config } = e.response;
+      throw new Error(
+        `error attempting to delete settings:\n${JSON.stringify(
+          { status, statusText, data, headers, config },
+          null,
+          2
+        )}`
+      );
+    }
+  }
+};
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -22,25 +45,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     this.tags('ciGroup6');
 
     beforeEach('delete settings', async () => {
-      // delete the saved object
-      try {
-        await server.savedObjects.delete({
-          type: settingsObjectType,
-          id: settingsObjectId,
-        });
-      } catch (e) {
-        // a 404 just means the doc is already missing
-        if (e.response.status !== 404) {
-          const { status, statusText, data, headers, config } = e.response;
-          throw new Error(
-            `error attempting to delete settings:\n${JSON.stringify(
-              { status, statusText, data, headers, config },
-              null,
-              2
-            )}`
-          );
-        }
-      }
+      await deleteUptimeSettingsObject(server);
     });
 
     describe('with generated data', () => {

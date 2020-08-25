@@ -6,10 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  settingsObjectId,
-  settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects';
+import { deleteUptimeSettingsObject } from '../../../functional/apps/uptime';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('uptime simple down alert', () => {
@@ -30,24 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       // delete the saved object
-      try {
-        await server.savedObjects.delete({
-          type: settingsObjectType,
-          id: settingsObjectId,
-        });
-      } catch (e) {
-        // a 404 just means the doc is already missing
-        if (e.response.status !== 404) {
-          const { status, statusText, data, headers, config } = e.response;
-          throw new Error(
-            `error attempting to delete settings:\n${JSON.stringify(
-              { status, statusText, data, headers, config },
-              null,
-              2
-            )}`
-          );
-        }
-      }
+      await deleteUptimeSettingsObject(server);
 
       await uptime.navigation.goToUptime();
 
