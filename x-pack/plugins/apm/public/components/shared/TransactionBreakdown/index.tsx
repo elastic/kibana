@@ -10,11 +10,11 @@ import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
-import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
+import { asPercent } from '../../../utils/formatters';
 
 function TransactionBreakdown() {
   const { data, status } = useTransactionBreakdown();
-  const { kpis, timeseries } = data;
+  const { timeseries } = data;
   const noHits = isEmpty(timeseries) && status === FETCH_STATUS.SUCCESS;
 
   return (
@@ -30,10 +30,13 @@ function TransactionBreakdown() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TransactionBreakdownKpiList kpis={kpis} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TransactionBreakdownGraph timeseries={timeseries} noHits={noHits} />
+          <TransactionBreakdownGraph
+            timeseries={timeseries.map((serie) => ({
+              ...serie,
+              legendValue: asPercent(serie.legendValue, 1),
+            }))}
+            noHits={noHits}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -11,7 +11,6 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Maybe } from '../../../../../typings/common';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { unit } from '../../../../style/variables';
 import { asPercent } from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { getEmptySeries } from '../../charts/CustomPlot/getEmptySeries';
@@ -56,9 +55,9 @@ function TransactionBreakdownGraph({ timeseries, noHits }: Props) {
       tickFormatY={tickFormatY}
       formatTooltipValue={formatTooltipValue}
       yMax={1}
-      height={unit * 12}
       stacked={true}
       onHover={handleHover}
+      visibleLegendCount={10}
     />
   );
 }

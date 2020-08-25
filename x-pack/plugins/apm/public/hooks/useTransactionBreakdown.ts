@@ -13,7 +13,7 @@ export function useTransactionBreakdown() {
     uiFilters,
   } = useUrlParams();
 
-  const { data = { kpis: [], timeseries: [] }, error, status } = useFetcher(
+  const { data = { timeseries: [] }, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({

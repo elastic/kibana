@@ -28,6 +28,7 @@ interface Props {
   height?: number;
   stacked?: boolean;
   onHover?: () => void;
+  visibleLegendCount?: number;
 }
 
 function TransactionLineChart(props: Props) {
@@ -40,6 +41,7 @@ function TransactionLineChart(props: Props) {
     truncateLegends,
     stacked = false,
     onHover,
+    visibleLegendCount,
   } = props;
 
   const syncedChartsProps = useChartsSync();
@@ -66,6 +68,7 @@ function TransactionLineChart(props: Props) {
       height={height}
       truncateLegends={truncateLegends}
       {...(stacked ? { stackBy: 'y' } : {})}
+      visibleLegendCount={visibleLegendCount}
     />
   );
 }
