@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useShallowEqualSelector } from '../../common/hooks/use_selector';
+import { useSelector } from 'react-redux';
 import * as selectors from '../store/selectors';
 
 /**
  * Get the query string keys used by this Resolver instance.
  */
-export const useQueryStringKeys = (): { idKey: string; eventKey: string } => {
-  const resolverComponentInstanceID = useShallowEqualSelector(
-    selectors.resolverComponentInstanceID
-  );
+export function useQueryStringKeys(): { idKey: string; eventKey: string } {
+  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
   const idKey: string = `resolver-${resolverComponentInstanceID}-id`;
   const eventKey: string = `resolver-${resolverComponentInstanceID}-event`;
   return {
     idKey,
     eventKey,
   };
-};
+}

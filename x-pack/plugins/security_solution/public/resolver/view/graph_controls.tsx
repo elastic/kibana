@@ -9,14 +9,12 @@
 import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { EuiRange, EuiPanel, EuiIcon } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
-
+import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 import { useResolverTheme } from './assets';
 import { ResolverAction } from '../store/actions';
-import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 
 interface StyledGraphControls {
   graphControlsBackground: string;
@@ -66,7 +64,7 @@ const GraphControlsComponent = React.memo(
     className?: string;
   }) => {
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
-    const scalingFactor = useShallowEqualSelector(selectors.scalingFactor);
+    const scalingFactor = useSelector(selectors.scalingFactor);
     const { timestamp } = useContext(SideEffectContext);
     const { colorMap } = useResolverTheme();
 

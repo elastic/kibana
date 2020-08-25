@@ -12,10 +12,9 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
 import * as event from '../../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import * as selectors from '../../store/selectors';
 import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
 import { useResolverDispatch } from '../use_resolver_dispatch';
@@ -62,7 +61,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
 
   const dispatch = useResolverDispatch();
   const { timestamp } = useContext(SideEffectContext);
-  const isProcessTerminated = useShallowEqualSelector(selectors.isProcessTerminated);
+  const isProcessTerminated = useSelector(selectors.isProcessTerminated);
   const handleBringIntoViewClick = useCallback(
     (processTableViewItem) => {
       dispatch({
@@ -150,7 +149,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     [pushToQueryParams, handleBringIntoViewClick, isProcessTerminated]
   );
 
-  const { processNodePositions } = useShallowEqualSelector(selectors.layout);
+  const { processNodePositions } = useSelector(selectors.layout);
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {
@@ -176,8 +175,8 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     ];
   }, []);
 
-  const children = useShallowEqualSelector(selectors.hasMoreChildren);
-  const ancestors = useShallowEqualSelector(selectors.hasMoreAncestors);
+  const children = useSelector(selectors.hasMoreChildren);
+  const ancestors = useSelector(selectors.hasMoreAncestors);
   const showWarning = children === true || ancestors === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (

@@ -5,12 +5,11 @@
  */
 
 import React, { memo, useMemo, useContext, useLayoutEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { EuiPanel } from '@elastic/eui';
-
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import * as event from '../../../../common/endpoint/models/event';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import { SideEffectContext } from '../side_effect_context';
 import { ProcessEventList } from './process_event_list';
@@ -42,7 +41,7 @@ const PanelContent = memo(function PanelContent() {
 
   const { pushToQueryParams, queryParams } = useResolverQueryParams();
 
-  const graphableProcesses = useShallowEqualSelector(selectors.graphableProcesses);
+  const graphableProcesses = useSelector(selectors.graphableProcesses);
   const graphableProcessEntityIds = useMemo(() => {
     return new Set(graphableProcesses.map(event.entityId));
   }, [graphableProcesses]);
@@ -61,7 +60,7 @@ const PanelContent = memo(function PanelContent() {
   // The "selected" node (and its corresponding event) in the tree control.
   // It may need to be synchronized with the ID indicated as selected via the `idFromParams`
   // memo above. When this is the case, it is handled by the layout effect below.
-  const selectedNode = useShallowEqualSelector(selectors.selectedNode);
+  const selectedNode = useSelector(selectors.selectedNode);
   const uiSelectedEvent = useMemo(() => {
     return graphableProcesses.find((evt) => event.entityId(evt) === selectedNode);
   }, [graphableProcesses, selectedNode]);
@@ -98,7 +97,7 @@ const PanelContent = memo(function PanelContent() {
     }
   }, [dispatch, uiSelectedEvent, paramsSelectedEvent, lastUpdatedProcess, timestamp]);
 
-  const relatedEventStats = useShallowEqualSelector(selectors.relatedEventsStats);
+  const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
   const relatedStatsForIdFromParams: ResolverNodeStats | undefined = idFromParams
     ? relatedEventStats(idFromParams)
