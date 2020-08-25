@@ -8,7 +8,7 @@ import { kea } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
 import { IAccount, IOrganization } from '../../types';
-import { IFlashMessagesProps, IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
+import { IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -30,19 +30,16 @@ export interface IOverviewServerData {
 
 export interface IOverviewActions {
   setServerData(serverData: IOverviewServerData): void;
-  setFlashMessages(flashMessages: IFlashMessagesProps): void;
   initializeOverview(): void;
 }
 
 export interface IOverviewValues extends IOverviewServerData {
   dataLoading: boolean;
-  flashMessages: IFlashMessagesProps;
 }
 
 export const OverviewLogic = kea({
   actions: (): IOverviewActions => ({
     setServerData: (serverData) => serverData,
-    setFlashMessages: (flashMessages) => ({ flashMessages }),
     initializeOverview: () => null,
   }),
   reducers: (): TKeaReducers<IOverviewValues, IOverviewActions> => ({
@@ -68,12 +65,6 @@ export const OverviewLogic = kea({
       false,
       {
         setServerData: (_, { canCreateInvitations }) => canCreateInvitations,
-      },
-    ],
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
       },
     ],
     hasUsers: [

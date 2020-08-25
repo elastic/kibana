@@ -22,7 +22,6 @@ export const mockLogicValues = {
   personalSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
-  flashMessages: {},
 } as IOverviewValues;
 
 export const mockLogicActions = {

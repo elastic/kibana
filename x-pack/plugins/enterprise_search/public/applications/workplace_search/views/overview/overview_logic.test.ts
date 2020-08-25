@@ -76,15 +76,6 @@ describe('OverviewLogic', () => {
     });
   });
 
-  describe('setFlashMessages', () => {
-    it('will set `flashMessages`', () => {
-      const flashMessages = { error: ['error'] };
-      OverviewLogic.actions.setFlashMessages(flashMessages);
-
-      expect(OverviewLogic.values.flashMessages).toEqual(flashMessages);
-    });
-  });
-
   describe('initializeOverview', () => {
     it('calls API and sets values', async () => {
       const setServerDataSpy = jest.spyOn(OverviewLogic.actions, 'setServerData');
