@@ -2241,6 +2241,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
     // (undocumented)
+    static createTooManyRequestsError(type: string, id: string): DecoratedError;
+    // (undocumented)
     static createUnsupportedTypeError(type: string): DecoratedError;
     // (undocumented)
     static decorateBadRequestError(error: Error, reason?: string): DecoratedError;
@@ -2258,6 +2260,8 @@ export class SavedObjectsErrorHelpers {
     static decorateNotAuthorizedError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateRequestEntityTooLargeError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateTooManyRequestsError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static isBadRequestError(error: Error | DecoratedError): boolean;
     // (undocumented)
@@ -2280,6 +2284,8 @@ export class SavedObjectsErrorHelpers {
     //
     // (undocumented)
     static isSavedObjectsClientError(error: any): error is DecoratedError;
+    // (undocumented)
+    static isTooManyRequestsError(error: Error | DecoratedError): boolean;
 }
 
 // @public
@@ -2851,6 +2857,7 @@ export type StartServicesAccessor<TPluginsStart extends object = object, TStart 
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
+    overall$: Observable<ServiceStatus>;
 }
 
 // @public

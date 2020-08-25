@@ -19,14 +19,18 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../core/server';
+import { LegacyAPICaller, SharedGlobalConfig } from 'kibana/server';
 import { Usage } from './register';
+
+interface SearchTelemetrySavedObject {
+  'search-telemetry': Usage;
+}
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
   return async (callCluster: LegacyAPICaller): Promise<Usage> => {
     const config = await config$.pipe(first()).toPromise();
 
-    const response = await callCluster('search', {
+    const response = await callCluster<SearchTelemetrySavedObject>('search', {
       index: config.kibana.index,
       body: {
         query: { term: { type: { value: 'search-telemetry' } } },
@@ -35,7 +39,7 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
     });
 
     return response.hits.hits.length
-      ? (response.hits.hits[0]._source as Usage)
+      ? response.hits.hits[0]._source['search-telemetry']
       : {
           successCount: 0,
           errorCount: 0,
