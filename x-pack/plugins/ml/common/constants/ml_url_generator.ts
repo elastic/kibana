@@ -37,6 +37,6 @@ export const ML_PAGES = {
     return `${this.ANOMALY_DETECTION}/new_job/step/job_type`;
   },
   SETTINGS: 'settings',
-  CALENDARS: 'settings/calendars_list',
-  FILTERS: 'settings/filter_lists',
+  CALENDARS_MANAGE: 'settings/calendars_list',
+  FILTER_LISTS_MANAGE: 'settings/filter_lists',
 } as const;
