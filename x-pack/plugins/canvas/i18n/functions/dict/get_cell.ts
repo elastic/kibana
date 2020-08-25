@@ -12,7 +12,7 @@ import { DATATABLE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
   help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
-    defaultMessage: 'Fetchs a single cell from a {DATATABLE}.',
+    defaultMessage: 'Fetches a single cell from a {DATATABLE}.',
     values: {
       DATATABLE,
     },

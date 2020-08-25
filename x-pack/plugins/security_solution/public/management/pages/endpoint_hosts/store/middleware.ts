@@ -18,38 +18,38 @@ import {
 } from './selectors';
 import { EndpointState } from '../types';
 import {
-  sendGetEndpointSpecificPackageConfigs,
+  sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
-  sendGetAgentConfigList,
+  sendGetAgentPolicyList,
 } from '../../policy/store/policy_list/services/ingest';
-import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
+  // eslint-disable-next-line complexity
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
-    const state = getState();
 
     // Endpoint list
     if (
-      action.type === 'userChangedUrl' &&
-      isOnEndpointPage(state) &&
-      hasSelectedEndpoint(state) !== true
+      (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
+      isOnEndpointPage(getState()) &&
+      hasSelectedEndpoint(getState()) !== true
     ) {
-      if (!endpointPackageInfo(state)) {
-        sendGetEndpointSecurityPackage(coreStart.http)
-          .then((packageInfo) => {
-            dispatch({
-              type: 'serverReturnedEndpointPackageInfo',
-              payload: packageInfo,
-            });
-          })
-          .catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error(error);
+      if (!endpointPackageInfo(getState())) {
+        try {
+          const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
+          dispatch({
+            type: 'serverReturnedEndpointPackageInfo',
+            payload: packageInfo,
           });
+        } catch (error) {
+          // Ignore Errors, since this should not hinder the user's ability to use the UI
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
       }
 
-      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
       try {
@@ -65,22 +65,23 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           payload: endpointResponse,
         });
 
-        getNonExistingPoliciesForEndpointsList(
-          coreStart.http,
-          endpointResponse.hosts,
-          nonExistingPolicies(state)
-        )
-          .then((missingPolicies) => {
-            if (missingPolicies !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: missingPolicies,
-              });
-            }
-          })
+        try {
+          const missingPolicies = await getNonExistingPoliciesForEndpointsList(
+            coreStart.http,
+            endpointResponse.hosts,
+            nonExistingPolicies(getState())
+          );
+          if (missingPolicies !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointNonExistingPolicies',
+              payload: missingPolicies,
+            });
+          }
+        } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           // eslint-disable-next-line no-console
-          .catch((error) => console.error(error));
+          console.error(error);
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnEndpointList',
@@ -105,7 +106,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
 
         try {
-          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackageConfigs(
+          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
             http,
             {
               query: {
@@ -132,18 +133,23 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverCancelledPolicyItemsLoading',
         });
+
+        dispatch({
+          type: 'serverReturnedEndpointExistValue',
+          payload: true,
+        });
       }
     }
 
     // Endpoint Details
-    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(state) === true) {
+    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
       dispatch({
         type: 'serverCancelledPolicyItemsLoading',
       });
 
       // If user navigated directly to a endpoint details page, load the endpoint list
-      if (listData(state).length === 0) {
-        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      if (listData(getState()).length === 0) {
+        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
         try {
           const response = await coreStart.http.post('/api/endpoint/metadata', {
             body: JSON.stringify({
@@ -156,22 +162,23 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             payload: response,
           });
 
-          getNonExistingPoliciesForEndpointsList(
-            coreStart.http,
-            response.hosts,
-            nonExistingPolicies(state)
-          )
-            .then((missingPolicies) => {
-              if (missingPolicies !== undefined) {
-                dispatch({
-                  type: 'serverReturnedEndpointNonExistingPolicies',
-                  payload: missingPolicies,
-                });
-              }
-            })
+          try {
+            const missingPolicies = await getNonExistingPoliciesForEndpointsList(
+              coreStart.http,
+              response.hosts,
+              nonExistingPolicies(getState())
+            );
+            if (missingPolicies !== undefined) {
+              dispatch({
+                type: 'serverReturnedEndpointNonExistingPolicies',
+                payload: missingPolicies,
+              });
+            }
+          } catch (error) {
             // Ignore Errors, since this should not hinder the user's ability to use the UI
             // eslint-disable-next-line no-console
-            .catch((error) => console.error(error));
+            console.error(error);
+          }
         } catch (error) {
           dispatch({
             type: 'serverFailedToReturnEndpointList',
@@ -185,7 +192,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // call the endpoint details api
-      const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
+      const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       try {
         const response = await coreStart.http.get<HostInfo>(
           `/api/endpoint/metadata/${selectedEndpoint}`
@@ -194,22 +201,24 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointDetails',
           payload: response,
         });
-        getNonExistingPoliciesForEndpointsList(
-          coreStart.http,
-          [response],
-          nonExistingPolicies(state)
-        )
-          .then((missingPolicies) => {
-            if (missingPolicies !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: missingPolicies,
-              });
-            }
-          })
+
+        try {
+          const missingPolicies = await getNonExistingPoliciesForEndpointsList(
+            coreStart.http,
+            [response],
+            nonExistingPolicies(getState())
+          );
+          if (missingPolicies !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointNonExistingPolicies',
+              payload: missingPolicies,
+            });
+          }
+        } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           // eslint-disable-next-line no-console
-          .catch((error) => console.error(error));
+          console.error(error);
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnEndpointDetails',
@@ -258,21 +267,21 @@ const getNonExistingPoliciesForEndpointsList = async (
     return;
   }
 
-  // We use the Agent Config API here, instead of the Package Config, because we can't use
-  // filter by ID of the Saved Object. Agent Config, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package config (policy)
+  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
+  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
+  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentConfigList(http, {
+    await sendGetAgentPolicyList(http, {
       query: {
-        kuery: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.package_configs: (${policyIdsToCheck.join(
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
           ' or '
         )})`,
       },
     })
-  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentConfig) => {
-    (agentConfig.package_configs as string[]).forEach((packageConfig) => {
-      list[packageConfig as string] = true;
+  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentPolicy) => {
+    (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
+      list[packagePolicy as string] = true;
     });
     return list;
   }, {});
