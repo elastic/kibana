@@ -28,7 +28,11 @@ import { navigationPluginMock } from '../../../../../src/plugins/navigation/publ
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
 import { Optional } from '@kbn/utility-types';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import {
+  LensEmbeddableInput,
+  LensByValueInput,
+} from '../editor_frame_service/embeddable/embeddable';
+import { SavedObjectReference } from '../../../../../src/core/types';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
@@ -303,10 +307,11 @@ describe('Lens App', () => {
       valueInput: {
         id: 'whatchaGonnaDoWith',
         attributes: {
-          allTheseReferences: 'all these references in your value Input',
-          references: [],
+          title:
+            'whatcha gonna do with all these references? All these references in your value Input',
+          references: [] as SavedObjectReference[],
         },
-      },
+      } as LensByValueInput,
     };
 
     instance = mount(<App {...args} />);

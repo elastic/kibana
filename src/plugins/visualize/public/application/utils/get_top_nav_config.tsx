@@ -21,7 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -167,7 +167,7 @@ export const getTopNavConfig = (
     const state = {
       input: {
         savedVis: vis.serialize(),
-      },
+      } as VisualizeInput,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
     };

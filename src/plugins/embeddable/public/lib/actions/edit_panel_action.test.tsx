@@ -57,7 +57,12 @@ test('redirects to app using state transfer with by value mode', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   const embeddable = new EditableEmbeddable(
-    { id: '123', viewMode: ViewMode.EDIT, coolInput1: 1, coolInput2: 2 },
+    ({
+      id: '123',
+      viewMode: ViewMode.EDIT,
+      coolInput1: 1,
+      coolInput2: 2,
+    } as unknown) as EmbeddableInput,
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
@@ -81,7 +86,7 @@ test('redirects to app using state transfer without by value mode', async () => 
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   const embeddable = new EditableEmbeddable(
-    { id: '123', viewMode: ViewMode.EDIT, savedObjectId: '1234' },
+    { id: '123', viewMode: ViewMode.EDIT, savedObjectId: '1234' } as SavedObjectEmbeddableInput,
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));

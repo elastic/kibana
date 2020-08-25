@@ -45,6 +45,7 @@ import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/pub
 import {
   LensByValueInput,
   LensEmbeddableInput,
+  LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 
 interface LensAppState {
@@ -398,7 +399,7 @@ export function App({
     if (state.byValueMode && !saveToLibrary && redirectToOrigin) {
       await setState((s: LensAppState) => ({ ...s, persistedDoc: doc }));
       const { savedObjectId: id, type, ...attributes } = doc;
-      redirectToOrigin({ attributes });
+      redirectToOrigin({ attributes } as LensByValueInput);
     } else {
       await checkForDuplicateTitle(
         {
@@ -434,7 +435,11 @@ export function App({
             lastKnownDoc: newDoc,
           }));
           if (saveProps.returnToOrigin && redirectToOrigin) {
-            redirectToOrigin(newlyCreated ? { savedObjectId: newSavedObjectId } : undefined);
+            redirectToOrigin(
+              newlyCreated
+                ? ({ savedObjectId: newSavedObjectId } as LensByReferenceInput)
+                : undefined
+            );
           } else if (savedObjectId !== newSavedObjectId) {
             redirectTo(newSavedObjectId);
           }
