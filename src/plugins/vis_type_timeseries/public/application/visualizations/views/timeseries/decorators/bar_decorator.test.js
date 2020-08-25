@@ -33,7 +33,7 @@ describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries
         [1557003600000, 9],
       ],
       hideInLegend: false,
-      stackAsPercentage: false,
+      stackMode: undefined,
       seriesId: '61ca57f1-469d-11e7-af02-69e470af7417:Rome',
       seriesGroupId: 'yaxis_main_group',
       name: 'Rome',

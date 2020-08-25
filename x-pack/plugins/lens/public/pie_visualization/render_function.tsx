@@ -161,7 +161,7 @@ export function PieComponent(
       // to account for in outer labels
       // This does not handle non-dashboard embeddables, which are allowed to
       // have different backgrounds.
-      textColor: chartTheme.axes?.axisTitleStyle?.fill,
+      textColor: chartTheme.axes?.axisTitle?.fill,
     },
     sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,

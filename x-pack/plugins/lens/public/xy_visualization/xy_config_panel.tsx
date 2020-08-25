@@ -135,8 +135,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { frame, state, setState } = props;
 
   const [open, setOpen] = useState(false);
-  const hasNonBarSeries = state?.layers.some(
-    (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
+  const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
+    ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
   const [xAxisTitle, setXAxisTitle] = useState(state?.xTitle);
@@ -261,8 +261,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             content={
               !hasNonBarSeries &&
               i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-                defaultMessage:
-                  'This setting only applies to line charts and unstacked area charts.',
+                defaultMessage: 'This setting only applies to line and area charts.',
               })
             }
           >

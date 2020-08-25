@@ -420,11 +420,21 @@ export function XYChart({
       <Axis
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
-        title={showXAxisTitle ? xTitle : undefined}
-        showGridLines={gridlinesVisibilitySettings?.x}
-        gridLineStyle={{ strokeWidth: 2 }}
+        title={xTitle}
+        gridLine={{
+          visible: gridlinesVisibilitySettings?.x,
+          strokeWidth: 2,
+        }}
         hide={filteredLayers[0].hide}
-        tickFormat={tickLabelsVisibilitySettings?.x ? (d) => xAxisFormatter.convert(d) : () => ''}
+        tickFormat={(d) => xAxisFormatter.convert(d)}
+        style={{
+          tickLabel: {
+            visible: tickLabelsVisibilitySettings?.x,
+          },
+          axisTitle: {
+            visible: showXAxisTitle,
+          },
+        }}
       />
 
       {yAxesConfiguration.map((axis, index) => (
@@ -433,10 +443,20 @@ export function XYChart({
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={showYAxisTitle ? getYAxesTitles(axis.series, index) : undefined}
-          showGridLines={gridlinesVisibilitySettings?.y}
+          title={getYAxesTitles(axis.series, index)}
+          gridLine={{
+            visible: gridlinesVisibilitySettings?.y,
+          }}
           hide={filteredLayers[0].hide}
-          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => axis.formatter.convert(d) : () => ''}
+          tickFormat={(d) => axis.formatter.convert(d)}
+          style={{
+            tickLabel: {
+              visible: tickLabelsVisibilitySettings?.y,
+            },
+            axisTitle: {
+              visible: showYAxisTitle,
+            },
+          }}
         />
       ))}
 
@@ -529,7 +549,9 @@ export function XYChart({
             case 'bar_horizontal_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             case 'area_stacked':
-              return <AreaSeries key={index} {...seriesProps} />;
+              return (
+                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
             case 'area':
               return (
                 <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
