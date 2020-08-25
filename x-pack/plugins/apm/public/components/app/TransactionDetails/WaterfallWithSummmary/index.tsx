@@ -64,8 +64,8 @@ export function WaterfallWithSummmary({
     });
   };
 
-  const { entryTransaction } = waterfall;
-  if (!entryTransaction) {
+  const { entryWaterfallTransaction } = waterfall;
+  if (!entryWaterfallTransaction) {
     const content = isLoading ? (
       <LoadingStatePrompt />
     ) : (
@@ -83,6 +83,8 @@ export function WaterfallWithSummmary({
 
     return <EuiPanel paddingSize="m">{content}</EuiPanel>;
   }
+
+  const entryTransaction = entryWaterfallTransaction.doc;
 
   return (
     <EuiPanel paddingSize="m">
