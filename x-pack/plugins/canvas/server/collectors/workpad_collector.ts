@@ -44,6 +44,10 @@ interface WorkpadTelemetry {
       max: number;
     };
   };
+  templates?: {
+    total: number;
+    by_name: Record<string, number>;
+  };
 }
 
 /**
@@ -81,7 +85,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       });
     }, []);
 
-    return { pages, elementCounts, functionCounts };
+    return { pages, elementCounts, functionCounts, template: workpad.fromTemplate };
   });
 
   // combine together info from across the workpads
@@ -91,9 +95,10 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     pageCounts: number[];
     elementCounts: number[];
     functionCounts: number[];
+    templates: string[];
   }>(
     (accum, pageInfo) => {
-      const { pages, elementCounts, functionCounts } = pageInfo;
+      const { pages, elementCounts, functionCounts, template } = pageInfo;
 
       return {
         pageMin: pages.count < accum.pageMin ? pages.count : accum.pageMin,
@@ -101,6 +106,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
         pageCounts: accum.pageCounts.concat(pages.count),
         elementCounts: accum.elementCounts.concat(elementCounts),
         functionCounts: accum.functionCounts.concat(functionCounts),
+        templates: template ? accum.templates.concat([template]) : accum.templates,
       };
     },
     {
@@ -109,9 +115,17 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
       pageCounts: [],
       elementCounts: [],
       functionCounts: [],
+      templates: [],
     }
   );
-  const { pageCounts, pageMin, pageMax, elementCounts, functionCounts } = combinedWorkpadsInfo;
+  const {
+    pageCounts,
+    pageMin,
+    pageMax,
+    elementCounts,
+    functionCounts,
+    templates,
+  } = combinedWorkpadsInfo;
 
   const pageTotal = arraySum(pageCounts);
   const elementsTotal = arraySum(elementCounts);
@@ -151,11 +165,23 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
         }
       : undefined;
 
+  const countByTemplateName = templates.reduce((accum: Record<string, number>, t: string) => {
+    accum[t] = accum[t] ? accum[t] + 1 : 1;
+
+    return accum;
+  }, {});
+
+  const templatesInfo = {
+    total: templates.length,
+    by_name: countByTemplateName,
+  };
+
   return {
     workpads: { total: workpadsInfo.length },
     pages: pagesInfo,
     elements: elementsInfo,
     functions: functionsInfo,
+    templates: templatesInfo,
   };
 }
 

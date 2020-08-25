@@ -55,7 +55,10 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
           TEMPLATE_TYPE,
           request.body.templateId
         );
-        workpad = templateSavedObject.attributes.template;
+        const { template } = templateSavedObject.attributes;
+
+        workpad = template;
+        workpad.fromTemplate = template.name;
       }
 
       const now = new Date().toISOString();

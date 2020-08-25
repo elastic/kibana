@@ -49,13 +49,14 @@ export interface CanvasWorkpad {
   assets: { [id: string]: CanvasAsset };
   colors: string[];
   css: string;
-  variables: CanvasVariable[];
+  fromTemplate?: string;
   height: number;
   id: string;
   isWriteable: boolean;
   name: string;
   page: number;
   pages: CanvasPage[];
+  variables: CanvasVariable[];
   width: number;
 }
 

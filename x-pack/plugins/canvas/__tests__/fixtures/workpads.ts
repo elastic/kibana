@@ -53,6 +53,7 @@ const BaseElement: CanvasElement = {
 export const workpads: CanvasWorkpad[] = [
   {
     ...BaseWorkpad,
+    fromTemplate: 'APM Template',
     pages: [
       {
         ...BasePage,
@@ -74,6 +75,7 @@ export const workpads: CanvasWorkpad[] = [
   },
   {
     ...BaseWorkpad,
+    fromTemplate: 'APM Template',
     pages: [
       {
         ...BasePage,
@@ -106,6 +108,7 @@ export const workpads: CanvasWorkpad[] = [
   },
   {
     ...BaseWorkpad,
+    fromTemplate: 'SIEM Template',
     pages: [
       {
         ...BasePage,

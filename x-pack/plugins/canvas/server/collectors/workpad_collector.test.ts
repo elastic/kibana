@@ -9,7 +9,7 @@ import { summarizeWorkpads } from './workpad_collector';
 import { workpads } from '../../__tests__/fixtures/workpads';
 
 describe('usage collector handle es response data', () => {
-  it('should summarize workpads, pages, and elements', () => {
+  it('should summarize workpads, pages, elements, and templates', () => {
     const usage = summarizeWorkpads(workpads);
     expect(usage).toEqual({
       workpads: {
@@ -49,6 +49,13 @@ describe('usage collector handle es response data', () => {
           'shape',
         ],
       },
+      templates: {
+        total: 3,
+        by_name: {
+          'APM Template': 2,
+          'SIEM Template': 1,
+        },
+      },
     });
   });
 
@@ -63,6 +70,32 @@ describe('usage collector handle es response data', () => {
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
       elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
       functions: { total: 1, in_use: ['toast'], per_element: { avg: 1, min: 1, max: 1 } },
+      templates: {
+        total: 1,
+        by_name: {
+          'APM Template': 1,
+        },
+      },
+    });
+  });
+
+  it('should collect correctly even if there are no workpads based on templates', () => {
+    const workpad = cloneDeep(workpads[0]);
+    workpad.fromTemplate = undefined;
+    workpad.pages[0].elements[0].expression = 'markdown hello';
+
+    const newWorkpads = [workpad];
+    const usage = summarizeWorkpads(newWorkpads);
+
+    expect(usage).toEqual({
+      workpads: { total: 1 },
+      pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
+      elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
+      functions: { total: 1, in_use: ['markdown'], per_element: { avg: 1, min: 1, max: 1 } },
+      templates: {
+        total: 0,
+        by_name: {},
+      },
     });
   });
 
@@ -76,6 +109,12 @@ describe('usage collector handle es response data', () => {
       pages: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } },
       elements: undefined,
       functions: undefined,
+      templates: {
+        total: 1,
+        by_name: {
+          'APM Template': 1,
+        },
+      },
     });
   });
 
