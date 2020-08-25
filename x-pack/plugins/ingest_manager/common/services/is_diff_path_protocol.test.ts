@@ -33,4 +33,7 @@ describe('Ingest Manager - isDiffPathProtocol', () => {
       ])
     ).toBe(false);
   });
+  it('returns false for one url', () => {
+    expect(isDiffPathProtocol(['http://localhost:8888/abc'])).toBe(false);
+  });
 });

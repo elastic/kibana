@@ -16,7 +16,7 @@ export const PutSettingsRequestSchema = {
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
         validate: (value) => {
           if (isDiffPathProtocol(value)) {
-            return 'URL protocol and path must be the same';
+            return 'Protocol and path must be the same for each URL';
           }
         },
       })

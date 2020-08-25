@@ -53,8 +53,8 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
     if (isDiffPathProtocol(value)) {
       return [
-        i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
-          defaultMessage: 'URL protocol and path must be the same',
+        i18n.translate('xpack.ingestManager.settings.kibanaUrlDifferentPathOrProtocolError', {
+          defaultMessage: 'Protocol and path must be the same for each URL',
         }),
       ];
     }
