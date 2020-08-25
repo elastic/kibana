@@ -27,6 +27,7 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';
 import { I18LABELS } from '../translations';
@@ -38,7 +39,15 @@ interface Props {
 
 export function PageViewsChart({ data, loading }: Props) {
   const history = useHistory();
-  const formatter = timeFormatter(niceTimeFormatByDay(2));
+  const { urlParams } = useUrlParams();
+
+  const { start, end } = urlParams;
+  const diffInDays = moment(new Date(end as string)).diff(
+    moment(new Date(start as string)),
+    'day'
+  );
+
+  const formatter = timeFormatter(niceTimeFormatByDay(diffInDays > 1 ? 2 : 1));
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -92,18 +101,21 @@ export function PageViewsChart({ data, loading }: Props) {
             }
             showLegend
             onBrushEnd={onBrushEnd}
+            xDomain={{
+              min: new Date(start as string).valueOf(),
+              max: new Date(end as string).valueOf(),
+            }}
           />
           <Axis
             id="date_time"
             position={Position.Bottom}
-            title={I18LABELS.dateTime}
             tickFormat={formatter}
           />
           <Axis
             id="page_views"
             title={I18LABELS.pageViews}
             position={Position.Left}
-            tickFormat={(d) => numeral(d).format('0.0 a')}
+            tickFormat={(d) => numeral(d).format('0a')}
           />
           <BarSeries
             id={I18LABELS.pageViews}

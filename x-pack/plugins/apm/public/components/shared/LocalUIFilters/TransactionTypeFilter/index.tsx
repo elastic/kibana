@@ -6,7 +6,7 @@
 
 import {
   EuiHorizontalRule,
-  EuiSelect,
+  EuiRadioGroup,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,8 +27,8 @@ function TransactionTypeFilter({ transactionTypes }: Props) {
   } = useUrlParams();
 
   const options = transactionTypes.map((type) => ({
-    text: type,
-    value: type,
+    id: type,
+    label: type,
   }));
 
   return (
@@ -43,16 +43,15 @@ function TransactionTypeFilter({ transactionTypes }: Props) {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
-      <EuiSelect
+      <EuiRadioGroup
         options={options}
-        value={transactionType}
-        compressed={true}
-        onChange={(event) => {
+        idSelected={transactionType}
+        onChange={(selectedTransactionType) => {
           const newLocation = {
             ...history.location,
             search: fromQuery({
               ...toQuery(history.location.search),
-              transactionType: event.target.value,
+              transactionType: selectedTransactionType,
             }),
           };
           history.push(newLocation);

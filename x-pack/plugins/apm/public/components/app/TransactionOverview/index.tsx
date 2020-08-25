@@ -119,7 +119,7 @@ export function TransactionOverview() {
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localFiltersConfig}>
             <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="m" />
             <EuiHorizontalRule margin="none" />
           </LocalUIFilters>
         </EuiFlexItem>

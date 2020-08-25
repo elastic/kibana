@@ -21,6 +21,7 @@ import { DatePicker } from '../index';
 
 const history = createMemoryHistory();
 const mockHistoryPush = jest.spyOn(history, 'push');
+const mockHistoryReplace = jest.spyOn(history, 'replace');
 const mockRefreshTimeRange = jest.fn();
 function MockUrlParamsProvider({
   params = {},
@@ -70,8 +71,8 @@ describe('DatePicker', () => {
 
   it('sets default query params in the URL', () => {
     mountDatePicker();
-    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
-    expect(mockHistoryPush).toHaveBeenCalledWith(
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
+    expect(mockHistoryReplace).toHaveBeenCalledWith(
       expect.objectContaining({
         search: 'rangeFrom=now-15m&rangeTo=now',
       })
@@ -83,8 +84,8 @@ describe('DatePicker', () => {
       rangeTo: 'now',
       refreshInterval: 5000,
     });
-    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
-    expect(mockHistoryPush).toHaveBeenCalledWith(
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
+    expect(mockHistoryReplace).toHaveBeenCalledWith(
       expect.objectContaining({
         search: 'rangeFrom=now-15m&rangeTo=now&refreshInterval=5000',
       })
@@ -98,18 +99,19 @@ describe('DatePicker', () => {
       refreshPaused: false,
       refreshInterval: 5000,
     });
-    expect(mockHistoryPush).toHaveBeenCalledTimes(0);
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
   });
 
   it('updates the URL when the date range changes', () => {
     const datePicker = mountDatePicker();
+    expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
     datePicker.find(EuiSuperDatePicker).props().onTimeChange({
       start: 'updated-start',
       end: 'updated-end',
       isInvalid: false,
       isQuickSelection: true,
     });
-    expect(mockHistoryPush).toHaveBeenCalledTimes(2);
+    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
     expect(mockHistoryPush).toHaveBeenLastCalledWith(
       expect.objectContaining({
         search: 'rangeFrom=updated-start&rangeTo=updated-end',
