@@ -14,12 +14,10 @@
   },
   "devDependencies": {
     "@types/md5": "^2.2.0",
+    "@types/rbush": "^3.0.0",
+    "@types/seedrandom": ">=2.0.0 <4.0.0",
     "querystring": "^0.2.0",
     "rbush": "^3.0.1",
     "redux-devtools-extension": "^2.13.8"
-  },
-  "dependencies": {
-    "@types/rbush": "^3.0.0",
-    "@types/seedrandom": ">=2.0.0 <4.0.0"
   }
 }
