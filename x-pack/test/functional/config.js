@@ -221,6 +221,17 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        global_canvas_read: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_discover_read: {
           kibana: [
             {

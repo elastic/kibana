@@ -18,15 +18,12 @@ export default function canvasCustomElementTest({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
+  const security = getService('security');
 
   describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
-      // init data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('canvas/default');
-
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
 

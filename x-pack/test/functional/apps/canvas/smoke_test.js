@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -20,12 +19,6 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      // init data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('canvas/default');
-
-      // load canvas
-      // see also navigateToUrl(app, hash)
       await PageObjects.common.navigateToApp('canvas');
     });
 
