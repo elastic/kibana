@@ -39,7 +39,7 @@ export function registerWSOverviewRoute({ router, config, log }: IRouteDependenc
         log.error(`Cannot connect to Workplace Search: ${e.toString()}`);
         if (e instanceof Error) log.debug(e.stack as string);
 
-        return response.notFound({ body: 'cannot-connect' });
+        return response.customError({ statusCode: 502, body: 'cannot-connect' });
       }
     }
   );

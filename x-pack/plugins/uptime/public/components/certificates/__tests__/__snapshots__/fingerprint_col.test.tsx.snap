@@ -1,8 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FingerprintCol renders expected elements for valid props 1`] = `
-Array [
-  .c1 .euiButtonEmpty__content {
+.c1 .euiButtonEmpty__content {
   padding-right: 0px;
 }
 
@@ -10,8 +9,9 @@ Array [
   margin-right: 8px;
 }
 
-<span
-    class="c0"
+<span>
+  <span
+    class="c0 eui-textNoWrap"
     data-test-subj="CA06F56B258B7A0D4F2B05470939478651151984"
   >
     <span
@@ -48,17 +48,9 @@ Array [
         />
       </button>
     </span>
-  </span>,
-  .c1 .euiButtonEmpty__content {
-  padding-right: 0px;
-}
-
-.c0 {
-  margin-right: 8px;
-}
-
-<span
-    class="c0"
+  </span>
+  <span
+    class="c0 eui-textNoWrap"
     data-test-subj="3111500C4A66012CDAE333EC3FCA1C9DDE45C954440E7EE413716BFF3663C074"
   >
     <span
@@ -95,8 +87,8 @@ Array [
         />
       </button>
     </span>
-  </span>,
-]
+  </span>
+</span>
 `;
 
 exports[`FingerprintCol shallow renders expected elements for valid props 1`] = `
