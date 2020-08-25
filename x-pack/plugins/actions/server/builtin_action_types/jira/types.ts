@@ -14,7 +14,6 @@ import {
   ExecutorSubActionPushParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionCreateIssueMetadataParamsSchema,
   ExecutorSubActionGetCapabilitiesParamsSchema,
   ExecutorSubActionGetIssueTypesParamsSchema,
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
@@ -78,21 +77,6 @@ export interface CreateCommentParams {
   comment: Comment;
 }
 
-export interface IssueTypes {
-  [key: string]: {
-    name: string;
-    fields: {
-      [key: string]: {
-        allowedValues: Array<{ name: string; id: string }> | [];
-        defaultValue: { name: string; id: string } | {};
-      };
-    };
-  };
-}
-export interface GetCreateIssueMetadataResponse {
-  issueTypes: IssueTypes;
-}
-
 export type GetIssueTypesResponse = Array<{ id: string; name: string }>;
 export type GetFieldsByIssueTypeResponse = Record<
   string,
@@ -105,7 +89,6 @@ export interface ExternalService {
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
-  getCreateIssueMetadata: () => Promise<GetCreateIssueMetadataResponse>;
   getCapabilities: () => Promise<ExternalServiceParams>;
   getIssueTypes: () => Promise<GetIssueTypesResponse>;
   getFieldsByIssueType: (issueTypeId: string) => Promise<GetFieldsByIssueTypeResponse>;
@@ -121,10 +104,6 @@ export type ExecutorSubActionGetIncidentParams = TypeOf<
 
 export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
->;
-
-export type ExecutorSubActionCreateIssueMetadataParams = TypeOf<
-  typeof ExecutorSubActionCreateIssueMetadataParamsSchema
 >;
 
 export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
@@ -156,10 +135,6 @@ export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs
 export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionHandshakeParams;
 }
-export interface CreateIssueMetadataHandlerArgs {
-  externalService: ExternalService;
-  params: ExecutorSubActionCreateIssueMetadataParams;
-}
 
 export interface GetIssueTypesHandlerArgs {
   externalService: ExternalService;
@@ -175,9 +150,6 @@ export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
-  getCreateIssueMetadata: (
-    args: CreateIssueMetadataHandlerArgs
-  ) => Promise<GetCreateIssueMetadataResponse>;
   getIssueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
   getFieldsByIssueType: (
     args: GetFieldsByIssueTypeHandlerArgs
@@ -186,7 +158,6 @@ export interface ExternalServiceApi {
 
 export type JiraExecutorResultData =
   | PushToServiceResponse
-  | GetCreateIssueMetadataResponse
   | GetIssueTypesResponse
   | GetFieldsByIssueTypeResponse;
 

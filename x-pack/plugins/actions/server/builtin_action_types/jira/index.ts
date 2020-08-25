@@ -20,7 +20,6 @@ import { api } from './api';
 import {
   ExecutorParams,
   ExecutorSubActionPushParams,
-  ExecutorSubActionCreateIssueMetadataParams,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
   JiraExecutorResultData,
@@ -38,12 +37,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = [
-  'pushToService',
-  'getCreateIssueMetadata',
-  'getIssueTypes',
-  'getFieldsByIssueType',
-];
+const supportedSubActions: string[] = ['pushToService', 'getIssueTypes', 'getFieldsByIssueType'];
 
 // action type definition
 export function getActionType(
@@ -123,14 +117,6 @@ async function executor(
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
-  }
-
-  if (subAction === 'getCreateIssueMetadata') {
-    const getCreateIssueMetadataParams = subActionParams as ExecutorSubActionCreateIssueMetadataParams;
-    data = await api.getCreateIssueMetadata({
-      externalService,
-      params: getCreateIssueMetadataParams,
-    });
   }
 
   if (subAction === 'getIssueTypes') {
