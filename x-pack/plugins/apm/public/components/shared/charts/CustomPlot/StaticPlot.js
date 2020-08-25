@@ -77,22 +77,23 @@ class StaticPlot extends PureComponent {
         // make sure individual markers are displayed in cases
         // where there are gaps
 
-        const markersForGaps = serie.data.reduce(
-          (series, value, index, data) => {
-            const prevHasData = getNull(data[index - 1] ?? {});
-            const nextHasData = getNull(data[index + 1] ?? {});
+        const markersForGaps = serie.data.map((value, index) => {
+          const prevHasData = getNull(serie.data[index - 1] ?? {});
+          const nextHasData = getNull(serie.data[index + 1] ?? {});
+          const thisHasData = getNull(value);
 
-            if (prevHasData || nextHasData) {
-              return series.concat({
-                ...value,
-                y: undefined,
-              });
-            }
+          const isGap = !prevHasData && !nextHasData && thisHasData;
 
-            return series.concat(value);
-          },
-          []
-        );
+          if (!isGap) {
+            return {
+              ...value,
+              y: undefined,
+            };
+          }
+
+          return value;
+        });
+
         return [
           <AreaSeries
             getNull={getNull}
