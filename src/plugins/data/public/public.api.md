@@ -65,6 +65,7 @@ import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { Subscription } from 'rxjs';
 import { ToastInputFields } from 'src/core/public/notifications';
+import { ToastsSetup } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -1753,6 +1754,8 @@ export class SearchInterceptor {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
+    // (undocumented)
+    protected showTimeoutError: ((e: Error) => void) & import("lodash").Cancelable;
     // @internal
     protected timeoutSubscriptions: Subscription;
 }
@@ -1765,6 +1768,8 @@ export interface SearchInterceptorDeps {
     http: CoreSetup_2['http'];
     // (undocumented)
     startServices: Promise<[CoreStart, any, unknown]>;
+    // (undocumented)
+    toasts: ToastsSetup;
     // (undocumented)
     uiSettings: CoreSetup_2['uiSettings'];
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts

@@ -22,6 +22,7 @@ export declare class SearchInterceptor
 |  --- | --- | --- | --- |
 |  [deps](./kibana-plugin-plugins-data-public.searchinterceptor.deps.md) |  | <code>SearchInterceptorDeps</code> |  |
 |  [requestTimeout](./kibana-plugin-plugins-data-public.searchinterceptor.requesttimeout.md) |  | <code>number &#124; undefined</code> |  |
+|  [showTimeoutError](./kibana-plugin-plugins-data-public.searchinterceptor.showtimeouterror.md) |  | <code>((e: Error) =&gt; void) &amp; import(&quot;lodash&quot;).Cancelable</code> |  |
 
 ## Methods
 
