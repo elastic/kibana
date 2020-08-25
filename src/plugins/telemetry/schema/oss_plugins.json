@@ -26,19 +26,6 @@
         }
       }
     },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "number"
-        },
-        "errorCount": {
-          "type": "number"
-        },
-        "averageDuration": {
-          "type": "long"
-        }
-      }
-    },
     "sample-data": {
       "properties": {
         "installed": {
