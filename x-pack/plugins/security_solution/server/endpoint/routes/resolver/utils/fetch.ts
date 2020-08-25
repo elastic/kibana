@@ -228,7 +228,8 @@ export class Fetcher {
   /**
    * Retrieves the related events for the origin node.
    *
-   * @param limit the upper bound number of related events to return
+   * @param limit the upper bound number of related events to return. The limit is applied after the cursor is used to
+   *  skip the previous results.
    * @param after a cursor to use as the starting point for retrieving related events
    * @param filter a kql query for filtering the results
    */
@@ -252,8 +253,10 @@ export class Fetcher {
   /**
    * Retrieves the alerts for the origin node.
    *
-   * @param limit the upper bound number of alerts to return
+   * @param limit the upper bound number of alerts to return. The limit is applied after the cursor is used to
+   *  skip the previous results.
    * @param after a cursor to use as the starting point for retrieving alerts
+   * @param filter a kql query string for filtering the results
    */
   public async alerts(
     limit: number,
