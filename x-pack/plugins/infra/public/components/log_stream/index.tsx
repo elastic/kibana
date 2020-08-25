@@ -5,7 +5,10 @@
  */
 
 import React, { useEffect } from 'react';
+import { noop } from 'lodash';
+import { EuiPanel } from '@elastic/eui';
 import { useLogStream } from '../../containers/logs/log_stream';
+import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 
 interface LogStreamProps {
   startTimestamp: number;
@@ -17,5 +20,31 @@ export const LogStream: React.FC<LogStreamProps> = ({ startTimestamp, endTimesta
 
   useEffect(() => fetchEntries(), [fetchEntries]);
 
-  return <span>It works!</span>;
+  return (
+    <EuiPanel>
+      <ScrollableLogTextStreamView
+        target={null}
+        columnConfigurations={[]}
+        items={entries}
+        scale="medium"
+        wrap={false}
+        isReloading={false}
+        isLoadingMore={false}
+        hasMoreBeforeStart={false}
+        hasMoreAfterEnd={false}
+        isStreaming={false}
+        lastLoadedTime={null}
+        jumpToTarget={noop}
+        reportVisibleInterval={noop}
+        loadNewerItems={noop}
+        reloadItems={fetchEntries}
+        highlightedItem={null}
+        currentHighlightKey={null}
+        startDateExpression={''}
+        endDateExpression={''}
+        updateDateRange={noop}
+        startLiveStreaming={noop}
+      />
+    </EuiPanel>
+  );
 };
