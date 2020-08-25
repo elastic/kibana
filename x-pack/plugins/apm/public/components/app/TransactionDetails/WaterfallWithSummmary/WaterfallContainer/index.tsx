@@ -8,8 +8,8 @@ import { Location } from 'history';
 import React from 'react';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { ServiceLegends } from './ServiceLegends';
-import { Waterfall } from './Waterfall';
 import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { Waterfall } from './Waterfall';
 
 interface Props {
   urlParams: IUrlParams;
