@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { DASHBOARD_CONTAINER_TYPE } from '..';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 

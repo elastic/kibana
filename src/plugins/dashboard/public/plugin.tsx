@@ -41,7 +41,6 @@ import {
   SavedObjectEmbeddableInput,
   EmbeddableInput,
   PANEL_NOTIFICATION_TRIGGER,
-  PANEL_BADGE_TRIGGER,
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
