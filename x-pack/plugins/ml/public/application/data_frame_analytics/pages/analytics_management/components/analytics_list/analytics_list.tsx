@@ -5,17 +5,12 @@
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
-import sortBy from 'lodash/sortBy';
-
 import { i18n } from '@kbn/i18n';
-
 import {
-  Direction,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBasicTable,
-  EuiInMemoryTable,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -44,11 +39,9 @@ import {
   getGroupQueryText,
 } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
-import { filterAnalytics, AnalyticsSearchBar } from './analytics_search_bar';
+import { filterAnalytics, AnalyticsSearchBar } from '../analytics_search_bar';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
-
-const PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [2, 5, 10, 25, 50];
+import { useTableSettings } from './use_table_settings';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -105,7 +98,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [filteredAnalytics, setFilteredAnalytics] = useState({
+  const [filteredAnalytics, setFilteredAnalytics] = useState<{
+    active: boolean;
+    items: DataFrameAnalyticsListRow[];
+  }>({
     active: false,
     items: [],
   });
@@ -119,21 +115,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   // Query text/job_id based on url but only after getAnalytics is done first
   // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
   const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
-  const [tableSettings, setTableSettings] = useState<{
-    pageIndex: number;
-    pageSize: number;
-    totalItemCount: number;
-    hidePerPageOptions: boolean;
-    sortField: string;
-    sortDirection: Direction;
-  }>({
-    pageIndex: 0,
-    pageSize: PAGE_SIZE,
-    totalItemCount: 0,
-    hidePerPageOptions: false,
-    sortField: DataFrameAnalyticsListColumn.id,
-    sortDirection: 'asc',
-  });
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -146,32 +127,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setIsInitialized,
     blockRefresh
   );
-
-  const getPageOfItems = (
-    index: number,
-    size: number,
-    sortField: string,
-    sortDirection: Direction
-  ) => {
-    let list = filteredAnalytics.active ? filteredAnalytics.items : analytics;
-    // @ts-ignore
-    list = sortBy(list, (item) => item[sortField]);
-    list = sortDirection === 'asc' ? list : list.reverse();
-    const listLength = list.length;
-
-    let pageStart = index * size;
-    if (pageStart >= listLength && listLength !== 0) {
-      // if the page start is larger than the number of items due to
-      // filters being applied or jobs being deleted, calculate a new page start
-      pageStart = Math.floor((listLength - 1) / size) * size;
-
-      setTableSettings({ ...tableSettings, pageIndex: pageStart / size });
-    }
-    return {
-      pageOfItems: list.slice(pageStart, pageStart + size),
-      totalItemCount: listLength,
-    };
-  };
 
   const setQueryClauses = (queryClauses: any) => {
     if (queryClauses.length) {
@@ -228,6 +183,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isMlEnabledInSpace
   );
 
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings(
+    filteredAnalytics.active ? filteredAnalytics.items : analytics
+  );
+
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.
   if (!isInitialized) {
@@ -262,45 +221,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </>
     );
   }
-
-  const { pageIndex, pageSize, sortField, sortDirection } = tableSettings;
-
-  const { pageOfItems, totalItemCount } = getPageOfItems(
-    pageIndex,
-    pageSize,
-    sortField,
-    sortDirection
-  );
-
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
-  };
-
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
-
-  const onTableChange: EuiInMemoryTable<DataFrameAnalyticsListRow>['onTableChange'] = ({
-    page = { index: 0, size: PAGE_SIZE },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: 'asc' },
-  }) => {
-    const { index, size } = page;
-    const { field, direction } = sort;
-
-    setTableSettings({
-      ...tableSettings,
-      pageIndex: index,
-      pageSize: size,
-      sortField: field,
-      sortDirection: direction,
-    });
-  };
 
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, analytics);
 
@@ -337,7 +257,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           setQueryClauses={setQueryClauses}
         />
         <EuiSpacer size="l" />
-        <EuiBasicTable
+        <EuiBasicTable<DataFrameAnalyticsListRow>
           className="mlAnalyticsTable"
           columns={columns}
           hasActions={false}
@@ -349,7 +269,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           loading={isLoading}
           onChange={onTableChange}
           pagination={pagination}
-          // @ts-ignore
           sorting={sorting}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
           rowProps={(item) => ({

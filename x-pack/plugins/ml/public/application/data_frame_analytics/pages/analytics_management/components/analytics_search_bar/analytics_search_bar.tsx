@@ -5,7 +5,6 @@
  */
 
 import React, { Dispatch, SetStateAction, FC, Fragment, useState } from 'react';
-import each from 'lodash/each';
 import {
   EuiSearchBar,
   EuiSearchBarProps,
@@ -15,15 +14,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { stringMatch } from '../../../../../util/string_utils';
+import {
+  Clause,
+  TermClause,
+  FieldClause,
+  Value,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 
-export function filterAnalytics(jobs: any, clauses: any) {
+export function filterAnalytics(
+  items: DataFrameAnalyticsListRow[],
+  clauses: Array<TermClause | FieldClause>
+) {
   if (clauses.length === 0) {
-    return jobs;
+    return items;
   }
 
   // keep count of the number of matches we make as we're looping over the clauses
-  // we only want to return jobs which match all clauses, i.e. each search term is ANDed
-  const matches = jobs.reduce((p: any, c: any) => {
+  // we only want to return items which match all clauses, i.e. each search term is ANDed
+  const matches: Record<string, any> = items.reduce((p: Record<string, any>, c) => {
     p[c.id] = {
       job: c,
       count: 0,
@@ -41,49 +50,48 @@ export function filterAnalytics(jobs: any, clauses: any) {
       // match on id, description and memory_status
       // if the term has been negated, AND the matches
       if (bool === true) {
-        js = jobs.filter(
-          (job: any) =>
-            stringMatch(job.id, c.value) === bool ||
-            stringMatch(job.description, c.value) === bool ||
-            stringMatch(job.memory_status, c.value) === bool
+        js = items.filter(
+          (item) =>
+            stringMatch(item.id, c.value) === bool ||
+            stringMatch(item.config.description, c.value) === bool ||
+            stringMatch(item.stats?.memory_usage?.status, c.value) === bool
         );
       } else {
-        js = jobs.filter(
-          (job: any) =>
-            stringMatch(job.id, c.value) === bool &&
-            stringMatch(job.description, c.value) === bool &&
-            stringMatch(job.memory_status, c.value) === bool
+        js = items.filter(
+          (item) =>
+            stringMatch(item.id, c.value) === bool &&
+            stringMatch(item.config.description, c.value) === bool &&
+            stringMatch(item.stats?.memory_usage?.status, c.value) === bool
         );
       }
     } else {
       // filter other clauses, i.e. the filters for type and status
-      if (Array.isArray(c.value)) {
-        // the job type value is an array of job types
-        js = jobs.filter((job: any) => c.value.some((value: any) => value === job[c.field]));
+      if (Array.isArray(c.value as Value[])) {
+        // job type value and status value is an array of job types
+        // @ts-ignore
+        js = items.filter((item) => c.value.some((value) => value === item[c.field]));
       } else {
-        // TODO
-        // js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        // @ts-ignore
+        js = items.filter((item) => item[c.field] === c.value);
       }
     }
 
     js.forEach((j) => matches[j.id].count++);
   });
 
-  // loop through the matches and return only those jobs which have match all the clauses
-  const filteredJobs: any = [];
-  each(matches, (m) => {
-    if (m.count >= clauses.length) {
-      filteredJobs.push(m.job);
-    }
-  });
-  return filteredJobs;
+  // loop through the matches and return only those items which have match all the clauses
+  const filtered = Object.values(matches)
+    .filter((m) => (m && m.count) >= clauses.length)
+    .map((m) => m.job);
+
+  return filtered;
 }
 
-function getError(error: any) {
-  if (error) {
+function getError(errorMessage: string | null) {
+  if (errorMessage) {
     return i18n.translate('xpack.ml.analyticList.searchBar.invalidSearchErrorMessage', {
       defaultMessage: 'Invalid search: {errorMessage}',
-      values: { errorMessage: error.message },
+      values: { errorMessage },
     });
   }
 
@@ -97,13 +105,13 @@ interface Props {
 }
 
 export const AnalyticsSearchBar: FC<Props> = ({ filters, searchQueryText, setQueryClauses }) => {
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
-  const onChange: any = ({ query, error }: any) => {
+  const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
     if (error) {
-      setErrorMessage(error);
+      setErrorMessage(error.message);
     } else {
-      let clauses = [];
+      let clauses: Clause[] = [];
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
       }
