@@ -111,12 +111,12 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureWhitelistedUri(url.toString());
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(url.toString());
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }

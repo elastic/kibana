@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -36,7 +35,6 @@ const mapping = [
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const config = getService('config');
 
   const mockJira = {
     config: {
@@ -75,19 +73,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
   };
 
   let jiraSimulatorURL: string = '<could not determine kibana url>';
-  let proxyServer: any;
-  let proxyHaveBeenCalled = false;
 
   describe('Jira', () => {
     before(() => {
       jiraSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
       );
-      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
     });
 
     describe('Jira - Action Creation', () => {
@@ -175,7 +166,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a jira action with a non whitelisted apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -195,7 +186,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -538,8 +529,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          expect(proxyHaveBeenCalled).to.equal(true);
-
           expect(body).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
@@ -552,10 +541,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           });
         });
       });
-    });
-
-    after(() => {
-      proxyServer.close();
     });
   });
 }
