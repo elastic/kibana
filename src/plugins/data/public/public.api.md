@@ -943,7 +943,7 @@ export type IMetricAggType = MetricAggType;
 // @public (undocumented)
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
-    constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, uiSettingsValues, }: IndexPatternDeps);
+    constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, shortDotsEnable, metaFields, }: IndexPatternDeps);
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)

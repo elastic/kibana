@@ -28,7 +28,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.joinForm.separatorFieldHelpText',
       {
-        defaultMessage: 'Separator character',
+        defaultMessage: 'Separator character.',
       }
     ),
     validations: [
@@ -49,7 +49,7 @@ export const Join: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.joinForm.fieldNameHelpText',
-          { defaultMessage: 'Field containing array values to join' }
+          { defaultMessage: 'Field containing array values to join.' }
         )}
       />
 

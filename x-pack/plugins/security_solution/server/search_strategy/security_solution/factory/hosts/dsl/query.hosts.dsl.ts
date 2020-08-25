@@ -11,7 +11,7 @@ import {
   HostsRequestOptions,
   SortField,
 } from '../../../../../../common/search_strategy/security_solution';
-import { assertUnreachable, createQueryFilterClauses } from '../../../../../utils/build_query';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildHostsQuery = ({
   defaultIndex,
@@ -83,7 +83,5 @@ const getQueryOrder = (sort: SortField): QueryOrder => {
       return { lastSeen: sort.direction };
     case 'hostName':
       return { _key: sort.direction };
-    default:
-      return assertUnreachable(sort.field);
   }
 };

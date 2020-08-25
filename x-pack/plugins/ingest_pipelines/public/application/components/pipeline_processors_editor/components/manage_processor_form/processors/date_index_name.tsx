@@ -133,7 +133,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText"
-        defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}"
+        defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}."
         values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />
     ),
