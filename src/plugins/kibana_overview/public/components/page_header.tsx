@@ -20,17 +20,15 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createAppNavigationHandler } from './app_navigation_handler';
-import { FeatureCatalogueEntry } from '../../services';
+import { createAppNavigationHandler } from '../app_navigation_handler';
 
 interface Props {
   title: JSX.Element;
-  findDirectoryById: (id: string) => FeatureCatalogueEntry | undefined;
 }
 
-export const PageHeader: FC<Props> = ({ title, findDirectoryById }) => {
-  const devTools = findDirectoryById('console');
-  const stackManagement = findDirectoryById('stack-management');
+export const PageHeader: FC<Props> = ({ title }) => {
+  const devTools = { path: '/app/dev_tools#/console' };
+  const stackManagement = { path: '/app/management' };
 
   return (
     <div className="homPageHeaderContainer">

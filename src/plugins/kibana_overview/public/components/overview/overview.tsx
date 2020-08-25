@@ -36,6 +36,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
+import { PageHeader } from '../page_header';
 
 const apps = {
   dashboard: {
@@ -180,7 +181,7 @@ export const Overview: FC = () => {
           image={addBasePath(
             `/plugins/home/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}_2x.png`
           )}
-          // isDisabled={!Boolean(directory)}
+          // isDisabled={!Boolean(directory)} TODO: should apps be hidden or disabled?
           href={addBasePath(app.path)}
           onClick={createAppNavigationHandler(app.path)}
           titleElement="h3"
@@ -251,19 +252,23 @@ export const Overview: FC = () => {
             <EuiFlexItem grow={false}>
               <EuiIcon type="logoKibana" size="xxl" />
             </EuiFlexItem>
-            <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexGroup gutterSize="none" direction="column" justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiText>Visualize & analyze</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="l">
-                  <h1 id="kibanaOverviewHeader__title">
-                    <FormattedMessage
-                      id="kibanaOverview.pageHeader.title"
-                      defaultMessage="Kibana"
-                    />
-                  </h1>
-                </EuiTitle>
+                <PageHeader
+                  title={
+                    <EuiTitle size="l">
+                      <h1 id="kibanaOverviewHeader__title">
+                        <FormattedMessage
+                          id="kibanaOverview.pageHeader.title"
+                          defaultMessage="Kibana"
+                        />
+                      </h1>
+                    </EuiTitle>
+                  }
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexGroup>
