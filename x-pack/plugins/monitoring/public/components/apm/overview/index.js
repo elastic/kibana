@@ -55,11 +55,11 @@ export function ApmOverview({ stats, metrics, ...props }) {
             />
           </h1>
         </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={stats} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={stats} />
-          </EuiPanel>
-          <EuiSpacer size="s" />
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>

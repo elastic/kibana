@@ -13,7 +13,10 @@ import {
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
+  EuiPageHeader,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
@@ -32,6 +35,18 @@ export const Index = ({ scope, indexSummary, metrics, clusterUuid, indexUuid, lo
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiPageHeader>
+          <EuiTitle size="s">
+            <h1>
+              {i18n.translate('xpack.monitoring.elasticsearch.index.pageTitle', {
+                defaultMessage: 'Index: {indexName}',
+                values: {
+                  indexName: indexUuid,
+                },
+              })}
+            </h1>
+          </EuiTitle>
+        </EuiPageHeader>
         <EuiPanel>
           <IndexDetailStatus stats={indexSummary} />
         </EuiPanel>

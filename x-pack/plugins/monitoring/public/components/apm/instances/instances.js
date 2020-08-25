@@ -156,11 +156,11 @@ export function ApmServerInstances({ apms, setupMode }) {
             />
           </h1>
         </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={data.stats} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={data.stats} />
-          </EuiPanel>
-          <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"
