@@ -12,7 +12,7 @@ import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import { useValues } from 'kea';
 
-import { Overview } from './components/overview';
+import { Overview } from './views/overview';
 import { ErrorState } from './components/error_state';
 
 import { WorkplaceSearch } from './';
