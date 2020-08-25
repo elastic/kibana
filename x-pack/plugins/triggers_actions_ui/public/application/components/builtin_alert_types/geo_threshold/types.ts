@@ -57,3 +57,6 @@ export interface GeoThresholdAlertParams {
   shapesArr: ShapeQueryData[];
   type: string;
 }
+
+export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
+export const ES_GEO_SHAPE_TYPES = ['geo_shape'];

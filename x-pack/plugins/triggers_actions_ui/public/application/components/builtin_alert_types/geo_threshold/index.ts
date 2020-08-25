@@ -13,9 +13,9 @@ import { AlertsContextValue } from '../../../context/alerts_context';
 export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams, AlertsContextValue> {
   return {
     id: '.geo-threshold',
-    name: 'Geo threshold',
-    iconClass: 'Globe',
-    alertParamsExpression: lazy(() => import('./expression')),
+    name: 'Tracking threshold',
+    iconClass: 'globe',
+    alertParamsExpression: lazy(() => import('./expression/expression')),
     // validate: validateExpression,
     validate: (alertParams: string) => {
       return {
