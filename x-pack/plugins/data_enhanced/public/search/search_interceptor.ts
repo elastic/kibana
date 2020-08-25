@@ -95,9 +95,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   // error notification per session.
   protected showTimeoutError = debounce(
     (e: Error) => {
+      const message = this.application.capabilities.advancedSettings.save
+        ? 'Increase the advanced setting timeout to ensure queries can run to completion.'
+        : 'Contact an administrator to increase the advanced setting.';
       this.deps.toasts.addError(e, {
         title: 'Timed out',
-        toastMessage: 'One or more queries timed out.', // TODO: Improve this message
+        toastMessage: `One or more queries timed out. ${message}`,
       });
     },
     60000,
