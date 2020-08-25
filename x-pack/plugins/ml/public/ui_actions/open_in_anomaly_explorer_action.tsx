@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
-import { ML_APP_URL_GENERATOR } from '../url_generator';
+import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
