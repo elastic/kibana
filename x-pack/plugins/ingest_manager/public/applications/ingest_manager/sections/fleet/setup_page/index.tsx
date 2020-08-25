@@ -95,8 +95,7 @@ export const SetupPage: React.FunctionComponent<{
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ingestManager.setupPage.enableText"
-                defaultMessage="In order to use Fleet, you must create an Elastic user. This user can create API keys
-        and write to logs-* and metrics-*."
+                defaultMessage="Fleet requires an Elastic user who can create API keys and write to logs-* and metrics-*."
               />
             </EuiText>
             <EuiSpacer size="l" />
