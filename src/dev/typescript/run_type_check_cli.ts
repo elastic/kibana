@@ -79,7 +79,14 @@ export function runTypeCheckCli() {
     process.exit();
   }
 
-  const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
+  const tscArgs = [
+    // composite project cannot be used with --noEmit
+    ...['--composite', 'false'],
+    ...['--emitDeclarationOnly', 'false'],
+    '--noEmit',
+    '--pretty',
+    ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : []),
+  ];
   const projects = filterProjectsByFlag(opts.project).filter((p) => !p.disableTypeCheck);
 
   if (!projects.length) {
