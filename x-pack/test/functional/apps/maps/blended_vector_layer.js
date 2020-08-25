@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }) {
 
     afterEach(async () => {
       await inspector.close();
-      await security.testUser.restoreDefaults();
     });
 
     after(async () => {
