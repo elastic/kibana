@@ -49,7 +49,7 @@ project {
       type = "CloudProfile"
       param("profileServerUrl", "")
       param("system.cloud.profile_id", "KIBANA_CLOUD_PROFILE")
-      param("agent_pool_id", "0") // TODO currently default pool
+      param("agent_pool_id", "-2") // TODO currently default pool
       param("total-work-time", "")
       param("credentialsType", "key")
       param("description", "")
