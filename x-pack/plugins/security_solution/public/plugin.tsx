@@ -57,7 +57,6 @@ import {
   CASE,
   ADMINISTRATION,
 } from './app/home/translations';
-import { resolverPluginSetup } from './resolver';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -321,7 +320,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     return {
-      resolver: resolverPluginSetup,
+      resolver: () => import('./resolver'),
     };
   }
 
