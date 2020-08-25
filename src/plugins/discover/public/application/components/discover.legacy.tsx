@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -70,6 +70,7 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
 }: any) {
+  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const toMoment = function (datetime: string) {
     if (!datetime) {
       return '';
@@ -103,7 +104,9 @@ export function DiscoverLegacy({
         <main className="container-fluid">
           <div className="row">
             <div
-              className="col-md-2 dscSidebar__container collapsible-sidebar"
+              className={`col-md-2 dscSidebar__container collapsible-sidebar ${
+                isSidebarClosed ? 'closed' : ''
+              }`}
               id="discover-sidebar"
               data-test-subj="discover-sidebar"
             >
@@ -121,8 +124,22 @@ export function DiscoverLegacy({
                   state={state}
                 />
               </div>
+              <button
+                onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                data-test-subj="collapseSideBarButton"
+                aria-controls="discover-sidebar"
+                aria-expanded="true"
+                aria-label="Toggle sidebar"
+                className="kuiCollapseButton kbnCollapsibleSidebar__collapseButton"
+              >
+                <span
+                  className={`kuiIcon ${
+                    isSidebarClosed ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left'
+                  }`}
+                />
+              </button>
             </div>
-            <div className="dscWrapper col-md-10">
+            <div className={`dscWrapper col-md-${isSidebarClosed ? '12' : '10'}`}>
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
