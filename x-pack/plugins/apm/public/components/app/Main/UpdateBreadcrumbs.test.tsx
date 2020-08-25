@@ -65,7 +65,7 @@ describe('UpdateBreadcrumbs', () => {
         expect.objectContaining({
           text: 'APM',
           href:
-            '/basepath/app/apm?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+            '/basepath/app/apm/?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
         }),
         expect.objectContaining({
           text: 'Services',
@@ -102,7 +102,7 @@ describe('UpdateBreadcrumbs', () => {
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
-          href: '/basepath/app/apm?kuery=myKuery',
+          href: '/basepath/app/apm/?kuery=myKuery',
         }),
         expect.objectContaining({
           text: 'Services',
@@ -130,7 +130,7 @@ describe('UpdateBreadcrumbs', () => {
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
-          href: '/basepath/app/apm?kuery=myKuery',
+          href: '/basepath/app/apm/?kuery=myKuery',
         }),
         expect.objectContaining({
           text: 'Services',
@@ -163,7 +163,7 @@ describe('UpdateBreadcrumbs', () => {
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
-          href: '/basepath/app/apm?kuery=myKuery',
+          href: '/basepath/app/apm/?kuery=myKuery',
         }),
         expect.objectContaining({
           text: 'Services',
