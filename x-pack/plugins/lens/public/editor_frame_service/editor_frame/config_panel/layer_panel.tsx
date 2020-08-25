@@ -216,7 +216,12 @@ export function LayerPanel(
                   return (
                     <DragDrop
                       key={accessor}
-                      className={classNames('lnsLayerPanel__dimension')}
+                      className={classNames('lnsLayerPanel__dimension', {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        'lnsLayerPanel__dimension-hidden':
+                          isDraggedOperation(dragDropContext.dragging) &&
+                          accessor === dragDropContext.dragging.columnId,
+                      })}
                       getAdditionalClassesOnEnter={() => {
                         // If we are dragging another column, add an indication that the behavior will be a replacement'
                         if (
