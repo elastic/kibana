@@ -139,7 +139,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to get incident with id ${id}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response.data.errors)}`
+          } Reason: ${createErrorMessage(error.response?.data?.errors ?? {})}`
         )
       );
     }
@@ -196,7 +196,7 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response.data.errors
+            error.response?.data?.errors ?? {}
           )}`
         )
       );
@@ -238,7 +238,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to update incident with id ${incidentId}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response.data.errors)}`
+          }. Reason: ${createErrorMessage(error.response?.data?.errors ?? {})}`
         )
       );
     }
@@ -269,7 +269,7 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response.data.errors)}`
+          }. Reason: ${createErrorMessage(error.response?.data?.errors ?? {})}`
         )
       );
     }
@@ -290,8 +290,8 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to get capabilities. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response.data.errors
+          `Unable to get capabilities. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data?.errors ?? {}
           )}`
         )
       );
@@ -324,14 +324,14 @@ export const createExternalService = (
         });
 
         const issueTypes = res.data.values;
-        return issueTypes.map((type: { name: string }) => ({ name: type.name }));
+        return normalizeIssueTypes(issueTypes);
       }
     } catch (error) {
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to get issue types. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response.data.errors
+          `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data?.errors ?? {}
           )}`
         )
       );
@@ -363,15 +363,21 @@ export const createExternalService = (
           proxySettings,
         });
 
-        const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
+        const fields = res.data.values.reduce(
+          (acc: { [x: string]: {} }, value: { fieldId: string }) => ({
+            ...acc,
+            [value.fieldId]: { ...value },
+          }),
+          {}
+        );
         return normalizeFields(fields);
       }
     } catch (error) {
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to get fields. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response.data.errors
+          `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response?.data?.errors ?? {}
           )}`
         )
       );
