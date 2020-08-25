@@ -7,7 +7,8 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana, useMlUrlGenerator, ML_PAGES } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 export const BackToListPanel: FC = () => {
   const urlGenerator = useMlUrlGenerator();

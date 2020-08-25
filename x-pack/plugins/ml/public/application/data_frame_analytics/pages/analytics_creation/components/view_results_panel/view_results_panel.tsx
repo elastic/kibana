@@ -7,8 +7,9 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlUrlGenerator, ML_PAGES } from '../../../../../contexts/kibana';
+import { useMlUrlGenerator } from '../../../../../contexts/kibana';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 interface Props {
   jobId: string;
