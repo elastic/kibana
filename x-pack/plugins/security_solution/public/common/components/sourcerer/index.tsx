@@ -91,19 +91,20 @@ export const MaybeSourcerer = React.memo(() => {
     ],
     [kibanaIndexPatterns, scopePatterns, selectedOptions]
   );
-  const unSelectableOptions: EuiSelectableOption[] = useMemo(
-    () =>
-      []
-        .filter((title) => !kibanaIndexPatterns.includes(title))
-        .map((title, id) => ({
-          label: title,
-          key: `${title}-${id}`,
-          value: title,
-          disabled: true,
-          checked: undefined,
-        })),
-    [kibanaIndexPatterns]
-  );
+  // TO DO check if index pattern has results and if it does not, make it unselectable
+  // const unSelectableOptions: EuiSelectableOption[] = useMemo(
+  //   () =>
+  //     []
+  //       .filter((title) => !kibanaIndexPatterns.includes(title))
+  //       .map((title, id) => ({
+  //         label: title,
+  //         key: `${title}-${id}`,
+  //         value: title,
+  //         disabled: true,
+  //         checked: undefined,
+  //       })),
+  //   [kibanaIndexPatterns]
+  // );
   const renderOption = useCallback(
     (option, searchValue) => (
       <>
@@ -125,10 +126,6 @@ export const MaybeSourcerer = React.memo(() => {
     },
     [onChangeIndexPattern]
   );
-  const allOptions = useMemo(() => [...options, ...unSelectableOptions], [
-    options,
-    unSelectableOptions,
-  ]);
   return (
     <EuiPopover
       button={trigger}
@@ -149,7 +146,7 @@ export const MaybeSourcerer = React.memo(() => {
           data-test-subj="indexPattern-switcher"
           searchable
           isLoading={loading}
-          options={allOptions}
+          options={options}
           onChange={onChange}
           renderOption={renderOption}
           searchProps={{
