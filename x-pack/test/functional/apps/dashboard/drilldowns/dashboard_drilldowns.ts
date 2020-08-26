@@ -21,12 +21,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const security = getService('security');
 
   describe('Dashboard Drilldowns', function () {
     before(async () => {
       log.debug('Dashboard Drilldowns:initTests');
+      await security.testUser.setRoles([
+        'global_drilldown_all',
+        'test_logstash_reader',
+        'global_dashboard_all',
+      ]);
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should create dashboard to dashboard drilldown, use it, and then delete it', async () => {

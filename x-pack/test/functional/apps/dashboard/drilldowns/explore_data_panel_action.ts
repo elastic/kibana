@@ -22,31 +22,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const panelActionsTimeRange = getService('dashboardPanelTimeRange');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
 
   describe('Explore underlying data - panel action', function () {
     before(
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
+        await security.testUser.setRoles([
+          'global_drilldown_all',
+          'test_logstash_reader',
+          'global_dashboard_all',
+        ]);
         await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
       }
     );
 
-    before('start on Dashboard landing page', async () => {
-      await common.navigateToApp('dashboard');
-      await dashboard.preserveCrossAppState();
-    });
-
     after('set back default index pattern', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-    });
-
-    after('clean-up custom time range on panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
       await panelActions.openContextMenu();
       await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
       await panelActionsTimeRange.clickRemovePerPanelTimeRangeButton();
       await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await security.testUser.restoreDefaults();
     });
 
     it('action exists in panel context menu', async () => {

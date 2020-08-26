@@ -232,11 +232,32 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        global_drilldown_all: {
+          kibana: [
+            {
+              feature: {
+                drilldown: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         global_discover_read: {
           kibana: [
             {
               feature: {
                 discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_dashboard_all: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
               },
               spaces: ['*'],
             },
