@@ -135,12 +135,12 @@ function valdiateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   try {
-    configurationUtilities.ensureWhitelistedUri(getPagerDutyApiUrl(configObject));
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
       defaultMessage: 'error configuring pagerduty action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
