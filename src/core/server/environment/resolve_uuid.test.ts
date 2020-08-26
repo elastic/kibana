@@ -18,12 +18,11 @@
  */
 
 import { join } from 'path';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
-import { configServiceMock } from '../config/config_service.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { BehaviorSubject } from 'rxjs';
-import { Logger } from '../logging';
+import { PathConfigType } from '../path';
+import { HttpConfigType } from '../http';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
@@ -66,40 +65,34 @@ const mockWriteFile = (error?: object) => {
   });
 };
 
-const getConfigService = (serverUuid: string | undefined) => {
-  const configService = configServiceMock.create();
-  configService.atPath.mockImplementation((path) => {
-    if (path === 'path') {
-      return new BehaviorSubject({
-        data: 'data-folder',
-      });
-    }
-    if (path === 'server') {
-      return new BehaviorSubject({
-        uuid: serverUuid,
-      });
-    }
-    return new BehaviorSubject({});
-  });
-  return configService;
+const createServerConfig = (serverUuid: string | undefined) => {
+  return {
+    uuid: serverUuid,
+  } as HttpConfigType;
 };
 
 describe('resolveInstanceUuid', () => {
-  let configService: ReturnType<typeof configServiceMock.create>;
-  let logger: jest.Mocked<Logger>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let pathConfig: PathConfigType;
+  let serverConfig: HttpConfigType;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockReadFile({ uuid: DEFAULT_FILE_UUID });
     mockWriteFile();
-    configService = getConfigService(DEFAULT_CONFIG_UUID);
-    logger = loggingSystemMock.create().get() as any;
+
+    pathConfig = {
+      data: 'data-folder',
+    };
+    serverConfig = createServerConfig(DEFAULT_CONFIG_UUID);
+
+    logger = loggingSystemMock.createLogger();
   });
 
   describe('when file is present and config property is set', () => {
     describe('when they mismatch', () => {
       it('writes to file and returns the config uuid', async () => {
-        const uuid = await resolveInstanceUuid({ configService, logger });
+        const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
         expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
         expect(writeFile).toHaveBeenCalledWith(
           join('data-folder', 'uuid'),
@@ -118,7 +111,7 @@ describe('resolveInstanceUuid', () => {
     describe('when they match', () => {
       it('does not write to file', async () => {
         mockReadFile({ uuid: DEFAULT_CONFIG_UUID });
-        const uuid = await resolveInstanceUuid({ configService, logger });
+        const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
         expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
         expect(writeFile).not.toHaveBeenCalled();
         expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -134,7 +127,7 @@ describe('resolveInstanceUuid', () => {
   describe('when file is not present and config property is set', () => {
     it('writes the uuid to file and returns the config uuid', async () => {
       mockReadFile({ error: fileNotFoundError });
-      const uuid = await resolveInstanceUuid({ configService, logger });
+      const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -152,8 +145,8 @@ describe('resolveInstanceUuid', () => {
 
   describe('when file is present and config property is not set', () => {
     it('does not write to file and returns the file uuid', async () => {
-      configService = getConfigService(undefined);
-      const uuid = await resolveInstanceUuid({ configService, logger });
+      serverConfig = createServerConfig(undefined);
+      const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
       expect(uuid).toEqual(DEFAULT_FILE_UUID);
       expect(writeFile).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -169,8 +162,8 @@ describe('resolveInstanceUuid', () => {
     describe('when config property is not set', () => {
       it('writes new uuid to file and returns new uuid', async () => {
         mockReadFile({ uuid: UUID_7_6_0_BUG });
-        configService = getConfigService(undefined);
-        const uuid = await resolveInstanceUuid({ configService, logger });
+        serverConfig = createServerConfig(undefined);
+        const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
         expect(uuid).not.toEqual(UUID_7_6_0_BUG);
         expect(uuid).toEqual('NEW_UUID');
         expect(writeFile).toHaveBeenCalledWith(
@@ -195,8 +188,8 @@ describe('resolveInstanceUuid', () => {
     describe('when config property is set', () => {
       it('writes config uuid to file and returns config uuid', async () => {
         mockReadFile({ uuid: UUID_7_6_0_BUG });
-        configService = getConfigService(DEFAULT_CONFIG_UUID);
-        const uuid = await resolveInstanceUuid({ configService, logger });
+        serverConfig = createServerConfig(DEFAULT_CONFIG_UUID);
+        const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
         expect(uuid).not.toEqual(UUID_7_6_0_BUG);
         expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
         expect(writeFile).toHaveBeenCalledWith(
@@ -221,9 +214,9 @@ describe('resolveInstanceUuid', () => {
 
   describe('when file is not present and config property is not set', () => {
     it('generates a new uuid and write it to file', async () => {
-      configService = getConfigService(undefined);
+      serverConfig = createServerConfig(undefined);
       mockReadFile({ error: fileNotFoundError });
-      const uuid = await resolveInstanceUuid({ configService, logger });
+      const uuid = await resolveInstanceUuid({ pathConfig, serverConfig, logger });
       expect(uuid).toEqual('NEW_UUID');
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -243,7 +236,7 @@ describe('resolveInstanceUuid', () => {
     it('throws an explicit error for file read errors', async () => {
       mockReadFile({ error: permissionError });
       await expect(
-        resolveInstanceUuid({ configService, logger })
+        resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to read Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
       );
@@ -251,7 +244,7 @@ describe('resolveInstanceUuid', () => {
     it('throws an explicit error for file write errors', async () => {
       mockWriteFile(isDirectoryError);
       await expect(
-        resolveInstanceUuid({ configService, logger })
+        resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to write Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
       );
