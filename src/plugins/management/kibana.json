@@ -3,6 +3,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["kibanaLegacy", "home"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils"]
+  "requiredPlugins": ["kibanaLegacy"],
+  "optionalPlugins": ["home"],
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
 }
