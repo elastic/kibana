@@ -50,10 +50,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
     });
 
     EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-      'http://localhost:3002/as/credentials/collection?type=indexed&pageIndex=1',
-      {
-        headers: { Authorization: KibanaAuthHeader },
-      }
+      'http://localhost:3002/as/credentials/collection?type=indexed&pageIndex=1'
     );
 
     expect(responseMock.ok).toHaveBeenCalledWith({
@@ -74,10 +71,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
       await makeAPICall(requestHandler);
 
       EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        `http://localhost:3002/as/credentials/collection`,
-        {
-          headers: { Authorization: KibanaAuthHeader },
-        }
+        `http://localhost:3002/as/credentials/collection`
       );
 
       expect(responseMock.customError).toHaveBeenCalledWith({
@@ -106,10 +100,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
       await makeAPICall(requestHandler);
 
       EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        `http://localhost:3002/as/credentials/collection`,
-        {
-          headers: { Authorization: KibanaAuthHeader },
-        }
+        `http://localhost:3002/as/credentials/collection`
       );
 
       expect(responseMock.customError).toHaveBeenCalledWith({
@@ -126,8 +117,11 @@ const makeAPICall = (handler: Function, params = {}) => {
 };
 
 const EnterpriseSearchAPI = {
-  shouldHaveBeenCalledWith(expectedUrl: string, expectedParams: object) {
-    expect(fetchMock).toHaveBeenCalledWith(expectedUrl, expectedParams);
+  shouldHaveBeenCalledWith(expectedUrl: string, expectedParams = {}) {
+    expect(fetchMock).toHaveBeenCalledWith(expectedUrl, {
+      headers: { Authorization: KibanaAuthHeader },
+      ...expectedParams,
+    });
   },
   mockReturn(response: object) {
     fetchMock.mockImplementation(() => {
