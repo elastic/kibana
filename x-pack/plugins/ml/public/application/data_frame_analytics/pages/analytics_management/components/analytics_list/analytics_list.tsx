@@ -42,6 +42,7 @@ import { SourceSelection } from '../source_selection';
 import { filterAnalytics, AnalyticsSearchBar } from '../analytics_search_bar';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
+import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -224,18 +225,30 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, analytics);
 
+  const stats = analyticsStats && (
+    <EuiFlexItem grow={false}>
+      <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
+    </EuiFlexItem>
+  );
+
+  const managementStats = (
+    <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        {stats}
+        <EuiFlexItem grow={false}>
+          <RefreshAnalyticsListButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+
   return (
     <>
       {modals}
-      <EuiSpacer size="m" />
+      {!isManagementTable && <EuiSpacer size="m" />}
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {analyticsStats && (
-            <EuiFlexItem grow={false}>
-              <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexItem>
+        {!isManagementTable && stats}
+        {isManagementTable && managementStats}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {!isManagementTable && (

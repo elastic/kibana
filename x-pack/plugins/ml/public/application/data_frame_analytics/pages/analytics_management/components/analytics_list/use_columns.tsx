@@ -23,7 +23,6 @@ import { getJobIdUrl, TAB_IDS } from '../../../../../util/get_selected_ids_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,

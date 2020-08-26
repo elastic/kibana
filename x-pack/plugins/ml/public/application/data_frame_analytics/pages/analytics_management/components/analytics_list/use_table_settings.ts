@@ -52,7 +52,9 @@ export function useTableSettings(items: DataFrameAnalyticsListRow[]): UseTableSe
     sortField: string,
     sortDirection: Direction
   ) => {
-    list = sortBy(list, (item) => get(item, jobPropertyMap[sortField] || sortField));
+    list = sortBy(list, (item) =>
+      get(item, jobPropertyMap[sortField as keyof typeof jobPropertyMap] || sortField)
+    );
     list = sortDirection === 'asc' ? list : list.reverse();
     const listLength = list.length;
 
