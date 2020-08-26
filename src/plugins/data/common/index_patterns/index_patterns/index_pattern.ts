@@ -22,20 +22,19 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  FieldFormatNotFoundError,
+} from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import {
-  OnNotification,
-  OnError,
-  UiSettingsCommon,
-  IIndexPatternsApiClient,
-  IndexPatternAttributes,
-} from '../types';
+import { OnNotification, OnError, IIndexPatternsApiClient, IndexPatternAttributes } from '../types';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
@@ -44,21 +43,16 @@ import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
-interface IUiSettingsValues {
-  [key: string]: any;
-  shortDotsEnable: any;
-  metaFields: any;
-}
 
 interface IndexPatternDeps {
-  getConfig: UiSettingsCommon['get'];
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
-  uiSettingsValues: IUiSettingsValues;
+  shortDotsEnable: boolean;
+  metaFields: string[];
 }
 
 export class IndexPattern implements IIndexPattern {
@@ -78,7 +72,6 @@ export class IndexPattern implements IIndexPattern {
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
-  private getConfig: UiSettingsCommon['get'];
   private sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
@@ -87,7 +80,6 @@ export class IndexPattern implements IIndexPattern {
   private onNotification: OnNotification;
   private onError: OnError;
   private apiClient: IIndexPatternsApiClient;
-  private uiSettingsValues: IUiSettingsValues;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -114,35 +106,31 @@ export class IndexPattern implements IIndexPattern {
   constructor(
     id: string | undefined,
     {
-      getConfig,
       savedObjectsClient,
       apiClient,
       patternCache,
       fieldFormats,
       onNotification,
       onError,
-      uiSettingsValues,
+      shortDotsEnable = false,
+      metaFields = [],
     }: IndexPatternDeps
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
-    // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
-    // which cause problems when being consumed from angular
-    this.getConfig = getConfig;
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.uiSettingsValues = uiSettingsValues;
 
-    this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
-    this.metaFields = uiSettingsValues.metaFields;
+    this.shortDotsEnable = shortDotsEnable;
+    this.metaFields = metaFields;
 
     this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
 
     this.apiClient = apiClient;
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
-    this.flattenHit = flattenHitWrapper(this, uiSettingsValues.metaFields);
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
+    this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
       this,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -157,15 +145,15 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormatter = this.fieldFormats.getType(mapping.id);
-
-    return (
-      FieldFormatter &&
-      new FieldFormatter(
-        mapping.params,
-        (key: string) => this.uiSettingsValues[key]?.userValue || this.uiSettingsValues[key]?.value
-      )
-    );
+    try {
+      return this.fieldFormats.getInstance(mapping.id, mapping.params);
+    } catch (err) {
+      if (err instanceof FieldFormatNotFoundError) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
   }
 
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
@@ -513,17 +501,14 @@ export class IndexPattern implements IIndexPattern {
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
           const samePattern = new IndexPattern(this.id, {
-            getConfig: this.getConfig,
             savedObjectsClient: this.savedObjectsClient,
             apiClient: this.apiClient,
             patternCache: this.patternCache,
             fieldFormats: this.fieldFormats,
             onNotification: this.onNotification,
             onError: this.onError,
-            uiSettingsValues: {
-              shortDotsEnable: this.shortDotsEnable,
-              metaFields: this.metaFields,
-            },
+            shortDotsEnable: this.shortDotsEnable,
+            metaFields: this.metaFields,
           });
 
           return samePattern.init().then(() => {

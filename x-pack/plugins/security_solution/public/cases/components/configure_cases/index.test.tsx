@@ -15,38 +15,39 @@ import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
+  TriggersAndActionsUIPublicPluginStart,
 } from '../../../../../triggers_actions_ui/public';
+import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
-import {
-  connectors,
-  searchURL,
-  useCaseConfigureResponse,
-  useConnectorsResponse,
-  kibanaMockImplementationArgs,
-} from './__mock__';
+import { connectors, searchURL, useCaseConfigureResponse, useConnectorsResponse } from './__mock__';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../../../common/components/navigation/use_get_url_search');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
+
 describe('ConfigureCases', () => {
+  beforeEach(() => {
+    useKibanaMock().services.triggers_actions_ui = ({
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+    } as unknown) as TriggersAndActionsUIPublicPluginStart;
+  });
+
   describe('rendering', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
@@ -84,8 +85,8 @@ describe('ConfigureCases', () => {
 
   describe('Unhappy path', () => {
     let wrapper: ReactWrapper;
+
     beforeEach(() => {
-      jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         closureType: 'close-by-user',
@@ -98,7 +99,6 @@ describe('ConfigureCases', () => {
         },
       }));
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
@@ -122,7 +122,6 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: connectors[0].config.incidentConfiguration.mapping,
@@ -136,7 +135,6 @@ describe('ConfigureCases', () => {
         },
       }));
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
@@ -211,9 +209,6 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.restoreAllMocks();
-      jest.clearAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: connectors[1].config.incidentConfiguration.mapping,
@@ -230,7 +225,6 @@ describe('ConfigureCases', () => {
         ...useConnectorsResponse,
         loading: true,
       }));
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
@@ -262,7 +256,6 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         connectorId: 'servicenow-1',
@@ -270,7 +263,6 @@ describe('ConfigureCases', () => {
       }));
 
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
@@ -305,7 +297,6 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         loading: true,
@@ -313,7 +304,6 @@ describe('ConfigureCases', () => {
       useConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
       }));
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
@@ -329,10 +319,10 @@ describe('ConfigureCases', () => {
 
   describe('connectors', () => {
     let wrapper: ReactWrapper;
-    const persistCaseConfigure = jest.fn();
+    let persistCaseConfigure: jest.Mock;
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      persistCaseConfigure = jest.fn();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: connectors[0].config.incidentConfiguration.mapping,
@@ -347,7 +337,6 @@ describe('ConfigureCases', () => {
         persistCaseConfigure,
       }));
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
@@ -396,10 +385,10 @@ describe('ConfigureCases', () => {
 
 describe('closure options', () => {
   let wrapper: ReactWrapper;
-  const persistCaseConfigure = jest.fn();
+  let persistCaseConfigure: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    persistCaseConfigure = jest.fn();
     useCaseConfigureMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
       mapping: connectors[0].config.incidentConfiguration.mapping,
@@ -414,7 +403,6 @@ describe('closure options', () => {
       persistCaseConfigure,
     }));
     useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
     useGetUrlSearchMock.mockImplementation(() => searchURL);
 
     wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
@@ -435,7 +423,6 @@ describe('closure options', () => {
 
 describe('user interactions', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     useCaseConfigureMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
       mapping: connectors[1].config.incidentConfiguration.mapping,
@@ -449,7 +436,6 @@ describe('user interactions', () => {
       },
     }));
     useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
     useGetUrlSearchMock.mockImplementation(() => searchURL);
   });
 

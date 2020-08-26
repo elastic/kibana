@@ -38,7 +38,7 @@ export function getActionType(): ActionTypeModel {
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
             {
-              defaultMessage: 'A routing key is required.',
+              defaultMessage: 'An integration key / routing key is required.',
             }
           )
         );
