@@ -12,6 +12,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
+  const esArchiver = getService('esArchiver');
 
   describe('smoke test', function () {
     this.tags('includeFirefox');
@@ -19,6 +20,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
+      await esArchiver.load('canvas/default');
       await PageObjects.common.navigateToApp('canvas');
     });
 

@@ -17,14 +17,15 @@ export default function canvasCustomElementTest({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
+  const esArchiver = getService('esArchiver');
 
   describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
+      await esArchiver.load('canvas/default');
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
-
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',

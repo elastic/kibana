@@ -7,13 +7,12 @@
 export default function canvasApp({ loadTestFile, getService }) {
   const security = getService('security');
   const esArchiver = getService('esArchiver');
-
+  
   describe('Canvas app', function canvasAppTestSuite() {
     before(async () => {
       // init data
       await security.testUser.setRoles(['test_logstash_reader', 'global_canvas_read']);
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('canvas/default');
     });
 
     after(async () => {
