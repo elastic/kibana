@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line no-restricted-imports
 import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { State } from '../store';
