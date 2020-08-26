@@ -273,6 +273,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         global_devtools_read: {
           kibana: [
             {
