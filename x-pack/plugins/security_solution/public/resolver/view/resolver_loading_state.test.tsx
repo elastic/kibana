@@ -5,53 +5,24 @@
  */
 
 import { Simulator } from '../test_utilities/simulator';
-import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
-import { noResolverDataReturned } from '../data_access_layer/mocks/no_resolver_data_returned';
+import { pausableNoAncestorsTwoChildren } from '../data_access_layer/mocks/pausable_no_ancestors_two_children';
+import { emptiableNoAncestorsTwoChildren } from '../data_access_layer/mocks/emptiable_no_ancestors_two_children';
 import '../test_utilities/extend_jest';
 
 describe('Resolver: data loading and resolution states', () => {
   let simulator: Simulator;
   let dbDocumentId: string;
-  const resolverComponentInstanceID = 'resolver-loading-state';
-  const newTreeId = 'new-tree-id';
+  const resolverComponentInstanceID = 'resolver-loading-resolution-states';
 
-  describe('When resolver is loaded with data', () => {
+  describe('When entities data is being requested', () => {
     beforeEach(() => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = noAncestorsTwoChildren();
-
-      dbDocumentId = databaseDocumentID;
-      simulator = new Simulator({
-        dataAccessLayer,
-        databaseDocumentID,
-        resolverComponentInstanceID,
-      });
-    });
-
-    it('should display the resolver graph', async () => {
-      await expect(
-        simulator.map(() => ({
-          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
-          resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.processResolverGraph(dbDocumentId).length,
-        }))
-      ).toYieldEqualTo({
-        resolverGraphLoading: 0,
-        resolverGraphError: 0,
-        resolverGraph: 1,
-      });
-    });
-  });
-
-  describe('When resolver data is being requested', () => {
-    beforeEach(() => {
-      const {
-        metadata: { databaseDocumentID },
-        dataAccessLayer,
-      } = noAncestorsTwoChildren();
-
+        pause,
+        resume,
+      } = pausableNoAncestorsTwoChildren();
+      pause({ entities: true });
       simulator = new Simulator({
         dataAccessLayer,
         databaseDocumentID,
@@ -62,8 +33,6 @@ describe('Resolver: data loading and resolution states', () => {
     it('should display a loading state', async () => {
       // Trigger a loading state by requesting data based on a new DocumentID.
       // There really is no way to do this in the view besides changing the url, so triggering the action instead
-
-      simulator.requestNewTree(newTreeId);
       await expect(
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
@@ -78,13 +47,45 @@ describe('Resolver: data loading and resolution states', () => {
     });
   });
 
-  describe('When a resolver data request fails', () => {
+  describe('When resolver tree data is being requested', () => {
     beforeEach(() => {
-      // We utilize a data access layer that never successfully resolves.
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = noResolverDataReturned();
+        pause,
+        resume,
+      } = pausableNoAncestorsTwoChildren();
+      pause({ resolverTree: true });
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+      });
+    });
+
+    it('should display a loading state', async () => {
+      // Trigger a loading state by requesting data based on a new DocumentID.
+      // There really is no way to do this in the view besides changing the url, so triggering the action instead
+      await expect(
+        simulator.map(() => ({
+          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
+          resolverGraphError: simulator.testSubject('resolver:graph:error').length,
+          resolverGraph: simulator.testSubject('resolver:graph').length,
+        }))
+      ).toYieldEqualTo({
+        resolverGraphLoading: 1,
+        resolverGraphError: 0,
+        resolverGraph: 0,
+      });
+    });
+  });
+
+  describe("When the entities request doesn't return any data", () => {
+    beforeEach(() => {
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = emptiableNoAncestorsTwoChildren({ entities: true });
 
       simulator = new Simulator({
         dataAccessLayer,
@@ -93,12 +94,12 @@ describe('Resolver: data loading and resolution states', () => {
       });
     });
 
-    it('should display an error state', async () => {
+    it('should display an error', async () => {
       await expect(
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          resolverGraph: simulator.processResolverGraph(newTreeId).length,
+          resolverGraph: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
@@ -108,37 +109,64 @@ describe('Resolver: data loading and resolution states', () => {
     });
   });
 
-  describe('When the resolver data requests successfully resolves', () => {
-    beforeEach(async () => {
+  describe("When the resolver tree request doesn't return any data", () => {
+    beforeEach(() => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = noAncestorsTwoChildren();
+      } = emptiableNoAncestorsTwoChildren({ resolverTree: true });
 
       simulator = new Simulator({
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
       });
-
-      // @ts-ignore
-      const result = await dataAccessLayer.resolverTree();
-
-      simulator.requestNewTree(newTreeId);
-      simulator.resolveNewTree(result, newTreeId);
     });
-    it('should display the resolver graph', async () => {
-      // Load a new databaseDocumentID, then explicitly check for that reference in the view
+
+    it('should display a resolver graph with 0 nodes', async () => {
       await expect(
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
           resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
         resolverGraph: 1,
+        resolverGraphNodes: 0,
+      });
+    });
+  });
+
+  describe('When all resolver data requests successfully resolve', () => {
+    beforeEach(async () => {
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = emptiableNoAncestorsTwoChildren();
+
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+      });
+    });
+
+    it('should display the resolver graph with 3 nodes', async () => {
+      await expect(
+        simulator.map(() => ({
+          resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
+          resolverGraphError: simulator.testSubject('resolver:graph:error').length,
+          resolverGraph: simulator.testSubject('resolver:graph').length,
+          resolverGraphNodes: simulator.testSubject('resolver:node').length,
+        }))
+      ).toYieldEqualTo({
+        resolverGraphLoading: 0,
+        resolverGraphError: 0,
+        resolverGraph: 1,
+        resolverGraphNodes: 3,
       });
     });
   });

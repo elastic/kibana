@@ -147,30 +147,6 @@ export class Simulator {
       .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
   }
 
-  public requestNewTree(documentIdToFetch: string) {
-    this.store.dispatch({
-      type: 'appRequestedResolverData',
-      payload: documentIdToFetch,
-    });
-  }
-
-  public resolveNewTree(result: ResolverTree, fetchedDocumentID: string) {
-    this.store.dispatch({
-      type: 'serverReturnedResolverData',
-      payload: {
-        result,
-        databaseDocumentID: fetchedDocumentID,
-      },
-    });
-  }
-
-  public failToReturnTree(databaseDocumentID: string) {
-    this.store.dispatch({
-      type: 'serverFailedToReturnResolverData',
-      payload: databaseDocumentID,
-    });
-  }
-
   /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
@@ -189,14 +165,6 @@ export class Simulator {
         }, 0);
       });
     }
-  }
-
-  /**
-   * Find the graph container by the database document ID.
-   * This better allows us to test when new data is loaded into an existing resolver
-   */
-  public processResolverGraph(databaseDocumentID: string): ReactWrapper {
-    return this.domNodes(`[data-test-resolver-document-id="${databaseDocumentID}"]`);
   }
 
   /**

@@ -90,7 +90,6 @@ export const ResolverWithoutProviders = React.memo(
         ) : (
           <GraphContainer
             data-test-subj="resolver:graph"
-            data-test-resolver-document-id={databaseDocumentID}
             className="resolver-graph kbn-resetFocusState"
             onMouseDown={onMouseDown}
             ref={ref}
