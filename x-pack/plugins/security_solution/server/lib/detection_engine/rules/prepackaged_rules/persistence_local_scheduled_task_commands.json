@@ -6,6 +6,7 @@
   "false_positives": [
     "Legitimate scheduled tasks may be created during installation of new software."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -39,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
