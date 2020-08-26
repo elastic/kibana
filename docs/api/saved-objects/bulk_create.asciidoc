@@ -65,7 +65,7 @@ Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-d
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_bulk_create"
+$ curl -X POST api/saved_objects/_bulk_create
 [
   {
     "type": "index-pattern",

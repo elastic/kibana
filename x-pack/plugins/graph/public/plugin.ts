@@ -10,7 +10,10 @@ import { AppMountParameters, Plugin } from 'src/core/public';
 import { PluginInitializerContext } from 'kibana/public';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { initAngularBootstrap } from '../../../../src/plugins/kibana_legacy/public';
+import {
+  initAngularBootstrap,
+  KibanaLegacyStart,
+} from '../../../../src/plugins/kibana_legacy/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
@@ -34,6 +37,7 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export class GraphPlugin
@@ -85,6 +89,7 @@ export class GraphPlugin
           core: coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,

@@ -115,9 +115,9 @@ describe('bin script points to a file', () => {
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " debg Linking package executables",
-        " debg [foo] bar -> ../bar/bin/bar.js",
-        " debg [baz] bar -> ../bar/bin/bar.js",
+         debg Linking package executables,
+         debg [foo] bar -> ../bar/bin/bar.js,
+         debg [baz] bar -> ../bar/bin/bar.js,
       ]
     `);
   });

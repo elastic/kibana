@@ -84,6 +84,7 @@ export class SecurityPlugin
 
     this.authc = this.authenticationService.setup({
       application: core.application,
+      fatalErrors: core.fatalErrors,
       config: this.config,
       getStartServices: core.getStartServices,
       http: core.http,
@@ -139,9 +140,8 @@ export class SecurityPlugin
   public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
-
     if (management) {
-      this.managementService.start({ management });
+      this.managementService.start();
     }
   }
 

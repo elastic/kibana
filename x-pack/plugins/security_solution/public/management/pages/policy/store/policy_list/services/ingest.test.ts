@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sendGetDatasource, sendGetEndpointSpecificDatasources } from './ingest';
+import {
+  INGEST_API_EPM_PACKAGES,
+  sendGetPackagePolicy,
+  sendGetEndpointSecurityPackage,
+  sendGetEndpointSpecificPackagePolicies,
+} from './ingest';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
-import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
+import { policyListApiPathHandlers } from '../test_mock_utils';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -15,40 +21,60 @@ describe('ingest service', () => {
     http = httpServiceMock.createStartContract();
   });
 
-  describe('sendGetEndpointSpecificDatasources()', () => {
+  describe('sendGetEndpointSpecificPackagePolicies()', () => {
     it('auto adds kuery to api request', async () => {
-      await sendGetEndpointSpecificDatasources(http);
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources', {
+      await sendGetEndpointSpecificPackagePolicies(http);
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies', {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         },
       });
     });
     it('supports additional KQL to be defined on input for query params', async () => {
-      await sendGetEndpointSpecificDatasources(http, {
+      await sendGetEndpointSpecificPackagePolicies(http, {
         query: { kuery: 'someValueHere', page: 1, perPage: 10 },
       });
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources', {
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies', {
         query: {
-          kuery: `someValueHere and ${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `someValueHere and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           perPage: 10,
           page: 1,
         },
       });
     });
   });
-  describe('sendGetDatasource()', () => {
+
+  describe('sendGetPackagePolicy()', () => {
     it('builds correct API path', async () => {
-      await sendGetDatasource(http, '123');
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources/123', undefined);
+      await sendGetPackagePolicy(http, '123');
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies/123', undefined);
     });
     it('supports http options', async () => {
-      await sendGetDatasource(http, '123', { query: { page: 1 } });
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources/123', {
+      await sendGetPackagePolicy(http, '123', { query: { page: 1 } });
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_policies/123', {
         query: {
           page: 1,
         },
       });
+    });
+  });
+
+  describe('sendGetEndpointSecurityPackage()', () => {
+    it('should query EPM with category=security', async () => {
+      http.get.mockReturnValue(
+        Promise.resolve(policyListApiPathHandlers()[INGEST_API_EPM_PACKAGES]())
+      );
+      await sendGetEndpointSecurityPackage(http);
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/epm/packages', {
+        query: { category: 'security' },
+      });
+    });
+
+    it('should throw if package is not found', async () => {
+      http.get.mockResolvedValue({ response: [], success: true });
+      await expect(async () => {
+        await sendGetEndpointSecurityPackage(http);
+      }).rejects.toThrow();
     });
   });
 });

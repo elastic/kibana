@@ -235,10 +235,12 @@ export const PingListComponent = (props: Props) => {
       width: '24px',
       isExpander: true,
       render: (item: Ping) => {
+        console.log("CAN RENDER", !item.script?.journey, item.script)
         return (
           <EuiButtonIcon
+            data-test-subj="uptimePingListExpandBtn"
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-            disabled={!item.journey && !item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
+            disabled={!(item.script?.journey) && !item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
             aria-label={
               expandedRows[item.docId]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
@@ -267,7 +269,7 @@ export const PingListComponent = (props: Props) => {
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <h4>
           <FormattedMessage id="xpack.uptime.pingList.checkHistoryTitle" defaultMessage="History" />
         </h4>

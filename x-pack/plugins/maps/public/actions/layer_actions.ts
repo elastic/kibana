@@ -13,6 +13,7 @@ import {
   getLayerListRaw,
   getSelectedLayerId,
   getMapReady,
+  getMapColors,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
@@ -34,17 +35,13 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import {
-  clearDataRequests,
-  syncDataForLayerId,
-  syncDataForLayer,
-  updateStyleMeta,
-} from './data_request_actions';
+import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
-import { LAYER_TYPE } from '../../common/constants';
+import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -129,8 +126,6 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
   };
 }
 
-// Do not use when rendering a map. Method exists to enable selectors for getLayerList when
-// rendering is not needed.
 export function addLayerWithoutDataSync(layerDescriptor: LayerDescriptor) {
   return {
     type: ADD_LAYER,
@@ -174,7 +169,7 @@ export function promotePreviewLayers() {
 }
 
 export function setLayerVisibility(layerId: string, makeVisible: boolean) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     // if the current-state is invisible, we also want to sync data
     // e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerById(layerId, getState());
@@ -188,19 +183,19 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       dispatch<any>(cleanTooltipStateForLayer(layerId));
     }
 
-    await dispatch({
+    dispatch({
       type: SET_LAYER_VISIBILITY,
       layerId,
       visibility: makeVisible,
     });
     if (makeVisible) {
-      dispatch<any>(syncDataForLayer(layer));
+      dispatch<any>(syncDataForLayerId(layerId));
     }
   };
 }
 
 export function toggleLayerVisible(layerId: string) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
@@ -318,6 +313,15 @@ export function updateLayerAlpha(id: string, alpha: number) {
   };
 }
 
+export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'areLabelsOnTop',
+    newValue: areLabelsOnTop,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: Dispatch) => {
     dispatch({
@@ -378,13 +382,17 @@ export function clearMissingStyleProperties(layerId: string) {
     }
 
     const style = targetLayer!.getCurrentStyle();
-    if (!style) {
+    if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
-    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(
-      nextFields
+    const {
+      hasChanges,
+      nextStyleDescriptor,
+    } = (style as IVectorStyle).getDescriptorWithMissingStylePropsRemoved(
+      nextFields,
+      getMapColors(getState())
     );
     if (hasChanges && nextStyleDescriptor) {
       dispatch<any>(updateLayerStyle(layerId, nextStyleDescriptor));

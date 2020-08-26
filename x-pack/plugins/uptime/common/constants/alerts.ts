@@ -20,9 +20,14 @@ export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
     id: 'xpack.uptime.alerts.actionGroups.tls',
     name: 'Uptime TLS Alert',
   },
+  DURATION_ANOMALY: {
+    id: 'xpack.uptime.alerts.actionGroups.durationAnomaly',
+    name: 'Uptime Duration Anomaly',
+  },
 };
 
 export const CLIENT_ALERT_TYPES = {
   MONITOR_STATUS: 'xpack.uptime.alerts.monitorStatus',
   TLS: 'xpack.uptime.alerts.tls',
+  DURATION_ANOMALY: 'xpack.uptime.alerts.durationAnomaly',
 };

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import * as rt from 'io-ts';
+import { commonSearchSuccessResponseFieldsRT } from '../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_ALERT_TYPE_ID = 'logs.alert.document.count';
 
@@ -19,6 +21,19 @@ export enum Comparator {
   MATCH_PHRASE = 'matches phrase',
   NOT_MATCH_PHRASE = 'does not match phrase',
 }
+
+const ComparatorRT = rt.keyof({
+  [Comparator.GT]: null,
+  [Comparator.GT_OR_EQ]: null,
+  [Comparator.LT]: null,
+  [Comparator.LT_OR_EQ]: null,
+  [Comparator.EQ]: null,
+  [Comparator.NOT_EQ]: null,
+  [Comparator.MATCH]: null,
+  [Comparator.NOT_MATCH]: null,
+  [Comparator.MATCH_PHRASE]: null,
+  [Comparator.NOT_MATCH_PHRASE]: null,
+});
 
 // Maps our comparators to i18n strings, some comparators have more specific wording
 // depending on the field type the comparator is being used with.
@@ -74,22 +89,78 @@ export enum AlertStates {
   ERROR,
 }
 
-export interface DocumentCount {
-  comparator: Comparator;
-  value: number;
-}
+const DocumentCountRT = rt.type({
+  comparator: ComparatorRT,
+  value: rt.number,
+});
 
-export interface Criterion {
-  field: string;
-  comparator: Comparator;
-  value: string | number;
-}
+export type DocumentCount = rt.TypeOf<typeof DocumentCountRT>;
 
-export interface LogDocumentCountAlertParams {
-  count: DocumentCount;
-  criteria: Criterion[];
-  timeUnit: 's' | 'm' | 'h' | 'd';
-  timeSize: number;
-}
+const CriterionRT = rt.type({
+  field: rt.string,
+  comparator: ComparatorRT,
+  value: rt.union([rt.string, rt.number]),
+});
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
+export type Criterion = rt.TypeOf<typeof CriterionRT>;
+
+const TimeUnitRT = rt.union([rt.literal('s'), rt.literal('m'), rt.literal('h'), rt.literal('d')]);
+export type TimeUnit = rt.TypeOf<typeof TimeUnitRT>;
+
+export const LogDocumentCountAlertParamsRT = rt.intersection([
+  rt.type({
+    count: DocumentCountRT,
+    criteria: rt.array(CriterionRT),
+    timeUnit: TimeUnitRT,
+    timeSize: rt.number,
+  }),
+  rt.partial({
+    groupBy: rt.array(rt.string),
+  }),
+]);
+
+export type LogDocumentCountAlertParams = rt.TypeOf<typeof LogDocumentCountAlertParamsRT>;
+
+export const UngroupedSearchQueryResponseRT = rt.intersection([
+  commonSearchSuccessResponseFieldsRT,
+  rt.type({
+    hits: rt.type({
+      total: rt.type({
+        value: rt.number,
+      }),
+    }),
+  }),
+]);
+
+export type UngroupedSearchQueryResponse = rt.TypeOf<typeof UngroupedSearchQueryResponseRT>;
+
+export const GroupedSearchQueryResponseRT = rt.intersection([
+  commonSearchSuccessResponseFieldsRT,
+  rt.type({
+    aggregations: rt.type({
+      groups: rt.intersection([
+        rt.type({
+          buckets: rt.array(
+            rt.type({
+              key: rt.record(rt.string, rt.string),
+              doc_count: rt.number,
+              filtered_results: rt.type({
+                doc_count: rt.number,
+              }),
+            })
+          ),
+        }),
+        rt.partial({
+          after_key: rt.record(rt.string, rt.string),
+        }),
+      ]),
+    }),
+    hits: rt.type({
+      total: rt.type({
+        value: rt.number,
+      }),
+    }),
+  }),
+]);
+
+export type GroupedSearchQueryResponse = rt.TypeOf<typeof GroupedSearchQueryResponseRT>;

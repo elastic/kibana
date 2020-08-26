@@ -5,6 +5,7 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
+import '../../../common/mock/match_media';
 import { AllCasesModal } from '.';
 import { TestProviders } from '../../../common/mock';
 
@@ -14,6 +15,19 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { EuiTableRow } from '@elastic/eui';
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../common/components/link_to');
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');

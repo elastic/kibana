@@ -48,6 +48,7 @@ const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalStatusServiceSetup> = {
     core$: new BehaviorSubject(availableCoreStatus),
     overall$: new BehaviorSubject(available),
+    isStatusPageAnonymous: jest.fn().mockReturnValue(false),
   };
 
   return setupContract;

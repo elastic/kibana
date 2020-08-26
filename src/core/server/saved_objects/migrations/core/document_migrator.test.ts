@@ -17,14 +17,15 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
-const mockLoggerFactory = loggingServiceMock.create();
+const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
@@ -132,7 +133,7 @@ describe('DocumentMigrator', () => {
         name: 'user',
         migrations: {
           '1.2.3': (doc) => {
-            _.set(doc, 'attributes.name', 'Mike');
+            set(doc, 'attributes.name', 'Mike');
             return doc;
           },
         },
@@ -572,7 +573,7 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = loggingServiceMock.collect(mockLoggerFactory).warn[0][0];
+      const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
@@ -601,8 +602,8 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(loggingServiceMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-    expect(loggingServiceMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {
@@ -639,7 +640,7 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'aaa',
         migrations: {
-          '2.3.4': (d) => _.set(d, 'attributes.counter', 42),
+          '2.3.4': (d) => set(d, 'attributes.counter', 42),
         },
       }),
       validateDoc: (d) => {
@@ -657,12 +658,12 @@ describe('DocumentMigrator', () => {
 
 function renameAttr(path: string, newPath: string) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
+    _.omit(set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
 }
 
 function setAttr(path: string, value: any) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    _.set(
+    set(
       doc,
       path,
       _.isFunction(value) ? value(_.get(doc, path)) : value

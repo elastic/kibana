@@ -4,10 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-duplicate-imports */
+
+/* eslint-disable react/display-name */
+
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState, useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiButton, EuiPopover, ButtonColor, htmlIdGenerator } from '@elastic/eui';
+import React, { useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
+import {
+  EuiI18nNumber,
+  EuiSelectable,
+  EuiButton,
+  EuiPopover,
+  ButtonColor,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import styled from 'styled-components';
+import { EuiSelectableOption } from '@elastic/eui';
+import { Matrix3 } from '../types';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -24,11 +37,6 @@ export const subMenuAssets = {
   menuError: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedRetrievalError', {
     defaultMessage: 'There was an error retrieving related events.',
   }),
-  relatedAlerts: {
-    title: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedAlerts', {
-      defaultMessage: 'Related Alerts',
-    }),
-  },
   relatedEvents: {
     title: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedEvents', {
       defaultMessage: 'Events',
@@ -56,44 +64,64 @@ const OptionList = React.memo(
     subMenuOptions: ResolverSubmenuOptionList;
     isLoading: boolean;
   }) => {
-    const [options, setOptions] = useState(() =>
+    const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
       typeof subMenuOptions !== 'object'
         ? []
-        : subMenuOptions.map((opt: ResolverSubmenuOption): {
-            label: string;
-            prepend?: ReactNode;
-          } => {
-            return opt.prefix
+        : subMenuOptions.map((option: ResolverSubmenuOption) => {
+            const dataTestSubj = 'resolver:map:node-submenu-item';
+            return option.prefix
               ? {
-                  label: opt.optionTitle,
-                  prepend: <span>{opt.prefix} </span>,
+                  label: option.optionTitle,
+                  prepend: <span>{option.prefix} </span>,
+                  'data-test-subj': dataTestSubj,
                 }
               : {
-                  label: opt.optionTitle,
+                  label: option.optionTitle,
                   prepend: <span />,
+                  'data-test-subj': dataTestSubj,
                 };
           })
     );
-    return useMemo(
-      () => (
-        <EuiSelectable
-          singleSelection={true}
-          options={options}
-          onChange={(newOptions) => {
-            setOptions(newOptions);
-          }}
-          listProps={{ showIcons: true, bordered: true }}
-          isLoading={isLoading}
-        >
-          {(list) => <OptionListItem>{list}</OptionListItem>}
-        </EuiSelectable>
-      ),
-      [isLoading, options]
+
+    const actionsByLabel: Record<string, () => unknown> = useMemo(() => {
+      if (typeof subMenuOptions !== 'object') {
+        return {};
+      }
+      return subMenuOptions.reduce((titleActionRecord, opt) => {
+        const { optionTitle, action } = opt;
+        return { ...titleActionRecord, [optionTitle]: action };
+      }, {});
+    }, [subMenuOptions]);
+
+    const selectableProps = useMemo(() => {
+      return {
+        listProps: { showIcons: true, bordered: true },
+        onChange: (newOptions: EuiSelectableOption[]) => {
+          const selectedOption = newOptions.find((opt) => opt.checked === 'on');
+          if (selectedOption) {
+            const { label } = selectedOption;
+            const actionToTake = actionsByLabel[label];
+            if (typeof actionToTake === 'function') {
+              actionToTake();
+            }
+          }
+          setOptions(newOptions);
+        },
+      };
+    }, [actionsByLabel]);
+
+    return (
+      <EuiSelectable
+        singleSelection={true}
+        options={options}
+        {...selectableProps}
+        isLoading={isLoading}
+      >
+        {(list) => <OptionListItem>{list}</OptionListItem>}
+      </EuiSelectable>
     );
   }
 );
-
-OptionList.displayName = 'OptionList';
 
 /**
  * A Submenu to be displayed in one of two forms:
@@ -102,20 +130,32 @@ OptionList.displayName = 'OptionList';
  */
 const NodeSubMenuComponents = React.memo(
   ({
+    count,
     buttonBorderColor,
     menuTitle,
     menuAction,
     optionsWithActions,
     className,
+    projectionMatrix,
+    nodeID,
   }: {
     menuTitle: string;
     className?: string;
     menuAction?: () => unknown;
     buttonBorderColor: ButtonColor;
     buttonFill: string;
+    count?: number;
+    /**
+     * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
+     */
+    projectionMatrix: Matrix3;
+    nodeID: string;
   } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
+    // keep a ref to the popover so we can call its reposition method
+    const popoverRef = useRef<EuiPopover>(null);
+
     const [menuIsOpen, setMenuOpen] = useState(false);
     const handleMenuOpenClick = useCallback(
       (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -141,6 +181,28 @@ const NodeSubMenuComponents = React.memo(
     const popoverId = idGenerator('submenu-popover');
 
     const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
+
+    // The last projection matrix that was used to position the popover
+    const projectionMatrixAtLastRender = useRef<Matrix3>();
+
+    useLayoutEffect(() => {
+      if (
+        /**
+         * If there is a popover component reference,
+         * and this isn't the first render,
+         * and the projectionMatrix has changed since last render,
+         * then force the popover to reposition itself.
+         */
+        popoverRef.current &&
+        projectionMatrixAtLastRender.current &&
+        projectionMatrixAtLastRender.current !== projectionMatrix
+      ) {
+        popoverRef.current.positionPopoverFixed();
+      }
+
+      // no matter what, keep track of the last project matrix that was used to size the popover
+      projectionMatrixAtLastRender.current = projectionMatrix;
+    }, [projectionMatrixAtLastRender, projectionMatrix]);
 
     if (!optionsWithActions) {
       /**
@@ -175,8 +237,10 @@ const NodeSubMenuComponents = React.memo(
         iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
         iconSide="right"
         tabIndex={-1}
+        data-test-subj="resolver:submenu:button"
+        data-test-resolver-node-id={nodeID}
       >
-        {menuTitle}
+        {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
       </EuiButton>
     );
 
@@ -188,6 +252,8 @@ const NodeSubMenuComponents = React.memo(
           button={submenuPopoverButton}
           isOpen={menuIsOpen}
           closePopover={closePopover}
+          repositionOnScroll
+          ref={popoverRef}
         >
           {menuIsOpen && typeof optionsWithActions === 'object' && (
             <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
@@ -197,8 +263,6 @@ const NodeSubMenuComponents = React.memo(
     );
   }
 );
-
-NodeSubMenuComponents.displayName = 'NodeSubMenu';
 
 export const NodeSubMenu = styled(NodeSubMenuComponents)`
   margin: 2px 0 0 0;

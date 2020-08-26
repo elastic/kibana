@@ -14,13 +14,13 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   KibanaRequest,
   PluginInitializerContext,
-  IScopedClusterClient,
-  APICaller,
+  ILegacyScopedClusterClient,
+  LegacyAPICaller,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
@@ -41,7 +41,7 @@ import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
 
 interface RollupContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
@@ -54,7 +54,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
-  private rollupEsClient?: ICustomClusterClient;
+  private rollupEsClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -122,8 +122,8 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       const callWithRequestFactoryShim = (
         elasticsearchServiceShim: CallWithRequestFactoryShim,
         request: KibanaRequest
-      ): APICaller => {
-        return async (...args: Parameters<APICaller>) => {
+      ): LegacyAPICaller => {
+        return async (...args: Parameters<LegacyAPICaller>) => {
           this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
           return await this.rollupEsClient.asScoped(request).callAsCurrentUser(...args);
         };

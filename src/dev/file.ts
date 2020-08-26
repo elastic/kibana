@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dirname, extname, join, relative, resolve, sep } from 'path';
+import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
 
 export class File {
   private path: string;
@@ -38,6 +38,12 @@ export class File {
     return this.relativePath;
   }
 
+  public getWithoutExtension() {
+    const directory = dirname(this.path);
+    const stem = basename(this.path, this.ext);
+    return new File(resolve(directory, stem));
+  }
+
   public isJs() {
     return this.ext === '.js';
   }
@@ -55,7 +61,9 @@ export class File {
   }
 
   public isFixture() {
-    return this.relativePath.split(sep).includes('__fixtures__');
+    return (
+      this.relativePath.split(sep).includes('__fixtures__') || this.path.endsWith('.test-d.ts')
+    );
   }
 
   public getRelativeParentDirs() {

@@ -265,7 +265,7 @@ export class JobTable extends Component {
           <EuiLink
             onClick={() => {
               trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
-              openDetailPanel(job.id);
+              openDetailPanel(encodeURIComponent(job.id));
             }}
           >
             {value}

@@ -40,6 +40,17 @@ jest.mock('./layer_settings', () => ({
   },
 }));
 
+jest.mock('../../kibana_services', () => {
+  return {
+    getData() {
+      return {};
+    },
+    getCore() {
+      return {};
+    },
+  };
+});
+
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -55,7 +66,7 @@ const mockLayer = {
   getImmutableSourceProperties: () => {
     return [{ label: 'source prop1', value: 'you get one chance to set me' }];
   },
-  isJoinable: () => {
+  showJoinEditor: () => {
     return true;
   },
   supportsElasticsearchFilters: () => {

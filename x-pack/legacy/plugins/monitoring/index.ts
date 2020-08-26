@@ -6,7 +6,6 @@
 
 import Hapi from 'hapi';
 import { config } from './config';
-import { KIBANA_ALERTING_ENABLED } from '../../../plugins/monitoring/common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
@@ -14,9 +13,6 @@ import { KIBANA_ALERTING_ENABLED } from '../../../plugins/monitoring/common/cons
  * @return {Object} Monitoring UI Kibana plugin object
  */
 const deps = ['kibana', 'elasticsearch', 'xpack_main'];
-if (KIBANA_ALERTING_ENABLED) {
-  deps.push(...['alerts', 'actions']);
-}
 export const monitoring = (kibana: any) => {
   return new kibana.Plugin({
     require: deps,

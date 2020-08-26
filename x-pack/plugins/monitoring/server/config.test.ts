@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createConfig, configSchema } from './config';
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  readFileSync: jest.fn().mockImplementation((path: string) => `contents-of-${path}`),
-}));
+jest.mock('fs', () => {
+  const original = jest.requireActual('fs');
+
+  return {
+    ...original,
+    readFileSync: jest.fn().mockImplementation((path: string) => `contents-of-${path}`),
+  };
+});
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -22,33 +26,6 @@ describe('config schema', () => {
             "enabled": true,
           },
           "enabled": true,
-        },
-        "elasticsearch": Object {
-          "apiVersion": "master",
-          "customHeaders": Object {},
-          "healthCheck": Object {
-            "delay": "PT2.5S",
-          },
-          "ignoreVersionMismatch": false,
-          "logFetchCount": 10,
-          "logQueries": false,
-          "pingTimeout": "PT30S",
-          "preserveHost": true,
-          "requestHeadersWhitelist": Array [
-            "authorization",
-          ],
-          "requestTimeout": "PT30S",
-          "shardTimeout": "PT30S",
-          "sniffInterval": false,
-          "sniffOnConnectionFault": false,
-          "sniffOnStart": false,
-          "ssl": Object {
-            "alwaysPresentCertificate": false,
-            "keystore": Object {},
-            "truststore": Object {},
-            "verificationMode": "full",
-          },
-          "startupTimeout": "PT5S",
         },
         "enabled": true,
         "kibana": Object {
@@ -121,9 +98,6 @@ describe('createConfig()', () => {
   it('should wrap in Elasticsearch config', async () => {
     const config = createConfig(
       configSchema.validate({
-        elasticsearch: {
-          hosts: 'http://localhost:9200',
-        },
         ui: {
           elasticsearch: {
             hosts: 'http://localhost:9200',
@@ -131,7 +105,6 @@ describe('createConfig()', () => {
         },
       })
     );
-    expect(config.elasticsearch.hosts).toEqual(['http://localhost:9200']);
     expect(config.ui.elasticsearch.hosts).toEqual(['http://localhost:9200']);
   });
 
@@ -143,9 +116,6 @@ describe('createConfig()', () => {
     };
     const config = createConfig(
       configSchema.validate({
-        elasticsearch: {
-          ssl,
-        },
         ui: {
           elasticsearch: {
             ssl,
@@ -158,7 +128,6 @@ describe('createConfig()', () => {
       key: 'contents-of-packages/kbn-dev-utils/certs/elasticsearch.key',
       certificateAuthorities: ['contents-of-packages/kbn-dev-utils/certs/ca.crt'],
     });
-    expect(config.elasticsearch.ssl).toEqual(expected);
     expect(config.ui.elasticsearch.ssl).toEqual(expected);
   });
 });

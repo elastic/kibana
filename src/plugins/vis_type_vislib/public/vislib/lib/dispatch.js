@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import { get, pull, restParam, size, reduce } from 'lodash';
+import { get, pull, rest, size, reduce } from 'lodash';
 import $ from 'jquery';
 import { DIMMING_OPACITY_SETTING } from '../../../common';
 
@@ -97,7 +97,7 @@ export class Dispatch {
    * @param  {*} [arg...] - any number of arguments that will be applied to each handler
    * @return {Dispatch} - this, for chaining
    */
-  emit = restParam(function (name, args) {
+  emit = rest(function (name, args) {
     if (!this._listeners[name]) {
       return this;
     }

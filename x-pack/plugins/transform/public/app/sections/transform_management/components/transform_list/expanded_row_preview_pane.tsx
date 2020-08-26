@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useMemo, FC } from 'react';
 
 import { DataGrid } from '../../../../../shared_imports';
 
@@ -24,14 +24,22 @@ interface ExpandedRowPreviewPaneProps {
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
   const toastNotifications = useToastNotifications();
-  const { aggList, groupByList, searchQuery } = applyTransformConfigToDefineState(
-    getDefaultStepDefineState({} as SearchItems),
-    transformConfig
+
+  const { aggList, groupByList, searchQuery } = useMemo(
+    () =>
+      applyTransformConfigToDefineState(
+        getDefaultStepDefineState({} as SearchItems),
+        transformConfig
+      ),
+    [transformConfig]
   );
-  const pivotQuery = getPivotQuery(searchQuery);
+
+  const pivotQuery = useMemo(() => getPivotQuery(searchQuery), [searchQuery]);
+
   const indexPatternTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
+
   const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
 
   return (

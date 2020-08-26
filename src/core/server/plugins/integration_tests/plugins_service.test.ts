@@ -27,13 +27,13 @@ import { getEnvOptions } from '../../config/__mocks__/env';
 import { BehaviorSubject, from } from 'rxjs';
 import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { coreMock } from '../../mocks';
 import { Plugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -43,6 +43,7 @@ describe('PluginsService', () => {
       disabled = false,
       version = 'some-version',
       requiredPlugins = [],
+      requiredBundles = [],
       optionalPlugins = [],
       kibanaVersion = '7.0.0',
       configPath = [path],
@@ -53,6 +54,7 @@ describe('PluginsService', () => {
       disabled?: boolean;
       version?: string;
       requiredPlugins?: string[];
+      requiredBundles?: string[];
       optionalPlugins?: string[];
       kibanaVersion?: string;
       configPath?: ConfigPath;
@@ -68,6 +70,7 @@ describe('PluginsService', () => {
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         kibanaVersion,
         requiredPlugins,
+        requiredBundles,
         optionalPlugins,
         server,
         ui,

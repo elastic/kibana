@@ -62,7 +62,11 @@ export const buildTlsQuery = ({
 }: TlsRequestOptions) => {
   const defaultFilter = [
     ...createQueryFilterClauses(filterQuery),
-    { range: { [timestamp]: { gte: from, lte: to } } },
+    {
+      range: {
+        [timestamp]: { gte: from, lte: to, format: 'strict_date_optional_time' },
+      },
+    },
   ];
 
   const filter = ip ? [...defaultFilter, { term: { [`${flowTarget}.ip`]: ip } }] : defaultFilter;

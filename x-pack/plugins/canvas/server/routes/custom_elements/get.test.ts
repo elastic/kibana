@@ -6,18 +6,9 @@
 
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeGetCustomElementRoute } from './get';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingServiceMock,
-} from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -31,14 +22,10 @@ describe('GET custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeGetCustomElementRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeGetCustomElementRoute(routerDeps);
 
-    routeHandler = router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
   it(`returns 200 when the custom element is found`, async () => {

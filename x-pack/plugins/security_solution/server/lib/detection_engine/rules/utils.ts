@@ -29,11 +29,19 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
-  ListAndOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RuleNameOverrideOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
+import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -49,11 +57,14 @@ export const calculateInterval = (
 };
 
 export interface UpdateProperties {
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
   language: LanguageOrUndefined;
+  license: LicenseOrUndefined;
   savedId: SavedIdOrUndefined;
   timelineId: TimelineIdOrUndefined;
   timelineTitle: TimelineTitleOrUndefined;
@@ -64,17 +75,22 @@ export interface UpdateProperties {
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
   severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
 }
 

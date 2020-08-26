@@ -36,6 +36,7 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
     name: i18n.translate('home.tutorials.logstashMetrics.nameTitle', {
       defaultMessage: 'Logstash metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.logstashMetrics.shortDescription', {

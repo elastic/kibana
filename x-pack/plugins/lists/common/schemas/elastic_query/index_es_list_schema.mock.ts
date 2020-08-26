@@ -8,21 +8,27 @@ import { IndexEsListSchema } from '../../../common/schemas';
 import {
   DATE_NOW,
   DESCRIPTION,
+  IMMUTABLE,
   META,
   NAME,
   TIE_BREAKER,
   TYPE,
   USER,
+  VERSION,
 } from '../../../common/constants.mock';
 
 export const getIndexESListMock = (): IndexEsListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
+  deserializer: undefined,
+  immutable: IMMUTABLE,
   meta: META,
   name: NAME,
+  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
+  version: VERSION,
 });

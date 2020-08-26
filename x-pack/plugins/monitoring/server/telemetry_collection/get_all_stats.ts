@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, merge } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, merge } from 'lodash';
 
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';

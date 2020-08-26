@@ -25,6 +25,7 @@ const BaseWorkpad: CanvasWorkpad = {
   pages: [],
   colors: [],
   isWriteable: true,
+  variables: [],
 };
 
 const BasePage: CanvasPage = {

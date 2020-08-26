@@ -77,7 +77,10 @@ export const MetricsExplorerChart = ({
   const dateFormatter = useMemo(
     () =>
       series.rows.length > 0
-        ? niceTimeFormatter([first(series.rows).timestamp, last(series.rows).timestamp])
+        ? niceTimeFormatter([
+            (first(series.rows) as any).timestamp,
+            (last(series.rows) as any).timestamp,
+          ])
         : (value: number) => `${value}`,
     [series.rows]
   );

@@ -43,7 +43,6 @@ import {
 import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
-import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
@@ -62,7 +61,6 @@ declare module 'hapi' {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;
     spaces: any;
-    apm_oss: ApmOssPlugin;
     // add new plugin types here
   }
 

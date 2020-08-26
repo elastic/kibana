@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { override } from './override';
 import createDefaultSchema from './schema';
@@ -56,7 +57,7 @@ export class Config {
       throw new Error(`Config schema already has key: ${key}`);
     }
 
-    _.set(this[schemaExts], key, extension);
+    set(this[schemaExts], key, extension);
     this[schema] = null;
 
     this.set(key, settings);
@@ -82,7 +83,7 @@ export class Config {
     if (_.isPlainObject(key)) {
       config = override(config, key);
     } else {
-      _.set(config, key, value);
+      set(config, key, value);
     }
 
     // attempt to validate the config value

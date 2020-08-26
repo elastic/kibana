@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { removeOrphanedSourcesAndLayers, syncLayerOrderForSingleLayer } from './utils';
+import { removeOrphanedSourcesAndLayers } from './utils';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import _ from 'lodash';
 
@@ -184,82 +184,5 @@ describe('removeOrphanedSourcesAndLayers', () => {
 
     removeOrphanedSourcesAndLayers(mockMbMap, [], spatialFilterLayer);
     expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
-  });
-});
-
-describe('syncLayerOrderForSingleLayer', () => {
-  test('should move bar layer in front of foo layer', async () => {
-    const fooLayer = makeSingleSourceMockLayer('foo');
-    const barLayer = makeSingleSourceMockLayer('bar');
-
-    const currentLayerOrder = [fooLayer, barLayer];
-    const nextLayerListOrder = [barLayer, fooLayer];
-
-    const currentStyle = getMockStyle(currentLayerOrder);
-    const mockMbMap = new MockMbMap(currentStyle);
-    syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
-    const orderedStyle = mockMbMap.getStyle();
-
-    const nextStyle = getMockStyle(nextLayerListOrder);
-    expect(orderedStyle).toEqual(nextStyle);
-  });
-
-  test('should fail at moving multiple layers (this tests a limitation of the sync)', async () => {
-    //This is a known limitation of the layer order syncing.
-    //It assumes only a single layer will have moved.
-    //In practice, the Maps app will likely not cause multiple layers to move at once:
-    // - the UX only allows dragging a single layer
-    // - redux triggers a updates frequently enough
-    //But this is conceptually "wrong", as the sync does not actually operate in the same way as all the other mb-syncing methods
-
-    const fooLayer = makeSingleSourceMockLayer('foo');
-    const barLayer = makeSingleSourceMockLayer('bar');
-    const foozLayer = makeSingleSourceMockLayer('foo');
-    const bazLayer = makeSingleSourceMockLayer('baz');
-
-    const currentLayerOrder = [fooLayer, barLayer, foozLayer, bazLayer];
-    const nextLayerListOrder = [bazLayer, barLayer, foozLayer, fooLayer];
-
-    const currentStyle = getMockStyle(currentLayerOrder);
-    const mockMbMap = new MockMbMap(currentStyle);
-    syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
-    const orderedStyle = mockMbMap.getStyle();
-
-    const nextStyle = getMockStyle(nextLayerListOrder);
-    const isSyncSuccesful = _.isEqual(orderedStyle, nextStyle);
-    expect(isSyncSuccesful).toEqual(false);
-  });
-
-  test('should move bar layer in front of foo layer (multi source)', async () => {
-    const fooLayer = makeSingleSourceMockLayer('foo');
-    const barLayer = makeMultiSourceMockLayer('bar');
-
-    const currentLayerOrder = [fooLayer, barLayer];
-    const nextLayerListOrder = [barLayer, fooLayer];
-
-    const currentStyle = getMockStyle(currentLayerOrder);
-    const mockMbMap = new MockMbMap(currentStyle);
-    syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
-    const orderedStyle = mockMbMap.getStyle();
-
-    const nextStyle = getMockStyle(nextLayerListOrder);
-    expect(orderedStyle).toEqual(nextStyle);
-  });
-
-  test('should move bar layer in front of foo layer, but after baz layer', async () => {
-    const bazLayer = makeSingleSourceMockLayer('baz');
-    const fooLayer = makeSingleSourceMockLayer('foo');
-    const barLayer = makeSingleSourceMockLayer('bar');
-
-    const currentLayerOrder = [bazLayer, fooLayer, barLayer];
-    const nextLayerListOrder = [bazLayer, barLayer, fooLayer];
-
-    const currentStyle = getMockStyle(currentLayerOrder);
-    const mockMbMap = new MockMbMap(currentStyle);
-    syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
-    const orderedStyle = mockMbMap.getStyle();
-
-    const nextStyle = getMockStyle(nextLayerListOrder);
-    expect(orderedStyle).toEqual(nextStyle);
   });
 });

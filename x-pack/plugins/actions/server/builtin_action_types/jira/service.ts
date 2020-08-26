@@ -7,6 +7,7 @@
 import axios from 'axios';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
+import { Logger } from '../../../../../../src/core/server';
 import {
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
@@ -16,7 +17,8 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request } from '../case/utils';
+import { request, getErrorMessage } from '../lib/axios_utils';
+import { ProxySettings } from '../../types';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
@@ -25,10 +27,11 @@ const COMMENT_URL = `comment`;
 
 const VIEW_INCIDENT_URL = `browse`;
 
-export const createExternalService = ({
-  config,
-  secrets,
-}: ExternalServiceCredentials): ExternalService => {
+export const createExternalService = (
+  { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
+  proxySettings?: ProxySettings
+): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
 
@@ -55,6 +58,8 @@ export const createExternalService = ({
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
+        proxySettings,
       });
 
       const { fields, ...rest } = res.data;
@@ -75,10 +80,12 @@ export const createExternalService = ({
       const res = await request<CreateIncidentRequest>({
         axios: axiosInstance,
         url: `${incidentUrl}`,
+        logger,
         method: 'post',
         data: {
           fields: { ...incident, project: { key: projectKey }, issuetype: { name: 'Task' } },
         },
+        proxySettings,
       });
 
       const updatedIncident = await getIncident(res.data.id);
@@ -102,7 +109,9 @@ export const createExternalService = ({
         axios: axiosInstance,
         method: 'put',
         url: `${incidentUrl}/${incidentId}`,
+        logger,
         data: { fields: { ...incident } },
+        proxySettings,
       });
 
       const updatedIncident = await getIncident(incidentId);
@@ -129,7 +138,9 @@ export const createExternalService = ({
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),
+        logger,
         data: { body: comment.comment },
+        proxySettings,
       });
 
       return {

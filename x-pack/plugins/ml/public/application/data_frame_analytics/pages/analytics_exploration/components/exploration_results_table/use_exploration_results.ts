@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
+import { CoreSetup } from 'src/core/public';
+
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import {
   getDataGridSchemasFromFieldTypes,
+  getFieldType,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
@@ -29,7 +35,8 @@ import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fi
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery
+  searchQuery: SavedSearchQuery,
+  toastNotifications: CoreSetup['notifications']['toasts']
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
@@ -63,8 +70,43 @@ export const useExplorationResults = (
   useEffect(() => {
     getIndexData(jobConfig, dataGrid, searchQuery);
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
+
+  const dataLoader = useMemo(
+    () =>
+      indexPattern !== undefined ? new DataLoader(indexPattern, toastNotifications) : undefined,
+    [indexPattern]
+  );
+
+  const fetchColumnChartsData = async function () {
+    try {
+      if (jobConfig !== undefined && dataLoader !== undefined) {
+        const columnChartsData = await dataLoader.loadFieldHistograms(
+          columns
+            .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+            .map((cT) => ({
+              fieldName: cT.id,
+              type: getFieldType(cT.schema),
+            })),
+          searchQuery
+        );
+        dataGrid.setColumnCharts(columnChartsData);
+      }
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+    }
+  };
+
+  useEffect(() => {
+    if (dataGrid.chartsVisible) {
+      fetchColumnChartsData();
+    }
+    // custom comparison
+  }, [
+    dataGrid.chartsVisible,
+    jobConfig?.dest.index,
+    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+  ]);
 
   const renderCellValue = useRenderCellValue(
     indexPattern,
@@ -75,7 +117,6 @@ export const useExplorationResults = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

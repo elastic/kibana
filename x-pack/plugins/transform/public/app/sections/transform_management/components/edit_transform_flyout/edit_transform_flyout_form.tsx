@@ -25,6 +25,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   return (
     <EuiForm>
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutDescriptionInput"
         errorMessages={formFields.description.errorMessages}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
           defaultMessage: 'Description',
@@ -33,6 +34,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         value={formFields.description.value}
       />
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutDocsPerSecondInput"
         errorMessages={formFields.docsPerSecond.errorMessages}
         helpText={i18n.translate(
           'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
@@ -48,6 +50,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         value={formFields.docsPerSecond.value}
       />
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutFrequencyInput"
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelptext', {
           defaultMessage:

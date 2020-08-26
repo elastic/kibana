@@ -24,6 +24,9 @@ import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
 
+/**
+ * @internal
+ */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}
@@ -61,5 +64,10 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public async getHref(context: Context<A>): Promise<string | undefined> {
     if (!this.definition.getHref) return undefined;
     return await this.definition.getHref(context);
+  }
+
+  public async shouldAutoExecute(context: Context<A>): Promise<boolean> {
+    if (!this.definition.shouldAutoExecute) return false;
+    return this.definition.shouldAutoExecute(context);
   }
 }

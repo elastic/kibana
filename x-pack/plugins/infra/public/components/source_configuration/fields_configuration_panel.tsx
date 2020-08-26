@@ -27,9 +27,7 @@ interface FieldsConfigurationPanelProps {
   isLoading: boolean;
   readOnly: boolean;
   podFieldProps: InputFieldProps;
-  tiebreakerFieldProps: InputFieldProps;
   timestampFieldProps: InputFieldProps;
-  displaySettings: 'metrics' | 'logs';
 }
 
 export const FieldsConfigurationPanel = ({
@@ -38,15 +36,12 @@ export const FieldsConfigurationPanel = ({
   isLoading,
   readOnly,
   podFieldProps,
-  tiebreakerFieldProps,
   timestampFieldProps,
-  displaySettings,
 }: FieldsConfigurationPanelProps) => {
   const isHostValueDefault = hostFieldProps.value === 'host.name';
   const isContainerValueDefault = containerFieldProps.value === 'container.id';
   const isPodValueDefault = podFieldProps.value === 'kubernetes.pod.uid';
   const isTimestampValueDefault = timestampFieldProps.value === '@timestamp';
-  const isTiebreakerValueDefault = tiebreakerFieldProps.value === '_doc';
   return (
     <EuiForm>
       <EuiTitle size="s">
@@ -139,194 +134,141 @@ export const FieldsConfigurationPanel = ({
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {displaySettings === 'logs' && (
-        <>
-          <EuiDescribedFormGroup
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.tiebreakerFieldLabel"
-                  defaultMessage="Tiebreaker"
-                />
-              </h4>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.tiebreakerFieldDescription"
-                defaultMessage="Field used to break ties between two entries with the same timestamp"
-              />
-            }
-          >
-            <EuiFormRow
-              error={tiebreakerFieldProps.error}
-              fullWidth
-              helpText={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.tiebreakerFieldRecommendedValue"
-                  defaultMessage="The recommended value is {defaultValue}"
-                  values={{
-                    defaultValue: <EuiCode>_doc</EuiCode>,
-                  }}
-                />
-              }
-              isInvalid={tiebreakerFieldProps.isInvalid}
-              label={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.tiebreakerFieldLabel"
-                  defaultMessage="Tiebreaker"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                disabled={isLoading || isTiebreakerValueDefault}
-                readOnly={readOnly}
-                isLoading={isLoading}
-                {...tiebreakerFieldProps}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        </>
-      )}
-      {displaySettings === 'metrics' && (
-        <>
-          <EuiDescribedFormGroup
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.containerFieldLabel"
-                  defaultMessage="Container ID"
-                />
-              </h4>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.containerFieldDescription"
-                defaultMessage="Field used to identify Docker containers"
-              />
-            }
-          >
-            <EuiFormRow
-              error={containerFieldProps.error}
-              fullWidth
-              helpText={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.containerFieldRecommendedValue"
-                  defaultMessage="The recommended value is {defaultValue}"
-                  values={{
-                    defaultValue: <EuiCode>container.id</EuiCode>,
-                  }}
-                />
-              }
-              isInvalid={containerFieldProps.isInvalid}
-              label={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.containerFieldLabel"
-                  defaultMessage="Container ID"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                disabled={isLoading || isContainerValueDefault}
-                readOnly={readOnly}
-                isLoading={isLoading}
-                {...containerFieldProps}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-          <EuiDescribedFormGroup
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.hostNameFieldLabel"
-                  defaultMessage="Host name"
-                />
-              </h4>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.hostNameFieldDescription"
-                defaultMessage="Field used to identify hosts"
-              />
-            }
-          >
-            <EuiFormRow
-              error={hostFieldProps.error}
-              fullWidth
-              helpText={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.hostFieldDescription"
-                  defaultMessage="The recommended value is {defaultValue}"
-                  values={{
-                    defaultValue: <EuiCode>host.name</EuiCode>,
-                  }}
-                />
-              }
-              isInvalid={hostFieldProps.isInvalid}
-              label={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.hostFieldLabel"
-                  defaultMessage="Host name"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                disabled={isLoading || isHostValueDefault}
-                readOnly={readOnly}
-                isLoading={isLoading}
-                {...hostFieldProps}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-          <EuiDescribedFormGroup
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.podFieldLabel"
-                  defaultMessage="Pod ID"
-                />
-              </h4>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.infra.sourceConfiguration.podFieldDescription"
-                defaultMessage="Field used to identify Kubernetes pods"
-              />
-            }
-          >
-            <EuiFormRow
-              error={podFieldProps.error}
-              fullWidth
-              helpText={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.podFieldRecommendedValue"
-                  defaultMessage="The recommended value is {defaultValue}"
-                  values={{
-                    defaultValue: <EuiCode>kubernetes.pod.uid</EuiCode>,
-                  }}
-                />
-              }
-              isInvalid={podFieldProps.isInvalid}
-              label={
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.podFieldLabel"
-                  defaultMessage="Pod ID"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                disabled={isLoading || isPodValueDefault}
-                readOnly={readOnly}
-                isLoading={isLoading}
-                {...podFieldProps}
-              />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        </>
-      )}
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.containerFieldLabel"
+              defaultMessage="Container ID"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.containerFieldDescription"
+            defaultMessage="Field used to identify Docker containers"
+          />
+        }
+      >
+        <EuiFormRow
+          error={containerFieldProps.error}
+          fullWidth
+          helpText={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.containerFieldRecommendedValue"
+              defaultMessage="The recommended value is {defaultValue}"
+              values={{
+                defaultValue: <EuiCode>container.id</EuiCode>,
+              }}
+            />
+          }
+          isInvalid={containerFieldProps.isInvalid}
+          label={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.containerFieldLabel"
+              defaultMessage="Container ID"
+            />
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            disabled={isLoading || isContainerValueDefault}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            {...containerFieldProps}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.hostNameFieldLabel"
+              defaultMessage="Host name"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.hostNameFieldDescription"
+            defaultMessage="Field used to identify hosts"
+          />
+        }
+      >
+        <EuiFormRow
+          error={hostFieldProps.error}
+          fullWidth
+          helpText={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.hostFieldDescription"
+              defaultMessage="The recommended value is {defaultValue}"
+              values={{
+                defaultValue: <EuiCode>host.name</EuiCode>,
+              }}
+            />
+          }
+          isInvalid={hostFieldProps.isInvalid}
+          label={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.hostFieldLabel"
+              defaultMessage="Host name"
+            />
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            disabled={isLoading || isHostValueDefault}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            {...hostFieldProps}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.podFieldLabel"
+              defaultMessage="Pod ID"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.podFieldDescription"
+            defaultMessage="Field used to identify Kubernetes pods"
+          />
+        }
+      >
+        <EuiFormRow
+          error={podFieldProps.error}
+          fullWidth
+          helpText={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.podFieldRecommendedValue"
+              defaultMessage="The recommended value is {defaultValue}"
+              values={{
+                defaultValue: <EuiCode>kubernetes.pod.uid</EuiCode>,
+              }}
+            />
+          }
+          isInvalid={podFieldProps.isInvalid}
+          label={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.podFieldLabel"
+              defaultMessage="Pod ID"
+            />
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            disabled={isLoading || isPodValueDefault}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            {...podFieldProps}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
     </EuiForm>
   );
 };

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import {
@@ -13,44 +12,21 @@ import {
   TestBedConfig,
   findTestSubject,
 } from '../../../../../test_utils';
-// NOTE: We have to use the Home component instead of the TemplateList component because we depend
-// upon react router to provide the name of the template to load in the detail panel.
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import { WithAppDependencies, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
-  store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`/indices`],
-    componentRoutePath: `/:section(indices|templates)`,
+    initialEntries: [`/templates`],
+    componentRoutePath: `/templates/:templateName?`,
   },
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
+const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateList), testBedConfig);
 
-export interface IndexTemplatesTabTestBed extends TestBed<TestSubjects> {
-  findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;
-  actions: {
-    goToTemplatesList: () => void;
-    selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
-    clickReloadButton: () => void;
-    clickTemplateAction: (
-      name: TemplateDeserialized['name'],
-      action: 'edit' | 'clone' | 'delete'
-    ) => void;
-    clickTemplateAt: (index: number) => void;
-    clickCloseDetailsButton: () => void;
-    clickActionMenu: (name: TemplateDeserialized['name']) => void;
-    toggleViewItem: (view: 'composable' | 'system') => void;
-  };
-}
-
-export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
-  const testBed = await initTestBed();
-
+const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
    * Additional helpers
    */
@@ -64,15 +40,15 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
   /**
    * User Actions
    */
+  const selectDetailsTab = async (
+    tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
+  ) => {
+    const tabs = ['summary', 'settings', 'mappings', 'aliases', 'preview'];
 
-  const goToTemplatesList = () => {
-    testBed.find('templatesTab').simulate('click');
-  };
-
-  const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
-    const tabs = ['summary', 'settings', 'mappings', 'aliases'];
-
-    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    await act(async () => {
+      testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    });
+    testBed.component.update();
   };
 
   const clickReloadButton = () => {
@@ -80,12 +56,15 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
     find('reloadButton').simulate('click');
   };
 
-  const clickActionMenu = async (templateName: TemplateDeserialized['name']) => {
+  const clickActionMenu = (templateName: TemplateDeserialized['name']) => {
     const { component } = testBed;
 
     // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
     // The template name may contain a period (.) so we use bracket syntax for selector
-    component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+    act(() => {
+      component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+    });
+    component.update();
   };
 
   const clickTemplateAction = (
@@ -97,12 +76,15 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
 
     clickActionMenu(templateName);
 
-    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    act(() => {
+      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    });
+    component.update();
   };
 
-  const clickTemplateAt = async (index: number) => {
+  const clickTemplateAt = async (index: number, isLegacy = false) => {
     const { component, table, router } = testBed;
-    const { rows } = table.getMetaData('legacyTemplateTable');
+    const { rows } = table.getMetaData(isLegacy ? 'legacyTemplateTable' : 'templateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
     const { href } = templateLink.props();
@@ -118,9 +100,9 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const toggleViewItem = (view: 'composable' | 'system') => {
+  const toggleViewItem = (view: 'managed' | 'cloudManaged' | 'system') => {
     const { find, component } = testBed;
-    const views = ['composable', 'system'];
+    const views = ['managed', 'cloudManaged', 'system'];
 
     // First open the pop over
     act(() => {
@@ -136,10 +118,8 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
   };
 
   return {
-    ...testBed,
     findAction,
     actions: {
-      goToTemplatesList,
       selectDetailsTab,
       clickReloadButton,
       clickTemplateAction,
@@ -150,3 +130,14 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
     },
   };
 };
+
+export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
+  const testBed = await initTestBed();
+
+  return {
+    ...testBed,
+    ...createActions(testBed),
+  };
+};
+
+export type IndexTemplatesTabTestBed = TestBed<TestSubjects> & ReturnType<typeof createActions>;

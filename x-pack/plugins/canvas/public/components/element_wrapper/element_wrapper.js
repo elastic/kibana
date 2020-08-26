@@ -14,7 +14,13 @@ export const ElementWrapper = (props) => {
 
   return (
     <Positionable transformMatrix={transformMatrix} width={width} height={height}>
-      <ElementContent renderable={renderable} state={state} handlers={handlers} />
+      <ElementContent
+        renderable={renderable}
+        state={state}
+        handlers={handlers}
+        width={width}
+        height={height}
+      />
     </Positionable>
   );
 };

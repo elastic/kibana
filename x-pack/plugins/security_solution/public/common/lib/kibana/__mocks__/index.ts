@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
@@ -16,9 +17,12 @@ export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => 
 export const useKibana = jest.fn(createUseKibanaMock());
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const useHttp = jest.fn(() => useKibana().services.http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn();
 export const useBasePath = jest.fn(() => '/test/base/path');
+export const useToasts = jest.fn(() => notificationServiceMock.createStartContract().toasts);
 export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
+export const useGetUserSavedObjectPermissions = jest.fn();

@@ -10,7 +10,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiPageContent } from '@elastic/eui';
 
-import { getRouter, redirect, extractQueryParams } from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 

@@ -22,7 +22,7 @@
   // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
   // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
   // This also means needing to add same amount of margin to page content and suggestion items
-  padding: $euiSize $euiSize 0 0;
+  padding: $euiSize $euiSize 0;
 
   &:first-child {
     padding-left: $euiSize;
@@ -40,9 +40,10 @@
 
 .lnsFrameLayout__sidebar--right {
   @include euiScrollBar;
-  min-width: $lnsPanelMinWidth + $euiSize;
+  background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
+  min-width: $lnsPanelMinWidth + $euiSizeXL;
   overflow-x: hidden;
   overflow-y: scroll;
-  padding-top: $euiSize;
+  padding: $euiSize 0 $euiSize $euiSize;
   max-height: 100%;
 }

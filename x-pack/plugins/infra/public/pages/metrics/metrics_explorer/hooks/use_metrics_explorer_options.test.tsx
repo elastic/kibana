@@ -4,26 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import {
   useMetricsExplorerOptions,
-  MetricsExplorerOptionsContainer,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   DEFAULT_OPTIONS,
   DEFAULT_TIMERANGE,
 } from './use_metrics_explorer_options';
 
-const renderUseMetricsExplorerOptionsHook = () =>
-  renderHook(() => useMetricsExplorerOptions(), {
-    initialProps: {},
-    wrapper: ({ children }) => (
-      <MetricsExplorerOptionsContainer.Provider>
-        {children}
-      </MetricsExplorerOptionsContainer.Provider>
-    ),
-  });
+let PREFILL: Record<string, any> = {};
+jest.mock('../../../../alerting/use_alert_prefill', () => ({
+  useAlertPrefillContext: () => ({
+    metricThresholdPrefill: {
+      setPrefillOptions(opts: Record<string, any>) {
+        PREFILL = opts;
+      },
+    },
+  }),
+}));
+
+const renderUseMetricsExplorerOptionsHook = () => renderHook(() => useMetricsExplorerOptions());
 
 interface LocalStore {
   [key: string]: string;
@@ -52,6 +53,7 @@ describe('useMetricExplorerOptions', () => {
   beforeEach(() => {
     delete STORE.MetricsExplorerOptions;
     delete STORE.MetricsExplorerTimeRange;
+    PREFILL = {};
   });
 
   it('should just work', () => {
@@ -99,5 +101,23 @@ describe('useMetricExplorerOptions', () => {
     STORE.MetricsExplorerOptions = JSON.stringify(newOptions);
     const { result } = renderUseMetricsExplorerOptionsHook();
     expect(result.current.options).toEqual(newOptions);
+  });
+
+  it('should sync the options to the threshold alert preview context', () => {
+    const { result, rerender } = renderUseMetricsExplorerOptionsHook();
+
+    const newOptions: MetricsExplorerOptions = {
+      ...DEFAULT_OPTIONS,
+      metrics: [{ aggregation: 'count' }],
+      filterQuery: 'foo',
+      groupBy: 'host.hostname',
+    };
+    act(() => {
+      result.current.setOptions(newOptions);
+    });
+    rerender();
+    expect(PREFILL.metrics).toEqual(newOptions.metrics);
+    expect(PREFILL.groupBy).toEqual(newOptions.groupBy);
+    expect(PREFILL.filterQuery).toEqual(newOptions.filterQuery);
   });
 });

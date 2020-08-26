@@ -10,12 +10,10 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embedd
 import { DashboardDrilldownsService } from './services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/public';
-import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
-  drilldowns: DrilldownsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
 }
@@ -23,7 +21,6 @@ export interface SetupDependencies {
 export interface StartDependencies {
   uiActionsEnhanced: AdvancedUiActionsStart;
   data: DataPublicPluginStart;
-  drilldowns: DrilldownsStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
   dashboard: DashboardStart;

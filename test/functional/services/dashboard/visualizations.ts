@@ -139,5 +139,31 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
         redirectToOrigin: true,
       });
     }
+
+    async createAndEmbedMetric(name: string) {
+      log.debug(`createAndEmbedMetric(${name})`);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      if (inViewMode) {
+        await PageObjects.dashboard.switchToEditMode();
+      }
+      await this.ensureNewVisualizationDialogIsShowing();
+      await PageObjects.visualize.clickMetric();
+      await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
+      await testSubjects.exists('visualizeSaveButton');
+      await testSubjects.click('visualizeSaveButton');
+    }
+
+    async createAndEmbedMarkdown({ name, markdown }: { name: string; markdown: string }) {
+      log.debug(`createAndEmbedMarkdown(${markdown})`);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      if (inViewMode) {
+        await PageObjects.dashboard.switchToEditMode();
+      }
+      await this.ensureNewVisualizationDialogIsShowing();
+      await PageObjects.visualize.clickMarkdownWidget();
+      await PageObjects.visEditor.setMarkdownTxt(markdown);
+      await PageObjects.visEditor.clickGo();
+      await testSubjects.click('visualizeSaveButton');
+    }
   })();
 }

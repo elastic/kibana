@@ -7,59 +7,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
-import { MlStartDependencies } from '../../plugin';
-import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { ExplorerService } from '../../application/services/explorer_service';
+import { MlDependencies } from '../../application/app';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
-  Filter,
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../../src/plugins/data/common';
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneServices,
+} from '..';
 
-export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
+export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+  i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
+    defaultMessage: 'ML anomaly swim lane for {jobIds}',
+    values: { jobIds: jobIds.join(', ') },
+  });
 
-export interface AnomalySwimlaneEmbeddableCustomInput {
-  jobIds: JobId[];
-  swimlaneType: string;
-  viewBy?: string;
-  limit?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
-}
-
-export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
-
-export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
-  jobIds: JobId[];
-  swimlaneType: string;
-  viewBy?: string;
-  limit?: number;
-}
-
-export interface AnomalySwimlaneServices {
-  anomalyDetectorService: AnomalyDetectorService;
-  explorerService: ExplorerService;
-}
-
-export type AnomalySwimlaneEmbeddableServices = [
-  CoreStart,
-  MlStartDependencies,
-  AnomalySwimlaneServices
-];
+export type IAnomalySwimlaneEmbeddable = typeof AnomalySwimlaneEmbeddable;
 
 export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
@@ -71,16 +39,13 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   constructor(
     initialInput: AnomalySwimlaneEmbeddableInput,
-    private services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
+    public services: [CoreStart, MlDependencies, AnomalySwimlaneServices],
     parent?: IContainer
   ) {
     super(
       initialInput,
       {
-        jobIds: initialInput.jobIds,
-        swimlaneType: initialInput.swimlaneType,
         defaultTitle: initialInput.title,
-        ...(initialInput.viewBy ? { viewBy: initialInput.viewBy } : {}),
       },
       parent
     );
@@ -90,14 +55,20 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super.render(node);
     this.node = node;
 
+    const I18nContext = this.services[0].i18n.Context;
+
     ReactDOM.render(
-      <ExplorerSwimlaneContainer
-        id={this.input.id}
-        embeddableInput={this.getInput$()}
-        services={this.services}
-        refresh={this.reload$.asObservable()}
-        onOutputChange={(output) => this.updateOutput(output)}
-      />,
+      <I18nContext>
+        <EmbeddableSwimLaneContainer
+          id={this.input.id}
+          embeddableContext={this}
+          embeddableInput={this.getInput$()}
+          services={this.services}
+          refresh={this.reload$.asObservable()}
+          onInputChange={this.updateInput.bind(this)}
+          onOutputChange={this.updateOutput.bind(this)}
+        />
+      </I18nContext>,
       node
     );
   }
@@ -111,5 +82,9 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   public reload() {
     this.reload$.next();
+  }
+
+  public supportedTriggers() {
+    return [SWIM_LANE_SELECTION_TRIGGER as typeof SWIM_LANE_SELECTION_TRIGGER];
   }
 }

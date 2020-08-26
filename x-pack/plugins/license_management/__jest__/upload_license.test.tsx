@@ -29,8 +29,6 @@ import {
   // @ts-ignore
 } from './api_responses';
 
-window.location.reload = () => {};
-
 let store: any = null;
 let component: any = null;
 const history = scopedHistoryMock.create();
@@ -60,6 +58,14 @@ const thunkServices = {
 };
 
 describe('UploadLicense', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        reload: jest.fn(),
+      },
+    });
+  });
+
   beforeEach(() => {
     store = licenseManagementStore({}, thunkServices);
     component = (

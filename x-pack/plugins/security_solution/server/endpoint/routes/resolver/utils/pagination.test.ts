@@ -18,20 +18,20 @@ describe('Pagination', () => {
     const root = generator.generateEvent();
     const events = Array.from(generator.relatedEventsGenerator(root, 5));
 
-    it('does not build a cursor when all events are present', () => {
-      expect(PaginationBuilder.buildCursor(0, events)).toBeNull();
+    it('does build a cursor when received the same number of events as was requested', () => {
+      expect(PaginationBuilder.buildCursorRequestLimit(4, events)).not.toBeNull();
     });
 
-    it('creates a cursor when not all events are present', () => {
-      expect(PaginationBuilder.buildCursor(events.length + 1, events)).not.toBeNull();
+    it('does not create a cursor when the number of events received is less than the amount requested', () => {
+      expect(PaginationBuilder.buildCursorRequestLimit(events.length + 1, events)).toBeNull();
     });
 
     it('creates a cursor with the right information', () => {
-      const cursor = PaginationBuilder.buildCursor(events.length + 1, events);
+      const cursor = PaginationBuilder.buildCursorRequestLimit(events.length, events);
       expect(cursor).not.toBeNull();
       // we are guaranteed that the cursor won't be null from the check above
       const builder = PaginationBuilder.createBuilder(0, cursor!);
-      const fields = builder.buildQueryFields(0, '', '');
+      const fields = builder.buildQueryFields('');
       expect(fields.search_after).toStrictEqual(getSearchAfterInfo(events));
     });
   });
@@ -39,30 +39,8 @@ describe('Pagination', () => {
   describe('pagination builder', () => {
     it('does not include the search after information when no cursor is provided', () => {
       const builder = PaginationBuilder.createBuilder(100);
-      const fields = builder.buildQueryFields(1, '', '');
+      const fields = builder.buildQueryFields('');
       expect(fields).not.toHaveProperty('search_after');
-    });
-
-    it('returns no results when the aggregation does not exist in the response', () => {
-      expect(PaginationBuilder.getTotals()).toStrictEqual({});
-    });
-
-    it('constructs the totals from the aggregation results', () => {
-      const agg = {
-        totals: {
-          buckets: [
-            {
-              key: 'awesome',
-              doc_count: 5,
-            },
-            {
-              key: 'soup',
-              doc_count: 1,
-            },
-          ],
-        },
-      };
-      expect(PaginationBuilder.getTotals(agg)).toStrictEqual({ awesome: 5, soup: 1 });
     });
   });
 });

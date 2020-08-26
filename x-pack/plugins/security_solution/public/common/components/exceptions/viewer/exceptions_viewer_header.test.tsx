@@ -10,14 +10,14 @@ import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListType } from '../types';
+import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
 
 describe('ExceptionsViewerHeader', () => {
   it('it renders all disabled if "isInitLoading" is true', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={true}
           detectionsListItems={0}
           endpointListItems={0}
@@ -48,7 +48,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -68,7 +68,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -88,7 +88,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -108,7 +108,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -135,11 +135,13 @@ describe('ExceptionsViewerHeader', () => {
     expect(mockOnFilterChange).toHaveBeenCalledWith({
       filter: {
         filter: '',
-        showDetectionsList: true,
-        showEndpointList: false,
         tags: [],
       },
-      pagination: {},
+      pagination: {
+        pageIndex: 0,
+      },
+      showDetectionsListsOnly: true,
+      showEndpointListsOnly: false,
     });
   });
 
@@ -148,7 +150,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -175,11 +177,13 @@ describe('ExceptionsViewerHeader', () => {
     expect(mockOnFilterChange).toHaveBeenCalledWith({
       filter: {
         filter: '',
-        showDetectionsList: false,
-        showEndpointList: true,
         tags: [],
       },
-      pagination: {},
+      pagination: {
+        pageIndex: 0,
+      },
+      showDetectionsListsOnly: false,
+      showEndpointListsOnly: true,
     });
   });
 
@@ -188,7 +192,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -208,7 +212,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -228,7 +232,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -251,7 +255,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}
@@ -274,7 +278,7 @@ describe('ExceptionsViewerHeader', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerHeader
-          supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+          supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
           isInitLoading={false}
           detectionsListItems={0}
           endpointListItems={0}

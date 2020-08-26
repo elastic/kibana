@@ -42,7 +42,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -96,7 +96,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -147,7 +147,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -188,7 +188,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -222,7 +222,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -284,7 +284,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -337,7 +337,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -417,7 +417,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -573,12 +573,14 @@ describe('state_helpers', () => {
       fields: [
         {
           name: 'fieldA',
+          displayName: 'fieldA',
           aggregatable: true,
           searchable: true,
           type: 'string',
         },
         {
           name: 'fieldB',
+          displayName: 'fieldB',
           aggregatable: true,
           searchable: true,
           type: 'number',
@@ -590,12 +592,14 @@ describe('state_helpers', () => {
         },
         {
           name: 'fieldC',
+          displayName: 'fieldC',
           aggregatable: false,
           searchable: true,
           type: 'date',
         },
         {
           name: 'fieldD',
+          displayName: 'fieldD',
           aggregatable: true,
           searchable: true,
           type: 'date',
@@ -609,6 +613,7 @@ describe('state_helpers', () => {
         },
         {
           name: 'fieldE',
+          displayName: 'fieldE',
           aggregatable: true,
           searchable: true,
           type: 'date',

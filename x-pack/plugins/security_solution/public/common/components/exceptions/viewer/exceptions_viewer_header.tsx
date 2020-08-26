@@ -18,15 +18,16 @@ import {
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import * as i18n from '../translations';
-import { ExceptionListType, Filter } from '../types';
+import { Filter } from '../types';
+import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
 
 interface ExceptionsViewerHeaderProps {
   isInitLoading: boolean;
-  supportedListTypes: ExceptionListType[];
+  supportedListTypes: ExceptionListTypeEnum[];
   detectionsListItems: number;
   endpointListItems: number;
-  onFilterChange: (arg: Filter) => void;
-  onAddExceptionClick: (type: ExceptionListType) => void;
+  onFilterChange: (arg: Partial<Filter>) => void;
+  onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
 
 /**
@@ -42,16 +43,20 @@ const ExceptionsViewerHeaderComponent = ({
 }: ExceptionsViewerHeaderProps): JSX.Element => {
   const [filter, setFilter] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
-  const [showDetectionsList, setShowDetectionsList] = useState(false);
-  const [showEndpointList, setShowEndpointList] = useState(false);
+  const [showDetectionsListsOnly, setShowDetectionsList] = useState(false);
+  const [showEndpointListsOnly, setShowEndpointList] = useState(false);
   const [isAddExceptionMenuOpen, setAddExceptionMenuOpen] = useState(false);
 
   useEffect((): void => {
     onFilterChange({
-      filter: { filter, showDetectionsList, showEndpointList, tags },
-      pagination: {},
+      filter: { filter, tags },
+      pagination: {
+        pageIndex: 0,
+      },
+      showDetectionsListsOnly,
+      showEndpointListsOnly,
     });
-  }, [filter, tags, showDetectionsList, showEndpointList, onFilterChange]);
+  }, [filter, tags, showDetectionsListsOnly, showEndpointListsOnly, onFilterChange]);
 
   const onAddExceptionDropdownClick = useCallback(
     (): void => setAddExceptionMenuOpen(!isAddExceptionMenuOpen),
@@ -59,14 +64,14 @@ const ExceptionsViewerHeaderComponent = ({
   );
 
   const handleDetectionsListClick = useCallback((): void => {
-    setShowDetectionsList(!showDetectionsList);
+    setShowDetectionsList(!showDetectionsListsOnly);
     setShowEndpointList(false);
-  }, [showDetectionsList, setShowDetectionsList, setShowEndpointList]);
+  }, [showDetectionsListsOnly, setShowDetectionsList, setShowEndpointList]);
 
   const handleEndpointListClick = useCallback((): void => {
-    setShowEndpointList(!showEndpointList);
+    setShowEndpointList(!showEndpointListsOnly);
     setShowDetectionsList(false);
-  }, [showEndpointList, setShowEndpointList, setShowDetectionsList]);
+  }, [showEndpointListsOnly, setShowEndpointList, setShowDetectionsList]);
 
   const handleOnSearch = useCallback(
     (searchValue: string): void => {
@@ -85,7 +90,7 @@ const ExceptionsViewerHeaderComponent = ({
   );
 
   const onAddException = useCallback(
-    (type: ExceptionListType): void => {
+    (type: ExceptionListTypeEnum): void => {
       onAddExceptionClick(type);
       setAddExceptionMenuOpen(false);
     },
@@ -99,12 +104,12 @@ const ExceptionsViewerHeaderComponent = ({
         items: [
           {
             name: i18n.ADD_TO_ENDPOINT_LIST,
-            onClick: () => onAddException(ExceptionListType.ENDPOINT),
+            onClick: () => onAddException(ExceptionListTypeEnum.ENDPOINT),
             'data-test-subj': 'addEndpointExceptionBtn',
           },
           {
             name: i18n.ADD_TO_DETECTIONS_LIST,
-            onClick: () => onAddException(ExceptionListType.DETECTION_ENGINE),
+            onClick: () => onAddException(ExceptionListTypeEnum.DETECTION),
             'data-test-subj': 'addDetectionsExceptionBtn',
           },
         ],
@@ -147,7 +152,7 @@ const ExceptionsViewerHeaderComponent = ({
               <EuiFilterGroup data-test-subj="exceptionsFilterGroupBtns">
                 <EuiFilterButton
                   data-test-subj="exceptionsDetectionFilterBtn"
-                  hasActiveFilters={showDetectionsList}
+                  hasActiveFilters={showDetectionsListsOnly}
                   onClick={handleDetectionsListClick}
                   isDisabled={isInitLoading}
                 >
@@ -156,7 +161,7 @@ const ExceptionsViewerHeaderComponent = ({
                 </EuiFilterButton>
                 <EuiFilterButton
                   data-test-subj="exceptionsEndpointFilterBtn"
-                  hasActiveFilters={showEndpointList}
+                  hasActiveFilters={showEndpointListsOnly}
                   onClick={handleEndpointListClick}
                   isDisabled={isInitLoading}
                 >

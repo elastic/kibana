@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadgeGroup, EuiBadge, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { CaseFullExternalService, Connector } from '../../../../../case/common/api';
@@ -50,14 +50,14 @@ const getTagsLabelTitle = (action: CaseUserActions) => (
       {action.action === 'add' && i18n.ADDED_FIELD}
       {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
     </EuiFlexItem>
-    {action.newValue != null &&
-      action.newValue.split(',').map((tag) => (
-        <EuiFlexItem grow={false} key={tag}>
-          <EuiBadge data-test-subj={`ua-tag`} color="default">
+    <EuiBadgeGroup>
+      {action.newValue != null &&
+        action.newValue.split(',').map((tag) => (
+          <EuiBadge data-test-subj={`ua-tag`} color="default" key={tag}>
             {tag}
           </EuiBadge>
-        </EuiFlexItem>
-      ))}
+        ))}
+    </EuiBadgeGroup>
   </EuiFlexGroup>
 );
 

@@ -63,6 +63,9 @@ describe('FieldTitleBar', () => {
   });
 
   test(`tooltip hovering`, () => {
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
+
     const props = { card: { fieldName: 'foo', type: 'bar' } };
     const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
     const container = wrapper.find({ className: 'field-name' });
@@ -70,9 +73,22 @@ describe('FieldTitleBar', () => {
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
 
     container.simulate('mouseover');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
 
     container.simulate('mouseout');
+
+    // Run the timers so the EuiTooltip will be hidden again
+    jest.runAllTimers();
+
+    wrapper.update();
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
+
+    // Clearing all mocks will also reset fake timers.
+    jest.clearAllMocks();
   });
 });

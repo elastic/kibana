@@ -17,12 +17,13 @@ export const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
   history: ScopedHistory,
-  navigateToApp: ApplicationStart['navigateToApp']
+  navigateToApp: ApplicationStart['navigateToApp'],
+  getUrlForApp: ApplicationStart['getUrlForApp']
 ): UnmountCallback => {
   render(
     <I18nContext>
       <Provider store={indexLifecycleManagementStore()}>
-        <App history={history} navigateToApp={navigateToApp} />
+        <App history={history} navigateToApp={navigateToApp} getUrlForApp={getUrlForApp} />
       </Provider>
     </I18nContext>,
     element

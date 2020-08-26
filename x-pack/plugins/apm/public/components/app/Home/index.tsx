@@ -20,6 +20,7 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
@@ -72,6 +73,7 @@ function getHomeTabs({
 
   return homeTabs;
 }
+
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
@@ -81,7 +83,8 @@ interface Props {
 }
 
 export function Home({ tab }: Props) {
-  const { config } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
+  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     (homeTab) => homeTab.name === tab
@@ -103,6 +106,11 @@ export function Home({ tab }: Props) {
               </EuiButtonEmpty>
             </SettingsLink>
           </EuiFlexItem>
+          {canAccessML && (
+            <EuiFlexItem grow={false}>
+              <AnomalyDetectionSetupLink />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />
           </EuiFlexItem>

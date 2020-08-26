@@ -6,13 +6,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy, uniq } from 'lodash';
+import { sortBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import {
-  BeatTag,
-  CMBeat,
-} from '../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
@@ -226,7 +223,7 @@ export const BeatsTableType: TableType = {
     //   render: (tags?: BeatTag[]) =>
     //     tags && tags.length ? (
     //       <span>
-    //         {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
+    //         {moment(first(orderBy(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
     //       </span>
     //     ) : null,
     //   sortable: true,
@@ -249,7 +246,7 @@ export const BeatsTableType: TableType = {
         name: i18n.translate('xpack.beatsManagement.beatsTable.typeLabel', {
           defaultMessage: 'Type',
         }),
-        options: uniq(
+        options: uniqBy(
           data.map(({ type }: { type: any }) => ({ value: type })),
           'value'
         ),

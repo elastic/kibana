@@ -8,6 +8,7 @@ import { PluginInitializerContext, RequestHandlerContext } from '../../../../src
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
@@ -33,6 +34,7 @@ describe('Actions Plugin', () => {
         enabledActionTypes: ['*'],
         whitelistedHosts: ['*'],
         preconfigured: {},
+        rejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -43,6 +45,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
     });
 
@@ -123,7 +126,9 @@ describe('Actions Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
-        async executor() {},
+        async executor(options) {
+          return { status: 'ok', actionId: options.actionId };
+        },
       };
 
       beforeEach(async () => {
@@ -190,6 +195,7 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
+        rejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -200,6 +206,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
         taskManager: taskManagerMock.createStart(),
@@ -212,7 +219,7 @@ describe('Actions Plugin', () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
       });
@@ -227,7 +234,7 @@ describe('Actions Plugin', () => {
             usingEphemeralEncryptionKey: false,
           },
         });
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
       });
@@ -236,7 +243,7 @@ describe('Actions Plugin', () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
         await expect(

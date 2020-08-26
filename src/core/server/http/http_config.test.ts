@@ -24,10 +24,14 @@ import { CspConfig } from '../csp';
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
 
-jest.mock('os', () => ({
-  ...jest.requireActual('os'),
-  hostname: () => 'kibana-hostname',
-}));
+jest.mock('os', () => {
+  const original = jest.requireActual('os');
+
+  return {
+    ...original,
+    hostname: () => 'kibana-hostname',
+  };
+});
 
 test('has defaults for config', () => {
   const httpSchema = config.schema;
@@ -50,6 +54,63 @@ test('throws if invalid hostname', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
+describe('requestId', () => {
+  test('accepts valid ip addresses', () => {
+    const {
+      requestId: { ipAllowlist },
+    } = config.schema.validate({
+      requestId: {
+        allowFromAnyIp: false,
+        ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
+      },
+    });
+    expect(ipAllowlist).toMatchInlineSnapshot(`
+      Array [
+        "0.0.0.0",
+        "123.123.123.123",
+        "1200:0000:AB00:1234:0000:2552:7777:1313",
+      ]
+    `);
+  });
+
+  test('rejects invalid ip addresses', () => {
+    expect(() => {
+      config.schema.validate({
+        requestId: {
+          allowFromAnyIp: false,
+          ipAllowlist: ['1200:0000:AB00:1234:O000:2552:7777:1313', '[2001:db8:0:1]:80'],
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address"`
+    );
+  });
+
+  test('rejects if allowFromAnyIp is `true` and `ipAllowlist` is non-empty', () => {
+    expect(() => {
+      config.schema.validate({
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+    );
+
+    expect(() => {
+      config.schema.validate({
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+    );
+  });
+});
+
 test('can specify max payload as string', () => {
   const obj = {
     maxPayload: '2mb',
@@ -70,6 +131,14 @@ test('throws if basepath appends a slash', () => {
   const httpSchema = config.schema;
   const obj = {
     basePath: '/foo/',
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
+test('throws if basepath is an empty string', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    basePath: '',
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });

@@ -18,18 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
-
 import { AppSetupUIPluginDependencies } from './types';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
-  constructor() {}
-
-  async setup(
-    { notifications, getStartServices }: CoreSetup,
+  public setup(
+    { notifications, getStartServices, http }: CoreSetup,
     { devTools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
     home.featureCatalogue.register({
@@ -53,18 +49,21 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      mount: async ({ core: { docLinks, i18n: i18nDep } }, { element }) => {
+      mount: async ({ element }) => {
+        const [core] = await getStartServices();
+
+        const {
+          i18n: { Context: I18nContext },
+          docLinks: { DOC_LINK_VERSION },
+        } = core;
+
         const { renderApp } = await import('./application');
-        const [{ injectedMetadata }] = await getStartServices();
-        const elasticsearchUrl = injectedMetadata.getInjectedVar(
-          'elasticsearchUrl',
-          'http://localhost:9200'
-        ) as string;
+
         return renderApp({
-          docLinkVersion: docLinks.DOC_LINK_VERSION,
-          I18nContext: i18nDep.Context,
+          http,
+          docLinkVersion: DOC_LINK_VERSION,
+          I18nContext,
           notifications,
-          elasticsearchUrl,
           usageCollection,
           element,
         });
@@ -72,5 +71,5 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     });
   }
 
-  async start(core: CoreStart) {}
+  public start() {}
 }

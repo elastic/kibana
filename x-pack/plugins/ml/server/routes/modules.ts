@@ -6,7 +6,11 @@
 
 import { TypeOf } from '@kbn/config-schema';
 
-import { RequestHandlerContext } from 'kibana/server';
+import {
+  ILegacyScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
@@ -18,19 +22,23 @@ import {
 } from './schemas/modules';
 import { RouteInitialization } from '../types';
 
-function recognize(context: RequestHandlerContext, indexPatternTitle: string) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient.callAsCurrentUser,
-    context.core.savedObjects.client
-  );
+function recognize(
+  legacyClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest,
+  indexPatternTitle: string
+) {
+  const dr = new DataRecognizer(legacyClient, savedObjectsClient, request);
   return dr.findMatches(indexPatternTitle);
 }
 
-function getModule(context: RequestHandlerContext, moduleId: string) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient.callAsCurrentUser,
-    context.core.savedObjects.client
-  );
+function getModule(
+  legacyClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest,
+  moduleId: string
+) {
+  const dr = new DataRecognizer(legacyClient, savedObjectsClient, request);
   if (moduleId === undefined) {
     return dr.listModules();
   } else {
@@ -38,8 +46,10 @@ function getModule(context: RequestHandlerContext, moduleId: string) {
   }
 }
 
-function saveModuleItems(
-  context: RequestHandlerContext,
+function setup(
+  legacyClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest,
   moduleId: string,
   prefix?: string,
   groups?: string[],
@@ -53,11 +63,8 @@ function saveModuleItems(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient.callAsCurrentUser,
-    context.core.savedObjects.client
-  );
-  return dr.setupModuleItems(
+  const dr = new DataRecognizer(legacyClient, savedObjectsClient, request);
+  return dr.setup(
     moduleId,
     prefix,
     groups,
@@ -73,11 +80,13 @@ function saveModuleItems(
   );
 }
 
-function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: string) {
-  const dr = new DataRecognizer(
-    context.ml!.mlClient.callAsCurrentUser,
-    context.core.savedObjects.client
-  );
+function dataRecognizerJobsExist(
+  legacyClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest,
+  moduleId: string
+) {
+  const dr = new DataRecognizer(legacyClient, savedObjectsClient, request);
   return dr.dataRecognizerJobsExist(moduleId);
 }
 
@@ -122,10 +131,15 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response, context }) => {
       try {
         const { indexPatternTitle } = request.params;
-        const results = await recognize(context, indexPatternTitle);
+        const results = await recognize(
+          legacyClient,
+          context.core.savedObjects.client,
+          request,
+          indexPatternTitle
+        );
 
         return response.ok({ body: results });
       } catch (e) {
@@ -252,7 +266,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response, context }) => {
       try {
         let { moduleId } = request.params;
         if (moduleId === '') {
@@ -260,7 +274,12 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           // the moduleId will be an empty string.
           moduleId = undefined;
         }
-        const results = await getModule(context, moduleId);
+        const results = await getModule(
+          legacyClient,
+          context.core.savedObjects.client,
+          request,
+          moduleId
+        );
 
         return response.ok({ body: results });
       } catch (e) {
@@ -420,7 +439,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response, context }) => {
       try {
         const { moduleId } = request.params;
 
@@ -438,8 +457,10 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           estimateModelMemory,
         } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
-        const result = await saveModuleItems(
-          context,
+        const result = await setup(
+          legacyClient,
+          context.core.savedObjects.client,
+          request,
           moduleId,
           prefix,
           groups,
@@ -523,10 +544,15 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response, context }) => {
       try {
         const { moduleId } = request.params;
-        const result = await dataRecognizerJobsExist(context, moduleId);
+        const result = await dataRecognizerJobsExist(
+          legacyClient,
+          context.core.savedObjects.client,
+          request,
+          moduleId
+        );
 
         return response.ok({ body: result });
       } catch (e) {

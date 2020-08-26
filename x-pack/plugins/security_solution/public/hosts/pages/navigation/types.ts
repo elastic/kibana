@@ -7,11 +7,11 @@
 import { ESTermQuery } from '../../../../common/typed_json';
 import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { NarrowDateRange } from '../../../common/components/ml/types';
-import { InspectQuery, Refetch } from '../../../common/store/inputs/model';
-
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HostsTableType, HostsType } from '../../store/model';
 import { NavTab } from '../../../common/components/navigation/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
+import { DocValueFields } from '../../../common/containers/source';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -24,31 +24,20 @@ type KeyHostsNavTab = KeyHostsNavTabWithoutMlPermission | KeyHostsNavTabWithMlPe
 
 export type HostsNavTab = Record<KeyHostsNavTab, NavTab>;
 
-export type SetQuery = ({
-  id,
-  inspect,
-  loading,
-  refetch,
-}: {
-  id: string;
-  inspect: InspectQuery | null;
-  loading: boolean;
-  refetch: Refetch;
-}) => void;
-
 export interface QueryTabBodyProps {
   type: HostsType;
-  startDate: number;
-  endDate: number;
+  startDate: GlobalTimeArgs['from'];
+  endDate: GlobalTimeArgs['to'];
   filterQuery?: string | ESTermQuery;
 }
 
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
-  deleteQuery?: ({ id }: { id: string }) => void;
+  deleteQuery?: GlobalTimeArgs['deleteQuery'];
+  docValueFields?: DocValueFields[];
   indexPattern: IIndexPattern;
   pageFilters?: Filter[];
   skip: boolean;
-  setQuery: SetQuery;
+  setQuery: GlobalTimeArgs['setQuery'];
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };

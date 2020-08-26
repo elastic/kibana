@@ -5,20 +5,17 @@
  */
 
 import { EventEmitter } from 'events';
-import { Job } from './job';
 import { Worker } from './worker';
 import { constants } from './constants';
-import { indexTimestamp } from './helpers/index_timestamp';
 import { omit } from 'lodash';
 
 export { events } from './constants/events';
 
 export class Esqueue extends EventEmitter {
-  constructor(index, options = {}) {
-    if (!index) throw new Error('Must specify an index to write to');
-
+  constructor(store, options = {}) {
     super();
-    this.index = index;
+    this.store = store; // for updating jobs in ES
+    this.index = this.store.indexPrefix; // for polling for pending jobs
     this.settings = {
       interval: constants.DEFAULT_SETTING_INTERVAL,
       timeout: constants.DEFAULT_SETTING_TIMEOUT,
@@ -38,21 +35,6 @@ export class Esqueue extends EventEmitter {
       this._logger(['initTasks', 'error'], err);
       throw err;
     });
-  }
-
-  addJob(jobtype, payload, opts = {}) {
-    const timestamp = indexTimestamp(this.settings.interval, this.settings.dateSeparator);
-    const index = `${this.index}-${timestamp}`;
-    const defaults = {
-      timeout: this.settings.timeout,
-    };
-
-    const options = Object.assign(defaults, opts, {
-      indexSettings: this.settings.indexSettings,
-      logger: this._logger,
-    });
-
-    return new Job(this, index, jobtype, payload, options);
   }
 
   registerWorker(type, workerFn, opts) {

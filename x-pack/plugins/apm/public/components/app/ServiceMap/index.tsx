@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useTheme } from '../../../hooks/useTheme';
 import {
   invalidLicenseMessage,
   isValidPlatinumLicense,
@@ -18,7 +18,7 @@ import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
-import { cytoscapeDivStyle } from './cytoscapeOptions';
+import { getCytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
@@ -30,6 +30,7 @@ interface ServiceMapProps {
 }
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
+  const theme = useTheme();
   const license = useLicense();
   const { urlParams } = useUrlParams();
 
@@ -67,14 +68,16 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   return isValidPlatinumLicense(license) ? (
     <div
-      style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }}
+      style={{
+        height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10),
+      }}
       ref={ref}
     >
       <Cytoscape
         elements={data?.elements ?? []}
         height={height}
         serviceName={serviceName}
-        style={cytoscapeDivStyle}
+        style={getCytoscapeDivStyle(theme)}
         width={width}
       >
         <Controls />

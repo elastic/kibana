@@ -28,7 +28,8 @@ import {
 } from './build_pipeline';
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
-import { IAggConfig } from '../../../../plugins/data/public';
+import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
+import { parseExpression } from '../../../expressions/common';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -122,23 +123,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
-    it('handles markdown function', () => {
-      const params = {
-        markdown: '## hello _markdown_',
-        fontSize: 12,
-        openLinksInNewTab: true,
-        foo: 'bar',
-      };
-      const actual = buildPipelineVisFunction.markdown(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
-    it('handles undefined markdown function', () => {
-      const params = { fontSize: 12, openLinksInNewTab: true, foo: 'bar' };
-      const actual = buildPipelineVisFunction.markdown(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     describe('handles table function', () => {
       it('without splits or buckets', () => {
         const params = { foo: 'bar' };
@@ -213,42 +197,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           bucket: [0, 3],
         };
         const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-    });
-
-    describe('handles metric function', () => {
-      it('without buckets', () => {
-        const params = { metric: {} };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-        };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with buckets', () => {
-        const params = { metric: {} };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-          group: [{ accessor: 2 }],
-        };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with percentage mode should have percentage format', () => {
-        const params = { metric: { percentageMode: true } };
-        const schemas = { ...schemasDef };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
         expect(actual).toMatchSnapshot();
       });
     });
@@ -331,7 +279,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         },
         // @ts-ignore
         type: {
-          toExpression: () => 'testing custom expressions',
+          toExpressionAst: () => parseExpression('test'),
         },
       } as unknown) as Vis;
       const expression = await buildPipeline(vis, {
@@ -344,23 +292,20 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('buildVislibDimensions', () => {
     const dataStart = dataPluginMock.createStartContract();
 
-    let aggs: IAggConfig[];
+    let aggs: IAggConfigs;
     let vis: Vis;
     let params: any;
 
     beforeEach(() => {
-      aggs = [
+      aggs = dataStart.search.aggs.createAggConfigs({} as IndexPattern, [
         {
           id: '0',
           enabled: true,
-          type: {
-            type: 'metrics',
-            name: 'count',
-          },
+          type: 'count',
           schema: 'metric',
           params: {},
-        } as IAggConfig,
-      ];
+        },
+      ]);
 
       params = {
         searchSource: null,
@@ -393,11 +338,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             ],
           },
           data: {
-            aggs: {
-              getResponseAggs: () => {
-                return aggs;
-              },
-            } as any,
+            aggs,
             searchSource: {} as any,
           },
           isHierarchical: () => {
@@ -422,8 +363,13 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
 
       it('with two numeric metrics, mixed normal and percent mode should have corresponding formatters', async () => {
-        const aggConfig = aggs[0];
-        aggs = [{ ...aggConfig } as IAggConfig, { ...aggConfig, id: '5' } as IAggConfig];
+        aggs.createAggConfig({
+          id: '5',
+          enabled: true,
+          type: 'count',
+          schema: 'metric',
+          params: {},
+        });
 
         vis.params = {
           seriesParams: [
@@ -469,11 +415,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           },
           params: { gauge: {} },
           data: {
-            aggs: {
-              getResponseAggs: () => {
-                return aggs;
-              },
-            } as any,
+            aggs,
             searchSource: {} as any,
           },
           isHierarchical: () => {

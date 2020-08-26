@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup, ManagementSectionId } from '../../management/public';
+import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
@@ -87,7 +87,7 @@ export class SavedObjectsManagementPlugin
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
+    const kibanaSection = management.sections.section.kibana;
     kibanaSection.registerApp({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {

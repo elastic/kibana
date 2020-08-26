@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DeleteButton } from './DeleteButton';
 
-export const FlyoutFooter = ({
+export function FlyoutFooter({
   onClose,
   isSaving,
   onDelete,
@@ -26,7 +26,7 @@ export const FlyoutFooter = ({
   onDelete: () => void;
   customLinkId?: string;
   isSaveButtonEnabled: boolean;
-}) => {
+}) {
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -61,4 +61,4 @@ export const FlyoutFooter = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
-};
+}

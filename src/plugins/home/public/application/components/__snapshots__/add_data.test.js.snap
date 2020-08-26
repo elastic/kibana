@@ -195,7 +195,7 @@ exports[`apmUiEnabled 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
@@ -212,7 +212,7 @@ exports[`apmUiEnabled 1`] = `
           </EuiButton>
         }
         textAlign="left"
-        title="Security"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -461,7 +461,7 @@ exports[`isNewKibanaInstance 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
@@ -478,7 +478,7 @@ exports[`isNewKibanaInstance 1`] = `
           </EuiButton>
         }
         textAlign="left"
-        title="Security"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -758,7 +758,7 @@ exports[`mlEnabled 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
@@ -775,7 +775,7 @@ exports[`mlEnabled 1`] = `
           </EuiButton>
         }
         textAlign="left"
-        title="Security"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -1060,7 +1060,7 @@ exports[`render 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
@@ -1077,7 +1077,7 @@ exports[`render 1`] = `
           </EuiButton>
         }
         textAlign="left"
-        title="Security"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
+import { GetConfigFn } from '../../../common';
 import { ISearchStartLegacy } from '../types';
 
 export type SearchRequest = any;
@@ -30,6 +30,15 @@ export interface FetchOptions {
 
 export interface FetchHandlers {
   legacySearchService: ISearchStartLegacy;
-  config: IUiSettingsClient;
+  config: { get: GetConfigFn };
   esShardTimeout: number;
+}
+
+export interface SearchError {
+  name: string;
+  status: string;
+  title: string;
+  message: string;
+  path: string;
+  type: string;
 }

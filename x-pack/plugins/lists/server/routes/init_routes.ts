@@ -6,18 +6,25 @@
 
 import { IRouter } from 'kibana/server';
 
+import { SecurityPluginSetup } from '../../../security/server';
+import { ConfigType } from '../config';
+
 import {
+  createEndpointListItemRoute,
+  createEndpointListRoute,
   createExceptionListItemRoute,
   createExceptionListRoute,
   createListIndexRoute,
   createListItemRoute,
   createListRoute,
+  deleteEndpointListItemRoute,
   deleteExceptionListItemRoute,
   deleteExceptionListRoute,
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
   exportListItemRoute,
+  findEndpointListItemRoute,
   findExceptionListItemRoute,
   findExceptionListRoute,
   findListItemRoute,
@@ -25,18 +32,25 @@ import {
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
+  readEndpointListItemRoute,
   readExceptionListItemRoute,
   readExceptionListRoute,
   readListIndexRoute,
   readListItemRoute,
   readListRoute,
+  readPrivilegesRoute,
+  updateEndpointListItemRoute,
   updateExceptionListItemRoute,
   updateExceptionListRoute,
   updateListItemRoute,
   updateListRoute,
 } from '.';
 
-export const initRoutes = (router: IRouter): void => {
+export const initRoutes = (
+  router: IRouter,
+  config: ConfigType,
+  security: SecurityPluginSetup | null | undefined
+): void => {
   // lists
   createListRoute(router);
   readListRoute(router);
@@ -44,6 +58,7 @@ export const initRoutes = (router: IRouter): void => {
   deleteListRoute(router);
   patchListRoute(router);
   findListRoute(router);
+  readPrivilegesRoute(router, security);
 
   // list items
   createListItemRoute(router);
@@ -52,7 +67,7 @@ export const initRoutes = (router: IRouter): void => {
   deleteListItemRoute(router);
   patchListItemRoute(router);
   exportListItemRoute(router);
-  importListItemRoute(router);
+  importListItemRoute(router, config);
   findListItemRoute(router);
 
   // indexes of lists
@@ -73,4 +88,14 @@ export const initRoutes = (router: IRouter): void => {
   updateExceptionListItemRoute(router);
   deleteExceptionListItemRoute(router);
   findExceptionListItemRoute(router);
+
+  // endpoint list
+  createEndpointListRoute(router);
+
+  // endpoint list items
+  createEndpointListItemRoute(router);
+  readEndpointListItemRoute(router);
+  updateEndpointListItemRoute(router);
+  deleteEndpointListItemRoute(router);
+  findEndpointListItemRoute(router);
 };

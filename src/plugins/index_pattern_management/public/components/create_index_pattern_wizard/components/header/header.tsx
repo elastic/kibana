@@ -17,38 +17,26 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import {
-  EuiBetaBadge,
-  EuiSpacer,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextColor,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DocLinksStart } from 'kibana/public';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const Header = ({
   prompt,
   indexPatternName,
-  showSystemIndices = false,
-  isIncludingSystemIndices,
-  onChangeIncludingSystemIndices,
   isBeta = false,
+  docLinks,
 }: {
   prompt?: React.ReactNode;
   indexPatternName: string;
-  showSystemIndices?: boolean;
-  isIncludingSystemIndices: boolean;
-  onChangeIncludingSystemIndices: () => void;
   isBeta?: boolean;
+  docLinks: DocLinksStart;
 }) => {
   const changeTitle = useKibana<IndexPatternManagmentContext>().services.chrome.docTitle.change;
   const createIndexPatternHeader = i18n.translate(
@@ -67,53 +55,44 @@ export const Header = ({
         <h1>
           {createIndexPatternHeader}
           {isBeta ? (
-            <Fragment>
+            <>
               {' '}
               <EuiBetaBadge
                 label={i18n.translate('indexPatternManagement.createIndexPattern.betaLabel', {
                   defaultMessage: 'Beta',
                 })}
               />
-            </Fragment>
+            </>
           ) : null}
         </h1>
       </EuiTitle>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <p>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPatternLabel"
-                  defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                />
-              </EuiTextColor>
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        {showSystemIndices ? (
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                  defaultMessage="Include system indices"
-                />
-              }
-              id="checkboxShowSystemIndices"
-              checked={isIncludingSystemIndices}
-              onChange={onChangeIncludingSystemIndices}
+      <EuiSpacer size="s" />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.createIndexPattern.description"
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+            values={{
+              multiple: <strong>multiple</strong>,
+              single: <EuiCode>filebeat-4-3-22</EuiCode>,
+              star: <EuiCode>filebeat-*</EuiCode>,
+            }}
+          />
+          <br />
+          <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.documentation"
+              defaultMessage="Read documentation"
             />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+          </EuiLink>
+        </p>
+      </EuiText>
       {prompt ? (
-        <Fragment>
-          <EuiSpacer size="s" />
+        <>
+          <EuiSpacer size="m" />
           {prompt}
-        </Fragment>
+        </>
       ) : null}
-      <EuiSpacer size="m" />
     </div>
   );
 };

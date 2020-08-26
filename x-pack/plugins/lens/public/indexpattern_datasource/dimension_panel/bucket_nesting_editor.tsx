@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
-import { IndexPatternLayer } from '../types';
+import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
 
 const generator = htmlIdGenerator('lens-nesting');
@@ -26,10 +25,12 @@ export function BucketNestingEditor({
   columnId,
   layer,
   setColumns,
+  fieldMap,
 }: {
   columnId: string;
   layer: IndexPatternLayer;
   setColumns: (columns: string[]) => void;
+  fieldMap: Record<string, IndexPatternField>;
 }) {
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
@@ -38,14 +39,14 @@ export function BucketNestingEditor({
     .map(([value, c]) => ({
       value,
       text: c.label,
-      fieldName: hasField(c) ? c.sourceField : '',
+      fieldName: hasField(c) ? fieldMap[c.sourceField].displayName : '',
     }));
 
   if (!column || !column.isBucketed || !aggColumns.length) {
     return null;
   }
 
-  const fieldName = hasField(column) ? column.sourceField : '';
+  const fieldName = hasField(column) ? fieldMap[column.sourceField].displayName : '';
 
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 

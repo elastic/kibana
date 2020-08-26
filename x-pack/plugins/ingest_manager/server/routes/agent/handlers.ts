@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, KibanaRequest } from 'src/core/server';
+import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { AbortController } from 'abort-controller';
 import {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
   PostAgentCheckinResponse,
   PostAgentEnrollResponse,
-  PostAgentUnenrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
 } from '../../../common/types';
@@ -24,20 +24,12 @@ import {
   GetOneAgentEventsRequestSchema,
   PostAgentCheckinRequestSchema,
   PostAgentEnrollRequestSchema,
-  PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
-
-export function getInternalUserSOClient(request: KibanaRequest) {
-  // soClient as kibana internal users, be carefull on how you use it, security is not enabled
-  return appContextService.getSavedObjects().getScopedClient(request, {
-    excludedWrappers: ['security'],
-  });
-}
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -56,7 +48,7 @@ export const getAgentHandler: RequestHandler<TypeOf<
 
     return response.ok({ body });
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (soClient.errors.isNotFoundError(e)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
@@ -176,14 +168,22 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
-    const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
-    const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
+    const soClient = appContextService.getInternalUserSOClient(request);
+    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      abortController.abort();
+    });
+    const signal = abortController.signal;
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
-      request.body.events || [],
-      request.body.local_metadata
+      {
+        events: request.body.events || [],
+        localMetadata: request.body.local_metadata,
+        status: request.body.status,
+      },
+      { signal }
     );
     const body: PostAgentCheckinResponse = {
       action: 'checkin',
@@ -198,16 +198,24 @@ export const postAgentCheckinHandler: RequestHandler<
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
+  } catch (err) {
+    const logger = appContextService.getLogger();
+    if (err.isBoom) {
+      if (err.output.statusCode >= 500) {
+        logger.error(err);
+      }
+
+      return response.customError({
+        statusCode: err.output.statusCode,
+        body: { message: err.output.payload.message },
       });
     }
 
+    logger.error(err);
+
     return response.customError({
       statusCode: 500,
-      body: { message: e.message },
+      body: { message: err.message },
     });
   }
 };
@@ -218,7 +226,7 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
+    const soClient = appContextService.getInternalUserSOClient(request);
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
 
@@ -231,7 +239,7 @@ export const postAgentEnrollHandler: RequestHandler<
     const agent = await AgentService.enroll(
       soClient,
       request.body.type,
-      enrollmentAPIKey.config_id as string,
+      enrollmentAPIKey.policy_id as string,
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
@@ -295,25 +303,6 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const postAgentsUnenrollHandler: RequestHandler<TypeOf<
-  typeof PostAgentUnenrollRequestSchema.params
->> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  try {
-    await AgentService.unenrollAgent(soClient, request.params.agentId);
-
-    const body: PostAgentUnenrollResponse = {
-      success: true,
-    };
-    return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
-  }
-};
-
 export const putAgentsReassignHandler: RequestHandler<
   TypeOf<typeof PutAgentReassignRequestSchema.params>,
   undefined,
@@ -321,7 +310,7 @@ export const putAgentsReassignHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.config_id);
+    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.policy_id);
 
     const body: PutAgentReassignResponse = {
       success: true,
@@ -335,14 +324,17 @@ export const putAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForConfigHandler: RequestHandler<
+export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     // TODO change path
-    const results = await AgentService.getAgentStatusForConfig(soClient, request.query.configId);
+    const results = await AgentService.getAgentStatusForAgentPolicy(
+      soClient,
+      request.query.policyId
+    );
 
     const body: GetAgentStatusResponse = { results, success: true };
 

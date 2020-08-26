@@ -5,7 +5,17 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
+import { appContextService } from '../../services';
 import {
+  GetInfoResponse,
+  InstallPackageResponse,
+  DeletePackageResponse,
+  GetCategoriesResponse,
+  GetPackagesResponse,
+  GetLimitedPackagesResponse,
+} from '../../../common';
+import {
+  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
@@ -13,24 +23,24 @@ import {
   DeletePackageRequestSchema,
 } from '../../types';
 import {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-} from '../../../common';
-import {
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
   installPackage,
   removeInstallation,
+  getLimitedPackages,
+  getInstallationObject,
 } from '../../services/epm/packages';
+import { IngestManagerError, getHTTPResponseCode } from '../../errors';
+import { splitPkgKey } from '../../services/epm/registry';
 
-export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
+export const getCategoriesHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetCategoriesRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const res = await getCategories();
+    const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
       success: true,
@@ -52,9 +62,28 @@ export const getListHandler: RequestHandler<
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
-      category: request.query.category,
+      ...request.query,
     });
     const body: GetPackagesResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({
+      body,
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getLimitedListHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getLimitedPackages({ savedObjectsClient });
+    const body: GetLimitedPackagesResponse = {
       response: res,
       success: true,
     };
@@ -103,7 +132,7 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     // TODO: change epm API to /packageName/version so we don't need to do this
-    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
@@ -118,17 +147,22 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const installPackageHandler: RequestHandler<TypeOf<
-  typeof InstallPackageRequestSchema.params
->> = async (context, request, response) => {
+export const installPackageHandler: RequestHandler<
+  TypeOf<typeof InstallPackageRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallPackageRequestSchema.body>
+> = async (context, request, response) => {
+  const logger = appContextService.getLogger();
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const { pkgkey } = request.params;
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   try {
-    const { pkgkey } = request.params;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
       callCluster,
+      force: request.body?.force,
     });
     const body: InstallPackageResponse = {
       response: res,
@@ -136,12 +170,25 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
-    if (e.isBoom) {
+    if (e instanceof IngestManagerError) {
+      logger.error(e);
       return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
+        statusCode: getHTTPResponseCode(e),
+        body: { message: e.message },
       });
     }
+
+    // if there is an unknown server error, uninstall any package assets
+    try {
+      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+      const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
+      if (!isUpdate) {
+        await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+      }
+    } catch (error) {
+      logger.error(`could not remove failed installation ${error}`);
+    }
+    logger.error(e);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

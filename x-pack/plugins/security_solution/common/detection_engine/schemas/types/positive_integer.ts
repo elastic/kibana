@@ -22,5 +22,3 @@ export const PositiveInteger = new t.Type<number, number, unknown>(
   },
   t.identity
 );
-
-export type PositiveIntegerC = typeof PositiveInteger;

@@ -7,23 +7,29 @@
 
 import { ReactElement } from 'react';
 import { LayerDescriptor } from '../../../common/descriptor_types';
+import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
 
 export type RenderWizardArguments = {
-  previewLayers: (layerDescriptors: LayerDescriptor[], isIndexingSource?: boolean) => void;
+  previewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   mapColors: string[];
-  // upload arguments
-  isIndexingTriggered: boolean;
-  onRemove: () => void;
-  onIndexReady: (indexReady: boolean) => void;
-  importSuccessHandler: (indexResponses: unknown) => void;
-  importErrorHandler: (indexResponses: unknown) => void;
+  // multi-step arguments for wizards that supply 'prerequisiteSteps'
+  currentStepId: string | null;
+  enableNextBtn: () => void;
+  disableNextBtn: () => void;
+  startStepLoading: () => void;
+  stopStepLoading: () => void;
+  // Typically, next step will be triggered via user clicking next button.
+  // However, this method is made available to trigger next step manually
+  // for async task completion that triggers the next step.
+  advanceToNextStep: () => void;
 };
 
 export type LayerWizard = {
+  categories: LAYER_WIZARD_CATEGORY[];
   checkVisibility?: () => Promise<boolean>;
   description: string;
   icon: string;
-  isIndexingSource?: boolean;
+  prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
 };

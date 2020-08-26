@@ -18,7 +18,15 @@
  */
 
 import { IBasePath } from '../http';
-import { App, LegacyApp, PublicAppInfo, PublicLegacyAppInfo, ParsedAppUrl } from './types';
+import {
+  App,
+  AppNavLinkStatus,
+  AppStatus,
+  LegacyApp,
+  ParsedAppUrl,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
+} from './types';
 
 /**
  * Utility to remove trailing, leading or duplicate slashes.
@@ -116,16 +124,27 @@ const removeBasePath = (url: string, basePath: IBasePath, origin: string): strin
 };
 
 export function getAppInfo(app: App<unknown> | LegacyApp): PublicAppInfo | PublicLegacyAppInfo {
+  const navLinkStatus =
+    app.navLinkStatus === AppNavLinkStatus.default
+      ? app.status === AppStatus.inaccessible
+        ? AppNavLinkStatus.hidden
+        : AppNavLinkStatus.visible
+      : app.navLinkStatus!;
   if (isLegacyApp(app)) {
     const { updater$, ...infos } = app;
     return {
       ...infos,
+      status: app.status!,
+      navLinkStatus,
       legacy: true,
     };
   } else {
     const { updater$, mount, ...infos } = app;
     return {
       ...infos,
+      status: app.status!,
+      navLinkStatus,
+      appRoute: app.appRoute!,
       legacy: false,
     };
   }

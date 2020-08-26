@@ -17,7 +17,7 @@ import {
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
 } from '../common/constants';
-import { hostMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
+import { endpointMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
 
 const policyListSelector = (state: State) =>
   state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_POLICY_LIST_NAMESPACE];
@@ -39,6 +39,6 @@ export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
       policyDetailsSelector,
       policyDetailsMiddlewareFactory(coreStart, depsStart)
     ),
-    substateMiddlewareFactory(endpointsSelector, hostMiddlewareFactory(coreStart, depsStart)),
+    substateMiddlewareFactory(endpointsSelector, endpointMiddlewareFactory(coreStart, depsStart)),
   ];
 };

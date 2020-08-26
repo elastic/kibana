@@ -9,7 +9,14 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../../common/mock';
+import '../../../common/mock/match_media';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
+} from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { hostsModel } from '../../store';
 import { mockData } from './mock';
@@ -20,10 +27,23 @@ describe('Authentication Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

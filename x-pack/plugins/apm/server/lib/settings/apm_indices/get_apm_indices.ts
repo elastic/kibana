@@ -18,12 +18,14 @@ import { APMRequestHandlerContext } from '../../../routes/typings';
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
 export interface ApmIndicesConfig {
+  /* eslint-disable @typescript-eslint/naming-convention */
   'apm_oss.sourcemapIndices': string;
   'apm_oss.errorIndices': string;
   'apm_oss.onboardingIndices': string;
   'apm_oss.spanIndices': string;
   'apm_oss.transactionIndices': string;
   'apm_oss.metricsIndices': string;
+  /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
 }
@@ -46,12 +48,14 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': config['apm_oss.sourcemapIndices'],
     'apm_oss.errorIndices': config['apm_oss.errorIndices'],
     'apm_oss.onboardingIndices': config['apm_oss.onboardingIndices'],
     'apm_oss.spanIndices': config['apm_oss.spanIndices'],
     'apm_oss.transactionIndices': config['apm_oss.transactionIndices'],
     'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
+    /* eslint-enable @typescript-eslint/naming-convention */
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
     apmCustomLinkIndex: '.apm-custom-link',

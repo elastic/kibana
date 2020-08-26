@@ -30,6 +30,7 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
+  contextMenuTrigger,
 } from '../triggers';
 import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
@@ -43,6 +44,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
+import { EmbeddableStateTransfer } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -62,6 +64,7 @@ interface Props {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
 }
 
@@ -299,14 +302,21 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ),
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),
-      new EditPanelAction(this.props.getEmbeddableFactory, this.props.application),
+      new EditPanelAction(
+        this.props.getEmbeddableFactory,
+        this.props.application,
+        this.props.stateTransfer
+      ),
     ];
 
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions: sortedActions,
-      actionContext: { embeddable: this.props.embeddable },
+      actions: sortedActions.map((action) => ({
+        action,
+        context: { embeddable: this.props.embeddable },
+        trigger: contextMenuTrigger,
+      })),
       closeMenu: this.closeMyContextMenuPanel,
     });
   };

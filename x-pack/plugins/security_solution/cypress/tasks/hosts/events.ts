@@ -13,7 +13,6 @@ import {
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
   INSPECT_QUERY,
   LOAD_MORE,
-  RESET_FIELDS,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 import { DRAGGABLE_HEADER } from '../../screens/timeline';
@@ -53,10 +52,6 @@ export const opensInspectQueryModal = () => {
     .click({ force: true });
 };
 
-export const resetFields = () => {
-  cy.get(RESET_FIELDS).click({ force: true });
-};
-
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('exist').invoke('text').should('not.equal', '0');
 };
@@ -72,8 +67,6 @@ export const dragAndDropColumn = ({
   cy.get(DRAGGABLE_HEADER)
     .eq(column)
     .then((header) => drag(header));
-
-  cy.wait(3000); // wait for DOM updates before moving
 
   cy.get(DRAGGABLE_HEADER)
     .eq(newPosition)

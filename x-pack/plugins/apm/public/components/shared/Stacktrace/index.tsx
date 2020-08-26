@@ -87,7 +87,7 @@ export function getGroupedStackframes(stackframes: IStackframe[]) {
       !stackframe.exclude_from_grouping;
 
     // append to group
-    if (shouldAppend) {
+    if (prevGroup && shouldAppend) {
       prevGroup.stackframes.push(stackframe);
       return acc;
     }

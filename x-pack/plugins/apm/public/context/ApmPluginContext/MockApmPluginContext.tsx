@@ -7,6 +7,30 @@ import React from 'react';
 import { ApmPluginContext, ApmPluginContextValue } from '.';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
 import { ConfigSchema } from '../..';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+
+const uiSettings: Record<string, unknown> = {
+  [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
+    {
+      from: 'now/d',
+      to: 'now/d',
+      display: 'Today',
+    },
+    {
+      from: 'now/w',
+      to: 'now/w',
+      display: 'This week',
+    },
+  ],
+  [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
+    from: 'now-15m',
+    to: 'now',
+  },
+  [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
+    pause: false,
+    value: 100000,
+  },
+};
 
 const mockCore = {
   chrome: {
@@ -26,6 +50,9 @@ const mockCore = {
       addWarning: () => {},
       addDanger: () => {},
     },
+  },
+  uiSettings: {
+    get: (key: string) => uiSettings[key],
   },
 };
 

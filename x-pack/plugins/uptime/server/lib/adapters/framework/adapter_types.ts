@@ -7,18 +7,19 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   IRouter,
-  CallAPIOptions,
+  LegacyCallAPIOptions,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { DynamicSettings } from '../../../../common/runtime_types';
+import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 
 export type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
-  options?: CallAPIOptions
+  options?: LegacyCallAPIOptions
 ) => Promise<any>;
 
 export type UMElasticsearchQueryFn<P, R = any> = (
@@ -39,6 +40,7 @@ export interface UptimeCorePlugins {
   alerts: any;
   elasticsearch: any;
   usageCollection: UsageCollectionSetup;
+  ml: MlSetup;
 }
 
 export interface UMBackendFrameworkAdapter {

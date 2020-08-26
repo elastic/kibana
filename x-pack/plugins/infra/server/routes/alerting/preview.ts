@@ -12,8 +12,10 @@ import {
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
   MetricThresholdAlertPreviewRequestParams,
+  InventoryAlertPreviewRequestParams,
 } from '../../../common/alerting/metrics';
 import { createValidationFunction } from '../../../common/runtime_types';
+import { previewInventoryMetricThresholdAlert } from '../../lib/alerting/inventory_metric_threshold/preview_inventory_metric_threshold_alert';
 import { previewMetricThresholdAlert } from '../../lib/alerting/metric_threshold/preview_metric_threshold_alert';
 import { InfraBackendLibs } from '../../lib/infra_types';
 
@@ -53,18 +55,51 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
 
             const numberOfGroups = previewResult.length;
             const resultTotals = previewResult.reduce(
-              (totals, groupResult) => {
-                if (groupResult === TOO_MANY_BUCKETS_PREVIEW_EXCEPTION)
-                  return { ...totals, tooManyBuckets: totals.tooManyBuckets + 1 };
-                if (groupResult === null) return { ...totals, noData: totals.noData + 1 };
-                if (isNaN(groupResult)) return { ...totals, error: totals.error + 1 };
-                return { ...totals, fired: totals.fired + groupResult };
+              (totals, [firedResult, noDataResult, errorResult]) => {
+                return {
+                  ...totals,
+                  fired: totals.fired + firedResult,
+                  noData: totals.noData + noDataResult,
+                  error: totals.error + errorResult,
+                };
               },
               {
                 fired: 0,
                 noData: 0,
                 error: 0,
-                tooManyBuckets: 0,
+              }
+            );
+            return response.ok({
+              body: alertPreviewSuccessResponsePayloadRT.encode({
+                numberOfGroups,
+                resultTotals,
+              }),
+            });
+          }
+          case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
+            const { nodeType } = request.body as InventoryAlertPreviewRequestParams;
+            const previewResult = await previewInventoryMetricThresholdAlert({
+              callCluster,
+              params: { criteria, filterQuery, nodeType },
+              lookback,
+              config: source.configuration,
+              alertInterval,
+            });
+
+            const numberOfGroups = previewResult.length;
+            const resultTotals = previewResult.reduce(
+              (totals, [firedResult, noDataResult, errorResult]) => {
+                return {
+                  ...totals,
+                  fired: totals.fired + firedResult,
+                  noData: totals.noData + noDataResult,
+                  error: totals.error + errorResult,
+                };
+              },
+              {
+                fired: 0,
+                noData: 0,
+                error: 0,
               }
             );
 
@@ -75,14 +110,18 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               }),
             });
           }
-          case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
-            // TODO: Add inventory preview functionality
-            return response.ok({});
-          }
           default:
             throw new Error('Unknown alert type');
         }
       } catch (error) {
+        if (error.message.includes(TOO_MANY_BUCKETS_PREVIEW_EXCEPTION)) {
+          return response.customError({
+            statusCode: 508,
+            body: {
+              message: error.message.split(':')[1], // Extract the max buckets from the error message
+            },
+          });
+        }
         return response.customError({
           statusCode: error.statusCode ?? 500,
           body: {

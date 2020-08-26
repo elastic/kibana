@@ -17,7 +17,10 @@ if (len(sys.argv) < 2):
 # 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479
 source_version = sys.argv[1]
 
-print('Building Chromium ' + source_version)
+# Set to "arm" to build for ARM on Linux
+arch_name = sys.argv[2] if len(sys.argv) >= 3 else 'x64'
+
+print('Building Chromium ' + source_version + ' for ' + arch_name)
 
 # Set the environment variables required by the build tools
 print('Configuring the build environment')
@@ -42,21 +45,29 @@ print('Generating platform-specific args')
 print('Copying build args: ' + platform_build_args + ' to out/headless/args.gn')
 mkdir('out/headless')
 shutil.copyfile(platform_build_args, 'out/headless/args.gn')
+
+print('Adding target_cpu to args')
+
+f = open('out/headless/args.gn', 'a')
+f.write('\rtarget_cpu = "' + arch_name + '"')
+f.close()
+
 runcmd('gn gen out/headless')
 
 # Build Chromium... this takes *forever* on underpowered VMs
 print('Compiling... this will take a while')
 runcmd('autoninja -C out/headless headless_shell')
 
-# Optimize the output on Linux and Mac by stripping inessentials from the binary
-if platform.system() != 'Windows':
+# Optimize the output on Linux x64 and Mac by stripping inessentials from the binary
+# ARM must be cross-compiled from Linux and can not read the ARM binary in order to strip
+if platform.system() != 'Windows' and arch_name != 'arm64':
   print('Optimizing headless_shell')
   shutil.move('out/headless/headless_shell', 'out/headless/headless_shell_raw')
   runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
 # Create the zip and generate the md5 hash using filenames like:
-# chromium-4747cc2-linux.zip
-base_filename = 'out/headless/chromium-' + source_version[:7].strip('.') + '-' + platform.system().lower()
+# chromium-4747cc2-linux_x64.zip
+base_filename = 'out/headless/chromium-' + source_version[:7].strip('.') + '-' + platform.system().lower() + '_' + arch_name
 zip_filename = base_filename + '.zip'
 md5_filename = base_filename + '.md5'
 
@@ -66,7 +77,7 @@ archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLAT
 def archive_file(name):
   """A little helper function to write individual files to the zip file"""
   from_path = os.path.join('out/headless', name)
-  to_path = os.path.join('headless_shell-' + platform.system().lower(), name)
+  to_path = os.path.join('headless_shell-' + platform.system().lower() + '_' + arch_name, name)
   archive.write(from_path, to_path)
 
 # Each platform has slightly different requirements for what dependencies
@@ -75,6 +86,9 @@ if platform.system() == 'Linux':
   archive_file('headless_shell')
   archive_file(os.path.join('swiftshader', 'libEGL.so'))
   archive_file(os.path.join('swiftshader', 'libGLESv2.so'))
+
+  if arch_name == 'arm64':
+    archive_file(os.path.join('swiftshader', 'libEGL.so'))
 
 elif platform.system() == 'Windows':
   archive_file('headless_shell.exe')

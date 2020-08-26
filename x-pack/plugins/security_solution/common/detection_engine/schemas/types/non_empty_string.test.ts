@@ -24,7 +24,9 @@ describe('non_empty_string', () => {
     const decoded = NonEmptyString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "NonEmptyString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -33,7 +35,9 @@ describe('non_empty_string', () => {
     const decoded = NonEmptyString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "" supplied to "NonEmptyString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -42,7 +46,9 @@ describe('non_empty_string', () => {
     const decoded = NonEmptyString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "  " supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "  " supplied to "NonEmptyString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 });

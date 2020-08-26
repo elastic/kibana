@@ -13,7 +13,7 @@ import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
 import {
-  EuiButtonIcon,
+  EuiIcon,
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
@@ -44,16 +43,16 @@ export class LayerPanel extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
-    this.loadLeftJoinFields();
+    this._loadDisplayName();
+    this._loadImmutableSourceProperties();
+    this._loadLeftJoinFields();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  loadDisplayName = async () => {
+  _loadDisplayName = async () => {
     if (!this.props.selectedLayer) {
       return;
     }
@@ -64,7 +63,7 @@ export class LayerPanel extends React.Component {
     }
   };
 
-  loadImmutableSourceProperties = async () => {
+  _loadImmutableSourceProperties = async () => {
     if (!this.props.selectedLayer) {
       return;
     }
@@ -75,8 +74,8 @@ export class LayerPanel extends React.Component {
     }
   };
 
-  async loadLeftJoinFields() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.isJoinable()) {
+  async _loadLeftJoinFields() {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
       return;
     }
 
@@ -98,8 +97,11 @@ export class LayerPanel extends React.Component {
     }
   }
 
-  _onSourceChange = ({ propName, value, newLayerType }) => {
-    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+  _onSourceChange = (...args) => {
+    for (let i = 0; i < args.length; i++) {
+      const { propName, value, newLayerType } = args[i];
+      this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
+    }
   };
 
   _renderFilterSection() {
@@ -118,7 +120,7 @@ export class LayerPanel extends React.Component {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer.isJoinable()) {
+    if (!this.props.selectedLayer.showJoinEditor()) {
       return null;
     }
 
@@ -126,6 +128,7 @@ export class LayerPanel extends React.Component {
       <Fragment>
         <EuiPanel>
           <JoinEditor
+            layer={this.props.selectedLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />
@@ -175,18 +178,7 @@ export class LayerPanel extends React.Component {
           <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
-                    defaultMessage: 'Fit to bounds',
-                  })}
-                  iconType={selectedLayer.getLayerTypeIconName()}
-                  onClick={this.props.fitToBounds}
-                >
-                  <FormattedMessage
-                    id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-                    defaultMessage="Fit"
-                  />
-                </EuiButtonIcon>
+                <EuiIcon type={selectedLayer.getLayerTypeIconName()} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -214,7 +206,7 @@ export class LayerPanel extends React.Component {
             <div className="mapLayerPanel__bodyOverflow">
               <LayerErrors />
 
-              <LayerSettings />
+              <LayerSettings layer={selectedLayer} />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
                 onChange: this._onSourceChange,

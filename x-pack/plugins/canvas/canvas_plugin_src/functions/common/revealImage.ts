@@ -5,9 +5,8 @@
  */
 
 import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-// @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
@@ -24,11 +23,18 @@ interface Arguments {
   origin: Origin;
 }
 
+export interface Output {
+  image: string;
+  emptyImage: string;
+  origin: Origin;
+  percent: number;
+}
+
 export function revealImage(): ExpressionFunctionDefinition<
   'revealImage',
   number,
   Arguments,
-  ExpressionValueRender<Arguments>
+  ExpressionValueRender<Output>
 > {
   const { help, args: argHelp } = getFunctionHelp().revealImage;
   const errors = getFunctionErrors().revealImage;

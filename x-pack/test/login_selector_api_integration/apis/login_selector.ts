@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should allow access to login selector with intermediate authentication cookie', async () => {
       const handshakeResponse = await supertest
-        .post('/internal/security/login_with')
+        .post('/internal/security/login')
         .ca(CA_CERT)
         .set('kbn-xsrf', 'xxx')
         .send({ providerType: 'saml', providerName: 'saml1', currentURL: 'https://kibana.com/' })
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       }
 
-      it('should be able to log in via IdP initiated login for any configured realm', async () => {
+      it('should be able to log in via IdP initiated login for any configured provider', async () => {
         for (const providerName of ['saml1', 'saml2']) {
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -124,20 +124,76 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('should be able to log in via IdP initiated login even if session with other provider type exists', async () => {
-        const basicAuthenticationResponse = await supertest
-          .post('/internal/security/login')
-          .ca(CA_CERT)
-          .set('kbn-xsrf', 'xxx')
-          .send({ username: validUsername, password: validPassword })
-          .expect(204);
+      it('should redirect to URL from relay state in case of IdP initiated login only for providers that explicitly enabled that behaviour', async () => {
+        for (const { providerName, redirectURL } of [
+          { providerName: 'saml1', redirectURL: '/' },
+          { providerName: 'saml2', redirectURL: '/app/kibana#/dashboards' },
+        ]) {
+          const authenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .ca(CA_CERT)
+            .type('form')
+            .send({
+              SAMLResponse: await createSAMLResponse({
+                issuer: `http://www.elastic.co/${providerName}`,
+              }),
+            })
+            .send({ RelayState: '/app/kibana#/dashboards' })
+            .expect(302);
 
-        const basicSessionCookie = request.cookie(
-          basicAuthenticationResponse.headers['set-cookie'][0]
-        )!;
-        await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1');
+          // User should be redirected to the base URL.
+          expect(authenticationResponse.headers.location).to.be(redirectURL);
 
+          const cookies = authenticationResponse.headers['set-cookie'];
+          expect(cookies).to.have.length(1);
+
+          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+        }
+      });
+
+      it('should not redirect to URL from relay state in case of IdP initiated login if URL is not internal', async () => {
         for (const providerName of ['saml1', 'saml2']) {
+          const authenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .ca(CA_CERT)
+            .type('form')
+            .send({
+              SAMLResponse: await createSAMLResponse({
+                issuer: `http://www.elastic.co/${providerName}`,
+              }),
+            })
+            .send({ RelayState: 'http://www.elastic.co/app/kibana#/dashboards' })
+            .expect(302);
+
+          // User should be redirected to the base URL.
+          expect(authenticationResponse.headers.location).to.be('/');
+
+          const cookies = authenticationResponse.headers['set-cookie'];
+          expect(cookies).to.have.length(1);
+
+          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+        }
+      });
+
+      it('should be able to log in via IdP initiated login even if session with other provider type exists', async () => {
+        for (const providerName of ['saml1', 'saml2']) {
+          const basicAuthenticationResponse = await supertest
+            .post('/internal/security/login')
+            .ca(CA_CERT)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              providerType: 'basic',
+              providerName: 'basic1',
+              currentURL: '/',
+              params: { username: validUsername, password: validPassword },
+            })
+            .expect(200);
+
+          const basicSessionCookie = request.cookie(
+            basicAuthenticationResponse.headers['set-cookie'][0]
+          )!;
+          await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1');
+
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
             .ca(CA_CERT)
@@ -149,8 +205,9 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(302);
 
-          // It should be `/overwritten_session` instead of `/` once it's generalized.
-          expect(authenticationResponse.headers.location).to.be('/');
+          expect(authenticationResponse.headers.location).to.be(
+            '/security/overwritten_session?next=%2F'
+          );
 
           const cookies = authenticationResponse.headers['set-cookie'];
           expect(cookies).to.have.length(1);
@@ -184,8 +241,46 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(302);
 
-        // It should be `/overwritten_session` instead of `/` once it's generalized.
-        expect(saml2AuthenticationResponse.headers.location).to.be('/');
+        expect(saml2AuthenticationResponse.headers.location).to.be(
+          '/security/overwritten_session?next=%2F'
+        );
+
+        const saml2SessionCookie = request.cookie(
+          saml2AuthenticationResponse.headers['set-cookie'][0]
+        )!;
+        await checkSessionCookie(saml2SessionCookie, 'a@b.c', 'saml2');
+      });
+
+      it('should redirect to URL from relay state in case of IdP initiated login even if session with other SAML provider exists', async () => {
+        // First login with `saml1`.
+        const saml1AuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .ca(CA_CERT)
+          .send({
+            SAMLResponse: await createSAMLResponse({ issuer: `http://www.elastic.co/saml1` }),
+          })
+          .expect(302);
+
+        const saml1SessionCookie = request.cookie(
+          saml1AuthenticationResponse.headers['set-cookie'][0]
+        )!;
+        await checkSessionCookie(saml1SessionCookie, 'a@b.c', 'saml1');
+
+        // And now try to login with `saml2`.
+        const saml2AuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .ca(CA_CERT)
+          .set('Cookie', saml1SessionCookie.cookieString())
+          .type('form')
+          .send({
+            SAMLResponse: await createSAMLResponse({ issuer: `http://www.elastic.co/saml2` }),
+          })
+          .send({ RelayState: '/app/kibana#/dashboards' })
+          .expect(302);
+
+        expect(saml2AuthenticationResponse.headers.location).to.be(
+          '/security/overwritten_session?next=%2Fapp%2Fkibana%23%2Fdashboards'
+        );
 
         const saml2SessionCookie = request.cookie(
           saml2AuthenticationResponse.headers['set-cookie'][0]
@@ -200,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should fail for IdP initiated login if intermediate session with other SAML provider exists', async () => {
         // First start authentication flow with `saml1`.
         const saml1HandshakeResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -232,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should be able to log in via SP initiated login with any configured realm', async () => {
         for (const providerName of ['saml1', 'saml2']) {
           const handshakeResponse = await supertest
-            .post('/internal/security/login_with')
+            .post('/internal/security/login')
             .ca(CA_CERT)
             .set('kbn-xsrf', 'xxx')
             .send({
@@ -278,7 +373,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should be able to log in via SP initiated login even if intermediate session with other SAML provider exists', async () => {
         // First start authentication flow with `saml1`.
         const saml1HandshakeResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -298,7 +393,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // And now try to login with `saml2`.
         const saml2HandshakeResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', saml1HandshakeCookie.cookieString())
@@ -340,7 +435,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Kerberos', () => {
       it('should be able to log in from Login Selector', async () => {
         const spnegoResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -354,7 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
 
         const authenticationResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', `Negotiate ${getSPNEGOToken()}`)
@@ -382,7 +477,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be able to log in from Login Selector even if client provides certificate and PKI is enabled', async () => {
         const spnegoResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .pfx(CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
@@ -397,7 +492,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
 
         const authenticationResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .pfx(CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
@@ -459,7 +554,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be able to log in via SP initiated login', async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -524,7 +619,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be able to log in from Login Selector', async () => {
         const authenticationResponse = await supertest
-          .post('/internal/security/login_with')
+          .post('/internal/security/login')
           .ca(CA_CERT)
           .pfx(CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')

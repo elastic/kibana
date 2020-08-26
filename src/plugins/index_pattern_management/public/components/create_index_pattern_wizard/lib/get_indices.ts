@@ -17,17 +17,31 @@
  * under the License.
  */
 
-import { get, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
+import { HttpStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-import { DataPublicPluginStart } from '../../../../../data/public';
-import { MatchedIndex } from '../types';
+import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
+
+const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
+const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
+  defaultMessage: 'Data stream',
+});
+
+const indexLabel = i18n.translate('indexPatternManagement.indexLabel', {
+  defaultMessage: 'Index',
+});
+
+const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
+  defaultMessage: 'Frozen',
+});
 
 export async function getIndices(
-  es: DataPublicPluginStart['search']['__LEGACY']['esClient'],
-  indexPatternCreationType: IndexPatternCreationConfig,
+  http: HttpStart,
+  getIndexTags: IndexPatternCreationConfig['getIndexTags'],
   rawPattern: string,
-  limit: number
-): Promise<MatchedIndex[]> {
+  showAllIndices: boolean
+): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -48,54 +62,58 @@ export async function getIndices(
     return [];
   }
 
-  // We need to always provide a limit and not rely on the default
-  if (!limit) {
-    throw new Error('`getIndices()` was called without the required `limit` parameter.');
-  }
-
-  const params = {
-    ignoreUnavailable: true,
-    index: pattern,
-    ignore: [404],
-    body: {
-      size: 0, // no hits
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: limit,
-          },
-        },
-      },
-    },
-  };
+  const query = showAllIndices ? { expand_wildcards: 'all' } : undefined;
 
   try {
-    const response = await es.search(params);
-    if (!response || response.error || !response.aggregations) {
+    const response = await http.get<ResolveIndexResponse>(
+      `/internal/index-pattern-management/resolve_index/${pattern}`,
+      { query }
+    );
+    if (!response) {
       return [];
     }
 
-    return sortBy(
-      response.aggregations.indices.buckets
-        .map((bucket: { key: string; doc_count: number }) => {
-          return bucket.key;
-        })
-        .map((indexName: string) => {
-          return {
-            name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName),
-          };
-        }),
-      'name'
-    );
-  } catch (err) {
-    const type = get(err, 'body.error.caused_by.type');
-    if (type === 'index_not_found_exception') {
-      // This happens in a CSS environment when the controlling node returns a 500 even though the data
-      // nodes returned a 404. Remove this when/if this is handled: https://github.com/elastic/elasticsearch/issues/27461
-      return [];
-    }
-    throw err;
+    return responseToItemArray(response, getIndexTags);
+  } catch {
+    return [];
   }
 }
+
+export const responseToItemArray = (
+  response: ResolveIndexResponse,
+  getIndexTags: IndexPatternCreationConfig['getIndexTags']
+): MatchedItem[] => {
+  const source: MatchedItem[] = [];
+
+  (response.indices || []).forEach((index) => {
+    const tags: MatchedItem['tags'] = [{ key: 'index', name: indexLabel, color: 'default' }];
+    const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
+
+    tags.push(...getIndexTags(index.name));
+    if (isFrozen) {
+      tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
+    }
+
+    source.push({
+      name: index.name,
+      tags,
+      item: index,
+    });
+  });
+  (response.aliases || []).forEach((alias) => {
+    source.push({
+      name: alias.name,
+      tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
+      item: alias,
+    });
+  });
+  (response.data_streams || []).forEach((dataStream) => {
+    source.push({
+      name: dataStream.name,
+      tags: [{ key: 'data_stream', name: dataStreamLabel, color: 'primary' }],
+      item: dataStream,
+    });
+  });
+
+  return sortBy(source, 'name');
+};

@@ -6,7 +6,7 @@
 
 // test error conditions of calling timeSeriesQuery - postive results tested in FT
 
-import { loggingServiceMock } from '../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { coreMock } from '../../../../../../../src/core/server/mocks';
 import { AlertingBuiltinsPlugin } from '../../../plugin';
 import { TimeSeriesQueryParameters, TimeSeriesResult, TimeSeriesQuery } from './time_series_query';
@@ -44,7 +44,7 @@ describe('timeSeriesQuery', () => {
 
     mockCallCluster.mockReset();
     params = {
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
       callCluster: mockCallCluster,
       query: DefaultQueryParams,
     };

@@ -6,33 +6,5 @@
   "severity": "high",
   "type": "query",
   "query": "user.name: root or user.name: admin",
-  "exceptions_list": [
-    {
-      "field": "source.ip",
-      "values_operator": "excluded",
-      "values_type": "exists"
-    },
-    {
-      "field": "host.name",
-      "values_operator": "included",
-      "values_type": "match",
-      "values": [
-        {
-          "name": "rock01"
-        }
-      ],
-      "and": [
-        {
-          "field": "host.id",
-          "values_operator": "included",
-          "values_type": "match_all",
-          "values": [
-            {
-              "name": "123456"
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "exceptions_list": [{ "id": "some_updated_fake_id", "namespace_type": "single" }]
 }

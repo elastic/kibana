@@ -16,8 +16,11 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [auditTrail](./kibana-plugin-core-server.corestart.audittrail.md) | <code>AuditTrailStart</code> | [AuditTrailSetup](./kibana-plugin-core-server.audittrailsetup.md) |
 |  [capabilities](./kibana-plugin-core-server.corestart.capabilities.md) | <code>CapabilitiesStart</code> | [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) |
 |  [elasticsearch](./kibana-plugin-core-server.corestart.elasticsearch.md) | <code>ElasticsearchServiceStart</code> | [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |
+|  [http](./kibana-plugin-core-server.corestart.http.md) | <code>HttpServiceStart</code> | [HttpServiceStart](./kibana-plugin-core-server.httpservicestart.md) |
+|  [metrics](./kibana-plugin-core-server.corestart.metrics.md) | <code>MetricsServiceStart</code> |  |
 |  [savedObjects](./kibana-plugin-core-server.corestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> | [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) |
 |  [uiSettings](./kibana-plugin-core-server.corestart.uisettings.md) | <code>UiSettingsServiceStart</code> | [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |
 

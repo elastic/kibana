@@ -13,7 +13,8 @@
 
 ```typescript
 legacy: {
-        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-        readonly client: IClusterClient;
+        readonly config$: Observable<ElasticsearchConfig>;
+        readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
+        readonly client: ILegacyClusterClient;
     };
 ```

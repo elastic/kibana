@@ -8,12 +8,12 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
 import {
-  CommentsPartialArray,
+  CreateCommentsArray,
   Description,
   EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListItemType,
   ExceptionListSoSchema,
-  ExceptionListType,
   ItemId,
   ListId,
   MetaOrUndefined,
@@ -25,13 +25,13 @@ import {
 
 import {
   getSavedObjectType,
-  transformComments,
+  transformCreateCommentsToComments,
   transformSavedObjectToExceptionListItem,
 } from './utils';
 
 interface CreateExceptionListItemOptions {
   _tags: _Tags;
-  comments: CommentsPartialArray;
+  comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
   savedObjectsClient: SavedObjectsClientContract;
@@ -43,7 +43,7 @@ interface CreateExceptionListItemOptions {
   user: string;
   tags: Tags;
   tieBreaker?: string;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
 }
 
 export const createExceptionListItem = async ({
@@ -64,13 +64,18 @@ export const createExceptionListItem = async ({
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
+  const transformedComments = transformCreateCommentsToComments({
+    incomingComments: comments,
+    user,
+  });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
-    comments: transformComments({ comments, user }),
+    comments: transformedComments,
     created_at: dateNow,
     created_by: user,
     description,
     entries,
+    immutable: undefined,
     item_id: itemId,
     list_id: listId,
     list_type: 'item',
@@ -80,6 +85,7 @@ export const createExceptionListItem = async ({
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
     updated_by: user,
+    version: undefined,
   });
-  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

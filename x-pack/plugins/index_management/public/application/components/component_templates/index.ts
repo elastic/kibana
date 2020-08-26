@@ -8,4 +8,15 @@ export { ComponentTemplatesProvider } from './component_templates_context';
 
 export { ComponentTemplateList } from './component_template_list';
 
-export * from './types';
+export {
+  ComponentTemplateDetailsFlyoutContent,
+  defaultFlyoutProps as componentDetailsFlyoutProps,
+} from './component_template_details';
+
+export {
+  ComponentTemplateCreate,
+  ComponentTemplateEdit,
+  ComponentTemplateClone,
+} from './component_template_wizard';
+
+export * from './component_template_selector';

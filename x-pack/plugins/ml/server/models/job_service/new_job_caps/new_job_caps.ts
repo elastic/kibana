@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
@@ -12,7 +12,7 @@ interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 
-export function newJobCapsProvider(callWithRequest: any) {
+export function newJobCapsProvider(mlClusterClient: ILegacyScopedClusterClient) {
   async function newJobCaps(
     indexPattern: string,
     isRollup: boolean = false,
@@ -21,7 +21,7 @@ export function newJobCapsProvider(callWithRequest: any) {
     const fieldService = fieldServiceProvider(
       indexPattern,
       isRollup,
-      callWithRequest,
+      mlClusterClient,
       savedObjectsClient
     );
     const { aggs, fields } = await fieldService.getData();

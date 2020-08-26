@@ -40,6 +40,7 @@ interface ConnectorAddModalProps {
   >;
   capabilities: ApplicationStart['capabilities'];
   docLinks: DocLinksStart;
+  consumer?: string;
 }
 
 export const ConnectorAddModal = ({
@@ -52,6 +53,7 @@ export const ConnectorAddModal = ({
   actionTypeRegistry,
   capabilities,
   docLinks,
+  consumer,
 }: ConnectorAddModalProps) => {
   let hasErrors = false;
   const initialConnector = {
@@ -164,6 +166,8 @@ export const ConnectorAddModal = ({
             actionTypeRegistry={actionTypeRegistry}
             docLinks={docLinks}
             http={http}
+            capabilities={capabilities}
+            consumer={consumer}
           />
         </EuiModalBody>
         <EuiModalFooter>

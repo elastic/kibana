@@ -5,12 +5,16 @@
  */
 
 import * as rt from 'io-ts';
-
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import {
+  createJobIdsFilters,
+  createResultTypeFilters,
+  createTimeRangeFilters,
+  defaultRequestParameters,
+} from './common';
 
 export const createLogEntryDatasetsQuery = (
-  logEntryAnalysisJobId: string,
+  jobIds: string[],
   startTime: number,
   endTime: number,
   size: number,
@@ -21,21 +25,9 @@ export const createLogEntryDatasetsQuery = (
     query: {
       bool: {
         filter: [
-          {
-            range: {
-              timestamp: {
-                gte: startTime,
-                lt: endTime,
-              },
-            },
-          },
-          {
-            term: {
-              result_type: {
-                value: 'model_plot',
-              },
-            },
-          },
+          ...createJobIdsFilters(jobIds),
+          ...createTimeRangeFilters(startTime, endTime),
+          ...createResultTypeFilters(['model_plot']),
         ],
       },
     },
@@ -58,7 +50,6 @@ export const createLogEntryDatasetsQuery = (
       },
     },
   },
-  index: getMlResultIndex(logEntryAnalysisJobId),
   size: 0,
 });
 
@@ -76,7 +67,7 @@ export type LogEntryDatasetBucket = rt.TypeOf<typeof logEntryDatasetBucketRT>;
 
 export const logEntryDatasetsResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
-  rt.type({
+  rt.partial({
     aggregations: rt.type({
       dataset_buckets: rt.intersection([
         rt.type({

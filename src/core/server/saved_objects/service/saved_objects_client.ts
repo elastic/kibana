@@ -37,6 +37,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
+   **/
+  version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
@@ -52,6 +57,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   id?: string;
   type: string;
   attributes: T;
+  version?: string;
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
@@ -80,6 +86,17 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 }
 
 /**
+ *
+ * @public
+ */
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+  /**
+   * The Elasticsearch `_score` of this result.
+   */
+  score: number;
+}
+
+/**
  * Return type of the Saved Objects `find()` method.
  *
  * *Note*: this type is different between the Public and Server Saved Objects
@@ -88,7 +105,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  * @public
  */
 export interface SavedObjectsFindResponse<T = unknown> {
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;
@@ -122,9 +139,27 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
  *
  * @public
  */
+export interface SavedObjectsAddToNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  namespaces: string[];
 }
 
 /**
@@ -303,7 +338,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
     return await this._repository.addToNamespaces(type, id, namespaces, options);
   }
 
@@ -320,7 +355,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 

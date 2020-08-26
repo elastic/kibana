@@ -5,8 +5,13 @@
  */
 
 import Mustache from 'mustache';
-import { isString, cloneDeep } from 'lodash';
-import { AlertActionParams, State, Context } from '../types';
+import { isString, cloneDeepWith } from 'lodash';
+import {
+  AlertActionParams,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertTypeParams,
+} from '../types';
 
 interface TransformActionParamsOptions {
   alertId: string;
@@ -15,8 +20,9 @@ interface TransformActionParamsOptions {
   tags?: string[];
   alertInstanceId: string;
   actionParams: AlertActionParams;
-  state: State;
-  context: Context;
+  alertParams: AlertTypeParams;
+  state: AlertInstanceState;
+  context: AlertInstanceContext;
 }
 
 export function transformActionParams({
@@ -28,8 +34,9 @@ export function transformActionParams({
   context,
   actionParams,
   state,
+  alertParams,
 }: TransformActionParamsOptions): AlertActionParams {
-  const result = cloneDeep(actionParams, (value: unknown) => {
+  const result = cloneDeepWith(actionParams, (value: unknown) => {
     if (!isString(value)) return;
 
     // when the list of variables we pass in here changes,
@@ -43,6 +50,7 @@ export function transformActionParams({
       alertInstanceId,
       context,
       state,
+      params: alertParams,
     };
     return Mustache.render(value, variables);
   });

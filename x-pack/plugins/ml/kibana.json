@@ -15,7 +15,9 @@
     "usageCollection",
     "share",
     "embeddable",
-    "uiActions"
+    "uiActions",
+    "kibanaLegacy",
+    "indexPatternManagement"
   ],
   "optionalPlugins": [
     "security",
@@ -24,5 +26,12 @@
     "licenseManagement"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaUtils",
+    "kibanaReact",
+    "dashboard",
+    "savedObjects"
+  ]
 }

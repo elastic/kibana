@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, JobDocPayload, TimeRangeParams } from '../../types';
+import { JobParamPostPayload, ScheduledTaskParams, TimeRangeParams } from '../../types';
 
 export interface FakeRequest {
   headers: Record<string, unknown>;
@@ -21,10 +21,6 @@ export interface JobParamsPanelCsv {
   panel?: SearchPanel;
   post?: JobParamsPostPayloadPanelCsv;
   visType?: string;
-}
-
-export interface JobDocPayloadPanelCsv extends JobDocPayload<JobParamsPanelCsv> {
-  jobParams: JobParamsPanelCsv;
 }
 
 export interface SavedObjectServiceError {
@@ -99,20 +95,6 @@ export interface SavedObject {
   references: SavedObjectReference[];
 }
 
-/* This object is passed to different helpers in different parts of the code
-   - packages/kbn-es-query/src/es_query/build_es_query
-   The structure has redundant parts and json-parsed / json-unparsed versions of the same data
- */
-export interface IndexPatternSavedObject {
-  title: string;
-  timeFieldName: string;
-  fields: any[];
-  attributes: {
-    fieldFormatMap: string;
-    fields: string;
-  };
-}
-
 export interface VisPanel {
   indexPatternSavedObjectId?: string;
   savedSearchObjectId?: string;
@@ -124,6 +106,11 @@ export interface SearchPanel {
   indexPatternSavedObjectId: string;
   attributes: SavedSearchObjectAttributes;
   timerange: TimeRangeParams;
+}
+
+export interface DocValueFields {
+  field: string;
+  format: string;
 }
 
 export interface SearchSourceQuery {

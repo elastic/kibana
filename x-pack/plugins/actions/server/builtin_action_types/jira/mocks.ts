@@ -88,7 +88,7 @@ mapping.set('summary', {
 });
 
 const executorParams: ExecutorSubActionPushParams = {
-  caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   externalId: 'incident-3',
   createdAt: '2020-04-27T10:59:46.202Z',
   createdBy: { fullName: 'Elastic User', username: 'elastic' },

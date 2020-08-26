@@ -16,7 +16,8 @@ import {
 } from '../map_config';
 
 import * as i18n from '../translations';
-import { ITooltipProperty } from '../../../../../../maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 const FlowBadge = (styled(EuiBadge)`
   height: 45px;

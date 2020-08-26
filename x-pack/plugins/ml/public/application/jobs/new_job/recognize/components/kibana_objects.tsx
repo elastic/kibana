@@ -46,7 +46,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
         </EuiTitle>
         <EuiSpacer size="s" />
         <ul>
-          {kibanaObjects.map(({ id, title, success, exists }, i) => (
+          {kibanaObjects.map(({ id, title, success, exists, error }, i) => (
             <li key={id}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
@@ -55,6 +55,11 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                       <EuiText size="s" color={exists ? 'subdued' : 'secondary'}>
                         {title}
                       </EuiText>
+                      {success === false && error !== undefined && (
+                        <EuiText size="xs" color="danger">
+                          {error.message}
+                        </EuiText>
+                      )}
                     </EuiFlexItem>
                     {exists && (
                       <EuiFlexItem grow={false}>

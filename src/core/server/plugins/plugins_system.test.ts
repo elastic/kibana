@@ -28,7 +28,7 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
@@ -36,7 +36,7 @@ import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 import { Logger } from '../logging';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 function createPlugin(
   id: string,
   {
@@ -55,6 +55,7 @@ function createPlugin(
       kibanaVersion: '7.0.0',
       requiredPlugins: required,
       optionalPlugins: optional,
+      requiredBundles: [],
       server,
       ui,
     },

@@ -68,7 +68,7 @@ const FooterContainer = styled(EuiFlexGroup).attrs<HeightProp>(({ height }) => (
     height: `${height}px`,
   },
 }))<HeightProp>`
-  flex: 0;
+  flex: 0 0 auto;
 `;
 
 FooterContainer.displayName = 'FooterContainer';
@@ -144,6 +144,7 @@ export const EventsCountComponent = ({
                 iconType="arrowDown"
                 iconSide="right"
                 onClick={onClick}
+                data-test-subj="local-events-count-button"
               />
             </EuiBadge>
             {` ${i18n.OF} `}
@@ -289,6 +290,7 @@ export const FooterComponent = ({
       <EuiContextMenuItem
         key={item}
         icon={itemsPerPage === item ? 'check' : 'empty'}
+        data-test-subj={`items-per-page-option-${item}`}
         onClick={() => {
           closePopover();
           onChangeItemsPerPage(item);

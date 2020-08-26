@@ -9,20 +9,26 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
+import { nestedProcessorsErrorFixture } from './fixtures';
+
 const { setup } = pageHelpers.pipelinesCreate;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj']}
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
 
 describe('<PipelinesCreate />', () => {
   let testBed: PipelinesCreateTestBed;
@@ -66,21 +72,6 @@ describe('<PipelinesCreate />', () => {
       });
 
       expect(exists('versionField')).toBe(true);
-    });
-
-    test('should toggle the on-failure processors editor', async () => {
-      const { actions, component, exists } = testBed;
-
-      // On-failure editor should be hidden by default
-      expect(exists('onFailureEditor')).toBe(false);
-
-      await act(async () => {
-        actions.toggleOnFailureSwitch();
-        await nextTick();
-        component.update();
-      });
-
-      expect(exists('onFailureEditor')).toBe(true);
     });
 
     test('should show the request flyout', async () => {
@@ -174,6 +165,25 @@ describe('<PipelinesCreate />', () => {
         expect(exists('savePipelineError')).toBe(true);
         expect(find('savePipelineError').text()).toContain(error.message);
       });
+
+      test('displays nested pipeline errors as a flat list', async () => {
+        const { actions, find, exists, waitFor } = testBed;
+        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
+          body: nestedProcessorsErrorFixture,
+        });
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await waitFor('savePipelineError');
+        });
+
+        expect(exists('savePipelineError')).toBe(true);
+        expect(exists('savePipelineError.showErrorsButton')).toBe(true);
+        find('savePipelineError.showErrorsButton').simulate('click');
+        expect(exists('savePipelineError.hideErrorsButton')).toBe(true);
+        expect(exists('savePipelineError.showErrorsButton')).toBe(false);
+        expect(find('savePipelineError').find('li').length).toBe(8);
+      });
     });
 
     describe('test pipeline', () => {
@@ -191,7 +201,7 @@ describe('<PipelinesCreate />', () => {
         const { actions, exists, find, waitFor } = testBed;
 
         await act(async () => {
-          actions.clickTestPipelineButton();
+          actions.clickAddDocumentsButton();
           await waitFor('testPipelineFlyout');
         });
 

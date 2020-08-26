@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { APICaller, Logger } from 'src/core/server';
+import { LegacyAPICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
@@ -127,7 +127,7 @@ export interface ReindexService {
 }
 
 export const reindexServiceFactory = (
-  callAsUser: APICaller,
+  callAsUser: LegacyAPICaller,
   actions: ReindexActions,
   log: Logger,
   licensing: LicensingPluginSetup
@@ -346,8 +346,8 @@ export const reindexServiceFactory = (
     // Where possible, derive reindex options at the last moment before reindexing
     // to prevent them from becoming stale as they wait in the queue.
     const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
-    const openAndClose = indicesState[indexName] === 'close';
-    if (indicesState[indexName] === 'close') {
+    const shouldOpenAndClose = indicesState[indexName] === 'closed';
+    if (shouldOpenAndClose) {
       log.debug(`Detected closed index ${indexName}, opening...`);
       await callAsUser('indices.open', { index: indexName });
     }
@@ -369,7 +369,7 @@ export const reindexServiceFactory = (
         ...(reindexOptions ?? {}),
         // Indicate to downstream states whether we opened a closed index that should be
         // closed again.
-        openAndClose,
+        openAndClose: shouldOpenAndClose,
       },
     });
   };

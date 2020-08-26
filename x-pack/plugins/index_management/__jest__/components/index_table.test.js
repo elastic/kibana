@@ -198,18 +198,10 @@ describe('index table', () => {
   });
   test('should show system indices only when the switch is turned on', () => {
     const rendered = mountWithIntl(component);
-    snapshot(
-      rendered
-        .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
-        .map((span) => span.text())
-    );
+    snapshot(rendered.find('.euiPagination li').map((item) => item.text()));
     const switchControl = rendered.find('.euiSwitch__button');
     switchControl.simulate('click');
-    snapshot(
-      rendered
-        .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
-        .map((span) => span.text())
-    );
+    snapshot(rendered.find('.euiPagination li').map((item) => item.text()));
   });
   test('should filter based on content of search input', () => {
     const rendered = mountWithIntl(component);

@@ -10,12 +10,14 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import { OpenTimelineResult, OpenTimelineProps } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,7 +47,9 @@ describe('OpenTimelineModal', () => {
     selectedItems: [],
     sortDirection: DEFAULT_SORT_DIRECTION,
     sortField: DEFAULT_SORT_FIELD,
-    tabs: <div />,
+    timelineType: TimelineType.default,
+    timelineStatus: TimelineStatus.active,
+    templateTimelineFilter: [<div />],
     title,
     totalSearchResultsCount: mockSearchResults.length,
   });

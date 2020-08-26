@@ -10,40 +10,20 @@ function extractCountFromSummary(str: string) {
   return parseInt(str.split('\n')[1], 10);
 }
 
-export function CopySavedObjectsToSpacePageProvider({ getService }: FtrProviderContext) {
+export function CopySavedObjectsToSpacePageProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const find = getService('find');
+  const { savedObjects, common } = getPageObjects(['savedObjects', 'common']);
 
   return {
-    async searchForObject(objectName: string) {
-      const searchBox = await testSubjects.find('savedObjectSearchBar');
-      await searchBox.clearValue();
-      await searchBox.type(objectName);
-      await searchBox.pressKeys(browser.keys.ENTER);
-    },
-
     async openCopyToSpaceFlyoutForObject(objectName: string) {
-      await this.searchForObject(objectName);
-
-      // Click action button to show context menu
-      await find.clickByCssSelector(
-        'table.euiTable tbody tr.euiTableRow td.euiTableRowCell:last-child .euiButtonIcon'
-      );
-
-      // Wait for context menu to render
-      await find.existsByCssSelector('.euiContextMenuPanel');
-
-      const actions = await find.allByCssSelector('.euiContextMenuItem');
-
-      for (const action of actions) {
-        const actionText = await action.getVisibleText();
-        if (actionText === 'Copy to space') {
-          await action.click();
-          break;
-        }
-      }
-
+      // This searchForObject narrows down the objects to those matching ANY of the words in the objectName.
+      // Hopefully the one we want is on the first page of results.
+      await savedObjects.searchForObject(objectName);
+      await common.sleep(1000);
+      await savedObjects.clickCopyToSpaceByTitle(objectName);
       await testSubjects.existOrFail('copy-to-space-flyout');
     },
 

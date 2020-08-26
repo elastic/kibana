@@ -19,7 +19,7 @@
 
 import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
-// @ts-ignore no TS definitions
+// @ts-expect-error no TS definitions
 import Statehood from 'statehood';
 
 import { KibanaRequest, ensureRawRequest } from './router';

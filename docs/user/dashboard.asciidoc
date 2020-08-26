@@ -66,7 +66,7 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 +
 For information on how to create visualizations, see <<visualize,Visualize>>.
 +
-For information on how to create Maps, see <<maps,Elastic Maps>>.
+For information on how to create maps, see <<maps,Maps>>.
 
 To add an existing element:
 
@@ -160,6 +160,7 @@ When you're finished adding and arranging the panels, save the dashboard.
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
 include::{kib-repo-dir}/drilldowns/drilldowns.asciidoc[]
+include::{kib-repo-dir}/drilldowns/explore-underlying-data.asciidoc[]
 
 [[sharing-dashboards]]
 == Share the dashboard

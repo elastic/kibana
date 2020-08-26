@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { TransformEndpointRequest } from '../../../../plugins/transform/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 async function asyncForEach(array: any[], callback: Function) {
@@ -15,7 +15,6 @@ async function asyncForEach(array: any[], callback: Function) {
   }
 }
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -247,7 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPattern(destinationIndex);
+        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
       });
 
       it('should delete transform and destination index pattern', async () => {
@@ -287,7 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPattern(destinationIndex);
+        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
       });
 
       it('should delete transform, destination index, & destination index pattern', async () => {

@@ -1,32 +1,15 @@
 {
-  "rule_id": "query-with-list",
+  "rule_id": "query-with-exceptions",
   "exceptions_list": [
-    {
-      "field": "source.ip",
-      "values_operator": "excluded",
-      "values_type": "exists"
+    { 
+      "id": "ID_HERE",
+      "namespace_type": "single",
+      "type": "endpoint"
     },
     {
-      "field": "host.name",
-      "values_operator": "included",
-      "values_type": "match",
-      "values": [
-        {
-          "name": "rock01"
-        }
-      ],
-      "and": [
-        {
-          "field": "host.id",
-          "values_operator": "included",
-          "values_type": "match_all",
-          "values": [
-            {
-              "name": "123456"
-            }
-          ]
-        }
-      ]
+      "id": "ID_HERE",
+      "namespace_type": "single",
+      "type": "detection"
     }
   ]
 }

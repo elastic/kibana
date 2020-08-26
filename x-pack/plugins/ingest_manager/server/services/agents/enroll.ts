@@ -5,19 +5,23 @@
  */
 
 import Boom from 'boom';
+import semver from 'semver';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import * as APIKeyService from '../api_keys';
+import { appContextService } from '../app_context';
 
 export async function enroll(
   soClient: SavedObjectsClientContract,
   type: AgentType,
-  configId: string,
+  agentPolicyId: string,
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
+  validateAgentVersion(metadata);
+
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
   if (existingAgent && existingAgent.active === true) {
@@ -29,7 +33,7 @@ export async function enroll(
   const agentData: AgentSOAttributes = {
     shared_id: sharedId,
     active: true,
-    config_id: configId,
+    policy_id: agentPolicyId,
     type,
     enrolled_at: enrolledAt,
     user_provided_metadata: metadata?.userProvided ?? {},
@@ -60,7 +64,7 @@ export async function enroll(
     );
   }
 
-  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id, configId);
+  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
     access_api_key_id: accessAPIKey.id,
@@ -83,4 +87,26 @@ async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId
   }
 
   return null;
+}
+
+export function validateAgentVersion(metadata?: { local: any; userProvided: any }) {
+  const kibanaVersion = semver.parse(appContextService.getKibanaVersion());
+  if (!kibanaVersion) {
+    throw Boom.badRequest('Kibana version is not set');
+  }
+  const version = semver.parse(metadata?.local?.elastic?.agent?.version);
+  if (!version) {
+    throw Boom.badRequest('Agent version not provided in metadata.');
+  }
+
+  if (!version || !semver.lte(formatVersion(version), formatVersion(kibanaVersion))) {
+    throw Boom.badRequest('Agent version is not compatible with kibana version');
+  }
+}
+
+/**
+ * used to remove prelease from version as includePrerelease in not working as expected
+ */
+function formatVersion(version: semver.SemVer) {
+  return `${version.major}.${version.minor}.${version.patch}`;
 }

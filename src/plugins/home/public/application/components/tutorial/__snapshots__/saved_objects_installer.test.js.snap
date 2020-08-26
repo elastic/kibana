@@ -120,7 +120,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       Array [
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -142,7 +142,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -245,22 +245,41 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                       isLoading={false}
                       onClick={[Function]}
                     >
-                      <button
-                        className="euiButton euiButton--primary"
+                      <EuiButtonDisplay
                         data-test-subj="loadSavedObjects"
+                        element="button"
+                        isLoading={false}
                         onClick={[Function]}
                         type="button"
                       >
-                        <span
-                          className="euiButton__content"
+                        <button
+                          className="euiButton euiButton--primary"
+                          data-test-subj="loadSavedObjects"
+                          onClick={[Function]}
+                          type="button"
                         >
-                          <span
-                            className="euiButton__text"
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            isLoading={false}
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
                           >
-                            Load Kibana objects
-                          </span>
-                        </span>
-                      </button>
+                            <span
+                              className="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Load Kibana objects
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
                     </EuiButton>
                   </div>
                 </EuiFlexItem>
@@ -421,7 +440,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       Array [
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -443,7 +462,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   Load Kibana objects
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -565,22 +584,41 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       isLoading={false}
                       onClick={[Function]}
                     >
-                      <button
-                        className="euiButton euiButton--primary"
+                      <EuiButtonDisplay
                         data-test-subj="loadSavedObjects"
+                        element="button"
+                        isLoading={false}
                         onClick={[Function]}
                         type="button"
                       >
-                        <span
-                          className="euiButton__content"
+                        <button
+                          className="euiButton euiButton--primary"
+                          data-test-subj="loadSavedObjects"
+                          onClick={[Function]}
+                          type="button"
                         >
-                          <span
-                            className="euiButton__text"
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            isLoading={false}
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
                           >
-                            Load Kibana objects
-                          </span>
-                        </span>
-                      </button>
+                            <span
+                              className="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Load Kibana objects
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
                     </EuiButton>
                   </div>
                 </EuiFlexItem>
@@ -627,7 +665,7 @@ exports[`renders 1`] = `
     Array [
       Object {
         "children": <React.Fragment>
-          <ForwardRef
+          <EuiFlexGroup
             alignItems="center"
             justifyContent="spaceBetween"
           >
@@ -649,7 +687,7 @@ exports[`renders 1`] = `
                 Load Kibana objects
               </EuiButton>
             </EuiFlexItem>
-          </ForwardRef>
+          </EuiFlexGroup>
           <EuiSpacer
             size="s"
           />

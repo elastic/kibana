@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
-import { ServiceIntegrations } from './ServiceIntegrations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { AlertIntegrations } from './AlertIntegrations';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
@@ -33,6 +38,12 @@ export function ServiceDetails({ tab }: Props) {
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
 
+  const { core } = useApmPluginContext();
+
+  const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
+    defaultMessage: 'Add data',
+  });
+
   return (
     <div>
       <ApmHeader>
@@ -42,9 +53,6 @@ export function ServiceDetails({ tab }: Props) {
               <h1>{serviceName}</h1>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ServiceIntegrations urlParams={urlParams} />
-          </EuiFlexItem>
           {isAlertingAvailable && (
             <EuiFlexItem grow={false}>
               <AlertIntegrations
@@ -53,6 +61,16 @@ export function ServiceDetails({ tab }: Props) {
               />
             </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
+              size="s"
+              color="primary"
+              iconType="plusInCircle"
+            >
+              {ADD_DATA_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
 

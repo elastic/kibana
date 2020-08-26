@@ -13,3 +13,4 @@ export * from './missing_results_privileges_prompt';
 export * from './missing_setup_privileges_prompt';
 export * from './ml_unavailable_prompt';
 export * from './setup_status_unknown_prompt';
+export * from './subscription_splash_content';

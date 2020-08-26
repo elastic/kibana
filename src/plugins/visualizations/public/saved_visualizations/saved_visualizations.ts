@@ -43,7 +43,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
           typeName = JSON.parse(String(source.visState)).type;
         } catch (e) {
           /* missing typename handled below */
-        } // eslint-disable-line no-empty
+        }
       }
 
       if (!typeName || !visTypes.get(typeName)) {
@@ -56,7 +56,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
       source.icon = source.type.icon;
       source.image = source.type.image;
       source.typeTitle = source.type.title;
-      source.editUrl = `#/edit/${id}`;
+      source.editUrl = `/edit/${id}`;
 
       return source;
     };

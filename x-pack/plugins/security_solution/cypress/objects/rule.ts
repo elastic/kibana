@@ -11,9 +11,16 @@ export const totalNumberOfPrebuiltRules = rawRules.length;
 
 export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
+export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
+
 interface Mitre {
   tactic: string;
   techniques: string[];
+}
+
+interface SeverityOverride {
+  sourceField: string;
+  sourceValue: string;
 }
 
 export interface CustomRule {
@@ -29,6 +36,18 @@ export interface CustomRule {
   mitre: Mitre[];
   note: string;
   timelineId: string;
+}
+
+export interface ThresholdRule extends CustomRule {
+  thresholdField: string;
+  threshold: string;
+}
+
+export interface OverrideRule extends CustomRule {
+  severityOverride: SeverityOverride[];
+  riskOverride: string;
+  nameOverride: string;
+  timestampOverride: string;
 }
 
 export interface MachineLearningRule {
@@ -56,8 +75,28 @@ const mitre2: Mitre = {
   techniques: ['CMSTP (T1191)'],
 };
 
+const severityOverride1: SeverityOverride = {
+  sourceField: 'host.name',
+  sourceValue: 'host',
+};
+
+const severityOverride2: SeverityOverride = {
+  sourceField: 'agent.type',
+  sourceValue: 'endpoint',
+};
+
+const severityOverride3: SeverityOverride = {
+  sourceField: 'host.geo.name',
+  sourceValue: 'atack',
+};
+
+const severityOverride4: SeverityOverride = {
+  sourceField: '@timestamp',
+  sourceValue: '10/02/2020',
+};
+
 export const newRule: CustomRule = {
-  customQuery: 'host.name: *',
+  customQuery: 'host.name:*',
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -67,7 +106,41 @@ export const newRule: CustomRule = {
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
-  timelineId: '352c6110-9ffb-11ea-b3d8-857d6042d9bd',
+  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+};
+
+export const newOverrideRule: OverrideRule = {
+  customQuery: 'host.name:*',
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  severityOverride: [severityOverride1, severityOverride2, severityOverride3, severityOverride4],
+  riskOverride: 'destination.port',
+  nameOverride: 'agent.type',
+  timestampOverride: '@timestamp',
+};
+
+export const newThresholdRule: ThresholdRule = {
+  customQuery: 'host.name:*',
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  thresholdField: 'host.name',
+  threshold: '10',
 };
 
 export const machineLearningRule: MachineLearningRule = {

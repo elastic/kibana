@@ -27,7 +27,6 @@ import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
@@ -35,14 +34,6 @@ import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();
@@ -115,7 +106,7 @@ describe('utils', () => {
       expect(rule).toEqual(expected);
     });
 
-    it('transforms ML Rule fields', () => {
+    test('transforms ML Rule fields', () => {
       const mlRule = getResult();
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = 'some_job_id';
@@ -127,6 +118,33 @@ describe('utils', () => {
           anomaly_threshold: 55,
           machine_learning_job_id: 'some_job_id',
           type: 'machine_learning',
+        })
+      );
+    });
+
+    // This has to stay here until we do data migration of saved objects and lists is removed from:
+    // signal_params_schema.ts
+    test('does not leak a lists structure in the transform which would cause validation issues', () => {
+      const result: RuleAlertType & { lists: [] } = { lists: [], ...getResult() };
+      const rule = transformAlertToRule(result);
+      expect(rule).toEqual(
+        expect.not.objectContaining({
+          lists: [],
+        })
+      );
+    });
+
+    // This has to stay here until we do data migration of saved objects and exceptions_list is removed from:
+    // signal_params_schema.ts
+    test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
+      const result: RuleAlertType & { exceptions_list: [] } = {
+        exceptions_list: [],
+        ...getResult(),
+      };
+      const rule = transformAlertToRule(result);
+      expect(rule).toEqual(
+        expect.not.objectContaining({
+          exceptions_list: [],
         })
       );
     });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 // This can be removed when the ES client improves the types
 export interface ESClusterInfo {
@@ -43,6 +43,6 @@ export interface ESClusterInfo {
  *
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
  */
-export function getClusterInfo(callCluster: APICaller) {
+export function getClusterInfo(callCluster: LegacyAPICaller) {
   return callCluster<ESClusterInfo>('info');
 }

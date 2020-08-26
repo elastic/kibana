@@ -158,26 +158,18 @@ export class Worker extends events.EventEmitter {
       kibana_name: this.kibanaName,
     };
 
-    return this._client
-      .callAsInternalUser('update', {
-        index: job._index,
-        id: job._id,
-        if_seq_no: job._seq_no,
-        if_primary_term: job._primary_term,
-        body: { doc },
-      })
-      .then((response) => {
-        this.info(`Job marked as claimed: ${getUpdatedDocPath(response)}`);
-        const updatedJob = {
-          ...job,
-          ...response,
-        };
-        updatedJob._source = {
-          ...job._source,
-          ...doc,
-        };
-        return updatedJob;
-      });
+    return this.queue.store.setReportClaimed(job, doc).then((response) => {
+      this.info(`Job marked as claimed: ${getUpdatedDocPath(response)}`);
+      const updatedJob = {
+        ...job,
+        ...response,
+      };
+      updatedJob._source = {
+        ...job._source,
+        ...doc,
+      };
+      return updatedJob;
+    });
   }
 
   _failJob(job, output = false) {
@@ -197,14 +189,8 @@ export class Worker extends events.EventEmitter {
       output: docOutput,
     });
 
-    return this._client
-      .callAsInternalUser('update', {
-        index: job._index,
-        id: job._id,
-        if_seq_no: job._seq_no,
-        if_primary_term: job._primary_term,
-        body: { doc },
-      })
+    return this.queue.store
+      .setReportFailed(job, doc)
       .then((response) => {
         this.info(`Job marked as failed: ${getUpdatedDocPath(response)}`);
       })
@@ -294,14 +280,8 @@ export class Worker extends events.EventEmitter {
           output: docOutput,
         };
 
-        return this._client
-          .callAsInternalUser('update', {
-            index: job._index,
-            id: job._id,
-            if_seq_no: job._seq_no,
-            if_primary_term: job._primary_term,
-            body: { doc },
-          })
+        return this.queue.store
+          .setReportCompleted(job, doc)
           .then((response) => {
             const eventOutput = {
               job: formatJobObject(job),

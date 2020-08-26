@@ -35,7 +35,7 @@ export function handleESError(error) {
     return Boom.serverUnavailable(error);
   } else if (
     error instanceof esErrors.Conflict ||
-    _.contains(error.message, 'index_template_already_exists')
+    _.includes(error.message, 'index_template_already_exists')
   ) {
     return Boom.conflict(error);
   } else if (error instanceof esErrors[403]) {

@@ -15,13 +15,25 @@ export const reindexOperationSavedObjectType: SavedObjectsType = {
   mappings: {
     properties: {
       reindexTaskId: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       indexName: {
         type: 'keyword',
       },
       newIndexName: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       status: {
         type: 'integer',
@@ -30,10 +42,19 @@ export const reindexOperationSavedObjectType: SavedObjectsType = {
         type: 'date',
       },
       lastCompletedStep: {
-        type: 'integer',
+        type: 'long',
       },
+      // Note that reindex failures can result in extremely long error messages coming from ES.
+      // We need to map these errors as text and use ignore_above to prevent indexing really large
+      // messages as keyword. See https://github.com/elastic/kibana/issues/71642 for more info.
       errorMessage: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       reindexTaskPercComplete: {
         type: 'float',

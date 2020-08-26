@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo } from 'react';
 import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
@@ -11,7 +13,8 @@ import { htmlIdGenerator, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { DEFAULT_DARK_MODE as defaultDarkMode } from '../../../common/constants';
+import { ResolverProcessType } from '../types';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -20,7 +23,8 @@ type ResolverColorNames =
   | 'graphControlsBackground'
   | 'resolverBackground'
   | 'resolverEdge'
-  | 'resolverEdgeText';
+  | 'resolverEdgeText'
+  | 'resolverBreadcrumbBackground';
 
 type ColorMap = Record<ResolverColorNames, string>;
 interface NodeStyleConfig {
@@ -138,8 +142,6 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
     )}
   </>
 ));
-
-PaintServers.displayName = 'PaintServers';
 
 /**
  * Ids of symbols to be linked by <use> elements
@@ -374,8 +376,6 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
   </>
 ));
 
-SymbolsAndShapes.displayName = 'SymbolsAndShapes';
-
 /**
  * This `<defs>` element is used to define the reusable assets for the Resolver
  * It confers several advantages, including but not limited to:
@@ -384,7 +384,7 @@ SymbolsAndShapes.displayName = 'SymbolsAndShapes';
  *  3. `<use>` elements can be handled by compositor (faster)
  */
 const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const isDarkMode = useUiSetting<boolean>(defaultDarkMode);
   return (
     <svg className={className}>
       <defs>
@@ -395,8 +395,6 @@ const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) 
   );
 });
 
-SymbolDefinitionsComponent.displayName = 'SymbolDefinitions';
-
 export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   position: absolute;
   left: 100%;
@@ -405,8 +403,24 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   height: 0;
 `;
 
-export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap } => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
+  processCreated: 'runningProcessCube',
+  processRan: 'runningProcessCube',
+  processTerminated: 'terminatedProcessCube',
+  unknownProcessEvent: 'runningProcessCube',
+  processCausedAlert: 'runningTriggerCube',
+  unknownEvent: 'runningProcessCube',
+};
+
+/**
+ * A hook to bring Resolver theming information into components.
+ */
+export const useResolverTheme = (): {
+  colorMap: ColorMap;
+  nodeAssets: NodeStyleMap;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessTrigger: boolean) => NodeStyleConfig;
+} => {
+  const isDarkMode = useUiSetting<boolean>(defaultDarkMode);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
   const getThemedOption = (lightOption: string, darkOption: string): string => {
@@ -421,6 +435,7 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
     resolverBackground: theme.euiColorEmptyShade,
     resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
+    resolverBreadcrumbBackground: theme.euiColorLightestShade,
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
   };
@@ -478,7 +493,21 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     },
   };
 
-  return { colorMap, nodeAssets };
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessTrigger: boolean) {
+    if (isProcessTerminated) {
+      if (isProcessTrigger) {
+        return nodeAssets.terminatedTriggerCube;
+      } else {
+        return nodeAssets[processTypeToCube.processTerminated];
+      }
+    } else if (isProcessTrigger) {
+      return nodeAssets[processTypeToCube.processCausedAlert];
+    } else {
+      return nodeAssets[processTypeToCube.processRan];
+    }
+  }
+
+  return { colorMap, nodeAssets, cubeAssetsForNode };
 };
 
 export const calculateResolverFontSize = (

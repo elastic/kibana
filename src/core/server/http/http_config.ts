@@ -23,7 +23,7 @@ import { hostname } from 'os';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
-const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
+const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
@@ -42,21 +42,7 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.conditional(
-        schema.contextRef('dev'),
-        true,
-        schema.object(
-          {
-            origin: schema.arrayOf(schema.string()),
-          },
-          {
-            defaultValue: {
-              origin: ['*://localhost:9876'], // karma test server
-            },
-          }
-        ),
-        schema.boolean({ defaultValue: false })
-      ),
+      cors: schema.boolean({ defaultValue: false }),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),
@@ -101,6 +87,19 @@ export const config = {
           { defaultValue: [] }
         ),
       }),
+      requestId: schema.object(
+        {
+          allowFromAnyIp: schema.boolean({ defaultValue: false }),
+          ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        },
+        {
+          validate(value) {
+            if (value.allowFromAnyIp === true && value.ipAllowlist?.length > 0) {
+              return `allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist`;
+            }
+          },
+        }
+      ),
     },
     {
       validate: (rawConfig) => {
@@ -144,6 +143,7 @@ export class HttpConfig {
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
   public xsrf: { disableProtection: boolean; whitelist: string[] };
+  public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
@@ -172,6 +172,7 @@ export class HttpConfig {
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
     this.xsrf = rawHttpConfig.xsrf;
+    this.requestId = rawHttpConfig.requestId;
   }
 }
 

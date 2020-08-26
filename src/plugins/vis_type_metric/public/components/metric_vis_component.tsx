@@ -27,12 +27,13 @@ import { KibanaDatatable } from '../../../expressions/public';
 import { getHeatmapColors } from '../../../charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
-import { SchemaConfig, ExprVis } from '../../../visualizations/public';
+import { SchemaConfig } from '../../../visualizations/public';
+import { Range } from '../../../expressions/public';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
   visData: Input;
-  vis: ExprVis;
+  fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
 
@@ -41,7 +42,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = last(colorsRange).to;
+    const max = (last(colorsRange) as Range).to;
     const labels: string[] = [];
 
     colorsRange.forEach((range: any) => {
@@ -111,7 +112,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
-    const max = last(config.colorsRange).to;
+    const max = (last(config.colorsRange) as Range).to;
     const colors = this.getColors();
     const labels = this.getLabels();
     const metrics: MetricVisMetric[] = [];
@@ -165,10 +166,17 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.filter({
-      table,
-      column: dimensions.bucket.accessor,
-      row: metric.rowIndex,
+    this.props.fireEvent({
+      name: 'filterBucket',
+      data: {
+        data: [
+          {
+            table,
+            column: dimensions.bucket.accessor,
+            row: metric.rowIndex,
+          },
+        ],
+      },
     });
   };
 
@@ -198,6 +206,6 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       const metrics = this.processTableGroups(this.props.visData);
       metricsHtml = metrics.map(this.renderMetric);
     }
-    return <div className="mtrVis">{metricsHtml}</div>;
+    return metricsHtml;
   }
 }

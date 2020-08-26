@@ -7,12 +7,15 @@
 import axios from 'axios';
 
 import { createExternalService } from './service';
-import * as utils from '../case/utils';
+import * as utils from '../lib/axios_utils';
 import { ExternalService } from '../case/types';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
-jest.mock('../case/utils', () => {
-  const originalUtils = jest.requireActual('../case/utils');
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -26,10 +29,13 @@ describe('Jira service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
-    service = createExternalService({
-      config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
-      secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
-    });
+    service = createExternalService(
+      {
+        config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
+        secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+      },
+      logger
+    );
   });
 
   beforeEach(() => {
@@ -39,37 +45,49 @@ describe('Jira service', () => {
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: null, projectKey: 'CK' },
-          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: null, projectKey: 'CK' },
+            secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without projectKey', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', projectKey: null },
-          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', projectKey: null },
+            secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without username', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com' },
-          secrets: { apiToken: '', email: 'elastic@elastic.com' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com' },
+            secrets: { apiToken: '', email: 'elastic@elastic.com' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without password', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com' },
-          secrets: { apiToken: '', email: undefined },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com' },
+            secrets: { apiToken: '', email: undefined },
+          },
+          logger
+        )
       ).toThrow();
     });
   });
@@ -92,6 +110,7 @@ describe('Jira service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        logger,
       });
     });
 
@@ -146,6 +165,7 @@ describe('Jira service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        logger,
         method: 'post',
         data: {
           fields: {
@@ -210,6 +230,7 @@ describe('Jira service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'put',
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
         data: { fields: { summary: 'title', description: 'desc' } },
@@ -272,6 +293,7 @@ describe('Jira service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'post',
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },

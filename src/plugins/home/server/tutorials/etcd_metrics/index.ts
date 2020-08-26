@@ -36,6 +36,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.etcdMetrics.nameTitle', {
       defaultMessage: 'Etcd metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {

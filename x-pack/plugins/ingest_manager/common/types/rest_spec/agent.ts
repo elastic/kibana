@@ -47,6 +47,7 @@ export interface PostAgentCheckinRequest {
     agentId: string;
   };
   body: {
+    status?: 'online' | 'error' | 'degraded';
     local_metadata?: Record<string, any>;
     events?: NewAgentEvent[];
   };
@@ -117,7 +118,7 @@ export interface PutAgentReassignRequest {
   params: {
     agentId: string;
   };
-  body: { config_id: string };
+  body: { policy_id: string };
 }
 
 export interface PutAgentReassignResponse {
@@ -160,7 +161,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    configId?: string;
+    policyId?: string;
   };
 }
 
@@ -172,5 +173,6 @@ export interface GetAgentStatusResponse {
     online: number;
     error: number;
     offline: number;
+    other: number;
   };
 }

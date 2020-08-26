@@ -12,9 +12,9 @@ import { LicensingPlugin } from './plugin';
 import {
   coreMock,
   elasticsearchServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../src/core/server/mocks';
-import { IClusterClient } from '../../../../src/core/server/';
+import { ILegacyClusterClient } from '../../../../src/core/server/';
 
 function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   const defaultRawLicense: RawLicense = {
@@ -29,13 +29,20 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
 
 const flushPromises = (ms = 50) => new Promise((res) => setTimeout(res, ms));
 
-function createCoreSetupWith(esClient: IClusterClient) {
+function createCoreSetupWith(esClient: ILegacyClusterClient) {
   const coreSetup = coreMock.createSetup();
-
+  const coreStart = coreMock.createStart();
   coreSetup.getStartServices.mockResolvedValue([
     {
-      ...coreMock.createStart(),
-      elasticsearch: { legacy: { client: esClient, createClient: jest.fn() } },
+      ...coreStart,
+      elasticsearch: {
+        ...coreStart.elasticsearch,
+        legacy: {
+          ...coreStart.elasticsearch.legacy,
+          client: esClient,
+          createClient: jest.fn(),
+        },
+      },
     },
     {},
     {},
@@ -61,7 +68,7 @@ describe('licensing plugin', () => {
       });
 
       it('returns license', async () => {
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
@@ -77,7 +84,7 @@ describe('licensing plugin', () => {
       it('observable receives updated licenses', async () => {
         const types: LicenseType[] = ['basic', 'gold', 'platinum'];
 
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockImplementation(() =>
           Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
@@ -96,7 +103,7 @@ describe('licensing plugin', () => {
       });
 
       it('returns a license with error when request fails', async () => {
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockRejectedValue(new Error('test'));
 
         const coreSetup = createCoreSetupWith(esClient);
@@ -109,7 +116,7 @@ describe('licensing plugin', () => {
       });
 
       it('generate error message when x-pack plugin was not installed', async () => {
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         const error: ElasticsearchError = new Error('reason');
         error.status = 400;
         esClient.callAsInternalUser.mockRejectedValue(error);
@@ -127,7 +134,7 @@ describe('licensing plugin', () => {
         const error1 = new Error('reason-1');
         const error2 = new Error('reason-2');
 
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
 
         esClient.callAsInternalUser
           .mockRejectedValueOnce(error1)
@@ -145,7 +152,7 @@ describe('licensing plugin', () => {
       });
 
       it('fetch license immediately without subscriptions', async () => {
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
@@ -161,7 +168,7 @@ describe('licensing plugin', () => {
       });
 
       it('logs license details without subscriptions', async () => {
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
@@ -173,7 +180,7 @@ describe('licensing plugin', () => {
 
         await flushPromises();
 
-        const loggedMessages = loggingServiceMock.collect(pluginInitContextMock.logger).debug;
+        const loggedMessages = loggingSystemMock.collect(pluginInitContextMock.logger).debug;
 
         expect(
           loggedMessages.some(([message]) =>
@@ -187,7 +194,7 @@ describe('licensing plugin', () => {
       it('generates signature based on fetched license content', async () => {
         const types: LicenseType[] = ['basic', 'gold', 'basic'];
 
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockImplementation(() =>
           Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
@@ -218,7 +225,7 @@ describe('licensing plugin', () => {
             api_polling_frequency: moment.duration(50000),
           })
         );
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
@@ -253,7 +260,7 @@ describe('licensing plugin', () => {
           })
         );
 
-        const esClient = elasticsearchServiceMock.createClusterClient();
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
         esClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
           features: {},
@@ -262,7 +269,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { createLicensePoller, license$ } = await plugin.start();
 
-        const customClient = elasticsearchServiceMock.createClusterClient();
+        const customClient = elasticsearchServiceMock.createLegacyClusterClient();
         customClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense({ type: 'gold' }),
           features: {},
@@ -297,7 +304,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { createLicensePoller } = await plugin.start();
 
-        const customClient = elasticsearchServiceMock.createClusterClient();
+        const customClient = elasticsearchServiceMock.createLegacyClusterClient();
         customClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense({ type: 'gold' }),
           features: {},

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AuditService } from './audit_service';
-import { loggingServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, ConfigType } from '../config';
 import { SecurityLicenseFeatures } from '../../common/licensing';
@@ -20,7 +20,7 @@ const config = createConfig({
 
 describe('#setup', () => {
   it('returns the expected contract', () => {
-    const logger = loggingServiceMock.createLogger();
+    const logger = loggingSystemMock.createLogger();
     const auditService = new AuditService(logger);
     const license = licenseMock.create();
     expect(auditService.setup({ license, config })).toMatchInlineSnapshot(`
@@ -34,7 +34,7 @@ describe('#setup', () => {
 test(`calls the underlying logger with the provided message and requisite tags`, () => {
   const pluginId = 'foo';
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
   const license = licenseMock.create();
   license.features$ = new BehaviorSubject({
     allowAuditLogging: true,
@@ -58,7 +58,7 @@ test(`calls the underlying logger with the provided message and requisite tags`,
 test(`calls the underlying logger with the provided metadata`, () => {
   const pluginId = 'foo';
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
   const license = licenseMock.create();
   license.features$ = new BehaviorSubject({
     allowAuditLogging: true,
@@ -90,7 +90,7 @@ test(`calls the underlying logger with the provided metadata`, () => {
 test(`does not call the underlying logger if license does not support audit logging`, () => {
   const pluginId = 'foo';
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
   const license = licenseMock.create();
   license.features$ = new BehaviorSubject({
     allowAuditLogging: false,
@@ -110,7 +110,7 @@ test(`does not call the underlying logger if license does not support audit logg
 test(`does not call the underlying logger if security audit logging is not enabled`, () => {
   const pluginId = 'foo';
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
   const license = licenseMock.create();
   license.features$ = new BehaviorSubject({
     allowAuditLogging: true,
@@ -135,7 +135,7 @@ test(`does not call the underlying logger if security audit logging is not enabl
 test(`calls the underlying logger after license upgrade`, () => {
   const pluginId = 'foo';
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
   const license = licenseMock.create();
 
   const features$ = new BehaviorSubject({

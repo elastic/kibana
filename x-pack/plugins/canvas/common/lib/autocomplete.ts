@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-// @ts-ignore Untyped Library
+// @ts-expect-error untyped library
 import { parse } from '@kbn/interpreter/common';
 import {
   ExpressionAstExpression,
@@ -14,7 +14,7 @@ import {
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
-} from '../../../../../src/plugins/expressions';
+} from '../../../../../src/plugins/expressions/common';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 

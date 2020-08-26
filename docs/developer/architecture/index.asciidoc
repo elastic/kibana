@@ -1,0 +1,28 @@
+[[kibana-architecture]]
+== Architecture
+
+[IMPORTANT]
+==============================================
+{kib} developer services and apis are in a state of constant development. We cannot provide backwards compatibility at this time due to the high rate of change.
+==============================================
+
+Our developer services are changing all the time. One of the best ways to discover and learn about them is to read the available
+READMEs from all the plugins inside our {kib-repo}tree/{branch}/src/plugins[open source plugins folder] and our
+{kib-repo}/tree/{branch}/x-pack/plugins[commercial plugins folder].
+
+A few services also automatically generate api documentation which can be browsed inside the {kib-repo}tree/{branch}/docs/development[docs/development section of our repo]
+
+A few notable services are called out below.
+
+* <<development-security>>
+* <<add-data-tutorials>>
+* <<development-visualize-index>>
+* <<code-exploration>>
+
+include::add-data-tutorials.asciidoc[leveloffset=+1]
+
+include::development-visualize-index.asciidoc[leveloffset=+1]
+
+include::security/index.asciidoc[leveloffset=+1]
+
+include::code-exploration.asciidoc[leveloffset=+1]

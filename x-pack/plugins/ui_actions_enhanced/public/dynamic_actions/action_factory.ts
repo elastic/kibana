@@ -6,23 +6,36 @@
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
 import {
-  UiActionsActionDefinition as ActionDefinition,
+  TriggerContextMapping,
+  TriggerId,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { SerializedAction } from './types';
+import { BaseActionFactoryContext, SerializedAction } from './types';
+import { ILicense } from '../../../licensing/public';
+import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export class ActionFactory<
   Config extends object = object,
-  FactoryContext extends object = object,
-  ActionContext extends object = object
+  SupportedTriggers extends TriggerId = TriggerId,
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 > implements Omit<Presentable<FactoryContext>, 'getHref'>, Configurable<Config, FactoryContext> {
   constructor(
-    protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
+    protected readonly def: ActionFactoryDefinition<
+      Config,
+      SupportedTriggers,
+      FactoryContext,
+      ActionContext
+    >,
+    protected readonly getLicence: () => ILicense
   ) {}
 
   public readonly id = this.def.id;
+  public readonly minimalLicense = this.def.minimalLicense;
   public readonly order = this.def.order || 0;
   public readonly MenuItem? = this.def.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
@@ -51,9 +64,31 @@ export class ActionFactory<
     return await this.def.isCompatible(context);
   }
 
+  /**
+   * Does this action factory licence requirements
+   * compatible with current license?
+   */
+  public isCompatibleLicence() {
+    if (!this.minimalLicense) return true;
+    const licence = this.getLicence();
+    return licence.isAvailable && licence.isActive && licence.hasAtLeast(this.minimalLicense);
+  }
+
   public create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
   ): ActionDefinition<ActionContext> {
-    return this.def.create(serializedAction);
+    const action = this.def.create(serializedAction);
+    return {
+      ...action,
+      isCompatible: async (context: ActionContext): Promise<boolean> => {
+        if (!this.isCompatibleLicence()) return false;
+        if (!action.isCompatible) return true;
+        return action.isCompatible(context);
+      },
+    };
+  }
+
+  public supportedTriggers(): SupportedTriggers[] {
+    return this.def.supportedTriggers();
   }
 }

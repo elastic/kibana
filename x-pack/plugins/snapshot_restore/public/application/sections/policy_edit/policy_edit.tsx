@@ -55,9 +55,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   const {
     error: errorLoadingIndices,
     isLoading: isLoadingIndices,
-    data: { indices } = {
-      indices: [],
-    },
+    data: indicesData,
   } = useLoadIndices();
 
   // Load policy
@@ -200,7 +198,8 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
         ) : null}
         <PolicyForm
           policy={policy}
-          indices={indices}
+          dataStreams={indicesData!.dataStreams}
+          indices={indicesData!.indices}
           currentUrl={pathname}
           isEditing={true}
           isSaving={isSaving}

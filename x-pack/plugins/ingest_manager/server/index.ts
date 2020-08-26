@@ -6,11 +6,16 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
-export { AgentService, ESIndexPatternService } from './services';
+import {
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+  AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+} from '../common';
+export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
 export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
   IngestManagerStartContract,
+  ExternalCallback,
 } from './plugin';
 
 export const config = {
@@ -19,14 +24,13 @@ export const config = {
     fleet: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    epm: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.maybe(schema.uri()),
-    }),
+    enabled: schema.boolean({ defaultValue: true }),
+    registryUrl: schema.maybe(schema.uri()),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
+      pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
+      maxConcurrentConnections: schema.number({ defaultValue: 0 }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
@@ -35,11 +39,19 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      agentPolicyRolloutRateLimitIntervalMs: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
+      }),
+      agentPolicyRolloutRateLimitRequestPerInterval: schema.number({
+        defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
+      }),
     }),
   }),
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
+
+export { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

@@ -13,13 +13,13 @@ import {
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
-  DataFrameAnalyticsConfig,
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
+import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -30,7 +30,7 @@ export interface EsDoc extends Record<string, any> {
   _source: EsDocSource;
 }
 
-export const MAX_COLUMNS = 20;
+export const MAX_COLUMNS = 10;
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
 export const BASIC_NUMERICAL_TYPES = new Set([
@@ -47,6 +47,7 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.SCALED_FLOAT,
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {

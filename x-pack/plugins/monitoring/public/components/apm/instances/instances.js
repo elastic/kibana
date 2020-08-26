@@ -15,6 +15,7 @@ import {
   EuiPageContent,
   EuiSpacer,
   EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
@@ -25,6 +26,8 @@ import { APM_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 function getColumns(setupMode) {
   return [
@@ -35,7 +38,7 @@ function getColumns(setupMode) {
       field: 'name',
       render: (name, apm) => {
         let setupModeStatus = null;
-        if (setupMode && setupMode.enabled) {
+        if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[apm.uuid] || {};
           const instance = {
@@ -128,7 +131,7 @@ export function ApmServerInstances({ apms, setupMode }) {
   const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
-  if (setupMode.enabled && setupMode.data) {
+  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}
@@ -154,7 +157,9 @@ export function ApmServerInstances({ apms, setupMode }) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageContent>
-          <Status stats={data.stats} />
+          <EuiPanel>
+            <Status stats={data.stats} />
+          </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable

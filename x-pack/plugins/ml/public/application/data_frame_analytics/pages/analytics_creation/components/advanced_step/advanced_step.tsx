@@ -19,14 +19,19 @@ export const AdvancedStep: FC<CreateAnalyticsStepProps> = ({
   setCurrentStep,
   stepActivated,
 }) => {
+  const showForm = step === ANALYTICS_STEPS.ADVANCED;
+  const showDetails = step !== ANALYTICS_STEPS.ADVANCED && stepActivated === true;
+
+  const dataTestSubj = `mlAnalyticsCreateJobWizardAdvancedStep${showForm ? ' active' : ''}${
+    showDetails ? ' summary' : ''
+  }`;
+
   return (
-    <EuiForm>
-      {step === ANALYTICS_STEPS.ADVANCED && (
+    <EuiForm data-test-subj={dataTestSubj}>
+      {showForm && (
         <AdvancedStepForm actions={actions} state={state} setCurrentStep={setCurrentStep} />
       )}
-      {step !== ANALYTICS_STEPS.ADVANCED && stepActivated === true && (
-        <AdvancedStepDetails setCurrentStep={setCurrentStep} state={state} />
-      )}
+      {showDetails && <AdvancedStepDetails setCurrentStep={setCurrentStep} state={state} />}
     </EuiForm>
   );
 };

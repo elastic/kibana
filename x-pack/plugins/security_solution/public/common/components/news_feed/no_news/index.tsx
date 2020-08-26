@@ -8,17 +8,21 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from '../translations';
+import { useBasePath } from '../../../lib/kibana';
 
-export const NoNews = React.memo(() => (
-  <>
-    <EuiText color="subdued" size="s">
-      {i18n.NO_NEWS_MESSAGE}{' '}
-      <EuiLink href={'/app/management/kibana/settings'}>
-        {i18n.ADVANCED_SETTINGS_LINK_TITLE}
-      </EuiLink>
-      {'.'}
-    </EuiText>
-  </>
-));
+export const NoNews = React.memo(() => {
+  const basePath = useBasePath();
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        {i18n.NO_NEWS_MESSAGE}{' '}
+        <EuiLink href={`${basePath}/app/management/kibana/settings`}>
+          {i18n.ADVANCED_SETTINGS_LINK_TITLE}
+        </EuiLink>
+        {'.'}
+      </EuiText>
+    </>
+  );
+});
 
 NoNews.displayName = 'NoNews';

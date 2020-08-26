@@ -13,8 +13,10 @@ import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const regions = getKibanaRegionList();
     return regions.length > 0;

@@ -9,9 +9,10 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/e
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
-import { ExceptionListItemSchema, ApiProps } from '../types';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
+import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
+import { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
@@ -32,16 +33,18 @@ const MyExceptionItemContainer = styled(EuiFlexGroup)`
 
 interface ExceptionsViewerItemsProps {
   showEmpty: boolean;
+  showNoResults: boolean;
   isInitLoading: boolean;
   exceptions: ExceptionListItemSchema[];
-  loadingItemIds: ApiProps[];
+  loadingItemIds: ExceptionListItemIdentifiers[];
   commentsAccordionId: string;
-  onDeleteException: (arg: ApiProps) => void;
+  onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
 
 const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   showEmpty,
+  showNoResults,
   isInitLoading,
   exceptions,
   loadingItemIds,
@@ -50,12 +53,22 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   onEditExceptionItem,
 }): JSX.Element => (
   <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
-    {showEmpty || isInitLoading ? (
+    {showEmpty || showNoResults || isInitLoading ? (
       <EuiFlexItem grow={1}>
         <EuiEmptyPrompt
-          iconType="advancedSettingsApp"
-          title={<h2>{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
-          body={<p>{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
+          iconType={showNoResults ? 'searchProfilerApp' : 'list'}
+          title={
+            <h2 data-test-subj="exceptionsEmptyPromptTitle">
+              {showNoResults ? '' : i18n.EXCEPTION_EMPTY_PROMPT_TITLE}
+            </h2>
+          }
+          body={
+            <p data-test-subj="exceptionsEmptyPromptBody">
+              {showNoResults
+                ? i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
+                : i18n.EXCEPTION_EMPTY_PROMPT_BODY}
+            </p>
+          }
           data-test-subj="exceptionsEmptyPrompt"
         />
       </EuiFlexItem>

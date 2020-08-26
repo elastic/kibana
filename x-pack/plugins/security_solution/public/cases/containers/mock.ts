@@ -133,7 +133,7 @@ const basicAction = {
 
 export const casePushParams = {
   actionBy: elasticUser,
-  caseId: basicCaseId,
+  savedObjectId: basicCaseId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   externalId: null,

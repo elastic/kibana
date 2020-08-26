@@ -5,7 +5,7 @@
  */
 
 import { toExpression } from './lens';
-import { SavedLensInput } from '../../../functions/common/saved_lens';
+import { SavedLensInput } from '../../../functions/external/saved_lens';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseEmbeddableInput = {

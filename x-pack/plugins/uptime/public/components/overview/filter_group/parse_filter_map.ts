@@ -14,7 +14,7 @@ interface FilterField {
  * If your code needs to support custom fields, introduce a second parameter to
  * `parseFiltersMap` to take a list of FilterField objects.
  */
-const filterWhitelist: FilterField[] = [
+const filterAllowList: FilterField[] = [
   { name: 'ports', fieldName: 'url.port' },
   { name: 'locations', fieldName: 'observer.geo.name' },
   { name: 'tags', fieldName: 'tags' },
@@ -28,7 +28,7 @@ export const parseFiltersMap = (filterMapString: string) => {
   const filterSlices: { [key: string]: any } = {};
   try {
     const map = new Map<string, string[]>(JSON.parse(filterMapString));
-    filterWhitelist.forEach(({ name, fieldName }) => {
+    filterAllowList.forEach(({ name, fieldName }) => {
       filterSlices[name] = map.get(fieldName) ?? [];
     });
     return filterSlices;

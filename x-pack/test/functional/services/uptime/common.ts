@@ -58,13 +58,13 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
         '[data-test-subj="xpack.uptime.filterBar.filterStatusUp"]'
       );
       if (await upFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
-        this.setStatusFilterUp();
+        await this.setStatusFilterUp();
       }
       const downFilter = await find.byCssSelector(
         '[data-test-subj="xpack.uptime.filterBar.filterStatusDown"]'
       );
       if (await downFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
-        this.setStatusFilterDown();
+        await this.setStatusFilterDown();
       }
     },
     async selectFilterItem(filterType: string, option: string) {
@@ -90,6 +90,14 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
         `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
         5000
       );
+    },
+    async waitUntilDataIsLoaded() {
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('data-missing')) {
+          await testSubjects.click('superDatePickerApplyTimeButton');
+        }
+        await testSubjects.missingOrFail('data-missing');
+      });
     },
   };
 }

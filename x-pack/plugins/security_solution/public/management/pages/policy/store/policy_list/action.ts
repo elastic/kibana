@@ -6,7 +6,10 @@
 
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
-import { GetAgentStatusResponse } from '../../../../../../../ingest_manager/common/types/rest_spec';
+import {
+  GetAgentStatusResponse,
+  GetPackagesResponse,
+} from '../../../../../../../ingest_manager/common';
 
 interface ServerReturnedPolicyListData {
   type: 'serverReturnedPolicyListData';
@@ -30,7 +33,7 @@ interface UserClickedPolicyListDeleteButton {
 
 interface UserOpenedPolicyListDeleteModal {
   type: 'userOpenedPolicyListDeleteModal';
-  payload: { agentConfigId: string };
+  payload: { agentPolicyId: string };
 }
 
 interface ServerDeletedPolicyFailure {
@@ -53,6 +56,11 @@ interface ServerReturnedPolicyAgentsSummaryForDelete {
   payload: { agentStatusSummary: GetAgentStatusResponse['results'] };
 }
 
+interface ServerReturnedEndpointPackageInfo {
+  type: 'serverReturnedEndpointPackageInfo';
+  payload: GetPackagesResponse['response'][0];
+}
+
 export type PolicyListAction =
   | ServerReturnedPolicyListData
   | ServerFailedToReturnPolicyListData
@@ -61,4 +69,5 @@ export type PolicyListAction =
   | ServerDeletedPolicy
   | UserOpenedPolicyListDeleteModal
   | ServerReturnedPolicyAgentsSummaryForDeleteFailure
-  | ServerReturnedPolicyAgentsSummaryForDelete;
+  | ServerReturnedPolicyAgentsSummaryForDelete
+  | ServerReturnedEndpointPackageInfo;

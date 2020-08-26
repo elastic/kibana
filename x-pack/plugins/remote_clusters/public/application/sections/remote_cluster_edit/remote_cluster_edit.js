@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { extractQueryParams, getRouter, redirect } from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 

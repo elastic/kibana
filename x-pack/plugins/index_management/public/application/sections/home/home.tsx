@@ -144,13 +144,19 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
             component={DataStreamList}
           />
           <Route exact path={`/${Section.Indices}`} component={IndexList} />
-          <Route exact path={`/${Section.Indices}/filter/:filter?`} component={IndexList} />
           <Route
             exact
             path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
             component={TemplateList}
           />
-          <Route exact path={`/${Section.ComponentTemplates}`} component={ComponentTemplateList} />
+          <Route
+            exact
+            path={[
+              `/${Section.ComponentTemplates}`,
+              `/${Section.ComponentTemplates}/:componentTemplateName?`,
+            ]}
+            component={ComponentTemplateList}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

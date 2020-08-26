@@ -22,6 +22,8 @@ export const sourceQuery = gql`
           type
           aggregatable
           format
+          esTypes
+          subType
         }
       }
     }

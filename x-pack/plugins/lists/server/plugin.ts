@@ -40,10 +40,6 @@ export class ListPlugin
 
   public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<ListPluginSetup> {
     const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
-
-    this.logger.error(
-      'You have activated the lists values feature flag which is NOT currently supported for Elastic Security! You should turn this feature flag off immediately by un-setting "xpack.lists.enabled: true" in kibana.yml and restarting Kibana'
-    );
     this.spaces = plugins.spaces?.spacesService;
     this.config = config;
     this.security = plugins.security;
@@ -52,7 +48,7 @@ export class ListPlugin
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
-    initRoutes(router);
+    initRoutes(router, config, plugins.security);
 
     return {
       getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {

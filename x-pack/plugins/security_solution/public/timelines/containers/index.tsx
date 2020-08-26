@@ -27,7 +27,7 @@ import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query
 import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
-import { ALERTS_TABLE_TIMELINE_ID } from '../../alerts/components/alerts_table';
+import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -47,6 +47,7 @@ export interface CustomReduxProps {
 
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
+  endDate: string;
   eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
@@ -54,6 +55,8 @@ export interface OwnProps extends QueryTemplateProps {
   limit: number;
   sortField: SortField;
   fields: string[];
+  startDate: string;
+  queryDeduplication: string;
 }
 
 type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
@@ -75,6 +78,8 @@ class TimelineQueryComponent extends QueryTemplate<
     const {
       children,
       clearSignalsState,
+      docValueFields,
+      endDate,
       eventType = 'raw',
       id,
       indexPattern,
@@ -86,6 +91,8 @@ class TimelineQueryComponent extends QueryTemplate<
       filterQuery,
       sourceId,
       sortField,
+      startDate,
+      queryDeduplication,
     } = this.props;
     const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex =
@@ -95,14 +102,25 @@ class TimelineQueryComponent extends QueryTemplate<
             ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
           ]
         : indexPattern?.title.split(',') ?? [];
-    const variables: GetTimelineQuery.Variables = {
+    // Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
+    // the apolloClient will perform queryDeduplication and prevent the first query from executing. A deep compare is not
+    // performed on `indices`, so another field must be passed to circumvent this.
+    // For details, see https://github.com/apollographql/react-apollo/issues/2202
+    const variables: GetTimelineQuery.Variables & { queryDeduplication: string } = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
       defaultIndex,
+      docValueFields: docValueFields ?? [],
       inspect: isInspected,
+      queryDeduplication,
     };
 
     return (
@@ -110,6 +128,7 @@ class TimelineQueryComponent extends QueryTemplate<
         query={timelineQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
+        skip={skipQueryForDetectionsPage(id, defaultIndex)}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -182,7 +201,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   clearSignalsState: ({ id }: { id?: string }) => {
-    if (id != null && id === ALERTS_TABLE_TIMELINE_ID) {
+    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }

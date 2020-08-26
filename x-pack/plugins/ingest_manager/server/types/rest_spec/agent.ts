@@ -32,6 +32,9 @@ export const PostAgentCheckinRequestSchema = {
     agentId: schema.string(),
   }),
   body: schema.object({
+    status: schema.maybe(
+      schema.oneOf([schema.literal('online'), schema.literal('error'), schema.literal('degraded')])
+    ),
     local_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     events: schema.maybe(schema.arrayOf(NewAgentEventSchema)),
   }),
@@ -70,6 +73,11 @@ export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };
 
 export const PutAgentReassignRequestSchema = {
@@ -77,7 +85,7 @@ export const PutAgentReassignRequestSchema = {
     agentId: schema.string(),
   }),
   body: schema.object({
-    config_id: schema.string(),
+    policy_id: schema.string(),
   }),
 };
 
@@ -109,6 +117,6 @@ export const UpdateAgentRequestSchema = {
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
-    configId: schema.maybe(schema.string()),
+    policyId: schema.maybe(schema.string()),
   }),
 };

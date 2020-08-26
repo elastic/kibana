@@ -30,4 +30,4 @@ export type UrlStateType =
   | 'network'
   | 'overview'
   | 'timeline'
-  | 'management';
+  | 'administration';

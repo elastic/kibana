@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sortBy, pick, identity } from 'lodash';
+import { sortBy, pickBy, identity } from 'lodash';
 import { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
@@ -17,12 +17,8 @@ import {
   ServiceConnectionNode,
   ExternalConnectionNode,
 } from '../../../common/service_map';
-import {
-  ConnectionsResponse,
-  ServicesResponse,
-  ServiceAnomalies,
-} from './get_service_map';
-import { addAnomaliesDataToNodes } from './ml_helpers';
+import { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import { ServiceAnomaliesResponse } from './get_service_anomalies';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -67,12 +63,12 @@ export function getServiceNodes(allNodes: ConnectionNode[]) {
 }
 
 export type ServiceMapResponse = ConnectionsResponse & {
-  anomalies: ServiceAnomalies;
   services: ServicesResponse;
+  anomalies: ServiceAnomaliesResponse;
 };
 
 export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { anomalies, discoveredServices, services, connections } = response;
+  const { discoveredServices, services, connections, anomalies } = response;
 
   const allNodes = getAllNodes(services, connections);
   const serviceNodes = getServiceNodes(allNodes);
@@ -106,21 +102,23 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       serviceName = node[SERVICE_NAME];
     }
 
-    const matchedServiceNodes = serviceNodes.filter(
-      (serviceNode) => serviceNode[SERVICE_NAME] === serviceName
-    );
+    const matchedServiceNodes = serviceNodes
+      .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
+      .map((serviceNode) => pickBy(serviceNode, identity));
+    const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
+
+    const serviceAnomalyStats = serviceName
+      ? anomalies.serviceAnomalies[serviceName]
+      : null;
 
     if (matchedServiceNodes.length) {
       return {
         ...map,
-        [node.id]: Object.assign(
-          {
-            id: matchedServiceNodes[0][SERVICE_NAME],
-          },
-          ...matchedServiceNodes.map((serviceNode) =>
-            pick(serviceNode, identity)
-          )
-        ),
+        [node.id]: {
+          id: matchedServiceNodes[0][SERVICE_NAME],
+          ...mergedServiceNode,
+          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+        },
       };
     }
 
@@ -214,18 +212,10 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     return prev.concat(connection);
   }, []);
 
-  // Add anomlies data
-  const dedupedNodesWithAnomliesData = addAnomaliesDataToNodes(
-    dedupedNodes,
-    anomalies
-  );
-
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodesWithAnomliesData].map(
-    (element) => ({
-      data: element,
-    })
-  );
+  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+    data: element,
+  }));
 
   return { elements };
 }

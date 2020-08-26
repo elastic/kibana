@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { TimeRange } from 'src/plugins/data/common';
 import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { buildBoolArray } from '../../public/lib/build_bool_array';
 import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
@@ -135,10 +135,13 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
 
           return {
             type: 'datatable',
+            meta: {
+              source: 'timelion',
+            },
             columns: [
-              { name: '@timestamp', type: 'date' },
-              { name: 'value', type: 'number' },
-              { name: 'label', type: 'string' },
+              { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+              { id: 'value', name: 'value', meta: { type: 'number' } },
+              { id: 'label', name: 'label', meta: { type: 'string' } },
             ],
             rows,
           };

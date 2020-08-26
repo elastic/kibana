@@ -2,6 +2,416 @@
 
 exports[`Metrics should export metric objects that match a snapshot 1`] = `
 Object {
+  "apm_acm_request_count": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.request.count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "HTTP Requests received by agent configuration managemen",
+    "field": "beats_stats.metrics.apm-server.acm.request.count",
+    "format": "0,0.[00]",
+    "label": "Count",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Requests Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_count": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "HTTP requests responded to by APM Server",
+    "field": "beats_stats.metrics.apm-server.acm.response.count",
+    "format": "0,0.[00]",
+    "label": "Count",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Count Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_errors_count": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.errors.count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "HTTP errors count",
+    "field": "beats_stats.metrics.apm-server.acm.response.errors.count",
+    "format": "0,0.[00]",
+    "label": "Error Count",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Error Count Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_errors_forbidden": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.errors.forbidden",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "Forbidden HTTP requests rejected count",
+    "field": "beats_stats.metrics.apm-server.acm.response.errors.forbidden",
+    "format": "0,0.[00]",
+    "label": "Count",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Errors Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_errors_invalidquery": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.errors.invalidquery",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "Invalid HTTP query",
+    "field": "beats_stats.metrics.apm-server.acm.response.errors.invalidquery",
+    "format": "0,0.[00]",
+    "label": "Invalid Query",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Invalid Query Errors Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_errors_method": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.errors.method",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "HTTP requests rejected due to incorrect HTTP method",
+    "field": "beats_stats.metrics.apm-server.acm.response.errors.method",
+    "format": "0,0.[00]",
+    "label": "Method",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Method Errors Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_errors_unauthorized": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.errors.unauthorized",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "Unauthorized HTTP requests rejected count",
+    "field": "beats_stats.metrics.apm-server.acm.response.errors.unauthorized",
+    "format": "0,0.[00]",
+    "label": "Unauthorized",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Unauthorized Errors Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_errors_unavailable": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.errors.unavailable",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "Unavailable HTTP response count. Possible misconfiguration or unsupported version of Kibana",
+    "field": "beats_stats.metrics.apm-server.acm.response.errors.unavailable",
+    "format": "0,0.[00]",
+    "label": "Unavailable",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Unavailable Errors Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_valid_notmodified": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.valid.notmodified",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "304 Not modified response count",
+    "field": "beats_stats.metrics.apm-server.acm.response.valid.notmodified",
+    "format": "0,0.[00]",
+    "label": "Not Modified",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response Not Modified Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
+  "apm_acm_response_valid_ok": ApmEventsRateClusterMetric {
+    "aggs": Object {
+      "beats_uuids": Object {
+        "aggs": Object {
+          "event_rate_per_beat": Object {
+            "max": Object {
+              "field": "beats_stats.metrics.apm-server.acm.response.valid.ok",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "beats_stats.beat.uuid",
+          "size": 10000,
+        },
+      },
+      "event_rate": Object {
+        "sum_bucket": Object {
+          "buckets_path": "beats_uuids>event_rate_per_beat",
+          "gap_policy": "skip",
+        },
+      },
+      "metric_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_rate",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "derivative": true,
+    "description": "200 OK response count",
+    "field": "beats_stats.metrics.apm-server.acm.response.valid.ok",
+    "format": "0,0.[00]",
+    "label": "OK",
+    "metricAgg": "max",
+    "timestampField": "beats_stats.timestamp",
+    "title": "Response OK Count Agent Configuration Management",
+    "units": "/s",
+    "uuidField": "cluster_uuid",
+  },
   "apm_cpu_total": ApmCpuUtilizationMetric {
     "app": "apm",
     "calculation": [Function],
@@ -80,7 +490,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -93,7 +503,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Output Acked Events Rate",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_output_events_active": ApmEventsRateClusterMetric {
@@ -121,7 +531,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -134,7 +544,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Output Active Events Rate",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_output_events_dropped": ApmEventsRateClusterMetric {
@@ -162,7 +572,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -175,7 +585,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Output Dropped Events Rate",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_output_events_failed": ApmEventsRateClusterMetric {
@@ -203,7 +613,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -216,7 +626,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Output Failed Events Rate",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_output_events_total": ApmEventsRateClusterMetric {
@@ -244,7 +654,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -257,7 +667,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Output Events Rate",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_processor_error_transformations": ApmEventsRateClusterMetric {
@@ -285,7 +695,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -298,7 +708,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Transformations",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_processor_metric_transformations": ApmEventsRateClusterMetric {
@@ -326,7 +736,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -339,7 +749,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Transformations",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_processor_span_transformations": ApmEventsRateClusterMetric {
@@ -367,7 +777,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -380,7 +790,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Transformations",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_processor_transaction_transformations": ApmEventsRateClusterMetric {
@@ -408,7 +818,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -421,7 +831,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Processed Events",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_requests": ApmEventsRateClusterMetric {
@@ -449,7 +859,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -462,7 +872,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Request Count Intake API",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_count": ApmEventsRateClusterMetric {
@@ -490,7 +900,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -503,7 +913,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Response Count Intake API",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_closed": ApmEventsRateClusterMetric {
@@ -531,7 +941,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -544,7 +954,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Closed",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_concurrency": ApmEventsRateClusterMetric {
@@ -572,7 +982,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -585,7 +995,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Concurrency",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_decode": ApmEventsRateClusterMetric {
@@ -613,7 +1023,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -626,7 +1036,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Decode",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_forbidden": ApmEventsRateClusterMetric {
@@ -654,7 +1064,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -667,7 +1077,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Forbidden",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_internal": ApmEventsRateClusterMetric {
@@ -695,7 +1105,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -708,7 +1118,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Internal",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_method": ApmEventsRateClusterMetric {
@@ -736,7 +1146,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -749,7 +1159,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Method",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_queue": ApmEventsRateClusterMetric {
@@ -777,7 +1187,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -790,7 +1200,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Queue",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_ratelimit": ApmEventsRateClusterMetric {
@@ -818,7 +1228,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -831,7 +1241,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Rate limit",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_toolarge": ApmEventsRateClusterMetric {
@@ -859,7 +1269,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -872,7 +1282,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Response Errors Intake API",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_unauthorized": ApmEventsRateClusterMetric {
@@ -900,7 +1310,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -913,7 +1323,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Unauthorized",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_errors_validate": ApmEventsRateClusterMetric {
@@ -941,7 +1351,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -954,7 +1364,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Validate",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_valid_accepted": ApmEventsRateClusterMetric {
@@ -982,7 +1392,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -995,7 +1405,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Accepted",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_responses_valid_ok": ApmEventsRateClusterMetric {
@@ -1023,7 +1433,7 @@ Object {
         "derivative": Object {
           "buckets_path": "event_rate",
           "gap_policy": "skip",
-          "unit": "1m",
+          "unit": "1s",
         },
       },
     },
@@ -1036,7 +1446,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
     "title": "Ok",
-    "units": "/m",
+    "units": "/s",
     "uuidField": "cluster_uuid",
   },
   "apm_system_os_load_1": ApmMetric {

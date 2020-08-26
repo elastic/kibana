@@ -9,4 +9,3 @@ type Path = string;
 export const MANAGEMENT_PATH: Path = '/management';
 export const ML_PATH: Path = `${MANAGEMENT_PATH}/ml`;
 export const JOBS_LIST_PATH: Path = `${ML_PATH}/jobs_list`;
-export const ACCESS_DENIED_PATH: Path = `${ML_PATH}/access_denied`;

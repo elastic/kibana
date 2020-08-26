@@ -20,7 +20,7 @@
 import { UiActionsService } from './ui_actions_service';
 import { Action, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
+import { TriggerRegistry, TriggerId, ActionType, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
 
 // Casting to ActionType or TriggerId is a hack - in a real situation use

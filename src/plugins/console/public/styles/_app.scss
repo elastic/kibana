@@ -1,5 +1,5 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
-@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/global_styling/variables/header';
 
 // This value is calculated to static value using SCSS because calc in calc has issues in IE11
 $headerHeightOffset: $euiHeaderHeightCompensation * 2;

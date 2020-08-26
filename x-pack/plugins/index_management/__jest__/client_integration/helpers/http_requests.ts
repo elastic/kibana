@@ -35,6 +35,22 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadDataStreamResponse = (response: HttpResponse = []) => {
+    server.respondWith('GET', `${API_BASE_PATH}/data_streams/:id`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
+  const setDeleteDataStreamResponse = (response: HttpResponse = []) => {
+    server.respondWith('POST', `${API_BASE_PATH}/delete_data_streams`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   const setDeleteTemplateResponse = (response: HttpResponse = []) => {
     server.respondWith('POST', `${API_BASE_PATH}/delete_index_templates`, [
       200,
@@ -76,14 +92,28 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setSimulateTemplateResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('POST', `${API_BASE_PATH}/index_templates/simulate`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
     setLoadDataStreamsResponse,
+    setLoadDataStreamResponse,
+    setDeleteDataStreamResponse,
     setDeleteTemplateResponse,
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setUpdateTemplateResponse,
+    setSimulateTemplateResponse,
   };
 };
 

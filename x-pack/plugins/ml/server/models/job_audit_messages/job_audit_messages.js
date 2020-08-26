@@ -34,14 +34,14 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider(callAsCurrentUser) {
+export function jobAuditMessagesProvider({ callAsInternalUser }) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
   async function getJobAuditMessages(jobId, from) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
-      const jobs = await callAsCurrentUser('ml.jobs', { jobId });
+      const jobs = await callAsInternalUser('ml.jobs', { jobId });
       if (jobs.count > 0 && jobs.jobs !== undefined) {
         gte = moment(jobs.jobs[0].create_time).valueOf();
       }
@@ -100,7 +100,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
     }
 
     try {
-      const resp = await callAsCurrentUser('search', {
+      const resp = await callAsInternalUser('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
@@ -155,7 +155,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
         levelsPerJobAggSize = jobIds.length;
       }
 
-      const resp = await callAsCurrentUser('search', {
+      const resp = await callAsInternalUser('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,

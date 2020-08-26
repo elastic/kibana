@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ISearch<T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY> = (request: IRequestTypesMap[T], options?: ISearchOptions) => Observable<IResponseTypesMap[T]>;
+export declare type ISearch = (request: IKibanaSearchRequest, options?: ISearchOptions) => Observable<IKibanaSearchResponse>;
 ```

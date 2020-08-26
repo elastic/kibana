@@ -2,21 +2,25 @@
 
 exports[`PageHeader shallow renders extra links: page_header_with_extra_links 1`] = `
 Array [
-  @media only screen and (max-width:1024px) and (min-width:868px) {
-  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+  .c0 {
+  white-space: nowrap;
+}
+
+@media only screen and (max-width:1024px) and (min-width:868px) {
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
     width: 500px;
   }
 }
 
 @media only screen and (max-width:880px) {
-  .c0.c0.c0 {
+  .c1.c1.c1 {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
     -ms-flex-positive: 1;
     flex-grow: 1;
   }
 
-  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
     width: calc(100% + 8px);
   }
 }
@@ -28,7 +32,7 @@ Array [
       class="euiFlexItem"
     >
       <h1
-        class="euiTitle euiTitle--medium"
+        class="c0 euiTitle euiTitle--medium"
       >
         TestingHeading
       </h1>
@@ -50,16 +54,15 @@ Array [
             >
               <button
                 aria-label="Open alert context menu"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+                class="euiButtonEmpty euiButtonEmpty--primary"
                 data-test-subj="xpack.uptime.alertsPopover.toggleButton"
                 type="button"
               >
                 <span
-                  class="euiButtonEmpty__content"
+                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    class="euiButtonEmpty__icon"
+                    class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -76,34 +79,52 @@ Array [
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="settings-page-link"
             href="/settings"
+            rel="noreferrer"
           >
-            <button
-              class="euiButtonEmpty euiButtonEmpty--primary"
-              data-test-subj="settings-page-link"
-              type="button"
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
             >
+              <div
+                class="euiButtonContent__icon"
+                data-euiicon-type="gear"
+              />
               <span
-                class="euiButtonEmpty__content"
+                class="euiButtonEmpty__text"
               >
-                <div
-                  aria-hidden="true"
-                  class="euiButtonEmpty__icon"
-                  data-euiicon-type="gear"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Settings
-                </span>
+                Settings
               </span>
-            </button>
+            </span>
           </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <div
+                class="euiButtonContent__icon"
+                data-euiicon-type="plusInCircle"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Add data
+              </span>
+            </span>
+          </button>
         </div>
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero c0"
+      class="euiFlexItem euiFlexItem--flexGrowZero c1"
       style="flex-basis:485px"
     >
       <div
@@ -124,16 +145,15 @@ Array [
               >
                 <button
                   aria-label="Date quick select"
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                   data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
                     <div
-                      aria-hidden="true"
-                      class="euiButtonEmpty__icon"
+                      class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -180,11 +200,10 @@ Array [
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
                 <div
-                  aria-hidden="true"
-                  class="euiButton__icon"
+                  class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
                 <span
@@ -215,21 +234,25 @@ Array [
 
 exports[`PageHeader shallow renders with the date picker: page_header_with_date_picker 1`] = `
 Array [
-  @media only screen and (max-width:1024px) and (min-width:868px) {
-  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+  .c0 {
+  white-space: nowrap;
+}
+
+@media only screen and (max-width:1024px) and (min-width:868px) {
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
     width: 500px;
   }
 }
 
 @media only screen and (max-width:880px) {
-  .c0.c0.c0 {
+  .c1.c1.c1 {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
     -ms-flex-positive: 1;
     flex-grow: 1;
   }
 
-  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
     width: calc(100% + 8px);
   }
 }
@@ -241,7 +264,7 @@ Array [
       class="euiFlexItem"
     >
       <h1
-        class="euiTitle euiTitle--medium"
+        class="c0 euiTitle euiTitle--medium"
       >
         TestingHeading
       </h1>
@@ -250,7 +273,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero c0"
+      class="euiFlexItem euiFlexItem--flexGrowZero c1"
       style="flex-basis:485px"
     >
       <div
@@ -271,16 +294,15 @@ Array [
               >
                 <button
                   aria-label="Date quick select"
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                   data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
                     <div
-                      aria-hidden="true"
-                      class="euiButtonEmpty__icon"
+                      class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -327,11 +349,10 @@ Array [
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
                 <div
-                  aria-hidden="true"
-                  class="euiButton__icon"
+                  class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
                 <span
@@ -362,14 +383,18 @@ Array [
 
 exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
 Array [
-  <div
+  .c0 {
+  white-space: nowrap;
+}
+
+<div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
     >
       <h1
-        class="euiTitle euiTitle--medium"
+        class="c0 euiTitle euiTitle--medium"
       >
         TestingHeading
       </h1>

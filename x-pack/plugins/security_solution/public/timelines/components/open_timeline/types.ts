@@ -8,7 +8,14 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineTypeLiteralWithNull,
+  TimelineStatus,
+  TemplateTimelineTypeLiteral,
+  RowRendererId,
+  TimelineStatusLiteralWithNull,
+} from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -41,14 +48,16 @@ export interface OpenTimelineResult {
   created?: number | null;
   description?: string | null;
   eventIdToNoteIds?: Readonly<Record<string, string[]>> | null;
+  excludedRowRendererIds?: RowRendererId[] | null;
   favorite?: FavoriteTimelineResult[] | null;
   noteIds?: string[] | null;
   notes?: TimelineResultNote[] | null;
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
   savedObjectId?: string | null;
+  status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineTypeLiteral;
+  timelineType?: TimelineTypeLiteral;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -76,9 +85,11 @@ export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 export type OnOpenTimeline = ({
   duplicate,
   timelineId,
+  timelineType,
 }: {
   duplicate: boolean;
   timelineId: string;
+  timelineType?: TimelineTypeLiteral;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -111,13 +122,15 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
-export type ActionTimelineToShow = 'duplicate' | 'delete' | 'export' | 'selectable';
+export type ActionTimelineToShow = 'createFrom' | 'duplicate' | 'delete' | 'export' | 'selectable';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
   deleteTimelines?: DeleteTimelines;
   /** The default requested size of each page of search results */
   defaultPageSize: number;
+  /** The number of favorite timeline*/
+  favoriteCount?: number | null | undefined;
   /** Displays an indicator that data is loading when true */
   isLoading: boolean;
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
@@ -160,8 +173,14 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
-  /** timeline / template timeline */
-  tabs?: JSX.Element;
+  /** this affects timeline's behaviour like editable / duplicatible */
+  timelineType: TimelineTypeLiteralWithNull;
+  /* active or immutable */
+  timelineStatus: TimelineStatusLiteralWithNull;
+  /** when timelineType === template, templatetimelineFilter is a JSX.Element */
+  templateTimelineFilter: JSX.Element[] | null;
+  /** timeline / timeline template */
+  timelineFilter?: JSX.Element | JSX.Element[] | null;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */
@@ -173,10 +192,11 @@ export interface OpenTimelineProps {
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
-  from: number;
+  forceNotes?: boolean;
+  from: string;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;
-  to: number;
+  to: string;
   ruleNote?: string;
 }
 
@@ -196,8 +216,19 @@ export enum TimelineTabsStyle {
 }
 
 export interface TimelineTab {
-  id: TimelineTypeLiteral;
-  name: string;
+  count: number | undefined;
   disabled: boolean;
   href: string;
+  id: TimelineTypeLiteral;
+  name: string;
+  onClick: (ev: { preventDefault: () => void }) => void;
+  withNext: boolean;
+}
+
+export interface TemplateTimelineFilter {
+  id: TemplateTimelineTypeLiteral;
+  name: string;
+  disabled: boolean;
+  withNext: boolean;
+  count: number | undefined;
 }

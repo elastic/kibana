@@ -14,6 +14,7 @@ import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 import { useUiSetting } from '../../../common/lib/kibana';
 
 import { timelineDetailsQuery } from './index.gql_query';
+import { DocValueFields } from '../../../common/containers/source';
 
 export interface EventsArgs {
   detailsData: DetailItem[] | null;
@@ -22,6 +23,7 @@ export interface EventsArgs {
 
 export interface TimelineDetailsProps {
   children?: (args: EventsArgs) => React.ReactElement;
+  docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   executeQuery: boolean;
@@ -34,12 +36,14 @@ const getDetailsEvent = memoizeOne(
 
 const TimelineDetailsQueryComponent: React.FC<TimelineDetailsProps> = ({
   children,
+  docValueFields,
   indexName,
   eventId,
   executeQuery,
   sourceId,
 }) => {
   const variables: GetTimelineDetailsQuery.Variables = {
+    docValueFields,
     sourceId,
     indexName,
     eventId,

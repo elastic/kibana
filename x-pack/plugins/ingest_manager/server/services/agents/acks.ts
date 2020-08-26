@@ -18,6 +18,7 @@ import {
   AgentEventSOAttributes,
   AgentSOAttributes,
   AgentActionSOAttributes,
+  FullAgentPolicy,
 } from '../../types';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -25,6 +26,7 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
+import { forceUnenrollAgent } from './unenroll';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -62,37 +64,54 @@ export async function acknowledgeAgentActions(
   if (actions.length === 0) {
     return [];
   }
-  const configRevision = getLatestConfigRevison(agent, actions);
+
+  const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
+  if (isAgentUnenrolled) {
+    await forceUnenrollAgent(soClient, agent.id);
+  }
+
+  const agentPolicy = getLatestAgentPolicyIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    buildUpdateAgentConfigRevision(agent.id, configRevision),
+    ...(agentPolicy ? [buildUpdateAgentPolicy(agent.id, agentPolicy)] : []),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
 
   return actions;
 }
 
-function getLatestConfigRevison(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce((acc, action) => {
+function getLatestAgentPolicyIfUpdated(agent: Agent, actions: AgentAction[]) {
+  return actions.reduce<null | FullAgentPolicy>((acc, action) => {
     if (action.type !== 'CONFIG_CHANGE') {
       return acc;
     }
     const data = action.data || {};
 
-    if (data?.config?.id !== agent.config_id) {
+    if (data?.config?.id !== agent.policy_id) {
       return acc;
     }
 
-    return data?.config?.revision > acc ? data?.config?.revision : acc;
-  }, agent.config_revision || 0);
+    const currentRevision = (acc && acc.revision) || agent.policy_revision || 0;
+
+    return data?.config?.revision > currentRevision ? data?.config : acc;
+  }, null);
 }
 
-function buildUpdateAgentConfigRevision(agentId: string, configRevision: number) {
+function buildUpdateAgentPolicy(agentId: string, agentPolicy: FullAgentPolicy) {
+  const packages = agentPolicy.inputs.reduce<string[]>((acc, input) => {
+    const packageName = input.meta?.package?.name;
+    if (packageName && acc.indexOf(packageName) < 0) {
+      return [packageName, ...acc];
+    }
+    return acc;
+  }, []);
+
   return {
     type: AGENT_SAVED_OBJECT_TYPE,
     id: agentId,
     attributes: {
-      config_revision: configRevision,
+      policy_revision: agentPolicy.revision,
+      packages,
     },
   };
 }
@@ -140,9 +159,9 @@ export interface AcksService {
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
 
-  getAgentByAccessAPIKeyId: (
+  authenticateAgentWithAccessToken: (
     soClient: SavedObjectsClientContract,
-    accessAPIKeyId: string
+    request: KibanaRequest
   ) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;

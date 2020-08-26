@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
-import { IEsSearchRequest } from '../../../../../src/plugins/data/common';
+import { IEsSearchRequest, ISearchRequestParams } from '../../../../../src/plugins/data/common';
 
-export interface EnhancedSearchParams extends SearchParams {
+export interface EnhancedSearchParams extends ISearchRequestParams {
   ignoreThrottled: boolean;
+}
+
+export interface IAsyncSearchRequest extends IEsSearchRequest {
+  /**
+   * The ID received from the response from the initial request
+   */
+  id?: string;
+
+  params?: EnhancedSearchParams;
 }
 
 export interface IEnhancedEsSearchRequest extends IEsSearchRequest {

@@ -4,26 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut } from '@elastic/eui';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
+import { useTheme } from '../../../hooks/useTheme';
 
 const EmptyBannerContainer = styled.div`
-  margin: ${lightTheme.gutterTypes.gutterSmall};
+  margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
   /* Add some extra margin so it displays to the right of the controls. */
   left: calc(
-    ${lightTheme.gutterTypes.gutterExtraLarge} +
-      ${lightTheme.gutterTypes.gutterSmall}
+    ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge} +
+      ${({ theme }) => theme.eui.gutterTypes.gutterSmall}
   );
   position: absolute;
   z-index: 1;
 `;
 
 export function EmptyBanner() {
+  const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [nodeCount, setNodeCount] = useState(0);
 
@@ -51,8 +52,8 @@ export function EmptyBanner() {
   // subtract the space for controls and margins.
   const width =
     cy.width() -
-    parseInt(lightTheme.gutterTypes.gutterExtraLarge, 10) -
-    parseInt(lightTheme.gutterTypes.gutterLarge, 10);
+    parseInt(theme.eui.gutterTypes.gutterExtraLarge, 10) -
+    parseInt(theme.eui.gutterTypes.gutterLarge, 10);
 
   return (
     <EmptyBannerContainer style={{ width }}>

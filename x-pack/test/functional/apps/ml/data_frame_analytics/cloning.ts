@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               classification: {
+                prediction_field_name: 'test',
                 dependent_variable: 'y',
                 training_percent: 20,
               },
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
               includes: [],
               excludes: [],
             },
-            model_memory_limit: '350mb',
+            model_memory_limit: '60mb',
             allow_lazy_start: false,
           },
         },
@@ -83,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
               includes: [],
               excludes: [],
             },
-            model_memory_limit: '55mb',
+            model_memory_limit: '5mb',
           },
         },
         {
@@ -107,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             analysis: {
               regression: {
+                prediction_field_name: 'test',
                 dependent_variable: 'stab',
                 training_percent: 20,
               },
@@ -115,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
               includes: [],
               excludes: [],
             },
-            model_memory_limit: '105mb',
+            model_memory_limit: '20mb',
           },
         },
       ];
@@ -153,40 +155,67 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
-          await ml.testResources.deleteIndexPattern(testData.job.dest!.index as string);
+          await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
+          await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
         });
 
-        it('should open the flyout with a proper header', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.be(
-            `Clone job from ${testData.job.id}`
+        it('opens the existing job in the data frame analytics job wizard', async () => {
+          await ml.testExecution.logTestStep('should open the wizard with a proper header');
+          const headerText = await ml.dataFrameAnalyticsCreation.getHeaderText();
+          expect(headerText).to.match(/Clone job/);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
+        });
+
+        it('navigates through the wizard, checks and sets all needed fields', async () => {
+          await ml.testExecution.logTestStep(
+            'should have correct init form values for config step'
           );
-        });
-
-        it('should have correct init form values', async () => {
-          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobForm(
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobConfigStep(
             testData.job as DataFrameAnalyticsConfig
           );
-        });
 
-        it('should have disabled Create button on open', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(true);
-        });
+          await ml.testExecution.logTestStep('should continue to the additional options step');
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
 
-        it('should enable Create button on a valid form input', async () => {
+          await ml.testExecution.logTestStep(
+            'should have correct init form values for additional options step'
+          );
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
+            testData.job.analysis as DataFrameAnalyticsConfig['analysis']
+          );
+
+          await ml.testExecution.logTestStep('should continue to the details step');
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
+
+          await ml.testExecution.logTestStep(
+            'should have correct init form values for details step'
+          );
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobDetailsStep(
+            testData.job as DataFrameAnalyticsConfig
+          );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
+
+          await ml.testExecution.logTestStep('should continue to the create step');
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+        });
+
+        it('runs the clone analytics job and displays it correctly in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'should have enabled Create button on a valid form input'
+          );
           expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(false);
-        });
 
-        it('should create a clone job', async () => {
+          await ml.testExecution.logTestStep('should create a clone job');
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
-        });
 
-        it('finishes analytics processing', async () => {
+          await ml.testExecution.logTestStep('should finish analytics processing');
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
-        });
 
-        it('displays the created job in the analytics table', async () => {
+          await ml.testExecution.logTestStep(
+            'should display the created job in the analytics table'
+          );
+          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();

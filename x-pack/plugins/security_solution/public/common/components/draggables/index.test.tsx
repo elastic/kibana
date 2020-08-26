@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
+import '../../mock/match_media';
 import { getEmptyString } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
 

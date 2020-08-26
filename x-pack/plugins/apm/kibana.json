@@ -25,5 +25,13 @@
   "configPath": [
     "xpack",
     "apm"
+  ],
+  "extraPublicDirs": [
+    "public/style/variables"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "observability"
   ]
 }

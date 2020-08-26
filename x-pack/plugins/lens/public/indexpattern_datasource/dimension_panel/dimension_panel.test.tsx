@@ -27,6 +27,14 @@ import { OperationMetadata } from '../../types';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const expectedIndexPatterns = {
   1: {
@@ -37,6 +45,7 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -44,6 +53,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -51,6 +61,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -58,6 +69,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -79,7 +91,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
-      showEmptyFields: false,
+      isFirstExistenceFetch: false,
       existingFields: {
         'my-fake-index-pattern': {
           timestamp: true,
@@ -202,9 +214,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options).toHaveLength(2);
 
       expect(options![0].label).toEqual('Records');
-
       expect(options![1].options!.map(({ label }) => label)).toEqual([
-        'timestamp',
+        'timestampLabel',
         'bytes',
         'memory',
         'source',
@@ -231,7 +242,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .filter('[data-test-subj="indexPattern-dimension-field"]')
         .prop('options');
 
-      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
+      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
     });
 
     it('should indicate fields which are incompatible for the operation of the current column', () => {
@@ -269,7 +280,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
@@ -306,11 +317,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
       expect(items.find(({ label }) => label === 'Minimum')!['data-test-subj']).not.toContain(
-        'Incompatible'
+        'incompatible'
       );
 
       expect(items.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
-        'Incompatible'
+        'incompatible'
       );
     });
 
@@ -593,7 +604,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         act(() => {
           wrapper
-            .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+            .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
             .simulate('click');
         });
 
@@ -604,7 +615,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(
@@ -618,7 +629,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         wrapper
@@ -632,7 +643,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         const options = wrapper
@@ -643,7 +654,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -714,7 +727,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         );
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-count"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
           .simulate('click');
 
         const newColumnState = setState.mock.calls[0][0].layers.first.columns.col2;
@@ -750,7 +763,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         );
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         const options = wrapper
@@ -761,7 +774,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -773,7 +788,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         act(() => {
           wrapper
-            .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+            .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
             .simulate('click');
         });
 
@@ -915,7 +930,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']
@@ -1087,12 +1102,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
               },
             },
           },
@@ -1137,12 +1152,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
                 params: {
                   format: { id: 'bytes', params: { decimals: 0 } },
                 },
@@ -1187,12 +1202,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
                 params: {
                   format: { id: 'bytes', params: { decimals: 2 } },
                 },
@@ -1245,12 +1260,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
               {
                 aggregatable: true,
                 name: 'bar',
+                displayName: 'bar',
                 searchable: true,
                 type: 'number',
               },
               {
                 aggregatable: true,
                 name: 'mystring',
+                displayName: 'mystring',
                 searchable: true,
                 type: 'string',
               },
@@ -1258,7 +1275,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',

@@ -124,7 +124,7 @@
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.blocklistButtonTooltip' | i18n: { defaultMessage: 'Block selection from appearing in workspace' } }}"
           aria-label="{{ ::'xpack.graph.sidebar.topMenu.blocklistButtonTooltip' | i18n: { defaultMessage: 'Block selection from appearing in workspace' } }}"
-          ng-click="workspace.blacklistSelection();">
+          ng-click="workspace.blocklistSelection();">
           <span class="kuiIcon fa-ban"></span>
         </button>
 

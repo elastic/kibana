@@ -8,7 +8,10 @@ import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
+import {
+  DataFrameAnalyticsConfig,
+  UpdateDataFrameAnalyticsConfig,
+} from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
 
@@ -69,6 +72,14 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
+      body,
+    });
+  },
+  updateDataFrameAnalytics(analyticsId: string, updateConfig: UpdateDataFrameAnalyticsConfig) {
+    const body = JSON.stringify(updateConfig);
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}/_update`,
+      method: 'POST',
       body,
     });
   },

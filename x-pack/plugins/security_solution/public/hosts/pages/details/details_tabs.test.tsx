@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import '../../../common/mock/match_media';
 import { mockIndexPattern } from '../../../common/mock/index_pattern';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { HostDetailsTabs } from './details_tabs';
@@ -18,13 +18,19 @@ import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 jest.mock('../../../common/containers/source', () => ({
-  indicesExistOrDataTemporarilyUnavailable: () => true,
-  WithSource: ({
-    children,
-  }: {
-    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
-  }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
+  useWithSource: jest.fn().mockReturnValue({ indicesExist: true, indexPattern: mockIndexPattern }),
+}));
+
+jest.mock('../../../common/containers/use_global_time', () => ({
+  useGlobalTime: jest.fn().mockReturnValue({
+    from: '2020-07-07T08:20:18.966Z',
+    isInitializing: false,
+    to: '2020-07-08T08:20:18.966Z',
+    setQuery: jest.fn(),
+  }),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -71,19 +77,19 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/host-1/${path}`]}>
             <HostDetailsTabs
-              from={0}
               isInitializing={false}
               detailName={'host-1'}
               setQuery={jest.fn()}
-              to={0}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={mockIndexPattern}
               type={type}
               pageFilters={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
+              from={'2020-07-07T08:20:18.966Z'}
+              to={'2020-07-08T08:20:18.966Z'}
             />
           </MemoryRouter>
         </TestProviders>
@@ -91,10 +97,10 @@ describe('body', () => {
 
       // match against everything but the functions to ensure they are there as expected
       expect(wrapper.find(componentName).props()).toMatchObject({
-        endDate: 0,
+        endDate: '2020-07-08T08:20:18.966Z',
         filterQuery,
         skip: false,
-        startDate: 0,
+        startDate: '2020-07-07T08:20:18.966Z',
         type: 'details',
         indexPattern: {
           fields: [

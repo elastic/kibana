@@ -15,7 +15,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       id="xpack.securitySolution.components.mlPopup.upgradeDescription"
       values={
         Object {
-          "cloudLink": <ForwardRef
+          "cloudLink": <EuiLink
             href="https://www.elastic.co/cloud/"
             target="_blank"
           >
@@ -24,7 +24,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               id="xpack.securitySolution.components.mlPopup.cloudLink"
               values={Object {}}
             />
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />

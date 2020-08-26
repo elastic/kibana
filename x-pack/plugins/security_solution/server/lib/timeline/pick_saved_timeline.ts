@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { isEmpty } from 'lodash/fp';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
@@ -28,19 +27,15 @@ export const pickSavedTimeline = (
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
 
-  if (savedTimeline.timelineType === TimelineType.template) {
-    if (savedTimeline.templateTimelineId == null) {
-      // create template timeline
-      savedTimeline.templateTimelineId = uuid.v4();
-      savedTimeline.templateTimelineVersion = 1;
-    } else {
-      // update template timeline
-      if (savedTimeline.templateTimelineVersion != null) {
-        savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
-      }
-    }
-  } else {
+  if (savedTimeline.status === TimelineStatus.draft) {
+    savedTimeline.status = !isEmpty(savedTimeline.title)
+      ? TimelineStatus.active
+      : TimelineStatus.draft;
+  }
+
+  if (savedTimeline.timelineType === TimelineType.default) {
     savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
+    savedTimeline.status = savedTimeline.status ?? TimelineStatus.active;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
   }
@@ -48,6 +43,8 @@ export const pickSavedTimeline = (
   if (!isEmpty(savedTimeline.title) && savedTimeline.status === TimelineStatus.draft) {
     savedTimeline.status = TimelineStatus.active;
   }
+
+  savedTimeline.excludedRowRendererIds = savedTimeline.excludedRowRendererIds ?? [];
 
   return savedTimeline;
 };

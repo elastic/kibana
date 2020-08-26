@@ -7,10 +7,11 @@
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render, act } from '@testing-library/react';
+
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { render, act, wait as waitFor } from '@testing-library/react';
 
 import { mockFirstLastSeenHostQuery } from '../../containers/hosts/first_last_seen/mock';
-import { wait } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock';
 
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
@@ -51,10 +52,12 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await act(() => wait());
-
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+        );
+      })
     );
   });
 
@@ -66,9 +69,12 @@ describe('FirstLastSeen Component', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await act(() => wait());
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+        );
+      })
     );
   });
 
@@ -83,10 +89,12 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await act(() => wait());
-
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+        );
+      })
     );
   });
 
@@ -101,10 +109,12 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await act(() => wait());
-
-    expect(container.innerHTML).toBe(
-      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+    await act(() =>
+      waitFor(() => {
+        expect(container.innerHTML).toBe(
+          `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+        );
+      })
     );
   });
 
@@ -118,8 +128,11 @@ describe('FirstLastSeen Component', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await act(() => wait());
-    expect(container.textContent).toBe('something-invalid');
+    await act(() =>
+      waitFor(() => {
+        expect(container.textContent).toBe('something-invalid');
+      })
+    );
   });
 
   test('Last Seen With a bad date time string', async () => {
@@ -132,7 +145,10 @@ describe('FirstLastSeen Component', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await act(() => wait());
-    expect(container.textContent).toBe('something-invalid');
+    await act(() =>
+      waitFor(() => {
+        expect(container.textContent).toBe('something-invalid');
+      })
+    );
   });
 });

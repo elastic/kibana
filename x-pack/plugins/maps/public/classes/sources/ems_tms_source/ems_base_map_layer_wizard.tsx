@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiPanel } from '@elastic/eui';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { EMSTMSSource, sourceTitle } from './ems_tms_source';
@@ -13,9 +14,11 @@ import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_laye
 // @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
 import { getIsEmsEnabled } from '../../../kibana_services';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
-  checkVisibility: () => {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
+  checkVisibility: async () => {
     return getIsEmsEnabled();
   },
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
@@ -30,7 +33,11 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
       previewLayers([layerDescriptor]);
     };
 
-    return <TileServiceSelect onTileSelect={onSourceConfigChange} />;
+    return (
+      <EuiPanel>
+        <TileServiceSelect onTileSelect={onSourceConfigChange} />
+      </EuiPanel>
+    );
   },
   title: sourceTitle,
 };

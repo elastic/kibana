@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
+import { xyVisualization } from './xy_visualization';
 
 jest.mock('../id_generator');
 
@@ -119,7 +120,33 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => state.preferredSeriesType)).toEqual([
+    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+      'bar_stacked',
+      'area_stacked',
+      'area',
+      'line',
+      'bar_horizontal_stacked',
+      'bar_horizontal',
+      'bar',
+    ]);
+  });
+
+  // This limitation is acceptable for now, but is now tested
+  test('is unable to generate layers when switching from a non-XY chart with multiple layers', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first', 'second'],
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => state.layers.length)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
       'area_stacked',
       'area',
@@ -156,7 +183,7 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => state.preferredSeriesType)).toEqual([
+    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'line',
       'bar',
       'bar_horizontal',
@@ -164,6 +191,59 @@ describe('xy_suggestions', () => {
       'bar_horizontal_stacked',
       'area',
       'area_stacked',
+    ]);
+  });
+
+  test('suggests all basic x y charts when switching from another x y chart with multiple layers', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first', 'second'],
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'bar',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+          {
+            layerId: 'second',
+            seriesType: 'bar',
+            xAccessor: undefined,
+            accessors: [],
+            splitAccessor: undefined,
+          },
+        ],
+      },
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+      'line',
+      'bar',
+      'bar_horizontal',
+      'bar_stacked',
+      'bar_horizontal_stacked',
+      'area',
+      'area_stacked',
+    ]);
+    expect(suggestions.map(({ state }) => state.layers.map((l) => l.layerId))).toEqual([
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
     ]);
   });
 
@@ -328,9 +408,47 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
+  test('keeps existing seriesType for initial tables', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
+      preferredSeriesType: 'line',
+      layers: [
+        {
+          accessors: [],
+          layerId: 'first',
+          seriesType: 'line',
+          splitAccessor: undefined,
+          xAccessor: '',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'initial',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].hide).toEqual(false);
+    expect(suggestions[0].state.preferredSeriesType).toEqual('line');
+    expect(suggestions[0].state.layers[0].seriesType).toEqual('line');
+  });
+
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -368,6 +486,11 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -386,7 +509,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
-      keptLayerIds: [],
+      keptLayerIds: ['first'],
     });
 
     expect(rest).toHaveLength(visualizationTypes.length - 2);
@@ -408,6 +531,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -440,6 +564,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price'],
@@ -474,6 +599,11 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -492,7 +622,7 @@ describe('xy_suggestions', () => {
         changeType: 'extended',
       },
       state: currentState,
-      keptLayerIds: [],
+      keptLayerIds: ['first'],
     });
 
     expect(rest).toHaveLength(0);
@@ -512,6 +642,11 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price'],
@@ -530,7 +665,7 @@ describe('xy_suggestions', () => {
         changeType: 'reorder',
       },
       state: currentState,
-      keptLayerIds: [],
+      keptLayerIds: ['first'],
     });
 
     expect(rest).toHaveLength(0);
@@ -551,6 +686,11 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -569,7 +709,7 @@ describe('xy_suggestions', () => {
         changeType: 'extended',
       },
       state: currentState,
-      keptLayerIds: [],
+      keptLayerIds: ['first'],
     });
 
     expect(rest).toHaveLength(0);

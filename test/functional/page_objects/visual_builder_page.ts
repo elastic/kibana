@@ -49,6 +49,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics', {
         useActualUrl: true,
       });
+      log.debug('Wait for initializing TSVB editor');
+      await this.checkVisualBuilderIsPresent();
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
@@ -277,8 +279,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       decimalPlaces?: string;
     }) {
       if (from) {
-        const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
-        await comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        await retry.try(async () => {
+          const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
+          await comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        });
       }
       if (to) {
         const toCombobox = await find.byCssSelector('[id$="to-row"] .euiComboBox');
@@ -311,9 +315,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`))[
-        nth
-      ];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -404,7 +408,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getViewTable(): Promise<string> {
-      const tableView = await testSubjects.find('tableView');
+      const tableView = await testSubjects.find('tableView', 20000);
       return await tableView.getVisibleText();
     }
 
@@ -416,7 +420,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async setIndexPatternValue(value: string) {
       const el = await testSubjects.find('metricsIndexPatternInput');
       await el.clearValue();
-      await el.type(value);
+      await el.type(value, { charByChar: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -502,14 +506,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async setBackgroundColor(colorHex: string): Promise<void> {
       await this.clickColorPicker();
       await this.checkColorPickerPopUpIsPresent();
-      await find.setValue('.tvbColorPickerPopUp input', colorHex);
+      await find.setValue('.euiColorPicker input', colorHex);
       await this.clickColorPicker();
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
       log.debug(`Check color picker popup is present`);
-      await testSubjects.existOrFail('tvbColorPickerPopUp', { timeout: 5000 });
+      await testSubjects.existOrFail('colorPickerPopover', { timeout: 5000 });
     }
 
     public async changePanelPreview(nth: number = 0): Promise<void> {

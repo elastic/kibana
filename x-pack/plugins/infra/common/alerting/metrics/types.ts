@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { ItemTypeRT } from '../../inventory_models/types';
 
 // TODO: Have threshold and inventory alerts import these types from this file instead of from their
 // local directories
@@ -39,7 +40,16 @@ const baseAlertRequestParamsRT = rt.intersection([
     sourceId: rt.string,
   }),
   rt.type({
-    lookback: rt.union([rt.literal('h'), rt.literal('d'), rt.literal('w'), rt.literal('M')]),
+    lookback: rt.union([
+      rt.literal('ms'),
+      rt.literal('s'),
+      rt.literal('m'),
+      rt.literal('h'),
+      rt.literal('d'),
+      rt.literal('w'),
+      rt.literal('M'),
+      rt.literal('y'),
+    ]),
     criteria: rt.array(rt.any),
     alertInterval: rt.string,
   }),
@@ -61,15 +71,19 @@ export type MetricThresholdAlertPreviewRequestParams = rt.TypeOf<
 const inventoryAlertPreviewRequestParamsRT = rt.intersection([
   baseAlertRequestParamsRT,
   rt.type({
-    nodeType: rt.string,
+    nodeType: ItemTypeRT,
     alertType: rt.literal(METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID),
   }),
 ]);
+export type InventoryAlertPreviewRequestParams = rt.TypeOf<
+  typeof inventoryAlertPreviewRequestParamsRT
+>;
 
 export const alertPreviewRequestParamsRT = rt.union([
   metricThresholdAlertPreviewRequestParamsRT,
   inventoryAlertPreviewRequestParamsRT,
 ]);
+export type AlertPreviewRequestParams = rt.TypeOf<typeof alertPreviewRequestParamsRT>;
 
 export const alertPreviewSuccessResponsePayloadRT = rt.type({
   numberOfGroups: rt.number,
@@ -77,6 +91,8 @@ export const alertPreviewSuccessResponsePayloadRT = rt.type({
     fired: rt.number,
     noData: rt.number,
     error: rt.number,
-    tooManyBuckets: rt.number,
   }),
 });
+export type AlertPreviewSuccessResponsePayload = rt.TypeOf<
+  typeof alertPreviewSuccessResponsePayloadRT
+>;

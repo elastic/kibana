@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse, GenericParams } from 'elasticsearch';
+import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { RouteMethod, RouteConfig } from '../../../../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
-import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
+import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginSetup } from '../../../../../../plugins/apm/server';
-import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
+import { MlPluginSetup } from '../../../../../ml/server';
 
-// NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
@@ -24,6 +24,7 @@ export interface InfraServerPluginDeps {
   features: FeaturesPluginSetup;
   apm: APMPluginSetup;
   alerts: AlertingPluginContract;
+  ml?: MlPluginSetup;
 }
 
 export interface CallWithRequestParams extends GenericParams {
@@ -37,6 +38,7 @@ export interface CallWithRequestParams extends GenericParams {
   fields?: string | string[];
   path?: string;
   query?: string | object;
+  track_total_hits?: boolean | number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -59,6 +61,7 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
     skipped: number;
     failed: number;
   };
+  timed_out: boolean;
   aggregations?: Aggregations;
   hits: {
     total: {
@@ -168,6 +171,6 @@ export interface InfraTSVBSeries {
 
 export type InfraTSVBDataPoint = [number, number];
 
-export type InfraRouteConfig<params, query, body, method extends RouteMethod> = {
+export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<params, query, body, method>;
+} & RouteConfig<Params, Query, Body, Method>;

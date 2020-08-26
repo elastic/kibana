@@ -1,0 +1,58 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects events that may describe SMTP traffic from internal hosts to a host across the Internet. In an enterprise network, there is typically a dedicated internal host that performs this function. It is also frequently abused by threat actors for command and control, or data exfiltration.",
+  "false_positives": [
+    "NATed servers that process email traffic may false and should be excluded from this rule as this is expected behavior for them. Consumer and personal devices may send email traffic to remote Internet destinations. In this case, such devices or networks can be excluded from this rule if this is expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "SMTP to the Internet",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:(25 or 465 or 587) or event.dataset:zeek.smtp) and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\")",
+  "risk_score": 21,
+  "rule_id": "67a9beba-830d-4035-bfe8-40b7e28f8ac4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": [
+        {
+          "id": "T1048",
+          "name": "Exfiltration Over Alternative Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1048/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 4
+}

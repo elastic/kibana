@@ -24,7 +24,9 @@ describe('default_to_string', () => {
     const decoded = DefaultToString.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultToString"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

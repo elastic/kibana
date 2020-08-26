@@ -23,9 +23,10 @@ import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUr
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
+import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import {
-  EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
+  EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
@@ -36,7 +37,7 @@ interface RouteParams {
   serviceName: string;
 }
 
-const renderAsRedirectTo = (to: string) => {
+export const renderAsRedirectTo = (to: string) => {
   return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{
@@ -249,5 +250,21 @@ export const routes: BreadcrumbRoute[] = [
       defaultMessage: 'Customize UI',
     }),
     name: RouteName.CUSTOMIZE_UI,
+  },
+  {
+    exact: true,
+    path: '/settings/anomaly-detection',
+    component: () => (
+      <Settings>
+        <AnomalyDetection />
+      </Settings>
+    ),
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.anomalyDetection',
+      {
+        defaultMessage: 'Anomaly detection',
+      }
+    ),
+    name: RouteName.ANOMALY_DETECTION,
   },
 ];

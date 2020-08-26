@@ -5,12 +5,13 @@
  */
 
 import moment from 'moment';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
+import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export class QueryContext {
-  callES: APICaller;
+  callES: LegacyAPICaller;
   heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -145,5 +146,22 @@ export class QueryContext {
       this.size,
       this.statusFilter
     );
+  }
+
+  // Returns true if the order returned by the ES query matches the requested sort order.
+  // This useful to determine if the results need to be reversed from their ES results order.
+  // I.E. when navigating backwards using prevPagePagination (CursorDirection.Before) yet using a SortOrder.ASC.
+  searchSortAligned(): boolean {
+    if (this.pagination.cursorDirection === CursorDirection.AFTER) {
+      return this.pagination.sortOrder === SortOrder.ASC;
+    } else {
+      return this.pagination.sortOrder === SortOrder.DESC;
+    }
+  }
+
+  cursorOrder(): 'asc' | 'desc' {
+    return CursorDirection[this.pagination.cursorDirection] === CursorDirection.AFTER
+      ? 'asc'
+      : 'desc';
   }
 }

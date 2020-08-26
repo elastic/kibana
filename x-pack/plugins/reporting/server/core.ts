@@ -20,10 +20,10 @@ import { SecurityPluginSetup } from '../../security/server';
 import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { screenshotsObservableFactory } from './export_types/common/lib/screenshots';
+import { screenshotsObservableFactory } from './lib/screenshots';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
-import { EnqueueJobFn } from './lib/enqueue_job';
+import { ReportingStore } from './lib/store';
 
 export interface ReportingInternalSetup {
   elasticsearch: ElasticsearchServiceSetup;
@@ -35,8 +35,8 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
-  enqueueJob: EnqueueJobFn;
   esqueue: ESQueueInstance;
+  store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
 }
@@ -113,7 +113,7 @@ export class ReportingCore {
   /*
    * Gives async access to the startDeps
    */
-  private async getPluginStartDeps() {
+  public async getPluginStartDeps() {
     if (this.pluginStartDeps) {
       return this.pluginStartDeps;
     }
@@ -127,10 +127,6 @@ export class ReportingCore {
 
   public async getEsqueue() {
     return (await this.getPluginStartDeps()).esqueue;
-  }
-
-  public async getEnqueueJob() {
-    return (await this.getPluginStartDeps()).enqueueJob;
   }
 
   public async getLicenseInfo() {

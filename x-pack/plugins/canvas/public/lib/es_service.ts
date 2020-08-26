@@ -7,7 +7,6 @@
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
-// @ts-ignore untyped local
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
 import { notifyService } from '../services';
@@ -16,16 +15,16 @@ import { platformService } from '../services';
 const { esService: strings } = ErrorStrings;
 
 const getApiPath = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return basePath + API_ROUTE;
 };
 
 const getSavedObjectsClient = function () {
-  return platformService.getService().coreStart.savedObjects.client;
+  return platformService.getService().getSavedObjectsClient();
 };
 
 const getAdvancedSettings = function () {
-  return platformService.getService().coreStart.uiSettings;
+  return platformService.getService().getUISettings();
 };
 
 export const getFields = (index = '_all') => {

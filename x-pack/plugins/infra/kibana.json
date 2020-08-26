@@ -13,7 +13,15 @@
     "alerts",
     "triggers_actions_ui"
   ],
+  "optionalPlugins": ["ml", "observability"],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "infra"]
+  "configPath": ["xpack", "infra"],
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "apm"
+  ]
 }

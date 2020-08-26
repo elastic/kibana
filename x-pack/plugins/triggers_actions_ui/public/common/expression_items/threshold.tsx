@@ -136,14 +136,14 @@ export const ThresholdExpression = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
-                    isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
+                    isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
                     error={errors[`threshold${i}`]}
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
-                      isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
+                      isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
                       onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;

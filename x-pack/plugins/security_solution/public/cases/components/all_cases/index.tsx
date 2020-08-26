@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBasicTable,
-  EuiButton,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -17,7 +15,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
@@ -26,8 +24,7 @@ import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useDeleteCases } from '../../containers/use_delete_cases';
-import { EuiBasicTableOnChange } from '../../../alerts/pages/detection_engine/rules/types';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
+import { EuiBasicTableOnChange } from '../../../detections/pages/detection_engine/rules/types';
 import { Panel } from '../../../common/components/panel';
 import {
   UtilityBar,
@@ -36,13 +33,11 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
-import { getCreateCaseUrl } from '../../../common/components/link_to';
+import { getCreateCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { OpenClosedStats } from '../open_closed_stats';
-import { navTabs } from '../../../app/home/home_navigations';
-
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
@@ -51,6 +46,10 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
+import { LinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -82,13 +81,14 @@ const getSortField = (field: string): SortFieldCase => {
 };
 
 interface AllCasesProps {
-  onRowClick?: (id: string) => void;
+  onRowClick?: (id?: string) => void;
   isModal?: boolean;
   userCanCrud: boolean;
 }
 export const AllCases = React.memo<AllCasesProps>(
-  ({ onRowClick = () => {}, isModal = false, userCanCrud }) => {
-    const urlSearch = useGetUrlSearch(navTabs.case);
+  ({ onRowClick, isModal = false, userCanCrud }) => {
+    const { navigateToApp } = useKibana().services.application;
+    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
     const {
       countClosedCases,
@@ -136,7 +136,7 @@ export const AllCases = React.memo<AllCasesProps>(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
       },
-      [filterRefetch.current]
+      [filterRefetch]
     );
     const refreshCases = useCallback(
       (dataRefresh = true) => {
@@ -148,7 +148,7 @@ export const AllCases = React.memo<AllCasesProps>(
           filterRefetch.current();
         }
       },
-      [filterOptions, queryParams, filterRefetch.current]
+      [filterRefetch, refetchCases, setSelectedCases, fetchCasesStatus]
     );
 
     useEffect(() => {
@@ -160,7 +160,7 @@ export const AllCases = React.memo<AllCasesProps>(
         refreshCases();
         dispatchResetIsUpdated();
       }
-    }, [isDeleted, isUpdated]);
+    }, [isDeleted, isUpdated, refreshCases, dispatchResetIsDeleted, dispatchResetIsUpdated]);
     const confirmDeleteModal = useMemo(
       () => (
         <ConfirmDeleteCaseModal
@@ -174,13 +174,22 @@ export const AllCases = React.memo<AllCasesProps>(
           )}
         />
       ),
-      [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
+      [
+        deleteBulk,
+        deleteThisCase,
+        isDisplayConfirmDeleteModal,
+        handleToggleModal,
+        handleOnDeleteConfirm,
+      ]
     );
 
-    const toggleDeleteModal = useCallback((deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase(deleteCase);
-    }, []);
+    const toggleDeleteModal = useCallback(
+      (deleteCase: Case) => {
+        handleToggleModal();
+        setDeleteThisCase(deleteCase);
+      },
+      [handleToggleModal]
+    );
 
     const toggleBulkDeleteModal = useCallback(
       (caseIds: string[]) => {
@@ -194,14 +203,14 @@ export const AllCases = React.memo<AllCasesProps>(
         const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
         setDeleteBulk(convertToDeleteCases);
       },
-      [selectedCases]
+      [selectedCases, setDeleteBulk, handleToggleModal]
     );
 
     const handleUpdateCaseStatus = useCallback(
       (status: string) => {
         updateBulkStatus(selectedCases, status);
       },
-      [selectedCases]
+      [selectedCases, updateBulkStatus]
     );
 
     const selectedCaseIds = useMemo(
@@ -222,13 +231,27 @@ export const AllCases = React.memo<AllCasesProps>(
           })}
         />
       ),
-      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
+      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
     );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
         dispatchUpdateCaseProperty({ ...args, refetchCasesStatus: fetchCasesStatus });
       },
       [dispatchUpdateCaseProperty, fetchCasesStatus]
+    );
+
+    const goToCreateCase = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        if (isModal && onRowClick != null) {
+          onRowClick();
+        } else {
+          navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            path: getCreateCaseUrl(urlSearch),
+          });
+        }
+      },
+      [navigateToApp, isModal, onRowClick, urlSearch]
     );
 
     const actions = useMemo(
@@ -263,7 +286,7 @@ export const AllCases = React.memo<AllCasesProps>(
         setQueryParams(newQueryParams);
         refreshCases(false);
       },
-      [queryParams]
+      [queryParams, refreshCases, setQueryParams]
     );
 
     const onFilterChangedCallback = useCallback(
@@ -276,7 +299,7 @@ export const AllCases = React.memo<AllCasesProps>(
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [filterOptions, queryParams]
+      [refreshCases, setQueryParams, setFilters]
     );
 
     const memoizedGetCasesColumns = useMemo(
@@ -296,9 +319,10 @@ export const AllCases = React.memo<AllCasesProps>(
     const sorting: EuiTableSortingType<Case> = {
       sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
     };
+
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({ onSelectionChange: setSelectedCases }),
-      [selectedCases]
+      [setSelectedCases]
     );
     const isCasesLoading = useMemo(
       () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
@@ -307,6 +331,35 @@ export const AllCases = React.memo<AllCasesProps>(
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
     const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
+
+    const onTableRowClick = useMemo(
+      () =>
+        memoize<(id: string) => () => void>((id) => () => {
+          if (onRowClick) {
+            onRowClick(id);
+          }
+        }),
+      [onRowClick]
+    );
+
+    const tableRowProps = useCallback(
+      (item) => {
+        const rowProps = {
+          'data-test-subj': `cases-table-row-${item.id}`,
+        };
+
+        if (isModal) {
+          return {
+            ...rowProps,
+            onClick: onTableRowClick(item.id),
+          };
+        }
+
+        return rowProps;
+      },
+      [isModal, onTableRowClick]
+    );
+
     return (
       <>
         {!isEmpty(actionsErrors) && (
@@ -314,7 +367,13 @@ export const AllCases = React.memo<AllCasesProps>(
         )}
         {!isModal && (
           <CaseHeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="m"
+              responsive={false}
+              wrap={true}
+              data-test-subj="all-cases-header"
+            >
               <EuiFlexItem grow={false}>
                 <OpenClosedStats
                   dataTestSubj="openStatsHeader"
@@ -342,15 +401,16 @@ export const AllCases = React.memo<AllCasesProps>(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <LinkButton
                   isDisabled={!userCanCrud}
                   fill
-                  href={getCreateCaseUrl(urlSearch)}
+                  onClick={goToCreateCase}
+                  href={formatUrl(getCreateCaseUrl())}
                   iconType="plusInCircle"
                   data-test-subj="createNewCaseBtn"
                 >
                   {i18n.CREATE_TITLE}
-                </EuiButton>
+                </LinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </CaseHeaderPage>
@@ -385,7 +445,7 @@ export const AllCases = React.memo<AllCasesProps>(
                     </UtilityBarText>
                   </UtilityBarGroup>
                   {!isModal && (
-                    <UtilityBarGroup>
+                    <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
                       <UtilityBarText data-test-subj="case-table-selected-case-count">
                         {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                       </UtilityBarText>
@@ -418,27 +478,23 @@ export const AllCases = React.memo<AllCasesProps>(
                     titleSize="xs"
                     body={i18n.NO_CASES_BODY}
                     actions={
-                      <EuiButton
+                      <LinkButton
                         isDisabled={!userCanCrud}
                         fill
                         size="s"
-                        href={getCreateCaseUrl(urlSearch)}
+                        onClick={goToCreateCase}
+                        href={formatUrl(getCreateCaseUrl())}
                         iconType="plusInCircle"
+                        data-test-subj="cases-table-add-case"
                       >
                         {i18n.ADD_NEW_CASE}
-                      </EuiButton>
+                      </LinkButton>
                     }
                   />
                 }
                 onChange={tableOnChangeCallback}
                 pagination={memoizedPagination}
-                rowProps={(item) =>
-                  isModal
-                    ? {
-                        onClick: () => onRowClick(item.id),
-                      }
-                    : {}
-                }
+                rowProps={tableRowProps}
                 selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
               />

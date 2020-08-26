@@ -8,19 +8,33 @@
   "comments": [{ "comment": "This is a short little comment." }],
   "entries": [
     {
+      "field": "actingProcess.file.signer",
+      "operator": "excluded",
+      "type": "exists"
+    },
+    {
       "field": "host.name",
       "operator": "included",
-      "match": "sampleHostName"
+      "type": "match_any",
+      "value": ["some host", "another host"]
     },
     {
-      "field": "event.category",
-      "operator": "included",
-      "match_any": ["process", "malware"]
-    },
-    {
-      "field": "event.action",
-      "operator": "included",
-      "match": "user-password-change"
+      "field": "file.signature",
+      "type": "nested",
+      "entries": [
+        {
+          "field": "signer",
+          "type": "match",
+          "operator": "included",
+          "value": "Evil"
+        },
+        {
+          "field": "trusted",
+          "type": "match",
+          "operator": "included",
+          "value": "true"
+        }
+      ]
     }
   ]
 }

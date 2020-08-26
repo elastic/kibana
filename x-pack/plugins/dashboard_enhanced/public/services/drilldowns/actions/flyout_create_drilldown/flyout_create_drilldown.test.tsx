@@ -9,13 +9,17 @@ import {
   OpenFlyoutAddDrilldownParams,
 } from './flyout_create_drilldown';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { drilldownsPluginMock } from '../../../../../../drilldowns/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { TriggerContextMapping } from '../../../../../../../../src/plugins/ui_actions/public';
+import {
+  TriggerContextMapping,
+  TriggerId,
+} from '../../../../../../../../src/plugins/ui_actions/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
+import { uiActionsEnhancedPluginMock } from '../../../../../../ui_actions_enhanced/public/mocks';
+import { UiActionsEnhancedActionFactory } from '../../../../../../ui_actions_enhanced/public/';
 
 const overlays = coreMock.createStart().overlays;
-const drilldowns = drilldownsPluginMock.createStartContract();
+const uiActionsEnhanced = uiActionsEnhancedPluginMock.createStartContract();
 
 const actionParams: OpenFlyoutAddDrilldownParams = {
   start: () => ({
@@ -23,7 +27,7 @@ const actionParams: OpenFlyoutAddDrilldownParams = {
       overlays,
     } as any,
     plugins: {
-      drilldowns,
+      uiActionsEnhanced,
     },
     self: {},
   }),
@@ -50,6 +54,7 @@ interface CompatibilityParams {
   isValueClickTriggerSupported?: boolean;
   isEmbeddableEnhanced?: boolean;
   rootType?: string;
+  actionFactoriesTriggers?: TriggerId[];
 }
 
 describe('isCompatible', () => {
@@ -61,9 +66,16 @@ describe('isCompatible', () => {
       isValueClickTriggerSupported = true,
       isEmbeddableEnhanced = true,
       rootType = 'dashboard',
+      actionFactoriesTriggers = ['VALUE_CLICK_TRIGGER'],
     }: CompatibilityParams,
     expectedResult: boolean = true
   ): Promise<void> {
+    uiActionsEnhanced.getActionFactories.mockImplementation(() => [
+      ({
+        supportedTriggers: () => actionFactoriesTriggers,
+      } as unknown) as UiActionsEnhancedActionFactory,
+    ]);
+
     let embeddable = new MockEmbeddable(
       { id: '', viewMode: isEdit ? ViewMode.EDIT : ViewMode.VIEW },
       {
@@ -114,6 +126,15 @@ describe('isCompatible', () => {
   test('not compatible if root embeddable is not "dashboard"', async () => {
     await assertNonCompatibility({
       rootType: 'visualization',
+    });
+  });
+
+  test('not compatible if no triggers intersection', async () => {
+    await assertNonCompatibility({
+      actionFactoriesTriggers: [],
+    });
+    await assertNonCompatibility({
+      actionFactoriesTriggers: ['SELECT_RANGE_TRIGGER'],
     });
   });
 });

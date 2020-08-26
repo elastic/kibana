@@ -30,6 +30,7 @@ import {
   UIM_TEMPLATE_CREATE,
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
+  UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
 import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
@@ -46,18 +47,28 @@ export const setUiMetricService = (_uiMetricService: UiMetricService<IndexMgmtMe
 };
 // End hack
 
-export function useLoadDataStreams() {
+export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
     path: `${API_BASE_PATH}/data_streams`,
+    method: 'get',
+    query: {
+      includeStats,
+    },
+  });
+}
+
+export function useLoadDataStream(name: string) {
+  return useRequest<DataStream>({
+    path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}`,
     method: 'get',
   });
 }
 
-// TODO: Implement this API endpoint once we have content to surface in the detail panel.
-export function useLoadDataStream(name: string) {
-  return useRequest<DataStream[]>({
-    path: `${API_BASE_PATH}/data_stream/${encodeURIComponent(name)}`,
-    method: 'get',
+export async function deleteDataStreams(dataStreams: string[]) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/delete_data_streams`,
+    method: 'post',
+    body: { dataStreams },
   });
 }
 
@@ -278,4 +289,15 @@ export async function updateTemplate(template: TemplateDeserialized) {
   uiMetricService.trackMetric('count', UIM_TEMPLATE_UPDATE);
 
   return result;
+}
+
+export function simulateIndexTemplate(template: { [key: string]: any }) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/index_templates/simulate`,
+    method: 'post',
+    body: JSON.stringify(template),
+  }).then((result) => {
+    uiMetricService.trackMetric('count', UIM_TEMPLATE_SIMULATE);
+    return result;
+  });
 }

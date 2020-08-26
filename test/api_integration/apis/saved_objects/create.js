@@ -58,6 +58,7 @@ export default function ({ getService }) {
                 title: 'My favorite vis',
               },
               references: [],
+              namespaces: ['default'],
             });
             expect(resp.body.migrationVersion).to.be.ok();
           });
@@ -104,6 +105,7 @@ export default function ({ getService }) {
                 title: 'My favorite vis',
               },
               references: [],
+              namespaces: ['default'],
             });
             expect(resp.body.migrationVersion).to.be.ok();
           });

@@ -12,5 +12,6 @@
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]
 }

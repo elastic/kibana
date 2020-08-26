@@ -7,10 +7,11 @@ import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '../../../common/constants';
+import { ImportDataProps } from '../../detections/containers/detection_engine/rules/types';
 
 jest.mock('../../common/lib/kibana', () => {
   return {
-    KibanaServices: { get: jest.fn() },
+    KibanaServices: { get: jest.fn(() => ({ http: { fetch: jest.fn() } })) },
   };
 });
 
@@ -165,6 +166,7 @@ describe('persistTimeline', () => {
         },
       },
     };
+
     const version = null;
     const fetchMock = jest.fn();
     const postMock = jest.fn();
@@ -172,6 +174,7 @@ describe('persistTimeline', () => {
 
     beforeAll(() => {
       jest.resetAllMocks();
+      jest.resetModules();
 
       (KibanaServices.get as jest.Mock).mockReturnValue({
         http: {
@@ -180,11 +183,11 @@ describe('persistTimeline', () => {
           patch: patchMock.mockReturnValue(mockPatchTimelineResponse),
         },
       });
-      api.persistTimeline({ timelineId, timeline: initialDraftTimeline, version });
-    });
-
-    afterAll(() => {
-      jest.resetAllMocks();
+      api.persistTimeline({
+        timelineId,
+        timeline: initialDraftTimeline,
+        version,
+      });
     });
 
     test('it should create a draft timeline if given status is draft and timelineId is null', () => {
@@ -329,6 +332,7 @@ describe('persistTimeline', () => {
 
     beforeAll(() => {
       jest.resetAllMocks();
+      jest.resetModules();
 
       (KibanaServices.get as jest.Mock).mockReturnValue({
         http: {
@@ -338,10 +342,6 @@ describe('persistTimeline', () => {
         },
       });
       api.persistTimeline({ timelineId, timeline: importTimeline, version });
-    });
-
-    afterAll(() => {
-      jest.resetAllMocks();
     });
 
     test('it should update timeline', () => {
@@ -469,6 +469,7 @@ describe('persistTimeline', () => {
 
     beforeAll(() => {
       jest.resetAllMocks();
+      jest.resetModules();
 
       (KibanaServices.get as jest.Mock).mockReturnValue({
         http: {
@@ -478,10 +479,6 @@ describe('persistTimeline', () => {
         },
       });
       api.persistTimeline({ timelineId, timeline: inputTimeline, version });
-    });
-
-    afterAll(() => {
-      jest.resetAllMocks();
     });
 
     test('it should update timeline', () => {
@@ -498,6 +495,130 @@ describe('persistTimeline', () => {
         timelineId,
         version,
       });
+    });
+  });
+});
+
+describe('importTimelines', () => {
+  const fileToImport = { fileToImport: {} } as ImportDataProps;
+  const fetchMock = jest.fn();
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+
+    (KibanaServices.get as jest.Mock).mockReturnValue({
+      http: {
+        fetch: fetchMock,
+      },
+    });
+    api.importTimelines(fileToImport);
+  });
+
+  test('should pass correct args to KibanaServices - url', () => {
+    expect(fetchMock.mock.calls[0][0]).toEqual('/api/timeline/_import');
+  });
+
+  test('should pass correct args to KibanaServices - args', () => {
+    expect(JSON.stringify(fetchMock.mock.calls[0][1])).toEqual(
+      JSON.stringify({
+        method: 'POST',
+        headers: { 'Content-Type': undefined },
+        body: new FormData(),
+        signal: undefined,
+      })
+    );
+  });
+});
+
+describe('exportSelectedTimeline', () => {
+  const ids = ['123', 'abc'];
+  const fetchMock = jest.fn();
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+
+    (KibanaServices.get as jest.Mock).mockReturnValue({
+      http: {
+        fetch: fetchMock,
+      },
+    });
+    api.exportSelectedTimeline({
+      filename: 'timelines_export.ndjson',
+      ids,
+      signal: {} as AbortSignal,
+    });
+  });
+
+  test('should pass correct args to KibanaServices', () => {
+    expect(fetchMock).toBeCalledWith('/api/timeline/_export', {
+      body: JSON.stringify({ ids }),
+      method: 'POST',
+      query: { file_name: 'timelines_export.ndjson' },
+      signal: {},
+    });
+  });
+});
+
+describe('getDraftTimeline', () => {
+  const timelineType = { timelineType: TimelineType.default };
+  const getMock = jest.fn();
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+
+    (KibanaServices.get as jest.Mock).mockReturnValue({
+      http: {
+        get: getMock,
+      },
+    });
+    api.getDraftTimeline(timelineType);
+  });
+
+  test('should pass correct args to KibanaServices', () => {
+    expect(getMock).toBeCalledWith('/api/timeline/_draft', {
+      query: timelineType,
+    });
+  });
+});
+
+describe('cleanDraftTimeline', () => {
+  const postMock = jest.fn();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+
+    (KibanaServices.get as jest.Mock).mockReturnValue({
+      http: {
+        post: postMock,
+      },
+    });
+  });
+
+  test('should pass correct args to KibanaServices - timeline', () => {
+    const args = { timelineType: TimelineType.default };
+
+    api.cleanDraftTimeline(args);
+
+    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+      body: JSON.stringify(args),
+    });
+  });
+
+  test('should pass correct args to KibanaServices - timeline template', () => {
+    const args = {
+      timelineType: TimelineType.template,
+      templateTimelineId: 'test-123',
+      templateTimelineVersion: 1,
+    };
+
+    api.cleanDraftTimeline(args);
+
+    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+      body: JSON.stringify(args),
     });
   });
 });

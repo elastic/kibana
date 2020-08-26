@@ -27,7 +27,7 @@ import {
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementSetup, ManagementApp, ManagementSectionId } from '../../management/public';
+import { ManagementSetup } from '../../management/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -57,7 +57,6 @@ export class IndexPatternManagementPlugin
       IndexPatternManagementStartDependencies
     > {
   private readonly indexPatternManagementService = new IndexPatternManagementService();
-  private managementApp?: ManagementApp;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -65,7 +64,7 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     { management, kibanaLegacy }: IndexPatternManagementSetupDependencies
   ) {
-    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
+    const kibanaSection = management.sections.section.kibana;
 
     if (!kibanaSection) {
       throw new Error('`kibana` management section not found.');
@@ -80,14 +79,16 @@ export class IndexPatternManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    this.managementApp = kibanaSection.registerApp({
+    kibanaSection.registerApp({
       id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, params, () =>
+          this.indexPatternManagementService.environmentService.getEnvironment().ml()
+        );
       },
     });
 
@@ -95,10 +96,6 @@ export class IndexPatternManagementPlugin
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    if (!core.application.capabilities.management.kibana.index_patterns) {
-      this.managementApp!.disable();
-    }
-
     return this.indexPatternManagementService.start();
   }
 

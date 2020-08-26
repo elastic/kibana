@@ -55,6 +55,9 @@ export const metricsExplorerViewSavedObjectType: SavedObjectsType = {
           aggregation: {
             type: 'keyword',
           },
+          source: {
+            type: 'keyword',
+          },
         },
       },
       chartOptions: {

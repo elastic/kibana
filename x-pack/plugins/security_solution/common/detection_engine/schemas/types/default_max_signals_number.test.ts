@@ -25,7 +25,9 @@ describe('default_from_string', () => {
     const decoded = DefaultMaxSignalsNumber.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "DefaultMaxSignals"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -34,7 +36,9 @@ describe('default_from_string', () => {
     const decoded = DefaultMaxSignalsNumber.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "DefaultMaxSignals"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -43,7 +47,9 @@ describe('default_from_string', () => {
     const decoded = DefaultMaxSignalsNumber.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "DefaultMaxSignals"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

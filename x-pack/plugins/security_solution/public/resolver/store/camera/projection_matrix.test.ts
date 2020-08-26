@@ -9,7 +9,7 @@ import { CameraAction } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { projectionMatrix } from './selectors';
-import { applyMatrix3 } from '../../lib/vector2';
+import { applyMatrix3 } from '../../models/vector2';
 import { scaleToZoom } from './scale_to_zoom';
 
 describe('projectionMatrix', () => {

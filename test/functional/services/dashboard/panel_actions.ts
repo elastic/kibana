@@ -70,6 +70,17 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await PageObjects.common.waitForTopNavToBeVisible();
     }
 
+    async editPanelByTitle(title?: string) {
+      log.debug(`editPanelByTitle(${title})`);
+      if (title) {
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
+      }
+      await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    }
+
     async clickExpandPanelToggle() {
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
@@ -212,6 +223,20 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click('resetCustomEmbeddablePanelTitle');
       await testSubjects.click('saveNewTitleButton');
       await this.toggleContextMenu(panel);
+    }
+
+    async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
+      log.debug(`getActionWebElement: "${text}"`);
+      const menu = await testSubjects.find('multipleActionsContextMenu');
+      const items = await menu.findAllByCssSelector('[data-test-subj*="embeddablePanelAction-"]');
+      for (const item of items) {
+        const currentText = await item.getVisibleText();
+        if (currentText === text) {
+          return item;
+        }
+      }
+
+      throw new Error(`No action matching text "${text}"`);
     }
   })();
 }

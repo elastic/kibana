@@ -17,33 +17,39 @@ let httpClient: HttpSetup;
 
 export type UseRequestConfig = _UseRequestConfig;
 
+interface RequestError extends Error {
+  statusCode?: number;
+}
+
 export const setHttpClient = (client: HttpSetup) => {
   httpClient = client;
 };
 
-export const sendRequest = <D = any>(
+export const sendRequest = <D = any, E = RequestError>(
   config: SendRequestConfig
-): Promise<SendRequestResponse<D>> => {
+): Promise<SendRequestResponse<D, E>> => {
   if (!httpClient) {
     throw new Error('sendRequest has no http client set');
   }
-  return _sendRequest<D>(httpClient, config);
+  return _sendRequest<D, E>(httpClient, config);
 };
 
-export const useRequest = <D = any>(config: UseRequestConfig) => {
+export const useRequest = <D = any, E = RequestError>(config: UseRequestConfig) => {
   if (!httpClient) {
     throw new Error('sendRequest has no http client set');
   }
-  return _useRequest<D>(httpClient, config);
+  return _useRequest<D, E>(httpClient, config);
 };
 
 export type SendConditionalRequestConfig =
   | (SendRequestConfig & { shouldSendRequest: true })
   | (Partial<SendRequestConfig> & { shouldSendRequest: false });
 
-export const useConditionalRequest = <D = any>(config: SendConditionalRequestConfig) => {
+export const useConditionalRequest = <D = any, E = RequestError>(
+  config: SendConditionalRequestConfig
+) => {
   const [state, setState] = useState<{
-    error: Error | null;
+    error: RequestError | null;
     data: D | null;
     isLoading: boolean;
   }>({
@@ -70,7 +76,7 @@ export const useConditionalRequest = <D = any>(config: SendConditionalRequestCon
         isLoading: true,
         error: null,
       });
-      const res = await sendRequest<D>({
+      const res = await sendRequest<D, E>({
         method: config.method,
         path: config.path,
         query: config.query,

@@ -101,7 +101,14 @@ export function getUiSettingDefaults() {
         },
       }),
       type: 'select',
-      options: ['Browser', ...moment.tz.names()],
+      options: [
+        'Browser',
+        ...moment.tz
+          .names()
+          // We need to filter out some time zones, that moment.js knows about, but Elasticsearch
+          // does not understand and would fail thus with a 400 bad request when using them.
+          .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST'].includes(tz)),
+      ],
       requiresPageReload: true,
     },
     'dateFormat:scaled': {
@@ -250,20 +257,6 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
       }),
-    },
-    'timepicker:timeDefaults': {
-      name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
-        defaultMessage: 'Time filter defaults',
-      }),
-      value: `{
-  "from": "now-15m",
-  "to": "now"
-}`,
-      type: 'json',
-      description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
-      }),
-      requiresPageReload: true,
     },
     'theme:darkMode': {
       name: i18n.translate('kbn.advancedSettings.darkModeTitle', {

@@ -6,3 +6,4 @@
 
 export { DashboardDrilldownPanelActionsProvider } from './panel_drilldown_actions';
 export { DashboardDrilldownsManageProvider } from './drilldowns_manage';
+export { DashboardPanelTimeRangeProvider } from './panel_time_range';

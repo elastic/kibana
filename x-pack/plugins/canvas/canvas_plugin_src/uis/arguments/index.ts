@@ -5,31 +5,30 @@
  */
 
 import { axisConfig } from './axis_config';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { datacolumn } from './datacolumn';
 import { dateFormatInitializer } from './date_format';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { filterGroup } from './filter_group';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { imageUpload } from './image_upload';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { number } from './number';
 import { numberFormatInitializer } from './number_format';
-// @ts-ignore untyped local
 import { palette } from './palette';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { percentage } from './percentage';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { range } from './range';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { select } from './select';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { shape } from './shape';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { string } from './string';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { textarea } from './textarea';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { toggle } from './toggle';
 
 import { SetupInitializer } from '../../plugin';

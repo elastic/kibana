@@ -1,6 +1,0 @@
-{
-  "id": "list-keyword",
-  "name": "Simple list with a keyword",
-  "description": "This list describes bad host names",
-  "type": "keyword"
-}

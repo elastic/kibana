@@ -18,5 +18,6 @@ export interface App<HistoryLocationState = unknown> extends AppBase
 |  --- | --- | --- |
 |  [appRoute](./kibana-plugin-core-public.app.approute.md) | <code>string</code> | Override the application's routing path from <code>/app/${id}</code>. Must be unique across registered applications. Should not include the base path from HTTP. |
 |  [chromeless](./kibana-plugin-core-public.app.chromeless.md) | <code>boolean</code> | Hide the UI chrome when the application is mounted. Defaults to <code>false</code>. Takes precedence over chrome service visibility settings. |
+|  [exactRoute](./kibana-plugin-core-public.app.exactroute.md) | <code>boolean</code> | If set to true, the application's route will only be checked against an exact match. Defaults to <code>false</code>. |
 |  [mount](./kibana-plugin-core-public.app.mount.md) | <code>AppMount&lt;HistoryLocationState&gt; &#124; AppMountDeprecated&lt;HistoryLocationState&gt;</code> | A mount function called when the user navigates to this app's route. May have signature of [AppMount](./kibana-plugin-core-public.appmount.md) or [AppMountDeprecated](./kibana-plugin-core-public.appmountdeprecated.md)<!-- -->. |
 

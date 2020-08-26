@@ -86,7 +86,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -97,17 +96,14 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -154,42 +150,99 @@ export {
  */
 
 import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
+  EsaggsExpressionFunctionDefinition,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
+  ParsedInterval,
+  // search
+  IEsSearchRequest,
+  IEsSearchResponse,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
+} from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
+  ISearchStrategy,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-  ISearchContext,
-  TSearchStrategyProvider,
+  ISearchSetup,
+  ISearchStart,
   getDefaultSearchParams,
   getTotalLoaded,
+  usageProvider,
+  SearchUsage,
 } from './search';
 
 // Search namespace
 export const search = {
   aggs: {
+    CidrMask,
     dateHistogramInterval,
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
+    isNumberType,
+    isStringType,
+    isType,
     isValidEsInterval,
     isValidInterval,
+    parentPipelineType,
     parseEsInterval,
     parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
     toAbsoluteDates,
   },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 };
 
 /**
@@ -202,6 +255,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,

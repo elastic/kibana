@@ -69,6 +69,7 @@ function mockProps() {
     onIsLockedUpdate: () => {},
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
+    customNavLink$: new BehaviorSubject(undefined),
   };
 }
 
@@ -120,12 +121,14 @@ describe('CollapsibleNav', () => {
       mockRecentNavLink({ label: 'recent 1' }),
       mockRecentNavLink({ label: 'recent 2' }),
     ];
+    const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
     expect(component).toMatchSnapshot();

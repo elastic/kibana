@@ -31,17 +31,22 @@ import {
   TRANSFORM_MODE,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
+import { useStopTransforms } from '../../../../hooks';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
-import { getTaskStateBadge } from './columns';
-import { DeleteAction } from './action_delete';
-import { StartAction } from './action_start';
-import { StopAction } from './action_stop';
+import {
+  isDeleteActionDisabled,
+  useDeleteAction,
+  DeleteActionName,
+  DeleteActionModal,
+} from '../action_delete';
+import { useStartAction, StartActionName, StartActionModal } from '../action_start';
+import { StopActionName } from '../action_stop';
 
 import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
-import { getColumns } from './columns';
+import { getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 
 function getItemIdToExpandedRowMap(
@@ -90,6 +95,8 @@ export const TransformList: FC<Props> = ({
 
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const bulkStartAction = useStartAction(false);
+  const bulkDeleteAction = useDeleteAction(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
 
@@ -98,6 +105,8 @@ export const TransformList: FC<Props> = ({
 
   const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
+
+  const stopTransforms = useStopTransforms();
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -185,6 +194,12 @@ export const TransformList: FC<Props> = ({
     setIsLoading(false);
   };
 
+  const { columns, modals: singleActionModals } = useColumns(
+    expandedRowItemIds,
+    setExpandedRowItemIds,
+    transformSelection
+  );
+
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No transforms found' during the initial loading.
   if (!isInitialized) {
@@ -231,8 +246,6 @@ export const TransformList: FC<Props> = ({
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, transformSelection);
-
   const sorting = {
     sort: {
       field: sortField,
@@ -252,13 +265,23 @@ export const TransformList: FC<Props> = ({
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
-      <StartAction items={transformSelection} />
+      <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
+        <StartActionName items={transformSelection} />
+      </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
-      <StopAction items={transformSelection} />
+      <EuiButtonEmpty onClick={() => stopTransforms(transformSelection)}>
+        <StopActionName items={transformSelection} />
+      </EuiButtonEmpty>
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
-      <DeleteAction items={transformSelection} />
+      <EuiButtonEmpty onClick={() => bulkDeleteAction.openModal(transformSelection)}>
+        <DeleteActionName
+          canDeleteTransform={capabilities.canDeleteTransform}
+          disabled={isDeleteActionDisabled(transformSelection, false)}
+          isBulkAction={true}
+        />
+      </EuiButtonEmpty>
     </div>,
   ];
 
@@ -287,7 +310,7 @@ export const TransformList: FC<Props> = ({
         button={buttonIcon}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         anchorPosition="rightUp"
       >
         {bulkActionMenuItems}
@@ -375,6 +398,13 @@ export const TransformList: FC<Props> = ({
 
   return (
     <div data-test-subj="transformListTableContainer">
+      {/* Bulk Action Modals */}
+      {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
+      {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
+
+      {/* Single Action Modals */}
+      {singleActionModals}
+
       <EuiInMemoryTable
         allowNeutralSort={false}
         className="transform__TransformTable"

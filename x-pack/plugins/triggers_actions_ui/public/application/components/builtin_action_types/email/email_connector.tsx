@@ -14,12 +14,14 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EmailActionConnector
->> = ({ action, editActionConfig, editActionSecrets, errors }) => {
+>> = ({ action, editActionConfig, editActionSecrets, errors, readOnly, docLinks }) => {
   const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 
@@ -38,9 +40,21 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                 defaultMessage: 'Sender',
               }
             )}
+            helpText={
+              <EuiLink
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/email-action-type.html#configuring-email`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
+                  defaultMessage="Configuring email accounts."
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldText
               fullWidth
+              readOnly={readOnly}
               isInvalid={errors.from.length > 0 && from !== undefined}
               name="from"
               value={from || ''}
@@ -73,6 +87,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           >
             <EuiFieldText
               fullWidth
+              readOnly={readOnly}
               isInvalid={errors.host.length > 0 && host !== undefined}
               name="host"
               value={host || ''}
@@ -108,6 +123,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                   prepend=":"
                   isInvalid={errors.port.length > 0 && port !== undefined}
                   fullWidth
+                  readOnly={readOnly}
                   name="port"
                   value={port || ''}
                   data-test-subj="emailPortInput"
@@ -132,6 +148,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                         defaultMessage: 'Secure',
                       }
                     )}
+                    disabled={readOnly}
                     checked={secure || false}
                     onChange={(e) => {
                       editActionConfig('secure', e.target.checked);
@@ -161,6 +178,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               fullWidth
               isInvalid={errors.user.length > 0}
               name="user"
+              readOnly={readOnly}
               value={user || ''}
               data-test-subj="emailUserInput"
               onChange={(e) => {
@@ -184,6 +202,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           >
             <EuiFieldPassword
               fullWidth
+              readOnly={readOnly}
               isInvalid={errors.password.length > 0}
               name="password"
               value={password || ''}

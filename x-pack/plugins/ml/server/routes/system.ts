@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { Request } from 'hapi';
-import { RequestHandlerContext } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
 import { capabilitiesProvider } from '../lib/capabilities';
@@ -21,9 +21,9 @@ export function systemRoutes(
   { router, mlLicense }: RouteInitialization,
   { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
-  async function getNodeCount(context: RequestHandlerContext) {
+  async function getNodeCount(legacyClient: ILegacyScopedClusterClient) {
     const filterPath = 'nodes.*.attributes';
-    const resp = await context.ml!.mlClient.callAsInternalUser('nodes.info', {
+    const resp = await legacyClient.callAsInternalUser('nodes.info', {
       filterPath,
     });
 
@@ -58,11 +58,12 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
+        const { callAsCurrentUser, callAsInternalUser } = legacyClient;
         let upgradeInProgress = false;
         try {
-          const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
+          const info = await callAsInternalUser('ml.info');
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = info.upgrade_mode === true;
@@ -90,7 +91,7 @@ export function systemRoutes(
           });
         } else {
           const body = request.body;
-          const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
+          const resp = await callAsCurrentUser('ml.privilegeCheck', { body });
           resp.upgradeInProgress = upgradeInProgress;
           return response.ok({
             body: resp,
@@ -113,11 +114,8 @@ export function systemRoutes(
     {
       path: '/api/ml/ml_capabilities',
       validate: false,
-      options: {
-        tags: ['access:ml:canAccessML'],
-      },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
@@ -131,7 +129,7 @@ export function systemRoutes(
         }
 
         const { getCapabilities } = capabilitiesProvider(
-          context.ml!.mlClient.callAsCurrentUser,
+          legacyClient,
           mlCapabilities,
           mlLicense,
           isMlEnabledInSpace
@@ -157,43 +155,15 @@ export function systemRoutes(
       path: '/api/ml/ml_node_count',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDatafeeds'],
       },
     },
 
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        // check for basic license first for consistency with other
-        // security disabled checks
-        if (mlLicense.isSecurityEnabled() === false) {
-          return response.ok({
-            body: await getNodeCount(context),
-          });
-        } else {
-          // if security is enabled, check that the user has permission to
-          // view jobs before calling getNodeCount.
-          // getNodeCount calls the _nodes endpoint as the internal user
-          // and so could give the user access to more information than
-          // they are entitled to.
-          const requiredPrivileges = [
-            'cluster:monitor/xpack/ml/job/get',
-            'cluster:monitor/xpack/ml/job/stats/get',
-            'cluster:monitor/xpack/ml/datafeeds/get',
-            'cluster:monitor/xpack/ml/datafeeds/stats/get',
-          ];
-          const body = { cluster: requiredPrivileges };
-          const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
-
-          if (resp.has_all_requested) {
-            return response.ok({
-              body: await getNodeCount(context),
-            });
-          } else {
-            // if the user doesn't have permission to create jobs
-            // return a 403
-            return response.forbidden();
-          }
-        }
+        return response.ok({
+          body: await getNodeCount(legacyClient),
+        });
       } catch (e) {
         return response.customError(wrapError(e));
       }
@@ -215,9 +185,9 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
+        const info = await legacyClient.callAsInternalUser('ml.info');
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
           body: { ...info, cloudId },
@@ -246,10 +216,54 @@ export function systemRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         return response.ok({
-          body: await context.ml!.mlClient.callAsCurrentUser('search', request.body),
+          body: await legacyClient.callAsCurrentUser('search', request.body),
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/index_exists ES Field caps wrapper checks if index exists
+   * @apiName MlIndexExists
+   */
+  router.post(
+    {
+      path: '/api/ml/index_exists',
+      validate: {
+        body: schema.object({ index: schema.string() }),
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
+    },
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+      try {
+        const { index } = request.body;
+
+        const options = {
+          index: [index],
+          fields: ['*'],
+          ignoreUnavailable: true,
+          allowNoIndices: true,
+          ignore: 404,
+        };
+
+        const fieldsResult = await legacyClient.callAsCurrentUser('fieldCaps', options);
+        const result = { exists: false };
+
+        if (Array.isArray(fieldsResult.indices) && fieldsResult.indices.length !== 0) {
+          result.exists = true;
+        }
+
+        return response.ok({
+          body: result,
         });
       } catch (error) {
         return response.customError(wrapError(error));

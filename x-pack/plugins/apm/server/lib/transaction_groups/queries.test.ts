@@ -18,6 +18,7 @@ describe('transaction group queries', () => {
   });
 
   it('fetches top transactions', async () => {
+    const bucketSize = 100;
     mock = await inspectSearchParams((setup) =>
       transactionGroupsFetcher(
         {
@@ -25,23 +26,30 @@ describe('transaction group queries', () => {
           serviceName: 'foo',
           transactionType: 'bar',
         },
-        setup
+        setup,
+        bucketSize
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 
   it('fetches top traces', async () => {
+    const bucketSize = 100;
     mock = await inspectSearchParams((setup) =>
       transactionGroupsFetcher(
         {
           type: 'top_traces',
         },
-        setup
+        setup,
+        bucketSize
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 });

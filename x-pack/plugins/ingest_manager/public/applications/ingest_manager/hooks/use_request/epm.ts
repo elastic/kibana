@@ -4,29 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchQuery } from 'src/core/public';
 import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
 import {
+  GetCategoriesRequest,
   GetCategoriesResponse,
+  GetPackagesRequest,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
 } from '../../types';
 
-export const useGetCategories = () => {
+export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
     path: epmRouteService.getCategoriesPath(),
     method: 'get',
+    query: { experimental: true, ...query },
   });
 };
 
-export const useGetPackages = (query: HttpFetchQuery = {}) => {
+export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return useRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',
-    query,
+    query: { experimental: true, ...query },
+  });
+};
+
+export const useGetLimitedPackages = () => {
+  return useRequest<GetLimitedPackagesResponse>({
+    path: epmRouteService.getListLimitedPath(),
+    method: 'get',
   });
 };
 
@@ -40,6 +50,13 @@ export const useGetPackageInfoByKey = (pkgkey: string) => {
 export const sendGetPackageInfoByKey = (pkgkey: string) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgkey),
+    method: 'get',
+  });
+};
+
+export const useGetFileByPath = (filePath: string) => {
+  return useRequest<string>({
+    path: epmRouteService.getFilePath(filePath),
     method: 'get',
   });
 };

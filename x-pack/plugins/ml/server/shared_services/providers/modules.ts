@@ -4,85 +4,87 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
-import { LicenseCheck } from '../license_checks';
-import { DataRecognizer, RecognizeResult } from '../../models/data_recognizer';
 import {
-  Module,
-  DatafeedOverride,
-  JobOverride,
-  DataRecognizerConfigResponse,
-} from '../../../common/types/modules';
+  ILegacyScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
+import { DataRecognizer } from '../../models/data_recognizer';
+import { SharedServicesChecks } from '../shared_services';
+import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
+import { HasMlCapabilities } from '../../lib/capabilities';
+
+export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
+  TypeOf<typeof setupModuleBodySchema>;
 
 export interface ModulesProvider {
   modulesProvider(
-    callAsCurrentUser: APICaller,
+    mlClusterClient: ILegacyScopedClusterClient,
+    request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): {
-    recognize(indexPatternTitle: string): Promise<RecognizeResult[]>;
-    getModule(moduleId?: string): Promise<Module | Module[]>;
-    saveModuleItems(
-      moduleId: string,
-      prefix: string,
-      groups: string[],
-      indexPatternName: string,
-      query: any,
-      useDedicatedIndex: boolean,
-      startDatafeed: boolean,
-      start: number,
-      end: number,
-      jobOverrides: JobOverride[],
-      datafeedOverrides: DatafeedOverride[],
-      estimateModelMemory?: boolean
-    ): Promise<DataRecognizerConfigResponse>;
+    recognize: DataRecognizer['findMatches'];
+    getModule: DataRecognizer['getModule'];
+    listModules: DataRecognizer['listModules'];
+    setup(payload: ModuleSetupPayload): ReturnType<DataRecognizer['setup']>;
   };
 }
 
-export function getModulesProvider(isFullLicense: LicenseCheck): ModulesProvider {
+export function getModulesProvider({
+  isFullLicense,
+  getHasMlCapabilities,
+}: SharedServicesChecks): ModulesProvider {
   return {
-    modulesProvider(callAsCurrentUser: APICaller, savedObjectsClient: SavedObjectsClientContract) {
-      isFullLicense();
+    modulesProvider(
+      mlClusterClient: ILegacyScopedClusterClient,
+      request: KibanaRequest,
+      savedObjectsClient: SavedObjectsClientContract
+    ) {
+      let hasMlCapabilities: HasMlCapabilities;
+      if (request.params === 'DummyKibanaRequest') {
+        hasMlCapabilities = () => Promise.resolve();
+      } else {
+        hasMlCapabilities = getHasMlCapabilities(request);
+      }
+      const dr = dataRecognizerFactory(mlClusterClient, savedObjectsClient, request);
+
       return {
-        recognize(indexPatternTitle: string) {
-          const dr = dataRecognizerFactory(callAsCurrentUser, savedObjectsClient);
-          return dr.findMatches(indexPatternTitle);
+        async recognize(...args) {
+          isFullLicense();
+          await hasMlCapabilities(['canCreateJob']);
+
+          return dr.findMatches(...args);
         },
-        getModule(moduleId?: string) {
-          const dr = dataRecognizerFactory(callAsCurrentUser, savedObjectsClient);
-          if (moduleId === undefined) {
-            return dr.listModules();
-          } else {
-            return dr.getModule(moduleId);
-          }
+        async getModule(moduleId: string) {
+          isFullLicense();
+          await hasMlCapabilities(['canGetJobs']);
+
+          return dr.getModule(moduleId);
         },
-        saveModuleItems(
-          moduleId: string,
-          prefix: string,
-          groups: string[],
-          indexPatternName: string,
-          query: any,
-          useDedicatedIndex: boolean,
-          startDatafeed: boolean,
-          start: number,
-          end: number,
-          jobOverrides: JobOverride[],
-          datafeedOverrides: DatafeedOverride[],
-          estimateModelMemory?: boolean
-        ) {
-          const dr = dataRecognizerFactory(callAsCurrentUser, savedObjectsClient);
-          return dr.setupModuleItems(
-            moduleId,
-            prefix,
-            groups,
-            indexPatternName,
-            query,
-            useDedicatedIndex,
-            startDatafeed,
-            start,
-            end,
-            jobOverrides,
-            datafeedOverrides,
-            estimateModelMemory
+        async listModules() {
+          isFullLicense();
+          await hasMlCapabilities(['canGetJobs']);
+
+          return dr.listModules();
+        },
+        async setup(payload: ModuleSetupPayload) {
+          isFullLicense();
+          await hasMlCapabilities(['canCreateJob']);
+
+          return dr.setup(
+            payload.moduleId,
+            payload.prefix,
+            payload.groups,
+            payload.indexPatternName,
+            payload.query,
+            payload.useDedicatedIndex,
+            payload.startDatafeed,
+            payload.start,
+            payload.end,
+            payload.jobOverrides,
+            payload.datafeedOverrides,
+            payload.estimateModelMemory
           );
         },
       };
@@ -91,8 +93,9 @@ export function getModulesProvider(isFullLicense: LicenseCheck): ModulesProvider
 }
 
 function dataRecognizerFactory(
-  callAsCurrentUser: APICaller,
-  savedObjectsClient: SavedObjectsClientContract
+  mlClusterClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest
 ) {
-  return new DataRecognizer(callAsCurrentUser, savedObjectsClient);
+  return new DataRecognizer(mlClusterClient, savedObjectsClient, request);
 }

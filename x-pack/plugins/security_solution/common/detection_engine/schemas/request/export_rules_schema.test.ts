@@ -34,10 +34,9 @@ describe('create rules schema', () => {
       const decoded = exportRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      // TODO: Change formatter to display a better value than [object Object]
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "undefined" supplied to "objects"',
-        'Invalid value "[object Object]" supplied to ""',
+        'Invalid value "{}" supplied to "({| objects: Array<{| rule_id: string |}> |} | null)"',
       ]);
       expect(message.schema).toEqual(payload);
     });
@@ -70,10 +69,9 @@ describe('create rules schema', () => {
       const decoded = exportRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      // TODO: Change formatter to display a better value than [object Object]
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "undefined" supplied to "objects,rule_id"',
-        'Invalid value "[object Object]" supplied to ""',
+        'Invalid value "{"objects":[{"id":"4a7ff83d-3055-4bb2-ba68-587b9c6c15a4"}]}" supplied to "({| objects: Array<{| rule_id: string |}> |} | null)"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -120,7 +118,9 @@ describe('create rules schema', () => {
       const decoded = exportRulesQuerySchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "10" supplied to ""']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "10" supplied to "file_name"',
+      ]);
       expect(message.schema).toEqual({});
     });
 
@@ -151,7 +151,7 @@ describe('create rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "invalid string" supplied to ""',
+        'Invalid value "invalid string" supplied to "exclude_export_details"',
       ]);
       expect(message.schema).toEqual({});
     });

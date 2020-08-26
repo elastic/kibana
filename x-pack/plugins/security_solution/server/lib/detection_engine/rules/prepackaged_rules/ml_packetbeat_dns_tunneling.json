@@ -1,0 +1,28 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected unusually large numbers of DNS queries for a single top-level DNS domain, which is often used for DNS tunneling. DNS tunneling can be used for command-and-control, persistence, or data exfiltration activity. For example, dnscat tends to generate many DNS questions for a top-level domain as it uses the DNS protocol to tunnel data.",
+  "false_positives": [
+    "DNS domains that use large numbers of child domains, such as software or content distribution networks, can trigger this alert and such parent domains can be excluded."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License",
+  "machine_learning_job_id": "packetbeat_dns_tunneling",
+  "name": "DNS Tunneling",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "91f02f01-969f-4167-8f66-07827ac3bdd9",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "ML",
+    "Packetbeat"
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

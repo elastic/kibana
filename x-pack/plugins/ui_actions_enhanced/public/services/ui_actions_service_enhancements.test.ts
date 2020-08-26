@@ -6,6 +6,9 @@
 
 import { UiActionsServiceEnhancements } from './ui_actions_service_enhancements';
 import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
+import { licensingMock } from '../../../licensing/public/mocks';
+
+const getLicenseInfo = () => licensingMock.createLicense();
 
 describe('UiActionsService', () => {
   describe('action factories', () => {
@@ -15,6 +18,9 @@ describe('UiActionsService', () => {
       createConfig: () => ({}),
       isConfigValid: () => true,
       create: () => ({} as any),
+      supportedTriggers() {
+        return ['VALUE_CLICK_TRIGGER'];
+      },
     };
     const factoryDefinition2: ActionFactoryDefinition = {
       id: 'test-factory-2',
@@ -22,10 +28,13 @@ describe('UiActionsService', () => {
       createConfig: () => ({}),
       isConfigValid: () => true,
       create: () => ({} as any),
+      supportedTriggers() {
+        return ['VALUE_CLICK_TRIGGER'];
+      },
     };
 
     test('.getActionFactories() returns empty array if no action factories registered', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       const factories = service.getActionFactories();
 
@@ -33,7 +42,7 @@ describe('UiActionsService', () => {
     });
 
     test('can register and retrieve an action factory', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       service.registerActionFactory(factoryDefinition1);
 
@@ -44,7 +53,7 @@ describe('UiActionsService', () => {
     });
 
     test('can retrieve all action factories', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       service.registerActionFactory(factoryDefinition1);
       service.registerActionFactory(factoryDefinition2);
@@ -58,13 +67,26 @@ describe('UiActionsService', () => {
     });
 
     test('throws when retrieving action factory that does not exist', () => {
-      const service = new UiActionsServiceEnhancements();
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
 
       service.registerActionFactory(factoryDefinition1);
 
       expect(() => service.getActionFactory('UNKNOWN_ID')).toThrowError(
         'Action factory [actionFactoryId = UNKNOWN_ID] does not exist.'
       );
+    });
+
+    test('isCompatible from definition is used on registered factory', async () => {
+      const service = new UiActionsServiceEnhancements({ getLicenseInfo });
+
+      service.registerActionFactory({
+        ...factoryDefinition1,
+        isCompatible: () => Promise.resolve(false),
+      });
+
+      await expect(
+        service.getActionFactory(factoryDefinition1.id).isCompatible({ triggers: [] })
+      ).resolves.toBe(false);
     });
   });
 });

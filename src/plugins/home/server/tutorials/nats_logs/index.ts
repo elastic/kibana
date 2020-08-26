@@ -37,6 +37,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
     name: i18n.translate('home.tutorials.natsLogs.nameTitle', {
       defaultMessage: 'NATS logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.natsLogs.shortDescription', {

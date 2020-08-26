@@ -9,6 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
+import { validate } from '../../../../../common/validate';
 import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
 import {
   RulesSchema,
@@ -112,18 +113,4 @@ export const transformValidateBulkError = (
       message: 'Internal error transforming',
     });
   }
-};
-
-export const validate = <T extends t.Mixed>(
-  obj: object,
-  schema: T
-): [t.TypeOf<T> | null, string | null] => {
-  const decoded = schema.decode(obj);
-  const checked = exactCheck(obj, decoded);
-  const left = (errors: t.Errors): [T | null, string | null] => [
-    null,
-    formatErrors(errors).join(','),
-  ];
-  const right = (output: T): [T | null, string | null] => [output, null];
-  return pipe(checked, fold(left, right));
 };

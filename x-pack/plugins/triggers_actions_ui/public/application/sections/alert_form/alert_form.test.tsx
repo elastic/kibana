@@ -13,6 +13,8 @@ import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
+import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 jest.mock('../../lib/alert_api', () => ({
@@ -20,6 +22,10 @@ jest.mock('../../lib/alert_api', () => ({
 }));
 
 describe('alert_form', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   let deps: any;
   const alertType = {
     id: 'my-alert-type',
@@ -63,6 +69,26 @@ describe('alert_form', () => {
 
     async function setup() {
       const mocks = coreMock.createSetup();
+      const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+      const alertTypes = [
+        {
+          id: 'my-alert-type',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
+        },
+      ];
+      loadAlertTypes.mockResolvedValue(alertTypes);
       const [
         {
           application: { capabilities },
@@ -85,7 +111,7 @@ describe('alert_form', () => {
       const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerts',
+        consumer: ALERTS_FEATURE_ID,
         schedule: {
           interval: '1m',
         },
@@ -111,7 +137,12 @@ describe('alert_form', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+          <AlertForm
+            alert={initialAlert}
+            dispatch={() => {}}
+            errors={{ name: [], interval: [] }}
+            operation="create"
+          />
         </AlertsContextProvider>
       );
 
@@ -167,7 +198,11 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
-          producer: 'alerting',
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
         },
         {
           id: 'same-consumer-producer-alert-type',
@@ -180,6 +215,10 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           producer: 'test',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
         },
       ]);
       const mocks = coreMock.createSetup();
@@ -250,7 +289,12 @@ describe('alert_form', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+          <AlertForm
+            alert={initialAlert}
+            dispatch={() => {}}
+            errors={{ name: [], interval: [] }}
+            operation="create"
+          />
         </AlertsContextProvider>
       );
 
@@ -302,7 +346,7 @@ describe('alert_form', () => {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
-        consumer: 'alerts',
+        consumer: ALERTS_FEATURE_ID,
         schedule: {
           interval: '1m',
         },
@@ -328,7 +372,12 @@ describe('alert_form', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+          <AlertForm
+            alert={initialAlert}
+            dispatch={() => {}}
+            errors={{ name: [], interval: [] }}
+            operation="create"
+          />
         </AlertsContextProvider>
       );
 

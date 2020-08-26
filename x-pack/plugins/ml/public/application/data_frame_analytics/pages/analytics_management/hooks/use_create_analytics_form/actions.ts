@@ -17,7 +17,6 @@ export enum ACTION {
   RESET_FORM,
   SET_ADVANCED_EDITOR_RAW_STRING,
   SET_FORM_STATE,
-  SET_INDEX_NAMES,
   SET_INDEX_PATTERN_TITLES,
   SET_IS_JOB_CREATED,
   SET_IS_JOB_STARTED,
@@ -26,6 +25,7 @@ export enum ACTION {
   SET_JOB_CONFIG,
   SET_JOB_IDS,
   SWITCH_TO_ADVANCED_EDITOR,
+  SWITCH_TO_FORM,
   SET_ESTIMATED_MODEL_MEMORY_LIMIT,
   SET_JOB_CLONE,
 }
@@ -39,7 +39,8 @@ export type Action =
         | ACTION.OPEN_MODAL
         | ACTION.RESET_ADVANCED_EDITOR_MESSAGES
         | ACTION.RESET_FORM
-        | ACTION.SWITCH_TO_ADVANCED_EDITOR;
+        | ACTION.SWITCH_TO_ADVANCED_EDITOR
+        | ACTION.SWITCH_TO_FORM;
     }
   // Actions with custom payloads:
   | { type: ACTION.ADD_REQUEST_MESSAGE; requestMessage: FormMessage }
@@ -48,7 +49,6 @@ export type Action =
       advancedEditorRawString: State['advancedEditorRawString'];
     }
   | { type: ACTION.SET_FORM_STATE; payload: Partial<State['form']> }
-  | { type: ACTION.SET_INDEX_NAMES; indexNames: State['indexNames'] }
   | {
       type: ACTION.SET_INDEX_PATTERN_TITLES;
       payload: {
@@ -73,6 +73,7 @@ export interface ActionDispatchers {
   setJobConfig: (payload: State['jobConfig']) => void;
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
+  switchToForm: () => void;
   setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
   setJobClone: (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => Promise<void>;
 }

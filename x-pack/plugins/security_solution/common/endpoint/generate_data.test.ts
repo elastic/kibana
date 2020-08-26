@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import _ from 'lodash';
 import {
   EndpointDocGenerator,
   Event,
@@ -10,6 +11,7 @@ import {
   TreeNode,
   RelatedEventCategory,
   ECSCategory,
+  ANCESTRY_LIMIT,
 } from './generate_data';
 
 interface Node {
@@ -22,6 +24,13 @@ describe('data generator', () => {
   let generator: EndpointDocGenerator;
   beforeEach(() => {
     generator = new EndpointDocGenerator('seed');
+  });
+
+  it('creates events with a numerically increasing sequence value', () => {
+    const event1 = generator.generateEvent();
+    const event2 = generator.generateEvent();
+
+    expect(event2.event.sequence).toBe(event1.event.sequence + 1);
   });
 
   it('creates the same documents with same random seed', () => {
@@ -47,7 +56,7 @@ describe('data generator', () => {
     const metadata = generator.generateHostMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
     expect(metadata.event.created).toEqual(timestamp);
-    expect(metadata.endpoint).not.toBeNull();
+    expect(metadata.Endpoint).not.toBeNull();
     expect(metadata.agent).not.toBeNull();
     expect(metadata.host).not.toBeNull();
   });
@@ -57,10 +66,10 @@ describe('data generator', () => {
     const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
     expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
     expect(hostPolicyResponse.event.created).toEqual(timestamp);
-    expect(hostPolicyResponse.endpoint).not.toBeNull();
+    expect(hostPolicyResponse.Endpoint).not.toBeNull();
     expect(hostPolicyResponse.agent).not.toBeNull();
     expect(hostPolicyResponse.host).not.toBeNull();
-    expect(hostPolicyResponse.endpoint.policy.applied).not.toBeNull();
+    expect(hostPolicyResponse.Endpoint.policy.applied).not.toBeNull();
   });
 
   it('creates alert event documents', () => {
@@ -68,7 +77,7 @@ describe('data generator', () => {
     const alert = generator.generateAlert(timestamp);
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event.action).not.toBeNull();
-    expect(alert.endpoint).not.toBeNull();
+    expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
     expect(alert.process.entity_id).not.toBeNull();
@@ -78,9 +87,9 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp });
     expect(processEvent['@timestamp']).toEqual(timestamp);
-    expect(processEvent.event.category).toEqual('process');
+    expect(processEvent.event.category).toEqual(['process']);
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('start');
+    expect(processEvent.event.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
@@ -93,11 +102,35 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('start');
+    expect(processEvent.event.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
     expect(processEvent.process.name).not.toBeNull();
+  });
+
+  describe('creates events with an empty ancestry array', () => {
+    let tree: Tree;
+    beforeEach(() => {
+      tree = generator.generateTree({
+        alwaysGenMaxChildrenPerNode: true,
+        ancestors: 3,
+        children: 3,
+        generations: 3,
+        percentTerminated: 100,
+        percentWithRelated: 100,
+        relatedEvents: 0,
+        relatedAlerts: 0,
+        ancestryArraySize: 0,
+      });
+      tree.ancestry.delete(tree.origin.id);
+    });
+
+    it('creates all events with an empty ancestry array', () => {
+      for (const event of tree.allEvents) {
+        expect(event.process.Ext!.ancestry!.length).toEqual(0);
+      }
+    });
   });
 
   describe('creates an origin alert when no related alerts are requested', () => {
@@ -112,7 +145,9 @@ describe('data generator', () => {
         percentWithRelated: 100,
         relatedEvents: 0,
         relatedAlerts: 0,
+        ancestryArraySize: ANCESTRY_LIMIT,
       });
+      tree.ancestry.delete(tree.origin.id);
     });
 
     it('creates an alert for the origin node but no other nodes', () => {
@@ -148,6 +183,7 @@ describe('data generator', () => {
           { category: RelatedEventCategory.Network, count: 1 },
         ],
         relatedAlerts,
+        ancestryArraySize: ANCESTRY_LIMIT,
       });
     });
 
@@ -158,6 +194,47 @@ describe('data generator', () => {
 
       return (inRelated || inRelatedAlerts || inLifecycle) && event.process.entity_id === node.id;
     };
+
+    const verifyAncestry = (event: Event, genTree: Tree) => {
+      if (event.process.Ext!.ancestry!.length > 0) {
+        expect(event.process.parent?.entity_id).toBe(event.process.Ext!.ancestry![0]);
+      }
+      for (let i = 0; i < event.process.Ext!.ancestry!.length; i++) {
+        const ancestor = event.process.Ext!.ancestry![i];
+        const parent = genTree.children.get(ancestor) || genTree.ancestry.get(ancestor);
+        expect(ancestor).toBe(parent?.lifecycle[0].process.entity_id);
+
+        // the next ancestor should be the grandparent
+        if (i + 1 < event.process.Ext!.ancestry!.length) {
+          const grandparent = event.process.Ext!.ancestry![i + 1];
+          expect(grandparent).toBe(parent?.lifecycle[0].process.parent?.entity_id);
+        }
+      }
+    };
+
+    it('has ancestry array defined', () => {
+      expect(tree.origin.lifecycle[0].process.Ext!.ancestry!.length).toBe(ANCESTRY_LIMIT);
+      for (const event of tree.allEvents) {
+        verifyAncestry(event, tree);
+      }
+    });
+
+    it('creates the right number childrenLevels', () => {
+      let totalChildren = 0;
+      for (const level of tree.childrenLevels) {
+        totalChildren += level.size;
+      }
+      expect(totalChildren).toEqual(tree.children.size);
+      expect(tree.childrenLevels.length).toEqual(generations);
+    });
+
+    it('has the right nodes in both the childrenLevels and children map', () => {
+      for (const level of tree.childrenLevels) {
+        for (const node of level.values()) {
+          expect(tree.children.get(node.id)).toEqual(node);
+        }
+      }
+    });
 
     it('has the right related events for each node', () => {
       const checkRelatedEvents = (node: TreeNode) => {
@@ -185,8 +262,6 @@ describe('data generator', () => {
       for (const node of tree.children.values()) {
         checkRelatedEvents(node);
       }
-
-      checkRelatedEvents(tree.origin);
     });
 
     it('has the right number of related alerts for each node', () => {
@@ -202,7 +277,8 @@ describe('data generator', () => {
     });
 
     it('has the right number of ancestors', () => {
-      expect(tree.ancestry.size).toEqual(ancestors);
+      // +1 for the origin node
+      expect(tree.ancestry.size).toEqual(ancestors + 1);
     });
 
     it('has the right number of total children', () => {
@@ -239,10 +315,7 @@ describe('data generator', () => {
         const children = tree.children.get(event.process.entity_id);
         if (children) {
           expect(eventInNode(event, children)).toBeTruthy();
-          return;
         }
-
-        expect(eventInNode(event, tree.origin)).toBeTruthy();
       });
     });
 
@@ -260,8 +333,6 @@ describe('data generator', () => {
         total += nodeEventCount(node);
       }
 
-      total += nodeEventCount(tree.origin);
-
       expect(tree.allEvents.length).toEqual(total);
     });
   });
@@ -269,18 +340,24 @@ describe('data generator', () => {
   describe('creates alert ancestor tree', () => {
     let events: Event[];
 
+    const isCategoryProcess = (event: Event) => {
+      return (
+        _.isEqual(event.event.category, ['process']) || _.isEqual(event.event.category, 'process')
+      );
+    };
+
     beforeEach(() => {
-      events = generator.createAlertEventAncestry(3, 0, 0, 0, 0);
+      events = generator.createAlertEventAncestry({
+        ancestors: 3,
+        percentTerminated: 0,
+        percentWithRelated: 0,
+      });
     });
 
     it('with n-1 process events', () => {
       for (let i = events.length - 2; i > 0; ) {
         const parentEntityIdOfChild = events[i].process.parent?.entity_id;
-        for (
-          ;
-          --i >= -1 && (events[i].event.kind !== 'event' || events[i].event.category !== 'process');
-
-        ) {
+        for (; --i >= -1 && (events[i].event.kind !== 'event' || !isCategoryProcess(events[i])); ) {
           // related event - skip it
         }
         expect(i).toBeGreaterThanOrEqual(0);
@@ -294,7 +371,7 @@ describe('data generator', () => {
         ;
         previousProcessEventIndex >= -1 &&
         (events[previousProcessEventIndex].event.kind !== 'event' ||
-          events[previousProcessEventIndex].event.category !== 'process');
+          !isCategoryProcess(events[previousProcessEventIndex]));
         previousProcessEventIndex--
       ) {
         // related event - skip it
@@ -355,7 +432,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = [root, ...generator.descendantsTreeGenerator(root, generations)];
+    const events = [root, ...generator.descendantsTreeGenerator(root, { generations })];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);
@@ -364,7 +441,9 @@ describe('data generator', () => {
   it('creates full resolver tree', () => {
     const alertAncestors = 3;
     const generations = 2;
-    const events = [...generator.fullResolverTreeGenerator(alertAncestors, generations)];
+    const events = [
+      ...generator.fullResolverTreeGenerator({ ancestors: alertAncestors, generations }),
+    ];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);

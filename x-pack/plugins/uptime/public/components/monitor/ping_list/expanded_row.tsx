@@ -20,8 +20,8 @@ import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { EuiPopover } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
+import { PingRedirects } from './ping_redirects';
 
 interface Props {
   ping: Ping;
@@ -51,7 +51,7 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
 };
 
 const BodyExcerpt = ({ content }: { content: string }) =>
-  content ? <EuiCodeBlock>{content}</EuiCodeBlock> : null;
+  content ? <EuiCodeBlock overflowHeight={250}>{content}</EuiCodeBlock> : null;
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
@@ -65,41 +65,41 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
   }
 
   // Show the journey
-  const journeyItems = ping.journey?.results?.map(r => {
+  const journeyItems = ping.script?.journey?.steps?.map(s => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onButtonClick = () => setIsPopoverOpen(isPopoverOpen => !isPopoverOpen);
     const closePopover = () => setIsPopoverOpen(false);
 
-    const thumbnail = <img style={{width: "auto", height: "auto", maxWidth: "150px", maxHeight: "150px"}} onClick={onButtonClick} src={"data:image/png;charset=utf-8;base64, " + r.screenshot} />
+    const thumbnail = <img style={{width: "auto", height: "auto", maxWidth: "150px", maxHeight: "150px"}} onClick={onButtonClick} src={"data:image/png;charset=utf-8;base64, " + s.screenshot} />
     const description = <EuiPopover
       button={thumbnail}
       isOpen={isPopoverOpen}
       closePopover={closePopover}>
 
-      <img style={{width: "600px"}} src={"data:image/png;charset=utf-8;base64, " + r.screenshot} />
+      <img style={{width: "600px"}} src={"data:image/png;charset=utf-8;base64, " + s.screenshot} />
       </EuiPopover>
 
     let color = "primary";
     let icon = "checkInCircleFilled";
     let message = "Succeeded";
-    if (r.status === "failed") {
+    if (s.status === "failed") {
       color = "danger";
       icon = "crossInACircleFilled";
-      message = `Failure (${r.error.name})`;
-    } else if (r.status === "skipped") {
+      message = `Failure (${s.error.name})`;
+    } else if (s.status === "skipped") {
       color = "hollow";
       icon = "questionInCircle";
       message = "Skipped";
     }
 
     const title = <>
-      <EuiText>{r.name}</EuiText>
+      <EuiText>{s.name}</EuiText>
       <EuiBadge color={color} iconType={icon} iconSide="left">
         {message}
       </EuiBadge>
       <EuiCodeBlock>
-        {r.source}
+        {s.source}
       </EuiCodeBlock>
     </>;
 
@@ -109,7 +109,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
       description
     }
   }) ?? [];
-  if (ping.journey) {
+  if (ping.script?.journey) {
     listItems.push({
       title: i18n.translate('xpack.uptime.pingList.expandedRow.journey', {
         defaultMessage: 'Journey'
@@ -143,7 +143,12 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     });
   }
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column">
+      {ping?.http?.response?.redirects && (
+        <EuiFlexItem>
+          <PingRedirects monitorStatus={ping} showTitle={true} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
           <EuiDescriptionList listItems={listItems} />

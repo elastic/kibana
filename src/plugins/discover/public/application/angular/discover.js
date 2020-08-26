@@ -64,15 +64,13 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { validateTimeRange } from '../helpers/validate_time_range';
 import {
   esFilters,
-  fieldFormats,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
-  getDefaultQuery,
   search,
-  UI_SETTINGS,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -114,7 +112,7 @@ app.config(($routeProvider) => {
       };
     },
   };
-  $routeProvider.when('/:id?', {
+  const discoverRoute = {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -177,7 +175,10 @@ app.config(($routeProvider) => {
         });
       },
     },
-  });
+  };
+
+  $routeProvider.when('/view/:id?', discoverRoute);
+  $routeProvider.when('/', discoverRoute);
 });
 
 app.directive('discoverApp', function () {
@@ -188,16 +189,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController(
-  $element,
-  $route,
-  $scope,
-  $timeout,
-  $window,
-  Promise,
-  localStorage,
-  uiCapabilities
-) {
+function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
@@ -228,6 +220,7 @@ function discoverController(
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
+    toasts: core.notifications.toasts,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -243,11 +236,15 @@ function discoverController(
 
   // sync initial app filters from state to filterManager
   filterManager.setAppFilters(_.cloneDeep(appStateContainer.getState().filters));
+  data.query.queryString.setQuery(appStateContainer.getState().query);
 
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
     data.query,
     appStateContainer,
-    { filters: esFilters.FilterStateStore.APP_STATE }
+    {
+      filters: esFilters.FilterStateStore.APP_STATE,
+      query: true,
+    }
   );
 
   const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
@@ -259,7 +256,7 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'query'].filter(
+        const changes = ['interval', 'sort'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
@@ -415,7 +412,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: (searchId) => `#/${encodeURIComponent(searchId)}`,
+          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -590,12 +587,7 @@ function discoverController(
   };
 
   function getStateDefaults() {
-    const query =
-      $scope.searchSource.getField('query') ||
-      getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') ||
-          config.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
-      );
+    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     return {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
@@ -632,12 +624,7 @@ function discoverController(
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
-      const searchBarChanges = merge(
-        timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$(),
-        filterManager.getFetches$(),
-        $fetchObservable
-      ).pipe(debounceTime(100));
+      const searchBarChanges = merge(data.query.state$, $fetchObservable).pipe(debounceTime(100));
 
       subscriptions.add(
         subscribeWithScope(
@@ -747,7 +734,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/${encodeURIComponent(savedSearch.id)}`);
+            history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -782,6 +769,10 @@ function discoverController(
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
+      $scope.resultState = 'none';
+      return;
+    }
 
     // Abort any in-progress requests before fetching again
     if (abortController) abortController.abort();
@@ -817,9 +808,8 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function ({ query }, isUpdate = true) {
-    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
-      setAppState({ query });
+  $scope.handleRefresh = function (_payload, isUpdate) {
+    if (isUpdate === false) {
       $fetchObservable.next();
     }
   };
@@ -848,7 +838,7 @@ function discoverController(
       x: {
         accessor: 0,
         label: agg.makeLabel(),
-        format: fieldFormats.serialize(agg),
+        format: agg.toSerializedFieldFormat(),
         params: {
           date: true,
           interval: moment.duration(esValue, esUnit),
@@ -860,14 +850,14 @@ function discoverController(
       },
       y: {
         accessor: 1,
-        format: fieldFormats.serialize(metric),
+        format: metric.toSerializedFieldFormat(),
         label: metric.makeLabel(),
       },
     };
   }
 
   function onResults(resp) {
-    inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
       const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
@@ -914,20 +904,42 @@ function discoverController(
   }
 
   $scope.updateTime = function () {
-    //this is the timerange for the histogram, should be refactored
+    const { from, to } = timefilter.getTime();
+    // this is the timerange for the histogram, should be refactored
     $scope.timeRange = {
-      from: dateMath.parse(timefilter.getTime().from),
-      to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
+      from: dateMath.parse(from),
+      to: dateMath.parse(to, { roundUp: true }),
     };
   };
 
   $scope.toMoment = function (datetime) {
+    if (!datetime) {
+      return;
+    }
     return moment(datetime).format(config.get('dateFormat'));
   };
 
   $scope.resetQuery = function () {
-    history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    history.push(
+      $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
+    );
     $route.reload();
+  };
+
+  $scope.onSkipBottomButtonClick = function () {
+    // show all the Rows
+    $scope.minimumVisibleRows = $scope.hits;
+
+    // delay scrolling to after the rows have been rendered
+    const bottomMarker = $element.find('#discoverBottomMarker');
+    $timeout(() => {
+      bottomMarker.focus();
+      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
+      // so the browser will show a highlight: remove the focus once scrolled
+      $timeout(() => {
+        bottomMarker.blur();
+      }, 0);
+    }, 0);
   };
 
   $scope.newQuery = function () {
@@ -947,7 +959,7 @@ function discoverController(
           config.get(SORT_DEFAULT_ORDER_SETTING)
         )
       )
-      .setField('query', $scope.state.query || null)
+      .setField('query', data.query.queryString.getQuery() || null)
       .setField('filter', filterManager.getFilters());
     return Promise.resolve();
   };
@@ -982,7 +994,11 @@ function discoverController(
       $scope.indexPattern.popularizeField(columnName, 1);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
-    setAppState({ columns });
+    // The state's sort property is an array of [sortByColumn,sortDirection]
+    const sort = $scope.state.sort.length
+      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
+      : [];
+    setAppState({ columns, sort });
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
@@ -992,17 +1008,6 @@ function discoverController(
 
   $scope.scrollToTop = function () {
     $window.scrollTo(0, 0);
-  };
-
-  $scope.scrollToBottom = function () {
-    // delay scrolling to after the rows have been rendered
-    $timeout(() => {
-      $element.find('#discoverBottomMarker').focus();
-    }, 0);
-  };
-
-  $scope.showAllRows = function () {
-    $scope.minimumVisibleRows = $scope.hits;
   };
 
   async function setupVisualization() {

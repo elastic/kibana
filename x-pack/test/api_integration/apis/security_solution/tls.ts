@@ -14,8 +14,8 @@ import {
 } from '../../../../plugins/security_solution/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+const FROM = '2000-01-01T00:00:00.000Z';
+const TO = '3000-01-01T00:00:00.000Z';
 const SOURCE_IP = '10.128.0.35';
 const DESTINATION_IP = '74.125.129.95';
 
@@ -117,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -149,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -186,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -217,6 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })

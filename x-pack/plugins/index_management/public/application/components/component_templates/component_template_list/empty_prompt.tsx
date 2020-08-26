@@ -6,11 +6,17 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { RouteComponentProps } from 'react-router-dom';
+import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
-export const EmptyPrompt: FunctionComponent = () => {
+interface Props {
+  history: RouteComponentProps['history'];
+}
+
+export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
   const { documentation } = useComponentTemplatesContext();
 
   return (
@@ -28,15 +34,26 @@ export const EmptyPrompt: FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.home.componentTemplates.emptyPromptDescription"
-            defaultMessage="For example, you might create a component template that defines index settings that can be reused across index templates."
+            defaultMessage="For example, you can create a component template for index settings that can be reused across index templates."
           />
           <br />
           <EuiLink href={documentation.componentTemplates} target="_blank" external>
             {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink', {
-              defaultMessage: 'Learn more',
+              defaultMessage: 'Learn more.',
             })}
           </EuiLink>
         </p>
+      }
+      actions={
+        <EuiButton
+          {...reactRouterNavigate(history, '/create_component_template')}
+          iconType="plusInCircle"
+          fill
+        >
+          {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptButtonLabel', {
+            defaultMessage: 'Create a component template',
+          })}
+        </EuiButton>
       }
     />
   );

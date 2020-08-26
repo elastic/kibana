@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
+import '../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
 import { ExitCodeDraggable } from './exit_code_draggable';

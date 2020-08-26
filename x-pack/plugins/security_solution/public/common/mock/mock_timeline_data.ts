@@ -418,8 +418,8 @@ export const mockTimelineData: TimelineItem[] = [
     data: [
       { field: '@timestamp', value: ['2019-03-07T05:06:51.000Z'] },
       { field: 'host.name', value: ['zeek-franfurt'] },
-      { field: 'source.ip', value: ['185.176.26.101'] },
-      { field: 'destination.ip', value: ['207.154.238.205'] },
+      { field: 'source.ip', value: ['192.168.26.101'] },
+      { field: 'destination.ip', value: ['192.168.238.205'] },
     ],
     ecs: {
       _id: '14',
@@ -466,8 +466,8 @@ export const mockTimelineData: TimelineItem[] = [
     data: [
       { field: '@timestamp', value: ['2019-03-07T00:51:28.000Z'] },
       { field: 'host.name', value: ['suricata-zeek-singapore'] },
-      { field: 'source.ip', value: ['206.189.35.240'] },
-      { field: 'destination.ip', value: ['67.207.67.3'] },
+      { field: 'source.ip', value: ['192.168.35.240'] },
+      { field: 'destination.ip', value: ['192.168.67.3'] },
     ],
     ecs: {
       _id: '15',
@@ -520,8 +520,8 @@ export const mockTimelineData: TimelineItem[] = [
     data: [
       { field: '@timestamp', value: ['2019-03-05T07:00:20.000Z'] },
       { field: 'host.name', value: ['suricata-zeek-singapore'] },
-      { field: 'source.ip', value: ['206.189.35.240'] },
-      { field: 'destination.ip', value: ['192.241.164.26'] },
+      { field: 'source.ip', value: ['192.168.35.240'] },
+      { field: 'destination.ip', value: ['192.168.164.26'] },
     ],
     ecs: {
       _id: '16',
@@ -572,7 +572,7 @@ export const mockTimelineData: TimelineItem[] = [
     data: [
       { field: '@timestamp', value: ['2019-02-28T22:36:28.000Z'] },
       { field: 'host.name', value: ['zeek-franfurt'] },
-      { field: 'source.ip', value: ['8.42.77.171'] },
+      { field: 'source.ip', value: ['192.168.77.171'] },
     ],
     ecs: {
       _id: '17',
@@ -621,8 +621,8 @@ export const mockTimelineData: TimelineItem[] = [
     data: [
       { field: '@timestamp', value: ['2019-02-22T21:12:13.000Z'] },
       { field: 'host.name', value: ['zeek-sensor-amsterdam'] },
-      { field: 'source.ip', value: ['188.166.66.184'] },
-      { field: 'destination.ip', value: ['91.189.95.15'] },
+      { field: 'source.ip', value: ['192.168.66.184'] },
+      { field: 'destination.ip', value: ['192.168.95.15'] },
     ],
     ecs: {
       _id: '18',
@@ -767,7 +767,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: '@timestamp', value: ['2019-03-14T22:30:25.527Z'] },
       { field: 'event.category', value: ['user-login'] },
       { field: 'host.name', value: ['zeek-london'] },
-      { field: 'source.ip', value: ['8.42.77.171'] },
+      { field: 'source.ip', value: ['192.168.77.171'] },
       { field: 'user.name', value: ['root'] },
     ],
     ecs: {
@@ -1101,7 +1101,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'event.action', value: ['connected-to'] },
       { field: 'event.category', value: ['audit-rule'] },
       { field: 'host.name', value: ['zeek-london'] },
-      { field: 'destination.ip', value: ['93.184.216.34'] },
+      { field: 'destination.ip', value: ['192.168.216.34'] },
       { field: 'user.name', value: ['alice'] },
     ],
     ecs: {
@@ -1121,7 +1121,7 @@ export const mockTimelineData: TimelineItem[] = [
         data: null,
         summary: {
           actor: { primary: ['alice'], secondary: ['alice'] },
-          object: { primary: ['93.184.216.34'], secondary: ['80'], type: ['socket'] },
+          object: { primary: ['192.168.216.34'], secondary: ['80'], type: ['socket'] },
           how: ['/usr/bin/wget'],
           message_type: null,
           sequence: null,
@@ -1133,7 +1133,7 @@ export const mockTimelineData: TimelineItem[] = [
         ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
       },
       source: null,
-      destination: { ip: ['93.184.216.34'], port: [80] },
+      destination: { ip: ['192.168.216.34'], port: [80] },
       geo: null,
       suricata: null,
       network: null,
@@ -1174,7 +1174,7 @@ export const mockTimelineData: TimelineItem[] = [
       },
       auditd: {
         result: ['success'],
-        session: ['unset'],
+        session: ['242'],
         data: null,
         summary: {
           actor: { primary: ['unset'], secondary: ['root'] },

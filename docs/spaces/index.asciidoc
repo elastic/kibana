@@ -116,7 +116,8 @@ interface.
 You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
 The landing page can route users to a specific dashboard, application, or saved object as they enter each space.
 
-To configure the landing page, use the default route setting in <<kibana-general-settings, Management > Advanced settings>>.
+To configure the landing page, use the default route setting in
+<<kibana-general-settings, Stack Management > {kib} > Advanced settings>>.
 For example, you might set the default route to `/app/kibana#/dashboards`.
 
 [role="screenshot"]

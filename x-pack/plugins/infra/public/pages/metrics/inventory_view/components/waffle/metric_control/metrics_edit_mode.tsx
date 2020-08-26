@@ -6,15 +6,15 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
-import { getCustomMetricLabel } from './get_custom_metric_label';
 import {
   EuiTheme,
   withTheme,
 } from '../../../../../../../../../legacy/common/eui_styled_components';
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   customMetrics: SnapshotCustomMetricInput[];
   options: Array<{ text: string; value: string }>;
   onEdit: (metric: SnapshotCustomMetricInput) => void;
@@ -28,7 +28,7 @@ export const MetricsEditMode = withTheme(
       <div style={{ width: 256 }}>
         {options.map((option) => (
           <div key={option.value} style={{ padding: '14px 14px 13px 36px' }}>
-            <span style={{ color: theme.eui.euiButtonColorDisabled }}>{option.text}</span>
+            <span style={{ color: theme?.eui.euiButtonColorDisabled }}>{option.text}</span>
           </div>
         ))}
         {customMetrics.map((metric) => (

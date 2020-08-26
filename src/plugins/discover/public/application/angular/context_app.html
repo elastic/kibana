@@ -12,44 +12,10 @@
 
 
 <!-- Error feedback -->
-<div
-  class="kuiViewContent kuiViewContentItem"
-  ng-if="contextApp.state.loadingStatus.anchor.status === contextApp.constants.LOADING_STATUS.FAILED"
->
-  <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
-    <div class="kuiInfoPanelHeader">
-      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
-      <span
-        class="kuiInfoPanelHeader__title"
-        i18n-id="discover.context.failedToLoadAnchorDocumentDescription"
-        i18n-default-message="Failed to load the anchor document"
-      ></span>
-    </div>
-
-    <div class="kuiInfoPanelBody">
-      <div
-        class="kuiInfoPanelBody__message"
-        ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.INVALID_TIEBREAKER"
-        i18n-id="discover.context.noSearchableTiebreakerFieldDescription"
-        i18n-default-message="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
-        i18n-values="{
-          indexPatternId: contextApp.state.queryParameters.indexPatternId,
-          html_tieBreakerFields: '<code>context:tieBreakerFields</code>'
-        }"
-      >
-      </div>
-      <div
-        class="kuiInfoPanelBody__message"
-        ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.UNKNOWN"
-      >
-        <span
-          i18n-id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"
-          i18n-default-message="Please reload or go back to the document list to select a valid anchor document."
-        ></span>
-    </div>
-    </div>
-  </div>
-</div>
+<context-error-message 
+  status="contextApp.state.loadingStatus.anchor.status" 
+  reason="contextApp.state.loadingStatus.anchor.reason">
+</context-error-message>
 
 <main
   class="kuiViewContent kuiViewContentItem"

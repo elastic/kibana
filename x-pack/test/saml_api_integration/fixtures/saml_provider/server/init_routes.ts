@@ -18,7 +18,7 @@ export function initRoutes(core: CoreSetup) {
     async (context, request, response) => {
       const samlResponse = await getSAMLResponse({
         inResponseTo: await getSAMLRequestId(request.url.href!),
-        destination: `${serverInfo.protocol}://${serverInfo.host}:${serverInfo.port}/api/security/saml/callback`,
+        destination: `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}/api/security/saml/callback`,
       });
 
       return response.renderHtml({
@@ -41,6 +41,17 @@ export function initRoutes(core: CoreSetup) {
     { path: '/saml_provider/login/submit.js', validate: false, options: { authRequired: false } },
     (context, request, response) => {
       return response.renderJs({ body: 'document.getElementById("loginForm").submit();' });
+    }
+  );
+
+  core.http.resources.register(
+    {
+      path: '/saml_provider/logout',
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      return response.redirected({ headers: { location: '/logout?SAMLResponse=something' } });
     }
   );
 }

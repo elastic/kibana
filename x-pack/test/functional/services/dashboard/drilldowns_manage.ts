@@ -20,8 +20,22 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
+  const esArchiver = getService('esArchiver');
 
   return new (class DashboardDrilldownsManage {
+    readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
+    readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
+
+    async loadData() {
+      log.debug('loadData');
+      await esArchiver.load('dashboard/drilldowns');
+    }
+
+    async unloadData() {
+      log.debug('unloadData');
+      await esArchiver.unload('dashboard/drilldowns');
+    }
+
     async expectsCreateDrilldownFlyoutOpen() {
       log.debug('expectsCreateDrilldownFlyoutOpen');
       await testSubjects.existOrFail(CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ);

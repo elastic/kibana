@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import each from 'lodash/each';
+import pick from 'lodash/pick';
+
 import semver from 'semver';
+import moment, { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
@@ -18,6 +23,7 @@ import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+import { MLCATEGORY } from '../constants/field_types';
 
 export interface ValidationResults {
   valid: boolean;
@@ -81,9 +87,9 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
     isSourceDataChartable =
       mlFunctionToESAggregation(functionName) !== null &&
-      dtr.by_field_name !== 'mlcategory' &&
-      dtr.partition_field_name !== 'mlcategory' &&
-      dtr.over_field_name !== 'mlcategory';
+      dtr.by_field_name !== MLCATEGORY &&
+      dtr.partition_field_name !== MLCATEGORY &&
+      dtr.over_field_name !== MLCATEGORY;
 
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
@@ -306,7 +312,7 @@ export function getSafeAggregationName(fieldName: string, index: number): string
 
 export function uniqWithIsEqual<T extends any[]>(arr: T): T {
   return arr.reduce((dedupedArray, value) => {
-    if (dedupedArray.filter((compareValue: any) => _.isEqual(compareValue, value)).length === 0) {
+    if (dedupedArray.filter((compareValue: any) => isEqual(compareValue, value)).length === 0) {
       dedupedArray.push(value);
     }
     return dedupedArray;
@@ -327,7 +333,7 @@ export function basicJobValidation(
 
   if (job) {
     // Job details
-    if (_.isEmpty(job.job_id)) {
+    if (isEmpty(job.job_id)) {
       messages.push({ id: 'job_id_empty' });
       valid = false;
     } else if (isJobIdValid(job.job_id) === false) {
@@ -349,7 +355,7 @@ export function basicJobValidation(
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, (d) => {
+      each(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -375,15 +381,24 @@ export function basicJobValidation(
         valid = false;
       }
     }
-
+    let categorizerDetectorMissingPartitionField = false;
     if (job.analysis_config.detectors.length === 0) {
       messages.push({ id: 'detectors_empty' });
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, (d) => {
-        if (_.isEmpty(d.function)) {
+
+      each(job.analysis_config.detectors, (d) => {
+        if (isEmpty(d.function)) {
           v = false;
+        }
+        // if detector has an ml category, check if the partition_field is missing
+        const needToHavePartitionFieldName =
+          job.analysis_config.per_partition_categorization?.enabled === true &&
+          (d.by_field_name === MLCATEGORY || d.over_field_name === MLCATEGORY);
+
+        if (needToHavePartitionFieldName && d.partition_field_name === undefined) {
+          categorizerDetectorMissingPartitionField = true;
         }
       });
       if (v) {
@@ -392,14 +407,50 @@ export function basicJobValidation(
         messages.push({ id: 'detectors_function_empty' });
         valid = false;
       }
+      if (categorizerDetectorMissingPartitionField) {
+        messages.push({ id: 'categorizer_detector_missing_per_partition_field' });
+        valid = false;
+      }
     }
 
-    // check for duplicate detectors
     if (job.analysis_config.detectors.length >= 2) {
+      // check if the detectors with mlcategory might have different per_partition_field values
+      // if per_partition_categorization is enabled
+      if (job.analysis_config.per_partition_categorization !== undefined) {
+        if (
+          job.analysis_config.per_partition_categorization.enabled ||
+          (job.analysis_config.per_partition_categorization.stop_on_warn &&
+            Array.isArray(job.analysis_config.detectors) &&
+            job.analysis_config.detectors.length >= 2)
+        ) {
+          const categorizationDetectors = job.analysis_config.detectors.filter(
+            (d) =>
+              d.by_field_name === MLCATEGORY ||
+              d.over_field_name === MLCATEGORY ||
+              d.partition_field_name === MLCATEGORY
+          );
+          const uniqPartitions = [
+            ...new Set(
+              categorizationDetectors
+                .map((d) => d.partition_field_name)
+                .filter((name) => name !== undefined)
+            ),
+          ];
+          if (uniqPartitions.length > 1) {
+            valid = false;
+            messages.push({
+              id: 'categorizer_varying_per_partition_fields',
+              fields: uniqPartitions.join(', '),
+            });
+          }
+        }
+      }
+
+      // check for duplicate detectors
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
       const compareSubSet = job.analysis_config.detectors.map((d) =>
-        _.pick(d, [
+        pick(d, [
           'function',
           'field_name',
           'by_field_name',
@@ -433,7 +484,7 @@ export function basicJobValidation(
       messages.push({ id: 'bucket_span_empty' });
       valid = false;
     } else {
-      if (isValidTimeFormat(job.analysis_config.bucket_span)) {
+      if (isValidTimeInterval(job.analysis_config.bucket_span)) {
         messages.push({
           id: 'bucket_span_valid',
           bucketSpan: job.analysis_config.bucket_span,
@@ -490,14 +541,14 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
 
   if (datafeed) {
     let queryDelayMessage = { id: 'query_delay_valid' };
-    if (isValidTimeFormat(datafeed.query_delay) === false) {
+    if (isValidTimeInterval(datafeed.query_delay) === false) {
       queryDelayMessage = { id: 'query_delay_invalid' };
       valid = false;
     }
     messages.push(queryDelayMessage);
 
     let frequencyMessage = { id: 'frequency_valid' };
-    if (isValidTimeFormat(datafeed.frequency) === false) {
+    if (isValidTimeInterval(datafeed.frequency) === false) {
       frequencyMessage = { id: 'frequency_invalid' };
       valid = false;
     }
@@ -591,12 +642,50 @@ export function validateGroupNames(job: Job): ValidationResults {
   };
 }
 
-function isValidTimeFormat(value: string | undefined): boolean {
+/**
+ * Parses the supplied string to a time interval suitable for use in an ML anomaly
+ * detection job or datafeed.
+ * @param value the string to parse
+ * @return {Duration} the parsed interval, or null if it does not represent a valid
+ * time interval.
+ */
+export function parseTimeIntervalForJob(value: string | undefined): Duration | null {
+  if (value === undefined) {
+    return null;
+  }
+
+  // Must be a valid interval, greater than zero,
+  // and if specified in ms must be a multiple of 1000ms.
+  const interval = parseInterval(value, true);
+  return interval !== null && interval.asMilliseconds() !== 0 && interval.milliseconds() === 0
+    ? interval
+    : null;
+}
+
+// Checks that the value for a field which represents a time interval,
+// such as a job bucket span or datafeed query delay, is valid.
+function isValidTimeInterval(value: string | undefined): boolean {
   if (value === undefined) {
     return true;
   }
-  const interval = parseInterval(value);
-  return interval !== null && interval.asMilliseconds() !== 0;
+  return parseTimeIntervalForJob(value) !== null;
+}
+
+// The earliest start time for the datafeed should be the max(latest_record_timestamp, latest_bucket.timestamp + bucket_span).
+export function getEarliestDatafeedStartTime(
+  latestRecordTimestamp: number | undefined,
+  latestBucketTimestamp: number | undefined,
+  bucketSpan?: Duration | null | undefined
+): number | undefined {
+  if (latestRecordTimestamp !== undefined && latestBucketTimestamp !== undefined) {
+    // if bucket span is available (e.g. 15m) add it to the latest bucket timestamp in ms
+    const adjustedBucketStartTime = bucketSpan
+      ? moment(latestBucketTimestamp).add(bucketSpan).valueOf()
+      : latestBucketTimestamp;
+    return Math.max(latestRecordTimestamp, adjustedBucketStartTime);
+  } else {
+    return latestRecordTimestamp !== undefined ? latestRecordTimestamp : latestBucketTimestamp;
+  }
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,

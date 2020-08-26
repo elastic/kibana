@@ -1,0 +1,28 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies unusual destination port activity that can indicate command-and-control, persistence mechanism, or data exfiltration activity. Rarely used destination port activity is generally unusual in Linux fleets, and can indicate unauthorized access or threat actor activity.",
+  "false_positives": [
+    "A newly installed program or one that rarely uses the network could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License",
+  "machine_learning_job_id": "linux_anomalous_network_port_activity_ecs",
+  "name": "Unusual Linux Network Port Activity",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "3c7e32e6-6104-46d9-a06e-da0f8b5795a0",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

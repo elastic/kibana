@@ -7,35 +7,37 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
-  CommentsPartialArray,
   DescriptionOrUndefined,
-  EntriesArrayOrUndefined,
+  EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListItemTypeOrUndefined,
   ExceptionListSoSchema,
-  ExceptionListTypeOrUndefined,
   IdOrUndefined,
   ItemIdOrUndefined,
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
   TagsOrUndefined,
+  UpdateCommentsArrayOrUndefined,
   _TagsOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 import {
   getSavedObjectType,
-  transformComments,
   transformSavedObjectUpdateToExceptionListItem,
+  transformUpdateCommentsToComments,
 } from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
 
 interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
-  comments: CommentsPartialArray;
+  comments: UpdateCommentsArrayOrUndefined;
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   itemId: ItemIdOrUndefined;
@@ -43,11 +45,12 @@ interface UpdateExceptionListItemOptions {
   user: string;
   tags: TagsOrUndefined;
   tieBreaker?: string;
-  type: ExceptionListTypeOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
 }
 
 export const updateExceptionListItem = async ({
   _tags,
+  _version,
   comments,
   entries,
   id,
@@ -71,12 +74,17 @@ export const updateExceptionListItem = async ({
   if (exceptionListItem == null) {
     return null;
   } else {
+    const transformedComments = transformUpdateCommentsToComments({
+      comments,
+      existingComments: exceptionListItem.comments,
+      user,
+    });
     const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
       savedObjectType,
       exceptionListItem.id,
       {
         _tags,
-        comments: transformComments({ comments, user }),
+        comments: transformedComments,
         description,
         entries,
         meta,
@@ -84,11 +92,13 @@ export const updateExceptionListItem = async ({
         tags,
         type,
         updated_by: user,
+      },
+      {
+        version: _version,
       }
     );
     return transformSavedObjectUpdateToExceptionListItem({
       exceptionListItem,
-      namespaceType,
       savedObject,
     });
   }

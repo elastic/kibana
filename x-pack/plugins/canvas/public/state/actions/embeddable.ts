@@ -7,7 +7,7 @@
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { createThunk } from '../../lib/create_thunk';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { fetchRenderable } from './elements';
 import { State } from '../../../types';
 

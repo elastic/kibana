@@ -6,16 +6,19 @@
 
 import React from 'react';
 import { ErrorCountSummaryItemBadge } from '../ErrorCountSummaryItemBadge';
-import { render } from '@testing-library/react';
-import { expectTextsInDocument } from '../../../../utils/testHelpers';
+import {
+  expectTextsInDocument,
+  renderWithTheme,
+} from '../../../../utils/testHelpers';
 
 describe('ErrorCountSummaryItemBadge', () => {
   it('shows singular error message', () => {
-    const component = render(<ErrorCountSummaryItemBadge count={1} />);
+    const component = renderWithTheme(<ErrorCountSummaryItemBadge count={1} />);
     expectTextsInDocument(component, ['1 Error']);
   });
+
   it('shows plural error message', () => {
-    const component = render(<ErrorCountSummaryItemBadge count={2} />);
+    const component = renderWithTheme(<ErrorCountSummaryItemBadge count={2} />);
     expectTextsInDocument(component, ['2 Errors']);
   });
 });

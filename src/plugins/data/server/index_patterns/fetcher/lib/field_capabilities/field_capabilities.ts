@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { defaults, indexBy, sortBy } from 'lodash';
+import { defaults, keyBy, sortBy } from 'lodash';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
@@ -39,12 +39,12 @@ export function concatIfUniq<T>(arr: T[], value: T) {
  *  @return {Promise<Array<FieldDescriptor>>}
  */
 export async function getFieldCapabilities(
-  callCluster: APICaller,
+  callCluster: LegacyAPICaller,
   indices: string | string[] = [],
   metaFields: string[] = []
 ) {
   const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(callCluster, indices);
-  const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))

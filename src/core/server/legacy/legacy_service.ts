@@ -264,6 +264,11 @@ export class LegacyService implements CoreService {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
       elasticsearch: startDeps.core.elasticsearch,
+      http: {
+        auth: startDeps.core.http.auth,
+        basePath: startDeps.core.http.basePath,
+        getServerInfo: startDeps.core.http.getServerInfo,
+      },
       savedObjects: {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
@@ -271,7 +276,11 @@ export class LegacyService implements CoreService {
         createSerializer: startDeps.core.savedObjects.createSerializer,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
+      metrics: {
+        getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -279,10 +288,7 @@ export class LegacyService implements CoreService {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        legacy: {
-          client: setupDeps.core.elasticsearch.legacy.client,
-          createClient: setupDeps.core.elasticsearch.legacy.createClient,
-        },
+        legacy: setupDeps.core.elasticsearch.legacy,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -292,6 +298,7 @@ export class LegacyService implements CoreService {
         ),
         createRouter: () => router,
         resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -302,11 +309,10 @@ export class LegacyService implements CoreService {
           isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
         },
         csp: setupDeps.core.http.csp,
-        isTlsEnabled: setupDeps.core.http.isTlsEnabled,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
-      metrics: {
-        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      logging: {
+        configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
@@ -323,6 +329,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
+      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
@@ -365,6 +372,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../cli/repl').startRepl(kbnServer);
     }
 

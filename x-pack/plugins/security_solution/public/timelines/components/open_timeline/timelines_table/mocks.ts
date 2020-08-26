@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '.';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 export const getMockTimelinesTableProps = (
   mockOpenTimelineResults: OpenTimelineResult[]
@@ -28,5 +30,6 @@ export const getMockTimelinesTableProps = (
   showExtendedColumns: true,
   sortDirection: DEFAULT_SORT_DIRECTION,
   sortField: DEFAULT_SORT_FIELD,
+  timelineType: TimelineType.default,
   totalSearchResultsCount: mockOpenTimelineResults.length,
 });

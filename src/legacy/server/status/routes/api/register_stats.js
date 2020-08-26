@@ -19,6 +19,7 @@
 
 import Joi from 'joi';
 import boom from 'boom';
+import { defaultsDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { getKibanaInfoForStats } from '../../lib';
@@ -54,7 +55,7 @@ export function registerStatsApi(usageCollection, server, config, kbnServer) {
   /* kibana_stats gets singled out from the collector set as it is used
    * for health-checking Kibana and fetch does not rely on fetching data
    * from ES */
-  server.newPlatform.setup.core.metrics.getOpsMetrics$().subscribe((metrics) => {
+  server.newPlatform.start.core.metrics.getOpsMetrics$().subscribe((metrics) => {
     lastMetrics = {
       ...metrics,
       timestamp: new Date().toISOString(),
@@ -120,10 +121,9 @@ export function registerStatsApi(usageCollection, server, config, kbnServer) {
                     },
                   };
                 } else {
-                  accum = {
-                    ...accum,
-                    [usageKey]: usage[usageKey],
-                  };
+                  // I don't think we need to it this for the above conditions, but do it for most as it will
+                  // match the behavior done in monitoring/bulk_uploader
+                  defaultsDeep(accum, { [usageKey]: usage[usageKey] });
                 }
 
                 return accum;

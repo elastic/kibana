@@ -13,7 +13,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FORMATTERS, InfraFormatterType } from '../../../../../infra/public';
+import { asPercent } from '../../../utils/formatters';
 
 interface TransactionBreakdownKpi {
   name: string;
@@ -31,10 +31,7 @@ const Description = styled.span`
   }
 `;
 
-const KpiDescription: React.FC<{
-  name: string;
-  color: string;
-}> = ({ name, color }) => {
+function KpiDescription({ name, color }: { name: string; color: string }) {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -52,9 +49,9 @@ const KpiDescription: React.FC<{
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}
 
-const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
+function TransactionBreakdownKpiList({ kpis }: Props) {
   return (
     <EuiFlexGrid>
       {kpis.map((kpi) => (
@@ -65,9 +62,7 @@ const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <span>
-                  {FORMATTERS[InfraFormatterType.percent](kpi.percentage)}
-                </span>
+                <span>{asPercent(kpi.percentage, 1)}</span>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -75,6 +70,6 @@ const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
       ))}
     </EuiFlexGrid>
   );
-};
+}
 
 export { TransactionBreakdownKpiList };

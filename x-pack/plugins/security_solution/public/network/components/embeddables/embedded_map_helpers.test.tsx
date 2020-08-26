@@ -14,6 +14,7 @@ import {
   mockAuditbeatIndexPattern,
   mockFilebeatIndexPattern,
   mockGlobIndexPattern,
+  mockCCSGlobIndexPattern,
 } from './__mocks__/mock';
 
 const mockEmbeddable = embeddablePluginMock.createStartContract();
@@ -34,8 +35,8 @@ describe('embedded_map_helpers', () => {
         [],
         [],
         { query: '', language: 'kuery' },
-        0,
-        0,
+        '2020-07-07T08:20:18.966Z',
+        '2020-07-08T08:20:18.966Z',
         setQueryMock,
         createPortalNode(),
         mockEmbeddable
@@ -49,8 +50,8 @@ describe('embedded_map_helpers', () => {
         [],
         [],
         { query: '', language: 'kuery' },
-        0,
-        0,
+        '2020-07-07T08:20:18.966Z',
+        '2020-07-08T08:20:18.966Z',
         setQueryMock,
         createPortalNode(),
         mockEmbeddable
@@ -106,12 +107,20 @@ describe('embedded_map_helpers', () => {
       ]);
     });
 
-    test('finds glob-only index patterns ', () => {
+    test('excludes glob-only index patterns', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
         kibanaIndexPatterns: [mockGlobIndexPattern, mockFilebeatIndexPattern],
         siemDefaultIndices,
       });
-      expect(matchingIndexPatterns).toEqual([mockGlobIndexPattern, mockFilebeatIndexPattern]);
+      expect(matchingIndexPatterns).toEqual([mockFilebeatIndexPattern]);
+    });
+
+    test('excludes glob-only CCS index patterns', () => {
+      const matchingIndexPatterns = findMatchingIndexPatterns({
+        kibanaIndexPatterns: [mockCCSGlobIndexPattern, mockFilebeatIndexPattern],
+        siemDefaultIndices,
+      });
+      expect(matchingIndexPatterns).toEqual([mockFilebeatIndexPattern]);
     });
   });
 });

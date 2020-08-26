@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { metricSet } from './metric_set_overview';
+import { metricSet } from './metric_set_instance';
 import { handleError } from '../../../../lib/errors';
 import { getApmInfo } from '../../../../lib/apm';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';

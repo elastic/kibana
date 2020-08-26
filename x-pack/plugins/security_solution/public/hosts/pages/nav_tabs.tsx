@@ -8,9 +8,9 @@ import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
 import { HostsNavTab } from './navigation/types';
-import { SiemPageName } from '../../app/types';
+import { SecurityPageName } from '../../app/types';
 
-const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/${SiemPageName.hosts}/${tabName}`;
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `/${tabName}`;
 
 export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
   const hostsNavTabs = {
@@ -20,6 +20,7 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       href: getTabsOnHostsUrl(HostsTableType.hosts),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.authentications]: {
       id: HostsTableType.authentications,
@@ -27,6 +28,7 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       href: getTabsOnHostsUrl(HostsTableType.authentications),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.uncommonProcesses]: {
       id: HostsTableType.uncommonProcesses,
@@ -34,6 +36,7 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       href: getTabsOnHostsUrl(HostsTableType.uncommonProcesses),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.anomalies]: {
       id: HostsTableType.anomalies,
@@ -41,6 +44,7 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       href: getTabsOnHostsUrl(HostsTableType.anomalies),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.events]: {
       id: HostsTableType.events,
@@ -48,6 +52,7 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       href: getTabsOnHostsUrl(HostsTableType.events),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
     [HostsTableType.alerts]: {
       id: HostsTableType.alerts,
@@ -55,6 +60,7 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       href: getTabsOnHostsUrl(HostsTableType.alerts),
       disabled: false,
       urlKey: 'host',
+      pageId: SecurityPageName.hosts,
     },
   };
 

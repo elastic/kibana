@@ -99,7 +99,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async find<T = unknown>(options: SavedObjectsFindOptions) {
-    await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
+    if (
+      this.getSpacesService() == null &&
+      Array.isArray(options.namespaces) &&
+      options.namespaces.length > 0
+    ) {
+      throw this.errors.createBadRequestError(
+        `_find across namespaces is not permitted when the Spaces plugin is disabled.`
+      );
+    }
+    await this.ensureAuthorized(options.type, 'find', options.namespaces, { options });
 
     const response = await this.baseClient.find<T>(options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -155,7 +164,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // result in a 404 error.
     await this.ensureAuthorized(type, 'update', namespace, args, 'addToNamespacesUpdate');
 
-    return await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.addToNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async deleteFromNamespaces(
@@ -168,7 +178,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
     await this.ensureAuthorized(type, 'delete', namespaces, args, 'deleteFromNamespaces');
 
-    return await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    const result = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+    return await this.redactSavedObjectNamespaces(result);
   }
 
   public async bulkUpdate<T = unknown>(
@@ -293,7 +304,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
     savedObject: T
   ): Promise<T> {
-    if (this.getSpacesService() === undefined || savedObject.namespaces == null) {
+    if (
+      this.getSpacesService() === undefined ||
+      savedObject.namespaces == null ||
+      savedObject.namespaces.length === 0
+    ) {
       return savedObject;
     }
 

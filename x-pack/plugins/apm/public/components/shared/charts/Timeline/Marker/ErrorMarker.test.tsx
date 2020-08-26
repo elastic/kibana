@@ -7,9 +7,12 @@
 import React from 'react';
 import { ErrorMarker } from './ErrorMarker';
 import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react-hooks';
-import { expectTextsInDocument } from '../../../../../utils/testHelpers';
+import {
+  expectTextsInDocument,
+  renderWithTheme,
+} from '../../../../../utils/testHelpers';
 
 describe('ErrorMarker', () => {
   const mark = ({
@@ -33,15 +36,17 @@ describe('ErrorMarker', () => {
   } as unknown) as ErrorMark;
 
   function openPopover(errorMark: ErrorMark) {
-    const component = render(<ErrorMarker mark={errorMark} />);
+    const component = renderWithTheme(<ErrorMarker mark={errorMark} />);
     act(() => {
       fireEvent.click(component.getByTestId('popover'));
     });
-    expectTextsInDocument(component, ['10.0 ms']);
+    expectTextsInDocument(component, ['10 ms']);
     return component;
   }
   function getKueryDecoded(url: string) {
-    return decodeURIComponent(url.substring(url.indexOf('kuery='), url.length));
+    return decodeURIComponent(
+      url.substring(url.indexOf('kuery='), url.indexOf('&'))
+    );
   }
   it('renders link with trace and transaction', () => {
     const component = openPopover(mark);
