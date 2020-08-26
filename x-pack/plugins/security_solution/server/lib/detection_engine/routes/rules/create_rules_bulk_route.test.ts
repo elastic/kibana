@@ -165,7 +165,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock(), type: 'query' }],
+        body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock() }],
       });
       const result = server.validate(request);
 
@@ -194,7 +194,6 @@ describe('create_rules_bulk', () => {
             from: 'now-3755555555555555.67s',
             interval: '5m',
             ...getCreateRulesSchemaMock(),
-            type: 'query',
           },
         ],
       });

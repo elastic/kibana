@@ -193,7 +193,7 @@ describe('patch_rules', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { from: 'now-7m', interval: '5m', ...getPatchRulesSchemaMock(), type: 'query' },
+        body: { from: 'now-7m', interval: '5m', ...getPatchRulesSchemaMock() },
       });
       const result = server.validate(request);
 
@@ -208,7 +208,6 @@ describe('patch_rules', () => {
           from: 'now-3755555555555555.67s',
           interval: '5m',
           ...getPatchRulesSchemaMock(),
-          type: 'query',
         },
       });
       const result = server.validate(request);
