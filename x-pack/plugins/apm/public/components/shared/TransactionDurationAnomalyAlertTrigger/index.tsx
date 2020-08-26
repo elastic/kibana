@@ -12,7 +12,10 @@ import { useServiceTransactionTypes } from '../../../hooks/useServiceTransaction
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
-import { SelectAnomalySeverity } from './SelectAnomalySeverity';
+import {
+  AnomalySeverity,
+  SelectAnomalySeverity,
+} from './SelectAnomalySeverity';
 
 interface Params {
   windowSize: number;
@@ -110,11 +113,11 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       />
     </PopoverExpression>,
     <PopoverExpression
-      value={params.anomalyScore.toString(10)}
+      value={<AnomalySeverity severityScore={params.anomalyScore} />}
       title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.anomalyScore',
+        'xpack.apm.transactionDurationAnomalyAlertTrigger.anomalySeverity',
         {
-          defaultMessage: 'Has anomaly score',
+          defaultMessage: 'Has anomaly with severity',
         }
       )}
     >

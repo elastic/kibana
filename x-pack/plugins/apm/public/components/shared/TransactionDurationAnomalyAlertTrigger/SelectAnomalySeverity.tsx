@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { getSeverityColor } from '../../app/ServiceMap/cytoscapeOptions';
 import { useTheme } from '../../../hooks/useTheme';
-import { EuiTheme } from '../../../../../observability/public';
 import { severity as Severity } from '../../app/ServiceMap/Popover/getSeverity';
 
 type SeverityScore = 0 | 25 | 50 | 75;
@@ -45,24 +44,29 @@ const anomalyScoreSeverityMap: {
   },
 };
 
-const getOption = (theme: EuiTheme, value: SeverityScore) => {
-  const { label, severity } = anomalyScoreSeverityMap[value];
+export function AnomalySeverity({
+  severityScore,
+}: {
+  severityScore: SeverityScore;
+}) {
+  const theme = useTheme();
+  const { label, severity } = anomalyScoreSeverityMap[severityScore];
   const defaultColor = theme.eui.euiColorMediumShade;
   const color = getSeverityColor(theme, severity) || defaultColor;
+  return (
+    <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+      {label}
+    </EuiHealth>
+  );
+}
+
+const getOption = (value: SeverityScore) => {
   return {
     value: value.toString(10),
-    inputDisplay: (
-      <>
-        <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
-          {label}
-        </EuiHealth>
-      </>
-    ),
+    inputDisplay: <AnomalySeverity severityScore={value} />,
     dropdownDisplay: (
       <>
-        <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
-          {label}
-        </EuiHealth>
+        <AnomalySeverity severityScore={value} />
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
           <p className="euiTextColor--subdued">
@@ -84,10 +88,7 @@ interface Props {
 }
 
 export function SelectAnomalySeverity({ onChange, value }: Props) {
-  const theme = useTheme();
-  const options = ANOMALY_SCORES.map((anomalyScore) =>
-    getOption(theme, anomalyScore)
-  );
+  const options = ANOMALY_SCORES.map((anomalyScore) => getOption(anomalyScore));
 
   return (
     <EuiSuperSelect

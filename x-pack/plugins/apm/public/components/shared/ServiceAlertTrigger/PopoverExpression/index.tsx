@@ -8,8 +8,8 @@ import React, { useState } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 
 interface Props {
-  title: string;
-  value: string;
+  title: React.ReactNode;
+  value: React.ReactNode;
   children?: React.ReactNode;
 }
 
