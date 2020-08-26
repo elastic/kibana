@@ -101,6 +101,16 @@ export const schema: FormSchema = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  severity: {
+    value: {},
+    mapping: {},
+    isMappingChecked: {},
+  },
+  riskScore: {
+    value: {},
+    mapping: {},
+    isMappingChecked: {},
+  },
   references: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel',
