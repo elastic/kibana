@@ -73,7 +73,7 @@ export async function getPageViewTrends({
       categoryBuckets.forEach(
         ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
           if (key === 'Other') {
-            res[key + `(${breakdownItem.name})`] = docCount;
+            res[key + `(${breakdownItem?.name})`] = docCount;
           } else {
             res[key] = docCount;
           }
