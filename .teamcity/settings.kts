@@ -43,7 +43,7 @@ project {
       param("profileId", "kibana-brianseeders")
       param("diskType", "pd-ssd")
       param("machineCustom", "false")
-      param("maxInstances", "10")
+      param("maxInstances", "20")
       param("imageType", "ImageFamily")
       param("machineType", "n2-standard-16")
       param("diskSizeGb", "")
