@@ -50,6 +50,34 @@ const TitleHr = memo(() => {
 });
 TitleHr.displayName = 'TitleHR';
 
+const GeneratedText = React.memo(function ({ children }) {
+  return <>{processedValue()}</>;
+
+  function processedValue() {
+    return React.Children.map(children, (child) => {
+      if (typeof child === 'string') {
+        const valueSplitByWordBoundaries = child.split(/\b/);
+
+        if (valueSplitByWordBoundaries.length < 2) {
+          return valueSplitByWordBoundaries[0];
+        }
+
+        return [
+          valueSplitByWordBoundaries[0],
+          ...valueSplitByWordBoundaries
+            .splice(1)
+            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value, index) {
+              return [...generatedTextMemo, value, <wbr />];
+            }, []),
+        ];
+      } else {
+        return child;
+      }
+    });
+  }
+});
+GeneratedText.displayName = 'GeneratedText';
+
 /**
  * Take description list entries and prepare them for display by
  * seeding with `<wbr />` tags.
@@ -60,23 +88,7 @@ function entriesForDisplay(entries: Array<{ title: string; description: string }
   return entries.map((entry) => {
     return {
       ...entry,
-      title: (
-        <>
-          {[...entry.title]
-            .reduce((acc: Array<string | JSX.Element>, char: string) => {
-              const shouldBreak = !!char.match(/\W/);
-              const shouldAppend = acc[acc.length - 1] && typeof acc[acc.length - 1] === 'string';
-              if (shouldBreak) {
-                return [...acc, <wbr />, char];
-              }
-              if (shouldAppend) {
-                return [...acc.slice(0, -1), acc[acc.length - 1] + char];
-              }
-              return [...acc, char];
-            }, [])
-            .map((titlePart) => (typeof titlePart === 'string' ? <>{titlePart}</> : titlePart))}
-        </>
-      ),
+      title: <GeneratedText>{entry.title}</GeneratedText>,
     };
   });
 }
