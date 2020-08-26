@@ -63,21 +63,25 @@ export class EnterpriseSearchRequestHandler {
           headers: { Authorization: request.headers.authorization as string },
         });
 
+        if (apiResponse.url.endsWith('/login')) {
+          throw new Error('Cannot authenticate Enterprise Search user');
+        }
+
         const body = await apiResponse.json();
 
         if (hasValidData(body)) {
           return response.ok({ body });
         } else {
-          throw new Error(`Invalid data received: ${JSON.stringify(body)}`);
+          this.log.debug(`Invalid data received from <${url}>: ${JSON.stringify(body)}`);
+          throw new Error('Invalid data received');
         }
       } catch (e) {
-        this.log.error(`Cannot connect to Enterprise Search: ${e.toString()}`);
+        const errorMessage = `Error connecting to Enterprise Search: ${e?.message || e.toString()}`;
+
+        this.log.error(errorMessage);
         if (e instanceof Error) this.log.debug(e.stack as string);
 
-        return response.customError({
-          statusCode: 502,
-          body: 'Error connecting or fetching data from Enterprise Search',
-        });
+        return response.customError({ statusCode: 502, body: errorMessage });
       }
     };
   }

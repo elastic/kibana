@@ -79,49 +79,56 @@ describe('EnterpriseSearchRequestHandler', () => {
     });
   });
 
-  describe('when an API request fails', () => {
-    it('should return 502 with a message', async () => {
-      EnterpriseSearchAPI.mockReturnError();
+  describe('error handling', () => {
+    afterEach(() => {
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error connecting to Enterprise Search')
+      );
+    });
 
-      const requestHandler = enterpriseSearchRequestHandler.createRequest({
-        path: '/as/credentials/collection',
-      });
+    it('returns an error when an API request fails', async () => {
+      EnterpriseSearchAPI.mockReturnError();
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/failed' });
 
       await makeAPICall(requestHandler);
-
-      EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        'http://localhost:3002/as/credentials/collection'
-      );
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/failed');
 
       expect(responseMock.customError).toHaveBeenCalledWith({
-        body: 'Error connecting or fetching data from Enterprise Search',
+        body: 'Error connecting to Enterprise Search: Failed',
         statusCode: 502,
       });
     });
-  });
 
-  describe('when `hasValidData` fails', () => {
-    it('should return 502 with a message', async () => {
-      const responseBody = {
-        foo: 'bar',
-      };
-
-      EnterpriseSearchAPI.mockReturn(responseBody);
-
+    it('returns an error when `hasValidData` fails', async () => {
+      EnterpriseSearchAPI.mockReturn({ results: false });
       const requestHandler = enterpriseSearchRequestHandler.createRequest({
-        path: '/as/credentials/collection',
-        hasValidData: (body?: any) =>
-          Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
+        path: '/api/invalid',
+        hasValidData: (body?: any) => Array.isArray(body?.results),
       });
 
       await makeAPICall(requestHandler);
-
-      EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        'http://localhost:3002/as/credentials/collection'
-      );
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/invalid');
 
       expect(responseMock.customError).toHaveBeenCalledWith({
-        body: 'Error connecting or fetching data from Enterprise Search',
+        body: 'Error connecting to Enterprise Search: Invalid data received',
+        statusCode: 502,
+      });
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Invalid data received from <http://localhost:3002/api/invalid>: {"results":false}'
+      );
+    });
+
+    it('returns an error when user authentication to Enterprise Search fails', async () => {
+      EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/login' });
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({
+        path: '/api/unauthenticated',
+      });
+
+      await makeAPICall(requestHandler);
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/unauthenticated');
+
+      expect(responseMock.customError).toHaveBeenCalledWith({
+        body: 'Error connecting to Enterprise Search: Cannot authenticate Enterprise Search user',
         statusCode: 502,
       });
     });
@@ -140,9 +147,9 @@ const EnterpriseSearchAPI = {
       ...expectedParams,
     });
   },
-  mockReturn(response: object) {
+  mockReturn(response: object, options?: object) {
     fetchMock.mockImplementation(() => {
-      return Promise.resolve(new Response(JSON.stringify(response)));
+      return Promise.resolve(new Response(JSON.stringify(response), options));
     });
   },
   mockReturnError() {
