@@ -84,7 +84,7 @@ describe('NavLinksService', () => {
       const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
       navLinkIds$.subscribe((r) => emittedLinks.push(r));
-      start.update('legacyApp1', { active: true });
+      start.update('app1', { active: true });
 
       service.stop();
       expect(emittedLinks).toEqual([
@@ -118,7 +118,7 @@ describe('NavLinksService', () => {
 
   describe('#has()', () => {
     it('returns true if exists', () => {
-      expect(start.has('legacyApp1')).toBe(true);
+      expect(start.has('app2')).toBe(true);
     });
 
     it('returns false if it does not exist', () => {
@@ -183,16 +183,13 @@ describe('NavLinksService', () => {
 
   describe('#update()', () => {
     it('updates the navlinks and returns the updated link', async () => {
-      expect(start.update('legacyApp1', { hidden: true })).toEqual(
+      expect(start.update('app2', { hidden: true })).toEqual(
         expect.objectContaining({
-          appUrl: '/app1',
-          disabled: false,
           hidden: true,
-          icon: 'legacyApp1',
-          id: 'legacyApp1',
-          legacy: true,
-          order: 5,
-          title: 'Legacy App 1',
+          id: 'app2',
+          order: -10,
+          title: 'App 2',
+          euiIconType: 'canvasApp',
         })
       );
       const hiddenLinkIds = await start
@@ -202,7 +199,7 @@ describe('NavLinksService', () => {
           map((links) => links.filter((l) => l.hidden).map((l) => l.id))
         )
         .toPromise();
-      expect(hiddenLinkIds).toEqual(['legacyApp1']);
+      expect(hiddenLinkIds).toEqual(['app2']);
     });
 
     it('returns undefined if link does not exist', () => {
@@ -210,7 +207,7 @@ describe('NavLinksService', () => {
     });
 
     it('keeps the updated link when availableApps are re-emitted', async () => {
-      start.update('legacyApp1', { hidden: true });
+      start.update('app2', { hidden: true });
       mockAppService.applications$.next(mockAppService.applications$.value);
       const hiddenLinkIds = await start
         .getNavLinks$()
@@ -219,7 +216,7 @@ describe('NavLinksService', () => {
           map((links) => links.filter((l) => l.hidden).map((l) => l.id))
         )
         .toPromise();
-      expect(hiddenLinkIds).toEqual(['legacyApp1']);
+      expect(hiddenLinkIds).toEqual(['app2']);
     });
   });
 

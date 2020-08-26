@@ -406,7 +406,6 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      legacy: false,
     });
   });
 

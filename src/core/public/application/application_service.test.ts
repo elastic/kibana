@@ -96,7 +96,6 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
         })
@@ -104,7 +103,6 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
         })
@@ -121,7 +119,6 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.hidden,
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
@@ -131,7 +128,6 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
         })
@@ -201,7 +197,6 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.disabled,
           status: AppStatus.inaccessible,
           tooltip: 'App inaccessible due to reason',
@@ -210,7 +205,6 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
           tooltip: 'App accessible',
@@ -250,7 +244,6 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.disabled,
           status: AppStatus.inaccessible,
           tooltip: 'App inaccessible due to reason',
@@ -259,7 +252,6 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          legacy: false,
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.hidden,
         })
@@ -295,7 +287,6 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           navLinkStatus: AppNavLinkStatus.disabled,
           status: AppStatus.inaccessible,
         })
@@ -325,7 +316,6 @@ describe('#setup()', () => {
       expect(latestValue.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.disabled,
         })
@@ -341,7 +331,6 @@ describe('#setup()', () => {
       expect(latestValue.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          legacy: false,
           status: AppStatus.accessible,
           navLinkStatus: AppNavLinkStatus.hidden,
         })
@@ -463,8 +452,6 @@ describe('#start()', () => {
         navLinks: {
           app1: true,
           app2: false,
-          legacyApp1: true,
-          legacyApp2: false,
         },
       },
     } as any);
