@@ -34,14 +34,8 @@ describe('#getInjected()', () => {
   it('proxies to newPlatformInjectedMetadata service', () => {
     const chrome = initChrome();
 
-    chrome.getInjected();
     chrome.getInjected('foo');
     chrome.getInjected('foo', 'bar');
-    expect(newPlatformInjectedMetadata.getInjectedVars.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [],
-]
-`);
     expect(newPlatformInjectedMetadata.getInjectedVar.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
@@ -54,25 +48,5 @@ Array [
   ],
 ]
 `);
-  });
-
-  it('returns mutable values, but does not persist changes internally', () => {
-    const chrome = initChrome();
-
-    newPlatformInjectedMetadata.getInjectedVars.mockReturnValue(
-      Object.freeze({
-        foo: Object.freeze({
-          bar: Object.freeze({
-            baz: 1,
-          }),
-        }),
-      })
-    );
-
-    const vars = chrome.getInjected();
-    expect(() => {
-      vars.newProperty = true;
-    }).not.toThrowError();
-    expect(chrome.getInjected()).not.toHaveProperty('newProperty');
   });
 });
