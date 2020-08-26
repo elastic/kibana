@@ -85,8 +85,8 @@ export function pausableNoAncestorsTwoChildren(): {
       }
     },
     resume: ({ relatedEvents, resolverTree, entities }: PausableRequests) => {
-      if (resolverTree && resolverTreeResolver) resolverTreeResolver();
       if (entities && entitiesResolver) entitiesResolver();
+      if (resolverTree && resolverTreeResolver) resolverTreeResolver();
       if (relatedEvents && relatedEventsResolver) relatedEventsResolver();
     },
     dataAccessLayer: {
