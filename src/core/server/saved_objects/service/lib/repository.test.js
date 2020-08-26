@@ -2315,7 +2315,7 @@ describe('SavedObjectsRepository', () => {
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, relevantOpts);
       });
 
-      it(`accepts KQL string filter and passes KueryNode to getSearchDsl`, async () => {
+      it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
           namespace,
           search: 'foo*',

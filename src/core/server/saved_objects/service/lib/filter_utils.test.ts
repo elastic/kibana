@@ -92,7 +92,7 @@ describe('Filter Utils', () => {
         )
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
     });
-    test('Validate a simple KQL string filter', () => {
+    test('Validate a simple KQL expression filter', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
