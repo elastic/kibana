@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
 import { PaginationBuilder } from '../utils/pagination';
@@ -13,12 +14,17 @@ import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/com
  * Builds a query for retrieving alerts for a node.
  */
 export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
+  private readonly kqlQuery: JsonObject[] = [];
   constructor(
     private readonly pagination: PaginationBuilder,
     indexPattern: string | string[],
-    endpointID?: string
+    endpointID?: string,
+    kql?: string
   ) {
     super(indexPattern, endpointID);
+    if (kql) {
+      this.kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
+    }
   }
 
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
@@ -26,6 +32,7 @@ export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
       query: {
         bool: {
           filter: [
+            ...this.kqlQuery,
             {
               terms: { 'endgame.unique_pid': uniquePIDs },
             },
@@ -38,7 +45,7 @@ export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('endgame.serial_event_id'),
+      ...this.pagination.buildQueryFields('endgame.serial_event_id', 'asc'),
     };
   }
 
@@ -47,6 +54,7 @@ export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
       query: {
         bool: {
           filter: [
+            ...this.kqlQuery,
             {
               terms: { 'process.entity_id': entityIDs },
             },
@@ -56,7 +64,7 @@ export class AlertsQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('event.id'),
+      ...this.pagination.buildQueryFields('event.id', 'asc'),
     };
   }
 
