@@ -17,19 +17,34 @@
  * under the License.
  */
 
-import { CoreSetup, RequestHandlerContext } from '../../../../../src/core/server';
-import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { registerSearchRoute } from './routes';
-import { DataPluginStart } from '../plugin';
-import { dataPluginMock } from '../mocks';
+import { Observable } from 'rxjs';
+
+import {
+  CoreSetup,
+  RequestHandlerContext,
+  SharedGlobalConfig,
+  StartServicesAccessor,
+} from 'src/core/server';
+import {
+  coreMock,
+  httpServerMock,
+  pluginInitializerContextConfigMock,
+} from '../../../../../../src/core/server/mocks';
+import { registerSearchRoute } from './search';
+import { DataPluginStart } from '../../plugin';
+import { dataPluginMock } from '../../mocks';
 
 describe('Search service', () => {
   let mockDataStart: MockedKeys<DataPluginStart>;
-  let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
+  let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
+  let getStartServices: jest.Mocked<StartServicesAccessor<{}, DataPluginStart>>;
+  let globalConfig$: Observable<SharedGlobalConfig>;
 
   beforeEach(() => {
     mockDataStart = dataPluginMock.createStartContract();
     mockCoreSetup = coreMock.createSetup({ pluginStartContract: mockDataStart });
+    getStartServices = mockCoreSetup.getStartServices;
+    globalConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
   });
 
   it('handler calls context.search.search with the given request and strategy', async () => {
@@ -44,7 +59,7 @@ describe('Search service', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    registerSearchRoute(mockCoreSetup);
+    registerSearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
@@ -75,7 +90,7 @@ describe('Search service', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    registerSearchRoute(mockCoreSetup);
+    registerSearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];

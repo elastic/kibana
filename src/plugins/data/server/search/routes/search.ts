@@ -18,13 +18,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from '../../../../core/server';
-import { getRequestAbortedSignal } from '../lib';
-import { DataPluginStart } from '../plugin';
+import { IRouter } from 'src/core/server';
+import { getRequestAbortedSignal } from '../../lib';
+import { SearchRouteDependencies } from '../search_service';
 
-export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): void {
-  const router = core.http.createRouter();
-
+export function registerSearchRoute(
+  router: IRouter,
+  { getStartServices }: SearchRouteDependencies
+): void {
   router.post(
     {
       path: '/internal/search/{strategy}/{id?}',
@@ -44,7 +45,7 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
       const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
-      const [, , selfStart] = await core.getStartServices();
+      const [, , selfStart] = await getStartServices();
 
       try {
         const response = await selfStart.search.search(
@@ -85,7 +86,7 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
     async (context, request, res) => {
       const { strategy, id } = request.params;
 
-      const [, , selfStart] = await core.getStartServices();
+      const [, , selfStart] = await getStartServices();
       const searchStrategy = selfStart.search.getSearchStrategy(strategy);
       if (!searchStrategy.cancel) return res.ok();
 

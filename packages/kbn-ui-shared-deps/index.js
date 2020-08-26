@@ -62,12 +62,5 @@ exports.externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
   '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.Theme.euiLightVars',
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
-
-  /**
-   * massive deps that we should really get rid of or reduce in size substantially
-   */
-  elasticsearch: '__kbnSharedDeps__.ElasticsearchBrowser',
-  'elasticsearch-browser': '__kbnSharedDeps__.ElasticsearchBrowser',
-  'elasticsearch-browser/elasticsearch': '__kbnSharedDeps__.ElasticsearchBrowser',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

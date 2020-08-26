@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { HttpStart } from 'src/core/public';
 import { GetConfigFn } from '../../../common';
-import { ISearchStartLegacy } from '../types';
 
 /**
  * @internal
@@ -35,9 +35,8 @@ export interface FetchOptions {
 }
 
 export interface FetchHandlers {
-  legacySearchService: ISearchStartLegacy;
   config: { get: GetConfigFn };
-  esShardTimeout: number;
+  http: HttpStart;
 }
 
 export interface SearchError {

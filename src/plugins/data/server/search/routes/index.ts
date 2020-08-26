@@ -17,14 +17,5 @@
  * under the License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { SearchRequest } from '../../fetch';
-
-export interface LegacyApiCaller {
-  search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-  msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-}
-
-interface LegacyApiCallerResponse extends Promise<SearchResponse<any>> {
-  abort: () => void;
-}
+export * from './msearch';
+export * from './search';

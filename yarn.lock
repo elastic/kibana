@@ -11247,11 +11247,6 @@ elastic-apm-node@^3.7.0:
     traceparent "^1.0.0"
     unicode-byte-truncate "^1.0.0"
 
-elasticsearch-browser@^16.7.0:
-  version "16.7.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.7.0.tgz#1f32a402cd36a9bb14a9ea6cb70f8e126d4cb9b1"
-  integrity sha512-UES2Fbnzy4Ivq4QvES4sfk/a5UytJczeJdfxRWa4kuHEllKOffKQLTxJ8Ti86OREpACQxppqvYgzctJuEiIr7Q==
-
 elasticsearch@^16.4.0:
   version "16.5.0"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.5.0.tgz#619a48040be25d345fdddf09fa6042a88c3974d6"

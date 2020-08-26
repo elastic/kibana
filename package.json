@@ -362,7 +362,6 @@
     "dedent": "^0.7.0",
     "deepmerge": "^4.2.2",
     "delete-empty": "^2.0.0",
-    "elasticsearch-browser": "^16.7.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-adapter-utils": "^1.13.0",
