@@ -19,7 +19,7 @@ export interface IAppActions {
 
 export const AppLogic = kea({
   actions: (): IAppActions => ({
-    initializeAppData: (props) => props.workplaceSearch,
+    initializeAppData: ({ workplaceSearch }) => workplaceSearch,
   }),
   reducers: () => ({
     hasInitialized: [
