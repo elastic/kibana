@@ -9,7 +9,7 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 // A Validator function takes in a value to check and returns an array of error messages.
 // If no messages (empty array) get returned, the value is valid.

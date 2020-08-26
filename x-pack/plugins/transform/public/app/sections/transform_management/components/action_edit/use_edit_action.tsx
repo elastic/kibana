@@ -6,7 +6,9 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { TransformListAction, TransformListRow, TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+
+import { TransformListAction, TransformListRow } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { editActionNameText, EditActionName } from './edit_action_name';

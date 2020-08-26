@@ -36,6 +36,7 @@ import {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
+import { TransformsResponseSchema } from '../../../common/api_schemas/transforms';
 
 import { RouteDependencies } from '../../types';
 
@@ -74,16 +75,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  router.get(
+  router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}'),
       validate: { params: transformIdParamSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { transformId } = req.params as TransformIdParamSchema;
-      const options = {
-        ...(transformId !== undefined ? { transformId } : {}),
-      };
+      const options = transformId !== undefined ? { transformId } : {};
       try {
         const transforms = await getTransforms(
           options,
@@ -264,7 +263,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
 }
 
-const getTransforms = async (options: { transformId?: string }, callAsCurrentUser: CallCluster) => {
+const getTransforms = async (
+  options: { transformId?: string },
+  callAsCurrentUser: CallCluster
+): Promise<TransformsResponseSchema> => {
   return await callAsCurrentUser('transform.getTransforms', options);
 };
 

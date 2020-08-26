@@ -11,51 +11,10 @@ import { Subscription } from 'rxjs';
 
 import { TransformId } from '../../../common/types/transform';
 
-import { PivotAggDict } from './pivot_aggs';
-import { PivotGroupByDict } from './pivot_group_by';
-
-export type IndexName = string;
-export type IndexPattern = string;
-
 // Transform name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // It must also start and end with an alphanumeric character.
 export function isTransformIdValid(transformId: TransformId) {
   return /^[a-z0-9\-\_]+$/g.test(transformId) && !/^([_-].*)?(.*[_-])?$/g.test(transformId);
-}
-
-export interface PreviewRequestBody {
-  pivot: {
-    group_by: PivotGroupByDict;
-    aggregations: PivotAggDict;
-  };
-  source: {
-    index: IndexPattern | IndexPattern[];
-    query?: any;
-  };
-}
-
-export interface CreateRequestBody extends PreviewRequestBody {
-  description?: string;
-  dest: {
-    index: IndexName;
-  };
-  frequency?: string;
-  settings?: {
-    max_page_search_size?: number;
-    docs_per_second?: number;
-  };
-  sync?: {
-    time: {
-      delay?: string;
-      field: string;
-    };
-  };
-}
-
-export interface TransformPivotConfig extends CreateRequestBody {
-  id: TransformId;
-  create_time?: number;
-  version?: string;
 }
 
 export enum REFRESH_TRANSFORM_LIST_STATE {

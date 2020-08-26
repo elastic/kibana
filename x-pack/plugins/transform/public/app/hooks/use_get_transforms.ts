@@ -4,22 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isHttpFetchError } from '../common/request';
 import {
   TransformListRow,
   TransformStats,
   TRANSFORM_MODE,
   isTransformStats,
-  TransformPivotConfig,
   refreshTransformList$,
   REFRESH_TRANSFORM_LIST_STATE,
 } from '../common';
 
 import { useApi } from './use_api';
-
-interface GetTransformsResponse {
-  count: number;
-  transforms: TransformPivotConfig[];
-}
 
 interface GetTransformsStatsResponseOk {
   node_failures?: object;
@@ -67,7 +62,12 @@ export const useGetTransforms = (
       }
 
       try {
-        const transformConfigs: GetTransformsResponse = await api.getTransforms();
+        const transformConfigs = await api.getTransforms();
+
+        if (isHttpFetchError(transformConfigs)) {
+          throw transformConfigs;
+        }
+
         const transformStats: GetTransformsStatsResponse = await api.getTransformsStats();
 
         const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {

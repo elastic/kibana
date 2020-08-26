@@ -5,30 +5,21 @@
  */
 
 import { FC } from 'react';
-import { Dictionary } from '../../../common/types/common';
+
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
-import { AggName } from './aggregations';
-import { EsFieldName } from './fields';
+import type { AggName } from '../../../common/types/aggregations';
+import type { Dictionary } from '../../../common/types/common';
+import type { EsFieldName } from '../../../common/types/fields';
+import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
-
-export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
 
 export function isPivotSupportedAggs(arg: any): arg is PivotSupportedAggs {
   return Object.values(PIVOT_SUPPORTED_AGGS).includes(arg);
 }
-
-export const PIVOT_SUPPORTED_AGGS = {
-  AVG: 'avg',
-  CARDINALITY: 'cardinality',
-  MAX: 'max',
-  MIN: 'min',
-  PERCENTILES: 'percentiles',
-  SUM: 'sum',
-  VALUE_COUNT: 'value_count',
-  FILTER: 'filter',
-} as const;
 
 export const PERCENTILES_AGG_DEFAULT_PERCENTS = [1, 5, 25, 50, 75, 95, 99];
 
@@ -67,16 +58,6 @@ export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES._SOURCE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.UNKNOWN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
-};
-
-export type PivotAgg = {
-  [key in PivotSupportedAggs]?: {
-    field: EsFieldName;
-  };
-};
-
-export type PivotAggDict = {
-  [key in AggName]: PivotAgg;
 };
 
 /**

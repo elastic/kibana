@@ -7,7 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from '../../../../common';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
+
+import { PivotAggsConfig } from '../../../../common';
 
 import { AggListForm, AggListProps } from './list_form';
 

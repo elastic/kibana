@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 import {
   applyFormFieldsToTransformConfig,

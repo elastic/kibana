@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PreviewRequestBody } from '../../../common/types/transform';
+
 import { PivotQuery } from './request';
-import { PreviewRequestBody } from './transform';
 
 export const INIT_MAX_COLUMNS = 20;
 

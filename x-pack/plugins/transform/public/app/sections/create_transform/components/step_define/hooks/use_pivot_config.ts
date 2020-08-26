@@ -6,11 +6,11 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
+import { AggName } from '../../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {
-  AggName,
   DropDownLabel,
   PivotAggsConfig,
   PivotAggsConfigDict,

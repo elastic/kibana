@@ -6,7 +6,9 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { transformStateSchema, ResponseStatus } from './common';
+import { TransformPivotConfig } from '../types/transform';
+
+import { transformStateSchema } from './common';
 
 export const transformsRequestSchema = schema.arrayOf(
   schema.object({
@@ -17,6 +19,7 @@ export const transformsRequestSchema = schema.arrayOf(
 
 export type TransformsRequestSchema = TypeOf<typeof transformsRequestSchema>;
 
-export interface TransformResponseSchema {
-  [key: string]: ResponseStatus;
+export interface TransformsResponseSchema {
+  count: number;
+  transforms: TransformPivotConfig[];
 }

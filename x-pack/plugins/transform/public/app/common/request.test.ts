@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+
 import { PivotGroupByConfig } from '../common';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
-import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
+import { PivotAggsConfig } from './pivot_aggs';
 import {
   defaultQuery,
   getPreviewRequestBody,

@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 
-import { PreviewRequestBody } from '../../../../../common';
+import { PreviewRequestBody } from '../../../../../../../common/types/transform';
 
 import { StepDefineExposedState } from '../common';
 

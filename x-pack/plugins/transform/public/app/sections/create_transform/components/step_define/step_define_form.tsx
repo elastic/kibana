@@ -22,6 +22,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
+import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
+
 import { DataGrid } from '../../../../../shared_imports';
 
 import {
@@ -31,9 +34,7 @@ import {
 
 import {
   getPreviewRequestBody,
-  PivotAggDict,
   PivotAggsConfigDict,
-  PivotGroupByDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PivotAggsConfig,

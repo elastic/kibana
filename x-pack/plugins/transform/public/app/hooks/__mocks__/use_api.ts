@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformId } from '../../../../common/types/transform';
+import { HttpFetchError } from 'kibana/public';
+
+import { PreviewRequestBody, TransformId } from '../../../../common/types/transform';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -17,13 +19,18 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../../common/api_schemas/stop_transforms';
-
-import { PreviewRequestBody } from '../../common';
+import type { TransformsResponseSchema } from '../../../../common/api_schemas/transforms';
+import { TransformIdParamSchema } from '../../../../common/api_schemas/common';
 
 const apiFactory = () => ({
-  getTransforms(transformId?: TransformId): Promise<any> {
+  getTransform(params: TransformIdParamSchema): Promise<TransformsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
-      resolve([]);
+      resolve({ count: 0, transforms: [] });
+    });
+  },
+  getTransforms(): Promise<TransformsResponseSchema | HttpFetchError> {
+    return new Promise((resolve, reject) => {
+      resolve({ count: 0, transforms: [] });
     });
   },
   getTransformsStats(transformId?: TransformId): Promise<any> {

@@ -21,39 +21,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { TransformPivotConfig } from '../../../../common/types/transform';
+
+import { isHttpFetchError } from '../../common/request';
 import { useApi } from '../../hooks/use_api';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 
-import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
-
 import { useAppDependencies } from '../../app_dependencies';
-import { TransformPivotConfig } from '../../common';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 
 import { Wizard } from '../create_transform/components/wizard';
-
-interface GetTransformsResponseOk {
-  count: number;
-  transforms: TransformPivotConfig[];
-}
-
-interface GetTransformsResponseError {
-  error: {
-    msg: string;
-    path: string;
-    query: any;
-    statusCode: number;
-    response: string;
-  };
-}
-
-function isGetTransformsResponseError(arg: any): arg is GetTransformsResponseError {
-  return arg.error !== undefined;
-}
-
-type GetTransformsResponse = GetTransformsResponseOk | GetTransformsResponseError;
 
 type Props = RouteComponentProps<{ transformId: string }>;
 export const CloneTransformSection: FC<Props> = ({ match }) => {
@@ -85,10 +65,10 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
 
   const fetchTransformConfig = async () => {
     try {
-      const transformConfigs: GetTransformsResponse = await api.getTransforms(transformId);
-      if (isGetTransformsResponseError(transformConfigs)) {
+      const transformConfigs = await api.getTransform({ transformId });
+      if (isHttpFetchError(transformConfigs)) {
         setTransformConfig(undefined);
-        setErrorMessage(transformConfigs.error.msg);
+        setErrorMessage(transformConfigs.message);
         setIsInitialized(true);
         return;
       }

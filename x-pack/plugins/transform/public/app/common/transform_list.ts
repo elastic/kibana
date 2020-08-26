@@ -6,8 +6,7 @@
 
 import { EuiTableActionsColumnType } from '@elastic/eui';
 
-import { TransformId } from '../../../common/types/transform';
-import { TransformPivotConfig } from './transform';
+import { TransformId, TransformPivotConfig } from '../../../common/types/transform';
 import { TransformStats } from './transform_stats';
 
 // Used to pass on attribute names to table columns

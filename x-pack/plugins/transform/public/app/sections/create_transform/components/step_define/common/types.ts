@@ -6,7 +6,9 @@
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 
-import { EsFieldName, PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import { EsFieldName } from '../../../../../../../common/types/fields';
+
+import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
 import { SavedSearchQuery } from '../../../../../hooks/use_search_items';
 
 import { QUERY_LANGUAGE } from './constants';

@@ -5,11 +5,11 @@
  */
 
 import {
-  PIVOT_SUPPORTED_AGGS,
-  PivotAggsConfigBase,
-  PivotAggsConfigWithUiBase,
   PivotSupportedAggs,
-} from '../../../../../common/pivot_aggs';
+  PIVOT_SUPPORTED_AGGS,
+} from '../../../../../../../common/types/pivot_aggs';
+
+import { PivotAggsConfigBase, PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg/config';
 
 /**

@@ -6,7 +6,11 @@
 
 import { DefaultOperator } from 'elasticsearch';
 
+import { HttpFetchError } from 'src/core/public';
+
 import { dictionaryToArray } from '../../../common/types/common';
+import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
+import { PreviewRequestBody, CreateRequestBody } from '../../../common/types/transform';
 import { SavedSearchQuery } from '../hooks/use_search_items';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
@@ -24,8 +28,6 @@ import {
 } from '../common';
 
 import { PivotAggsConfig } from './pivot_aggs';
-import { DateHistogramAgg, HistogramAgg, TermsAgg } from './pivot_group_by';
-import { PreviewRequestBody, CreateRequestBody } from './transform';
 
 export interface SimpleQuery {
   query_string: {
@@ -158,4 +160,12 @@ export function getCreateRequestBody(
   };
 
   return request;
+}
+
+export function isHttpFetchError(error: any): error is HttpFetchError {
+  return (
+    error instanceof HttpFetchError &&
+    typeof error.name === 'string' &&
+    typeof error.message !== 'undefined'
+  );
 }

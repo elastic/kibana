@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();

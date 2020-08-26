@@ -23,13 +23,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+
 import { getErrorMessage } from '../../../../../shared_imports';
 
-import {
-  refreshTransformList$,
-  TransformPivotConfig,
-  REFRESH_TRANSFORM_LIST_STATE,
-} from '../../../../common';
+import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';
 
 import { useApi } from '../../../../hooks/use_api';

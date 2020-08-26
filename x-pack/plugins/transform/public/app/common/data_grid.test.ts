@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+
 import {
   getPreviewRequestBody,
   PivotAggsConfig,
   PivotGroupByConfig,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
   SimpleQuery,
 } from '../common';

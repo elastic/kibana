@@ -10,7 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { getCreateRequestBody, TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+
+import { getCreateRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {

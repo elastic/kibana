@@ -11,25 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { TransformId } from '../../../../../../common/types/transform';
+
+import { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../shared_imports';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
+import { isHttpFetchError } from '../../../../common/request';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
-import {
-  getPivotQuery,
-  getPreviewRequestBody,
-  isTransformIdValid,
-  TransformPivotConfig,
-} from '../../../../common';
+import { getPivotQuery, getPreviewRequestBody, isTransformIdValid } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 import { delayValidator } from '../../../../common/validators';
 import { StepDefineExposedState } from '../step_define/common';
@@ -171,11 +167,13 @@ export const StepDetailsForm: FC<Props> = React.memo(
         }
 
         try {
-          setTransformIds(
-            (await api.getTransforms()).transforms.map(
-              (transform: TransformPivotConfig) => transform.id
-            )
-          );
+          const resp = await api.getTransforms();
+
+          if (isHttpFetchError(resp)) {
+            throw resp;
+          }
+
+          setTransformIds(resp.transforms.map((transform: TransformPivotConfig) => transform.id));
         } catch (e) {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {

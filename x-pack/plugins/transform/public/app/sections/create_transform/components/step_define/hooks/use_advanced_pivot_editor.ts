@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { useXJsonMode } from '../../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
-import { PreviewRequestBody } from '../../../../../common';
+import { PreviewRequestBody } from '../../../../../../../common/types/transform';
 
 import { StepDefineExposedState } from '../common';
 

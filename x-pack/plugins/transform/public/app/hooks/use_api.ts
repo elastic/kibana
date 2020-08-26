@@ -6,6 +6,8 @@
 
 import { useMemo } from 'react';
 
+import { HttpFetchError } from 'kibana/public';
+
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
 import type {
@@ -20,11 +22,13 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
-import { TransformId } from '../../../common/types/transform';
+import { TransformIdParamSchema } from '../../../common/api_schemas/common';
+import type { TransformsResponseSchema } from '../../../common/api_schemas/transforms';
+import { PreviewRequestBody, TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
-import { GetTransformsResponse, PreviewRequestBody } from '../common';
+import { GetTransformsResponse } from '../common';
 
 import { EsIndex } from './use_api_types';
 import { SavedSearchQuery } from './use_search_items';
@@ -42,15 +46,18 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      getTransforms(transformId?: TransformId): Promise<any> {
-        const transformIdString = transformId !== undefined ? `/${transformId}` : '';
-        return http.get(`${API_BASE_PATH}transforms${transformIdString}`);
+      getTransform({
+        transformId,
+      }: TransformIdParamSchema): Promise<TransformsResponseSchema | HttpFetchError> {
+        return http.get(`${API_BASE_PATH}transforms/${transformId}`);
+      },
+      getTransforms(): Promise<TransformsResponseSchema | HttpFetchError> {
+        return http.get(`${API_BASE_PATH}transforms`);
       },
       getTransformsStats(transformId?: TransformId): Promise<any> {
         if (transformId !== undefined) {
           return http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
         }
-
         return http.get(`${API_BASE_PATH}transforms/_stats`);
       },
       createTransform(transformId: TransformId, transformConfig: any): Promise<any> {
