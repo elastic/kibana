@@ -29,6 +29,7 @@ import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { FetchOptions as FetchOptions_2 } from 'src/plugins/data/public';
 import { History } from 'history';
 import { Href } from 'history';
+import { HttpStart } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
