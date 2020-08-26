@@ -237,7 +237,7 @@ export const relatedEventDisplayInfoByEntityAndSelfID: (
   state: DataState
 ) => (
   entityId: string,
-  relatedEventId: string
+  relatedEventId: string | number
 ) => [
   EndpointEvent | LegacyEndpointEvent | undefined,
   number,
@@ -249,7 +249,7 @@ export const relatedEventDisplayInfoByEntityAndSelfID: (
   relatedEventsByEntityId
   /* eslint-enable no-shadow */
 ) {
-  return defaultMemoize((entityId: string, relatedEventId: string) => {
+  return defaultMemoize((entityId: string, relatedEventId: string | number) => {
     const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityId);
     if (!relatedEventsForThisProcess) {
       return [undefined, 0, undefined, [], ''];
