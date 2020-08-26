@@ -59,7 +59,7 @@ describe('FrameHeading', () => {
           'Java'
         )
       ).toEqual(
-        'org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)'
+        'at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)'
       );
     });
   });
