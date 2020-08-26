@@ -117,14 +117,16 @@ export class FeatureProperties extends React.Component {
       items: this.state.actions.map((action) => {
         const actionContext = this.props.getActionContext();
         const iconType = action.getIconType ? action.getIconType(actionContext) : null;
+        const name = action.getDisplayName ? action.getDisplayName(actionContext) : action.id;
         return {
-          name: action.getDisplayName ? action.getDisplayName(actionContext) : action.id,
+          name,
           icon: iconType ? <EuiIcon type={iconType} /> : null,
           onClick: async () => {
             this.props.onCloseTooltip();
             const filters = await tooltipProperty.getESFilters();
             this.props.addFilters(filters, action.id);
           },
+          ['data-test-subj']: `mapFilterActionButton__${name}`,
         };
       }),
     };
@@ -202,6 +204,7 @@ export class FeatureProperties extends React.Component {
             aria-label={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
               defaultMessage: 'View filter actions',
             })}
+            data-test-subj="mapTooltipMoreActionsButton"
           >
             <EuiIcon type="arrowRight" />
           </EuiButtonEmpty>

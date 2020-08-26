@@ -86,11 +86,14 @@ exports[`FeatureProperties should show filter button for filterable properties 1
         <EuiButtonEmpty
           aria-label="Filter on property"
           data-test-subj="mapTooltipCreateFilterButton"
-          iconType="filter"
           onClick={[Function]}
           size="xs"
           title="Filter on property"
-        />
+        >
+          <EuiIcon
+            type="filter"
+          />
+        </EuiButtonEmpty>
       </td>
     </tr>
     <tr
@@ -138,34 +141,33 @@ exports[`FeatureProperties should show view actions button when there are availa
           }
         }
       />
-      <td>
-        <EuiFlexGroup
-          gutterSize="xs"
-        >
-          <EuiFlexItem
-            grow={false}
+      <td
+        className="mapFeatureTooltip_actionsRow"
+      >
+        <span>
+          <EuiButtonEmpty
+            aria-label="Filter on property"
+            data-test-subj="mapTooltipCreateFilterButton"
+            onClick={[Function]}
+            size="xs"
+            title="Filter on property"
           >
-            <EuiButtonEmpty
-              aria-label="Filter on property"
-              data-test-subj="mapTooltipCreateFilterButton"
-              iconType="filter"
-              onClick={[Function]}
-              size="xs"
-              title="Filter on property"
+            <EuiIcon
+              type="filter"
             />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
+          </EuiButtonEmpty>
+          <EuiButtonEmpty
+            aria-label="View filter actions"
+            data-test-subj="mapTooltipMoreActionsButton"
+            onClick={[Function]}
+            size="xs"
+            title="View filter actions"
           >
-            <EuiButtonEmpty
-              aria-label="View filter actions"
-              iconType="arrowRight"
-              onClick={[Function]}
-              size="xs"
-              title="View filter actions"
+            <EuiIcon
+              type="arrowRight"
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiButtonEmpty>
+        </span>
       </td>
     </tr>
     <tr
