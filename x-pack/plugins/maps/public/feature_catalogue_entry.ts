@@ -12,10 +12,10 @@ export const featureCatalogueEntry = {
   id: APP_ID,
   title: getAppTitle(),
   description: i18n.translate('xpack.maps.feature.appDescription', {
-    defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
+    defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service.',
   }),
   icon: APP_ICON,
   path: '/app/maps',
-  showOnHomePage: true,
+  showOnHomePage: false,
   category: FeatureCatalogueCategory.DATA,
 };
