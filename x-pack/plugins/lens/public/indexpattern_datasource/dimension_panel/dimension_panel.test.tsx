@@ -42,6 +42,7 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasExistence: true,
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
@@ -1256,6 +1257,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           foo: {
             id: 'foo',
             title: 'Foo pattern',
+            hasRestrictions: false,
             fields: [
               {
                 aggregatable: true,

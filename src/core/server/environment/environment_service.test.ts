@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { UuidService } from './uuid_service';
+import { BehaviorSubject } from 'rxjs';
+import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
+import { createDataFolder } from './create_data_folder';
 import { CoreContext } from '../core_context';
 
+import { configServiceMock } from '../config/config_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
 
@@ -28,31 +31,69 @@ jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
 }));
 
+jest.mock('./create_data_folder', () => ({
+  createDataFolder: jest.fn(),
+}));
+
+const pathConfig = {
+  data: 'data-folder',
+};
+const serverConfig = {
+  uuid: 'SOME_UUID',
+};
+
+const getConfigService = () => {
+  const configService = configServiceMock.create();
+  configService.atPath.mockImplementation((path) => {
+    if (path === 'path') {
+      return new BehaviorSubject(pathConfig);
+    }
+    if (path === 'server') {
+      return new BehaviorSubject(serverConfig);
+    }
+    return new BehaviorSubject({});
+  });
+  return configService;
+};
+
 describe('UuidService', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
+  let configService: ReturnType<typeof configServiceMock.create>;
   let coreContext: CoreContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggingSystemMock.create();
-    coreContext = mockCoreContext.create({ logger });
+    configService = getConfigService();
+    coreContext = mockCoreContext.create({ logger, configService });
   });
 
   describe('#setup()', () => {
-    it('calls resolveInstanceUuid with core configuration service', async () => {
-      const service = new UuidService(coreContext);
+    it('calls resolveInstanceUuid with correct parameters', async () => {
+      const service = new EnvironmentService(coreContext);
       await service.setup();
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
-        configService: coreContext.configService,
+        pathConfig,
+        serverConfig,
+        logger: logger.get('uuid'),
+      });
+    });
+
+    it('calls createDataFolder with correct parameters', async () => {
+      const service = new EnvironmentService(coreContext);
+      await service.setup();
+      expect(createDataFolder).toHaveBeenCalledTimes(1);
+      expect(createDataFolder).toHaveBeenCalledWith({
+        pathConfig,
         logger: logger.get('uuid'),
       });
     });
 
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      const service = new UuidService(coreContext);
+      const service = new EnvironmentService(coreContext);
       const setup = await service.setup();
-      expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
+      expect(setup.instanceUuid).toEqual('SOME_UUID');
     });
   });
 });

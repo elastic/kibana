@@ -19,11 +19,9 @@
 
 import uuid from 'uuid';
 import { join } from 'path';
-import { take } from 'rxjs/operators';
 import { readFile, writeFile } from './fs';
-import { IConfigService } from '../config';
-import { PathConfigType, config as pathConfigDef } from '../path';
-import { HttpConfigType, config as httpConfigDef } from '../http';
+import { PathConfigType } from '../path';
+import { HttpConfigType } from '../http';
 import { Logger } from '../logging';
 
 const FILE_ENCODING = 'utf8';
@@ -35,19 +33,15 @@ const FILE_NAME = 'uuid';
 export const UUID_7_6_0_BUG = `ce42b997-a913-4d58-be46-bb1937feedd6`;
 
 export async function resolveInstanceUuid({
-  configService,
+  pathConfig,
+  serverConfig,
   logger,
 }: {
-  configService: IConfigService;
+  pathConfig: PathConfigType;
+  serverConfig: HttpConfigType;
   logger: Logger;
 }): Promise<string> {
-  const [pathConfig, serverConfig] = await Promise.all([
-    configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
-    configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),
-  ]);
-
   const uuidFilePath = join(pathConfig.data, FILE_NAME);
-
   const uuidFromFile = await readUuidFromFile(uuidFilePath, logger);
   const uuidFromConfig = serverConfig.uuid;
 
