@@ -101,7 +101,7 @@ describe('<EditPolicy />', () => {
           },
         },
       };
-      // @ts-expect-error
+
       delete expected.phases.delete.actions.wait_for_snapshot;
 
       const latestRequest = server.requests[server.requests.length - 1];
