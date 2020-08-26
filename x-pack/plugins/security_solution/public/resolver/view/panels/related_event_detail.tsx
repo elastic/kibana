@@ -50,9 +50,6 @@ const TitleHr = memo(() => {
 });
 TitleHr.displayName = 'TitleHR';
 
-// Indicates if the User Agent supports <wbr/>
-const noWBRTagSupport = document.createElement('wbr') instanceof HTMLUnknownElement;
-
 /**
  * Take description list entries and prepare them for display by
  * replacing Zero-Width spaces with <wbr /> tags.
@@ -60,27 +57,25 @@ const noWBRTagSupport = document.createElement('wbr') instanceof HTMLUnknownElem
  * @param entries {title: string, description: string}[]
  */
 function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
-  return noWBRTagSupport
-    ? entries
-    : entries.map((entry) => {
-        return {
-          ...entry,
-          title: (
-            <>
-              {entry.title.split('\u200b').map((titlePart, i) => {
-                return i ? (
-                  <>
-                    <wbr />
-                    {titlePart}
-                  </>
-                ) : (
-                  <>{titlePart}</>
-                );
-              })}
-            </>
-          ),
-        };
-      });
+  return entries.map((entry) => {
+    return {
+      ...entry,
+      title: (
+        <>
+          {entry.title.split('\u200b').map((titlePart, i) => {
+            return i ? (
+              <>
+                <wbr />
+                {titlePart}
+              </>
+            ) : (
+              <>{titlePart}</>
+            );
+          })}
+        </>
+      ),
+    };
+  });
 }
 
 /**
