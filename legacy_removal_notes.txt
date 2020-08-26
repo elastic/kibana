@@ -1,3 +1,0 @@
-requireLegacyBootstrapModule
-requireNewPlatformShimModule
-requireLegacyFiles
