@@ -39,7 +39,11 @@ export async function getAgentActionsForCheckin(
         '*'
       )
     ),
-    nodeTypes.function.buildNode('is', 'fleet-agent-actions.attributes.agent_id', agentId),
+    nodeTypes.function.buildNode(
+      'is',
+      `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`,
+      agentId
+    ),
   ]);
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
