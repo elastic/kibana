@@ -92,7 +92,8 @@ export const DecisionPathChart = ({
   const baselineData: LineAnnotationDatum[] = useMemo(
     () => [
       {
-        dataValue: baseline ? baseline : undefined,
+        dataValue: baseline,
+        header: baseline ? baseline.toPrecision(NUM_PRECISION) : '',
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
           {
@@ -118,7 +119,6 @@ export const DecisionPathChart = ({
           dataValues={baselineData}
           style={baselineStyle}
           marker={AnnotationBaselineMarker}
-          header={baseline.toPrecision(NUM_PRECISION)}
         />
       )}
 
@@ -132,7 +132,7 @@ export const DecisionPathChart = ({
             values: { predictionFieldName },
           }
         )}
-        showGridLines={true}
+        showGridLines={false}
         position={Position.Top}
         showOverlappingTicks
         domain={
