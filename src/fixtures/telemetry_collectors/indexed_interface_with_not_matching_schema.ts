@@ -16,5 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CollectorSet } from '../../plugins/usage_collection/server/collector';
+import { loggerMock } from '../../core/server/logging/logger.mock';
 
-export { UuidService, UuidServiceSetup } from './uuid_service';
+const { makeUsageCollector } = new CollectorSet({
+  logger: loggerMock.create(),
+  maximumWaitTimeForAllCollectorsInS: 0,
+});
+
+interface Usage {
+  [key: string]: {
+    count_1?: number;
+    count_2?: number;
+  };
+}
+
+export const myCollector = makeUsageCollector<Usage>({
+  type: 'indexed_interface_with_not_matching_schema',
+  isReady: () => true,
+  fetch() {
+    if (Math.random()) {
+      return { something: { count_1: 1 } };
+    }
+    return { something: { count_2: 2 } };
+  },
+  schema: {
+    something: {
+      count_1: { type: 'long' }, // Intentionally missing count_2
+    },
+  },
+});
