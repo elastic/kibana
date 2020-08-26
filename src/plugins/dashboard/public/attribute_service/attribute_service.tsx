@@ -56,7 +56,11 @@ export interface AttributeServiceOptions<
   K extends string = typeof ATTRIBUTE_SERVICE_DEFAULT_KEY
 > {
   attributesKey?: K;
-  customSaveMethod?: (attributes: A, savedObjectId?: string) => Promise<{ id: string }>;
+  customSaveMethod?: (
+    type: string,
+    attributes: A,
+    savedObjectId?: string
+  ) => Promise<{ id: string }>;
   customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
 }
 
@@ -121,12 +125,15 @@ export class AttributeService<
       try {
         const originalInput = input ? input : {};
         if (savedObjectId) {
-          if (this.options?.customSaveMethod) await this.options.customSaveMethod(newAttributes);
-          else await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+          if (this.options?.customSaveMethod) {
+            await this.options.customSaveMethod(this.type, newAttributes, savedObjectId);
+          } else {
+            await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+          }
           return { ...originalInput, savedObjectId } as RefType;
         } else {
           const savedItem = this.options?.customSaveMethod
-            ? await this.options.customSaveMethod(newAttributes, savedObjectId)
+            ? await this.options.customSaveMethod(this.type, newAttributes)
             : await this.savedObjectsClient.create(this.type, newAttributes);
           return { ...originalInput, savedObjectId: savedItem.id } as RefType;
         }

@@ -176,13 +176,52 @@ describe('attributeService', () => {
         byReferenceInput
       );
       expect(core.savedObjects.client.update).toHaveBeenCalledWith(
-        'defaultTestType',
+        defaultTestType,
         '123',
         attributes
       );
     });
 
-    // wrap attr ref type savedObjectId undefined
-    // wrap attr ref type custom save method
+    it('creates new saved object with attributes when given no id', async () => {
+      const core = coreMock.createStart();
+      core.savedObjects.client.create = jest.fn().mockResolvedValueOnce({
+        id: '678',
+      });
+      const attributeService = mockAttributeService<DefaultTestAttributes>(
+        defaultTestType,
+        undefined,
+        core
+      );
+      expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
+        savedObjectId: '678',
+      });
+      expect(core.savedObjects.client.create).toHaveBeenCalledWith(defaultTestType, attributes);
+    });
+
+    it('uses custom save method when given an id', async () => {
+      const customSaveMethod = jest.fn().mockReturnValue({ id: '678' });
+      const attributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType, {
+        customSaveMethod,
+      });
+      expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
+        byReferenceInput
+      );
+      expect(customSaveMethod).toHaveBeenCalledWith(
+        defaultTestType,
+        attributes,
+        byReferenceInput.savedObjectId
+      );
+    });
+
+    it('uses custom save method given no id', async () => {
+      const customSaveMethod = jest.fn().mockReturnValue({ id: '678' });
+      const attributeService = mockAttributeService<DefaultTestAttributes>(defaultTestType, {
+        customSaveMethod,
+      });
+      expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
+        savedObjectId: '678',
+      });
+      expect(customSaveMethod).toHaveBeenCalledWith(defaultTestType, attributes);
+    });
   });
 });
