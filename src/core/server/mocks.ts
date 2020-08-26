@@ -94,6 +94,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         buildSha: 'buildSha',
         dist: false,
       },
+      instanceUuid: 'instance-uuid',
     },
     config: pluginInitializerContextConfigMock<T>(config),
   };
@@ -130,7 +131,6 @@ function createCoreSetupMock({
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
-    environment: environmentServiceMock.createSetupContract(),
     auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
     getStartServices: jest

@@ -93,7 +93,7 @@ describe('UuidService', () => {
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
       const service = new EnvironmentService(coreContext);
       const setup = await service.setup();
-      expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
+      expect(setup.instanceUuid).toEqual('SOME_UUID');
     });
   });
 });

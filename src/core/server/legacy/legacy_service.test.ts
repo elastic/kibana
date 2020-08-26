@@ -523,7 +523,7 @@ test('Sets the server.uuid property on the legacy configuration', async () => {
     configService: configService as any,
   });
 
-  environmentSetup.getInstanceUuid.mockImplementation(() => 'UUID_FROM_SERVICE');
+  environmentSetup.instanceUuid = 'UUID_FROM_SERVICE';
 
   const configSetMock = jest.fn();
 

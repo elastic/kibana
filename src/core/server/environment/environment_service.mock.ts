@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { EnvironmentService, EnvironmentServiceSetup } from './environment_service';
+import { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<EnvironmentServiceSetup> = {
-    getInstanceUuid: jest.fn().mockImplementation(() => 'uuid'),
+  const setupContract: jest.Mocked<InternalEnvironmentServiceSetup> = {
+    instanceUuid: 'uuid',
   };
   return setupContract;
 };

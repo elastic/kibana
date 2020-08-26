@@ -27,15 +27,13 @@ import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 
 /**
- * APIs to access the application's environment information.
- *
- * @public
+ * @internal
  */
-export interface EnvironmentServiceSetup {
+export interface InternalEnvironmentServiceSetup {
   /**
    * Retrieve the Kibana instance uuid.
    */
-  getInstanceUuid(): string;
+  instanceUuid: string;
 }
 
 /** @internal */
@@ -64,7 +62,7 @@ export class EnvironmentService {
     });
 
     return {
-      getInstanceUuid: () => this.uuid,
+      instanceUuid: this.uuid,
     };
   }
 }

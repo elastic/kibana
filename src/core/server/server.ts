@@ -107,8 +107,12 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
 
+    const environmentSetup = await this.environment.setup();
+
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover();
+    const { pluginTree, uiPlugins } = await this.plugins.discover({
+      environment: environmentSetup,
+    });
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
@@ -124,7 +128,6 @@ export class Server {
     });
 
     const auditTrailSetup = this.auditTrail.setup();
-    const environmentSetup = await this.environment.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,

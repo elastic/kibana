@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { EnvironmentService, EnvironmentServiceSetup } from './environment_service';
+export { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
