@@ -9,15 +9,15 @@ import { kea } from 'kea';
 import { IInitialAppData } from '../../../common/types';
 import { IKeaLogic } from '../shared/types';
 
-export interface IAppLogicValues {
+export interface IAppValues {
   hasInitialized: boolean;
 }
-export interface IAppLogicActions {
+export interface IAppActions {
   initializeAppData(props: IInitialAppData): void;
 }
 
 export const AppLogic = kea({
-  actions: (): IAppLogicActions => ({
+  actions: (): IAppActions => ({
     initializeAppData: (props) => props,
   }),
   reducers: () => ({
@@ -28,4 +28,4 @@ export const AppLogic = kea({
       },
     ],
   }),
-}) as IKeaLogic<IAppLogicValues, IAppLogicActions>;
+}) as IKeaLogic<IAppValues, IAppActions>;
