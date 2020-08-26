@@ -5,6 +5,7 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
@@ -14,7 +15,6 @@ import * as buildAlertStatusFilterHelper from '../../../detections/components/al
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
-import { createKibanaCoreStartMock } from '../../../common/mock/kibana_core';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -27,7 +27,7 @@ import {
   AddOrUpdateExceptionItemsFunc,
 } from './use_add_exception';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../common/lib/kibana');
 

@@ -22,6 +22,7 @@ import {
 } from 'src/core/public';
 import { ClientConfigType, ClientData, PluginsSetup } from '../plugin';
 import { LicenseProvider } from './shared/licensing';
+import { HttpProvider } from './shared/http';
 import { IExternalUrl } from './shared/enterprise_search_url';
 import { IInitialAppData } from '../../common/types';
 
@@ -48,7 +49,7 @@ export const renderApp = (
   core: CoreStart,
   plugins: PluginsSetup,
   config: ClientConfigType,
-  { externalUrl, ...initialData }: ClientData
+  { externalUrl, errorConnecting, ...initialData }: ClientData
 ) => {
   resetContext({ createStore: true });
   const store = getContext().store as Store;
@@ -67,6 +68,7 @@ export const renderApp = (
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
+            <HttpProvider http={core.http} errorConnecting={errorConnecting} />
             <Router history={params.history}>
               <App {...initialData} />
             </Router>
@@ -77,7 +79,6 @@ export const renderApp = (
     params.element
   );
   return () => {
-    resetContext({});
     ReactDOM.unmountComponentAtNode(params.element);
   };
 };

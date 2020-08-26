@@ -356,7 +356,8 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string }).kibana_siem_app_url,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
             });
 
             logger.info(

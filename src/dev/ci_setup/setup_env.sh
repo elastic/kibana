@@ -10,6 +10,7 @@ installNode=$1
 
 dir="$(pwd)"
 cacheDir="$HOME/.kibana"
+downloads="$cacheDir/downloads"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
@@ -132,6 +133,26 @@ export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunct
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
 export CHECKS_REPORTER_ACTIVE=false
+
+###
+### Download Chrome and install to this shell
+###
+
+# Available using the version information search at https://omahaproxy.appspot.com/
+chromeVersion=84
+
+mkdir -p "$downloads"
+
+if [ -d $cacheDir/chrome-$chromeVersion/chrome-linux ]; then
+  echo " -- Chrome already downloaded and extracted"
+else
+  mkdir -p "$cacheDir/chrome-$chromeVersion"
+
+  echo " -- Downloading and extracting Chrome"
+  curl -o "$downloads/chrome.zip" -L "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/chrome_$chromeVersion.zip"
+  unzip -o "$downloads/chrome.zip" -d "$cacheDir/chrome-$chromeVersion"
+  export PATH="$cacheDir/chrome-$chromeVersion/chrome-linux:$PATH"
+fi
 
 # This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
