@@ -7,7 +7,7 @@
 import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { CANVAS_TYPE } from '../../common/lib/constants';
-import { collectFns } from './collector_helpers';
+import { collectFns, getRenderFunction } from './collector_helpers';
 import { TelemetryCollector, CanvasWorkpad } from '../../types';
 import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
@@ -53,6 +53,7 @@ interface WorkpadTelemetry {
 */
 export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetry {
   const functionSet = new Set<string>();
+  const countByRenderFunction = {};
 
   if (workpadDocs.length === 0) {
     return {};
@@ -74,6 +75,15 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
       return page.elements.map((element) => {
         const ast = parseExpression(element.expression);
+
+        // Keep track of render function usage
+        const renderFuncName = getRenderFunction(ast);
+        if (renderFuncName) {
+          countByRenderFunction[renderFuncName] = countByRenderFunction[renderFuncName]
+            ? countByRenderFunction[renderFuncName] + 1
+            : 1;
+        }
+
         collectFns(ast, (cFunction) => {
           functionSet.add(cFunction);
         });
@@ -131,6 +141,9 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     pageTotal > 0
       ? {
           total: elementsTotal,
+          by_render_function: {
+            ...countByRenderFunction,
+          },
           per_page: {
             avg: elementsTotal / elementCounts.length,
             min: arrayMin(elementCounts) || 0,

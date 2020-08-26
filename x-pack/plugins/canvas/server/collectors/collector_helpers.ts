@@ -36,3 +36,27 @@ export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) =>
     });
   });
 }
+
+export function getRenderFunction(ast: ExpressionAstNode) {
+  const { chain } = ast;
+
+  if (chain.length === 0) {
+    return undefined;
+  }
+
+  // Take a best guess at pulling the function
+  // that will be used for rendering.
+  // If the `render` function is the last function
+  // in the chain, use the second to last function instead
+  const lastFn = chain[chain.length - 1];
+  if (lastFn.function !== 'render') {
+    return lastFn.function;
+  }
+
+  if (chain.length === 1) {
+    return undefined;
+  }
+
+  const secondToLastFn = chain[chain.length - 2];
+  return secondToLastFn.function;
+}

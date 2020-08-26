@@ -22,6 +22,16 @@ describe('usage collector handle es response data', () => {
       elements: {
         total: 34, // num elements in all the pages
         per_page: { avg: 2.125, min: 1, max: 5 },
+        by_render_function: {
+          demodata: 2,
+          image: 7,
+          markdown: 6,
+          pie: 4,
+          plot: 3,
+          repeatImage: 7,
+          shape: 1,
+          table: 4,
+        },
       },
       functions: {
         per_element: { avg: 4, min: 2, max: 7 },
@@ -61,7 +71,13 @@ describe('usage collector handle es response data', () => {
     expect(usage).toEqual({
       workpads: { total: 1 },
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
-      elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
+      elements: {
+        total: 1,
+        per_page: { avg: 1, min: 1, max: 1 },
+        by_render_function: {
+          toast: 1,
+        },
+      },
       functions: { total: 1, in_use: ['toast'], per_element: { avg: 1, min: 1, max: 1 } },
     });
   });
