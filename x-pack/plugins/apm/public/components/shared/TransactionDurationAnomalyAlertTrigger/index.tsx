@@ -52,7 +52,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     windowUnit: 'm',
     transactionType: transactionTypes[0],
     serviceName,
-    environment: urlParams.environment || ENVIRONMENT_ALL,
+    environment: urlParams.environment || ENVIRONMENT_ALL.value,
     anomalyScore: 75,
   };
 

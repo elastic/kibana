@@ -12,8 +12,6 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import {
-  ALL_OPTION,
-  NOT_DEFINED_OPTION,
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
@@ -24,7 +22,7 @@ function updateEnvironmentUrl(
   environment?: string
 ) {
   const nextEnvironmentQueryParam =
-    environment !== ENVIRONMENT_ALL ? environment : undefined;
+    environment !== ENVIRONMENT_ALL.value ? environment : undefined;
   history.push({
     ...location,
     search: fromQuery({
@@ -44,16 +42,16 @@ const SEPARATOR_OPTION = {
 
 function getOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
     .map((environment) => ({
       value: environment,
       text: environment,
     }));
 
   return [
-    ALL_OPTION,
-    ...(environments.includes(ENVIRONMENT_NOT_DEFINED)
-      ? [NOT_DEFINED_OPTION]
+    ENVIRONMENT_ALL,
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
+      ? [ENVIRONMENT_NOT_DEFINED]
       : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
     ...environmentOptions,
@@ -78,7 +76,7 @@ export function EnvironmentFilter() {
         defaultMessage: 'environment',
       })}
       options={getOptions(environments)}
-      value={environment || ENVIRONMENT_ALL}
+      value={environment || ENVIRONMENT_ALL.value}
       onChange={(event) => {
         updateEnvironmentUrl(location, event.target.value);
       }}

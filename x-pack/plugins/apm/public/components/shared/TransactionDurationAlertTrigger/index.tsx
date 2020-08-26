@@ -58,7 +58,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     windowSize: 5,
     windowUnit: 'm',
     transactionType: transactionTypes[0],
-    environment: ENVIRONMENT_ALL,
+    environment: ENVIRONMENT_ALL.value,
   };
 
   const params = {

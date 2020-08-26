@@ -12,7 +12,7 @@ export function getEnvironmentUiFilterES(environment?: string): ESFilter[] {
   if (!environment) {
     return [];
   }
-  if (environment === ENVIRONMENT_NOT_DEFINED) {
+  if (environment === ENVIRONMENT_NOT_DEFINED.value) {
     return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
   }
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];

@@ -7,20 +7,20 @@
 import { useMemo } from 'react';
 import { useFetcher } from './useFetcher';
 import {
-  ALL_OPTION,
+  ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../common/environment_filter_values';
 import { callApmApi } from '../services/rest/createCallApmApi';
 
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED)
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
     .map((environment) => ({
       value: environment,
       text: environment,
     }));
 
-  return [ALL_OPTION, ...environmentOptions];
+  return [ENVIRONMENT_ALL, ...environmentOptions];
 }
 
 export function useEnvironments({
