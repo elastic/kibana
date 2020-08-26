@@ -9,7 +9,7 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory, ApplicationStart } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { UIM_APP_LOAD } from './constants';
+import { UIM_APP_LOAD } from './constants/ui_metric';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
 import { trackUiMetric } from './services/ui_metric';

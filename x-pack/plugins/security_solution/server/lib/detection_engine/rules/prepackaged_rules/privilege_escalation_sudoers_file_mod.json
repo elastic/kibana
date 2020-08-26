@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "A sudoers file specifies the commands that users or groups can run and from which terminals. Adversaries can take advantage of these configurations to execute commands as other users or spawn processes with higher privileges.",
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }
