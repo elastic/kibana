@@ -486,8 +486,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
-    environment: EnvironmentServiceSetup;
-    // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup & {
@@ -750,11 +748,6 @@ export interface EnvironmentMode {
     name: 'development' | 'production';
     // (undocumented)
     prod: boolean;
-}
-
-// @public
-export interface EnvironmentServiceSetup {
-    getInstanceUuid(): string;
 }
 
 // @public
@@ -1783,6 +1776,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     env: {
         mode: EnvironmentMode;
         packageInfo: Readonly<PackageInfo>;
+        instanceUuid: string;
     };
     // (undocumented)
     logger: LoggerFactory;

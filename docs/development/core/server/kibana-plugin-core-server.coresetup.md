@@ -20,7 +20,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [capabilities](./kibana-plugin-core-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [context](./kibana-plugin-core-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
-|  [environment](./kibana-plugin-core-server.coresetup.environment.md) | <code>EnvironmentServiceSetup</code> | [EnvironmentServiceSetup](./kibana-plugin-core-server.environmentservicesetup.md) |
 |  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | <code>StartServicesAccessor&lt;TPluginsStart, TStart&gt;</code> | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
 |  [http](./kibana-plugin-core-server.coresetup.http.md) | <code>HttpServiceSetup &amp; {</code><br/><code>        resources: HttpResources;</code><br/><code>    }</code> | [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) |
 |  [logging](./kibana-plugin-core-server.coresetup.logging.md) | <code>LoggingServiceSetup</code> | [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) |
