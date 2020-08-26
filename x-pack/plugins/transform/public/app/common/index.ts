@@ -26,13 +26,7 @@ export {
   REFRESH_TRANSFORM_LIST_STATE,
 } from './transform';
 export { TRANSFORM_LIST_COLUMN, TransformListAction, TransformListRow } from './transform_list';
-export {
-  getTransformProgress,
-  isCompletedBatchTransform,
-  isTransformStats,
-  TransformStats,
-  TRANSFORM_MODE,
-} from './transform_stats';
+export { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
 export { getDiscoverUrl } from './navigation';
 export { GetTransformsResponse, PreviewData, PreviewMappings } from './pivot_preview';
 export {

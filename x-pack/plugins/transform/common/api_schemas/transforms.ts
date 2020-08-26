@@ -23,3 +23,11 @@ export interface TransformsResponseSchema {
   count: number;
   transforms: TransformPivotConfig[];
 }
+
+export const isTransformsResponseSchema = (arg: any): arg is TransformsResponseSchema => {
+  return (
+    {}.hasOwnProperty.call(arg, 'count') &&
+    {}.hasOwnProperty.call(arg, 'transforms') &&
+    Array.isArray(arg.transforms)
+  );
+};

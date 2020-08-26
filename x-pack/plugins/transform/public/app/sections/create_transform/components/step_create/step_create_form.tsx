@@ -30,6 +30,7 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
+import { isTransformsStatsResponseSchema } from '../../../../../../common/api_schemas/transforms_stats';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../shared_imports';
@@ -251,8 +252,12 @@ export const StepCreateForm: FC<Props> = React.memo(
       function startProgressBar() {
         const interval = setInterval(async () => {
           try {
-            const stats = await api.getTransformsStats(transformId);
-            if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
+            const stats = await api.getTransformStats(transformId);
+            if (
+              isTransformsStatsResponseSchema(stats) &&
+              Array.isArray(stats.transforms) &&
+              stats.transforms.length > 0
+            ) {
               const percent =
                 getTransformProgress({
                   id: transformConfig.id,

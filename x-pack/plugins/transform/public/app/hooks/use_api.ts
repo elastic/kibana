@@ -24,6 +24,7 @@ import type {
 } from '../../../common/api_schemas/stop_transforms';
 import { TransformIdParamSchema } from '../../../common/api_schemas/common';
 import type { TransformsResponseSchema } from '../../../common/api_schemas/transforms';
+import type { TransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import { PreviewRequestBody, TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -54,10 +55,12 @@ export const useApi = () => {
       getTransforms(): Promise<TransformsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms`);
       },
-      getTransformsStats(transformId?: TransformId): Promise<any> {
-        if (transformId !== undefined) {
-          return http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
-        }
+      getTransformStats(
+        transformId: TransformId
+      ): Promise<TransformsStatsResponseSchema | HttpFetchError> {
+        return http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
+      },
+      getTransformsStats(): Promise<TransformsStatsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms/_stats`);
       },
       createTransform(transformId: TransformId, transformConfig: any): Promise<any> {

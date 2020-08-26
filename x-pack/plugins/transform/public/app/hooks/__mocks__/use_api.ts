@@ -20,6 +20,7 @@ import type {
   StopTransformsResponseSchema,
 } from '../../../../common/api_schemas/stop_transforms';
 import type { TransformsResponseSchema } from '../../../../common/api_schemas/transforms';
+import type { TransformsStatsResponseSchema } from '../../../../common/api_schemas/transforms_stats';
 import { TransformIdParamSchema } from '../../../../common/api_schemas/common';
 
 const apiFactory = () => ({
@@ -33,15 +34,16 @@ const apiFactory = () => ({
       resolve({ count: 0, transforms: [] });
     });
   },
-  getTransformsStats(transformId?: TransformId): Promise<any> {
-    if (transformId !== undefined) {
-      return new Promise((resolve, reject) => {
-        resolve([]);
-      });
-    }
-
+  getTransformStats(
+    transformId: TransformId
+  ): Promise<TransformsStatsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
-      resolve([]);
+      resolve({ count: 0, transforms: [] });
+    });
+  },
+  getTransformsStats(): Promise<TransformsStatsResponseSchema | HttpFetchError> {
+    return new Promise((resolve, reject) => {
+      resolve({ count: 0, transforms: [] });
     });
   },
   createTransform(transformId: TransformId, transformConfig: any): Promise<any> {

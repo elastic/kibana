@@ -24,12 +24,11 @@ import {
 } from '@elastic/eui';
 
 import { TransformId } from '../../../../../../common/types/transform';
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import {
   useRefreshTransformList,
   TransformListRow,
-  TRANSFORM_MODE,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
 import { useStopTransforms } from '../../../../hooks';

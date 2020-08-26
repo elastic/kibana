@@ -88,3 +88,11 @@ export const TRANSFORM_STATE = {
 
 const transformStates = Object.values(TRANSFORM_STATE);
 export type TransformState = typeof transformStates[number];
+
+export const TRANSFORM_MODE = {
+  BATCH: 'batch',
+  CONTINUOUS: 'continuous',
+} as const;
+
+const transformModes = Object.values(TRANSFORM_MODE);
+export type TransformMode = typeof transformModes[number];

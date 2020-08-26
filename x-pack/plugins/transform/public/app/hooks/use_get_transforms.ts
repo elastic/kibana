@@ -4,47 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isHttpFetchError } from '../common/request';
-import {
-  TransformListRow,
-  TransformStats,
-  TRANSFORM_MODE,
-  isTransformStats,
-  refreshTransformList$,
-  REFRESH_TRANSFORM_LIST_STATE,
-} from '../common';
+import { HttpFetchError } from 'src/core/public';
+
+import { isTransformsResponseSchema } from '../../../common/api_schemas/transforms';
+import { isTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
+import { TRANSFORM_MODE } from '../../../common/constants';
+import { isTransformStats } from '../../../common/types/transform_stats';
+
+import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 
 import { useApi } from './use_api';
-
-interface GetTransformsStatsResponseOk {
-  node_failures?: object;
-  count: number;
-  transforms: TransformStats[];
-}
-
-const isGetTransformsStatsResponseOk = (arg: any): arg is GetTransformsStatsResponseOk => {
-  return (
-    {}.hasOwnProperty.call(arg, 'count') &&
-    {}.hasOwnProperty.call(arg, 'transforms') &&
-    Array.isArray(arg.transforms)
-  );
-};
-
-interface GetTransformsStatsResponseError {
-  statusCode: number;
-  error: string;
-  message: string;
-}
-
-type GetTransformsStatsResponse = GetTransformsStatsResponseOk | GetTransformsStatsResponseError;
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
 export const useGetTransforms = (
   setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
-  setErrorMessage: React.Dispatch<
-    React.SetStateAction<GetTransformsStatsResponseError | undefined>
-  >,
+  setErrorMessage: React.Dispatch<React.SetStateAction<HttpFetchError | undefined>>,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   blockRefresh: boolean
 ): GetTransforms => {
@@ -64,14 +39,14 @@ export const useGetTransforms = (
       try {
         const transformConfigs = await api.getTransforms();
 
-        if (isHttpFetchError(transformConfigs)) {
+        if (!isTransformsResponseSchema(transformConfigs)) {
           throw transformConfigs;
         }
 
-        const transformStats: GetTransformsStatsResponse = await api.getTransformsStats();
+        const transformStats = await api.getTransformsStats();
 
         const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
-          const stats = isGetTransformsStatsResponseOk(transformStats)
+          const stats = isTransformsStatsResponseSchema(transformStats)
             ? transformStats.transforms.find((d) => config.id === d.id)
             : undefined;
 

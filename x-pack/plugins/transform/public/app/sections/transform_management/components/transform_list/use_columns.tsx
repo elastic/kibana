@@ -23,14 +23,10 @@ import {
 } from '@elastic/eui';
 
 import { TransformId } from '../../../../../../common/types/transform';
+import { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import {
-  getTransformProgress,
-  TransformListRow,
-  TransformStats,
-  TRANSFORM_LIST_COLUMN,
-} from '../../../../common';
+import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 
 const STATE_COLOR = {
