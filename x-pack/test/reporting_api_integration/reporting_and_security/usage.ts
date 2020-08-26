@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  describe('reporting usage', () => {
+  describe('Usage', () => {
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);

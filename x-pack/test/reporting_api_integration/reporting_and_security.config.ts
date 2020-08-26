@@ -44,7 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.reporting.csv.maxSizeBytes=2850`,
         `--xpack.reporting.queue.pollInterval=3000`,
         `--xpack.security.session.idleTimeout=3600000`,
-        `--xpack.spaces.enabled=false`,
         `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
       ],
     },
