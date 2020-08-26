@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   disabled: boolean;
   isManagementTable: boolean;
-  onCreateFirstJobClick: any; // TODO: Update
+  onCreateFirstJobClick: () => void;
 }
 
 export const AnalyticsEmptyPrompt: FC<Props> = ({

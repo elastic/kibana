@@ -268,7 +268,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
           onChange={onTableChange}
-          pagination={pagination}
+          pagination={pagination!}
           sorting={sorting}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
           rowProps={(item) => ({

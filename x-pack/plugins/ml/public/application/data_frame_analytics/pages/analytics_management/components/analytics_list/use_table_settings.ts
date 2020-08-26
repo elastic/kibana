@@ -5,9 +5,9 @@
  */
 
 import { useState } from 'react';
-import { Direction, EuiTableSortingType } from '@elastic/eui';
+import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
 import sortBy from 'lodash/sortBy';
-import { DataFrameAnalyticsListColumn } from './common';
+import { DataFrameAnalyticsListColumn, DataFrameAnalyticsListRow } from './common';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -22,13 +22,13 @@ interface AnalyticsBasicTableSettings {
 }
 
 interface UseTableSettingsReturnValue {
-  onTableChange: any;
-  pageOfItems: any;
-  pagination: any;
+  onTableChange: EuiBasicTableProps<DataFrameAnalyticsListRow>['onChange'];
+  pageOfItems: DataFrameAnalyticsListRow[];
+  pagination: EuiBasicTableProps<DataFrameAnalyticsListRow>['pagination'];
   sorting: EuiTableSortingType<any>;
 }
 
-export function useTableSettings(items: any[]): UseTableSettingsReturnValue {
+export function useTableSettings(items: DataFrameAnalyticsListRow[]): UseTableSettingsReturnValue {
   const [tableSettings, setTableSettings] = useState<AnalyticsBasicTableSettings>({
     pageIndex: 0,
     pageSize: PAGE_SIZE,
