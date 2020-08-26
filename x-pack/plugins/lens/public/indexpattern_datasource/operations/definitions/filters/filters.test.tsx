@@ -10,7 +10,6 @@ import { act } from 'react-dom/test-utils';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '../index';
 import { IndexPatternPrivateState } from '../../../types';
