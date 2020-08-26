@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type IndexAlias = 'auditbeat' | 'filebeat' | 'packetbeat' | 'ecs' | 'winlogbeat' | 'unknown';
-
 /*
  * BEAT Interface
  *
