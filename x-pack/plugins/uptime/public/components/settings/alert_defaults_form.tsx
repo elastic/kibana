@@ -12,20 +12,30 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiComboBox,
-  EuiText,
   EuiIcon,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 import { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
 import { AddConnectorFlyout } from './add_connector_flyout';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
-import { getActionTypeIcon } from '../../../../triggers_actions_ui/public';
 import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
+
+const ConnectorSpan = styled.span`
+  .euiIcon {
+    margin-right: 5px;
+  }
+  > img {
+    width: 16px;
+    height: 20px;
+  }
+`;
 
 export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   onChange,
@@ -34,6 +44,11 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   fieldErrors,
   isDisabled,
 }) => {
+  const {
+    services: {
+      triggers_actions_ui: { actionTypeRegistry },
+    },
+  } = useKibana();
   const { focusConnectorField } = useGetUrlParams();
 
   const updateUrlParams = useUrlParams()[1];
@@ -79,9 +94,10 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
 
     const { actionTypeId: type } = data?.find((dt) => dt.id === value) ?? {};
     return (
-      <EuiText size="s">
-        <EuiIcon type={getActionTypeIcon(type as string)} /> <span>{label}</span>
-      </EuiText>
+      <ConnectorSpan>
+        <EuiIcon type={actionTypeRegistry.get(type as string).iconClass} />
+        <span>{label}</span>
+      </ConnectorSpan>
     );
   };
 

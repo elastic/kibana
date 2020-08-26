@@ -39,5 +39,3 @@ export * from './plugin';
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export { ForLastExpression } from './common/expression_items/for_the_last';
-
-export { getActionTypeIcon } from './application/components/builtin_action_types/action_type_icons';
