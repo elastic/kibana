@@ -58,6 +58,27 @@ describe('EnterpriseSearchRequestHandler', () => {
     });
   });
 
+  it('allows passing custom params', async () => {
+    const responseBody = {
+      results: [{ name: 'engine1' }],
+      meta: { page: { total_results: 1 } },
+    };
+    EnterpriseSearchAPI.mockReturn(responseBody);
+
+    const requestHandler = enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/collection',
+      params: '?some=custom&params=true',
+    });
+    await makeAPICall(requestHandler, { query: { overriden: true } });
+
+    EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+      'http://localhost:3002/as/engines/collection?some=custom&params=true'
+    );
+    expect(responseMock.ok).toHaveBeenCalledWith({
+      body: responseBody,
+    });
+  });
+
   describe('when an API request fails', () => {
     it('should return 502 with a message', async () => {
       EnterpriseSearchAPI.mockReturnError();

@@ -21,6 +21,7 @@ interface IConstructorDependencies {
 }
 interface IRequestParams<ResponseBody> {
   path: string;
+  params?: string;
   hasValidData?: (body?: ResponseBody) => boolean;
 }
 export interface IEnterpriseSearchRequestHandler {
@@ -44,14 +45,18 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest<ResponseBody>({ path, hasValidData = () => true }: IRequestParams<ResponseBody>) {
+  createRequest<ResponseBody>({
+    path,
+    params,
+    hasValidData = () => true,
+  }: IRequestParams<ResponseBody>) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, Readonly<{}>, unknown>,
       response: KibanaResponseFactory
     ) => {
       try {
-        const params = request.query ? `?${querystring.stringify(request.query)}` : '';
+        params = params ?? (request.query ? `?${querystring.stringify(request.query)}` : '');
         const url = encodeURI(this.enterpriseSearchUrl + path + params);
 
         const apiResponse = await fetch(url, {

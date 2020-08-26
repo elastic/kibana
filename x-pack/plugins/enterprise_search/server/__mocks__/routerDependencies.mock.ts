@@ -10,7 +10,7 @@ import { ConfigType } from '../';
 export const mockLogger = loggingSystemMock.createLogger().get();
 
 export const mockRequestHandler = {
-  createRequest: jest.fn(),
+  createRequest: jest.fn(() => () => {}),
 };
 
 export const mockConfig = {
@@ -28,5 +28,5 @@ export const mockDependencies = {
   // Mock router should be handled on a per-test basis
   config: mockConfig,
   log: mockLogger,
-  enterpriseSearchRequestHandler: mockRequestHandler,
+  enterpriseSearchRequestHandler: mockRequestHandler as any,
 };
