@@ -49,7 +49,7 @@ export const appToResult = (app: PublicAppInfo, score: number): GlobalSearchProv
     title: app.title,
     type: 'application',
     icon: app.euiIconType,
-    url: app.legacy ? app.appUrl : app.appRoute,
+    url: app.appRoute,
     score,
   };
 };
