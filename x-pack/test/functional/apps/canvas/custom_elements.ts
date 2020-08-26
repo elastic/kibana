@@ -12,13 +12,11 @@ export default function canvasCustomElementTest({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
-  const security = getService('security');
 
   describe('custom elements', function () {
     this.tags('skipFirefox');
