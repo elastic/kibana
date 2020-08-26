@@ -10,8 +10,8 @@ import { History } from 'history';
 
 import {
   FlashMessagesLogic,
-  IFlashMessagesLogicValues,
-  IFlashMessagesLogicActions,
+  IFlashMessagesValues,
+  IFlashMessagesActions,
 } from './flash_messages_logic';
 
 interface IFlashMessagesProviderProps {
@@ -19,8 +19,8 @@ interface IFlashMessagesProviderProps {
 }
 
 export const FlashMessagesProvider: React.FC<IFlashMessagesProviderProps> = ({ history }) => {
-  const { historyListener } = useValues(FlashMessagesLogic) as IFlashMessagesLogicValues;
-  const { listenToHistory } = useActions(FlashMessagesLogic) as IFlashMessagesLogicActions;
+  const { historyListener } = useValues(FlashMessagesLogic) as IFlashMessagesValues;
+  const { listenToHistory } = useActions(FlashMessagesLogic) as IFlashMessagesActions;
 
   useEffect(() => {
     if (!historyListener) listenToHistory(history);

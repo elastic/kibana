@@ -8,7 +8,7 @@ export { FlashMessages } from './flash_messages';
 export {
   FlashMessagesLogic,
   IFlashMessage,
-  IFlashMessagesLogicValues,
-  IFlashMessagesLogicActions,
+  IFlashMessagesValues,
+  IFlashMessagesActions,
 } from './flash_messages_logic';
 export { FlashMessagesProvider } from './flash_messages_provider';

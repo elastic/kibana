@@ -16,12 +16,12 @@ export interface IFlashMessage {
   description?: ReactNode;
 }
 
-export interface IFlashMessagesLogicValues {
+export interface IFlashMessagesValues {
   messages: IFlashMessage[];
   queuedMessages: IFlashMessage[];
   historyListener: Function | null;
 }
-export interface IFlashMessagesLogicActions {
+export interface IFlashMessagesActions {
   setFlashMessages(messages: IFlashMessage | IFlashMessage[]): void;
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): void;
@@ -34,7 +34,7 @@ const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
 export const FlashMessagesLogic = kea({
-  actions: (): IFlashMessagesLogicActions => ({
+  actions: (): IFlashMessagesActions => ({
     setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
@@ -42,7 +42,7 @@ export const FlashMessagesLogic = kea({
     listenToHistory: (history) => history,
     setHistoryListener: (historyListener) => ({ historyListener }),
   }),
-  reducers: (): TKeaReducers<IFlashMessagesLogicValues, IFlashMessagesLogicActions> => ({
+  reducers: (): TKeaReducers<IFlashMessagesValues, IFlashMessagesActions> => ({
     messages: [
       [],
       {
@@ -64,7 +64,7 @@ export const FlashMessagesLogic = kea({
       },
     ],
   }),
-  listeners: ({ values, actions }): Partial<IFlashMessagesLogicActions> => ({
+  listeners: ({ values, actions }): Partial<IFlashMessagesActions> => ({
     listenToHistory: (history) => {
       // On React Router navigation, clear previous flash messages and load any queued messages
       const unlisten = history.listen(() => {
@@ -81,7 +81,7 @@ export const FlashMessagesLogic = kea({
       if (removeHistoryListener) removeHistoryListener();
     },
   }),
-} as IKeaParams<IFlashMessagesLogicValues, IFlashMessagesLogicActions>) as IKeaLogic<
-  IFlashMessagesLogicValues,
-  IFlashMessagesLogicActions
+} as IKeaParams<IFlashMessagesValues, IFlashMessagesActions>) as IKeaLogic<
+  IFlashMessagesValues,
+  IFlashMessagesActions
 >;
