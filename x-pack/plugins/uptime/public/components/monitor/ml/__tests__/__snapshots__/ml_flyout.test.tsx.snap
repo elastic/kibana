@@ -80,190 +80,173 @@ exports[`ML Flyout component renders without errors 1`] = `
 `;
 
 exports[`ML Flyout component shows license info if no ml available 1`] = `
-<div>
+<div
+  data-eui="EuiFocusTrap"
+>
   <div
-    data-focus-guard="true"
-    style="width:1px;height:0px;padding:0;overflow:hidden;position:fixed;top:1px;left:1px"
-    tabindex="-1"
-  />
-  <div
-    data-focus-guard="true"
-    style="width:1px;height:0px;padding:0;overflow:hidden;position:fixed;top:1px;left:1px"
-    tabindex="-1"
-  />
-  <div
-    data-focus-lock-disabled="disabled"
+    class="euiFlyout euiFlyout--small"
+    data-test-subj="uptimeMLFlyout"
+    role="dialog"
+    tabindex="0"
   >
-    <div
-      class="euiFlyout euiFlyout--small"
-      data-test-subj="uptimeMLFlyout"
-      role="dialog"
-      tabindex="0"
+    <button
+      aria-label="Close this dialog"
+      class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+      data-test-subj="euiFlyoutCloseButton"
+      type="button"
     >
-      <button
-        aria-label="Close this dialog"
-        class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
-        data-test-subj="euiFlyoutCloseButton"
-        type="button"
-      >
-        <div
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          data-euiicon-type="cross"
-        />
-      </button>
       <div
-        class="euiFlyoutHeader"
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        data-euiicon-type="cross"
+      />
+    </button>
+    <div
+      class="euiFlyoutHeader"
+    >
+      <h2
+        class="euiTitle euiTitle--medium"
       >
-        <h2
-          class="euiTitle euiTitle--medium"
-        >
-          Enable anomaly detection
-        </h2>
-        <div
-          class="euiSpacer euiSpacer--s"
-        />
-      </div>
+        Enable anomaly detection
+      </h2>
       <div
-        class="euiFlyoutBody"
+        class="euiSpacer euiSpacer--s"
+      />
+    </div>
+    <div
+      class="euiFlyoutBody"
+    >
+      <div
+        class="euiFlyoutBody__overflow"
       >
         <div
-          class="euiFlyoutBody__overflow"
+          class="euiFlyoutBody__overflowContent"
         >
           <div
-            class="euiFlyoutBody__overflowContent"
+            class="euiCallOut euiCallOut--primary license-info-trial"
+            data-test-subj="uptimeMLLicenseInfo"
           >
             <div
-              class="euiCallOut euiCallOut--primary license-info-trial"
-              data-test-subj="uptimeMLLicenseInfo"
+              class="euiCallOutHeader"
             >
               <div
-                class="euiCallOutHeader"
+                aria-hidden="true"
+                class="euiCallOutHeader__icon"
+                data-euiicon-type="help"
+              />
+              <span
+                class="euiCallOutHeader__title"
               >
-                <div
-                  aria-hidden="true"
-                  class="euiCallOutHeader__icon"
-                  data-euiicon-type="help"
-                />
-                <span
-                  class="euiCallOutHeader__title"
-                >
-                  Start free 14-day trial
-                </span>
-              </div>
-              <div
-                class="euiText euiText--small"
-              >
-                <p>
-                  In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
-                </p>
-                <span>
-                  <a
-                    class="euiButton euiButton--primary"
-                    href="/app/management/stack/license_management/home"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <span
-                      class="euiButtonContent euiButton__content"
-                    >
-                      <span
-                        class="euiButton__text"
-                      >
-                        Start free 14-day trial
-                      </span>
-                    </span>
-                  </a>
-                </span>
-              </div>
+                Start free 14-day trial
+              </span>
             </div>
             <div
-              class="euiSpacer euiSpacer--l"
-            />
-            <div
-              class="euiText euiText--medium"
+              class="euiText euiText--small"
             >
               <p>
-                Here you can create a machine learning job to calculate anomaly scores on
+                In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
+              </p>
+              <span>
+                <a
+                  class="euiButton euiButton--primary"
+                  href="/app/management/stack/license_management/home"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <span
+                    class="euiButtonContent euiButton__content"
+                  >
+                    <span
+                      class="euiButton__text"
+                    >
+                      Start free 14-day trial
+                    </span>
+                  </span>
+                </a>
+              </span>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiText euiText--medium"
+          >
+            <p>
+              Here you can create a machine learning job to calculate anomaly scores on
     response durations for Uptime Monitor. Once enabled, the monitor duration chart on the details page
     will show the expected bounds and annotate the graph with anomalies. You can also potentially
      identify periods of increased latency across geographical regions.
-              </p>
-              <p>
-                Once a job is created, you can manage it and see more details in the 
-                <a
-                  class="euiLink euiLink--primary"
-                  href="/app/ml"
-                  rel="noreferrer"
-                >
-                  Machine Learning jobs management page
-                </a>
-                .
-              </p>
-              <p>
-                <em>
-                  Note: It might take a few minutes for the job to begin calculating results.
-                </em>
-              </p>
-            </div>
-            <div
-              class="euiSpacer euiSpacer--l"
-            />
+            </p>
+            <p>
+              Once a job is created, you can manage it and see more details in the 
+              <a
+                class="euiLink euiLink--primary"
+                href="/app/ml"
+                rel="noreferrer"
+              >
+                Machine Learning jobs management page
+              </a>
+              .
+            </p>
+            <p>
+              <em>
+                Note: It might take a few minutes for the job to begin calculating results.
+              </em>
+            </p>
           </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
         </div>
       </div>
+    </div>
+    <div
+      class="euiFlyoutFooter"
+    >
       <div
-        class="euiFlyoutFooter"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
           >
-            <button
-              class="euiButtonEmpty euiButtonEmpty--primary"
-              type="button"
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__text"
               >
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Cancel
-                </span>
+                Cancel
               </span>
-            </button>
-          </div>
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+            data-test-subj="uptimeMLCreateJobBtn"
+            disabled=""
+            type="button"
           >
-            <button
-              class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
-              data-test-subj="uptimeMLCreateJobBtn"
-              disabled=""
-              type="button"
+            <span
+              class="euiButtonContent euiButton__content"
             >
               <span
-                class="euiButtonContent euiButton__content"
+                class="euiButton__text"
               >
-                <span
-                  class="euiButton__text"
-                >
-                  Create new job
-                </span>
+                Create new job
               </span>
-            </button>
-          </div>
+            </span>
+          </button>
         </div>
       </div>
     </div>
   </div>
-  <div
-    data-focus-guard="true"
-    style="width:1px;height:0px;padding:0;overflow:hidden;position:fixed;top:1px;left:1px"
-    tabindex="-1"
-  />
 </div>
 `;

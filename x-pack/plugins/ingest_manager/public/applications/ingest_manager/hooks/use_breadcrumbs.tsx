@@ -207,7 +207,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.ingestManager.breadcrumbs.datastreamsPageTitle', {
-        defaultMessage: 'Datasets',
+        defaultMessage: 'Data streams',
       }),
     },
   ],
