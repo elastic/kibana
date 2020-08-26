@@ -16,11 +16,11 @@ import { WorkplaceSearchNav } from './components/layout/nav';
 
 import { SETUP_GUIDE_PATH } from './routes';
 
-import { SetupGuide } from './components/setup_guide';
-import { ErrorState } from './components/error_state';
-import { Overview } from './components/overview';
+import { SetupGuide } from './views/setup_guide';
+import { ErrorState } from './views/error_state';
+import { Overview } from './views/overview';
 
-export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
+export const WorkplaceSearch: React.FC<IInitialAppData> = () => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
   const { errorConnecting } = useValues(HttpLogic) as IHttpLogicValues;
 
