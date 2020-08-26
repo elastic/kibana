@@ -7,7 +7,9 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { encode, RisonValue } from 'rison-node';
+import { stringify } from 'query-string';
+import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
@@ -29,6 +31,9 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
+import { LogEntryFlyout, LogEntryFlyoutProps } from '../../../components/logging/log_entry_flyout';
+import { LogFlyout } from '../../../containers/logs/log_flyout';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -42,6 +47,7 @@ export const PAGINATION_DEFAULTS = {
 export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
+  const navigateToApp = useKibana().services.application?.navigateToApp;
 
   const { sourceId } = useLogSourceContext();
 
@@ -79,6 +85,30 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     lastChangedTime: Date.now(),
   }));
 
+  const linkToLogStream = useCallback<LogEntryFlyoutProps['setFilter']>(
+    (filter, id, timeKey) => {
+      const params = {
+        logPosition: encode({
+          end: moment(queryTimeRange.value.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          position: timeKey as RisonValue,
+          start: moment(queryTimeRange.value.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          streamLive: false,
+        }),
+        flyoutOptions: encode({
+          surroundingLogsId: id,
+        }),
+        logFilter: encode({
+          expression: filter,
+          kind: 'kuery',
+        }),
+      };
+
+      // eslint-disable-next-line no-unused-expressions
+      navigateToApp?.('logs', { path: `/stream?${stringify(params)}` });
+    },
+    [queryTimeRange, navigateToApp]
+  );
+
   const bucketDuration = useMemo(
     () => getBucketDuration(queryTimeRange.value.startTime, queryTimeRange.value.endTime),
     [queryTimeRange.value.endTime, queryTimeRange.value.startTime]
@@ -114,6 +144,10 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     defaultPaginationOptions: PAGINATION_DEFAULTS,
     filteredDatasets: selectedDatasets,
   });
+
+  const { flyoutVisible, setFlyoutVisibility, flyoutItem, isLoading: isFlyoutLoading } = useContext(
+    LogFlyout.Context
+  );
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -198,75 +232,86 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   );
 
   return (
-    <ResultsContentPage>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <DatasetsSelector
-                availableDatasets={datasets}
-                isLoading={isLoadingDatasets}
-                selectedDatasets={selectedDatasets}
-                onChangeDatasetSelection={setSelectedDatasets}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSuperDatePicker
-                start={selectedTimeRange.startTime}
-                end={selectedTimeRange.endTime}
-                onTimeChange={handleSelectedTimeRangeChange}
-                isPaused={autoRefresh.isPaused}
-                refreshInterval={autoRefresh.interval}
-                onRefreshChange={handleAutoRefreshChange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LogAnalysisJobProblemIndicator
-            hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
-            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-            hasStoppedJobs={hasStoppedLogEntryRateJobs}
-            isFirstUse={false /* the first use message is already shown by the section below */}
-            moduleName={logEntryRateModuleDescriptor.moduleName}
-            onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
-            onRecreateMlJobForUpdate={showLogEntryRateSetup}
-          />
-          <CategoryJobNoticesSection
-            hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
-            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-            hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
-            isFirstUse={isFirstUse}
-            moduleName={logEntryCategoriesModuleDescriptor.moduleName}
-            onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
-            onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
-            qualityWarnings={categoryQualityWarnings}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="m">
-            <AnomaliesResults
-              isLoadingLogRateResults={isLoading}
-              isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
-              onViewModuleList={showModuleList}
-              logEntryRateResults={logEntryRate}
-              anomalies={logEntryAnomalies}
-              setTimeRange={handleChartTimeRangeChange}
-              timeRange={queryTimeRange.value}
-              page={page}
-              fetchNextPage={fetchNextPage}
-              fetchPreviousPage={fetchPreviousPage}
-              changeSortOptions={changeSortOptions}
-              changePaginationOptions={changePaginationOptions}
-              sortOptions={sortOptions}
-              paginationOptions={paginationOptions}
+    <>
+      <ResultsContentPage>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <DatasetsSelector
+                  availableDatasets={datasets}
+                  isLoading={isLoadingDatasets}
+                  selectedDatasets={selectedDatasets}
+                  onChangeDatasetSelection={setSelectedDatasets}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={selectedTimeRange.startTime}
+                  end={selectedTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LogAnalysisJobProblemIndicator
+              hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
+              hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+              hasStoppedJobs={hasStoppedLogEntryRateJobs}
+              isFirstUse={false /* the first use message is already shown by the section below */}
+              moduleName={logEntryRateModuleDescriptor.moduleName}
+              onRecreateMlJobForReconfiguration={showLogEntryRateSetup}
+              onRecreateMlJobForUpdate={showLogEntryRateSetup}
             />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ResultsContentPage>
+            <CategoryJobNoticesSection
+              hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
+              hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+              hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
+              isFirstUse={isFirstUse}
+              moduleName={logEntryCategoriesModuleDescriptor.moduleName}
+              onRecreateMlJobForReconfiguration={showLogEntryCategoriesSetup}
+              onRecreateMlJobForUpdate={showLogEntryCategoriesSetup}
+              qualityWarnings={categoryQualityWarnings}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="m">
+              <AnomaliesResults
+                isLoadingLogRateResults={isLoading}
+                isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
+                onViewModuleList={showModuleList}
+                logEntryRateResults={logEntryRate}
+                anomalies={logEntryAnomalies}
+                setTimeRange={handleChartTimeRangeChange}
+                timeRange={queryTimeRange.value}
+                page={page}
+                fetchNextPage={fetchNextPage}
+                fetchPreviousPage={fetchPreviousPage}
+                changeSortOptions={changeSortOptions}
+                changePaginationOptions={changePaginationOptions}
+                sortOptions={sortOptions}
+                paginationOptions={paginationOptions}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ResultsContentPage>
+
+      {flyoutVisible ? (
+        <LogEntryFlyout
+          flyoutItem={flyoutItem}
+          setFlyoutVisibility={setFlyoutVisibility}
+          loading={isFlyoutLoading}
+          setFilter={linkToLogStream}
+        />
+      ) : null}
+    </>
   );
 };
 
