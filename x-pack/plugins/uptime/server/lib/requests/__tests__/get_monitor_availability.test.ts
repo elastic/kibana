@@ -203,28 +203,32 @@ describe('monitor availability', () => {
                       },
                     },
                   },
-                ],
-                "minimum_should_match": 1,
-                "should": Array [
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "match_phrase": Object {
-                            "monitor.id": "apm-dev",
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "monitor.id": "apm-dev",
+                                },
+                              },
+                            ],
                           },
                         },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
                         Object {
-                          "match_phrase": Object {
-                            "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                                },
+                              },
+                            ],
                           },
                         },
                       ],
