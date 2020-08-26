@@ -85,8 +85,8 @@ export class IndexPattern implements IIndexPattern {
     title: ES_FIELD_TYPES.TEXT,
     timeFieldName: ES_FIELD_TYPES.KEYWORD,
     intervalName: ES_FIELD_TYPES.KEYWORD,
-    fields: 'json',
-    sourceFilters: 'json',
+    // fields: 'json',
+    // sourceFilters: 'json',
     fieldFormatMap: {
       type: ES_FIELD_TYPES.TEXT,
       _serialize: (map = {}) => {
@@ -267,7 +267,10 @@ export class IndexPattern implements IIndexPattern {
     }
     this.version = response.version;
 
-    return this.indexFields(forceFieldRefresh, response.fields);
+    return this.indexFields(
+      forceFieldRefresh,
+      typeof response.fields === 'object' ? response.fields : JSON.parse(response.fields)
+    );
   }
 
   getComputedFields() {
