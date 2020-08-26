@@ -25,6 +25,8 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { nodeTypes } from '../../../../../plugins/data/common/es_query';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
@@ -2313,7 +2315,7 @@ describe('SavedObjectsRepository', () => {
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, relevantOpts);
       });
 
-      it(`accepts KQL filter and passes kueryNode to getSearchDsl`, async () => {
+      it(`accepts KQL string filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
           namespace,
           search: 'foo*',
@@ -2328,6 +2330,47 @@ describe('SavedObjectsRepository', () => {
           },
           indexPattern: undefined,
           filter: 'dashboard.attributes.otherField: *',
+        };
+
+        await findSuccess(findOpts, namespace);
+        const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
+        expect(kueryNode).toMatchInlineSnapshot(`
+          Object {
+            "arguments": Array [
+              Object {
+                "type": "literal",
+                "value": "dashboard.otherField",
+              },
+              Object {
+                "type": "wildcard",
+                "value": "@kuery-wildcard@",
+              },
+              Object {
+                "type": "literal",
+                "value": false,
+              },
+            ],
+            "function": "is",
+            "type": "function",
+          }
+        `);
+      });
+
+      it(`accepts KQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
+        const findOpts = {
+          namespace,
+          search: 'foo*',
+          searchFields: ['foo'],
+          type: ['dashboard'],
+          sortField: 'name',
+          sortOrder: 'desc',
+          defaultSearchOperator: 'AND',
+          hasReference: {
+            type: 'foo',
+            id: '1',
+          },
+          indexPattern: undefined,
+          filter: nodeTypes.function.buildNode('is', `dashboard.attributes.otherField`, '*'),
         };
 
         await findSuccess(findOpts, namespace);
