@@ -87,7 +87,7 @@ GeneratedText.displayName = 'GeneratedText';
 function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
   return entries.map((entry) => {
     return {
-      ...entry,
+      description: <GeneratedText>{entry.description}</GeneratedText>,
       title: <GeneratedText>{entry.title}</GeneratedText>,
     };
   });
