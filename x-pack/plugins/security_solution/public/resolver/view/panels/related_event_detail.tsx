@@ -52,7 +52,7 @@ TitleHr.displayName = 'TitleHR';
 
 /**
  * Take description list entries and prepare them for display by
- * replacing Zero-Width spaces with <wbr /> tags.
+ * seeding with `<wbr />` tags.
  *
  * @param entries {title: string, description: string}[]
  */
@@ -62,16 +62,19 @@ function entriesForDisplay(entries: Array<{ title: string; description: string }
       ...entry,
       title: (
         <>
-          {entry.title.split('\u200b').map((titlePart, i) => {
-            return i ? (
-              <>
-                <wbr />
-                {titlePart}
-              </>
-            ) : (
-              <>{titlePart}</>
-            );
-          })}
+          {[...entry.title]
+            .reduce((acc: Array<string | JSX.Element>, char: string) => {
+              const shouldBreak = !!char.match(/\W/);
+              const shouldAppend = acc[acc.length - 1] && typeof acc[acc.length - 1] === 'string';
+              if (shouldBreak) {
+                return [...acc, <wbr />, char];
+              }
+              if (shouldAppend) {
+                return [...acc.slice(0, -1), acc[acc.length - 1] + char];
+              }
+              return [...acc, char];
+            }, [])
+            .map((titlePart) => (typeof titlePart === 'string' ? <>{titlePart}</> : titlePart))}
         </>
       ),
     };
@@ -292,11 +295,6 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       </EuiText>
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
-        /**
-         * Replace Zero-Width Spaces with <wbr/> if the User Agent supports it.
-         * Both will hint breaking opportunities, but <wbr/> do not copy/paste
-         * so it's preferable to use them if the UA allows it.
-         */
         const displayEntries = entriesForDisplay(entries);
         return (
           <Fragment key={index}>

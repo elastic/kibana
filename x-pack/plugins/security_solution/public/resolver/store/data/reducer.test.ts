@@ -189,8 +189,7 @@ describe('Resolver Data Middleware', () => {
         const hostEntries = sectionData.filter((section) => {
           return section.sectionTitle === 'host';
         })[0].entries;
-        // u+200b is the "Zero-width-space" character we put around "."s so they break/wrap nicely on display;
-        expect(hostEntries).toContainEqual({ title: 'os\u200b.platform', description: 'Windows' });
+        expect(hostEntries).toContainEqual({ title: 'os.platform', description: 'Windows' });
         expect(countOfSameType).toBe(
           eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
         );
