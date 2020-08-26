@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { HttpStart, IUiSettingsClient } from 'src/core/public';
+import { coreMock } from '../../../../../core/public/mocks';
 import { defaultSearchStrategy } from './default_search_strategy';
-import { searchServiceMock } from '../mocks';
 import { SearchStrategySearchParams } from './types';
 import { UI_SETTINGS } from '../../../common';
 
@@ -31,30 +31,19 @@ function getConfigStub(config: any = {}) {
   } as IUiSettingsClient;
 }
 
-const msearchMockResponse: any = Promise.resolve([]);
-msearchMockResponse.abort = jest.fn();
-const msearchMock = jest.fn().mockReturnValue(msearchMockResponse);
-
-const searchMockResponse: any = Promise.resolve([]);
-searchMockResponse.abort = jest.fn();
-const searchMock = jest.fn().mockReturnValue(searchMockResponse);
+const msearchMock = jest.fn().mockResolvedValue({ body: { responses: [] } });
 
 describe('defaultSearchStrategy', function () {
   describe('search', function () {
     let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
     let es: any;
+    let http: jest.Mocked<HttpStart>;
 
     beforeEach(() => {
-      msearchMockResponse.abort.mockClear();
       msearchMock.mockClear();
 
-      searchMockResponse.abort.mockClear();
-      searchMock.mockClear();
-
-      const searchService = searchServiceMock.createStartContract();
-      searchService.aggs.calculateAutoTimeExpression = jest.fn().mockReturnValue('1d');
-      searchService.__LEGACY.esClient.search = searchMock;
-      searchService.__LEGACY.esClient.msearch = msearchMock;
+      http = coreMock.createStart().http;
+      http.post.mockResolvedValue(msearchMock);
 
       searchArgs = {
         searchRequests: [
@@ -63,16 +52,16 @@ describe('defaultSearchStrategy', function () {
           },
         ],
         esShardTimeout: 0,
-        legacySearchService: searchService.__LEGACY,
+        http,
       };
 
-      es = searchArgs.legacySearchService.esClient;
+      es = http.post;
     });
 
     test('does not send max_concurrent_shard_requests by default', async () => {
       const config = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
       await search({ ...searchArgs, config });
-      expect(es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
+      expect(es.mock.calls[0][1].query.max_concurrent_shard_requests).toBe(undefined);
     });
 
     test('allows configuration of max_concurrent_shard_requests', async () => {
@@ -81,13 +70,13 @@ describe('defaultSearchStrategy', function () {
         [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 42,
       });
       await search({ ...searchArgs, config });
-      expect(es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
+      expect(es.mock.calls[0][1].query.max_concurrent_shard_requests).toBe(42);
     });
 
     test('should set rest_total_hits_as_int to true on a request', async () => {
       const config = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
       await search({ ...searchArgs, config });
-      expect(es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
+      expect(es.mock.calls[0][1].query).toHaveProperty('rest_total_hits_as_int', true);
     });
 
     test('should set ignore_throttled=false when including frozen indices', async () => {
@@ -96,15 +85,7 @@ describe('defaultSearchStrategy', function () {
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true,
       });
       await search({ ...searchArgs, config });
-      expect(es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
-    });
-
-    test('should properly call abort with msearch', () => {
-      const config = getConfigStub({
-        [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-      });
-      search({ ...searchArgs, config }).abort();
-      expect(msearchMockResponse.abort).toHaveBeenCalled();
+      expect(es.mock.calls[0][1].query).toHaveProperty('ignore_throttled', false);
     });
   });
 });

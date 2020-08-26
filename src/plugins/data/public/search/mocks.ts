@@ -35,12 +35,6 @@ function createStartContract(): jest.Mocked<ISearchStart> {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
     searchSource: searchSourceMock,
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
-    },
   };
 }
 

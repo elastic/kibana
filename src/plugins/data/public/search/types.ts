@@ -19,7 +19,6 @@
 
 import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
-import { LegacyApiCaller } from './legacy/es_client';
 import { ISearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
@@ -51,10 +50,6 @@ export type ISearchGeneric = <
   options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;
 
-export interface ISearchStartLegacy {
-  esClient: LegacyApiCaller;
-}
-
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
 }
@@ -78,11 +73,6 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
-  /**
-   * @deprecated
-   * @internal
-   */
-  __LEGACY: ISearchStartLegacy;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';
