@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useRef, useEffect, useState, Component } from 'react';
 import ReactDOM from 'react-dom';
 import { MountPoint } from 'kibana/public';
 
@@ -50,8 +51,38 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
   }, [setMountPoint]);
 
   if (shouldRender && el.current) {
-    return ReactDOM.createPortal(children, el.current);
+    return ReactDOM.createPortal(
+      <MountPointPortalErrorBoundary>{children}</MountPointPortalErrorBoundary>,
+      el.current
+    );
   } else {
     return null;
   }
 };
+
+class MountPointPortalErrorBoundary extends Component<{}, { error?: any }> {
+  state = {
+    error: undefined,
+  };
+
+  static getDerivedStateFromError(error: any) {
+    return { error };
+  }
+
+  componentDidCatch() {
+    // nothing, will just rerender to display the error message
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <p>
+          {i18n.translate('kibana-react.mountPointPortal.errorMessage', {
+            defaultMessage: 'Error rendering portal content',
+          })}
+        </p>
+      );
+    }
+    return this.props.children;
+  }
+}

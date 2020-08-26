@@ -187,4 +187,24 @@ describe('MountPointPortal', () => {
 
     expect(portalTarget.innerHTML).toBe('');
   });
+
+  it('intercepts errors and display an error message', async () => {
+    const CrashTest = () => {
+      throw new Error('crash');
+    };
+
+    dom = mount(
+      <MountPointPortal setMountPoint={setMountPoint}>
+        <CrashTest />
+      </MountPointPortal>
+    );
+
+    act(() => {
+      mountPoint(portalTarget);
+    });
+
+    await refresh();
+
+    expect(portalTarget.innerHTML).toBe('<p>Error rendering portal content</p>');
+  });
 });
