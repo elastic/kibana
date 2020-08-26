@@ -14,6 +14,7 @@ import {
   IndexedProcessNode,
   AABB,
   VisibleEntites,
+  SectionData,
 } from '../../types';
 import {
   isGraphableProcess,
@@ -210,11 +211,6 @@ const objectToDescriptionListEntries = function* (
     }
   }
 };
-
-type SectionData = Array<{
-  sectionTitle: string;
-  entries: Array<{ title: string; description: string }>;
-}>;
 
 /**
  * Returns a function that returns the information needed to display related event details based on
