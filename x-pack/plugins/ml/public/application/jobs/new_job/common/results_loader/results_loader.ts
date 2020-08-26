@@ -126,6 +126,10 @@ export class ResultsLoader {
     this._results$.next(this._results);
   }
 
+  public get results$() {
+    return this._results$;
+  }
+
   public subscribeToResults(func: ResultsSubscriber) {
     return this._results$.subscribe(func);
   }

@@ -4,22 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  FC,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  MutableRefObject,
-} from 'react';
+import React, { FC, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
+import { from } from 'rxjs';
+import { switchMap, takeWhile, tap } from 'rxjs/operators';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
@@ -28,11 +20,9 @@ export const CategoryStoppedPartitions: FC = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);
-  const [hasStoppedPartitions, setHasStoppedPartitions] = useState(false);
   const [stoppedPartitionsError, setStoppedPartitionsError] = useState<string | undefined>();
 
   // using ref so this Subscription instance is only intialized once
-  const _resultsSubscription: MutableRefObject<Subscription | undefined> = useRef();
 
   const columns = useMemo(
     () => [
@@ -53,11 +43,8 @@ export const CategoryStoppedPartitions: FC = () => {
     ],
     []
   );
-  function setResultsWrapper(results: Results) {
-    loadCategoryStoppedPartitions();
-  }
 
-  async function loadCategoryStoppedPartitions() {
+  const loadCategoryStoppedPartitions = useCallback(async () => {
     try {
       const results = await ml.results.getCategoryStoppedPartitions([jobCreator.jobId]);
 
@@ -67,24 +54,9 @@ export const CategoryStoppedPartitions: FC = () => {
         Array.isArray(results?.jobs[jobCreator.jobId]) &&
         results.jobs[jobCreator.jobId].length > 0
       ) {
-        const stoppedPartitionsPreview = results.jobs[jobCreator.jobId];
-        // once we have reached number of stopped partitions we wanted to show as preview
-        // no need to keep fetching anymore
-        if (
-          stoppedPartitionsPreview.length >= NUMBER_OF_PREVIEW &&
-          _resultsSubscription &&
-          _resultsSubscription.current !== undefined
-        ) {
-          _resultsSubscription.current.unsubscribe();
-          _resultsSubscription.current = undefined;
-        }
-        setHasStoppedPartitions(true);
-        setTableRow(
-          stoppedPartitionsPreview.slice(0, NUMBER_OF_PREVIEW).map((partitionName) => ({
-            partitionName,
-          }))
-        );
+        return results.jobs[jobCreator.jobId];
       }
+      return undefined;
     } catch (e) {
       const error = extractErrorProperties(e);
       // might get 404 because job has not been created yet and that's ok
@@ -92,22 +64,32 @@ export const CategoryStoppedPartitions: FC = () => {
         setStoppedPartitionsError(error.message);
       }
     }
-  }
+  }, [jobCreator.jobId]);
 
   useEffect(() => {
     // only need to run this check if jobCreator.perPartitionStopOnWarn is turned on
-    if (
-      jobCreator.perPartitionCategorization &&
-      jobCreator.perPartitionStopOnWarn &&
-      _resultsSubscription?.current
-    ) {
+    if (jobCreator.perPartitionCategorization && jobCreator.perPartitionStopOnWarn) {
       // subscribe to result updates
-      _resultsSubscription.current = resultsLoader.subscribeToResults(setResultsWrapper);
-      return () => {
-        if (_resultsSubscription?.current) {
-          _resultsSubscription.current.unsubscribe();
-        }
-      };
+      const resultsSubscription = resultsLoader.results$
+        .pipe(
+          switchMap(() => {
+            return from(loadCategoryStoppedPartitions());
+          }),
+          tap((results) => {
+            if (Array.isArray(results)) {
+              setTableRow(
+                results.map((partitionName) => ({
+                  partitionName,
+                }))
+              );
+            }
+          }),
+          takeWhile((results) => {
+            return !results || (Array.isArray(results) && results.length <= NUMBER_OF_PREVIEW);
+          })
+        )
+        .subscribe();
+      return () => resultsSubscription.unsubscribe();
     }
   }, []);
 
@@ -128,7 +110,7 @@ export const CategoryStoppedPartitions: FC = () => {
           />
         </>
       )}
-      {hasStoppedPartitions && (
+      {Array.isArray(tableRow) && tableRow.length > 0 && (
         <>
           <EuiSpacer />
           <div>
