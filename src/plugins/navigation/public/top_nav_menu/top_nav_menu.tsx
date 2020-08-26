@@ -117,12 +117,12 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     const wrapperClassName = 'kbnTopNavMenu__wrapper';
     if (setMenuMountPoint) {
       return (
-        <span className={wrapperClassName}>
+        <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
-            {renderMenu(menuClassName)}
+            <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
           </MountPointPortal>
-          {renderSearchBar()}
-        </span>
+          <span className={wrapperClassName}>{renderSearchBar()}</span>
+        </>
       );
     } else {
       return (
