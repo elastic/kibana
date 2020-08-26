@@ -23,6 +23,11 @@ import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath } from '../../../common/routing';
 
+jest.mock('../../policy/store/policy_list/services/ingest', () => ({
+  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
+}));
+
 describe('endpoint list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
@@ -62,6 +67,34 @@ describe('endpoint list middleware', () => {
         ...history.location,
         pathname: getEndpointListPath({ name: 'endpointList' }),
       },
+    });
+    await waitForAction('serverReturnedEndpointList');
+    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
+      body: JSON.stringify({
+        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+      }),
+    });
+    expect(listData(getState())).toEqual(apiResponse.hosts);
+  });
+
+  it('handles `appRequestedEndpointList`', async () => {
+    const apiResponse = getEndpointListApiResponse();
+    fakeHttpServices.post.mockResolvedValue(apiResponse);
+    expect(fakeHttpServices.post).not.toHaveBeenCalled();
+
+    // First change the URL
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        ...history.location,
+        pathname: getEndpointListPath({ name: 'endpointList' }),
+      },
+    });
+    await waitForAction('serverReturnedEndpointList');
+
+    // Then request the Endpoint List
+    dispatch({
+      type: 'appRequestedEndpointList',
     });
     await waitForAction('serverReturnedEndpointList');
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {

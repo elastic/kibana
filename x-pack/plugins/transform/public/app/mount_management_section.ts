@@ -49,5 +49,10 @@ export async function mountManagementSection(
     history,
   };
 
-  return renderApp(element, appDependencies);
+  const unmountAppCallback = renderApp(element, appDependencies);
+
+  return () => {
+    docTitle.reset();
+    unmountAppCallback();
+  };
 }

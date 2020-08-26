@@ -157,6 +157,44 @@ describe('configureClient', () => {
       `);
     });
 
+    it('logs default error info when the error response body is empty', () => {
+      const client = configureClient(config, { logger, scoped: false });
+
+      let response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {
+          error: {},
+        },
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[ResponseError]: Response Error",
+          ],
+        ]
+      `);
+
+      logger.error.mockClear();
+
+      response = createApiResponse({
+        statusCode: 400,
+        headers: {},
+        body: {} as any,
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[ResponseError]: Response Error",
+          ],
+        ]
+      `);
+    });
+
     it('logs each queries if `logQueries` is true', () => {
       const client = configureClient(
         createFakeConfig({
