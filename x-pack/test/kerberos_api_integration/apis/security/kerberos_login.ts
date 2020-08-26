@@ -121,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionCookie = request.cookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
-        const expectedUserRoles = ['kibana_admin'];
+        const expectedUserRoles = ['kibana_admin', 'superuser_anonymous'];
 
         await supertest
           .get('/internal/security/me')
