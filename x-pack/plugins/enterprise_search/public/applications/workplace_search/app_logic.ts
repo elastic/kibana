@@ -7,9 +7,10 @@
 import { kea } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
+import { IWorkplaceSearchInitialData } from '../../../common/types/workplace_search';
 import { IKeaLogic } from '../shared/types';
 
-export interface IAppValues {
+export interface IAppValues extends IWorkplaceSearchInitialData {
   hasInitialized: boolean;
 }
 export interface IAppActions {
@@ -18,7 +19,7 @@ export interface IAppActions {
 
 export const AppLogic = kea({
   actions: (): IAppActions => ({
-    initializeAppData: (props) => props,
+    initializeAppData: (props) => props.workplaceSearch,
   }),
   reducers: () => ({
     hasInitialized: [
