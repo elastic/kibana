@@ -82,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.modelIDFieldHelpText',
       {
-        defaultMessage: 'ID of the model to infer against',
+        defaultMessage: 'ID of the model to infer against.',
       }
     ),
     validations: [

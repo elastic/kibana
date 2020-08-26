@@ -6,6 +6,7 @@
   "false_positives": [
     "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual. It is quite unusual for this program to be started by an Office application like Word or Excel."
   ],
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -57,5 +58,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }
