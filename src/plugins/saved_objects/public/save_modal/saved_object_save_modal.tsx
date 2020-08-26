@@ -281,8 +281,8 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             title={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleLabel"
-                defaultMessage="A {objectType} with the title '{title}' already exists"
-                values={{ objectType: this.props.objectType, title: this.state.title }}
+                defaultMessage="This {objectType} already exists"
+                values={{ objectType: this.props.objectType }}
               />
             }
             color="warning"
@@ -292,18 +292,9 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Clicking {confirmSaveLabel} will save the {objectType} with this duplicate title."
+                defaultMessage="Saving '{title}' creates a duplicate title."
                 values={{
-                  objectType: this.props.objectType,
-                  confirmSaveLabel: (
-                    <strong>
-                      {this.props.confirmButtonLabel
-                        ? this.props.confirmButtonLabel
-                        : i18n.translate('savedObjects.saveModal.saveButtonLabel', {
-                            defaultMessage: 'Save',
-                          })}
-                    </strong>
-                  ),
+                  title: this.props.title,
                 }}
               />
             </p>
