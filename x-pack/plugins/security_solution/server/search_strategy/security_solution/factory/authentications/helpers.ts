@@ -6,8 +6,10 @@
 import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { mergeFieldsWithHit } from '../../../../utils/build_query';
-import { AuthenticationsEdges } from '../../../../../common/search_strategy/security_solution/authentications';
-import { AuthenticationHit } from '../../../../lib/authentications/types';
+import {
+  AuthenticationsEdges,
+  AuthenticationHit,
+} from '../../../../../common/search_strategy/security_solution/authentications';
 import { toArray } from '../../../helpers/to_array';
 
 export const authenticationFields = [

@@ -134,3 +134,35 @@ export interface OsEcsFields {
 
   kernel?: Maybe<string[] | string>;
 }
+
+export interface AuthenticationHit extends Hit {
+  _source: {
+    '@timestamp': string;
+    lastSuccess?: LastSourceHost;
+    lastFailure?: LastSourceHost;
+  };
+  user: string;
+  failures: number;
+  successes: number;
+  cursor?: string;
+  sort: StringOrNumber[];
+}
+
+export interface AuthenticationBucket {
+  key: {
+    user_uid: string;
+  };
+  doc_count: number;
+  failures: {
+    doc_count: number;
+  };
+  successes: {
+    doc_count: number;
+  };
+  authentication: {
+    hits: {
+      total: TotalHit;
+      hits: ArrayLike<AuthenticationHit>;
+    };
+  };
+}

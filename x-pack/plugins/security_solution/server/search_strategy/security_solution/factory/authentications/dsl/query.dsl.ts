@@ -6,12 +6,16 @@
 
 import { isEmpty } from 'lodash/fp';
 
+import { AuthenticationsRequestOptions } from '../../../../../../common/search_strategy/security_solution/authentications';
+import {
+  sourceFieldsMap,
+  hostFieldsMap,
+} from '../../../../../../common/search_strategy/ecs_fields';
+
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
-
-import { sourceFieldsMap, hostFieldsMap } from '../../../../../lib/ecs_fields';
 import { extendMap } from '../../../../../lib/ecs_fields/extend_map';
-import { AuthenticationsRequestOptions } from '../../../../../../common/search_strategy/security_solution/authentications';
+
 import { authenticationFields } from '../helpers';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {

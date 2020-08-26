@@ -15,13 +15,14 @@ import {
   AuthenticationsRequestOptions,
   AuthenticationsStrategyResponse,
   AuthenticationsQuery,
+  AuthenticationHit,
+  AuthenticationBucket,
 } from '../../../../../common/search_strategy/security_solution/authentications';
 
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 import { formatAuthenticationData } from './helpers';
-import { AuthenticationHit, AuthenticationBucket } from '../../../../lib/authentications/types';
 
 export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authentications> = {
   buildDsl: (options: AuthenticationsRequestOptions) => {
