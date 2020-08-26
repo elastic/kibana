@@ -17,9 +17,13 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
+
 import { IRouter } from 'src/core/server';
+import { UI_SETTINGS } from '../../../common';
 import { SearchRouteDependencies } from '../search_service';
+import { getDefaultSearchParams } from '..';
 
 interface MsearchHeaders {
   index: string;
@@ -36,10 +40,19 @@ interface RequestBody {
 }
 
 /** @internal */
-export function convertRequestBody(requestBody: RequestBody): string {
+export function convertRequestBody(
+  requestBody: RequestBody,
+  { timeout }: { timeout?: string }
+): string {
   return requestBody.searches.reduce((req, curr) => {
-    const header = JSON.stringify({ ...curr.header });
-    const body = JSON.stringify({ ...curr.body });
+    const header = JSON.stringify({
+      ignore_unavailable: true,
+      ...curr.header,
+    });
+    const body = JSON.stringify({
+      timeout,
+      ...curr.body,
+    });
     req += `${header}\n${body}\n`;
     return req;
   }, '');
@@ -77,26 +90,34 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
             })
           ),
         }),
-        query: schema.object({
-          // We don't use `schema.boolean` here, because all query string parameters are treated as
-          // strings and @kbn/config-schema doesn't coerce strings to booleans.
-          ignore_throttled: schema.oneOf([schema.literal('true'), schema.literal('false')]),
-          rest_total_hits_as_int: schema.oneOf([schema.literal('true'), schema.literal('false')]),
-          max_concurrent_shard_requests: schema.maybe(schema.number()),
-        }),
       },
     },
     async (context, request, res) => {
       const client = context.core.elasticsearch.client.asCurrentUser;
-      const body = convertRequestBody(request.body);
-      const querystring = request.query;
+
+      // get shardTimeout
+      const config = await deps.globalConfig$.pipe(first()).toPromise();
+      const { timeout } = getDefaultSearchParams(config);
+
+      const body = convertRequestBody(request.body, { timeout });
 
       try {
+        const ignoreThrottled = !(await context.core.uiSettings.client.get(
+          UI_SETTINGS.SEARCH_INCLUDE_FROZEN
+        ));
+        const maxConcurrentShardRequests = await context.core.uiSettings.client.get(
+          UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
+        );
         const response = await client.transport.request({
           method: 'GET',
           path: '/_msearch',
           body,
-          querystring,
+          querystring: {
+            rest_total_hits_as_int: true,
+            ignore_throttled: ignoreThrottled,
+            max_concurrent_shard_requests:
+              maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
+          },
         });
 
         return res.ok({ body: response });

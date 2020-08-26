@@ -19,8 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { getPreference, getTimeout } from '../fetch';
-import { getMSearchParams } from './get_msearch_params';
+import { getPreference } from '../fetch';
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 
 // @deprecated
@@ -32,19 +31,14 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({ searchRequests, config, http, esShardTimeout }: SearchStrategySearchParams) {
-  const requests = searchRequests.map(({ index, body, search_type: searchType }) => {
+function msearch({ searchRequests, config, http }: SearchStrategySearchParams) {
+  const requests = searchRequests.map(({ index, body }) => {
     return {
       header: {
         index: index.title || index,
-        ignore_unavailable: true,
         preference: getPreference(config.get),
-        search_type: searchType,
       },
-      body: {
-        ...body,
-        timeout: getTimeout(esShardTimeout),
-      },
+      body,
     };
   });
 
@@ -67,7 +61,6 @@ function msearch({ searchRequests, config, http, esShardTimeout }: SearchStrateg
   };
 
   const searching = http.post('/internal/_msearch', {
-    query: getMSearchParams(config.get),
     body: JSON.stringify({ searches: requests }),
     signal: abortController.signal,
   });

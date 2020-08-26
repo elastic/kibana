@@ -243,7 +243,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { esShardTimeout, http, getConfig } = this.dependencies;
+    const { http, getConfig } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -254,7 +254,6 @@ export class SearchSource {
       {
         http,
         config: { get: getConfig },
-        esShardTimeout,
       }
     );
   }

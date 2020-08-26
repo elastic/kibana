@@ -36,7 +36,6 @@ export interface FetchOptions {
 
 export interface FetchHandlers {
   config: { get: GetConfigFn };
-  esShardTimeout: number;
   http: HttpStart;
 }
 

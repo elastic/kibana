@@ -17,26 +17,18 @@
  * under the License.
  */
 
-import { HttpStart, IUiSettingsClient } from 'src/core/public';
+import { HttpStart } from 'src/core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { SearchStrategySearchParams } from './types';
-import { UI_SETTINGS } from '../../../common';
 
 const { search } = defaultSearchStrategy;
-
-function getConfigStub(config: any = {}) {
-  return {
-    get: (key) => config[key],
-  } as IUiSettingsClient;
-}
 
 const msearchMock = jest.fn().mockResolvedValue({ body: { responses: [] } });
 
 describe('defaultSearchStrategy', function () {
   describe('search', function () {
-    let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
-    let es: any;
+    let searchArgs: MockedKeys<SearchStrategySearchParams>;
     let http: jest.Mocked<HttpStart>;
 
     beforeEach(() => {
@@ -51,41 +43,26 @@ describe('defaultSearchStrategy', function () {
             index: { title: 'foo' },
           },
         ],
-        esShardTimeout: 0,
         http,
+        config: {
+          get: jest.fn(),
+        },
       };
-
-      es = http.post;
     });
 
-    test('does not send max_concurrent_shard_requests by default', async () => {
-      const config = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
-      await search({ ...searchArgs, config });
-      expect(es.mock.calls[0][1].query.max_concurrent_shard_requests).toBe(undefined);
-    });
-
-    test('allows configuration of max_concurrent_shard_requests', async () => {
-      const config = getConfigStub({
-        [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-        [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 42,
-      });
-      await search({ ...searchArgs, config });
-      expect(es.mock.calls[0][1].query.max_concurrent_shard_requests).toBe(42);
-    });
-
-    test('should set rest_total_hits_as_int to true on a request', async () => {
-      const config = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
-      await search({ ...searchArgs, config });
-      expect(es.mock.calls[0][1].query).toHaveProperty('rest_total_hits_as_int', true);
-    });
-
-    test('should set ignore_throttled=false when including frozen indices', async () => {
-      const config = getConfigStub({
-        [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true,
-      });
-      await search({ ...searchArgs, config });
-      expect(es.mock.calls[0][1].query).toHaveProperty('ignore_throttled', false);
+    test('calls http.post with the correct arguments', async () => {
+      await search({ ...searchArgs });
+      expect(http.post.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/internal/_msearch",
+            Object {
+              "body": "{\\"searches\\":[{\\"header\\":{\\"index\\":\\"foo\\"}}]}",
+              "signal": AbortSignal {},
+            },
+          ],
+        ]
+      `);
     });
   });
 });

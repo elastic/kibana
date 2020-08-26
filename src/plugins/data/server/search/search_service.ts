@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -24,6 +25,7 @@ import {
   Plugin,
   PluginInitializerContext,
   RequestHandlerContext,
+  SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
 import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
@@ -59,6 +61,7 @@ export interface SearchServiceStartDependencies {
 /** @internal */
 export interface SearchRouteDependencies {
   getStartServices: StartServicesAccessor<{}, DataPluginStart>;
+  globalConfig$: Observable<SharedGlobalConfig>;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -78,8 +81,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
     const router = core.http.createRouter();
-    registerSearchRoute(router, { getStartServices: core.getStartServices });
-    registerMsearchRoute(router, { getStartServices: core.getStartServices });
+    const routeDependencies = {
+      getStartServices: core.getStartServices,
+      globalConfig$: this.initializerContext.config.legacy.globalConfig$,
+    };
+    registerSearchRoute(router, routeDependencies);
+    registerMsearchRoute(router, routeDependencies);
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,

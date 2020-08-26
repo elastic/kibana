@@ -17,8 +17,19 @@
  * under the License.
  */
 
-import { CoreSetup, RequestHandlerContext, StartServicesAccessor } from 'src/core/server';
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { Observable } from 'rxjs';
+
+import {
+  CoreSetup,
+  RequestHandlerContext,
+  SharedGlobalConfig,
+  StartServicesAccessor,
+} from 'src/core/server';
+import {
+  coreMock,
+  httpServerMock,
+  pluginInitializerContextConfigMock,
+} from '../../../../../../src/core/server/mocks';
 import { registerMsearchRoute, convertRequestBody } from './msearch';
 import { DataPluginStart } from '../../plugin';
 import { dataPluginMock } from '../../mocks';
@@ -27,17 +38,24 @@ describe('msearch route', () => {
   let mockDataStart: MockedKeys<DataPluginStart>;
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
   let getStartServices: jest.Mocked<StartServicesAccessor<{}, DataPluginStart>>;
+  let globalConfig$: Observable<SharedGlobalConfig>;
 
   beforeEach(() => {
     mockDataStart = dataPluginMock.createStartContract();
     mockCoreSetup = coreMock.createSetup({ pluginStartContract: mockDataStart });
     getStartServices = mockCoreSetup.getStartServices;
+    globalConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
   });
 
   it('handler calls /_msearch with the given request', async () => {
     const response = { id: 'yay' };
     const mockClient = { transport: { request: jest.fn().mockResolvedValue(response) } };
-    const mockContext = { core: { elasticsearch: { client: { asCurrentUser: mockClient } } } };
+    const mockContext = {
+      core: {
+        elasticsearch: { client: { asCurrentUser: mockClient } },
+        uiSettings: { client: { get: jest.fn() } },
+      },
+    };
     const mockBody = { searches: [{ header: {}, body: {} }] };
     const mockQuery = {};
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -46,7 +64,7 @@ describe('msearch route', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    registerMsearchRoute(mockCoreSetup.http.createRouter(), { getStartServices });
+    registerMsearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
@@ -55,7 +73,7 @@ describe('msearch route', () => {
     expect(mockClient.transport.request.mock.calls[0][0].method).toBe('GET');
     expect(mockClient.transport.request.mock.calls[0][0].path).toBe('/_msearch');
     expect(mockClient.transport.request.mock.calls[0][0].body).toEqual(
-      convertRequestBody(mockBody as any)
+      convertRequestBody(mockBody as any, { timeout: '0ms' })
     );
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
@@ -73,7 +91,12 @@ describe('msearch route', () => {
     const mockClient = {
       transport: { request: jest.fn().mockReturnValue(Promise.reject(response)) },
     };
-    const mockContext = { core: { elasticsearch: { client: { asCurrentUser: mockClient } } } };
+    const mockContext = {
+      core: {
+        elasticsearch: { client: { asCurrentUser: mockClient } },
+        uiSettings: { client: { get: jest.fn() } },
+      },
+    };
     const mockBody = { searches: [{ header: {}, body: {} }] };
     const mockQuery = {};
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -82,7 +105,7 @@ describe('msearch route', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    registerMsearchRoute(mockCoreSetup.http.createRouter(), { getStartServices });
+    registerMsearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
@@ -101,9 +124,9 @@ describe('msearch route', () => {
       const request = {
         searches: [{ header: { index: 'foo', preference: 0 }, body: { test: true } }],
       };
-      expect(convertRequestBody(request)).toMatchInlineSnapshot(`
-        "{\\"index\\":\\"foo\\",\\"preference\\":0}
-        {\\"test\\":true}
+      expect(convertRequestBody(request, { timeout: '30000ms' })).toMatchInlineSnapshot(`
+        "{\\"ignore_unavailable\\":true,\\"index\\":\\"foo\\",\\"preference\\":0}
+        {\\"timeout\\":\\"30000ms\\",\\"test\\":true}
         "
       `);
     });
@@ -115,11 +138,11 @@ describe('msearch route', () => {
           { header: { index: 'bar', preference: 1 }, body: { hello: 'world' } },
         ],
       };
-      expect(convertRequestBody(request)).toMatchInlineSnapshot(`
-        "{\\"index\\":\\"foo\\",\\"preference\\":0}
-        {\\"test\\":true}
-        {\\"index\\":\\"bar\\",\\"preference\\":1}
-        {\\"hello\\":\\"world\\"}
+      expect(convertRequestBody(request, { timeout: '30000ms' })).toMatchInlineSnapshot(`
+        "{\\"ignore_unavailable\\":true,\\"index\\":\\"foo\\",\\"preference\\":0}
+        {\\"timeout\\":\\"30000ms\\",\\"test\\":true}
+        {\\"ignore_unavailable\\":true,\\"index\\":\\"bar\\",\\"preference\\":1}
+        {\\"timeout\\":\\"30000ms\\",\\"hello\\":\\"world\\"}
         "
       `);
     });
