@@ -13,6 +13,19 @@
         }
       }
     },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "number"
+        },
+        "errorCount": {
+          "type": "number"
+        },
+        "averageDuration": {
+          "type": "long"
+        }
+      }
+    },
     "sample-data": {
       "properties": {
         "installed": {
@@ -32,6 +45,19 @@
         },
         "uninstalled": {
           "type": "keyword"
+        }
+      }
+    },
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean"
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean"
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean"
         }
       }
     },
