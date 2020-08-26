@@ -81,7 +81,7 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('portal content');
+    expect(portalTarget.innerHTML).toBe('<span>portal content</span>');
   });
 
   it('cleanup the portal content when the component is unmounted', async () => {
@@ -97,13 +97,13 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('portal content');
+    expect(portalTarget.innerHTML).toBe('<span>portal content</span>');
 
     dom.unmount();
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('');
+    expect(portalTarget.innerHTML).toBe('');
   });
 
   it('cleanup the portal content when unmounting the MountPoint from outside', async () => {
@@ -120,7 +120,7 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('portal content');
+    expect(portalTarget.innerHTML).toBe('<span>portal content</span>');
 
     act(() => {
       unmount();
@@ -128,7 +128,7 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('');
+    expect(portalTarget.innerHTML).toBe('');
   });
 
   it('updates the content of the portal element when the content of MountPointPortal changes', async () => {
@@ -151,7 +151,7 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('before');
+    expect(portalTarget.innerHTML).toBe('<div>before</div>');
 
     dom.setProps({
       portalContent: 'after',
@@ -159,7 +159,7 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('after');
+    expect(portalTarget.innerHTML).toBe('<div>after</div>');
   });
 
   it('cleanup the previous portal content when setMountPoint changes', async () => {
@@ -175,7 +175,7 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('portal content');
+    expect(portalTarget.innerHTML).toBe('<span>portal content</span>');
 
     const newSetMountPoint = jest.fn();
 
@@ -185,6 +185,6 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.textContent).toBe('');
+    expect(portalTarget.innerHTML).toBe('');
   });
 });
