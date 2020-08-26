@@ -5,10 +5,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import { commonSearchSuccessResponseFieldsRT } from '../../utils/elasticsearch_runtime_types';
+import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_ALERT_TYPE_ID = 'logs.alert.document.count';
 
+// Comparators //
 export enum Comparator {
   GT = 'more than',
   GT_OR_EQ = 'more than or equals',
@@ -82,6 +83,7 @@ export const ComparatorToi18nMap = {
   ),
 };
 
+// Alert parameters //
 export enum AlertStates {
   OK,
   ALERT,
@@ -89,12 +91,12 @@ export enum AlertStates {
   ERROR,
 }
 
-const DocumentCountRT = rt.type({
+const ThresholdRT = rt.type({
   comparator: ComparatorRT,
   value: rt.number,
 });
 
-export type DocumentCount = rt.TypeOf<typeof DocumentCountRT>;
+export type Threshold = rt.TypeOf<typeof ThresholdRT>;
 
 export const CriterionRT = rt.type({
   field: rt.string,
@@ -104,6 +106,13 @@ export const CriterionRT = rt.type({
 
 export type Criterion = rt.TypeOf<typeof CriterionRT>;
 export const criteriaRT = rt.array(CriterionRT);
+export type Criteria = rt.TypeOf<typeof criteriaRT>;
+
+export const countCriteriaRT = criteriaRT;
+export type CountCriteria = rt.TypeOf<typeof countCriteriaRT>;
+
+export const ratioCriteriaRT = rt.tuple([criteriaRT, criteriaRT]);
+export type RatioCriteria = rt.TypeOf<typeof ratioCriteriaRT>;
 
 export const TimeUnitRT = rt.union([
   rt.literal('s'),
@@ -116,25 +125,37 @@ export type TimeUnit = rt.TypeOf<typeof TimeUnitRT>;
 export const timeSizeRT = rt.number;
 export const groupByRT = rt.array(rt.string);
 
-export const LogDocumentCountAlertParamsRT = rt.intersection([
+const RequiredAlertParamsRT = rt.type({
+  threshold: ThresholdRT,
+  timeUnit: TimeUnitRT,
+  timeSize: timeSizeRT,
+});
+
+const OptionalAlertParamsRT = rt.partial({
+  groupBy: groupByRT,
+  // Maintain backwards compatbility with alerts that were created using "count" rather than "threshold"
+  count: ThresholdRT,
+});
+
+export const AlertParamsRT = rt.intersection([
   rt.type({
-    count: DocumentCountRT,
-    criteria: criteriaRT,
-    timeUnit: TimeUnitRT,
-    timeSize: timeSizeRT,
+    criteria: rt.union([countCriteriaRT, ratioCriteriaRT]),
+    ...RequiredAlertParamsRT.props,
   }),
   rt.partial({
-    groupBy: groupByRT,
+    ...OptionalAlertParamsRT.props,
   }),
 ]);
 
-export type LogDocumentCountAlertParams = rt.TypeOf<typeof LogDocumentCountAlertParamsRT>;
+export type AlertParams = rt.TypeOf<typeof AlertParamsRT>;
 
+// Chart previews //
 const chartPreviewHistogramBucket = rt.type({
   key: rt.number,
   doc_count: rt.number,
 });
 
+// ES query responses //
 export const UngroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.intersection([

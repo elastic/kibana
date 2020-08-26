@@ -10,7 +10,7 @@ import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_execu
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   Comparator,
-} from '../../../../common/alerting/logs/types';
+} from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
 
 const documentCountActionVariableDescription = i18n.translate(

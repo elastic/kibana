@@ -17,14 +17,14 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
 import {
   Comparator,
   ComparatorToi18nMap,
-  LogDocumentCountAlertParams,
-} from '../../../../../common/alerting/logs/types';
+  AlertParams,
+} from '../../../../../../common/alerting/logs/log_threshold/types';
 
-const documentCountPrefix = i18n.translate('xpack.infra.logs.alertFlyout.documentCountPrefix', {
+const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
   defaultMessage: 'when',
 });
 
@@ -43,11 +43,11 @@ const getComparatorOptions = (): Array<{
 interface Props {
   comparator?: Comparator;
   value?: number;
-  updateCount: (params: Partial<LogDocumentCountAlertParams['count']>) => void;
+  updateThreshold: (params: Partial<AlertParams['threshold']>) => void;
   errors: IErrorObject;
 }
 
-export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount, errors }) => {
+export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold, errors }) => {
   const [isComparatorPopoverOpen, setComparatorPopoverOpenState] = useState(false);
   const [isValuePopoverOpen, setIsValuePopoverOpen] = useState(false);
 
@@ -68,7 +68,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
           id="comparator"
           button={
             <EuiExpression
-              description={documentCountPrefix}
+              description={thresholdPrefix}
               uppercase={true}
               value={comparator ? ComparatorToi18nMap[comparator] : ''}
               isActive={isComparatorPopoverOpen}
@@ -82,11 +82,11 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
           anchorPosition="downLeft"
         >
           <div>
-            <EuiPopoverTitle>{documentCountPrefix}</EuiPopoverTitle>
+            <EuiPopoverTitle>{thresholdPrefix}</EuiPopoverTitle>
             <EuiSelect
               compressed
               value={comparator}
-              onChange={(e) => updateCount({ comparator: e.target.value as Comparator })}
+              onChange={(e) => updateThreshold({ comparator: e.target.value as Comparator })}
               options={getComparatorOptions()}
             />
           </div>
@@ -120,7 +120,7 @@ export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount,
                 value={value}
                 onChange={(e) => {
                   const number = parseInt(e.target.value, 10);
-                  updateCount({ value: number ? number : undefined });
+                  updateThreshold({ value: number ? number : undefined });
                 }}
               />
             </EuiFormRow>

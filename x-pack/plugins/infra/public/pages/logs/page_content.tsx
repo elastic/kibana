@@ -23,7 +23,7 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { AlertDropdown } from '../../components/alerting/logs/alert_dropdown';
+import { AlertDropdown } from '../../components/alerting/logs/log_threshold/alert_dropdown';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

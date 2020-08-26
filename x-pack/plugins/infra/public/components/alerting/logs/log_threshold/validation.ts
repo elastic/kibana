@@ -6,21 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
-import { LogDocumentCountAlertParams } from '../../../../common/alerting/logs/types';
+import { ValidationResult } from '../../../../../../triggers_actions_ui/public/types';
+import { AlertParams } from '../../../../../common/alerting/logs/log_threshold/types';
 
 export function validateExpression({
-  count,
+  threshold,
   criteria,
   timeSize,
   timeUnit,
-}: Partial<LogDocumentCountAlertParams>): ValidationResult {
+}: Partial<AlertParams>): ValidationResult {
   const validationResult = { errors: {} };
 
   // NOTE: In the case of components provided by the Alerting framework the error property names
   // must match what they expect.
   const errors: {
-    count: {
+    threshold: {
       value: string[];
     };
     criteria: {
@@ -33,7 +33,7 @@ export function validateExpression({
     timeWindowSize: string[];
     timeSizeUnit: string[];
   } = {
-    count: {
+    threshold: {
       value: [],
     },
     criteria: {},
@@ -43,11 +43,11 @@ export function validateExpression({
 
   validationResult.errors = errors;
 
-  // Document count validation
-  if (typeof count?.value !== 'number') {
-    errors.count.value.push(
-      i18n.translate('xpack.infra.logs.alertFlyout.error.documentCountRequired', {
-        defaultMessage: 'Document count is Required.',
+  // Threshold validation
+  if (typeof threshold?.value !== 'number') {
+    errors.threshold.value.push(
+      i18n.translate('xpack.infra.logs.alertFlyout.error.thresholdRequired', {
+        defaultMessage: 'Threshold value is Required.',
       })
     );
   }

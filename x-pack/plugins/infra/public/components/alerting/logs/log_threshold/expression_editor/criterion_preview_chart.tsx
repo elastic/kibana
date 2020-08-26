@@ -31,25 +31,26 @@ import {
   getChartTheme,
   yAxisFormatter,
   NUM_BUCKETS,
-} from '../../shared/criterion_preview_chart/criterion_preview_chart';
+} from '../../../shared/criterion_preview_chart/criterion_preview_chart';
 import {
-  LogDocumentCountAlertParams,
+  AlertParams,
+  Threshold,
   Criterion,
   Comparator,
-} from '../../../../../common/alerting/logs/types';
-import { Color, colorTransformer } from '../../../../../common/color_palette';
+} from '../../../../../../common/alerting/logs/log_threshold/types';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api/log_alerts/';
+} from '../../../../../../common/http_api/log_alerts/';
 import { AlertsContext } from './editor';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../../common/runtime_types';
 
 const GROUP_LIMIT = 5;
 
 interface Props {
-  alertParams: Partial<LogDocumentCountAlertParams>;
+  alertParams: Partial<AlertParams>;
   context: AlertsContext;
   chartCriterion: Partial<Criterion>;
   sourceId: string;
@@ -90,7 +91,7 @@ export const CriterionPreview: React.FC<Props> = ({
       } // Display less data for groups due to space limitations
       context={context}
       sourceId={sourceId}
-      threshold={alertParams.count}
+      threshold={alertParams.threshold}
       chartAlertParams={chartAlertParams}
     />
   );
@@ -100,7 +101,7 @@ interface ChartProps {
   buckets: number;
   context: AlertsContext;
   sourceId: string;
-  threshold?: LogDocumentCountAlertParams['count'];
+  threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
 }
 
