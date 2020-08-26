@@ -6,12 +6,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import {
-  FEATURE_ID_PROPERTY_NAME,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
-  LON_INDEX,
-} from '../../../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
+import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../../classes/util/mb_filter_expressions';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
@@ -181,7 +178,7 @@ export class TooltipControl extends React.Component {
     ];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbLayerIds,
-      filter: ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], false],
+      filter: EXCLUDE_TOO_MANY_FEATURES_BOX,
     });
   }
 

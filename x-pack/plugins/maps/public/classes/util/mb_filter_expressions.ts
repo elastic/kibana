@@ -10,8 +10,10 @@ import {
   KBN_TOO_MANY_FEATURES_PROPERTY,
 } from '../../../common/constants';
 
+export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], false];
+
 const VISIBILITY_FILTER_CLAUSE = ['all', ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]];
-const TOO_MANY_FEATURES_FILTER = ['all', ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], false]];
+const TOO_MANY_FEATURES_FILTER = ['all', EXCLUDE_TOO_MANY_FEATURES_BOX];
 
 const CLOSED_SHAPE_MB_FILTER = [
   ...TOO_MANY_FEATURES_FILTER,
