@@ -19,7 +19,7 @@
 
 import { PluginName } from '../plugins';
 import { PluginsStatusService } from './plugins_status';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import { of, Observable } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
 import { first } from 'rxjs/operators';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
@@ -74,6 +74,17 @@ describe('PluginStatusService', () => {
       expect(await serviceCritical.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.critical,
         summary: '[elasticsearch]: elasticsearch critical',
+        detail: 'See the status page for more information',
+        meta: expect.any(Object),
+      });
+    });
+
+    it(`provides a summary status when core and dependencies are at same severity level`, async () => {
+      const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
+      service.set('a', of({ level: ServiceStatusLevels.degraded, summary: 'a is degraded' }));
+      expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
+        level: ServiceStatusLevels.degraded,
+        summary: '[2] services are degraded',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -209,15 +220,6 @@ describe('PluginStatusService', () => {
       });
     });
 
-    const available: ServiceStatus<any> = {
-      level: ServiceStatusLevels.available,
-      summary: 'Available',
-    };
-    const degraded: ServiceStatus<any> = {
-      level: ServiceStatusLevels.degraded,
-      summary: 'This is degraded!',
-    };
-
     it('updates when a new plugin status observable is set', async () => {
       const service = new PluginsStatusService({
         core$: coreAllAvailable$,
@@ -240,62 +242,19 @@ describe('PluginStatusService', () => {
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
       ]);
     });
-
-    it('debounces updates in a dependency tree between ticks', async () => {
-      const service = new PluginsStatusService({ core$: coreAllAvailable$, pluginDependencies });
-      const pluginA$ = new BehaviorSubject(available);
-      service.set('a', pluginA$);
-
-      const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
-      const subscription = service
-        .getAll$()
-        .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
-      const nextTick = () => new Promise((resolve) => process.nextTick(resolve));
-
-      await nextTick();
-      pluginA$.next(degraded);
-      await nextTick();
-      subscription.unsubscribe();
-
-      // Results should only include the final computed state of the depenency tree, once per tick.
-      // As updates propagate between dependencies, they will not emit any updates until the microtasks queue has
-      // been exhausted before the next tick.
-      expect(statusUpdates).toEqual([
-        {
-          a: { level: ServiceStatusLevels.available, summary: 'Available' },
-          b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
-          c: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
-        },
-        {
-          a: { level: ServiceStatusLevels.degraded, summary: 'This is degraded!' },
-          b: {
-            level: ServiceStatusLevels.degraded,
-            summary: '[a]: This is degraded!',
-            detail: 'See the status page for more information',
-            meta: expect.any(Object),
-          },
-          c: {
-            level: ServiceStatusLevels.degraded,
-            summary: '[2] services are degraded',
-            detail: 'See the status page for more information',
-            meta: expect.any(Object),
-          },
-        },
-      ]);
-    });
   });
 
-  describe('getPlugins$', () => {
+  describe('getDepsStatus$', () => {
     it('only includes dependencies of specified plugin', async () => {
       const service = new PluginsStatusService({
         core$: coreAllAvailable$,
         pluginDependencies,
       });
-      expect(await service.getPlugins$('a').pipe(first()).toPromise()).toEqual({});
-      expect(await service.getPlugins$('b').pipe(first()).toPromise()).toEqual({
+      expect(await service.getDepsStatus$('a').pipe(first()).toPromise()).toEqual({});
+      expect(await service.getDepsStatus$('b').pipe(first()).toPromise()).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
       });
-      expect(await service.getPlugins$('c').pipe(first()).toPromise()).toEqual({
+      expect(await service.getDepsStatus$('c').pipe(first()).toPromise()).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
         b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
       });
@@ -305,7 +264,7 @@ describe('PluginStatusService', () => {
       const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
       service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
 
-      expect(await service.getPlugins$('c').pipe(first()).toPromise()).toEqual({
+      expect(await service.getDepsStatus$('c').pipe(first()).toPromise()).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
@@ -319,7 +278,7 @@ describe('PluginStatusService', () => {
     it('throws error if unknown plugin passed', () => {
       const service = new PluginsStatusService({ core$: coreAllAvailable$, pluginDependencies });
       expect(() => {
-        service.getPlugins$('dont-exist');
+        service.getDepsStatus$('dont-exist');
       }).toThrowError();
     });
   });

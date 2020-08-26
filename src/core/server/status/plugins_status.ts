@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
-import { map, distinctUntilChanged, switchMap, debounce } from 'rxjs/operators';
+import { map, distinctUntilChanged, switchMap, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { PluginName } from '../plugins';
@@ -52,17 +52,20 @@ export class PluginsStatusService {
     return this.getPluginStatuses$([...this.deps.pluginDependencies.keys()]);
   }
 
-  public getPlugins$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
+  public getDepsStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
     const dependencies = this.deps.pluginDependencies.get(plugin);
     if (!dependencies) {
       throw new Error(`Unknown plugin: ${plugin}`);
     }
 
-    return this.getPluginStatuses$(dependencies);
+    return this.getPluginStatuses$(dependencies).pipe(
+      // Prevent many emissions at once from dependency status resolution from making this too noisy
+      debounceTime(100)
+    );
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
-    return combineLatest(this.deps.core$, this.getPlugins$(plugin)).pipe(
+    return combineLatest([this.deps.core$, this.getDepsStatus$(plugin)]).pipe(
       map(([coreStatus, pluginStatuses]) => {
         return getSummaryStatus(
           [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
@@ -89,13 +92,12 @@ export class PluginsStatusService {
                 Observable<ServiceStatus>
               ]
           )
-          .map(([pName, status$]) => status$.pipe(map((status) => ({ [pName]: status }))));
+          .map(([pName, status$]) =>
+            status$.pipe(map((status) => [pName, status] as [PluginName, ServiceStatus]))
+          );
 
-        return combineLatest(...pluginStatuses).pipe(
-          // We schedule the number of microtasks expected to resolve all of the dependencies of this update.
-          // Waiting for this ensures that we do not emit 'partial updates' to reduce noise.
-          debounce((statuses) => waitForMicrotasks(Object.keys(statuses).length)),
-          map((statuses) => Object.assign({}, ...statuses)),
+        return combineLatest(pluginStatuses).pipe(
+          map((statuses) => Object.fromEntries(statuses)),
           distinctUntilChanged(isDeepStrictEqual)
         );
       })

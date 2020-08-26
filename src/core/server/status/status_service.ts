@@ -18,7 +18,7 @@
  */
 
 import { Observable, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, take, debounce } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
@@ -67,11 +67,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       core$,
       this.pluginsStatus.getAll$()
     ).pipe(
-      // We schedule the number of microtasks expected to resolve all of the dependencies of this update.
-      // Waiting for this ensures that we do not emit 'partial updates' to reduce noise.
-      debounce(([coreStatus, pluginsStatus]) =>
-        waitForMicrotasks(1 + Object.keys(pluginsStatus).length)
-      ),
+      // Prevent many emissions at once from dependency status resolution from making this too noisy
+      debounceTime(100),
       map(([coreStatus, pluginsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
@@ -88,7 +85,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       overall$,
       plugins: {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
-        getPlugins$: this.pluginsStatus.getPlugins$.bind(this.pluginsStatus),
+        getDepsStatus$: this.pluginsStatus.getDepsStatus$.bind(this.pluginsStatus),
         getDerivedStatus$: this.pluginsStatus.getDerivedStatus$.bind(this.pluginsStatus),
       },
       isStatusPageAnonymous: () => statusConfig.allowAnonymous,

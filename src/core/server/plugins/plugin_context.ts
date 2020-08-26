@@ -186,7 +186,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       core$: deps.status.core$,
       overall$: deps.status.overall$,
       set: deps.status.plugins.set.bind(null, plugin.name),
-      plugins$: deps.status.plugins.getPlugins$(plugin.name),
+      plugins$: deps.status.plugins.getDepsStatus$(plugin.name),
       derivedStatus$: deps.status.plugins.getDerivedStatus$(plugin.name),
     },
     uiSettings: {

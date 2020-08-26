@@ -55,7 +55,7 @@ const createInternalSetupContractMock = () => {
     isStatusPageAnonymous: jest.fn().mockReturnValue(false),
     plugins: {
       set: jest.fn(),
-      getPlugins$: jest.fn(),
+      getDepsStatus$: jest.fn(),
       getDerivedStatus$: jest.fn(),
     },
   };

@@ -42,12 +42,6 @@ describe('StatusService', () => {
     level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
   };
-  const critical: ServiceStatus<any> = {
-    level: ServiceStatusLevels.critical,
-    summary: 'This is critical!',
-  };
-
-  const nextTick = () => new Promise((resolve) => process.nextTick(resolve));
 
   describe('setup', () => {
     describe('core$', () => {
@@ -203,6 +197,7 @@ describe('StatusService', () => {
       });
 
       it('does not emit duplicate events', async () => {
+        jest.useFakeTimers();
         const elasticsearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
         const setup = await service.setup({
@@ -218,24 +213,22 @@ describe('StatusService', () => {
         const statusUpdates: ServiceStatus[] = [];
         const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
 
-        // Wait for ticks to ensure that duplicate events are still filtered out
-        // regardless of debouncing.
-        await nextTick();
+        // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await nextTick();
+        jest.runAllTimers();
         elasticsearch$.next(available);
-        await nextTick();
+        jest.runAllTimers();
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await nextTick();
+        jest.runAllTimers();
         savedObjects$.next(degraded);
-        await nextTick();
+        jest.runAllTimers();
         savedObjects$.next(available);
-        await nextTick();
+        jest.runAllTimers();
         savedObjects$.next(available);
-        await nextTick();
+        jest.runAllTimers();
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -259,71 +252,8 @@ describe('StatusService', () => {
             },
           ]
         `);
-      });
 
-      it('debounces updates in dependency tree between ticks', async () => {
-        const pluginDependencies = new Map([
-          ['a', []],
-          ['b', ['a']],
-        ]);
-        const elasticsearch$ = new BehaviorSubject(available);
-        const savedObjects$ = new BehaviorSubject(available);
-        const setup = await service.setup({
-          elasticsearch: {
-            status$: elasticsearch$,
-          },
-          savedObjects: {
-            status$: savedObjects$,
-          },
-          pluginDependencies,
-        });
-
-        const pluginA$ = new BehaviorSubject(available);
-        setup.plugins.set('a', pluginA$);
-
-        const statusUpdates: ServiceStatus[] = [];
-        const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
-
-        // Wait for ticks to exhaust the microtask queue for the next debounced value
-        await nextTick();
-        pluginA$.next(degraded);
-        await nextTick();
-        elasticsearch$.next(critical);
-        await nextTick();
-        elasticsearch$.next(available);
-        await nextTick();
-        pluginA$.next(available);
-        await nextTick();
-        subscription.unsubscribe();
-
-        // Results should only include the final computed state of the depenency tree, once per tick.
-        // As updates propagate between dependencies, they will not emit any updates until the microtasks queue has
-        // been exhausted before the next tick.
-        expect(statusUpdates.map(({ level, summary }) => ({ level, summary })))
-          .toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "level": available,
-              "summary": "All services are available",
-            },
-            Object {
-              "level": degraded,
-              "summary": "[2] services are degraded",
-            },
-            Object {
-              "level": critical,
-              "summary": "[2] services are critical",
-            },
-            Object {
-              "level": degraded,
-              "summary": "[2] services are degraded",
-            },
-            Object {
-              "level": available,
-              "summary": "All services are available",
-            },
-          ]
-        `);
+        jest.useRealTimers();
       });
     });
   });

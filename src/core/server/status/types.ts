@@ -158,6 +158,9 @@ export interface StatusServiceSetup {
    * @remarks
    * By default, plugins inherit this derived status from their dependencies.
    * Calling {@link StatusSetup.set} overrides this default status.
+   *
+   * This may emit multliple times for a single status change event as propagates
+   * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
 }
@@ -168,7 +171,7 @@ export interface InternalStatusServiceSetup extends Pick<StatusServiceSetup, 'co
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;
-    getPlugins$(plugin: PluginName): Observable<Record<string, ServiceStatus>>;
+    getDepsStatus$(plugin: PluginName): Observable<Record<string, ServiceStatus>>;
     getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus>;
   };
 }
