@@ -6,25 +6,47 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { GetTrustedAppsRequestSchema } from '../schema/trusted_apps';
-import { ExceptionListItemSchema } from '../../../../lists/common';
-import { FoundExceptionListItemSchema } from '../../../../lists/common/schemas/response';
 
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
-export type GetTrustedListAppsResponse = Pick<
-  FoundExceptionListItemSchema,
-  'per_page' | 'page' | 'total'
-> & {
+export interface GetTrustedListAppsResponse {
+  per_page: number;
+  page: number;
+  total: number;
   data: TrustedApp[];
-};
+}
+
+interface MacosLinuxConditionEntry {
+  field: 'hash' | 'path';
+  type: 'match';
+  operator: 'included';
+  value: string;
+}
+
+type WindowsConditionEntry =
+  | MacosLinuxConditionEntry
+  | (Omit<MacosLinuxConditionEntry, 'field'> & {
+      field: 'signer';
+    });
 
 /** Type for a new Trusted App Entry */
-export type NewTrustedApp = Pick<ExceptionListItemSchema, 'name' | 'description' | 'entries'> & {
-  os: string;
-};
+export type NewTrustedApp = {
+  name: string;
+  description?: string;
+} & (
+  | {
+      os: 'linux' | 'macos';
+      entries: MacosLinuxConditionEntry[];
+    }
+  | {
+      os: 'windows';
+      entries: WindowsConditionEntry[];
+    }
+);
 
 /** A trusted app entry */
-export type TrustedApp = NewTrustedApp &
-  Pick<ExceptionListItemSchema, 'created_at' | 'created_by'> & {
-    id: string;
-  };
+export type TrustedApp = NewTrustedApp & {
+  id: string;
+  created_at: string;
+  created_by: string;
+};

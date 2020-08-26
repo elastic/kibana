@@ -38,7 +38,7 @@ export const getTrustedAppsListRouteHandler = (
         data: results?.data.map(exceptionItemToTrustedAppItem) ?? [],
         total: results?.total ?? 0,
         page: results?.page ?? 1,
-        per_page: perPage!,
+        per_page: results?.per_page ?? perPage!,
       };
       return res.ok({ body });
     } catch (error) {

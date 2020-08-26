@@ -25,18 +25,18 @@ export const exceptionItemToTrustedAppItem = (
     name,
     os,
     id,
-  };
+  } as TrustedApp;
 };
 
 /**
  * Retrieves the OS entry from a list of tags (property returned with ExcptionListItem).
  * For Trusted Apps each entry must have at MOST 1 OS.
  * */
-const osFromTagsList = (tags: string[]): string => {
+const osFromTagsList = (tags: string[]): TrustedApp['os'] | 'unknown' => {
   for (const tag of tags) {
     if (tag.startsWith('os:')) {
-      return tag;
+      return tag.substr(3) as TrustedApp['os'];
     }
   }
-  return '';
+  return 'unknown';
 };
