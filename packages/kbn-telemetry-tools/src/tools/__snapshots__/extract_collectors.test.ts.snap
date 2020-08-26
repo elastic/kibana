@@ -99,11 +99,11 @@ Array [
           "": Object {
             "@@INDEX@@": Object {
               "count_1": Object {
-                "kind": 140,
+                "kind": 143,
                 "type": "NumberKeyword",
               },
               "count_2": Object {
-                "kind": 140,
+                "kind": 143,
                 "type": "NumberKeyword",
               },
             },
@@ -167,7 +167,7 @@ Array [
           "my_index_signature_prop": Object {
             "": Object {
               "@@INDEX@@": Object {
-                "kind": 140,
+                "kind": 143,
                 "type": "NumberKeyword",
               },
             },
