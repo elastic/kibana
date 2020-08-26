@@ -31,8 +31,6 @@ import {
   BOOK_EMBEDDABLE,
   BookEmbeddableInput,
   BookEmbeddableOutput,
-  BookByValueInput,
-  BookByReferenceInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { OverlayStart } from '../../../../src/core/public';
@@ -66,11 +64,7 @@ export class BookEmbeddableFactoryDefinition
     getIconForSavedObject: () => 'pencil',
   };
 
-  private attributeService?: AttributeService<
-    BookSavedObjectAttributes,
-    BookByValueInput,
-    BookByReferenceInput
-  >;
+  private attributeService?: AttributeService<BookSavedObjectAttributes>;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -126,9 +120,7 @@ export class BookEmbeddableFactoryDefinition
   private async getAttributeService() {
     if (!this.attributeService) {
       this.attributeService = await (await this.getStartServices()).getAttributeService<
-        BookSavedObjectAttributes,
-        BookByValueInput,
-        BookByReferenceInput
+        BookSavedObjectAttributes
       >(this.type);
     }
     return this.attributeService!;

@@ -70,11 +70,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
 
   constructor(
     initialInput: BookEmbeddableInput,
-    private attributeService: AttributeService<
-      BookSavedObjectAttributes,
-      BookByValueInput,
-      BookByReferenceInput
-    >,
+    private attributeService: AttributeService<BookSavedObjectAttributes>,
     {
       parent,
     }: {
@@ -109,7 +105,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
 
   getInputAsRefType = async (): Promise<BookByReferenceInput> => {
     const input = this.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.attributeService.getInputAsRefType(input, { showSaveModal: true });
+    return this.attributeService.getInputAsRefType(input, this, { showSaveModal: true });
   };
 
   public render(node: HTMLElement) {
