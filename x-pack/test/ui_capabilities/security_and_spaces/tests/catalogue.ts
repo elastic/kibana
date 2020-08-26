@@ -38,7 +38,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // everything except ml and monitoring is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+              (enabled, catalogueId) =>
+                catalogueId !== 'ml' &&
+                catalogueId !== 'ml_file_data_visualizer' &&
+                catalogueId !== 'monitoring'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
@@ -50,7 +53,14 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
             // everything except ml and monitoring and enterprise search is enabled
-            const exceptions = ['ml', 'monitoring', 'appSearch', 'workplaceSearch'];
+            const exceptions = [
+              'ml',
+              'ml_file_data_visualizer',
+              'monitoring',
+              'enterpriseSearch',
+              'appSearch',
+              'workplaceSearch',
+            ];
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => !exceptions.includes(catalogueId)

@@ -31,6 +31,7 @@ export const config = {
       maxTraceItems: schema.number({ defaultValue: 1000 }),
     }),
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
+    metricsInterval: schema.number({ defaultValue: 30 }),
   }),
 };
 
@@ -68,6 +69,7 @@ export function mergeConfigs(
     'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
     'xpack.apm.telemetryCollectionEnabled':
       apmConfig.telemetryCollectionEnabled,
+    'xpack.apm.metricsInterval': apmConfig.metricsInterval,
   };
 }
 
