@@ -50,6 +50,9 @@ const TitleHr = memo(() => {
 });
 TitleHr.displayName = 'TitleHR';
 
+// Indicates if the User Agent supports <wbr/>
+const noWBRTagSupport = document.createElement('wbr') instanceof HTMLUnknownElement;
+
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
@@ -264,6 +267,32 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       </EuiText>
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
+        /**
+         * Replace Zero-Width Spaces with <wbr/> if the User Agent supports it.
+         * Both will hint breaking opportunities, but <wbr/> do not copy/paste
+         * so it's preferable to use them if the UA allows it.
+         */
+        const displayEntries = noWBRTagSupport
+          ? entries
+          : entries.map((entry) => {
+              return {
+                ...entry,
+                title: (
+                  <>
+                    {entry.title.split('\u200b').map((titlePart, i) => {
+                      return i ? (
+                        <>
+                          <wbr />
+                          {titlePart}
+                        </>
+                      ) : (
+                        <>{titlePart}</>
+                      );
+                    })}
+                  </>
+                ),
+              };
+            });
         return (
           <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
@@ -281,7 +310,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
               align="left"
               titleProps={{ className: 'desc-title' }}
               compressed
-              listItems={entries}
+              listItems={displayEntries}
             />
             {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
           </Fragment>
