@@ -13,6 +13,8 @@ import { getManifestManagerMock, ManifestManagerMockType } from './manifest_mana
 import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
+  jest.setTimeout(200000); // FIXME: remove before push/commit. Testing only
+
   describe('ManifestManager sanity checks', () => {
     test('ManifestManager can retrieve and diff manifests', async () => {
       const manifestManager = getManifestManagerMock();
@@ -22,6 +24,21 @@ describe('manifest_manager', () => {
         {
           id:
             'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
@@ -57,6 +74,21 @@ describe('manifest_manager', () => {
         {
           id:
             'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
@@ -137,8 +169,12 @@ describe('manifest_manager', () => {
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
+
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
 
       newManifest.bumpSemanticVersion();
 
@@ -175,6 +211,36 @@ describe('manifest_manager', () => {
             relative_url:
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           },
+          'endpoint-trustlist-linux-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            decoded_size: 287,
+            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
+            encoded_size: 133,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          },
+          'endpoint-trustlist-macos-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            decoded_size: 287,
+            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
+            encoded_size: 133,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          },
+          'endpoint-trustlist-windows-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+            decoded_size: 287,
+            encoded_sha256: 'c3dec543df1177561ab2aa74a37997ea3c1d748d532a597884f5a5c16670d56c',
+            encoded_size: 133,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/1a8295e6ccb93022c6f5ceb8997b29f2912389b3b38f52a8f5a2ff7b0154b1bc',
+          },
         },
       });
     });
@@ -185,8 +251,12 @@ describe('manifest_manager', () => {
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
+
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
 
       newManifest.bumpSemanticVersion();
 
