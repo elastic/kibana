@@ -3,11 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 
 import { mockConfig, mockLogger } from '../__mocks__';
 
@@ -41,13 +36,14 @@ describe('createEnterpriseSearchRequestHandler', () => {
     responseMock.customError.mockClear();
     fetchMock.mockReset();
   });
+
   it('makes an API call and returns the response', async () => {
-    const appSearchAPIResponseBody = {
+    const responseBody = {
       results: [{ name: 'engine1' }],
       meta: { page: { total_results: 1 } },
     };
 
-    AppSearchAPI.mockReturn(appSearchAPIResponseBody);
+    EnterpriseSearchAPI.mockReturn(responseBody);
 
     const requestHandler = createEnterpriseSearchRequestHandler({
       config: mockConfig,
@@ -62,7 +58,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
       },
     });
 
-    AppSearchAPI.shouldHaveBeenCalledWith(
+    EnterpriseSearchAPI.shouldHaveBeenCalledWith(
       'http://localhost:3002/as/credentials/collection?type=indexed&pageIndex=1',
       {
         headers: { Authorization: KibanaAuthHeader },
@@ -70,13 +66,13 @@ describe('createEnterpriseSearchRequestHandler', () => {
     );
 
     expect(responseMock.ok).toHaveBeenCalledWith({
-      body: appSearchAPIResponseBody,
+      body: responseBody,
     });
   });
 
   describe('when an API request fails', () => {
-    it('should return 404 with a message', async () => {
-      AppSearchAPI.mockReturnError();
+    it('should return 502 with a message', async () => {
+      EnterpriseSearchAPI.mockReturnError();
 
       const requestHandler = createEnterpriseSearchRequestHandler({
         config: mockConfig,
@@ -86,7 +82,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
 
       await makeAPICall(requestHandler);
 
-      AppSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
         headers: { Authorization: KibanaAuthHeader },
       });
 
@@ -98,27 +94,24 @@ describe('createEnterpriseSearchRequestHandler', () => {
   });
 
   describe('when `hasValidData` fails', () => {
-    it('should return 404 with a message', async () => {
-      const appSearchAPIResponseBody = {
+    it('should return 502 with a message', async () => {
+      const responseBody = {
         foo: 'bar',
       };
 
-      AppSearchAPI.mockReturn(appSearchAPIResponseBody);
+      EnterpriseSearchAPI.mockReturn(responseBody);
 
       const requestHandler = createEnterpriseSearchRequestHandler({
         config: mockConfig,
         log: mockLogger,
         path: '/as/credentials/collection',
-        hasValidData: (body?: IMockResponse) => {
-          return (
-            Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number'
-          );
-        },
+        hasValidData: (body?: any) =>
+          Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
       });
 
       await makeAPICall(requestHandler);
 
-      AppSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
         headers: { Authorization: KibanaAuthHeader },
       });
 
@@ -143,7 +136,7 @@ const makeAPICall = (handler: Function, params = {}) => {
   );
 };
 
-const AppSearchAPI = {
+const EnterpriseSearchAPI = {
   shouldHaveBeenCalledWith(expectedUrl: string, expectedParams: object) {
     expect(fetchMock).toHaveBeenCalledWith(expectedUrl, expectedParams);
   },

@@ -3,13 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import fetch from 'node-fetch';
 import querystring from 'querystring';
-import { Logger } from 'src/core/server';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import {
+  RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+} from 'src/core/server';
 import { ConfigType } from '../index';
 
-interface IAppSearchRequestParams<ResponseBody> {
+interface IEnterpriseSearchRequestParams<ResponseBody> {
   config: ConfigType;
   log: Logger;
   path: string;
@@ -17,19 +22,19 @@ interface IAppSearchRequestParams<ResponseBody> {
 }
 
 /**
- * This function creates a handler, in a standard way, for handling App Search
- * API requests.
+ * This helper function creates a single standard DRY way of handling
+ * Enterprise Search API requests.
  *
  * This handler assumes that it will essentially just proxy the App Search API
  * request, so the request body and request parameters, and body are simply
  * passed through.
  */
-export function createAppSearchRequestHandler<ResponseBody>({
+export function createEnterpriseSearchRequestHandler<ResponseBody>({
   config,
   log,
   path,
   hasValidData = () => true,
-}: IAppSearchRequestParams<ResponseBody>) {
+}: IEnterpriseSearchRequestParams<ResponseBody>) {
   return async (
     _context: RequestHandlerContext,
     request: KibanaRequest<unknown, Readonly<{}>, unknown>,
@@ -37,8 +42,8 @@ export function createAppSearchRequestHandler<ResponseBody>({
   ) => {
     try {
       const enterpriseSearchUrl = config.host as string;
-      const params = querystring.stringify(request.query);
-      const url = `${encodeURI(enterpriseSearchUrl)}${path}?${params}`;
+      const params = request.query ? `?${querystring.stringify(request.query)}` : '';
+      const url = `${encodeURI(enterpriseSearchUrl)}${path}${params}`;
 
       const apiResponse = await fetch(url, {
         headers: { Authorization: request.headers.authorization as string },
@@ -49,11 +54,10 @@ export function createAppSearchRequestHandler<ResponseBody>({
       if (hasValidData(body)) {
         return response.ok({ body });
       } else {
-        // Either a completely incorrect Enterprise Search host URL was configured, or App Search is returning bad data
-        throw new Error(`Invalid data received from App Search: ${JSON.stringify(body)}`);
+        throw new Error(`Invalid data received: ${JSON.stringify(body)}`);
       }
     } catch (e) {
-      log.error(`Cannot connect to App Search: ${e.toString()}`);
+      log.error(`Cannot connect to Enterprise Search: ${e.toString()}`);
       if (e instanceof Error) log.debug(e.stack as string);
 
       return response.customError({

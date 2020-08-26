@@ -9,8 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { IRouteDependencies } from '../../plugin';
 import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
-interface ICredentialsResponse {
-  results: object[];
+interface ICredential {
+  id: string;
+  key: string;
+  name: string;
+  type: string;
+  access_all_engines: boolean;
+}
+interface ICredentialsResponse { 
+  results: ICredential[];
   meta?: {
     page?: {
       total_results: number;
