@@ -31,6 +31,7 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
   const form = useFormContext();
   const { subscribe } = form;
   const previousRawData = useRef<FormData>(form.__getFormData$().value);
+  const isMounted = useRef(false);
   const [formData, setFormData] = useState<FormData>(previousRawData.current);
 
   const onFormData = useCallback(
@@ -59,7 +60,14 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
     return subscription.unsubscribe;
   }, [subscribe, onFormData]);
 
-  if (Object.keys(formData).length === 0) {
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  if (!isMounted.current && Object.keys(formData).length === 0) {
     // No field has mounted yet, don't render anything
     return null;
   }
