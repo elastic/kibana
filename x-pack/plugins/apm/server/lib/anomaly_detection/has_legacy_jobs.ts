@@ -23,7 +23,7 @@ export async function hasLegacyJobs(setup: Setup) {
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  const response = await getMlJobsWithAPMGroup(ml);
+  const response = await getMlJobsWithAPMGroup(ml.anomalyDetectors);
   return response.jobs.some(
     (job) =>
       job.job_id.endsWith('high_mean_response_time') &&

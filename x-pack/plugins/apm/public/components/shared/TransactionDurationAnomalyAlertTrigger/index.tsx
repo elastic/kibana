@@ -84,9 +84,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       <EuiSelect
         value={params.environment}
         options={environmentOptions}
-        onChange={(e) =>
-          setAlertParams('environment', e.target.value as Params['environment'])
-        }
+        onChange={(e) => setAlertParams('environment', e.target.value)}
         compressed
       />
     </PopoverExpression>,
@@ -107,12 +105,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
             value: key,
           };
         })}
-        onChange={(e) =>
-          setAlertParams(
-            'transactionType',
-            e.target.value as Params['transactionType']
-          )
-        }
+        onChange={(e) => setAlertParams('transactionType', e.target.value)}
         compressed
       />
     </PopoverExpression>,

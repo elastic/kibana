@@ -79,7 +79,7 @@ export function registerTransactionDurationAnomalyAlertType({
       const anomalyDetectors = ml.anomalyDetectorsProvider(mlClient, request);
 
       const mlJobIds = await getMLJobIds(
-        { anomalyDetectors },
+        anomalyDetectors,
         alertParams.environment
       );
       const anomalySearchParams = {

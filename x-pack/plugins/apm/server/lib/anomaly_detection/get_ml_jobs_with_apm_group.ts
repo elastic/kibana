@@ -9,11 +9,9 @@ import { APM_ML_JOB_GROUP } from './constants';
 
 // returns ml jobs containing "apm" group
 // workaround: the ML api returns 404 when no jobs are found. This is handled so instead of throwing an empty response is returned
-export async function getMlJobsWithAPMGroup({
-  anomalyDetectors,
-}: {
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
-}) {
+export async function getMlJobsWithAPMGroup(
+  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>
+) {
   try {
     return await anomalyDetectors.jobs(APM_ML_JOB_GROUP);
   } catch (e) {

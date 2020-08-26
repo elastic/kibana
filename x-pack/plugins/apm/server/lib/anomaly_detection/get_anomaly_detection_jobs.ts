@@ -22,7 +22,7 @@ export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  const response = await getMlJobsWithAPMGroup(ml);
+  const response = await getMlJobsWithAPMGroup(ml.anomalyDetectors);
   return response.jobs
     .filter((job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2)
     .map((job) => {

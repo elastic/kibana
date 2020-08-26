@@ -45,7 +45,7 @@ export async function getServiceAnomalies({
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  const mlJobIds = await getMLJobIds(ml, environment);
+  const mlJobIds = await getMLJobIds(ml.anomalyDetectors, environment);
   const params = {
     body: {
       size: 0,
@@ -138,12 +138,10 @@ function transformResponseToServiceAnomalies(
 }
 
 export async function getMLJobIds(
-  ml: {
-    anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
-  },
+  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
   environment?: string
 ) {
-  const response = await getMlJobsWithAPMGroup(ml);
+  const response = await getMlJobsWithAPMGroup(anomalyDetectors);
 
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.

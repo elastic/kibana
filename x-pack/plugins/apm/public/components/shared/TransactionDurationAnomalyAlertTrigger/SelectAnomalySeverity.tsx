@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
@@ -88,24 +88,18 @@ export function SelectAnomalySeverity({ onChange, value }: Props) {
   const options = ANOMALY_SCORES.map((anomalyScore) =>
     getOption(theme, anomalyScore)
   );
-  const [anomalyScore, setAnomalyScore] = useState<SeverityScore>(value);
-
-  useEffect(() => {
-    setAnomalyScore(value);
-  }, [value]);
 
   return (
     <EuiSuperSelect
       hasDividers
       style={{ width: 200 }}
       options={options}
-      valueOfSelected={anomalyScore.toString(10)}
+      valueOfSelected={value.toString(10)}
       onChange={(selectedValue: string) => {
         const selectedAnomalyScore = parseInt(
           selectedValue,
           10
         ) as SeverityScore;
-        setAnomalyScore(selectedAnomalyScore);
         onChange(selectedAnomalyScore);
       }}
     />
