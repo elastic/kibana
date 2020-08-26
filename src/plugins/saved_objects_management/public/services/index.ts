@@ -23,8 +23,17 @@ export {
   SavedObjectsManagementActionServiceSetup,
 } from './action_service';
 export {
+  SavedObjectsManagementColumnService,
+  SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementColumnServiceSetup,
+} from './column_service';
+export {
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementServiceRegistryEntry,
 } from './service_registry';
-export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './types';
+export {
+  SavedObjectsManagementAction,
+  SavedObjectsManagementColumn,
+  SavedObjectsManagementRecord,
+} from './types';
