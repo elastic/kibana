@@ -207,10 +207,12 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const title = this.props.embeddable.getTitle();
     const headerId = this.generateId();
+
     return (
       <EuiPanel
         className={classes}
         data-test-subj="embeddablePanel"
+        data-test-embeddable-id={this.props.embeddable.id}
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
