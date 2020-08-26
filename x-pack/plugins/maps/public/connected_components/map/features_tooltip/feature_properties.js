@@ -10,8 +10,6 @@ import {
   EuiLoadingSpinner,
   EuiTextAlign,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiContextMenu,
 } from '@elastic/eui';
@@ -168,7 +166,6 @@ export class FeatureProperties extends React.Component {
     const applyFilterButton = (
       <EuiButtonEmpty
         size="xs"
-        iconType="filter"
         title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
           defaultMessage: 'Filter on property',
         })}
@@ -181,7 +178,9 @@ export class FeatureProperties extends React.Component {
           defaultMessage: 'Filter on property',
         })}
         data-test-subj="mapTooltipCreateFilterButton"
-      />
+      >
+        <EuiIcon type="filter" />
+      </EuiButtonEmpty>
     );
 
     return this.state.actions.length === 0 ||
@@ -189,25 +188,24 @@ export class FeatureProperties extends React.Component {
         this.state.actions[0].id === ACTION_GLOBAL_APPLY_FILTER) ? (
       <td>{applyFilterButton}</td>
     ) : (
-      <td>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>{applyFilterButton}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="arrowRight"
-              title={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
-                defaultMessage: 'View filter actions',
-              })}
-              onClick={() => {
-                this._showFilterActions(tooltipProperty);
-              }}
-              aria-label={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
-                defaultMessage: 'View filter actions',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <td className="mapFeatureTooltip_actionsRow">
+        <span>
+          {applyFilterButton}
+          <EuiButtonEmpty
+            size="xs"
+            title={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
+              defaultMessage: 'View filter actions',
+            })}
+            onClick={() => {
+              this._showFilterActions(tooltipProperty);
+            }}
+            aria-label={i18n.translate('xpack.maps.tooltip.viewActionsTitle', {
+              defaultMessage: 'View filter actions',
+            })}
+          >
+            <EuiIcon type="arrowRight" />
+          </EuiButtonEmpty>
+        </span>
       </td>
     );
   }
