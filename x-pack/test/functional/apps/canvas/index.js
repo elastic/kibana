@@ -11,7 +11,7 @@ export default function canvasApp({ loadTestFile, getService }) {
   describe('Canvas app', function canvasAppTestSuite() {
     before(async () => {
       // init data
-      await security.testUser.setRoles(['test_logstash_reader', 'global_canvas_read']);
+      await security.testUser.setRoles(['test_logstash_reader', 'global_canvas_all']);
       await esArchiver.loadIfNeeded('logstash_functional');
     });
 
