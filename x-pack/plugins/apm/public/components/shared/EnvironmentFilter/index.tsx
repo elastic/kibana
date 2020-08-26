@@ -12,10 +12,12 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import {
+  ALL_OPTION,
+  NOT_DEFINED_OPTION,
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
+import { useEnvironments } from '../../../hooks/useEnvironments';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,
@@ -31,13 +33,6 @@ function updateEnvironmentUrl(
     }),
   });
 }
-
-const NOT_DEFINED_OPTION = {
-  value: ENVIRONMENT_NOT_DEFINED,
-  text: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-    defaultMessage: 'Not defined',
-  }),
-};
 
 const SEPARATOR_OPTION = {
   text: `- ${i18n.translate(

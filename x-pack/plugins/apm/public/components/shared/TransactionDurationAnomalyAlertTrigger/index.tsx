@@ -7,7 +7,7 @@ import { EuiText, EuiSelect, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
-import { ALL_OPTION, useEnvironments } from '../../../hooks/useEnvironments';
+import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
@@ -16,6 +16,10 @@ import {
   AnomalySeverity,
   SelectAnomalySeverity,
 } from './SelectAnomalySeverity';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../../common/environment_filter_values';
 
 interface Params {
   windowSize: number;
@@ -48,7 +52,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     windowUnit: 'm',
     transactionType: transactionTypes[0],
     serviceName,
-    environment: urlParams.environment || ALL_OPTION.value,
+    environment: urlParams.environment || ENVIRONMENT_ALL,
     anomalyScore: 75,
   };
 
@@ -72,11 +76,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       }
     />,
     <PopoverExpression
-      value={
-        params.environment === ALL_OPTION.value
-          ? ALL_OPTION.text
-          : params.environment
-      }
+      value={getEnvironmentLabel(params.environment)}
       title={i18n.translate(
         'xpack.apm.transactionDurationAnomalyAlertTrigger.environment',
         {
