@@ -37,11 +37,7 @@ export function* setDynamicSettingsEffect() {
   yield takeLatest(String(setDynamicSettings), function* (action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
-        const err = new Error(
-          i18n.translate('xpack.uptime.settings.errorMessage', {
-            defaultMessage: 'Cannot fetch effect without a payload',
-          })
-        );
+        const err = new Error('Cannot fetch effect without a payload');
         yield put(setDynamicSettingsFail(err));
 
         kibanaService.core.notifications.toasts.addError(err, {
