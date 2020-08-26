@@ -11,6 +11,9 @@ export const mockLogger = loggingSystemMock.createLogger().get();
 
 export const mockRequestHandler = {
   createRequest: jest.fn(() => () => {}),
+  hasValidData(data: any) {
+    return (this.createRequest as jest.Mock).mock.calls[0][0].hasValidData(data);
+  },
 };
 
 export const mockConfig = {

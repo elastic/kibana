@@ -51,9 +51,7 @@ describe('credentials routes', () => {
           ],
         };
 
-        const { hasValidData } = mockRequestHandler.createRequest.mock.calls[0][0];
-
-        expect(hasValidData(response)).toBe(true);
+        expect(mockRequestHandler.hasValidData(response)).toBe(true);
       });
 
       it('should correctly validate that a response does not have data', () => {
@@ -61,9 +59,7 @@ describe('credentials routes', () => {
           foo: 'bar',
         };
 
-        const hasValidData = mockRequestHandler.createRequest.mock.calls[0][0].hasValidData;
-
-        expect(hasValidData(response)).toBe(false);
+        expect(mockRequestHandler.hasValidData(response)).toBe(false);
       });
     });
 
