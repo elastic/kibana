@@ -5,7 +5,7 @@
  */
 
 import { defaultsDeep, uniq, compact } from 'lodash';
-
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   TELEMETRY_COLLECTION_INTERVAL,
   KIBANA_STATS_TYPE_MONITORING,
@@ -55,7 +55,7 @@ export class BulkUploader {
 
     this.kibanaStatus = null;
     this.kibanaStatusGetter$ = statusGetter$.subscribe((nextStatus) => {
-      this.kibanaStatus = nextStatus.level.toString();
+      this.kibanaStatus = nextStatus.level;
     });
   }
 
@@ -173,13 +173,13 @@ export class BulkUploader {
   }
 
   getConvertedKibanaStatuss() {
-    if (this.kibanaStatus === 'available') {
+    if (this.kibanaStatus === ServiceStatusLevels.available) {
       return 'green';
     }
-    if (this.kibanaStatus === 'critical') {
+    if (this.kibanaStatus === ServiceStatusLevels.critical) {
       return 'red';
     }
-    if (this.kibanaStatus === 'degraded') {
+    if (this.kibanaStatus === ServiceStatusLevels.degraded) {
       return 'yellow';
     }
     return 'unknown';
