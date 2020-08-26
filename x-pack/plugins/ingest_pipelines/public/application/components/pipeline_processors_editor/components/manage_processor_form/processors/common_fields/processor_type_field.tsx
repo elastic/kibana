@@ -68,6 +68,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
+        let helpText: string = '';
         if (typeField.value?.length) {
           const type = typeField.value;
           const descriptor = getProcessorDescriptor(type);
@@ -75,6 +76,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
             ? [{ label: descriptor.label, value: type }]
             : // If there is no label for this processor type, just use the type as the label
               [{ label: type, value: type }];
+          helpText = descriptor?.helpText || '';
         } else {
           selectedOptions = [];
         }

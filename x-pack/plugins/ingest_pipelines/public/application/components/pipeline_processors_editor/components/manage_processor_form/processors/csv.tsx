@@ -36,7 +36,7 @@ const isStringLengthOne: ValidationFunc = ({ value }) => {
         message: i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.convertForm.separatorLengthError',
           {
-            defaultMessage: 'A separator value must be 1 character.',
+            defaultMessage: 'A separator value must be a single character.',
           }
         ),
       }
@@ -52,7 +52,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Target fields',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.targetFieldsHelpText', {
-      defaultMessage: 'The array of fields to assign extracted values to.',
+      defaultMessage: 'Array of fields to assign extracted values to.',
     }),
     validations: [
       {
@@ -83,7 +83,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText"
-        defaultMessage="Separator used in CSV, has to be single character string. Default value is {value}."
+        defaultMessage="Single character string used to separate data. Defaults to {value}."
         values={{ value: <EuiCode inline>{','}</EuiCode> }}
       />
     ),
@@ -102,7 +102,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.quoteHelpText"
-        defaultMessage="Quote used in CSV, has to be single character string. Default value is {value}."
+        defaultMessage="Single character string used to separate data. Defaults to {value}."
         values={{ value: <EuiCode inline>{'"'}</EuiCode> }}
       />
     ),
@@ -115,7 +115,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Trim',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.trimFieldHelpText', {
-      defaultMessage: 'Trim whitespaces in unquoted fields',
+      defaultMessage: 'Trim whitespaces in unquoted fields.',
     }),
   },
   empty_value: {
@@ -127,7 +127,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.convertForm.emptyValueFieldHelpText',
       {
         defaultMessage:
-          'Value used to fill empty fields, empty fields will be skipped if this is not provided.',
+          'Value used to fill empty fields. Empty fields are skipped if this value is not provided.',
       }
     ),
   },
@@ -138,7 +138,7 @@ export const CSV: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.fieldNameHelpText', {
-          defaultMessage: 'The field to extract data from.',
+          defaultMessage: 'Field to extract CSV data from.',
         })}
       />
 

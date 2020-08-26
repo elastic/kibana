@@ -17,11 +17,22 @@ export const Bytes: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.bytesForm.fieldNameHelpText',
-          { defaultMessage: 'The field to convert.' }
+          {
+            defaultMessage:
+              'Field to convert from a human-readable format to its value in bytes. For example, 1KB becomes 1024 bytes.',
+          }
         )}
       />
 
-      <TargetField />
+      <TargetField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
+          {
+            defaultMessage:
+              'Field to assign the converted value to. Defaults to the specified field name.',
+          }
+        )}
+      />
 
       <IgnoreMissingField />
     </>

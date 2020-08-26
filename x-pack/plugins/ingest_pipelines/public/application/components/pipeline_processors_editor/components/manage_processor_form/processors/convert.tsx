@@ -30,7 +30,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Type',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.typeFieldHelpText', {
-      defaultMessage: 'The type to convert the existing value to.',
+      defaultMessage: 'Data type to convert the specified value to.',
     }),
     validations: [
       {
@@ -50,7 +50,7 @@ export const Convert: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.convertForm.fieldNameHelpText',
-          { defaultMessage: 'The field whose value is to be converted.' }
+          { defaultMessage: 'Field to convert from one value to another.' }
         )}
       />
 
@@ -119,7 +119,8 @@ export const Convert: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
           {
-            defaultMessage: 'The field to assign the converted value to.',
+            defaultMessage:
+              'Field to assign the converted value to. Defaults to the specified field name.',
           }
         )}
       />

@@ -38,7 +38,7 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText',
       {
         defaultMessage:
-          'The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for geo_shape, unit-less for shape).',
+          'Difference between the side of the inscribed shape to the encompassing circle. Measured in meters for geo_shape, but uses no units for shape.',
       }
     ),
     validations: [
@@ -66,7 +66,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldHelpText',
-      { defaultMessage: 'Which field mapping type is to be used.' }
+      { defaultMessage: 'Field mapping type to use when processing the circle.' }
     ),
     validations: [
       {
@@ -86,7 +86,7 @@ export const Circle: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.circleForm.fieldNameHelpText',
-          { defaultMessage: 'The string-valued field to trim whitespace from.' }
+          { defaultMessage: 'Field to convert.' }
         )}
       />
 

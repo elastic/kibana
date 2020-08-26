@@ -33,7 +33,8 @@ const fieldsConfig: Record<string, FieldConfig> = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText',
       {
-        defaultMessage: 'The pattern to apply to the field.',
+        defaultMessage:
+          'Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard.',
       }
     ),
     validations: [
@@ -58,7 +59,7 @@ const fieldsConfig: Record<string, FieldConfig> = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
-        defaultMessage="The character(s) that separate the appended fields. Default value is {value} (an empty string)."
+        defaultMessage="Characters used to separate fields when appending two or more results together. Defaults to an empty string."
         values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
       />
     ),
@@ -71,7 +72,7 @@ export const Dissect: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dissectForm.fieldNameHelpText',
-          { defaultMessage: 'The field to dissect.' }
+          { defaultMessage: 'Field to dissect based on the defined pattern.' }
         )}
       />
 
