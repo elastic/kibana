@@ -9,6 +9,7 @@
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
+import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
 import {
   ResolverRelatedEvents,
@@ -410,7 +411,7 @@ export interface SideEffectSimulator {
   /**
    * Mocked `SideEffectors`.
    */
-  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+  mock: SideEffectors;
 }
 
 /**
@@ -531,4 +532,43 @@ export interface SpyMiddleware {
    * Call the returned function to stop debugging.
    */
   debugActions: () => () => void;
+}
+
+/**
+ * values of this type are exposed by the Security Solution plugin's setup phase.
+ */
+export interface ResolverPluginSetup {
+  /**
+   * Provide access to the instance of the `react-redux` `Provider` that Resolver recognizes.
+   */
+  Provider: typeof Provider;
+  /**
+   * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
+   * All data acess (e.g. HTTP requests) are done through the store.
+   */
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+
+  /**
+   * The Resolver component without the required Providers.
+   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * and the `Provider` component provided by this object.
+   */
+  ResolverWithoutProviders: React.MemoExoticComponent<
+    React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>
+  >;
+
+  /**
+   * A collection of mock objects that can be used in examples or in testing.
+   */
+  mocks: {
+    /**
+     * Mock `DataAccessLayer`s. All of Resolver's HTTP access is provided by a `DataAccessLayer`.
+     */
+    dataAccessLayer: {
+      /**
+       * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       */
+      noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
+    };
+  };
 }
