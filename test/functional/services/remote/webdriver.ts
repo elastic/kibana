@@ -163,18 +163,7 @@ async function attemptToCreateCommand(
 
         return {
           session,
-          consoleLog$: pollForLogEntry$(
-            session,
-            logging.Type.BROWSER,
-            config.logPollingMs,
-            lifecycle.cleanup.after$
-          ).pipe(
-            takeUntil(lifecycle.cleanup.after$),
-            map(({ message, level: { name: level } }) => ({
-              message: message.replace(/\\n/g, '\n'),
-              level,
-            }))
-          ),
+          consoleLog$: Rx.EMPTY,
         };
       }
 
@@ -200,18 +189,7 @@ async function attemptToCreateCommand(
             .build();
           return {
             session,
-            consoleLog$: pollForLogEntry$(
-              session,
-              logging.Type.BROWSER,
-              config.logPollingMs,
-              lifecycle.cleanup.after$
-            ).pipe(
-              takeUntil(lifecycle.cleanup.after$),
-              map(({ message, level: { name: level } }) => ({
-                message: message.replace(/\\n/g, '\n'),
-                level,
-              }))
-            ),
+            consoleLog$: Rx.EMPTY,
           };
         } else {
           throw new Error(
