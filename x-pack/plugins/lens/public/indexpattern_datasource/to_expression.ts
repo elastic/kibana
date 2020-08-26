@@ -21,7 +21,11 @@ function getExpressionForLayer(
   }
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(column, columnId);
+    return operationDefinitionMap[column.operationType].toEsAggsConfig(
+      column,
+      columnId,
+      indexPattern
+    );
   }
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
