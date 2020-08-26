@@ -44,9 +44,7 @@ export async function agentCheckin(
   }
   // Update agent only if something changed
   if (Object.keys(updateData).length > 0) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData, {
-      refresh: false,
-    });
+    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);
   }
 
   // Check if some actions are not acknowledged
