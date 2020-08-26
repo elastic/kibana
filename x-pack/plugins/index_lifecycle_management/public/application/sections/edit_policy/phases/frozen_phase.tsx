@@ -77,8 +77,8 @@ export class FrozenPhase extends PureComponent<Props> {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescriptionText"
-                  defaultMessage="You are querying your index less frequently, so you can allocate shards
-                  on significantly less performant hardware.
+                  defaultMessage="You are querying your index very infrequently, so you can allocate shards
+                  on the least performant hardware.
                   Because your queries are slower, you can reduce the number of replicas."
                 />
               </p>
