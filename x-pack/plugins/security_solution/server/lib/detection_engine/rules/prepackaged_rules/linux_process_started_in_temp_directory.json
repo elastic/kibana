@@ -6,6 +6,7 @@
   "false_positives": [
     "Build systems, like Jenkins, may start processes in the `/tmp` directory. These can be exempted by name or by username."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -22,5 +23,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
