@@ -9,15 +9,15 @@ import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getListMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { useDissasociateExceptionList } from '../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { ErrorCallout } from './error_callout';
 import { savedRuleMock } from '../../../detections/containers/detection_engine/rules/mock';
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list');
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('ErrorCallout', () => {
   const mockDissasociate = jest.fn();
