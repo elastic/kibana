@@ -10,13 +10,7 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import {
-  CrumbInfo,
-  formatDate,
-  StyledBreadcrumbs,
-  BoldCode,
-  StyledTime,
-} from './panel_content_utilities';
+import { CrumbInfo, StyledBreadcrumbs, BoldCode, StyledTime } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
@@ -152,59 +146,16 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     }
   }, [relatedsReady, dispatch, processEntityId]);
 
-  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
-    processEntityId!
+  const [
+    relatedEventToShowDetailsFor,
+    countBySameCategory,
+    relatedEventCategory = naString,
+    sections,
+    formattedDate,
+  ] = useSelector(selectors.relatedEventDisplayInfoByEntityAndSelfId)(
+    processEntityId,
+    relatedEventId
   );
-
-  const [relatedEventToShowDetailsFor, countBySameCategory, relatedEventCategory] = useMemo(() => {
-    if (!relatedEventsForThisProcess) {
-      return [undefined, 0];
-    }
-    const specificEvent = relatedEventsForThisProcess.events.find(
-      (evt) => event.eventId(evt) === relatedEventId
-    );
-    // For breadcrumbs:
-    const specificCategory = specificEvent && event.primaryEventCategory(specificEvent);
-    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
-      return event.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
-    }, 0);
-    return [specificEvent, countOfCategory, specificCategory || naString];
-  }, [relatedEventsForThisProcess, naString, relatedEventId]);
-
-  const [sections, formattedDate] = useMemo(() => {
-    if (!relatedEventToShowDetailsFor) {
-      // This could happen if user relaods from URL param and requests an eventId that no longer exists
-      return [[], naString];
-    }
-    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
-    const {
-      agent,
-      ecs,
-      process,
-      ...relevantData
-    } = relatedEventToShowDetailsFor as ResolverEvent & {
-      // Type this with various unknown keys so that ts will let us delete those keys
-      ecs: unknown;
-      process: unknown;
-    };
-    let displayDate = '';
-    const sectionData: Array<{
-      sectionTitle: string;
-      entries: Array<{ title: string; description: string }>;
-    }> = Object.entries(relevantData)
-      .map(([sectionTitle, val]) => {
-        if (sectionTitle === '@timestamp') {
-          displayDate = formatDate(val);
-          return { sectionTitle: '', entries: [] };
-        }
-        if (typeof val !== 'object') {
-          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
-        }
-        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
-      })
-      .filter((v) => v.sectionTitle !== '' && v.entries.length);
-    return [sectionData, displayDate];
-  }, [relatedEventToShowDetailsFor, naString]);
 
   const waitCrumbs = useMemo(() => {
     return [
