@@ -63,7 +63,8 @@ export function FormatSelector(props: FormatSelectorProps) {
         label={i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
           defaultMessage: 'Value format',
         })}
-        display="rowCompressed"
+        display="columnCompressed"
+        fullWidth
       >
         <EuiComboBox
           fullWidth
@@ -111,6 +112,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             defaultMessage: 'Decimals',
           })}
           display="rowCompressed"
+          fullWidth
         >
           <EuiFieldNumber
             data-test-subj="indexPattern-dimension-formatDecimals"

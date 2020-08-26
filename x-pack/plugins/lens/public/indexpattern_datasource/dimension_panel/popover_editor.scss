@@ -11,8 +11,13 @@
 }
 
 .lnsIndexPatternDimensionEditor__left {
-  background-color: $euiPageBackgroundColor;
+  background-color: $euiColorLightestShade;
   // width: $euiSize * 8;
+}
+
+.lnsIndexPatternDimensionEditor__columns {
+  column-count: 2;
+  column-gap: $euiSizeXL;
 }
 
 .lnsIndexPatternDimensionEditor__operation > button {
