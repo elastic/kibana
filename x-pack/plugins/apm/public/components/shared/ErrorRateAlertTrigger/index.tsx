@@ -43,7 +43,7 @@ export function ErrorRateAlertTrigger(props: Props) {
     threshold: 25,
     windowSize: 1,
     windowUnit: 'm',
-    environment: ENVIRONMENT_ALL.value,
+    environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
   const params = {
