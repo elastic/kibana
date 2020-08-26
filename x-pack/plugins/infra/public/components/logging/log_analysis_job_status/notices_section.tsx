@@ -41,6 +41,10 @@ export const CategoryJobNoticesSection: React.FC<{
       onRecreateMlJobForReconfiguration={onRecreateMlJobForReconfiguration}
       onRecreateMlJobForUpdate={onRecreateMlJobForUpdate}
     />
-    <CategoryQualityWarnings qualityWarnings={qualityWarnings} />
+    <CategoryQualityWarnings
+      hasSetupCapabilities={hasSetupCapabilities}
+      qualityWarnings={qualityWarnings}
+      onRecreateMlJob={onRecreateMlJobForReconfiguration}
+    />
   </>
 );
