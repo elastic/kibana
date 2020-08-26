@@ -32,15 +32,12 @@ jest.useFakeTimers();
 describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
-    searchInterceptor = new SearchInterceptor(
-      {
-        toasts: mockCoreSetup.notifications.toasts,
-        startServices: mockCoreSetup.getStartServices(),
-        uiSettings: mockCoreSetup.uiSettings,
-        http: mockCoreSetup.http,
-      },
-      1000
-    );
+    searchInterceptor = new SearchInterceptor({
+      toasts: mockCoreSetup.notifications.toasts,
+      startServices: mockCoreSetup.getStartServices(),
+      uiSettings: mockCoreSetup.uiSettings,
+      http: mockCoreSetup.http,
+    });
   });
 
   describe('search', () => {

@@ -1737,7 +1737,7 @@ export interface SearchError {
 //
 // @public (undocumented)
 export class SearchInterceptor {
-    constructor(deps: SearchInterceptorDeps, searchTimeout?: number);
+    constructor(deps: SearchInterceptorDeps);
     // @internal
     protected abortController: AbortController;
     // @internal (undocumented)
@@ -1755,11 +1755,10 @@ export class SearchInterceptor {
     protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
     // @internal (undocumented)
-    protected searchTimeout?: number;
-    // @internal (undocumented)
-    protected setSearchTimeout(timeout?: number): void;
-    // @internal (undocumented)
-    protected setupTimers(options?: ISearchOptions): {
+    protected setupTimers({ abortSignal, timeout }: {
+        abortSignal?: AbortSignal;
+        timeout?: number;
+    }): {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };

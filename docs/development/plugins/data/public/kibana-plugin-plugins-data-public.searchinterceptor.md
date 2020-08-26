@@ -14,7 +14,7 @@ export declare class SearchInterceptor
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(deps, searchTimeout)](./kibana-plugin-plugins-data-public.searchinterceptor._constructor_.md) |  | Constructs a new instance of the <code>SearchInterceptor</code> class |
+|  [(constructor)(deps)](./kibana-plugin-plugins-data-public.searchinterceptor._constructor_.md) |  | Constructs a new instance of the <code>SearchInterceptor</code> class |
 
 ## Properties
 

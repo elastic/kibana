@@ -9,7 +9,7 @@ Constructs a new instance of the `SearchInterceptor` class
 <b>Signature:</b>
 
 ```typescript
-constructor(deps: SearchInterceptorDeps, searchTimeout?: number);
+constructor(deps: SearchInterceptorDeps);
 ```
 
 ## Parameters
@@ -17,5 +17,4 @@ constructor(deps: SearchInterceptorDeps, searchTimeout?: number);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  deps | <code>SearchInterceptorDeps</code> |  |
-|  searchTimeout | <code>number</code> |  |
 

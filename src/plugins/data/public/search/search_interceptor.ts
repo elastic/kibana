@@ -18,7 +18,16 @@
  */
 
 import { trimEnd } from 'lodash';
-import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  throwError,
+  timer,
+  Subscription,
+  defer,
+  from,
+  Observable,
+  NEVER,
+} from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
@@ -67,17 +76,11 @@ export class SearchInterceptor {
    */
   protected application!: CoreStart['application'];
 
-  /**
-   * @internal
-   */
-  protected searchTimeout?: number;
-
   /*
    * @internal
    */
-  constructor(protected readonly deps: SearchInterceptorDeps, searchTimeout?: number) {
+  constructor(protected readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
-    this.searchTimeout = searchTimeout;
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
@@ -89,14 +92,6 @@ export class SearchInterceptor {
       .pipe(filter((count) => count === 0))
       .subscribe(this.hideToast);
   }
-
-  /**
-   * @internal
-   */
-  protected setSearchTimeout(timeout?: number) {
-    this.searchTimeout = timeout;
-  }
-
   /**
    * Returns an `Observable` over the current number of pending searches. This could mean that one
    * of the search requests is still in flight, or that it has only received partial responses.
@@ -141,7 +136,9 @@ export class SearchInterceptor {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.setupTimers(options);
+      const { combinedSignal, cleanup } = this.setupTimers({
+        abortSignal: options?.signal,
+      });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
@@ -156,11 +153,11 @@ export class SearchInterceptor {
   /**
    * @internal
    */
-  protected setupTimers(options?: ISearchOptions) {
+  protected setupTimers({ abortSignal, timeout }: { abortSignal?: AbortSignal; timeout?: number }) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
-    const timeout$ = timer(this.searchTimeout);
+    const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
     });
@@ -176,7 +173,7 @@ export class SearchInterceptor {
     const signals = [
       this.abortController.signal,
       timeoutSignal,
-      ...(options?.signal ? [options.signal] : []),
+      ...(abortSignal ? [abortSignal] : []),
     ];
 
     const combinedSignal = getCombinedSignal(signals);

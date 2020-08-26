@@ -18,17 +18,19 @@ import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
+  private searchTimeout: number;
 
   /**
    * @internal
    */
   constructor(deps: SearchInterceptorDeps) {
-    super(deps, deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT));
+    super(deps);
+    this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
 
     this.uiSettingsSub = deps.uiSettings
       .get$(UI_SETTINGS.SEARCH_TIMEOUT)
       .subscribe((timeout: number) => {
-        this.setSearchTimeout(timeout);
+        this.searchTimeout = timeout;
       });
   }
 
@@ -83,7 +85,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       ...request.params,
     };
 
-    const { combinedSignal, cleanup } = this.setupTimers(options);
+    const { combinedSignal, cleanup } = this.setupTimers({
+      abortSignal: options.signal,
+      timeout: this.searchTimeout,
+    });
     const aborted$ = from(toPromise(combinedSignal));
     const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
@@ -117,7 +122,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           // we don't need to send a follow-up request to delete this search. Otherwise, we
           // send the follow-up request to delete this search, then throw an abort error.
           if (id !== undefined) {
-            this.deps.http.delete(`/internal/search/es/${id}`);
+            this.deps.http.delete(`/internal/search/${strategy}/${id}`);
           }
         },
       }),

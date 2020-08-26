@@ -7,7 +7,7 @@
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { AbortError } from '../../../../../src/plugins/data/common';
+import { AbortError, UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -43,6 +43,15 @@ describe('EnhancedSearchInterceptor', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
 
+    mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
+      switch (name) {
+        case UI_SETTINGS.SEARCH_TIMEOUT:
+          return 1000;
+        default:
+          return;
+      }
+    });
+
     next.mockClear();
     error.mockClear();
     complete.mockClear();
@@ -64,16 +73,13 @@ describe('EnhancedSearchInterceptor', () => {
       ]);
     });
 
-    searchInterceptor = new EnhancedSearchInterceptor(
-      {
-        toasts: mockCoreSetup.notifications.toasts,
-        startServices: mockPromise as any,
-        http: mockCoreSetup.http,
-        uiSettings: mockCoreSetup.uiSettings,
-        usageCollector: mockUsageCollector,
-      },
-      1000
-    );
+    searchInterceptor = new EnhancedSearchInterceptor({
+      toasts: mockCoreSetup.notifications.toasts,
+      startServices: mockPromise as any,
+      http: mockCoreSetup.http,
+      uiSettings: mockCoreSetup.uiSettings,
+      usageCollector: mockUsageCollector,
+    });
   });
 
   describe('search', () => {
