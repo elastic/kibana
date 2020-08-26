@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ExceptionListItemComponent } from './builder_exception_item';
+import { BuilderExceptionListItemComponent } from './exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
@@ -20,7 +20,7 @@ import {
   entriesNested,
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
-import { BuilderButtonOptions } from './builder_button_options';
+import { BuilderLogicButtons } from './logic_buttons';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { State, exceptionsBuilderReducer } from './reducer';
@@ -72,7 +72,7 @@ interface ExceptionBuilderProps {
   onChange: (arg: OnChangeProps) => void;
 }
 
-export const ExceptionBuilder = ({
+export const ExceptionBuilderComponent = ({
   exceptionListItems,
   listType,
   listId,
@@ -310,6 +310,8 @@ export const ExceptionBuilder = ({
     onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
   }, [onChange, exceptionsToDelete, exceptions]);
 
+  // Defaults builder to never be sans entry, instead
+  // always falls back to an empty entry if user deletes all
   useEffect(() => {
     if (
       exceptions.length === 0 ||
@@ -351,13 +353,12 @@ export const ExceptionBuilder = ({
                 </EuiFlexItem>
               ))}
             <EuiFlexItem grow={false}>
-              <ExceptionListItemComponent
+              <BuilderExceptionListItemComponent
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
                 indexPattern={indexPatterns}
                 listType={listType}
-                addNested={addNested}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
                 isOnlyItem={exceptions.length === 1}
@@ -378,7 +379,7 @@ export const ExceptionBuilder = ({
             </MyInvisibleAndBadge>
           )}
           <EuiFlexItem grow={1}>
-            <BuilderButtonOptions
+            <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
               isAndDisabled={disableAnd}
               isNestedDisabled={disableNested}
@@ -396,4 +397,4 @@ export const ExceptionBuilder = ({
   );
 };
 
-ExceptionBuilder.displayName = 'ExceptionBuilder';
+ExceptionBuilderComponent.displayName = 'ExceptionBuilder';

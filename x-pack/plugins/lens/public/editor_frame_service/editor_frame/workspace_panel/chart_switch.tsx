@@ -188,6 +188,7 @@ export function ChartSwitch(props: Props) {
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
       props.visualizationMap,
@@ -259,7 +260,7 @@ export function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  newVisualization: Visualization<unknown, unknown>,
+  newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {
   const unfilteredSuggestions = getSuggestions({

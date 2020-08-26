@@ -26,6 +26,13 @@ describe('data generator', () => {
     generator = new EndpointDocGenerator('seed');
   });
 
+  it('creates events with a numerically increasing sequence value', () => {
+    const event1 = generator.generateEvent();
+    const event2 = generator.generateEvent();
+
+    expect(event2.event.sequence).toBe(event1.event.sequence + 1);
+  });
+
   it('creates the same documents with same random seed', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');
@@ -162,6 +169,7 @@ describe('data generator', () => {
     const childrenPerNode = 3;
     const generations = 3;
     const relatedAlerts = 4;
+
     beforeEach(() => {
       tree = generator.generateTree({
         alwaysGenMaxChildrenPerNode: true,
@@ -175,6 +183,7 @@ describe('data generator', () => {
           { category: RelatedEventCategory.File, count: 2 },
           { category: RelatedEventCategory.Network, count: 1 },
         ],
+        relatedEventsOrdered: true,
         relatedAlerts,
         ancestryArraySize: ANCESTRY_LIMIT,
       });
@@ -204,6 +213,14 @@ describe('data generator', () => {
         }
       }
     };
+
+    it('creates related events in ascending order', () => {
+      // the order should not change since it should already be in ascending order
+      const relatedEventsAsc = _.cloneDeep(tree.origin.relatedEvents).sort(
+        (event1, event2) => event1['@timestamp'] - event2['@timestamp']
+      );
+      expect(tree.origin.relatedEvents).toStrictEqual(relatedEventsAsc);
+    });
 
     it('has ancestry array defined', () => {
       expect(tree.origin.lifecycle[0].process.Ext!.ancestry!.length).toBe(ANCESTRY_LIMIT);

@@ -71,7 +71,6 @@ export const useDataGrid = (
 
   useEffect(() => {
     setVisibleColumns(defaultVisibleColumns);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultVisibleColumns.join()]);
 
   const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);

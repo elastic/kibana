@@ -39,7 +39,7 @@ let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-const executor: ExecutorType = async (options) => {
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
@@ -295,7 +295,7 @@ describe('create()', () => {
     const localConfigUtils = getActionsConfigurationUtilities({
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
-      whitelistedHosts: ['*'],
+      allowedHosts: ['*'],
     });
 
     const localActionTypeRegistryParams = {

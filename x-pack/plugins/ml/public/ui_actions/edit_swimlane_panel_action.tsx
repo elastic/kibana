@@ -6,13 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import {
-  AnomalySwimlaneEmbeddable,
-  EditSwimlanePanelContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
-import { resolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -27,7 +23,7 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
       i18n.translate('xpack.ml.actions.editSwimlaneTitle', {
         defaultMessage: 'Edit swim lane',
       }),
-    execute: async ({ embeddable }: EditSwimlanePanelContext) => {
+    async execute({ embeddable }: EditSwimlanePanelContext) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
@@ -35,15 +31,19 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
       const [coreStart] = await getStartServices();
 
       try {
+        const { resolveAnomalySwimlaneUserInput } = await import(
+          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
+        );
+
         const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();
       }
     },
-    isCompatible: async ({ embeddable }: EditSwimlanePanelContext) => {
+    async isCompatible({ embeddable }: EditSwimlanePanelContext) {
       return (
-        embeddable instanceof AnomalySwimlaneEmbeddable &&
+        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },

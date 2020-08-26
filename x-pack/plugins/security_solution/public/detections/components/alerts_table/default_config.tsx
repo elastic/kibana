@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import ApolloClient from 'apollo-client';
 import { Dispatch } from 'redux';
 
 import { EuiText } from '@elastic/eui';
+import { RuleType } from '../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../common/machine_learning/helpers';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -41,6 +41,7 @@ import {
 import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 import { AddExceptionModalBaseProps } from '../../../common/components/exceptions/add_exception_modal';
 import { getMappedNonEcsValue } from '../../../common/components/exceptions/helpers';
+import { isThresholdRule } from '../../../../common/detection_engine/utils';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -95,7 +96,7 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             key: 'signal.rule.building_block_type',
             value: 'exists',
           },
-          // @ts-ignore TODO: Rework parent typings to support ExistsFilter[]
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
       ]),
@@ -195,6 +196,7 @@ export const requiredFieldsForActions = [
   'signal.rule.query',
   'signal.rule.to',
   'signal.rule.id',
+  'signal.rule.type',
   'signal.original_event.kind',
   'signal.original_event.module',
 
@@ -319,6 +321,15 @@ export const getAlertActions = ({
     return module === 'endpoint' && kind === 'alert';
   };
 
+  const exceptionsAreAllowed = () => {
+    const ruleTypes = getMappedNonEcsValue({
+      data: nonEcsRowData,
+      fieldName: 'signal.rule.type',
+    });
+    const [ruleType] = ruleTypes as RuleType[];
+    return !isMlRule(ruleType) && !isThresholdRule(ruleType);
+  };
+
   return [
     {
       ...getInvestigateInResolverAction({ dispatch, timelineId }),
@@ -388,7 +399,7 @@ export const getAlertActions = ({
         }
       },
       id: 'addException',
-      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite || !exceptionsAreAllowed(),
       dataTestSubj: 'add-exception-menu-item',
       ariaLabel: 'Add Exception',
       content: <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>,

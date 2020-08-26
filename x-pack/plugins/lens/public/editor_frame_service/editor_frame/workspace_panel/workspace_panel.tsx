@@ -13,11 +13,11 @@ import {
   EuiIcon,
   EuiImage,
   EuiText,
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -85,29 +85,33 @@ export function InnerWorkspacePanel({
 
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(() => {
-    if (!dragDropContext.dragging || !activeDatasourceId) {
-      return;
-    }
+  const suggestionForDraggedField = useMemo(
+    () => {
+      if (!dragDropContext.dragging || !activeDatasourceId) {
+        return;
+      }
 
-    const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-      (datasource) => datasource.getTableSpec().length > 0
-    );
+      const hasData = Object.values(framePublicAPI.datasourceLayers).some(
+        (datasource) => datasource.getTableSpec().length > 0
+      );
 
-    const suggestions = getSuggestions({
-      datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
-      datasourceStates,
-      visualizationMap:
-        hasData && activeVisualizationId
-          ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-          : visualizationMap,
-      activeVisualizationId,
-      visualizationState,
-      field: dragDropContext.dragging,
-    });
+      const suggestions = getSuggestions({
+        datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
+        datasourceStates,
+        visualizationMap:
+          hasData && activeVisualizationId
+            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+            : visualizationMap,
+        activeVisualizationId,
+        visualizationState,
+        field: dragDropContext.dragging,
+      });
 
-    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-  }, [dragDropContext.dragging]);
+      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dragDropContext.dragging]
+  );
 
   const [localState, setLocalState] = useState({
     expressionBuildError: undefined as string | undefined,
@@ -117,28 +121,32 @@ export function InnerWorkspacePanel({
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : null;
-  const expression = useMemo(() => {
-    try {
-      return buildExpression({
-        visualization: activeVisualization,
-        visualizationState,
-        datasourceMap,
-        datasourceStates,
-        framePublicAPI,
-      });
-    } catch (e) {
-      // Most likely an error in the expression provided by a datasource or visualization
-      setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
-    }
-  }, [
-    activeVisualization,
-    visualizationState,
-    datasourceMap,
-    datasourceStates,
-    framePublicAPI.dateRange,
-    framePublicAPI.query,
-    framePublicAPI.filters,
-  ]);
+  const expression = useMemo(
+    () => {
+      try {
+        return buildExpression({
+          visualization: activeVisualization,
+          visualizationState,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers: framePublicAPI.datasourceLayers,
+        });
+      } catch (e) {
+        // Most likely an error in the expression provided by a datasource or visualization
+        setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      activeVisualization,
+      visualizationState,
+      datasourceMap,
+      datasourceStates,
+      framePublicAPI.dateRange,
+      framePublicAPI.query,
+      framePublicAPI.filters,
+    ]
+  );
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -162,7 +170,24 @@ export function InnerWorkspacePanel({
 
   const autoRefreshFetch$ = useMemo(
     () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
-    [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
+    [plugins.data.query.timefilter.timefilter]
+  );
+
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: framePublicAPI.query,
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      filters: framePublicAPI.filters,
+    }),
+    [
+      framePublicAPI.query,
+      framePublicAPI.dateRange.fromDate,
+      framePublicAPI.dateRange.toDate,
+      framePublicAPI.filters,
+    ]
   );
 
   useEffect(() => {
@@ -173,7 +198,7 @@ export function InnerWorkspacePanel({
         expressionBuildError: undefined,
       }));
     }
-  }, [expression]);
+  }, [expression, localState.expressionBuildError]);
 
   function onDrop() {
     if (suggestionForDraggedField) {
@@ -184,10 +209,6 @@ export function InnerWorkspacePanel({
   }
 
   function renderEmptyWorkspace() {
-    const tooltipContent = i18n.translate('xpack.lens.editorFrame.tooltipContent', {
-      defaultMessage:
-        'Lens is in beta and is subject to change.  The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
-    });
     return (
       <div className="eui-textCenter">
         <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
@@ -206,8 +227,7 @@ export function InnerWorkspacePanel({
             <FormattedMessage
               id="xpack.lens.editorFrame.emptyWorkspaceHeading"
               defaultMessage="Lens is a new tool for creating visualizations"
-            />{' '}
-            <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
+            />
           </p>
           <p>
             <small>
@@ -256,6 +276,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          searchContext={context}
           reload$={autoRefreshFetch$}
           onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {

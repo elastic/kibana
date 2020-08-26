@@ -10,6 +10,7 @@ export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_PATH = `/app/security`;
 export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
+export const ADD_INDEX_PATH = `/app/management/kibana/indexPatterns/create`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -139,6 +140,13 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated';
   Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
+  Machine Learning constants
+ */
+export const ML_GROUP_ID = 'security';
+export const LEGACY_ML_GROUP_ID = 'siem';
+export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 
 /*
   Rule notifications options

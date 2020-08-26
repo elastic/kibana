@@ -11,6 +11,7 @@ import { registerEnginesRoute } from './engines';
 jest.mock('node-fetch');
 const fetch = jest.requireActual('node-fetch');
 const { Response } = fetch;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mocked<typeof fetch>;
 
 describe('engine routes', () => {
@@ -67,10 +68,11 @@ describe('engine routes', () => {
         ).andReturnError();
       });
 
-      it('should return 404 with a message', async () => {
+      it('should return 502 with a message', async () => {
         await mockRouter.callRoute(mockRequest);
 
-        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
+        expect(mockRouter.response.customError).toHaveBeenCalledWith({
+          statusCode: 502,
           body: 'cannot-connect',
         });
         expect(mockLogger.error).toHaveBeenCalledWith('Cannot connect to App Search: Failed');
@@ -86,10 +88,11 @@ describe('engine routes', () => {
         ).andReturnInvalidData();
       });
 
-      it('should return 404 with a message', async () => {
+      it('should return 502 with a message', async () => {
         await mockRouter.callRoute(mockRequest);
 
-        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
+        expect(mockRouter.response.customError).toHaveBeenCalledWith({
+          statusCode: 502,
           body: 'cannot-connect',
         });
         expect(mockLogger.error).toHaveBeenCalledWith(

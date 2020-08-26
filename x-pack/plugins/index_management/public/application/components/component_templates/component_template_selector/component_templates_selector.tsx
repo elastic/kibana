@@ -157,6 +157,7 @@ export const ComponentTemplatesSelector = ({
       {/* Selection */}
       <EuiFlexItem
         className={classNames('componentTemplatesSelector__selection', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplatesSelector__selection--is-empty': !hasSelection,
         })}
       >
@@ -199,12 +200,19 @@ export const ComponentTemplatesSelector = ({
             </div>
           </>
         ) : (
-          <div>
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel"
-              defaultMessage="No component template selected."
-            />
-          </div>
+          <EuiText textAlign="center">
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-1"
+                defaultMessage="Add component template building blocks to this template."
+              />
+              <br />
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-2"
+                defaultMessage="Component templates are applied in the order specified."
+              />
+            </p>
+          </EuiText>
         )}
       </EuiFlexItem>
 

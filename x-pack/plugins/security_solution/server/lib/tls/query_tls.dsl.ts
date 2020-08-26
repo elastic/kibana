@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_query';
+import { assertUnreachable } from '../../../common/utility_types';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { TlsRequestOptions } from './index';
 import { TlsSortField, Direction, TlsFields } from '../../graphql/types';
