@@ -20,7 +20,7 @@
 import { __reset__, __setup__, __start__, PluginsSetup, PluginsStart } from './new_platform';
 import * as dataServices from '../../../../plugins/data/public/services';
 import * as visualizationsServices from '../../../../plugins/visualizations/public/services';
-import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
+import { CoreSetup, CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
 import { npSetup, npStart } from './__mocks__';
 
@@ -32,11 +32,11 @@ describe('ui/new_platform', () => {
         it(`ui/new_platform sets a value for ${name} getter ${g}`, () => {
           __reset__();
           __setup__(
-            (coreMock.createSetup() as unknown) as LegacyCoreSetup,
+            (coreMock.createSetup() as unknown) as CoreSetup,
             (npSetup.plugins as unknown) as PluginsSetup
           );
           __start__(
-            (coreMock.createStart() as unknown) as LegacyCoreStart,
+            (coreMock.createStart() as unknown) as CoreStart,
             (npStart.plugins as unknown) as PluginsStart
           );
 

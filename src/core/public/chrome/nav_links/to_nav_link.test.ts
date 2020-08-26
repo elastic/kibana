@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus, PublicLegacyAppInfo } from '../../application';
+import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
@@ -28,17 +28,6 @@ const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.default,
   appRoute: `/app/some-id`,
-  legacy: false,
-  ...props,
-});
-
-const legacyApp = (props: Partial<PublicLegacyAppInfo> = {}): PublicLegacyAppInfo => ({
-  appUrl: '/my-app-url',
-  id: 'some-id',
-  title: 'some-title',
-  status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.default,
-  legacy: true,
   ...props,
 });
 
@@ -65,11 +54,6 @@ describe('toNavLink', () => {
         euiIconType: 'my-icon',
       })
     );
-  });
-
-  it('flags legacy apps when converting to navLink', () => {
-    expect(toNavLink(app({}), basePath).properties.legacy).toEqual(false);
-    expect(toNavLink(legacyApp({}), basePath).properties.legacy).toEqual(true);
   });
 
   it('handles applications with custom app route', () => {
@@ -100,32 +84,6 @@ describe('toNavLink', () => {
     );
     expect(link.properties.url).toEqual(
       'http://localhost/base-path/my-route/my-path/some/default/path'
-    );
-  });
-
-  it('does not generate `url` for legacy app', () => {
-    const link = toNavLink(
-      legacyApp({
-        appUrl: '/my-legacy-app/#foo',
-        defaultPath: '/some/default/path',
-      }),
-      basePath
-    );
-    expect(link.properties.url).toBeUndefined();
-  });
-
-  it('uses appUrl when converting legacy applications', () => {
-    expect(
-      toNavLink(
-        legacyApp({
-          appUrl: '/my-legacy-app/#foo',
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        baseUrl: 'http://localhost/base-path/my-legacy-app/#foo',
-      })
     );
   });
 

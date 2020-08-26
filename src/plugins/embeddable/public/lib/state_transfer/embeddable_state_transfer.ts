@@ -18,12 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import {
-  ScopedHistory,
-  ApplicationStart,
-  PublicLegacyAppInfo,
-  PublicAppInfo,
-} from '../../../../../core/public';
+import { ScopedHistory, ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,
@@ -41,7 +36,7 @@ export class EmbeddableStateTransfer {
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
     private scopedHistory?: ScopedHistory,
-    private appList?: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo> | undefined
+    private appList?: ReadonlyMap<string, PublicAppInfo> | undefined
   ) {}
 
   /**

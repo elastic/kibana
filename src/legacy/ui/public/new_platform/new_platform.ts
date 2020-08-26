@@ -26,8 +26,8 @@ import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { DashboardStart } from '../../../../plugins/dashboard/public';
 import { setSetupServices, setStartServices } from './set_services';
 import {
-  LegacyCoreSetup,
-  LegacyCoreStart,
+  CoreSetup,
+  CoreStart,
   App,
   AppMountDeprecated,
   ScopedHistory,
@@ -119,12 +119,12 @@ export interface PluginsStart {
 }
 
 export const npSetup = {
-  core: (null as unknown) as LegacyCoreSetup,
+  core: (null as unknown) as CoreSetup,
   plugins: {} as PluginsSetup,
 };
 
 export const npStart = {
-  core: (null as unknown) as LegacyCoreStart,
+  core: (null as unknown) as CoreStart,
   plugins: {} as PluginsStart,
 };
 
@@ -133,14 +133,14 @@ export const npStart = {
  * @internal
  */
 export function __reset__() {
-  npSetup.core = (null as unknown) as LegacyCoreSetup;
+  npSetup.core = (null as unknown) as CoreSetup;
   npSetup.plugins = {} as any;
-  npStart.core = (null as unknown) as LegacyCoreStart;
+  npStart.core = (null as unknown) as CoreStart;
   npStart.plugins = {} as any;
   legacyAppRegistered = false;
 }
 
-export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
+export function __setup__(coreSetup: CoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
 
@@ -152,7 +152,7 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   setSetupServices(npSetup);
 }
 
-export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
+export function __start__(coreStart: CoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
 

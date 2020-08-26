@@ -22,13 +22,13 @@ import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { AppRouter, AppNotFound } from '../ui';
-import { EitherApp, MockedMounterMap, MockedMounterTuple } from '../test_types';
-import { createRenderer, createAppMounter, createLegacyAppMounter, getUnmounter } from './utils';
+import { MockedMounterMap, MockedMounterTuple } from '../test_types';
+import { createRenderer, createAppMounter, getUnmounter } from './utils';
 import { AppStatus } from '../types';
 import { ScopedHistory } from '../scoped_history';
 
 describe('AppRouter', () => {
-  let mounters: MockedMounterMap<EitherApp>;
+  let mounters: MockedMounterMap;
   let globalHistory: History;
   let update: ReturnType<typeof createRenderer>;
   let scopedAppHistory: History;
@@ -66,9 +66,7 @@ describe('AppRouter', () => {
   beforeEach(() => {
     mounters = new Map([
       createAppMounter({ appId: 'app1', html: '<span>App 1</span>' }),
-      createLegacyAppMounter('legacyApp1', jest.fn()),
       createAppMounter({ appId: 'app2', html: '<div>App 2</div>' }),
-      createLegacyAppMounter('baseApp:legacyApp2', jest.fn()),
       createAppMounter({
         appId: 'app3',
         html: '<div>Chromeless A</div>',
@@ -80,7 +78,6 @@ describe('AppRouter', () => {
         appRoute: '/chromeless-b/path',
       }),
       createAppMounter({ appId: 'disabledApp', html: '<div>Disabled app</div>' }),
-      createLegacyAppMounter('disabledLegacyApp', jest.fn()),
       createAppMounter({
         appId: 'scopedApp',
         extraMountHook: ({ history }) => {
@@ -98,7 +95,7 @@ describe('AppRouter', () => {
         html: '<div>App 6</div>',
         appRoute: '/app/my-app/app6',
       }),
-    ] as Array<MockedMounterTuple<EitherApp>>);
+    ] as MockedMounterTuple[]);
     globalHistory = createMemoryHistory();
     update = createMountersRenderer();
   });

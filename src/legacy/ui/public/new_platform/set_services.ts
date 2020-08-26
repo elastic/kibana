@@ -20,7 +20,7 @@
 import { pick } from 'lodash';
 
 import { PluginsSetup, PluginsStart } from './new_platform';
-import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
+import { CoreSetup, CoreStart } from '../../../../core/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import * as dataServices from '../../../../plugins/data/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -29,12 +29,12 @@ import * as visualizationsServices from '../../../../plugins/visualizations/publ
 import { createSavedVisLoader } from '../../../../plugins/visualizations/public/saved_visualizations/saved_visualizations';
 
 interface NpSetup {
-  core: LegacyCoreSetup;
+  core: CoreSetup;
   plugins: PluginsSetup;
 }
 
 interface NpStart {
-  core: LegacyCoreStart;
+  core: CoreStart;
   plugins: PluginsStart;
 }
 

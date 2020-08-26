@@ -52,12 +52,7 @@ export function createEuiListItem({
   dataTestSubj,
   externalLink = false,
 }: Props) {
-  const { legacy, active, id, title, disabled, euiIconType, icon, tooltip } = link;
-  let { href } = link;
-
-  if (legacy) {
-    href = link.url && !active ? link.url : link.baseUrl;
-  }
+  const { href, active, id, title, disabled, euiIconType, icon, tooltip } = link;
 
   return {
     label: tooltip ?? title,
@@ -71,7 +66,6 @@ export function createEuiListItem({
       if (
         !externalLink && // ignore external links
         !legacyMode && // ignore when in legacy mode
-        !legacy && // ignore links to legacy apps
         event.button === 0 && // ignore everything but left clicks
         !isModifiedOrPrevented(event)
       ) {

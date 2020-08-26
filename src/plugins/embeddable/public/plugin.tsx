@@ -29,7 +29,6 @@ import {
   Plugin,
   ScopedHistory,
   PublicAppInfo,
-  PublicLegacyAppInfo,
 } from '../../../core/public';
 import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
 import { bootstrap } from './bootstrap';
@@ -92,7 +91,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
   private outgoingOnlyStateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private isRegistryReady = false;
-  private appList?: ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>;
+  private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {}

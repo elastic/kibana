@@ -142,12 +142,6 @@ export interface ChromeNavLink {
    * register an Application if needed.
    */
   readonly hidden?: boolean;
-
-  /**
-   * Used to separate links to legacy applications from NP applications
-   * @internal
-   */
-  readonly legacy: boolean;
 }
 
 /** @public */

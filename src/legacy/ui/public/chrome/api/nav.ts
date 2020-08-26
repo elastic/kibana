@@ -18,7 +18,6 @@
  */
 
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 import { npStart } from '../../new_platform';
 import { ChromeNavLink } from '../../../../../core/public';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
@@ -72,30 +71,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     }
   };
 
-  internals.trackPossibleSubUrl = async function (url: string) {
-    const kibanaParsedUrl = absoluteToParsedUrl(url, chrome.getBasePath());
-
-    coreNavLinks
-      .getAll()
-      // Filter only legacy links
-      .filter((link) => link.legacy && !link.disableSubUrlTracking)
-      .forEach((link) => {
-        const active = url.startsWith(link.subUrlBase!);
-        link = coreNavLinks.update(link.id, { active })!;
-
-        if (active) {
-          setLastUrl(link, url);
-          return;
-        }
-
-        link = refreshLastUrl(link);
-
-        const newGlobalState = kibanaParsedUrl.getGlobalState();
-        if (newGlobalState) {
-          injectNewGlobalState(link, kibanaParsedUrl.appId, newGlobalState);
-        }
-      });
-  };
+  internals.trackPossibleSubUrl = async function (url: string) {};
 
   function lastSubUrlKey(link: ChromeNavLink) {
     return `lastSubUrl:${link.baseUrl}`;
@@ -120,26 +96,6 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     return coreNavLinks.update(link.id, {
       url: lastSubUrl || link.url || link.baseUrl,
     })!;
-  }
-
-  function injectNewGlobalState(
-    link: ChromeNavLink,
-    fromAppId: string,
-    newGlobalState: string | string[]
-  ) {
-    const kibanaParsedUrl = absoluteToParsedUrl(
-      getLastUrl(link) || link.url || link.baseUrl,
-      chrome.getBasePath()
-    );
-
-    // don't copy global state if links are for different apps
-    if (fromAppId !== kibanaParsedUrl.appId) return;
-
-    kibanaParsedUrl.setGlobalState(newGlobalState);
-
-    coreNavLinks.update(link.id, {
-      url: kibanaParsedUrl.getAbsoluteUrl(),
-    });
   }
 
   // simulate a possible change in url to initialize the

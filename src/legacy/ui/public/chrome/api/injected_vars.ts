@@ -23,10 +23,6 @@ import { npSetup } from 'ui/new_platform';
 const newPlatformInjectedVars = npSetup.core.injectedMetadata;
 
 export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
-  chrome.getInjected = (name?: string, defaultValue?: any) =>
-    cloneDeep(
-      name
-        ? newPlatformInjectedVars.getInjectedVar(name, defaultValue)
-        : newPlatformInjectedVars.getInjectedVars()
-    );
+  chrome.getInjected = (name: string, defaultValue?: any) =>
+    cloneDeep(newPlatformInjectedVars.getInjectedVar(name, defaultValue));
 }
