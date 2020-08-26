@@ -5,17 +5,21 @@
  */
 
 import { useState, useMemo } from 'react';
+import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
 
 interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
+  query?: string;
+  center?: LogEntriesCursor;
 }
 
 interface LogStreamState {
-  entries: any[];
+  entries: LogEntry[];
   fetchEntries: () => void;
   loadingState: 'uninitialized' | 'loading' | 'success' | 'error';
 }
@@ -24,20 +28,38 @@ export function useLogStream({
   sourceId,
   startTimestamp,
   endTimestamp,
+  query,
+  center,
 }: LogStreamProps): LogStreamState {
   const [entries, setEntries] = useState<LogStreamState['entries']>([]);
+
+  const parsedQuery = useMemo(() => {
+    return query
+      ? JSON.stringify(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query)))
+      : null;
+  }, [query]);
+
+  // Callbacks
   const [entriesPromise, fetchEntries] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
       createPromise: () => {
         setEntries([]);
-        return fetchLogEntries({ sourceId, startTimestamp, endTimestamp });
+        const fetchPosition = center ? { center } : { before: 'last' };
+
+        return fetchLogEntries({
+          sourceId,
+          startTimestamp,
+          endTimestamp,
+          query: parsedQuery,
+          ...fetchPosition,
+        });
       },
       onResolve: ({ data }) => {
         setEntries(data.entries);
       },
     },
-    [sourceId, startTimestamp, endTimestamp]
+    [sourceId, startTimestamp, endTimestamp, query]
   );
 
   const loadingState = useMemo(() => convertPromiseStateToLoadingState(entriesPromise.state), [

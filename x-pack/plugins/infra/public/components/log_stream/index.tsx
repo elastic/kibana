@@ -9,6 +9,8 @@ import { noop } from 'lodash';
 import { useMount } from 'react-use';
 import { EuiPanel } from '@elastic/eui';
 
+import { LogEntriesCursor } from '../../../common/http_api';
+
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import { useLogStream } from '../../containers/logs/log_stream';
@@ -20,6 +22,9 @@ interface LogStreamProps {
   startTimestamp: number;
   endTimestamp: number;
   seamless?: boolean;
+  query?: string;
+  center?: LogEntriesCursor;
+  highlight?: string;
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({
@@ -27,6 +32,9 @@ export const LogStream: React.FC<LogStreamProps> = ({
   startTimestamp,
   endTimestamp,
   seamless = false,
+  query,
+  center,
+  highlight,
 }) => {
   // source boilerplate
   const { services } = useKibana();
@@ -44,6 +52,8 @@ export const LogStream: React.FC<LogStreamProps> = ({
     sourceId,
     startTimestamp,
     endTimestamp,
+    query,
+    center,
   });
 
   // Derived state
@@ -72,7 +82,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
 
   const streamView = (
     <ScrollableLogTextStreamView
-      target={null}
+      target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
       columnConfigurations={columnConfigurations}
       items={streamItems}
       scale="medium"
@@ -87,7 +97,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
       reportVisibleInterval={noop}
       loadNewerItems={noop}
       reloadItems={fetchEntries}
-      highlightedItem={null}
+      highlightedItem={highlight ?? null}
       currentHighlightKey={null}
       startDateExpression={''}
       endDateExpression={''}
