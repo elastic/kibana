@@ -41,6 +41,7 @@ describe('home', () => {
   beforeEach(() => {
     defaultProps = {
       directories: [],
+      solutions: [],
       apmUiEnabled: true,
       mlEnabled: true,
       kibanaVersion: '99.2.1',
@@ -92,8 +93,96 @@ describe('home', () => {
     expect(component).toMatchSnapshot();
   });
 
+  describe('header', () => {
+    test('render', async () => {
+      const component = await renderHome();
+      expect(component).toMatchSnapshot();
+    });
+
+    test('should show "Manage" link if stack management is available', async () => {
+      const directoryEntry = {
+        id: 'stack-management',
+        title: 'Management',
+        description: 'Your center console for managing the Elastic Stack.',
+        icon: 'managementApp',
+        path: 'management_landing_page',
+        category: FeatureCatalogueCategory.ADMIN,
+        showOnHomePage: false,
+      };
+
+      const component = await renderHome({
+        directories: [directoryEntry],
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('should show "Dev tools" link if console is available', async () => {
+      const directoryEntry = {
+        id: 'console',
+        title: 'Console',
+        description: 'Skip cURL and use a JSON interface to work with your data in Console.',
+        icon: 'consoleApp',
+        path: 'path-to-dev-tools',
+        category: FeatureCatalogueCategory.ADMIN,
+        showOnHomePage: false,
+      };
+
+      const component = await renderHome({
+        directories: [directoryEntry],
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
   describe('directories', () => {
-    test('should render DATA directory entry in "Explore Data" panel', async () => {
+    test('should render solutions in the "solution section"', async () => {
+      const solutionEntry1 = {
+        id: 'kibana',
+        title: 'Kibana',
+        subtitle: 'Visualize & analyze',
+        descriptions: ['Analyze data in dashboards'],
+        icon: 'logoKibana',
+        path: 'kibana_landing_page',
+        order: 1,
+      };
+      const solutionEntry2 = {
+        id: 'solution-2',
+        title: 'Solution two',
+        subtitle: 'Subtitle for solution two',
+        descriptions: ['Example use case'],
+        icon: 'empty',
+        path: 'path-to-solution-two',
+        order: 2,
+      };
+      const solutionEntry3 = {
+        id: 'solution-3',
+        title: 'Solution three',
+        subtitle: 'Subtitle for solution three',
+        descriptions: ['Example use case'],
+        icon: 'empty',
+        path: 'path-to-solution-three',
+        order: 3,
+      };
+      const solutionEntry4 = {
+        id: 'solution-4',
+        title: 'Solution four',
+        subtitle: 'Subtitle for solution four',
+        descriptions: ['Example use case'],
+        icon: 'empty',
+        path: 'path-to-solution-four',
+        order: 4,
+      };
+
+      const component = await renderHome({
+        solutions: [solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4],
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('should render DATA directory entry in "Ingest your data" panel', async () => {
       const directoryEntry = {
         id: 'dashboard',
         title: 'Dashboard',
@@ -111,7 +200,7 @@ describe('home', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('should render ADMIN directory entry in "Manage" panel', async () => {
+    test('should render ADMIN directory entry in "Manage your data" panel', async () => {
       const directoryEntry = {
         id: 'index_patterns',
         title: 'Index Patterns',
@@ -142,6 +231,26 @@ describe('home', () => {
 
       const component = await renderHome({
         directories: [directoryEntry],
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('change home route', () => {
+    test('should render a link to change the default route in advanced settings if advanced settings is enabled', async () => {
+      const component = await renderHome({
+        directories: [
+          {
+            description: 'Change your settings',
+            icon: 'gear',
+            id: 'advanced_settings',
+            path: 'path-to-advanced_settings',
+            showOnHomePage: false,
+            title: 'Advanced settings',
+            category: FeatureCatalogueCategory.ADMIN,
+          },
+        ],
       });
 
       expect(component).toMatchSnapshot();
