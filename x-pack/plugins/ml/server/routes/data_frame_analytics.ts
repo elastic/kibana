@@ -42,7 +42,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     if (!mlLicense.isSecurityEnabled()) {
       return true;
     }
-    // TEST THIS WITH SECURITY OFF !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     const { body } = await client.asCurrentUser.security.hasPrivileges({
       body: {
         index: [
@@ -54,11 +54,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       },
     });
 
-    if (!body) {
-      // this will always exist? what should we check for here? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      return false;
-    }
-    return body.has_all_requested === true;
+    return body?.has_all_requested === true;
   }
 
   /**
