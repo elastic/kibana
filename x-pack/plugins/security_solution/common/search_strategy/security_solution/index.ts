@@ -40,7 +40,7 @@ export enum Direction {
 }
 
 export interface SortField {
-  field: string;
+  field: 'lastSeen' | 'hostName';
   direction: Direction;
 }
 
