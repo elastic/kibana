@@ -21,12 +21,12 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import sharedSourcesIcon from '../shared/assets/share_circle.svg';
+import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
-import { ContentSection } from '../shared/content_section';
+import { ContentSection } from '../../components/shared/content_section';
 
 import { OverviewLogic, IOverviewValues } from './overview_logic';
 

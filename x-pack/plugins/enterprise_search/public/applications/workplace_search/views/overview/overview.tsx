@@ -16,9 +16,9 @@ import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/t
 
 import { OverviewLogic, IOverviewActions, IOverviewValues } from './overview_logic';
 
-import { Loading } from '../shared/loading';
-import { ProductButton } from '../shared/product_button';
-import { ViewContentHeader } from '../shared/view_content_header';
+import { Loading } from '../../components/shared/loading';
+import { ProductButton } from '../../components/shared/product_button';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';

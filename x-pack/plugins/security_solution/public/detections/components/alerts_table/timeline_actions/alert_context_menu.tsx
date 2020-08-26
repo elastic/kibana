@@ -17,7 +17,9 @@ import styled from 'styled-components';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-
+import { isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { RuleType } from '../../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { EventsTd, EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -378,6 +380,15 @@ export const AlertContextMenu = React.memo<AlertContextMenuProps>(
       }
     }, [closePopover, ecsRowData, nonEcsRowData, openAddExceptionModal]);
 
+    const areExceptionsAllowed = useMemo(() => {
+      const ruleTypes = getMappedNonEcsValue({
+        data: nonEcsRowData,
+        fieldName: 'signal.rule.type',
+      });
+      const [ruleType] = ruleTypes as RuleType[];
+      return !isMlRule(ruleType) && !isThresholdRule(ruleType);
+    }, [nonEcsRowData]);
+
     const addExceptionComponent = (
       <EuiContextMenuItem
         key="add-exception-menu-item"
@@ -385,7 +396,7 @@ export const AlertContextMenu = React.memo<AlertContextMenuProps>(
         data-test-subj="add-exception-menu-item"
         id="addException"
         onClick={handleAddExceptionClick}
-        disabled={!canUserCRUD || !hasIndexWrite}
+        disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
       >
         <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>
       </EuiContextMenuItem>
