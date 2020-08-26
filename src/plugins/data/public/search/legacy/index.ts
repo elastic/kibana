@@ -18,4 +18,3 @@
  */
 
 export { fetchSoon } from './fetch_soon';
-export { getEsClient, LegacyApiCaller } from './es_client';
