@@ -43,10 +43,7 @@ export const scoreApp = (term: string, { title }: PublicAppInfo): number => {
   return 0;
 };
 
-export const appToResult = (
-  app: PublicAppInfo | PublicLegacyAppInfo,
-  score: number
-): GlobalSearchProviderResult => {
+export const appToResult = (app: PublicAppInfo, score: number): GlobalSearchProviderResult => {
   return {
     id: app.id,
     title: app.title,
