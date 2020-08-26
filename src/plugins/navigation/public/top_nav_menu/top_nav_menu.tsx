@@ -113,19 +113,25 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
   function renderLayout() {
     const { setMenuMountPoint } = props;
-    const className = classNames('kbnTopNavMenu', props.className);
-    return (
-      <span className="kbnTopNavMenu__wrapper">
-        {setMenuMountPoint ? (
+    const menuClassName = classNames('kbnTopNavMenu', props.className);
+    const wrapperClassName = 'kbnTopNavMenu__wrapper';
+    if (setMenuMountPoint) {
+      return (
+        <span className={wrapperClassName}>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
-            {renderMenu(className)}
+            {renderMenu(menuClassName)}
           </MountPointPortal>
-        ) : (
-          renderMenu(className)
-        )}
-        {renderSearchBar()}
-      </span>
-    );
+          {renderSearchBar()}
+        </span>
+      );
+    } else {
+      return (
+        <span className={wrapperClassName}>
+          {renderMenu(menuClassName)}
+          {renderSearchBar()}
+        </span>
+      );
+    }
   }
 
   return renderLayout();
