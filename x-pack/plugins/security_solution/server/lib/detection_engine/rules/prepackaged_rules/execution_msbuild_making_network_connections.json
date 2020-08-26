@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies MsBuild.exe making outbound network connections. This may indicate adversarial activity as MsBuild is often leveraged by adversaries to execute code and evade detection.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

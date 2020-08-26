@@ -78,8 +78,13 @@ const loginViaEnvironmentCredentials = () => {
   // programmatically authenticate without interacting with the Kibana login page
   cy.request({
     body: {
-      username: Cypress.env(ELASTICSEARCH_USERNAME),
-      password: Cypress.env(ELASTICSEARCH_PASSWORD),
+      providerType: 'basic',
+      providerName: 'basic',
+      currentURL: '/',
+      params: {
+        username: Cypress.env(ELASTICSEARCH_USERNAME),
+        password: Cypress.env(ELASTICSEARCH_PASSWORD),
+      },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
     method: 'POST',
@@ -104,8 +109,13 @@ const loginViaConfig = () => {
     // programmatically authenticate without interacting with the Kibana login page
     cy.request({
       body: {
-        username: config.elasticsearch.username,
-        password: config.elasticsearch.password,
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: config.elasticsearch.username,
+          password: config.elasticsearch.password,
+        },
       },
       headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
       method: 'POST',
@@ -116,7 +126,7 @@ const loginViaConfig = () => {
 
 /**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
- * Kibana logo to be displayed before continuing
+ * Kibana global nav to be displayed before continuing
  */
 export const loginAndWaitForPage = (url: string) => {
   login();
@@ -124,12 +134,12 @@ export const loginAndWaitForPage = (url: string) => {
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
-  cy.contains('a', 'Security');
+  cy.get('#headerGlobalNav');
 };
 
 export const loginAndWaitForPageWithoutDateRange = (url: string) => {
   login();
   cy.viewport('macbook-15');
   cy.visit(url);
-  cy.contains('a', 'Security', { timeout: 120000 });
+  cy.get('#headerGlobalNav', { timeout: 120000 });
 };

@@ -25,8 +25,8 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -36,9 +36,9 @@ import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_obj
 import {
   registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
-  registerPackageConfigRoutes,
+  registerPackagePolicyRoutes,
   registerDataStreamRoutes,
-  registerAgentConfigRoutes,
+  registerAgentPolicyRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
@@ -47,14 +47,14 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewPackageConfig } from '../common';
+import { IngestManagerConfigType, NewPackagePolicy } from '../common';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
-  packageConfigService,
+  packagePolicyService,
 } from './services';
 import {
   getAgentStatusById,
@@ -95,8 +95,8 @@ export type IngestManagerSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -107,8 +107,8 @@ const allSavedObjectTypes = [
  * Callbacks supported by the Ingest plugin
  */
 export type ExternalCallback = [
-  'packageConfigCreate',
-  (newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>
+  'packagePolicyCreate',
+  (newPackagePolicy: NewPackagePolicy) => Promise<NewPackagePolicy>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
@@ -120,9 +120,9 @@ export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
   /**
-   * Services for Ingest's package configs
+   * Services for Ingest's package policies
    */
-  packageConfigService: typeof packageConfigService;
+  packagePolicyService: typeof packagePolicyService;
   /**
    * Register callbacks for inclusion in ingest API processing
    * @param args
@@ -179,10 +179,12 @@ export class IngestManagerPlugin
         icon: 'savedObjectsApp',
         navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
+        catalogue: ['ingestManager'],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID, 'kibana'],
+            catalogue: ['ingestManager'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -192,6 +194,7 @@ export class IngestManagerPlugin
           read: {
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID, 'kibana'],
+            catalogue: ['ingestManager'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
@@ -214,8 +217,8 @@ export class IngestManagerPlugin
     // Register rest of routes only if security is enabled
     if (this.security) {
       registerSetupRoutes(router, config);
-      registerAgentConfigRoutes(router);
-      registerPackageConfigRoutes(router);
+      registerAgentPolicyRoutes(router);
+      registerPackagePolicyRoutes(router);
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
@@ -276,7 +279,7 @@ export class IngestManagerPlugin
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
-      packageConfigService,
+      packagePolicyService,
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
       },

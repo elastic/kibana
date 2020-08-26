@@ -48,6 +48,7 @@ import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
+import { inferenceRoutes } from './routes/inference';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -86,7 +87,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       order: 500,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
-      catalogue: [PLUGIN_ID],
+      catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
@@ -171,6 +172,8 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     });
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
+
+    inferenceRoutes(routeInit);
 
     return {
       ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud, resolveMlCapabilities),

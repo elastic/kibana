@@ -87,138 +87,130 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
-        it('should load the home page', async () => {
+        it('opens the existing transform in the wizard', async () => {
+          await transform.testExecution.logTestStep('should load the home page');
           await transform.navigation.navigateTo();
           await transform.management.assertTransformListPageExists();
-        });
 
-        it('should display the transforms table', async () => {
+          await transform.testExecution.logTestStep('should display the transforms table');
           await transform.management.assertTransformsTableExists();
-        });
 
-        it('should display the original transform in the transform list', async () => {
+          await transform.testExecution.logTestStep(
+            'should display the original transform in the transform list'
+          );
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(transformConfig.id);
           const rows = await transform.table.parseTransformTable();
           expect(rows.filter((row) => row.id === transformConfig.id)).to.have.length(1);
-        });
 
-        it('should show the actions popover', async () => {
+          await transform.testExecution.logTestStep('should show the actions popover');
           await transform.table.assertTransformRowActions(false);
-        });
 
-        it('should display the define pivot step', async () => {
+          await transform.testExecution.logTestStep('should display the define pivot step');
           await transform.table.clickTransformRowAction('Clone');
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('should load the index preview', async () => {
+        it('navigates through the wizard, checks and sets all needed fields', async () => {
+          await transform.testExecution.logTestStep('should load the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
-        });
 
-        it('should show the index preview', async () => {
+          await transform.testExecution.logTestStep('should show the index preview');
           await transform.wizard.assertIndexPreview(
             testData.expected.indexPreview.columns,
             testData.expected.indexPreview.rows
           );
-        });
 
-        it('should display the query input', async () => {
+          await transform.testExecution.logTestStep('should display the query input');
           await transform.wizard.assertQueryInputExists();
           await transform.wizard.assertQueryValue('');
-        });
 
-        it('should show the pre-filled group-by configuration', async () => {
+          await transform.testExecution.logTestStep(
+            'should show the pre-filled group-by configuration'
+          );
           await transform.wizard.assertGroupByEntryExists(
             testData.expected.groupBy.index,
             testData.expected.groupBy.label
           );
-        });
 
-        it('should show the pre-filled aggs configuration', async () => {
+          await transform.testExecution.logTestStep(
+            'should show the pre-filled aggs configuration'
+          );
           await transform.wizard.assertAggregationEntryExists(
             testData.expected.aggs.index,
             testData.expected.aggs.label
           );
-        });
 
-        it('should show the pivot preview', async () => {
+          await transform.testExecution.logTestStep('should show the pivot preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
             testData.expected.pivotPreview.column,
             testData.expected.pivotPreview.values
           );
-        });
 
-        it('should load the details step', async () => {
+          await transform.testExecution.logTestStep('should load the details step');
           await transform.wizard.advanceToDetailsStep();
-        });
 
-        it('should input the transform id', async () => {
+          await transform.testExecution.logTestStep('should input the transform id');
           await transform.wizard.assertTransformIdInputExists();
           await transform.wizard.assertTransformIdValue('');
           await transform.wizard.setTransformId(testData.transformId);
-        });
 
-        it('should input the transform description', async () => {
+          await transform.testExecution.logTestStep('should input the transform description');
           await transform.wizard.assertTransformDescriptionInputExists();
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
-        });
 
-        it('should input the destination index', async () => {
+          await transform.testExecution.logTestStep('should input the destination index');
           await transform.wizard.assertDestinationIndexInputExists();
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
-        });
 
-        it('should display the create index pattern switch', async () => {
+          await transform.testExecution.logTestStep(
+            'should display the create index pattern switch'
+          );
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
-        });
 
-        it('should display the continuous mode switch', async () => {
+          await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
-        });
 
-        it('should load the create step', async () => {
+          await transform.testExecution.logTestStep('should load the create step');
           await transform.wizard.advanceToCreateStep();
-        });
 
-        it('should display the create and start button', async () => {
+          await transform.testExecution.logTestStep('should display the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();
           await transform.wizard.assertCreateAndStartButtonEnabled(true);
-        });
 
-        it('should display the create button', async () => {
+          await transform.testExecution.logTestStep('should display the create button');
           await transform.wizard.assertCreateButtonExists();
           await transform.wizard.assertCreateButtonEnabled(true);
-        });
 
-        it('should display the copy to clipboard button', async () => {
+          await transform.testExecution.logTestStep('should display the copy to clipboard button');
           await transform.wizard.assertCopyToClipboardButtonExists();
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        it('should create the transform', async () => {
+        it('runs the clone transform and displays it correctly in the job list', async () => {
+          await transform.testExecution.logTestStep('should create the transform');
           await transform.wizard.createTransform();
-        });
 
-        it('should start the transform and finish processing', async () => {
+          await transform.testExecution.logTestStep(
+            'should start the transform and finish processing'
+          );
           await transform.wizard.startTransform();
           await transform.wizard.waitForProgressBarComplete();
-        });
 
-        it('should return to the management page', async () => {
+          await transform.testExecution.logTestStep('should return to the management page');
           await transform.wizard.returnToManagement();
-        });
 
-        it('should display the transforms table', async () => {
+          await transform.testExecution.logTestStep('should display the transforms table');
           await transform.management.assertTransformsTableExists();
-        });
 
-        it('should display the created transform in the transform list', async () => {
+          await transform.testExecution.logTestStep(
+            'should display the created transform in the transform list'
+          );
           await transform.table.refreshTransformList();
           await transform.table.filterWithSearchString(testData.transformId);
           const rows = await transform.table.parseTransformTable();

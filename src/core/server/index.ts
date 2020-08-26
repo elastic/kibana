@@ -60,7 +60,6 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { UuidServiceSetup } from './uuid';
 import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
@@ -274,7 +273,9 @@ export {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -430,8 +431,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
-  /** {@link UuidServiceSetup} */
-  uuid: UuidServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link AuditTrailSetup} */
@@ -481,7 +480,6 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  UuidServiceSetup,
   AuditTrailStart,
 };
 

@@ -188,7 +188,7 @@ export class LegacyService implements CoreService {
     }
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
     this.setupDeps = setupDeps;
     this.legacyInternals = new LegacyInternals(
       this.legacyPlugins.uiExports,
@@ -288,10 +288,7 @@ export class LegacyService implements CoreService {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        legacy: {
-          client: setupDeps.core.elasticsearch.legacy.client,
-          createClient: setupDeps.core.elasticsearch.legacy.createClient,
-        },
+        legacy: setupDeps.core.elasticsearch.legacy,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -325,12 +322,10 @@ export class LegacyService implements CoreService {
       },
       status: {
         core$: setupDeps.core.status.core$,
+        overall$: setupDeps.core.status.overall$,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
-      },
-      uuid: {
-        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),

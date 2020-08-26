@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import http from 'http';
-import getPort from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
+import getPort from 'get-port';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
@@ -31,6 +33,7 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -69,15 +72,26 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
+
     // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
-      const availablePort = await getPort({ port: 9000 });
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       webhookServer.listen(availablePort);
       webhookSimulatorURL = `http://localhost:${availablePort}`;
 
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
+
+      proxyServer = await getHttpProxyServer(
+        webhookSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
     });
 
@@ -177,10 +191,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      expect(proxyHaveBeenCalled).to.equal(true);
       expect(result.status).to.eql('ok');
     });
 
-    it('should handle target webhooks that are not whitelisted', async () => {
+    it('should handle target webhooks that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
@@ -192,13 +207,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             password: 'mypassphrase',
           },
           config: {
-            url: 'http://a.none.whitelisted.webhook/endpoint',
+            url: 'http://a.none.allowedHosts.webhook/endpoint',
           },
         })
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/is not whitelisted in the Kibana config/);
+      expect(result.message).to.match(/is not added to the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {
@@ -218,7 +233,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, unexpected error/);
+      expect(result.message).to.match(/error calling webhook, retry later/);
     });
 
     it('should handle failing webhook targets', async () => {
@@ -240,6 +255,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     after(() => {
       webhookServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }

@@ -153,6 +153,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectMigrationMap](./kibana-plugin-core-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
 |  [SavedObjectReference](./kibana-plugin-core-server.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsAddToNamespacesOptions](./kibana-plugin-core-server.savedobjectsaddtonamespacesoptions.md) |  |
+|  [SavedObjectsAddToNamespacesResponse](./kibana-plugin-core-server.savedobjectsaddtonamespacesresponse.md) |  |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-server.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkGetObject](./kibana-plugin-core-server.savedobjectsbulkgetobject.md) |  |
@@ -167,6 +168,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteFromNamespacesOptions](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesoptions.md) |  |
+|  [SavedObjectsDeleteFromNamespacesResponse](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesresponse.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportOptions](./kibana-plugin-core-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
@@ -212,7 +214,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
 |  [URLMeaningfulParts](./kibana-plugin-core-server.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
-|  [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
 
 ## Variables
 
