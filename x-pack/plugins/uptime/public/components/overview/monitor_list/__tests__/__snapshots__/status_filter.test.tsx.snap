@@ -38,12 +38,10 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
       >
         <span
           class="euiFilterButton__textShift"
+          data-text="Up"
+          title="Up"
         >
-          <span
-            class="euiTextColor euiTextColor--default"
-          >
-            Up
-          </span>
+          Up
         </span>
       </span>
     </span>
