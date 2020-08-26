@@ -155,7 +155,7 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType)}
       selectedOptions={
         ((selectedColumnOperationType
           ? selectedColumnSourceField

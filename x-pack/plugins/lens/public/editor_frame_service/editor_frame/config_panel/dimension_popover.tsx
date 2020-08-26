@@ -60,18 +60,21 @@ export function DimensionPopover({
       >
         <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
           <EuiTitle size="xs">
-            <button onClick={closeFlyout}>
-              <h2 id="lnsDimensionPopoverFlyoutTitle">
-                <EuiIcon type="sortLeft" /> {panelTitle}
-              </h2>
-            </button>
+            <EuiButtonEmpty
+              onClick={closeFlyout}
+              id="lnsDimensionPopoverFlyoutTitle"
+              iconType="sortLeft"
+              flush="left"
+            >
+              <strong>{panelTitle}</strong>
+            </EuiButtonEmpty>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
           {panel}
         </EuiFlexItem>
         <EuiFlyoutFooter className="lnsDimensionPopover__footer">
-          <EuiButtonEmpty size="s" onClick={closeFlyout}>
+          <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
             Close
           </EuiButtonEmpty>
         </EuiFlyoutFooter>

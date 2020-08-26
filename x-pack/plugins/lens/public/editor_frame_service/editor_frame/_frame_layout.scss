@@ -39,9 +39,11 @@
 }
 
 .lnsFrameLayout__sidebar--right {
+  flex-basis: 25%;
   background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
   min-width: $lnsPanelMinWidth + $euiSizeXL;
   max-height: 100%;
+  max-width: $euiFormMaxWidth + $euiSizeXXL;
 
   .lnsConfigPanel {
     @include euiScrollBar;

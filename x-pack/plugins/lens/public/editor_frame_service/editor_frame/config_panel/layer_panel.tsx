@@ -159,6 +159,7 @@ export function LayerPanel(
           return (
             <EuiFormRow
               className="lnsLayerPanel__row"
+              fullWidth
               label={group.groupLabel}
               key={index}
               isInvalid={isMissing}
