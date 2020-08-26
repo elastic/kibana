@@ -84,7 +84,7 @@ export const RiskScoreField = ({
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>): void => {
       const range = (e.target as HTMLInputElement).value;
       setValue({
-        value: +range,
+        value: range.trim() === '' ? '' : +range,
         isMappingChecked: (fieldValue as AboutStepRiskScore).isMappingChecked,
         mapping: (fieldValue as AboutStepRiskScore).mapping,
       });
