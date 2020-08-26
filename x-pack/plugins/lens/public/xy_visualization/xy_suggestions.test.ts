@@ -42,18 +42,6 @@ describe('xy_suggestions', () => {
     };
   }
 
-  function filtersCol(columnId: string): TableSuggestionColumn {
-    return {
-      columnId,
-      operation: {
-        dataType: 'string',
-        label: `Filters`,
-        isBucketed: true,
-        scale: 'ordinal',
-      },
-    };
-  }
-
   function dateCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
