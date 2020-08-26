@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
-  describe('application using leave confirmation', () => {
+  // skipped until https://bugs.chromium.org/p/chromedriver/issues/detail?id=3578 is fixed.
+  describe.skip('application using leave confirmation', () => {
     describe('when navigating to another app', () => {
       it('prevents navigation if user click cancel on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
