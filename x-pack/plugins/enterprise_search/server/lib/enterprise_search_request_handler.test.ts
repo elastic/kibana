@@ -15,16 +15,13 @@ const { Response } = jest.requireActual('node-fetch');
 
 const responseMock = {
   ok: jest.fn(),
-  notFound: jest.fn(),
   customError: jest.fn(),
 };
 const KibanaAuthHeader = 'Basic 123';
 
 describe('createEnterpriseSearchRequestHandler', () => {
   beforeEach(() => {
-    responseMock.ok.mockClear();
-    responseMock.notFound.mockClear();
-    responseMock.customError.mockClear();
+    jest.clearAllMocks()
     fetchMock.mockReset();
   });
 
@@ -71,7 +68,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
       await makeAPICall(requestHandler);
 
       EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        `http://localhost:3002/as/credentials/collection`
+        'http://localhost:3002/as/credentials/collection'
       );
 
       expect(responseMock.customError).toHaveBeenCalledWith({
@@ -100,7 +97,7 @@ describe('createEnterpriseSearchRequestHandler', () => {
       await makeAPICall(requestHandler);
 
       EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        `http://localhost:3002/as/credentials/collection`
+        'http://localhost:3002/as/credentials/collection'
       );
 
       expect(responseMock.customError).toHaveBeenCalledWith({

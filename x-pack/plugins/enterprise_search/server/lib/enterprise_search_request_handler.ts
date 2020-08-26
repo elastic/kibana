@@ -25,9 +25,9 @@ interface IEnterpriseSearchRequestParams<ResponseBody> {
  * This helper function creates a single standard DRY way of handling
  * Enterprise Search API requests.
  *
- * This handler assumes that it will essentially just proxy the App Search API
- * request, so the request body and request parameters, and body are simply
- * passed through.
+ * This handler assumes that it will essentially just proxy the
+ * Enterprise Search API request, so the request body and request
+ * parameters are simply passed through.
  */
 export function createEnterpriseSearchRequestHandler<ResponseBody>({
   config,
