@@ -30,8 +30,11 @@ export interface NewAgentAction {
 
 export interface AgentAction extends NewAgentAction {
   id: string;
-  agent_id: string;
+  agent_id?: string;
+  policy_id?: string;
+  policy_revision?: number;
   created_at: string;
+  ack_data?: any;
 }
 
 export interface AgentActionSOAttributes {
@@ -39,8 +42,11 @@ export interface AgentActionSOAttributes {
   sent_at?: string;
   timestamp?: string;
   created_at: string;
-  agent_id: string;
+  agent_id?: string;
+  policy_id?: string;
+  policy_revision?: number;
   data?: string;
+  ack_data?: string;
 }
 
 export interface NewAgentEvent {

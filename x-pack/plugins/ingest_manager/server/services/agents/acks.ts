@@ -18,7 +18,6 @@ import {
   AgentEventSOAttributes,
   AgentSOAttributes,
   AgentActionSOAttributes,
-  FullAgentPolicy,
 } from '../../types';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -55,8 +54,12 @@ export async function acknowledgeAgentActions(
     throw error;
   }
 
+  const agentActionsIds = [];
   for (const action of actions) {
-    if (action.agent_id !== agent.id) {
+    if (action.agent_id) {
+      agentActionsIds.push(action);
+    }
+    if (action.agent_id && action.agent_id !== agent.id) {
       throw Boom.badRequest(`${action.id} not found`);
     }
   }
@@ -70,50 +73,46 @@ export async function acknowledgeAgentActions(
     await forceUnenrollAgent(soClient, agent.id);
   }
 
-  const agentPolicy = getLatestAgentPolicyIfUpdated(agent, actions);
+  const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(agentPolicy ? [buildUpdateAgentPolicy(agent.id, agentPolicy)] : []),
+    ...(configChangeAction
+      ? [
+          {
+            type: AGENT_SAVED_OBJECT_TYPE,
+            id: agent.id,
+            attributes: {
+              policy_revision: configChangeAction.policy_revision,
+              packages: configChangeAction?.ack_data?.packages,
+            },
+          },
+        ]
+      : []),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
 
   return actions;
 }
 
-function getLatestAgentPolicyIfUpdated(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce<null | FullAgentPolicy>((acc, action) => {
+function getLatestConfigChangePolicyActionIfUpdated(agent: Agent, actions: AgentAction[]) {
+  return actions.reduce<null | AgentAction>((acc, action) => {
     if (action.type !== 'CONFIG_CHANGE') {
       return acc;
     }
-    const data = action.data || {};
-
-    if (data?.config?.id !== agent.policy_id) {
+    if (action.policy_id !== agent.policy_id) {
       return acc;
     }
 
-    const currentRevision = (acc && acc.revision) || agent.policy_revision || 0;
-
-    return data?.config?.revision > currentRevision ? data?.config : acc;
-  }, null);
-}
-
-function buildUpdateAgentPolicy(agentId: string, agentPolicy: FullAgentPolicy) {
-  const packages = agentPolicy.inputs.reduce<string[]>((acc, input) => {
-    const packageName = input.meta?.package?.name;
-    if (packageName && acc.indexOf(packageName) < 0) {
-      return [packageName, ...acc];
+    if (!acc) {
+      return action;
     }
-    return acc;
-  }, []);
 
-  return {
-    type: AGENT_SAVED_OBJECT_TYPE,
-    id: agentId,
-    attributes: {
-      policy_revision: agentPolicy.revision,
-      packages,
-    },
-  };
+    if (action.policy_revision && action.policy_revision > (acc.policy_revision || 0)) {
+      return action;
+    }
+
+    return acc;
+  }, null);
 }
 
 function buildUpdateAgentActionSentAt(

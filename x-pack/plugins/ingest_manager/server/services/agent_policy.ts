@@ -66,6 +66,10 @@ class AgentPolicyService {
       updated_by: user ? user.username : 'system',
     });
 
+    if (options.bumpRevision) {
+      await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+    }
+
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 

@@ -17,6 +17,7 @@ export async function createAgentAction(
   const so = await soClient.create<AgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
     ...newAgentAction,
     data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
+    ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
   });
 
   const agentAction = savedObjectToAgentAction(so);
@@ -84,6 +85,23 @@ export async function getNewActionsSince(soClient: SavedObjectsClientContract, t
   });
 
   return res.saved_objects.map(savedObjectToAgentAction);
+}
+
+export async function getLatestConfigChangeAction(
+  soClient: SavedObjectsClientContract,
+  policyId: string
+) {
+  const res = await soClient.find<AgentActionSOAttributes>({
+    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+    search: policyId,
+    searchFields: ['policy_id'],
+    sortField: 'created_at',
+    sortOrder: 'DESC',
+  });
+
+  if (res.saved_objects[0]) {
+    return savedObjectToAgentAction(res.saved_objects[0]);
+  }
 }
 
 export interface ActionsService {

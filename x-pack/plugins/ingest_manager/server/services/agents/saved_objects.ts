@@ -40,5 +40,6 @@ export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes
     id: so.id,
     ...so.attributes,
     data: so.attributes.data ? JSON.parse(so.attributes.data) : undefined,
+    ack_data: so.attributes.ack_data ? JSON.parse(so.attributes.ack_data) : undefined,
   };
 }
