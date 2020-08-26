@@ -18,6 +18,7 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiFormRow,
+  EuiCallOut,
   EuiText,
 } from '@elastic/eui';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -27,7 +28,6 @@ import {
   ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
-import * as sharedI18n from '../translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
@@ -35,7 +35,6 @@ import { ExceptionBuilderComponent } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -47,7 +46,6 @@ import {
   entryHasNonEcsType,
   getMappedNonEcsValue,
 } from '../helpers';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
 export interface AddExceptionModalBaseProps {
@@ -109,14 +107,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
-  const { rule: maybeRule } = useRuleAsync(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
-  const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
+  const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
@@ -167,41 +164,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     },
     [onRuleChange]
   );
-
-  const handleDissasociationSuccess = useCallback(
-    (id: string): void => {
-      handleRuleChange(true);
-      addSuccess(sharedI18n.DISSASOCIATE_LIST_SUCCESS(id));
-      onCancel();
-    },
-    [handleRuleChange, addSuccess, onCancel]
-  );
-
-  const handleDissasociationError = useCallback(
-    (error: Error): void => {
-      addError(error, { title: sharedI18n.DISSASOCIATE_EXCEPTION_LIST_ERROR });
-      onCancel();
-    },
-    [addError, onCancel]
-  );
-
-  const handleFetchOrCreateExceptionListError = useCallback(
-    (error: Error, statusCode: number | null, message: string | null) => {
-      setFetchOrCreateListError({
-        reason: error.message,
-        code: statusCode,
-        details: message,
-        listListId: null,
-      });
+  const onFetchOrCreateExceptionListError = useCallback(
+    (error: Error) => {
+      setFetchOrCreateListError(true);
     },
     [setFetchOrCreateListError]
   );
-
   const [isLoadingExceptionList, ruleExceptionList] = useFetchOrCreateRuleExceptionList({
     http,
     ruleId,
     exceptionListType,
-    onError: handleFetchOrCreateExceptionListError,
+    onError: onFetchOrCreateExceptionListError,
     onSuccess: handleRuleChange,
   });
 
@@ -306,9 +279,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   ]);
 
   const isSubmitButtonDisabled = useMemo(
-    () =>
-      fetchOrCreateListError != null ||
-      exceptionItemsToAdd.every((item) => item.entries.length === 0),
+    () => fetchOrCreateListError || exceptionItemsToAdd.every((item) => item.entries.length === 0),
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
@@ -324,27 +295,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {fetchOrCreateListError != null && (
-          <EuiModalFooter>
-            <ErrorCallout
-              http={http}
-              errorInfo={fetchOrCreateListError}
-              rule={maybeRule}
-              onCancel={onCancel}
-              onSuccess={handleDissasociationSuccess}
-              onError={handleDissasociationError}
-              data-test-subj="addExceptionModalErrorCallout"
-            />
-          </EuiModalFooter>
+        {fetchOrCreateListError === true && (
+          <EuiCallOut title={i18n.ADD_EXCEPTION_FETCH_ERROR_TITLE} color="danger" iconType="alert">
+            <p>{i18n.ADD_EXCEPTION_FETCH_ERROR}</p>
+          </EuiCallOut>
         )}
-        {fetchOrCreateListError == null &&
+        {fetchOrCreateListError === false &&
           (isLoadingExceptionList ||
             isIndexPatternLoading ||
             isSignalIndexLoading ||
             isSignalIndexPatternLoading) && (
             <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
           )}
-        {fetchOrCreateListError == null &&
+        {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
           !isSignalIndexPatternLoading &&
           !isLoadingExceptionList &&
@@ -414,21 +377,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </ModalBodySection>
             </>
           )}
-        {fetchOrCreateListError == null && (
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-            <EuiButton
-              data-test-subj="add-exception-confirm-button"
-              onClick={onAddExceptionConfirm}
-              isLoading={addExceptionIsLoading}
-              isDisabled={isSubmitButtonDisabled}
-              fill
-            >
-              {i18n.ADD_EXCEPTION}
-            </EuiButton>
-          </EuiModalFooter>
-        )}
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+
+          <EuiButton
+            data-test-subj="add-exception-confirm-button"
+            onClick={onAddExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
+            {i18n.ADD_EXCEPTION}
+          </EuiButton>
+        </EuiModalFooter>
       </Modal>
     </EuiOverlayMask>
   );
