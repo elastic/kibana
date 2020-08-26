@@ -9,11 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 
-import { toasts } from '../../../../services/notification';
-import { deletePolicy } from '../../../../services/api';
-import { showApiError } from '../../../../services/api_errors';
+import { PolicyFromES } from '../../../services/policies/types';
+import { toasts } from '../../../services/notification';
+import { showApiError } from '../../../services/api_errors';
+import { deletePolicy } from '../../../services/api';
 
-export class ConfirmDelete extends Component {
+interface Props {
+  policyToDelete: PolicyFromES;
+  callback: () => void;
+  onCancel: () => void;
+}
+export class ConfirmDelete extends Component<Props> {
   deletePolicy = async () => {
     const { policyToDelete, callback } = this.props;
     const policyName = policyToDelete.name;
@@ -61,7 +67,6 @@ export class ConfirmDelete extends Component {
             />
           }
           buttonColor="danger"
-          onClose={onCancel}
         >
           <div>
             <FormattedMessage

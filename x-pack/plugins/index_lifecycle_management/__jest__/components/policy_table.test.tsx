@@ -4,54 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment-timezone';
-import React from 'react';
-import { Provider } from 'react-redux';
+import React, { ReactElement } from 'react';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import sinon from 'sinon';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
 import { scopedHistoryMock } from '../../../../../src/core/public/mocks';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
-import { fetchedPolicies } from '../../public/application/store/actions';
-import { indexLifecycleManagementStore } from '../../public/application/store';
-import { PolicyTable } from '../../public/application/sections/policy_table';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { PolicyTable } from '../../public/application/sections/policy_table/policy_table';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
+import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
+import { PolicyFromES } from '../../public/application/services/policies/types';
+import { ReactWrapper } from 'enzyme';
 
-initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
-initUiMetric({ reportUiStats: () => {} });
+// This expects HttpSetup but we're giving it AxiosInstance.
+// @ts-ignore
+initHttp(axios.create({ adapter: axiosXhrAdapter }));
+initUiMetric(usageCollectionPluginMock.createSetupContract());
 
-let server = null;
-
-let store = null;
-const policies = [];
+const policies: PolicyFromES[] = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment().subtract(i, 'days').valueOf(),
-    linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
+    modified_date: moment().subtract(i, 'days').toISOString(),
+    linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
     name: `testy${i}`,
+    policy: {
+      name: `testy${i}`,
+      phases: {},
+    },
   });
 }
 jest.mock('');
-let component = null;
+let component: ReactElement;
 
-const snapshot = (rendered) => {
+const snapshot = (rendered: string[]) => {
   expect(rendered).toMatchSnapshot();
 };
-const mountedSnapshot = (rendered) => {
+const mountedSnapshot = (rendered: ReactWrapper) => {
   expect(takeMountedSnapshot(rendered)).toMatchSnapshot();
 };
-const names = (rendered) => {
+const names = (rendered: ReactWrapper) => {
   return findTestSubject(rendered, 'policyTablePolicyNameLink');
 };
-const namesText = (rendered) => {
-  return names(rendered).map((button) => button.text());
+const namesText = (rendered: ReactWrapper): string[] => {
+  return (names(rendered) as ReactWrapper).map((button) => button.text());
 };
 
-const testSort = (headerName) => {
+const testSort = (headerName: string) => {
   const rendered = mountWithIntl(component);
   const nameHeader = findTestSubject(rendered, `policyTableHeaderCell-${headerName}`).find(
     'button'
@@ -63,7 +65,7 @@ const testSort = (headerName) => {
   rendered.update();
   snapshot(namesText(rendered));
 };
-const openContextMenu = (buttonIndex) => {
+const openContextMenu = (buttonIndex: number) => {
   const rendered = mountWithIntl(component);
   const actionsButton = findTestSubject(rendered, 'policyActionsContextMenuButton');
   actionsButton.at(buttonIndex).simulate('click');
@@ -73,32 +75,25 @@ const openContextMenu = (buttonIndex) => {
 
 describe('policy table', () => {
   beforeEach(() => {
-    store = indexLifecycleManagementStore();
     component = (
-      <Provider store={store}>
-        <PolicyTable history={scopedHistoryMock.create()} navigateToApp={() => {}} />
-      </Provider>
+      <PolicyTable
+        policies={policies}
+        history={scopedHistoryMock.create()}
+        navigateToApp={jest.fn()}
+        sendRequest={jest.fn()}
+      />
     );
-    store.dispatch(fetchedPolicies(policies));
-    server = sinon.fakeServer.create();
-    server.respondWith('/api/index_lifecycle_management/policies', [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(policies),
-    ]);
   });
-  test('should show spinner when policies are loading', () => {
-    store = indexLifecycleManagementStore();
-    component = (
-      <Provider store={store}>
-        <PolicyTable history={scopedHistoryMock.create()} navigateToApp={() => {}} />
-      </Provider>
-    );
-    const rendered = mountWithIntl(component);
-    expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
-  });
+
   test('should show empty state when there are not any policies', () => {
-    store.dispatch(fetchedPolicies([]));
+    component = (
+      <PolicyTable
+        policies={[]}
+        history={scopedHistoryMock.create()}
+        navigateToApp={jest.fn()}
+        sendRequest={jest.fn()}
+      />
+    );
     const rendered = mountWithIntl(component);
     mountedSnapshot(rendered);
   });
@@ -123,7 +118,7 @@ describe('policy table', () => {
   test('should filter based on content of search input', () => {
     const rendered = mountWithIntl(component);
     const searchInput = rendered.find('.euiFieldSearch').first();
-    searchInput.instance().value = 'testy0';
+    ((searchInput.instance() as unknown) as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
     snapshot(namesText(rendered));
@@ -147,7 +142,7 @@ describe('policy table', () => {
     expect(buttons.at(0).text()).toBe('View indices linked to policy');
     expect(buttons.at(1).text()).toBe('Add policy to index template');
     expect(buttons.at(2).text()).toBe('Delete policy');
-    expect(buttons.at(2).getDOMNode().disabled).toBeTruthy();
+    expect((buttons.at(2).getDOMNode() as HTMLButtonElement).disabled).toBeTruthy();
   });
   test('should have proper actions in context menu when there are not linked indices', () => {
     const rendered = openContextMenu(1);
@@ -155,7 +150,7 @@ describe('policy table', () => {
     expect(buttons.length).toBe(2);
     expect(buttons.at(0).text()).toBe('Add policy to index template');
     expect(buttons.at(1).text()).toBe('Delete policy');
-    expect(buttons.at(1).getDOMNode().disabled).toBeFalsy();
+    expect((buttons.at(1).getDOMNode() as HTMLButtonElement).disabled).toBeFalsy();
   });
   test('confirmation modal should show when delete button is pressed', () => {
     const rendered = openContextMenu(1);
