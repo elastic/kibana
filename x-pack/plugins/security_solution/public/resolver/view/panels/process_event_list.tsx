@@ -21,6 +21,7 @@ import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/ty
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
+import { CrumbInfo } from '../../types';
 
 /**
  * This view presents a list of related events of a given type for a given process.

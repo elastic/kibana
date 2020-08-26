@@ -9,7 +9,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useQueryStringKeys } from './use_query_string_keys';
 import { CrumbInfo } from '../types';
 
-
 export function useResolverQueryParams() {
   /**
    * This updates the breadcrumb nav and the panel view. It's supplied to each
