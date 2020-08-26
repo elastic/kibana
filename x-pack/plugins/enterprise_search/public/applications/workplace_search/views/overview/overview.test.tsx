@@ -11,8 +11,8 @@ import { mockLogicActions, setMockValues } from './__mocks__';
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { Loading } from '../shared/loading';
-import { ViewContentHeader } from '../shared/view_content_header';
+import { Loading } from '../../components/shared/loading';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';

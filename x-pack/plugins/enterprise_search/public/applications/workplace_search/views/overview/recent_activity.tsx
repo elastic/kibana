@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ContentSection } from '../shared/content_section';
+import { ContentSection } from '../../components/shared/content_section';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { getSourcePath } from '../../routes';

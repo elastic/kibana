@@ -6,6 +6,7 @@
   "false_positives": [
     "Security tools and device drivers may run these programs in order to load legitimate kernel modules. Use of these programs by ordinary users is uncommon."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -42,5 +43,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
