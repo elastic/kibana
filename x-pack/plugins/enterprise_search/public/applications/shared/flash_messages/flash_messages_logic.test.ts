@@ -25,7 +25,7 @@ describe('FlashMessagesLogic', () => {
     expect(FlashMessagesLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  describe('setMessages()', () => {
+  describe('setFlashMessages()', () => {
     it('sets an array of messages', () => {
       const messages = [
         { type: 'success', message: 'Hello world!!' },
@@ -34,7 +34,7 @@ describe('FlashMessagesLogic', () => {
       ] as IFlashMessage[];
 
       FlashMessagesLogic.mount();
-      FlashMessagesLogic.actions.setMessages(messages);
+      FlashMessagesLogic.actions.setFlashMessages(messages);
 
       expect(FlashMessagesLogic.values.messages).toEqual(messages);
     });
@@ -43,17 +43,17 @@ describe('FlashMessagesLogic', () => {
       const message = { type: 'success', message: 'I turn into an array!' } as IFlashMessage;
 
       FlashMessagesLogic.mount();
-      FlashMessagesLogic.actions.setMessages(message);
+      FlashMessagesLogic.actions.setFlashMessages(message);
 
       expect(FlashMessagesLogic.values.messages).toEqual([message]);
     });
   });
 
-  describe('clearMessages()', () => {
+  describe('clearFlashMessages()', () => {
     it('sets messages back to an empty array', () => {
       FlashMessagesLogic.mount();
-      FlashMessagesLogic.actions.setMessages('test' as any);
-      FlashMessagesLogic.actions.clearMessages();
+      FlashMessagesLogic.actions.setFlashMessages('test' as any);
+      FlashMessagesLogic.actions.clearFlashMessages();
 
       expect(FlashMessagesLogic.values.messages).toEqual([]);
     });
@@ -94,8 +94,8 @@ describe('FlashMessagesLogic', () => {
       it('listens for history changes and clears messages on change', () => {
         FlashMessagesLogic.mount();
         FlashMessagesLogic.actions.setQueuedMessages(['queuedMessages'] as any);
-        jest.spyOn(FlashMessagesLogic.actions, 'clearMessages');
-        jest.spyOn(FlashMessagesLogic.actions, 'setMessages');
+        jest.spyOn(FlashMessagesLogic.actions, 'clearFlashMessages');
+        jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'clearQueuedMessages');
         jest.spyOn(FlashMessagesLogic.actions, 'setHistoryListener');
 
@@ -108,8 +108,10 @@ describe('FlashMessagesLogic', () => {
 
         const mockHistoryChange = (mockListener.mock.calls[0] as any)[0];
         mockHistoryChange();
-        expect(FlashMessagesLogic.actions.clearMessages).toHaveBeenCalled();
-        expect(FlashMessagesLogic.actions.setMessages).toHaveBeenCalledWith(['queuedMessages']);
+        expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
+        expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
+          'queuedMessages',
+        ]);
         expect(FlashMessagesLogic.actions.clearQueuedMessages).toHaveBeenCalled();
       });
     });

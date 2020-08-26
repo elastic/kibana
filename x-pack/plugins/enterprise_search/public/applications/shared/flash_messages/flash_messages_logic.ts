@@ -22,8 +22,8 @@ export interface IFlashMessagesLogicValues {
   historyListener: Function | null;
 }
 export interface IFlashMessagesLogicActions {
-  setMessages(messages: IFlashMessage | IFlashMessage[]): void;
-  clearMessages(): void;
+  setFlashMessages(messages: IFlashMessage | IFlashMessage[]): void;
+  clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): void;
   clearQueuedMessages(): void;
   listenToHistory(history: History): void;
@@ -35,8 +35,8 @@ const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
 
 export const FlashMessagesLogic = kea({
   actions: (): IFlashMessagesLogicActions => ({
-    setMessages: (messages) => ({ messages: convertToArray(messages) }),
-    clearMessages: () => null,
+    setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
+    clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
     listenToHistory: (history) => history,
@@ -46,8 +46,8 @@ export const FlashMessagesLogic = kea({
     messages: [
       [],
       {
-        setMessages: (_, { messages }) => messages,
-        clearMessages: () => [],
+        setFlashMessages: (_, { messages }) => messages,
+        clearFlashMessages: () => [],
       },
     ],
     queuedMessages: [
@@ -68,8 +68,8 @@ export const FlashMessagesLogic = kea({
     listenToHistory: (history) => {
       // On React Router navigation, clear previous flash messages and load any queued messages
       const unlisten = history.listen(() => {
-        actions.clearMessages();
-        actions.setMessages(values.queuedMessages);
+        actions.clearFlashMessages();
+        actions.setFlashMessages(values.queuedMessages);
         actions.clearQueuedMessages();
       });
       actions.setHistoryListener(unlisten);
