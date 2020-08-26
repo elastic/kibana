@@ -34,7 +34,7 @@ describe('extractCollectors', () => {
     const programPaths = await getProgramPaths(configs[0]);
 
     const results = [...extractCollectors(programPaths, tsConfig)];
-    expect(results).toHaveLength(6);
+    expect(results).toHaveLength(7);
     expect(results).toMatchSnapshot();
   });
 });
