@@ -47,21 +47,6 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   });
   const bulkDeleteModalContent = (
     <>
-      <p>
-        {shouldForceDelete ? (
-          <FormattedMessage
-            id="xpack.transform.transformList.bulkForceDeleteModalBody"
-            defaultMessage="Force delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The {count, plural, one {transform} other {transforms}} will be deleted regardless of {count, plural, one {its} other {their}} current state."
-            values={{ count: items.length }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.transform.transformList.bulkDeleteModalBody"
-            defaultMessage="Delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?"
-            values={{ count: items.length }}
-          />
-        )}
-      </p>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           {
