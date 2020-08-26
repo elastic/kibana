@@ -322,6 +322,7 @@ export class LegacyService implements CoreService {
       },
       status: {
         core$: setupDeps.core.status.core$,
+        overall$: setupDeps.core.status.overall$,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,

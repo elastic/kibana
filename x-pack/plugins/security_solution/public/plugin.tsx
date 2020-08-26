@@ -65,7 +65,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
       defaultMessage: 'Security',
     });
@@ -330,7 +330,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {};
+    return {
+      resolver: async () => {
+        const { resolverPluginSetup } = await import('./resolver');
+        return resolverPluginSetup();
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
