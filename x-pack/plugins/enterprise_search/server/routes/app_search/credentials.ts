@@ -16,11 +16,14 @@ interface ICredential {
   type: string;
   access_all_engines: boolean;
 }
-interface ICredentialsResponse { 
+interface ICredentialsResponse {
   results: ICredential[];
   meta?: {
     page?: {
+      current: number;
       total_results: number;
+      total_pages: number;
+      size: number;
     };
   };
 }

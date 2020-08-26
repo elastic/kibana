@@ -20,15 +20,6 @@ const responseMock = {
 };
 const KibanaAuthHeader = 'Basic 123';
 
-interface IMockResponse {
-  results: object[];
-  meta?: {
-    page?: {
-      total_results: number;
-    };
-  };
-}
-
 describe('createEnterpriseSearchRequestHandler', () => {
   beforeEach(() => {
     responseMock.ok.mockClear();
