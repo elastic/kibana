@@ -88,7 +88,7 @@ export function ErroneousTransactionsRateChart() {
           },
           {
             data: errorRates,
-            type: 'line',
+            type: 'linemark',
             color: theme.euiColorVis7,
             hideLegend: true,
             title: i18n.translate('xpack.apm.errorRateChart.rateLabel', {

@@ -6,6 +6,7 @@
   "false_positives": [
     "Certain programs or applications may modify files or change ownership in writable directories. These can be exempted by username."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -39,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

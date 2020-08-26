@@ -119,21 +119,24 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       sourceField: field.name,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: 'date_histogram',
-    schema: 'segment',
-    params: {
-      field: column.sourceField,
-      time_zone: column.params.timeZone,
-      useNormalizedEsInterval: true,
-      interval: column.params.interval,
-      drop_partials: false,
-      min_doc_count: 0,
-      extended_bounds: {},
-    },
-  }),
+  toEsAggsConfig: (column, columnId, indexPattern) => {
+    const usedField = indexPattern.fields.find((field) => field.name === column.sourceField);
+    return {
+      id: columnId,
+      enabled: true,
+      type: 'date_histogram',
+      schema: 'segment',
+      params: {
+        field: column.sourceField,
+        time_zone: column.params.timeZone,
+        useNormalizedEsInterval: !usedField || !usedField.aggregationRestrictions?.date_histogram,
+        interval: column.params.interval,
+        drop_partials: false,
+        min_doc_count: 0,
+        extended_bounds: {},
+      },
+    };
+  },
   paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
