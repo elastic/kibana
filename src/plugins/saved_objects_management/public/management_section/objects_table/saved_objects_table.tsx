@@ -27,7 +27,7 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiConfirmModal,
-  EuiLoadingKibana,
+  EuiLoadingElastic,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
@@ -545,7 +545,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     if (isDeleting) {
       // Block the user from interacting with the table while its contents are being deleted.
-      modal = <EuiLoadingKibana size="xl" />;
+      modal = <EuiLoadingElastic size="xl" />;
     } else {
       const onCancel = () => {
         this.setState({ isShowingDeleteConfirmModal: false });
