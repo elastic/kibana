@@ -12,6 +12,7 @@ import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../lib/ecs_fields';
 import { extendMap } from '../../../../../lib/ecs_fields/extend_map';
 import { AuthenticationsRequestOptions } from '../../../../../../common/search_strategy/security_solution/authentications';
+import { authenticationFields } from '../helpers';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
@@ -30,7 +31,7 @@ export const buildQuery = ({
   defaultIndex,
   docValueFields,
 }: AuthenticationsRequestOptions) => {
-  const esFields = reduceFields([], { ...hostFieldsMap, ...sourceFieldsMap });
+  const esFields = reduceFields(authenticationFields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),

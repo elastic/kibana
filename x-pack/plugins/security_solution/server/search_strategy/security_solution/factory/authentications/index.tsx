@@ -36,12 +36,13 @@ export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authe
     response: IEsSearchResponse<unknown>
   ): Promise<AuthenticationsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.user_count.value', response);
+    const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
+
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getOr(
       [],
       'aggregations.group_by_users.buckets',
-      response
+      response.rawResponse
     ).map((bucket: AuthenticationBucket) => ({
       _id: getOr(
         `${bucket.key}+${bucket.doc_count}`,
@@ -57,7 +58,7 @@ export const authentications: SecuritySolutionFactory<AuthenticationsQuery.authe
       successes: bucket.successes.doc_count,
     }));
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationData(options.fields, hit, auditdFieldsMap)
+      formatAuthenticationData(hit, auditdFieldsMap)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);

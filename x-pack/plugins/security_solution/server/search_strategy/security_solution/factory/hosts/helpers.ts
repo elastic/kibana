@@ -13,6 +13,8 @@ import { hostFieldsMap } from '../../../../lib/ecs_fields';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../lib/hosts/types';
 
+import { toArray } from '../../../helpers/to_array';
+
 const hostsFields = ['_id', 'lastSeen', 'host.id', 'host.name', 'host.os.name', 'host.os.version'];
 
 export const formatHostEdgesData = (bucket: HostAggEsItem): HostsEdges =>
@@ -23,11 +25,7 @@ export const formatHostEdgesData = (bucket: HostAggEsItem): HostsEdges =>
       flattenedFields.cursor.value = hostId || '';
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
-        return set(
-          `node.${fieldName}`,
-          Array.isArray(fieldValue) ? fieldValue : [fieldValue],
-          flattenedFields
-        );
+        return set(`node.${fieldName}`, toArray(fieldValue), flattenedFields);
       }
       return flattenedFields;
     },

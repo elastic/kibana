@@ -16,6 +16,6 @@ export const ERROR_AUTHENTICATIONS = i18n.translate(
 export const FAIL_AUTHENTICATIONS = i18n.translate(
   'xpack.securitySolution.authentications.failSearchDescription',
   {
-    defaultMessage: `Failed to run search on all hosts`,
+    defaultMessage: `Failed to run search on authentications`,
   }
 );
