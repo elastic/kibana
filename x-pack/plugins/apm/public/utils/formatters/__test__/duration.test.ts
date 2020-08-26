@@ -20,9 +20,12 @@ describe('duration formatters', () => {
         '10,000 ms'
       );
       expect(asDuration(toMicroseconds(20, 'seconds'))).toEqual('20 s');
-      expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('10 min');
+      expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('600 s');
+      expect(asDuration(toMicroseconds(11, 'minutes'))).toEqual('11 min');
       expect(asDuration(toMicroseconds(1, 'hours'))).toEqual('60 min');
-      expect(asDuration(toMicroseconds(1.5, 'hours'))).toEqual('1.5 h');
+      expect(asDuration(toMicroseconds(1.5, 'hours'))).toEqual('90 min');
+      expect(asDuration(toMicroseconds(10, 'hours'))).toEqual('600 min');
+      expect(asDuration(toMicroseconds(11, 'hours'))).toEqual('11 h');
     });
 
     it('falls back to default value', () => {

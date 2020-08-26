@@ -29,7 +29,11 @@ import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import { asDecimal, asDuration, tpmUnit } from '../../../../utils/formatters';
+import {
+  asDecimal,
+  getDurationFormatter,
+  tpmUnit,
+} from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { BrowserLineChart } from './BrowserLineChart';
@@ -53,11 +57,6 @@ const ShiftedEuiText = styled(EuiText)`
   position: relative;
   top: 5px;
 `;
-
-const getResponseTimeTickFormatter = (t: number) => asDuration(t);
-
-const getResponseTimeTooltipFormatter = (p: Coordinate) =>
-  isValidCoordinateValue(p.y) ? asDuration(p.y) : NOT_AVAILABLE_LABEL;
 
 export function getMaxY(responseTimeSeries: TimeSeries[]) {
   const coordinates = flatten(
@@ -140,9 +139,28 @@ export function TransactionCharts({
       </EuiFlexItem>
     );
   }
-
   const { responseTimeSeries, tpmSeries } = charts;
   const { transactionType } = urlParams;
+  const maxY = getMaxY(responseTimeSeries);
+  let formatter = getDurationFormatter(maxY);
+
+  function onToggleLegend(visibleSeries: TimeSeries[]) {
+    if (!isEmpty(visibleSeries)) {
+      // recalculate the formatter based on the max Y from the visible series
+      const maxVisibleY = getMaxY(visibleSeries);
+      formatter = getDurationFormatter(maxVisibleY);
+    }
+  }
+
+  function getResponseTimeTickFormatter(t: number) {
+    return formatter(t).formatted;
+  }
+
+  function getResponseTimeTooltipFormatter(coordinate: Coordinate) {
+    return isValidCoordinateValue(coordinate.y)
+      ? formatter(coordinate.y).formatted
+      : NOT_AVAILABLE_LABEL;
+  }
 
   return (
     <>
@@ -166,6 +184,7 @@ export function TransactionCharts({
                 series={responseTimeSeries}
                 tickFormatY={getResponseTimeTickFormatter}
                 formatTooltipValue={getResponseTimeTooltipFormatter}
+                onToggleLegend={onToggleLegend}
               />
             </React.Fragment>
           </EuiPanel>
