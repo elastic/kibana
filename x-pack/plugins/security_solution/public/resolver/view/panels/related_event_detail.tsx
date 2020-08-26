@@ -21,7 +21,7 @@ import { PanelContentError } from './panel_content_error';
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 8em;
-    word-break: break-word;
+    overflow-wrap: break-word;
   }
   &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
     max-width: calc(100% - 8.5em);
