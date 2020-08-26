@@ -31,7 +31,7 @@ import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from 
 import { AggsService, AggsSetupDependencies } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
-import { registerSearchRoute } from './routes';
+import { registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -79,6 +79,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const router = core.http.createRouter();
     registerSearchRoute(router, { getStartServices: core.getStartServices });
+    registerMsearchRoute(router, { getStartServices: core.getStartServices });
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
