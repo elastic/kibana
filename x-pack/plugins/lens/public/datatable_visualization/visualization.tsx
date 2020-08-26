@@ -163,6 +163,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           ),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
+          required: true,
           dataTestSubj: 'lnsDatatable_metrics',
         },
       ],
