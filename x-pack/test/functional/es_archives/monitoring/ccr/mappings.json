@@ -1,120 +1,53 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": ".monitoring-es-6-2018.09.19",
     "mappings": {
       "date_detection": false,
       "dynamic": false,
       "properties": {
+        "ccr_stats": {
+          "properties": {
+            "follower_global_checkpoint": {
+              "type": "long"
+            },
+            "follower_index": {
+              "type": "keyword"
+            },
+            "leader_global_checkpoint": {
+              "type": "long"
+            },
+            "leader_index": {
+              "type": "keyword"
+            },
+            "leader_max_seq_no": {
+              "type": "long"
+            },
+            "operations_written": {
+              "type": "long"
+            },
+            "remote_cluster": {
+              "type": "keyword"
+            },
+            "shard_id": {
+              "type": "integer"
+            },
+            "time_since_last_read_millis": {
+              "type": "long"
+            }
+          }
+        },
+        "cluster_state": {
+          "properties": {
+            "nodes_hash": {
+              "type": "integer"
+            }
+          }
+        },
         "cluster_uuid": {
           "type": "keyword"
-        },
-        "state_uuid": {
-          "type": "keyword"
-        },
-        "timestamp": {
-          "type": "date",
-          "format": "date_time"
-        },
-        "interval_ms": {
-          "type": "long"
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "source_node": {
-          "properties": {
-            "uuid": {
-              "type": "keyword"
-            },
-            "host": {
-              "type": "keyword"
-            },
-            "transport_address": {
-              "type": "keyword"
-            },
-            "ip": {
-              "type": "keyword"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "timestamp": {
-              "type": "date",
-              "format": "date_time"
-            }
-          }
-        },
-        "indices_stats": {
-          "properties": {
-            "_all": {
-              "properties": {
-                "primaries": {
-                  "properties": {
-                    "docs": {
-                      "properties": {
-                        "count": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "indexing": {
-                      "properties": {
-                        "index_total": {
-                          "type": "long"
-                        },
-                        "index_time_in_millis": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "search": {
-                      "properties": {
-                        "query_total": {
-                          "type": "long"
-                        },
-                        "query_time_in_millis": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "total": {
-                  "properties": {
-                    "docs": {
-                      "properties": {
-                        "count": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "indexing": {
-                      "properties": {
-                        "index_total": {
-                          "type": "long"
-                        },
-                        "index_time_in_millis": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "search": {
-                      "properties": {
-                        "query_total": {
-                          "type": "long"
-                        },
-                        "query_time_in_millis": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
         },
         "index_stats": {
           "properties": {
@@ -130,29 +63,12 @@
                     }
                   }
                 },
-                "fielddata": {
-                  "properties": {
-                    "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "store": {
-                  "properties": {
-                    "size_in_bytes": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "indexing": {
                   "properties": {
-                    "index_total": {
+                    "index_time_in_millis": {
                       "type": "long"
                     },
-                    "index_time_in_millis": {
+                    "index_total": {
                       "type": "long"
                     },
                     "throttle_time_in_millis": {
@@ -167,44 +83,9 @@
                     }
                   }
                 },
-                "query_cache": {
+                "refresh": {
                   "properties": {
-                    "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    },
-                    "hit_count": {
-                      "type": "long"
-                    },
-                    "miss_count": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "request_cache": {
-                  "properties": {
-                    "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    },
-                    "hit_count": {
-                      "type": "long"
-                    },
-                    "miss_count": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "search": {
-                  "properties": {
-                    "query_total": {
-                      "type": "long"
-                    },
-                    "query_time_in_millis": {
+                    "total_time_in_millis": {
                       "type": "long"
                     }
                   }
@@ -213,42 +94,12 @@
                   "properties": {
                     "count": {
                       "type": "integer"
-                    },
-                    "memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "terms_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "points_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "stored_fields_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "term_vectors_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "norms_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "doc_values_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "index_writer_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "version_map_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "fixed_bit_set_memory_in_bytes": {
-                      "type": "long"
                     }
                   }
                 },
-                "refresh": {
+                "store": {
                   "properties": {
-                    "total_time_in_millis": {
+                    "size_in_bytes": {
                       "type": "long"
                     }
                   }
@@ -257,36 +108,19 @@
             },
             "total": {
               "properties": {
-                "docs": {
-                  "properties": {
-                    "count": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "fielddata": {
                   "properties": {
                     "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "store": {
-                  "properties": {
-                    "size_in_bytes": {
                       "type": "long"
                     }
                   }
                 },
                 "indexing": {
                   "properties": {
-                    "index_total": {
+                    "index_time_in_millis": {
                       "type": "long"
                     },
-                    "index_time_in_millis": {
+                    "index_total": {
                       "type": "long"
                     },
                     "throttle_time_in_millis": {
@@ -305,78 +139,6 @@
                   "properties": {
                     "memory_size_in_bytes": {
                       "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    },
-                    "hit_count": {
-                      "type": "long"
-                    },
-                    "miss_count": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "request_cache": {
-                  "properties": {
-                    "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    },
-                    "hit_count": {
-                      "type": "long"
-                    },
-                    "miss_count": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "search": {
-                  "properties": {
-                    "query_total": {
-                      "type": "long"
-                    },
-                    "query_time_in_millis": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "segments": {
-                  "properties": {
-                    "count": {
-                      "type": "integer"
-                    },
-                    "memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "terms_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "points_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "stored_fields_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "term_vectors_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "norms_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "doc_values_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "index_writer_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "version_map_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "fixed_bit_set_memory_in_bytes": {
-                      "type": "long"
                     }
                   }
                 },
@@ -386,117 +148,10 @@
                       "type": "long"
                     }
                   }
-                }
-              }
-            }
-          }
-        },
-        "cluster_stats": {
-          "properties": {
-            "nodes": {
-              "type": "object"
-            },
-            "indices": {
-              "type": "object"
-            }
-          }
-        },
-        "cluster_state": {
-          "properties": {
-            "version": {
-              "type": "long"
-            },
-            "nodes_hash": {
-              "type": "integer"
-            },
-            "master_node": {
-              "type": "keyword"
-            },
-            "state_uuid": {
-              "type": "keyword"
-            },
-            "status": {
-              "type": "keyword"
-            },
-            "nodes": {
-              "type": "object"
-            },
-            "shards": {
-              "type": "object"
-            }
-          }
-        },
-        "node_stats": {
-          "properties": {
-            "node_id": {
-              "type": "keyword"
-            },
-            "node_master": {
-              "type": "boolean"
-            },
-            "mlockall": {
-              "type": "boolean"
-            },
-            "indices": {
-              "properties": {
-                "docs": {
-                  "properties": {
-                    "count": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "fielddata": {
-                  "properties": {
-                    "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "indexing": {
-                  "properties": {
-                    "index_time_in_millis": {
-                      "type": "long"
-                    },
-                    "index_total": {
-                      "type": "long"
-                    },
-                    "throttle_time_in_millis": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "query_cache": {
-                  "properties": {
-                    "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    },
-                    "hit_count": {
-                      "type": "long"
-                    },
-                    "miss_count": {
-                      "type": "long"
-                    }
-                  }
                 },
                 "request_cache": {
                   "properties": {
                     "memory_size_in_bytes": {
-                      "type": "long"
-                    },
-                    "evictions": {
-                      "type": "long"
-                    },
-                    "hit_count": {
-                      "type": "long"
-                    },
-                    "miss_count": {
                       "type": "long"
                     }
                   }
@@ -516,10 +171,19 @@
                     "count": {
                       "type": "integer"
                     },
+                    "doc_values_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "fixed_bit_set_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "index_writer_memory_in_bytes": {
+                      "type": "long"
+                    },
                     "memory_in_bytes": {
                       "type": "long"
                     },
-                    "terms_memory_in_bytes": {
+                    "norms_memory_in_bytes": {
                       "type": "long"
                     },
                     "points_memory_in_bytes": {
@@ -531,19 +195,10 @@
                     "term_vectors_memory_in_bytes": {
                       "type": "long"
                     },
-                    "norms_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "doc_values_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "index_writer_memory_in_bytes": {
+                    "terms_memory_in_bytes": {
                       "type": "long"
                     },
                     "version_map_memory_in_bytes": {
-                      "type": "long"
-                    },
-                    "fixed_bit_set_memory_in_bytes": {
                       "type": "long"
                     }
                   }
@@ -556,29 +211,63 @@
                   }
                 }
               }
-            },
-            "fs": {
+            }
+          }
+        },
+        "indices_stats": {
+          "properties": {
+            "_all": {
               "properties": {
+                "primaries": {
+                  "properties": {
+                    "indexing": {
+                      "properties": {
+                        "index_time_in_millis": {
+                          "type": "long"
+                        },
+                        "index_total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
                 "total": {
                   "properties": {
-                    "total_in_bytes": {
-                      "type": "long"
+                    "indexing": {
+                      "properties": {
+                        "index_total": {
+                          "type": "long"
+                        }
+                      }
                     },
-                    "free_in_bytes": {
-                      "type": "long"
-                    },
-                    "available_in_bytes": {
-                      "type": "long"
+                    "search": {
+                      "properties": {
+                        "query_time_in_millis": {
+                          "type": "long"
+                        },
+                        "query_total": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
-                },
-                "data": {
-                  "properties": {
-                    "spins": {
-                      "type": "boolean"
-                    }
-                  }
-                },
+                }
+              }
+            }
+          }
+        },
+        "job_stats": {
+          "properties": {
+            "job_id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "node_stats": {
+          "properties": {
+            "fs": {
+              "properties": {
                 "io_stats": {
                   "properties": {
                     "total": {
@@ -591,40 +280,161 @@
                         },
                         "write_operations": {
                           "type": "long"
-                        },
-                        "read_kilobytes": {
-                          "type": "long"
-                        },
-                        "write_kilobytes": {
-                          "type": "long"
                         }
                       }
+                    }
+                  }
+                },
+                "total": {
+                  "properties": {
+                    "available_in_bytes": {
+                      "type": "long"
                     }
                   }
                 }
               }
             },
+            "indices": {
+              "properties": {
+                "fielddata": {
+                  "properties": {
+                    "memory_size_in_bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "indexing": {
+                  "properties": {
+                    "index_time_in_millis": {
+                      "type": "long"
+                    },
+                    "index_total": {
+                      "type": "long"
+                    },
+                    "throttle_time_in_millis": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "query_cache": {
+                  "properties": {
+                    "memory_size_in_bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "request_cache": {
+                  "properties": {
+                    "memory_size_in_bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "search": {
+                  "properties": {
+                    "query_time_in_millis": {
+                      "type": "long"
+                    },
+                    "query_total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "segments": {
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "doc_values_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "fixed_bit_set_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "index_writer_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "norms_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "points_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "stored_fields_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "term_vectors_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "terms_memory_in_bytes": {
+                      "type": "long"
+                    },
+                    "version_map_memory_in_bytes": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "jvm": {
+              "properties": {
+                "gc": {
+                  "properties": {
+                    "collectors": {
+                      "properties": {
+                        "old": {
+                          "properties": {
+                            "collection_count": {
+                              "type": "long"
+                            },
+                            "collection_time_in_millis": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "young": {
+                          "properties": {
+                            "collection_count": {
+                              "type": "long"
+                            },
+                            "collection_time_in_millis": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "mem": {
+                  "properties": {
+                    "heap_max_in_bytes": {
+                      "type": "long"
+                    },
+                    "heap_used_in_bytes": {
+                      "type": "long"
+                    },
+                    "heap_used_percent": {
+                      "type": "half_float"
+                    }
+                  }
+                }
+              }
+            },
+            "node_id": {
+              "type": "keyword"
+            },
             "os": {
               "properties": {
                 "cgroup": {
                   "properties": {
-                    "cpuacct": {
-                      "properties": {
-                        "control_group": {
-                          "type": "keyword"
-                        },
-                        "usage_nanos": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "cpu": {
                       "properties": {
                         "cfs_quota_micros": {
                           "type": "long"
-                        },
-                        "control_group": {
-                          "type": "keyword"
                         },
                         "stat": {
                           "properties": {
@@ -641,16 +451,10 @@
                         }
                       }
                     },
-                    "memory": {
+                    "cpuacct": {
                       "properties": {
-                        "control_group": {
-                          "type": "keyword"
-                        },
-                        "limit_in_bytes": {
-                          "type": "keyword"
-                        },
-                        "usage_in_bytes": {
-                          "type": "keyword"
+                        "usage_nanos": {
+                          "type": "long"
                         }
                       }
                     }
@@ -662,12 +466,6 @@
                       "properties": {
                         "1m": {
                           "type": "half_float"
-                        },
-                        "5m": {
-                          "type": "half_float"
-                        },
-                        "15m": {
-                          "type": "half_float"
                         }
                       }
                     }
@@ -677,12 +475,6 @@
             },
             "process": {
               "properties": {
-                "open_file_descriptors": {
-                  "type": "long"
-                },
-                "max_file_descriptors": {
-                  "type": "long"
-                },
                 "cpu": {
                   "properties": {
                     "percent": {
@@ -692,71 +484,10 @@
                 }
               }
             },
-            "jvm": {
-              "properties": {
-                "mem": {
-                  "properties": {
-                    "heap_used_in_bytes": {
-                      "type": "long"
-                    },
-                    "heap_used_percent": {
-                      "type": "half_float"
-                    },
-                    "heap_max_in_bytes": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "gc": {
-                  "properties": {
-                    "collectors": {
-                      "properties": {
-                        "young": {
-                          "properties": {
-                            "collection_count": {
-                              "type": "long"
-                            },
-                            "collection_time_in_millis": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "old": {
-                          "properties": {
-                            "collection_count": {
-                              "type": "long"
-                            },
-                            "collection_time_in_millis": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
             "thread_pool": {
               "properties": {
                 "bulk": {
                   "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
-                    "queue": {
-                      "type": "integer"
-                    },
-                    "rejected": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "generic": {
-                  "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
                     "queue": {
                       "type": "integer"
                     },
@@ -767,9 +498,6 @@
                 },
                 "get": {
                   "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
                     "queue": {
                       "type": "integer"
                     },
@@ -780,22 +508,6 @@
                 },
                 "index": {
                   "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
-                    "queue": {
-                      "type": "integer"
-                    },
-                    "rejected": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "management": {
-                  "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
                     "queue": {
                       "type": "integer"
                     },
@@ -806,22 +518,6 @@
                 },
                 "search": {
                   "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
-                    "queue": {
-                      "type": "integer"
-                    },
-                    "rejected": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "watcher": {
-                  "properties": {
-                    "threads": {
-                      "type": "integer"
-                    },
                     "queue": {
                       "type": "integer"
                     },
@@ -844,246 +540,41 @@
             }
           }
         },
-        "index_recovery": {
-          "type": "object"
-        },
         "shard": {
           "properties": {
-            "state": {
+            "index": {
+              "type": "keyword"
+            },
+            "node": {
               "type": "keyword"
             },
             "primary": {
               "type": "boolean"
             },
-            "index": {
-              "type": "keyword"
-            },
-            "relocating_node": {
-              "type": "keyword"
-            },
-            "shard": {
-              "type": "long"
-            },
-            "node": {
-              "type": "keyword"
-            }
-          }
-        },
-        "job_stats": {
-          "properties": {
-            "job_id": {
-              "type": "keyword"
-            },
             "state": {
               "type": "keyword"
-            },
-            "data_counts": {
-              "properties": {
-                "input_bytes": {
-                  "type": "long"
-                },
-                "processed_record_count": {
-                  "type": "long"
-                },
-                "empty_bucket_count": {
-                  "type": "long"
-                },
-                "sparse_bucket_count": {
-                  "type": "long"
-                },
-                "bucket_count": {
-                  "type": "long"
-                },
-                "earliest_record_timestamp": {
-                  "type": "date"
-                },
-                "latest_record_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "model_size_stats": {
-              "properties": {
-                "model_bytes": {
-                  "type": "long"
-                },
-                "bucket_allocation_failures_count": {
-                  "type": "long"
-                }
-              }
-            },
-            "node": {
-              "properties": {
-                "id": {
-                  "type": "keyword"
-                }
-              }
             }
           }
         },
-        "ccr_stats": {
+        "source_node": {
           "properties": {
-            "remote_cluster": {
+            "name": {
               "type": "keyword"
             },
-            "leader_index": {
+            "uuid": {
               "type": "keyword"
-            },
-            "follower_index": {
-              "type": "keyword"
-            },
-            "shard_id": {
-              "type": "integer"
-            },
-            "leader_global_checkpoint": {
-              "type": "long"
-            },
-            "leader_max_seq_no": {
-              "type": "long"
-            },
-            "follower_global_checkpoint": {
-              "type": "long"
-            },
-            "follower_max_seq_no": {
-              "type": "long"
-            },
-            "last_requested_seq_no": {
-              "type": "long"
-            },
-            "outstanding_read_requests": {
-              "type": "long"
-            },
-            "outstanding_write_requests": {
-              "type": "long"
-            },
-            "write_buffer_operation_count": {
-              "type": "long"
-            },
-            "write_buffer_size_in_bytes": {
-              "type": "long"
-            },
-            "follower_mapping_version": {
-              "type": "long"
-            },
-            "follower_settings_version": {
-              "type": "long"
-            },
-            "total_read_time_millis": {
-              "type": "long"
-            },
-            "total_read_remote_exec_time_millis": {
-              "type": "long"
-            },
-            "successful_read_requests": {
-              "type": "long"
-            },
-            "failed_read_requests": {
-              "type": "long"
-            },
-            "operations_read": {
-              "type": "long"
-            },
-            "bytes_read": {
-              "type": "long"
-            },
-            "total_write_time_millis": {
-              "type": "long"
-            },
-            "successful_write_requests": {
-              "type": "long"
-            },
-            "failed_write_requests": {
-              "type": "long"
-            },
-            "operations_written": {
-              "type": "long"
-            },
-            "read_exceptions": {
-              "type": "nested",
-              "properties": {
-                "from_seq_no": {
-                  "type": "long"
-                },
-                "retries": {
-                  "type": "integer"
-                },
-                "exception": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "keyword"
-                    },
-                    "reason": {
-                      "type": "text"
-                    }
-                  }
-                }
-              }
-            },
-            "time_since_last_read_millis": {
-              "type": "long"
-            },
-            "fatal_exception": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "keyword"
-                },
-                "reason": {
-                  "type": "text"
-                }
-              }
             }
           }
         },
-        "ccr_auto_follow_stats": {
-          "properties": {
-            "number_of_failed_follow_indices": {
-              "type": "long"
-            },
-            "number_of_failed_remote_cluster_state_requests": {
-              "type": "long"
-            },
-            "number_of_successful_follow_indices": {
-              "type": "long"
-            },
-            "recent_auto_follow_errors": {
-              "type": "nested",
-              "properties": {
-                "leader_index": {
-                  "type": "keyword"
-                },
-                "timestamp": {
-                  "type": "long"
-                },
-                "auto_follow_exception": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "keyword"
-                    },
-                    "reason": {
-                      "type": "text"
-                    }
-                  }
-                }
-              }
-            },
-            "auto_followed_clusters": {
-              "type": "nested",
-              "properties": {
-                "cluster_name": {
-                  "type": "keyword"
-                },
-                "time_since_last_check_millis": {
-                  "type": "long"
-                },
-                "last_seen_metadata_version": {
-                  "type": "long"
-                }
-              }
-            }
-          }
+        "state_uuid": {
+          "type": "keyword"
+        },
+        "timestamp": {
+          "format": "date_time",
+          "type": "date"
+        },
+        "type": {
+          "type": "keyword"
         }
       }
     },
