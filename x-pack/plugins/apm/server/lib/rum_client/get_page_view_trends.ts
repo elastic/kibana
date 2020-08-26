@@ -23,7 +23,7 @@ export async function getPageViewTrends({
   const projection = getRumOverviewProjection({
     setup,
   });
-  let breakdownItem: BreakdownItem = null;
+  let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {
     breakdownItem = JSON.parse(breakdowns);
   }
