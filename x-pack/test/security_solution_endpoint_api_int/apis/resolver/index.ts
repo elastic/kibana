@@ -12,5 +12,7 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./entity_id'));
     loadTestFile(require.resolve('./children'));
     loadTestFile(require.resolve('./tree'));
+    loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./events'));
   });
 }
