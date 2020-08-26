@@ -8,8 +8,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiAccordion } from '@elastic/eui';
 import {
-  IStackframe,
-  IStackframeWithLineContext,
+  Stackframe as StackframeType,
+  StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   borderRadius,
@@ -33,7 +33,7 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
 `;
 
 interface Props {
-  stackframe: IStackframe;
+  stackframe: StackframeType;
   codeLanguage?: string;
   id: string;
   initialIsOpen?: boolean;
@@ -49,14 +49,22 @@ export function Stackframe({
 }: Props) {
   if (!hasLineContext(stackframe)) {
     return (
-      <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+      <FrameHeading
+        codeLanguage={codeLanguage}
+        stackframe={stackframe}
+        isLibraryFrame={isLibraryFrame}
+      />
     );
   }
 
   return (
     <EuiAccordion
       buttonContent={
-        <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+        <FrameHeading
+          codeLanguage={codeLanguage}
+          stackframe={stackframe}
+          isLibraryFrame={isLibraryFrame}
+        />
       }
       id={id}
       initialIsOpen={initialIsOpen}
@@ -74,7 +82,7 @@ export function Stackframe({
 }
 
 function hasLineContext(
-  stackframe: IStackframe
-): stackframe is IStackframeWithLineContext {
+  stackframe: StackframeType
+): stackframe is StackframeWithLineContext {
   return stackframe.line?.hasOwnProperty('context') || false;
 }

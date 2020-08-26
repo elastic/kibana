@@ -8,9 +8,9 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { Stackframe } from './Stackframe';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { px, unit } from '../../../style/variables';
+import { Stackframe as StackframeComponent } from './Stackframe';
 
 const FramesContainer = styled('div')`
   padding-left: ${px(unit)};
@@ -18,7 +18,7 @@ const FramesContainer = styled('div')`
 
 interface Props {
   codeLanguage?: string;
-  stackframes: IStackframe[];
+  stackframes: Stackframe[];
   id: string;
 }
 
@@ -41,7 +41,7 @@ export function LibraryStacktrace({ codeLanguage, id, stackframes }: Props) {
     >
       <FramesContainer>
         {stackframes.map((stackframe, i) => (
-          <Stackframe
+          <StackframeComponent
             key={i}
             id={i.toString(10)}
             isLibraryFrame

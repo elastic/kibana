@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { ComponentType } from 'react';
 import styled from 'styled-components';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
+import {
+  CSharpFrameHeadingRenderer,
+  DefaultFrameHeadingRenderer,
+  FrameHeadingRendererProps,
+  JavaFrameHeadingRenderer,
+  JavaScriptFrameHeadingRenderer,
+  RubyFrameHeadingRenderer,
+} from './frame_heading_renderers';
 
 const FileDetails = styled.div`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
@@ -25,29 +33,37 @@ const AppFrameFileDetail = styled.span`
 `;
 
 interface Props {
-  stackframe: IStackframe;
+  codeLanguage?: string;
+  stackframe: Stackframe;
   isLibraryFrame: boolean;
 }
 
-function FrameHeading({ stackframe, isLibraryFrame }: Props) {
-  const FileDetail = isLibraryFrame
+function FrameHeading({ codeLanguage, stackframe, isLibraryFrame }: Props) {
+  const FileDetail: ComponentType = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  const lineNumber = stackframe.line?.number ?? 0;
-
-  const name =
-    'filename' in stackframe ? stackframe.filename : stackframe.classname;
+  let Renderer: ComponentType<FrameHeadingRendererProps>;
+  switch (codeLanguage?.toString().toLowerCase()) {
+    case 'c#':
+      Renderer = CSharpFrameHeadingRenderer;
+      break;
+    case 'java':
+      Renderer = JavaFrameHeadingRenderer;
+      break;
+    case 'javascript':
+      Renderer = JavaScriptFrameHeadingRenderer;
+      break;
+    case 'ruby':
+      Renderer = RubyFrameHeadingRenderer;
+      break;
+    default:
+      Renderer = DefaultFrameHeadingRenderer;
+      break;
+  }
 
   return (
     <FileDetails data-test-subj="FrameHeading">
-      <FileDetail>{name}</FileDetail> in{' '}
-      <FileDetail>{stackframe.function}</FileDetail>
-      {lineNumber > 0 && (
-        <Fragment>
-          {' at '}
-          <FileDetail>line {lineNumber}</FileDetail>
-        </Fragment>
-      )}
+      <Renderer fileDetailComponent={FileDetail} stackframe={stackframe} />
     </FileDetails>
   );
 }
