@@ -29,6 +29,12 @@ const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   }
 `);
 
+// Also prevents horizontal scrollbars on long descriptive names
+const StyledDescriptiveName = memo(styled(EuiText)`
+  padding-right: 1em;
+  overflow-wrap: break-word;
+`);
+
 // Styling subtitles, per UX review:
 const StyledFlexTitle = memo(styled('h3')`
   display: flex;
@@ -298,13 +304,15 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
-          values={{ subject, descriptor }}
-          defaultMessage="{descriptor} {subject}"
-        />
-      </EuiText>
+      <StyledDescriptiveName>
+        <GeneratedText>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
+            values={{ subject, descriptor }}
+            defaultMessage="{descriptor} {subject}"
+          />
+        </GeneratedText>
+      </StyledDescriptiveName>
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
         const displayEntries = entriesForDisplay(entries);
