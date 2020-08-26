@@ -110,12 +110,12 @@ export const calculateHistogramInterval = ({
   values,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
-  let calculatedInterval = 0;
+  let calculatedInterval = isAuto ? 0 : parseFloat(interval);
 
   if (values) {
     calculatedInterval = isAuto
       ? calculateAutoInterval(values, maxBucketsUiSettings, maxBucketsUserInput)
-      : calculateForGivenInterval(values, parseFloat(interval), maxBucketsUiSettings);
+      : calculateForGivenInterval(values, calculatedInterval, maxBucketsUiSettings);
   }
 
   if (intervalBase) {
