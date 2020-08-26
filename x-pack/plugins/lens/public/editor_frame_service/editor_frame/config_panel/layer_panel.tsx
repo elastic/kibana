@@ -297,19 +297,8 @@ export function LayerPanel(
                             }}
                           />
                         }
-                        panel={
-                          <EuiTabbedContent
-                            tabs={tabs}
-                            selectedTab={tabs.find((t) => t.id === popoverState.tabId) || tabs[0]}
-                            size="s"
-                            onTabClick={(tab) => {
-                              setPopoverState({
-                                ...popoverState,
-                                tabId: tab.id as typeof popoverState['tabId'],
-                              });
-                            }}
-                          />
-                        }
+                        panel={<>{tabs.map((tab) => tab.content)}</>}
+                        panelTitle={`${group.groupLabel} configuration`}
                       />
 
                       <EuiButtonIcon
@@ -428,6 +417,7 @@ export function LayerPanel(
                           </EuiButtonEmpty>
                         </div>
                       }
+                      panelTitle={group.groupLabel}
                       panel={
                         <NativeRenderer
                           render={props.datasourceMap[datasourceId].renderDimensionEditor}

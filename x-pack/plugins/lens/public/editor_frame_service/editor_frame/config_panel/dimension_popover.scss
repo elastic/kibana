@@ -13,8 +13,16 @@
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
 
+.lnsDimensionPopover__footer {
+  padding: $euiSizeXS;
+}
+
+.lnsDimensionPopover__header {
+  padding: $euiSizeS;
+}
+
 .lnsDimensionPopover__trigger {
-  max-width: 100%;
+  width: 100%;
   display: block;
   word-break: break-word;
 }

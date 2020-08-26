@@ -6,7 +6,14 @@
 import './dimension_popover.scss';
 
 import React from 'react';
-import { EuiIcon, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiTitle,
+  EuiButtonEmpty,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { VisualizationDimensionGroupConfig } from '../../../types';
 import { DimensionPopoverState } from './types';
 
@@ -18,6 +25,7 @@ export function DimensionPopover({
   groupId,
   trigger,
   panel,
+  panelTitle,
 }: {
   popoverState: DimensionPopoverState;
   setPopoverState: (newState: DimensionPopoverState) => void;
@@ -26,8 +34,18 @@ export function DimensionPopover({
   groupId: string;
   trigger: React.ReactElement;
   panel: React.ReactElement;
+  panelTitle: React.ReactNode;
 }) {
   const noMatch = popoverState.isOpen ? !groups.some((d) => d.accessors.includes(accessor)) : false;
+
+  const closeFlyout = () => {
+    setPopoverState({
+      isOpen: false,
+      openId: null,
+      addingToGroupId: null,
+      tabId: null,
+    });
+  };
 
   let flyout;
   if (
@@ -35,26 +53,28 @@ export function DimensionPopover({
     (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
   ) {
     flyout = (
-      <div role="dialog" aria-labelledby="flyoutTitle" className="lnsDimensionPopover">
-        <EuiFlyoutHeader hasBorder>
+      <div
+        role="dialog"
+        aria-labelledby="lnsDimensionPopoverFlyoutTitle"
+        className="lnsDimensionPopover"
+      >
+        <EuiFlyoutHeader hasBorder className="lnsDimensionPopover__header">
           <EuiTitle size="xs">
-            <button
-              onClick={() => {
-                setPopoverState({
-                  isOpen: false,
-                  openId: null,
-                  addingToGroupId: null,
-                  tabId: null,
-                });
-              }}
-            >
-              <h2 id="flyoutTitle">
-                <EuiIcon type="sortLeft" /> A typical flyout
+            <button onClick={closeFlyout}>
+              <h2 id="lnsDimensionPopoverFlyoutTitle">
+                <EuiIcon type="sortLeft" /> {panelTitle}
               </h2>
             </button>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{panel}</EuiFlyoutBody>
+        <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
+          {panel}
+        </EuiFlexItem>
+        <EuiFlyoutFooter className="lnsDimensionPopover__footer">
+          <EuiButtonEmpty size="s" onClick={closeFlyout}>
+            Close
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
       </div>
     );
   }

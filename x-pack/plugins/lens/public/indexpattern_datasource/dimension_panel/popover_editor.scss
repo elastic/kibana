@@ -1,7 +1,8 @@
 .lnsIndexPatternDimensionEditor {
-  width: $euiSize * 30;
-  padding: $euiSizeS;
-  max-width: 100%;
+  // width: $euiSize * 30;
+  // padding: $euiSizeS;
+  // max-width: 100%;
+  height: 100%;
 }
 
 .lnsIndexPatternDimensionEditor__left,
@@ -11,7 +12,7 @@
 
 .lnsIndexPatternDimensionEditor__left {
   background-color: $euiPageBackgroundColor;
-  width: $euiSize * 8;
+  // width: $euiSize * 8;
 }
 
 .lnsIndexPatternDimensionEditor__operation > button {
