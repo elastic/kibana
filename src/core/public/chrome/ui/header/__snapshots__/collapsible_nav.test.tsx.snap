@@ -147,7 +147,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "euiIconType": "logoSecurity",
-            "id": "security",
+            "id": "securitySolution",
             "label": "Security",
             "order": 4000,
           },
@@ -1393,11 +1393,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 </EuiAccordion>
               </EuiCollapsibleNavGroup>
               <EuiCollapsibleNavGroup
-                data-test-subj="collapsibleNavGroup-security"
+                data-test-subj="collapsibleNavGroup-securitySolution"
                 iconType="logoSecurity"
                 initialIsOpen={true}
                 isCollapsible={true}
-                key="security"
+                key="securitySolution"
                 onToggle={[Function]}
                 title="Security"
               >
@@ -1433,7 +1433,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexGroup>
                   }
                   className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-security"
+                  data-test-subj="collapsibleNavGroup-securitySolution"
                   id="mockId"
                   initialIsOpen={true}
                   onToggle={[Function]}
@@ -1441,7 +1441,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 >
                   <div
                     className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                    data-test-subj="collapsibleNavGroup-security"
+                    data-test-subj="collapsibleNavGroup-securitySolution"
                     onToggle={[Function]}
                   >
                     <div
