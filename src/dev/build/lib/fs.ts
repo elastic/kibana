@@ -273,7 +273,16 @@ export async function compressTar({
 
   archive.pipe(output);
 
-  return archive.directory(source, name).finalize();
+  let fileCount = 0;
+  archive.on('entry', (entry) => {
+    if (entry.stats?.isFile()) {
+      fileCount += 1;
+    }
+  });
+
+  await archive.directory(source, name).finalize();
+
+  return fileCount;
 }
 
 interface CompressZipOptions {
@@ -294,5 +303,14 @@ export async function compressZip({
 
   archive.pipe(output);
 
-  return archive.directory(source, name).finalize();
+  let fileCount = 0;
+  archive.on('entry', (entry) => {
+    if (entry.stats?.isFile()) {
+      fileCount += 1;
+    }
+  });
+
+  await archive.directory(source, name).finalize();
+
+  return fileCount;
 }

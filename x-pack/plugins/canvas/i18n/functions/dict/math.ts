@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { math } from '../../../canvas_plugin_src/functions/common/math';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { DATATABLE, CONTEXT, TINYMATH, TINYMATH_URL } from '../../constants';
+import { DATATABLE, CONTEXT, TINYMATH, TINYMATH_URL, TYPE_NUMBER } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof math>> = {
   help: i18n.translate('xpack.canvas.functions.mathHelpText', {
     defaultMessage:
-      'Interprets a {TINYMATH} math expression using a number or {DATATABLE} as {CONTEXT}. ' +
+      'Interprets a {TINYMATH} math expression using a {TYPE_NUMBER} or {DATATABLE} as {CONTEXT}. ' +
       'The {DATATABLE} columns are available by their column name. ' +
       'If the {CONTEXT} is a number it is available as {value}.',
     values: {
@@ -21,6 +21,7 @@ export const help: FunctionHelp<FunctionFactory<typeof math>> = {
       CONTEXT,
       DATATABLE,
       value: '`value`',
+      TYPE_NUMBER,
     },
   }),
   args: {
