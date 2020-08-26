@@ -76,21 +76,6 @@ const convertFieldsToAssociativeArray = (
       }, {})
     : {};
 
-export const getIndexAlias = (defaultIndex: string[], indexName: string): string => {
-  try {
-    const found = defaultIndex.find((index) => `\\${indexName}`.match(`\\${index}`) != null);
-    if (found != null) {
-      return found;
-    } else {
-      return 'unknown';
-    }
-  } catch (error) {
-    // if we encounter an error because the index contains invalid regular expressions then we should return an unknown
-    // rather than blow up with a toaster error upstream
-    return 'unknown';
-  }
-};
-
 export const getIndexSchemaDoc = memoize((index: string) => {
   if (index.match('auditbeat') != null) {
     return {
