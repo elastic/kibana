@@ -228,7 +228,13 @@ export class IndexPattern implements IIndexPattern {
 
     // give index pattern all of the values
     const fieldList = this.fields;
-    _.assign(this, response);
+    this.title = response.title;
+    this.timeFieldName = response.timeFieldName;
+    this.intervalName = response.intervalName;
+    this.sourceFilters = response.sourceFilters;
+    this.fieldFormatMap = response.fieldFormatMap;
+    this.type = response.type;
+    this.typeMeta = response.typeMeta;
     this.fields = fieldList;
 
     if (!this.title && this.id) {
