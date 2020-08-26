@@ -18,7 +18,7 @@ export function PageViewsTrend() {
 
   const { start, end, serviceName } = urlParams;
 
-  const [breakdown, setBreakdown] = useState<BreakdownItem>();
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -44,7 +44,7 @@ export function PageViewsTrend() {
     [end, start, serviceName, uiFilters, breakdown]
   );
 
-  const onBreakdownChange = (value: BreakdownItem) => {
+  const onBreakdownChange = (value: BreakdownItem | null) => {
     setBreakdown(value);
   };
 

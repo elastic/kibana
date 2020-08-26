@@ -43,7 +43,7 @@ interface PageLoadData {
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
   data?: PageLoadData | null;
-  breakdown: BreakdownItem;
+  breakdown: BreakdownItem | null;
   percentileRange: PercentileRange;
   loading: boolean;
 }

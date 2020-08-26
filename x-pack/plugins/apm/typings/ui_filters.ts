@@ -14,7 +14,6 @@ export type UIFilters = {
 
 export interface BreakdownItem {
   name: string;
-  count: number;
   type: string;
   fieldName: string;
   selected?: boolean;

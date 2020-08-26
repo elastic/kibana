@@ -11,7 +11,6 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
@@ -24,7 +23,10 @@ export async function getPageViewTrends({
   const projection = getRumOverviewProjection({
     setup,
   });
-  const breakdownItem: BreakdownItem = JSON.parse(breakdowns ?? null);
+  let breakdownItem: BreakdownItem = null;
+  if (breakdowns) {
+    breakdownItem = JSON.parse(breakdowns);
+  }
 
   const params = mergeProjection(projection, {
     body: {

@@ -15,8 +15,8 @@ import {
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
-  selectedBreakdown: BreakdownItem;
-  onBreakdownChange: (value: BreakdownItem) => void;
+  selectedBreakdown: BreakdownItem | null;
+  onBreakdownChange: (value: BreakdownItem | null) => void;
 }
 
 export function BreakdownFilter({
@@ -59,11 +59,11 @@ export function BreakdownFilter({
     dropdownDisplay: name,
   }));
 
-  const onOptionChange = (value) => {
+  const onOptionChange = (value: string) => {
     if (value === NO_BREAKDOWN) {
       onBreakdownChange(null);
     }
-    onBreakdownChange(items.find(({ fieldName }) => fieldName === value));
+    onBreakdownChange(items.find(({ fieldName }) => fieldName === value)!);
   };
 
   return (

@@ -34,7 +34,7 @@ export function PageLoadDistribution() {
     max: null,
   });
 
-  const [breakdown, setBreakdown] = useState<BreakdownItem>();
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
