@@ -56,14 +56,14 @@ interface IndexPatternDeps {
 }
 
 export class IndexPattern implements IIndexPattern {
-  [key: string]: any;
-
   public id?: string;
   public title: string = '';
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
+  public intervalName: string | undefined;
+  public type: string | undefined;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
@@ -72,7 +72,7 @@ export class IndexPattern implements IIndexPattern {
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
-  private sourceFilters?: SourceFilter[];
+  public sourceFilters?: SourceFilter[];
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
@@ -126,7 +126,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onNotification);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
@@ -436,18 +436,16 @@ export class IndexPattern implements IIndexPattern {
   }
 
   prepBody() {
-    const body: { [key: string]: any } = {};
-
-    // serialize json fields
-    _.forOwn(this.mapping, (fieldMapping, fieldName) => {
-      if (!fieldName || this[fieldName] == null) return;
-
-      body[fieldName] = fieldMapping._serialize
-        ? fieldMapping._serialize(this[fieldName])
-        : this[fieldName];
-    });
-
-    return body;
+    return {
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      intervalName: this.intervalName,
+      sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters),
+      fields: this.mapping.sourceFilters._serialize!(this.sourceFilters),
+      fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
+      type: this.type,
+      typeMeta: this.mapping.typeMeta._serialize!(this.mapping),
+    };
   }
 
   getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
@@ -493,6 +491,7 @@ export class IndexPattern implements IIndexPattern {
     const body = this.prepBody();
     // What keys changed since they last pulled the index pattern
     const originalChangedKeys = Object.keys(body).filter(
+      // @ts-expect-error
       (key) => body[key] !== this.originalBody[key]
     );
     return this.savedObjectsClient
@@ -526,6 +525,7 @@ export class IndexPattern implements IIndexPattern {
             // is the same as the original response (since that is expected
             // if we made a change in that key)
             const serverChangedKeys = Object.keys(updatedBody).filter((key) => {
+              // @ts-expect-error
               return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
             });
 
@@ -551,6 +551,7 @@ export class IndexPattern implements IIndexPattern {
 
             // Set the updated response on this object
             serverChangedKeys.forEach((key) => {
+              // @ts-expect-error
               this[key] = samePattern[key];
             });
             this.version = samePattern.version;
