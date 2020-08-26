@@ -78,7 +78,7 @@ export const CategoryStoppedPartitions: FC = () => {
           tap((results) => {
             if (Array.isArray(results)) {
               setTableRow(
-                results.map((partitionName) => ({
+                results.slice(0, NUMBER_OF_PREVIEW).map((partitionName) => ({
                   partitionName,
                 }))
               );
