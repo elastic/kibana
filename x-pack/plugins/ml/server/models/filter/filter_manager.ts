@@ -140,7 +140,11 @@ export class FilterManager {
     delete filter.filterId;
     try {
       // Returns the newly created filter.
-      return await this._asInternalUser.ml.putFilter({ filter_id: filterId, body: filter });
+      const { body } = await this._asInternalUser.ml.putFilter({
+        filter_id: filterId,
+        body: filter,
+      });
+      return body;
     } catch (error) {
       throw Boom.badRequest(error);
     }

@@ -140,6 +140,7 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    return this._asInternalUser.ml.deleteCalendar({ calendar_id: calendarId });
+    const { body } = await this._asInternalUser.ml.deleteCalendar({ calendar_id: calendarId });
+    return body;
   }
 }

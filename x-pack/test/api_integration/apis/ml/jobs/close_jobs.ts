@@ -47,8 +47,8 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
 
         responseBody: {
-          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { statusCode: 409 } },
-          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { statusCode: 409 } },
+          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { status: 409 } },
+          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { status: 409 } },
         },
       },
     },
@@ -162,9 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expectedRspJobIds.forEach((id) => {
             expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
-            expect(body[id].error.statusCode).to.eql(
-              testData.expected.responseBody[id].error.statusCode
-            );
+            expect(body[id].error.status).to.eql(testData.expected.responseBody[id].error.status);
           });
 
           // ensure jobs are still open

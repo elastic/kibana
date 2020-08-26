@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 400,
         responseBody: {
           error: 'Bad Request',
-          message: 'Invalid filter_id',
+          message: 'status_exception',
         },
       },
     },
