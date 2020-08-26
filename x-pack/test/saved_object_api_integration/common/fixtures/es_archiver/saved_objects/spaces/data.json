@@ -397,3 +397,91 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_2a",
+    "index": ".kibana",
+    "source": {
+      "originId": "conflict_2",
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_2b",
+    "index": ".kibana",
+    "source": {
+      "originId": "conflict_2",
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_3",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_4a",
+    "index": ".kibana",
+    "source": {
+      "originId": "conflict_4",
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
