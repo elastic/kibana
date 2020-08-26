@@ -83,7 +83,16 @@ const mockMappings = {
 
 describe('Filter Utils', () => {
   describe('#validateConvertFilterToKueryNode', () => {
-    test('Validate a simple filter', () => {
+    test('Validate a simple KQL KueryNode filter', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          esKuery.nodeTypes.function.buildNode('is', `foo.attributes.title`, 'best', true),
+          mockMappings
+        )
+      ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
+    });
+    test('Validate a simple KQL string filter', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
