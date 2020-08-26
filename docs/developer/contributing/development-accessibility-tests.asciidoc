@@ -1,5 +1,37 @@
 [[development-accessibility-tests]]
-== Automated Accessibility Testing
+==== Automated Accessibility Testing
+
+To write an accessibility test, use the provided accessibility service `getService('a11y')`. Accessibility tests are fairly straightforward to write as https://github.com/dequelabs/axe-core[axe] does most of the heavy lifting. In short, navigate to the UI that needs to be tested then call `testAppSnapshot();` from the service imported earlier which will make sure axe finds no failures. Navigate through every portion of the UI for the best coverage.
+
+An example test might look like this:
+["source","js"]
+----
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
+  const a11y = getService('a11y');
+
+  describe('Kibana Home', () => {
+    before(async () => {
+      // navigate to a page
+      await PageObjects.common.navigateToApp('home');
+    });
+
+    it('Kibana Home view', async () => {
+      // run axe on the page load
+      await a11y.testAppSnapshot(); // this expects that there are no failures found by axe
+    });
+
+    it('Add Kibana sample data page', async () => {
+      // see a different version of this page be loading data
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      // re-run axe on the new UI
+      await a11y.testAppSnapshot();
+    });
+  });
+}
+----
 
 To run the tests locally:
 
