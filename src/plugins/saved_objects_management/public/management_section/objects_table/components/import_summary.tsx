@@ -146,7 +146,7 @@ const getStatusIndicator = ({ outcome, errorMessage }: ImportItem) => {
     case 'created':
       return (
         <EuiIconTip
-          type={'check'}
+          type={'checkInCircleFilled'}
           color={'success'}
           content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
             defaultMessage: 'Created',
@@ -157,7 +157,6 @@ const getStatusIndicator = ({ outcome, errorMessage }: ImportItem) => {
       return (
         <EuiIconTip
           type={'check'}
-          color={'warning'}
           content={i18n.translate('savedObjectsManagement.importSummary.overwrittenOutcomeLabel', {
             defaultMessage: 'Overwritten',
           })}
@@ -166,7 +165,7 @@ const getStatusIndicator = ({ outcome, errorMessage }: ImportItem) => {
     case 'error':
       return (
         <EuiIconTip
-          type={'cross'}
+          type={'alert'}
           color={'danger'}
           content={i18n.translate('savedObjectsManagement.importSummary.errorOutcomeLabel', {
             defaultMessage: 'Error{message}',
