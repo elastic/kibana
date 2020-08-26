@@ -25,7 +25,6 @@ import { AppRouter, AppNotFound } from '../ui';
 import { MockedMounterMap, MockedMounterTuple } from '../test_types';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
 import { AppStatus } from '../types';
-import { ScopedHistory } from '../scoped_history';
 
 describe('AppRouter', () => {
   let mounters: MockedMounterMap;
@@ -378,26 +377,6 @@ describe('AppRouter', () => {
     expect(scopedApp?.unmount).not.toHaveBeenCalled();
     expect(scopedAppHistory.location.pathname).toEqual('/subpath');
     expect(globalHistory.location.pathname).toEqual('/app/scopedApp/subpath');
-  });
-
-  it('calls legacy mount handler', async () => {
-    await navigate('/app/legacyApp1');
-    expect(mounters.get('legacyApp1')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/legacyApp1',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
-  it('handles legacy apps with subapps', async () => {
-    await navigate('/app/baseApp');
-    expect(mounters.get('baseApp:legacyApp2')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/baseApp',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
   });
 
   it('displays error page if no app is found', async () => {
