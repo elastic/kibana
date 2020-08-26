@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 
 import {
   RuleStep,
@@ -38,25 +38,25 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   setForm,
 }) => {
   const initialState = defaultValues ?? stepScheduleDefaultValue;
-  const [myStepData, setMyStepData] = useState<ScheduleStepRule>(initialState);
+  // const [myStepData, setMyStepData] = useState<ScheduleStepRule>(initialState);
 
-  const { form } = useForm({
+  const { form } = useForm<ScheduleStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
+  const { reset, submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
-      setStepData(RuleStep.scheduleRule, null, false);
-      const { isValid: newIsValid, data } = await submit();
-      if (newIsValid) {
-        setStepData(RuleStep.scheduleRule, { ...data }, newIsValid);
-        setMyStepData(data as ScheduleStepRule);
+      // setStepData(RuleStep.scheduleRule, null, false);
+      const { isValid, data } = await submit();
+      if (isValid) {
+        setStepData(RuleStep.scheduleRule, data, isValid);
+        reset({ defaultValue: data });
       }
     }
-  }, [setStepData, submit]);
+  }, [reset, setStepData, submit]);
 
   useEffect(() => {
     if (setForm) {
@@ -64,9 +64,9 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     }
   }, [form, setForm]);
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
     </StepContentWrapper>
   ) : (
     <>

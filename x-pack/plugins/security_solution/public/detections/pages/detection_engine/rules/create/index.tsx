@@ -247,7 +247,7 @@ const CreateRulePageComponent: React.FC = () => {
   const manageIsEditable = useCallback(
     async (step: RuleStep) => {
       const activeForm = await stepsForm.current[activeStep]?.submit();
-      if (activeForm != null && activeForm?.isValid) {
+      if (activeForm?.isValid) {
         stepsData.current[activeStep].isValid = true;
         stepsData.current[activeStep].data = {
           ...stepsData.current[activeStep].data,

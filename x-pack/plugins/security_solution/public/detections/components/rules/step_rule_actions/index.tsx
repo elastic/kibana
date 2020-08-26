@@ -69,7 +69,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   actionMessageParams,
 }) => {
   const initialState = defaultValues ?? stepActionsDefaultValue;
-  const [myStepData, setMyStepData] = useState<ActionsStepRule>(initialState);
+  const [throttle, setThrottle] = useState<ActionsStepRule['throttle']>(initialState.throttle);
   const {
     services: {
       application,
@@ -78,12 +78,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   } = useKibana();
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
 
-  const { form } = useForm({
+  const { form } = useForm<ActionsStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
+  const { getFields, reset, submit } = form;
 
   const kibanaAbsoluteUrl = useMemo(
     () =>
@@ -96,15 +96,16 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const onSubmit = useCallback(
     async (enabled: boolean) => {
       if (setStepData) {
-        setStepData(RuleStep.ruleActions, null, false);
-        const { isValid: newIsValid, data } = await submit();
-        if (newIsValid) {
-          setStepData(RuleStep.ruleActions, { ...data, enabled }, newIsValid);
-          setMyStepData(data as ActionsStepRule);
+        // setStepData(RuleStep.ruleActions, null, false);
+        const { isValid, data } = await submit();
+        if (isValid) {
+          setStepData(RuleStep.ruleActions, { ...data, enabled }, isValid);
+          reset({ defaultValue: { ...data, enabled } });
+          // setMyStepData(data as ActionsStepRule);
         }
       }
     },
-    [setStepData, submit]
+    [reset, setStepData, submit]
   );
 
   useEffect(() => {
@@ -113,16 +114,18 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [form, setForm]);
 
-  const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
-    myStepData,
-    setMyStepData,
-  ]);
+  const updateThrottle = useCallback(
+    (_throttle) => {
+      const throttleField = getFields().throttle;
+      throttleField.setValue(_throttle);
+      setThrottle(_throttle);
+    },
+    [getFields]
+  );
 
   const throttleOptions = useMemo(() => {
-    const throttle = myStepData.throttle;
-
     return getThrottleOptions(throttle);
-  }, [myStepData]);
+  }, [throttle]);
 
   const throttleFieldComponentProps = useMemo(
     () => ({
@@ -135,13 +138,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         options: throttleOptions,
       },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLoading, updateThrottle]
+    [isLoading, throttleOptions, updateThrottle]
   );
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription schema={schema} data={myStepData} columns="single" />
+      <StepRuleDescription schema={schema} data={initialState} columns="single" />
     </StepContentWrapper>
   ) : (
     <>
@@ -153,12 +155,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               component={ThrottleSelectField}
               componentProps={throttleFieldComponentProps}
             />
-            {myStepData.throttle !== stepActionsDefaultValue.throttle ? (
+            {throttle !== stepActionsDefaultValue.throttle ? (
               <>
                 <EuiSpacer />
                 <UseField
                   path="actions"
-                  defaultValue={myStepData.actions}
+                  // defaultValue={initialState.actions}
                   component={RuleActionsField}
                   componentProps={{
                     messageVariables: actionMessageParams,
@@ -168,7 +170,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             ) : (
               <UseField
                 path="actions"
-                defaultValue={myStepData.actions}
+                // defaultValue={initialState.actions}
                 component={GhostFormField}
               />
             )}
@@ -177,7 +179,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               defaultValue={kibanaAbsoluteUrl}
               component={GhostFormField}
             />
-            <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
+            <UseField path="enabled" component={GhostFormField} />
           </EuiForm>
         </Form>
       </StepContentWrapper>

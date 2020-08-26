@@ -5,7 +5,7 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -72,7 +72,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setStepData,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
-  const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? [],
     'step_about_rule'
@@ -82,23 +81,22 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     !isMlRule(defineRuleData.ruleType) &&
     !isThresholdRule(defineRuleData.ruleType);
 
-  const { form } = useForm({
+  const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields, reset, submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
-      setStepData(RuleStep.aboutRule, null, false);
       const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.aboutRule, data, isValid);
-        setMyStepData(data as AboutStepRule);
+        reset({ defaultValue: data });
       }
     }
-  }, [setStepData, submit]);
+  }, [reset, setStepData, submit]);
 
   useEffect(() => {
     if (setForm) {
@@ -106,9 +104,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     }
   }, [setForm, form]);
 
-  return isReadOnlyView && myStepData.name != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
     </StepContentWrapper>
   ) : (
     <>

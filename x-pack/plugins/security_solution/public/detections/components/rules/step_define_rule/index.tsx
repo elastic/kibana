@@ -50,7 +50,7 @@ import * as i18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues: DefineStepRule | undefined;
+  defaultValues?: DefineStepRule;
 }
 
 const stepDefineDefaultValue: DefineStepRule = {
