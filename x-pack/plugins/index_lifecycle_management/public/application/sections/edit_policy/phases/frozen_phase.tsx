@@ -18,7 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { ColdPhase as ColdPhaseInterface, Phases } from '../../../services/policies/types';
+import { FrozenPhase as FrozenPhaseInterface, Phases } from '../../../services/policies/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
@@ -32,21 +32,21 @@ import {
   SetPriorityInput,
 } from '../components';
 
-const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
+const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.freezeIndexLabel', {
   defaultMessage: 'Freeze index',
 });
 
-const coldProperty: keyof Phases = 'cold';
-const phaseProperty = (propertyName: keyof ColdPhaseInterface) => propertyName;
+const frozenProperty: keyof Phases = 'frozen';
+const phaseProperty = (propertyName: keyof FrozenPhaseInterface) => propertyName;
 
 interface Props {
-  setPhaseData: (key: keyof ColdPhaseInterface & string, value: string | boolean) => void;
-  phaseData: ColdPhaseInterface;
+  setPhaseData: (key: keyof FrozenPhaseInterface & string, value: string | boolean) => void;
+  phaseData: FrozenPhaseInterface;
   isShowingErrors: boolean;
-  errors?: PhaseValidationErrors<ColdPhaseInterface>;
+  errors?: PhaseValidationErrors<FrozenPhaseInterface>;
   hotPhaseRolloverEnabled: boolean;
 }
-export class ColdPhase extends PureComponent<Props> {
+export class FrozenPhase extends PureComponent<Props> {
   render() {
     const {
       setPhaseData,
@@ -57,14 +57,14 @@ export class ColdPhase extends PureComponent<Props> {
     } = this.props;
 
     return (
-      <div id="coldPhaseContent" aria-live="polite" role="region">
+      <div id="frozenPhaseContent" aria-live="polite" role="region">
         <EuiDescribedFormGroup
           title={
             <div>
               <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
-                  defaultMessage="Cold phase"
+                  id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseLabel"
+                  defaultMessage="Frozen phase"
                 />
               </h2>{' '}
               {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
@@ -76,26 +76,26 @@ export class ColdPhase extends PureComponent<Props> {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
+                  id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescriptionText"
                   defaultMessage="You are querying your index less frequently, so you can allocate shards
                   on significantly less performant hardware.
                   Because your queries are slower, you can reduce the number of replicas."
                 />
               </p>
               <EuiSwitch
-                data-test-subj="enablePhaseSwitch-cold"
+                data-test-subj="enablePhaseSwitch-frozen"
                 label={
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
-                    defaultMessage="Activate cold phase"
+                    id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateWarmPhaseSwitchLabel"
+                    defaultMessage="Activate frozen phase"
                   />
                 }
-                id={`${coldProperty}-${phaseProperty('phaseEnabled')}`}
+                id={`${frozenProperty}-${phaseProperty('phaseEnabled')}`}
                 checked={phaseData.phaseEnabled}
                 onChange={(e) => {
                   setPhaseData(phaseProperty('phaseEnabled'), e.target.checked);
                 }}
-                aria-controls="coldPhaseContent"
+                aria-controls="frozenPhaseContent"
               />
             </Fragment>
           }
@@ -104,18 +104,18 @@ export class ColdPhase extends PureComponent<Props> {
           <Fragment>
             {phaseData.phaseEnabled ? (
               <Fragment>
-                <MinAgeInput<ColdPhaseInterface>
+                <MinAgeInput<FrozenPhaseInterface>
                   errors={errors}
                   phaseData={phaseData}
-                  phase={coldProperty}
+                  phase={frozenProperty}
                   isShowingErrors={isShowingErrors}
                   setPhaseData={setPhaseData}
                   rolloverEnabled={hotPhaseRolloverEnabled}
                 />
                 <EuiSpacer />
 
-                <NodeAllocation<ColdPhaseInterface>
-                  phase={coldProperty}
+                <NodeAllocation<FrozenPhaseInterface>
+                  phase={frozenProperty}
                   setPhaseData={setPhaseData}
                   errors={errors}
                   phaseData={phaseData}
@@ -125,11 +125,11 @@ export class ColdPhase extends PureComponent<Props> {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                     <ErrableFormRow
-                      id={`${coldProperty}-${phaseProperty('freezeEnabled')}`}
+                      id={`${frozenProperty}-${phaseProperty('freezeEnabled')}`}
                       label={
                         <Fragment>
                           <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel"
+                            id="xpack.indexLifecycleMgmt.frozenPhase.numberOfReplicasLabel"
                             defaultMessage="Number of replicas"
                           />
                           <OptionalLabel />
@@ -138,14 +138,14 @@ export class ColdPhase extends PureComponent<Props> {
                       isShowingErrors={isShowingErrors}
                       errors={errors?.freezeEnabled}
                       helpText={i18n.translate(
-                        'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                        'xpack.indexLifecycleMgmt.frozenPhase.replicaCountHelpText',
                         {
                           defaultMessage: 'By default, the number of replicas remains the same.',
                         }
                       )}
                     >
                       <EuiFieldNumber
-                        id={`${coldProperty}-${phaseProperty('selectedReplicaCount')}`}
+                        id={`${frozenProperty}-${phaseProperty('selectedReplicaCount')}`}
                         value={phaseData.selectedReplicaCount}
                         onChange={(e) => {
                           setPhaseData(phaseProperty('selectedReplicaCount'), e.target.value);
@@ -167,7 +167,7 @@ export class ColdPhase extends PureComponent<Props> {
               title={
                 <h3>
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                    id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.freezeText"
                     defaultMessage="Freeze"
                   />
                 </h3>
@@ -175,7 +175,7 @@ export class ColdPhase extends PureComponent<Props> {
               description={
                 <EuiTextColor color="subdued">
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                    id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.freezeIndexExplanationText"
                     defaultMessage="A frozen index has little overhead on the cluster and is blocked for write operations.
                     You can search a frozen index, but expect queries to be slower."
                   />{' '}
@@ -195,10 +195,10 @@ export class ColdPhase extends PureComponent<Props> {
                 aria-label={freezeLabel}
               />
             </EuiDescribedFormGroup>
-            <SetPriorityInput<ColdPhaseInterface>
+            <SetPriorityInput<FrozenPhaseInterface>
               errors={errors}
               phaseData={phaseData}
-              phase={coldProperty}
+              phase={frozenProperty}
               isShowingErrors={isShowingErrors}
               setPhaseData={setPhaseData}
             />

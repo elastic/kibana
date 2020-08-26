@@ -9,7 +9,16 @@ import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
-import { ColdPhase, DeletePhase, HotPhase, Phase, Policy, PolicyFromES, WarmPhase } from './types';
+import {
+  ColdPhase,
+  DeletePhase,
+  FrozenPhase,
+  HotPhase,
+  Phase,
+  Policy,
+  PolicyFromES,
+  WarmPhase,
+} from './types';
 
 export const propertyof = <T>(propertyName: keyof T & string) => propertyName;
 
@@ -108,6 +117,7 @@ export interface ValidationErrors {
   hot: PhaseValidationErrors<HotPhase>;
   warm: PhaseValidationErrors<WarmPhase>;
   cold: PhaseValidationErrors<ColdPhase>;
+  frozen: PhaseValidationErrors<FrozenPhase>;
   delete: PhaseValidationErrors<DeletePhase>;
   policyName: string[];
 }
@@ -148,6 +158,7 @@ export const validatePolicy = (
   const hotPhaseErrors = validateHotPhase(policy.phases.hot);
   const warmPhaseErrors = validateWarmPhase(policy.phases.warm);
   const coldPhaseErrors = validateColdPhase(policy.phases.cold);
+  const frozenPhaseErrors = validateColdPhase(policy.phases.frozen);
   const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
   const isValid =
     policyNameErrors.length === 0 &&
@@ -162,6 +173,7 @@ export const validatePolicy = (
       hot: hotPhaseErrors,
       warm: warmPhaseErrors,
       cold: coldPhaseErrors,
+      frozen: frozenPhaseErrors,
       delete: deletePhaseErrors,
     },
   ];

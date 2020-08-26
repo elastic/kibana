@@ -7,4 +7,5 @@
 export { HotPhase } from './hot_phase';
 export { WarmPhase } from './warm_phase';
 export { ColdPhase } from './cold_phase';
+export { FrozenPhase } from './frozen_phase';
 export { DeletePhase } from './delete_phase';

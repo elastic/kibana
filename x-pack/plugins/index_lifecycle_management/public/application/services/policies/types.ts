@@ -13,6 +13,7 @@ export interface Phases {
   hot?: SerializedHotPhase;
   warm?: SerializedWarmPhase;
   cold?: SerializedColdPhase;
+  frozen?: SerializedFrozenPhase;
   delete?: SerializedDeletePhase;
 }
 
@@ -68,6 +69,16 @@ export interface SerializedColdPhase extends SerializedPhase {
   };
 }
 
+export interface SerializedFrozenPhase extends SerializedPhase {
+  actions: {
+    freeze?: {};
+    allocate?: AllocateAction;
+    set_priority?: {
+      priority: number | null;
+    };
+  };
+}
+
 export interface SerializedDeletePhase extends SerializedPhase {
   actions: {
     wait_for_snapshot?: {
@@ -94,6 +105,7 @@ export interface Policy {
     hot: HotPhase;
     warm: WarmPhase;
     cold: ColdPhase;
+    frozen: FrozenPhase;
     delete: DeletePhase;
   };
 }
@@ -125,6 +137,15 @@ export interface WarmPhase extends Phase {
 }
 
 export interface ColdPhase extends Phase {
+  selectedMinimumAge: string;
+  selectedMinimumAgeUnits: string;
+  selectedNodeAttrs: string;
+  selectedReplicaCount: string;
+  freezeEnabled: boolean;
+  phaseIndexPriority: string;
+}
+
+export interface FrozenPhase extends Phase {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
   selectedNodeAttrs: string;
