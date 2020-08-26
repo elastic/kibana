@@ -85,7 +85,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       ...request.params,
     };
 
-    const { combinedSignal, cleanup } = this.setupTimers({
+    const { combinedSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.signal,
       timeout: this.searchTimeout,
     });
