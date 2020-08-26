@@ -151,7 +151,20 @@ export async function inspectSearchParams(
     end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
-    config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
+    config: new Proxy(
+      {},
+      {
+        get: (_, key) => {
+          switch (key) {
+            default:
+              return 'myIndex';
+
+            case 'xpack.apm.metricsInterval':
+              return 30;
+          }
+        },
+      }
+    ) as APMConfig,
     uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
