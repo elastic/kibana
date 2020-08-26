@@ -7,7 +7,7 @@
 import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
@@ -221,7 +221,7 @@ export class Simulator {
   }
 
   /**
-   * This manually runs the animation frames tied to a configurable timestamp in the future
+   * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
     this.sideEffectSimulator.controls.time = time;

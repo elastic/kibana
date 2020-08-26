@@ -29,6 +29,7 @@ import {
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
 import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
+import { parseExpression } from '../../../expressions/common';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -122,23 +123,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
-    it('handles markdown function', () => {
-      const params = {
-        markdown: '## hello _markdown_',
-        fontSize: 12,
-        openLinksInNewTab: true,
-        foo: 'bar',
-      };
-      const actual = buildPipelineVisFunction.markdown(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
-    it('handles undefined markdown function', () => {
-      const params = { fontSize: 12, openLinksInNewTab: true, foo: 'bar' };
-      const actual = buildPipelineVisFunction.markdown(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     describe('handles table function', () => {
       it('without splits or buckets', () => {
         const params = { foo: 'bar' };
@@ -213,42 +197,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           bucket: [0, 3],
         };
         const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-    });
-
-    describe('handles metric function', () => {
-      it('without buckets', () => {
-        const params = { metric: {} };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-        };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with buckets', () => {
-        const params = { metric: {} };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-          group: [{ accessor: 2 }],
-        };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with percentage mode should have percentage format', () => {
-        const params = { metric: { percentageMode: true } };
-        const schemas = { ...schemasDef };
-        const actual = buildPipelineVisFunction.metric(params, schemas, uiState);
         expect(actual).toMatchSnapshot();
       });
     });
@@ -331,7 +279,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         },
         // @ts-ignore
         type: {
-          toExpression: () => 'testing custom expressions',
+          toExpressionAst: () => parseExpression('test'),
         },
       } as unknown) as Vis;
       const expression = await buildPipeline(vis, {

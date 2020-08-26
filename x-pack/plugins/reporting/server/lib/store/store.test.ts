@@ -53,7 +53,9 @@ describe('ReportingStore', () => {
         headers: 'rp_headers_1',
         objectType: 'testOt',
       };
-      await expect(store.addReport(reportType, 'username1', reportPayload)).resolves.toMatchObject({
+      await expect(
+        store.addReport(reportType, { username: 'username1' }, reportPayload)
+      ).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
@@ -84,9 +86,9 @@ describe('ReportingStore', () => {
         headers: 'rp_headers_2',
         objectType: 'testOt',
       };
-      expect(store.addReport(reportType, 'user1', reportPayload)).rejects.toMatchInlineSnapshot(
-        `[Error: Invalid index interval: centurially]`
-      );
+      expect(
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid index interval: centurially]`);
     });
 
     it('handles error creating the index', async () => {
@@ -102,7 +104,7 @@ describe('ReportingStore', () => {
         objectType: 'testOt',
       };
       await expect(
-        store.addReport(reportType, 'user1', reportPayload)
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
       ).rejects.toMatchInlineSnapshot(`[Error: horrible error]`);
     });
 
@@ -125,7 +127,7 @@ describe('ReportingStore', () => {
         objectType: 'testOt',
       };
       await expect(
-        store.addReport(reportType, 'user1', reportPayload)
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
       ).rejects.toMatchInlineSnapshot(`[Error: devastating error]`);
     });
 
@@ -143,7 +145,9 @@ describe('ReportingStore', () => {
         headers: 'rp_headers_5',
         objectType: 'testOt',
       };
-      await expect(store.addReport(reportType, 'user1', reportPayload)).resolves.toMatchObject({
+      await expect(
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
+      ).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
@@ -160,7 +164,7 @@ describe('ReportingStore', () => {
       });
     });
 
-    it('allows username string to be `null`', async () => {
+    it('allows username string to be `false`', async () => {
       // setup
       callClusterStub.withArgs('indices.exists').resolves(false);
       callClusterStub
@@ -174,13 +178,13 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
       };
-      await expect(store.addReport(reportType, null, reportPayload)).resolves.toMatchObject({
+      await expect(store.addReport(reportType, false, reportPayload)).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
         browser_type: undefined,
         completed_at: undefined,
-        created_by: null,
+        created_by: false,
         jobtype: 'unknowntype',
         max_attempts: undefined,
         payload: {},

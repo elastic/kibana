@@ -19,10 +19,12 @@ export interface IndexPattern {
       params: unknown;
     }
   >;
+  hasRestrictions: boolean;
 }
 
 export interface IndexPatternField {
   name: string;
+  displayName: string;
   type: string;
   esTypes?: string[];
   aggregatable: boolean;
@@ -39,11 +41,12 @@ export interface IndexPatternLayer {
 }
 
 export interface IndexPatternPersistedState {
-  currentIndexPatternId: string;
-  layers: Record<string, IndexPatternLayer>;
+  layers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>>;
 }
 
-export type IndexPatternPrivateState = IndexPatternPersistedState & {
+export interface IndexPatternPrivateState {
+  currentIndexPatternId: string;
+  layers: Record<string, IndexPatternLayer>;
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
 
@@ -53,7 +56,7 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
-};
+}
 
 export interface IndexPatternRef {
   id: string;

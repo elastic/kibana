@@ -182,12 +182,12 @@ export function Detail() {
                     fill
                     isDisabled={!hasWriteCapabilites}
                     iconType="plusInCircle"
-                    href={getHref('add_integration_to_configuration', {
+                    href={getHref('add_integration_to_policy', {
                       pkgkey,
                     })}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.epm.addPackageConfigButtonText"
+                      id="xpack.ingestManager.epm.addPackagePolicyButtonText"
                       defaultMessage="Add {packageName}"
                       values={{
                         packageName: packageInfo.title,

@@ -5,32 +5,47 @@
  */
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FIELD_TYPES, UseField, ToggleField } from '../../../../../../../shared_imports';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
-import { FieldsConfig } from '../shared';
+import {
+  FIELD_TYPES,
+  UseField,
+  ToggleField,
+  FieldConfig,
+} from '../../../../../../../shared_imports';
+
+import { FieldsConfig, to, from } from '../shared';
 
 export const fieldsConfig: FieldsConfig = {
   ignore_missing: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    serializer: (v) => (v === false ? undefined : v),
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
+    deserializer: to.booleanOrUndef,
+    serializer: from.defaultBoolToUndef(false),
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreMissingFieldLabel',
       {
         defaultMessage: 'Ignore missing',
       }
     ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.commonFields.ignoreMissingFieldHelpText"
+        defaultMessage="Ignore documents with a missing {field}."
+        values={{
+          field: <EuiCode>{'field'}</EuiCode>,
+        }}
+      />
+    ),
   },
 };
 
-interface Props {
-  helpText?: string;
-}
+type Props = Partial<FieldConfig>;
 
-export const IgnoreMissingField: FunctionComponent<Props> = ({ helpText }) => (
+export const IgnoreMissingField: FunctionComponent<Props> = (props) => (
   <UseField
-    config={{ ...fieldsConfig.ignore_missing, helpText }}
+    config={{ ...fieldsConfig.ignore_missing, ...props }}
     component={ToggleField}
     path="fields.ignore_missing"
   />
