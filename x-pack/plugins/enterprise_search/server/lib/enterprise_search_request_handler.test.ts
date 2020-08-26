@@ -82,9 +82,12 @@ describe('createEnterpriseSearchRequestHandler', () => {
 
       await makeAPICall(requestHandler);
 
-      EnterpriseSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
-        headers: { Authorization: KibanaAuthHeader },
-      });
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+        `http://localhost:3002/as/credentials/collection`,
+        {
+          headers: { Authorization: KibanaAuthHeader },
+        }
+      );
 
       expect(responseMock.customError).toHaveBeenCalledWith({
         body: 'Error connecting or fetching data from Enterprise Search',
@@ -111,9 +114,12 @@ describe('createEnterpriseSearchRequestHandler', () => {
 
       await makeAPICall(requestHandler);
 
-      EnterpriseSearchAPI.shouldHaveBeenCalledWith(`http://localhost:3002/as/credentials/collection?`, {
-        headers: { Authorization: KibanaAuthHeader },
-      });
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+        `http://localhost:3002/as/credentials/collection`,
+        {
+          headers: { Authorization: KibanaAuthHeader },
+        }
+      );
 
       expect(responseMock.customError).toHaveBeenCalledWith({
         body: 'Error connecting or fetching data from Enterprise Search',
