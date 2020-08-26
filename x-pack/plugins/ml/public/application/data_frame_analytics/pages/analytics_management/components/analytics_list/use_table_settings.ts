@@ -7,10 +7,17 @@
 import { useState } from 'react';
 import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
 import sortBy from 'lodash/sortBy';
+import get from 'lodash/get';
 import { DataFrameAnalyticsListColumn, DataFrameAnalyticsListRow } from './common';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+const jobPropertyMap = {
+  ID: 'id',
+  Status: 'state',
+  Type: 'job_type',
+};
 
 interface AnalyticsBasicTableSettings {
   pageIndex: number;
@@ -45,7 +52,7 @@ export function useTableSettings(items: DataFrameAnalyticsListRow[]): UseTableSe
     sortField: string,
     sortDirection: Direction
   ) => {
-    list = sortBy(list, (item) => item[sortField]);
+    list = sortBy(list, (item) => get(item, jobPropertyMap[sortField] || sortField));
     list = sortDirection === 'asc' ? list : list.reverse();
     const listLength = list.length;
 
