@@ -187,6 +187,34 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
     });
+    test('should show correct json in policy flyout', () => {
+      const rendered = mountWithIntl(component);
+      findTestSubject(rendered, 'requestButton').simulate('click');
+      const json = rendered.find(`code`).text();
+      const expected = `PUT _ilm/policy/<policyName>\n${JSON.stringify(
+        {
+          policy: {
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_size: '50gb',
+                  },
+                  set_priority: {
+                    priority: 100,
+                  },
+                },
+              },
+            },
+          },
+        },
+        null,
+        2
+      )}`;
+      expect(json).toBe(expected);
+    });
   });
   describe('hot phase', () => {
     test('should show errors when trying to save with no max size and no max age', () => {

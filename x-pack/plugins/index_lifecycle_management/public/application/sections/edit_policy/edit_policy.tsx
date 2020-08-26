@@ -352,7 +352,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={togglePolicyJsonFlyout}>
+                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
                   {isShowingPolicyJsonFlyout ? (
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
@@ -371,6 +371,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             {isShowingPolicyJsonFlyout ? (
               <PolicyJsonFlyout
                 policyName={policy.name || ''}
+                existingPolicy={existingPolicy}
                 policy={policy}
                 close={() => setIsShowingPolicyJsonFlyout(false)}
               />
