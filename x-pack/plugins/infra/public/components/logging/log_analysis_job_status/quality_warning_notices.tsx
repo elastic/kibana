@@ -33,7 +33,10 @@ export const CategoryQualityWarnings: React.FC<{ qualityWarnings: QualityWarning
         <ul>
           {qualityWarning.reasons.map((reason, reasonIndex) => (
             <li key={`${reasonIndex}`}>
-              <CategoryQualityWarningReasonDescription reason={reason} />
+              <CategoryQualityWarningReasonDescription
+                dataset={qualityWarning.dataset}
+                reason={reason}
+              />
             </li>
           ))}
         </ul>
@@ -50,6 +53,7 @@ const categoryQualityWarningCalloutTitle = i18n.translate(
 );
 
 const CategoryQualityWarningReasonDescription: React.FC<{
+  dataset: string;
   reason: CategoryQualityWarningReason;
 }> = ({ reason }) => {
   switch (reason.type) {
@@ -57,7 +61,7 @@ const CategoryQualityWarningReasonDescription: React.FC<{
       return (
         <FormattedMessage
           id="xpack.infra.logs.logEntryCategories.singleCategoryWarningReasonDescription"
-          defaultMessage="The analysis couldn't extract more than a single category from the log message."
+          defaultMessage="The analysis couldn't extract more than a single category from the log messages."
         />
       );
     case 'manyRareCategories':

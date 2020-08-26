@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import {
   getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT,
-  getLatestLogEntryCategoryDatasetsStatsSuccessReponsePayloadRT,
+  getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT,
   LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH,
 } from '../../../../common/http_api/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
@@ -28,7 +28,7 @@ export const initGetLogEntryCategoryDatasetsStatsRoute = ({ framework }: InfraBa
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
-          sourceId,
+          jobIds,
           timeRange: { startTime, endTime },
           includeCategorizerStatuses,
         },
@@ -39,14 +39,14 @@ export const initGetLogEntryCategoryDatasetsStatsRoute = ({ framework }: InfraBa
 
         const { data: datasetStats, timing } = await getLatestLogEntriesCategoriesDatasetsStats(
           requestContext,
-          sourceId,
+          jobIds,
           startTime,
           endTime,
           includeCategorizerStatuses
         );
 
         return response.ok({
-          body: getLatestLogEntryCategoryDatasetsStatsSuccessReponsePayloadRT.encode({
+          body: getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT.encode({
             data: {
               datasetStats,
             },

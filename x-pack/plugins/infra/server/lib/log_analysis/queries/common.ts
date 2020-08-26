@@ -40,6 +40,17 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   },
 ];
 
+export const createLogTimeRangeFilters = (startTime: number, endTime: number) => [
+  {
+    range: {
+      log_time: {
+        gte: startTime,
+        lte: endTime,
+      },
+    },
+  },
+];
+
 export const createResultTypeFilters = (
   resultTypes: Array<'categorizer_stats' | 'model_plot' | 'record'>
 ) => [

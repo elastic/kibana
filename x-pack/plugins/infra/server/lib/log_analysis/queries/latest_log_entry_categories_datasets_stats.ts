@@ -7,14 +7,14 @@
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
-  createJobIdFilters,
+  createJobIdsFilters,
   createResultTypeFilters,
   defaultRequestParameters,
-  createTimeRangeFilters,
+  createLogTimeRangeFilters,
 } from './common';
 
 export const createLatestLogEntryCategoriesDatasetsStatsQuery = (
-  logEntryCategoriesJobId: string,
+  logEntryCategoriesJobIds: string[],
   startTime: number,
   endTime: number,
   size: number,
@@ -25,54 +25,55 @@ export const createLatestLogEntryCategoriesDatasetsStatsQuery = (
     query: {
       bool: {
         filter: [
-          ...createJobIdFilters(logEntryCategoriesJobId),
+          ...createJobIdsFilters(logEntryCategoriesJobIds),
           ...createResultTypeFilters(['categorizer_stats']),
-          ...createTimeRangeFilters(startTime, endTime),
+          ...createLogTimeRangeFilters(startTime, endTime),
         ],
       },
     },
-    _source: [
-      'categorization_status',
-      'categorized_doc_count',
-      'dead_category_count',
-      'failed_category_count',
-      'frequent_category_count',
-      'rare_category_count',
-      'timestamp',
-      'total_category_count',
-    ],
-  },
-  size: 0,
-  aggregations: {
-    dataset_composite_terms: {
-      composite: {
-        after: afterKey,
-        size,
-        sources: [
-          {
-            dataset_terms: {
-              terms: {
-                field: 'partition_field_value',
-                missing_bucket: true,
+    aggregations: {
+      dataset_composite_terms: {
+        composite: {
+          after: afterKey,
+          size,
+          sources: [
+            {
+              dataset: {
+                terms: {
+                  field: 'partition_field_value',
+                  missing_bucket: true,
+                },
               },
             },
-          },
-        ],
-      },
-      aggs: {
-        categorizer_stats_top_hits: {
-          top_hits: {
-            size: 1,
-            sort: [
-              {
-                timestamp: 'desc',
-              },
-            ],
+          ],
+        },
+        aggs: {
+          categorizer_stats_top_hits: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  log_time: 'desc',
+                },
+              ],
+              _source: [
+                'categorization_status',
+                'categorized_doc_count',
+                'dead_category_count',
+                'failed_category_count',
+                'frequent_category_count',
+                'job_id',
+                'log_time',
+                'rare_category_count',
+                'total_category_count',
+              ],
+            },
           },
         },
       },
     },
   },
+  size: 0,
 });
 
 export const logEntryCategoryStatusRT = rt.keyof({
@@ -87,8 +88,9 @@ export const logEntryCategorizerStatsHitRT = rt.type({
     dead_category_count: rt.number,
     failed_category_count: rt.number,
     frequent_category_count: rt.number,
+    job_id: rt.string,
+    log_time: rt.number,
     rare_category_count: rt.number,
-    timestamp: rt.number,
     total_category_count: rt.number,
   }),
 });

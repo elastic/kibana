@@ -86,6 +86,7 @@ export type CategoryQualityWarningReasonType = CategoryQualityWarningReason['typ
 export interface CategoryQualityWarning {
   type: 'categoryQualityWarning';
   jobId: string;
+  dataset: string;
   reasons: CategoryQualityWarningReason[];
 }
 

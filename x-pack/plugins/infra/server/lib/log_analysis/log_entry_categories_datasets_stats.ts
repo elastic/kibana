@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getJobId, logEntryCategoriesJobTypes } from '../../../common/log_analysis';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
@@ -21,21 +20,14 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
     infra: {
       mlAnomalyDetectors: MlAnomalyDetectors;
       mlSystem: MlSystem;
-      spaceId: string;
     };
   },
-  sourceId: string,
+  jobIds: string[],
   startTime: number,
   endTime: number,
   includeCategorizerStatuses: Array<'ok' | 'warn'> = []
 ) {
   const finalizeLogEntryCategoriesDatasetsStats = startTracingSpan('get categories datasets stats');
-
-  const logEntryCategoriesCountJobId = getJobId(
-    context.infra.spaceId,
-    sourceId,
-    logEntryCategoriesJobTypes[0]
-  );
 
   let latestLogEntryCategoriesDatasetsStatsBuckets: LogEntryCategoryDatasetStatsBucket[] = [];
   let afterLatestBatchKey: CompositeDatasetKey | undefined;
@@ -43,7 +35,7 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
   while (true) {
     const latestLogEntryCategoriesDatasetsStatsResponse = await context.infra.mlSystem.mlAnomalySearch(
       createLatestLogEntryCategoriesDatasetsStatsQuery(
-        logEntryCategoriesCountJobId,
+        jobIds,
         startTime,
         endTime,
         COMPOSITE_AGGREGATION_BATCH_SIZE,
@@ -83,14 +75,15 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
       const latestHitSource = bucket.categorizer_stats_top_hits.hits.hits[0]._source;
 
       return {
-        dataset: bucket.key.dataset ?? '',
         categorization_status: latestHitSource.categorization_status,
         categorized_doc_count: latestHitSource.categorized_doc_count,
+        dataset: bucket.key.dataset ?? '',
         dead_category_count: latestHitSource.dead_category_count,
         failed_category_count: latestHitSource.failed_category_count,
         frequent_category_count: latestHitSource.frequent_category_count,
+        job_id: latestHitSource.job_id,
+        log_time: latestHitSource.log_time,
         rare_category_count: latestHitSource.rare_category_count,
-        timestamp: latestHitSource.timestamp,
         total_category_count: latestHitSource.total_category_count,
       };
     }),

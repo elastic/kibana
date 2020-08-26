@@ -6,12 +6,7 @@
 
 import * as rt from 'io-ts';
 
-import {
-  badRequestErrorRT,
-  forbiddenErrorRT,
-  timeRangeRT,
-  routeTimingMetadataRT,
-} from '../../shared';
+import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
 
 export const LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH =
   '/api/infra/log_analysis/results/latest_log_entry_category_datasets_stats';
@@ -21,14 +16,16 @@ const categorizerStatusRT = rt.keyof({
   warn: null,
 });
 
+export type CategorizerStatus = rt.TypeOf<typeof categorizerStatusRT>;
+
 /**
  * request
  */
 
 export const getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT = rt.type({
   data: rt.type({
-    // the id of the source configuration
-    sourceId: rt.string,
+    // the ids of the categorization jobs
+    jobIds: rt.array(rt.string),
     // the time range to fetch the category datasets stats for
     timeRange: timeRangeRT,
     // the categorizer statuses to include stats for, empty means all
@@ -45,20 +42,21 @@ export type GetLatestLogEntryCategoryDatasetsStatsRequestPayload = rt.TypeOf<
  */
 
 const logEntryCategoriesDatasetStatsRT = rt.type({
-  dataset: rt.string,
   categorization_status: categorizerStatusRT,
   categorized_doc_count: rt.number,
+  dataset: rt.string,
   dead_category_count: rt.number,
   failed_category_count: rt.number,
   frequent_category_count: rt.number,
+  job_id: rt.string,
+  log_time: rt.number,
   rare_category_count: rt.number,
-  timestamp: rt.number,
   total_category_count: rt.number,
 });
 
 export type LogEntryCategoriesDatasetStats = rt.TypeOf<typeof logEntryCategoriesDatasetStatsRT>;
 
-export const getLatestLogEntryCategoryDatasetsStatsSuccessReponsePayloadRT = rt.intersection([
+export const getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT = rt.intersection([
   rt.type({
     data: rt.type({
       datasetStats: rt.array(logEntryCategoriesDatasetStatsRT),
@@ -70,15 +68,5 @@ export const getLatestLogEntryCategoryDatasetsStatsSuccessReponsePayloadRT = rt.
 ]);
 
 export type GetLatestLogEntryCategoryDatasetsStatsSuccessResponsePayload = rt.TypeOf<
-  typeof getLatestLogEntryCategoryDatasetsStatsSuccessReponsePayloadRT
->;
-
-export const getLatestLogEntryCategoryDatasetsStatsResponsePayloadRT = rt.union([
-  getLatestLogEntryCategoryDatasetsStatsSuccessReponsePayloadRT,
-  badRequestErrorRT,
-  forbiddenErrorRT,
-]);
-
-export type GetLatestLogEntryCategoryDatasetsStatsReponsePayload = rt.TypeOf<
-  typeof getLatestLogEntryCategoryDatasetsStatsResponsePayloadRT
+  typeof getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT
 >;
