@@ -126,14 +126,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
-      // setStepData(RuleStep.defineRule, null, false); // TODO why do we set to null?
       const { isValid, data } = await submit();
       if (isValid && setStepData) {
         setStepData(RuleStep.defineRule, data, isValid);
-        reset({ defaultValue: data }); // TODO we have to reset our form to its values post-submission
       }
     }
-  }, [reset, setStepData, submit]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
     if (setForm) {
@@ -268,11 +266,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 fields={{
                   thresholdField: {
                     path: 'threshold.field',
-                    defaultValue: initialState.threshold.field,
                   },
                   thresholdValue: {
                     path: 'threshold.value',
-                    defaultValue: initialState.threshold.value,
                   },
                 }}
               >

@@ -83,7 +83,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset, submit } = form;
+  const { getFields, submit } = form;
 
   const kibanaAbsoluteUrl = useMemo(
     () =>
@@ -93,19 +93,20 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [application]
   );
 
+  useEffect(() => {
+    getFields().kibanaSiemAppUrl.setValue(kibanaAbsoluteUrl);
+  }, [getFields, kibanaAbsoluteUrl]);
+
   const onSubmit = useCallback(
     async (enabled: boolean) => {
       if (setStepData) {
-        // setStepData(RuleStep.ruleActions, null, false);
         const { isValid, data } = await submit();
         if (isValid) {
           setStepData(RuleStep.ruleActions, { ...data, enabled }, isValid);
-          reset({ defaultValue: { ...data, enabled } });
-          // setMyStepData(data as ActionsStepRule);
         }
       }
     },
-    [reset, setStepData, submit]
+    [setStepData, submit]
   );
 
   useEffect(() => {
@@ -160,7 +161,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 <EuiSpacer />
                 <UseField
                   path="actions"
-                  // defaultValue={initialState.actions}
                   component={RuleActionsField}
                   componentProps={{
                     messageVariables: actionMessageParams,
@@ -168,17 +168,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 />
               </>
             ) : (
-              <UseField
-                path="actions"
-                // defaultValue={initialState.actions}
-                component={GhostFormField}
-              />
+              <UseField path="actions" component={GhostFormField} />
             )}
-            <UseField
-              path="kibanaSiemAppUrl"
-              defaultValue={kibanaAbsoluteUrl}
-              component={GhostFormField}
-            />
+            <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
             <UseField path="enabled" component={GhostFormField} />
           </EuiForm>
         </Form>

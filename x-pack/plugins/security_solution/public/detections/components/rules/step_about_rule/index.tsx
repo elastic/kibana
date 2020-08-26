@@ -86,17 +86,16 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset, submit } = form;
+  const { getFields, submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
       const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.aboutRule, data, isValid);
-        reset({ defaultValue: data });
       }
     }
-  }, [reset, setStepData, submit]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
     if (setForm) {

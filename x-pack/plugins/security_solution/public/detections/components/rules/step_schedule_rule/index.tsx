@@ -38,14 +38,13 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   setForm,
 }) => {
   const initialState = defaultValues ?? stepScheduleDefaultValue;
-  // const [myStepData, setMyStepData] = useState<ScheduleStepRule>(initialState);
 
   const { form } = useForm<ScheduleStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { reset, submit } = form;
+  const { submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
@@ -53,10 +52,9 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.scheduleRule, data, isValid);
-        reset({ defaultValue: data });
       }
     }
-  }, [reset, setStepData, submit]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
     if (setForm) {
