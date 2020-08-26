@@ -21,6 +21,8 @@ import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
+import { sourcererSelectors } from '../../store/sourcerer';
+import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -117,6 +119,7 @@ export const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getSourcererScopes = sourcererSelectors.scopesSelector();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
@@ -146,10 +149,18 @@ export const makeMapStateToProps = () => {
         [CONSTANTS.savedQuery]: savedQuery.id,
       };
     }
+    const sourcerer = getSourcererScopes(state);
+    const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
+    const selectedPatterns: SourcererScopePatterns = activeScopes.reduce(
+      (acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }),
+      {}
+    );
+    // console.count('url state selectedPatterns');
 
     return {
       urlState: {
         ...searchAttr,
+        [CONSTANTS.sourcerer]: selectedPatterns,
         [CONSTANTS.timerange]: {
           global: {
             [CONSTANTS.timerange]: globalTimerange,
@@ -216,6 +227,18 @@ export const updateUrlStateString = ({
         urlStateKey: urlKey,
       });
     }
+  } else if (urlKey === CONSTANTS.sourcerer) {
+    const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+    console.log('replace sourcerer in url', sourcererState);
+    // if (sourcererState != null && Object.keys(sourcererState).length > 0) {
+    //   return replaceStateInLocation({
+    //     history,
+    //     pathName,
+    //     search,
+    //     urlStateToReplace: sourcererState,
+    //     urlStateKey: urlKey,
+    //   });
+    // }
   } else if (urlKey === CONSTANTS.filters) {
     const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {

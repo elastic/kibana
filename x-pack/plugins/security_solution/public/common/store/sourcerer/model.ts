@@ -47,21 +47,22 @@ export interface SourcererModel {
   activeSourcererScopeId: SourcererScopeName;
   kibanaIndexPatterns: string[];
   isIndexPatternsLoading: boolean;
-  sourcerScopes: SourcererScopeById;
+  sourcererScopes: SourcererScopeById;
 }
 
 export const initialSourcererState: SourcererState = {
   activeSourcererScopeId: SourcererScopeName.default,
   kibanaIndexPatterns: [],
   isIndexPatternsLoading: true,
-  sourcerScopes: {},
+  sourcererScopes: {},
 };
 
-export type SourcerScopePatterns = {
+export type FSourcererScopePatterns = {
   [id in SourcererScopeName]: string[];
 };
+export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;
 
-export const sourcerScopePatterns: SourcerScopePatterns = {
+export const sourcererScopePatterns: FSourcererScopePatterns = {
   [SourcererScopeName.default]: DEFAULT_INDEX_PATTERN,
   [SourcererScopeName.host]: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
   [SourcererScopeName.detections]: [DEFAULT_SIGNALS_INDEX],

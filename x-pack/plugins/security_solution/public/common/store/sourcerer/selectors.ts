@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import { State } from '../types';
 import { SourcererScopeById, SourcererScopeName } from './model';
 
@@ -13,5 +14,6 @@ export const kibanaIndexPatternsSelector = ({ sourcerer }: State): string[] =>
   sourcerer.kibanaIndexPatterns;
 export const isIndexPatternsLoadingSelector = ({ sourcerer }: State): boolean =>
   sourcerer.isIndexPatternsLoading;
-export const sourcerScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
-  sourcerer.sourcerScopes;
+export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
+  sourcerer.sourcererScopes;
+export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);

@@ -5,17 +5,18 @@
  */
 import React, { useMemo } from 'react';
 import { useSourcererContext } from './index';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface PassedProps extends React.PropsWithChildren<unknown> {
   sourcererIndexPatterns: string[];
 }
-export const withSourcerer = (BaseComponent: React.ComponentType<PassedProps>) => (
-  props: unknown
-) => {
-  const { activeSourcererScopeId, getSourcererScopeById } = useSourcererContext();
-  const { selectedPatterns } = useMemo(() => getSourcererScopeById(activeSourcererScopeId), [
-    getSourcererScopeById,
-    activeSourcererScopeId,
-  ]);
+export const withSourcerer = (
+  BaseComponent: React.ComponentType<PassedProps>,
+  sourcererScope: SourcererScopeName = SourcererScopeName.default
+) => (props: unknown) => {
+  const { getSourcererScopeById } = useSourcererContext();
+  const blah = useMemo(() => getSourcererScopeById(sourcererScope), [getSourcererScopeById]);
+  const { selectedPatterns } = blah;
+  console.log(`withSourcerer getSourcererScopeById(${sourcererScope})`, blah);
   return <BaseComponent {...props} sourcererIndexPatterns={selectedPatterns} />;
 };

@@ -30,6 +30,7 @@ import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { withSourcerer } from '../../common/containers/sourcerer/hoc';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../common/containers/sourcerer/constants';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -223,4 +224,4 @@ export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
   connector,
   withKibana,
   withSourcerer
-)(TimelineQueryComponent);
+)(TimelineQueryComponent, SourcererScopeName.timeline);

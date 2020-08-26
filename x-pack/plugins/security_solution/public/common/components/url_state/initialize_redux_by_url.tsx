@@ -8,7 +8,7 @@ import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { inputsActions } from '../../store/actions';
+import { inputsActions, sourcererActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
   UrlInputsModel,
@@ -22,6 +22,7 @@ import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
+import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
@@ -39,6 +40,26 @@ export const dispatchSetInitialStateFromUrl = (
   urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
     if (urlKey === CONSTANTS.timerange) {
       updateTimerange(newUrlStateString, dispatch);
+    }
+    if (urlKey === CONSTANTS.sourcerer) {
+      console.log('replace sourcerer in redux');
+      const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+      if (sourcererState != null) {
+        const activeScopes: SourcererScopeName[] = Object.keys(
+          sourcererState
+        ) as SourcererScopeName[];
+        activeScopes.forEach((scope) =>
+          dispatch(
+            sourcererActions.setSource({
+              id: scope,
+              payload: {
+                id: scope,
+                selectedPatterns: sourcererState[scope] ?? [],
+              },
+            })
+          )
+        );
+      }
     }
 
     if (urlKey === CONSTANTS.appQuery && indexPattern != null) {

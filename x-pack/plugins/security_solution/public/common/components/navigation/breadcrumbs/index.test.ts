@@ -105,6 +105,7 @@ const getMockObject = (
       },
     },
   },
+  sourcerer: {},
 });
 
 const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>

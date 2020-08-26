@@ -13,6 +13,7 @@ import { getSearch } from './helpers';
 import { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab: SearchNavTab) => {
+  // console.count('useGetUrlSearch');
   const mapState = makeMapStateToProps();
   const { urlState } = useSelector(mapState, isEqual);
   const urlSearch = useMemo(() => getSearch(tab, urlState), [tab, urlState]);

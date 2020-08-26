@@ -47,8 +47,11 @@ export const MaybeSourcerer = React.memo(() => {
   ]);
 
   const onChangeIndexPattern = useCallback(
-    (newIndexPatterns: string[]) => {
-      updateSourcererScopeIndices(activeSourcererScopeId, newIndexPatterns);
+    (selectedPatterns: string[]) => {
+      updateSourcererScopeIndices({
+        id: activeSourcererScopeId,
+        selectedPatterns,
+      });
     },
     [activeSourcererScopeId, updateSourcererScopeIndices]
   );
@@ -73,23 +76,26 @@ export const MaybeSourcerer = React.memo(() => {
     [setPopoverIsOpenCb]
   );
   const options: EuiSelectableOption[] = useMemo(
-    () => [
-      ...scopePatterns.map((title, id) => ({
-        label: title,
-        key: `${title}-${id}`,
-        value: title,
-        checked: selectedOptions.includes(title) ? ON : undefined,
-      })),
-      ...kibanaIndexPatterns
-        .filter((title) => !scopePatterns.includes(title))
-        .map((title, id) => ({
-          label: title,
-          key: `${title}-${id}`,
-          value: title,
-          checked: selectedOptions.includes(title) ? ON : undefined,
-        })),
-    ],
-    [kibanaIndexPatterns, scopePatterns, selectedOptions]
+    () =>
+      loading
+        ? []
+        : [
+            ...scopePatterns.map((title, id) => ({
+              label: title,
+              key: `${title}-${id}`,
+              value: title,
+              checked: selectedOptions.includes(title) ? ON : undefined,
+            })),
+            ...kibanaIndexPatterns
+              .filter((title) => !scopePatterns.includes(title))
+              .map((title, id) => ({
+                label: title,
+                key: `${title}-${id}`,
+                value: title,
+                checked: selectedOptions.includes(title) ? ON : undefined,
+              })),
+          ],
+    [kibanaIndexPatterns, loading, scopePatterns, selectedOptions]
   );
   // TO DO check if index pattern has results and if it does not, make it unselectable
   // const unSelectableOptions: EuiSelectableOption[] = useMemo(

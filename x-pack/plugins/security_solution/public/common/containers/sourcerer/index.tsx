@@ -5,7 +5,7 @@
  */
 
 import { get, noop, isEmpty } from 'lodash/fp';
-import React, { createContext, useCallback, useContext, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { NO_ALERT_INDEX, SecurityPageName } from '../../../../common/constants';
@@ -26,26 +26,25 @@ import {
 } from './format';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
 
-export interface UseSourcerer extends Omit<sourcererModel.SourcererModel, 'sourcerScopes'> {
+export interface UseSourcerer extends Omit<sourcererModel.SourcererModel, 'sourcererScopes'> {
   getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => sourcererModel.ManageScope;
-  initializeSourcererScope: (
-    id: sourcererModel.SourcererScopeName,
-    indexToAdd?: string[] | null,
-    onlyCheckIndexToAdd?: boolean
-  ) => void;
   setActiveSourcererScopeId: (id: sourcererModel.SourcererScopeName) => void;
-  updateSourcererScopeIndices: (
-    id: sourcererModel.SourcererScopeName,
-    updatedIndicies: string[]
-  ) => void;
+  updateSourcererScopeIndices: ({
+    id,
+    selectedPatterns,
+  }: {
+    id: sourcererModel.SourcererScopeName;
+    selectedPatterns: string[];
+  }) => void;
 }
 
 // DEFAULTS/INIT
 export const getSourceDefaults = (
   id: sourcererModel.SourcererScopeName,
   defaultIndex: string[]
-) => ({
+): ManageScope => ({
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
@@ -56,11 +55,13 @@ export const getSourceDefaults = (
   scopePatterns: defaultIndex,
   selectedPatterns: defaultIndex,
 });
-const { sourcerScopes: foo, ...rest } = sourcererModel.initialSourcererState;
+const { sourcererScopes: foo, ...rest } = sourcererModel.initialSourcererState;
 const initialUseSourcerer: UseSourcerer = {
   ...rest,
-  getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => getSourceDefaults(id, []),
-  initializeSourcererScope: () => noop,
+  getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => {
+    console.log('dear lord dont call this shit', id);
+    return getSourceDefaults(id, []);
+  },
   setActiveSourcererScopeId: () => noop,
   updateSourcererScopeIndices: () => noop,
 };
@@ -78,7 +79,7 @@ export const useSourcerer = (): UseSourcerer => {
   const activeSourcererScopeId = useSelector(sourcererSelectors.activeSourcererScopeIdSelector);
   const kibanaIndexPatterns = useSelector(sourcererSelectors.kibanaIndexPatternsSelector);
   const isIndexPatternsLoading = useSelector(sourcererSelectors.isIndexPatternsLoadingSelector);
-  const sourcerScopes = useSelector(sourcererSelectors.sourcerScopesSelector);
+  const sourcererScopes = useSelector(sourcererSelectors.sourcererScopesSelector);
   // Kibana Index Patterns
   const setIsIndexPatternsLoading = useCallback(
     (loading: boolean) => {
@@ -140,13 +141,13 @@ export const useSourcerer = (): UseSourcerer => {
 
   const doesSourcererScopeExist = useCallback(
     (id: sourcererModel.SourcererScopeName) => {
-      const sourceById = sourcerScopes[id];
-      if (sourceById != null) {
+      const scopeById = sourcererScopes[id];
+      if (scopeById != null) {
         return true;
       }
       return false;
     },
-    [sourcerScopes]
+    [sourcererScopes]
   );
   const setActiveSourcererScopeId = useCallback(
     (sourceGroupId: sourcererModel.SourcererScopeName) => {
@@ -160,26 +161,22 @@ export const useSourcerer = (): UseSourcerer => {
     },
     [doesSourcererScopeExist, dispatch]
   );
-  const setIsSourceLoading = useCallback(
-    ({ id, loading }: { id: sourcererModel.SourcererScopeName; loading: boolean }) => {
-      dispatch(
-        sourcererActions.setIsSourceLoading({
-          id,
-          payload: loading,
-        })
-      );
-    },
-    [dispatch]
-  );
+
   const enrichSource = useCallback(
-    (
-      id: sourcererModel.SourcererScopeName,
-      indexToAdd?: string[] | null,
-      onlyCheckIndexToAdd?: boolean
-    ) => {
+    ({
+      id,
+      scopePatterns,
+      selectedPatterns: indexToAdd,
+      onlyCheckIndexToAdd,
+    }: {
+      id: sourcererModel.SourcererScopeName;
+      scopePatterns?: string[];
+      selectedPatterns: string[];
+      onlyCheckIndexToAdd?: boolean;
+    }) => {
       let isSubscribed = true;
       const abortCtrl = new AbortController();
-      if (onlyCheckIndexToAdd && isEmpty(indexToAdd) && indexToAdd != null) {
+      if (onlyCheckIndexToAdd && isEmpty(indexToAdd)) {
         return dispatch(
           sourcererActions.setSource({
             id,
@@ -197,19 +194,34 @@ export const useSourcerer = (): UseSourcerer => {
         );
       }
       const selectedPatterns = getDefaultIndex(indexToAdd, onlyCheckIndexToAdd);
-      if (!doesSourcererScopeExist(id)) {
-        dispatch(
-          sourcererActions.setSource({
-            id,
-            payload: { scopePatterns: selectedPatterns, selectedPatterns, id },
-          })
-        );
-      }
 
       async function fetchSource() {
         if (!apolloClient) return;
-        setIsSourceLoading({ id, loading: true });
+        let patternsPayload: {
+          scopePatterns?: string[];
+          selectedPatterns: string[];
+        } = {
+          selectedPatterns,
+        };
+        if (scopePatterns != null) {
+          patternsPayload = {
+            selectedPatterns,
+            scopePatterns,
+          };
+        }
+
+        dispatch(
+          sourcererActions.setSource({
+            id,
+            payload: {
+              id,
+              loading: true,
+              ...patternsPayload,
+            },
+          })
+        );
         try {
+          console.log('apollo query', selectedPatterns);
           const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
             context: {
               fetchOptions: {
@@ -246,7 +258,7 @@ export const useSourcerer = (): UseSourcerer => {
                     get('data.source.status.indicesExist', result)
                   ),
                   loading: false,
-                  selectedPatterns,
+                  ...patternsPayload,
                 },
               })
             );
@@ -260,7 +272,7 @@ export const useSourcerer = (): UseSourcerer => {
                   errorMessage: error.message,
                   id,
                   loading: false,
-                  selectedPatterns,
+                  ...patternsPayload,
                 },
               })
             );
@@ -268,81 +280,110 @@ export const useSourcerer = (): UseSourcerer => {
         }
       }
 
-      fetchSource();
+      fetchSource().then(() =>
+        activeSourcererScopeId !== id ? setActiveSourcererScopeId(id) : null
+      );
 
       return () => {
         isSubscribed = false;
         return abortCtrl.abort();
       };
     },
-    [apolloClient, dispatch, doesSourcererScopeExist, getDefaultIndex, setIsSourceLoading]
+    [activeSourcererScopeId, apolloClient, dispatch, getDefaultIndex, setActiveSourcererScopeId]
   );
 
   const initializeSourcererScope = useCallback(
-    (
-      id: sourcererModel.SourcererScopeName,
-      indexToAdd?: string[] | null,
-      onlyCheckIndexToAdd?: boolean
-    ) => enrichSource(id, indexToAdd, onlyCheckIndexToAdd),
+    ({
+      id,
+      scopePatterns,
+      selectedPatterns,
+    }: {
+      id: sourcererModel.SourcererScopeName;
+      scopePatterns: string[];
+      selectedPatterns: string[];
+    }) => enrichSource({ id, scopePatterns, selectedPatterns, onlyCheckIndexToAdd: true }),
     [enrichSource]
   );
 
   const updateSourcererScopeIndices = useCallback(
-    (id: sourcererModel.SourcererScopeName, updatedIndicies: string[]) => {
-      enrichSource(id, updatedIndicies, true);
+    ({
+      id,
+      selectedPatterns,
+    }: {
+      id: sourcererModel.SourcererScopeName;
+      selectedPatterns: string[];
+    }) => {
+      enrichSource({ id, selectedPatterns, onlyCheckIndexToAdd: true });
     },
     [enrichSource]
   );
+
+  const activeScopeByPage: sourcererModel.SourcererScopeName = useMemo(() => {
+    switch (routeProps.pageName) {
+      case SecurityPageName.detections:
+        return sourcererModel.SourcererScopeName.detections;
+      case SecurityPageName.overview:
+        return sourcererModel.SourcererScopeName.default;
+      case SecurityPageName.hosts:
+        return sourcererModel.SourcererScopeName.host;
+      case SecurityPageName.network:
+        return sourcererModel.SourcererScopeName.network;
+      case SecurityPageName.timelines:
+      case SecurityPageName.case:
+      case SecurityPageName.administration:
+      default:
+        return sourcererModel.SourcererScopeName.default;
+    }
+  }, [routeProps.pageName]);
   const getSourcererScopeById = useCallback(
-    (id: sourcererModel.SourcererScopeName) => {
-      const sourceById = sourcerScopes[id];
-      if (sourceById != null) {
-        return sourceById;
+    (id: sourcererModel.SourcererScopeName): ManageScope => {
+      console.log('getSourcererScopeById', {
+        id,
+        sourcererScopes,
+      });
+      if (sourcererScopes[id] != null) {
+        return sourcererScopes[id];
+      } else {
+        console.log('SHOULD I INITIALIZE?', id, {
+          activeScopeByPage,
+          activeSourcererScopeId,
+        });
       }
       return getSourceDefaults(id, getDefaultIndex());
     },
-    [getDefaultIndex, sourcerScopes]
+    [activeScopeByPage, activeSourcererScopeId, getDefaultIndex, sourcererScopes]
+  );
+  const initializeScope = useCallback(
+    (activeScope: SourcererScopeName) => {
+      if (!doesSourcererScopeExist(activeScope)) {
+        console.log('initialize from scope');
+        initializeSourcererScope({
+          id: activeScope,
+          scopePatterns: sourcererModel.sourcererScopePatterns[activeScope],
+          selectedPatterns: sourcererModel.sourcererScopePatterns[activeScope],
+        });
+      } else if (getSourcererScopeById(activeScope) != null) {
+        console.log('initialize from url');
+        const { loading, selectedPatterns } = getSourcererScopeById(activeScope);
+        if (loading) {
+          initializeSourcererScope({
+            id: activeScope,
+            scopePatterns: sourcererModel.sourcererScopePatterns[activeScope],
+            selectedPatterns,
+          });
+        }
+      }
+      console.count(`sourcerer initializeScope`);
+    },
+    [doesSourcererScopeExist, getSourcererScopeById, initializeSourcererScope]
   );
 
   useEffect(() => {
     if (!isIndexPatternsLoading) {
-      let activeScope: sourcererModel.SourcererScopeName;
-      switch (routeProps.pageName) {
-        case SecurityPageName.detections:
-          activeScope = sourcererModel.SourcererScopeName.detections;
-          break;
-        case SecurityPageName.overview:
-          activeScope = sourcererModel.SourcererScopeName.default;
-          break;
-        case SecurityPageName.hosts:
-          activeScope = sourcererModel.SourcererScopeName.host;
-          break;
-        case SecurityPageName.network:
-          activeScope = sourcererModel.SourcererScopeName.network;
-          break;
-        case SecurityPageName.timelines:
-        case SecurityPageName.case:
-        case SecurityPageName.administration:
-        default:
-          activeScope = sourcererModel.SourcererScopeName.default;
-          break;
-      }
-      if (!doesSourcererScopeExist(activeScope)) {
-        initializeSourcererScope(
-          activeScope,
-          sourcererModel.sourcerScopePatterns[activeScope],
-          true
-        );
-      }
-      setActiveSourcererScopeId(activeScope);
+      initializeScope(activeScopeByPage);
     }
-  }, [
-    doesSourcererScopeExist,
-    initializeSourcererScope,
-    isIndexPatternsLoading,
-    routeProps,
-    setActiveSourcererScopeId,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeScopeByPage, isIndexPatternsLoading]);
 
   // load initial default index
   useEffect(() => {
@@ -353,7 +394,6 @@ export const useSourcerer = (): UseSourcerer => {
   return {
     activeSourcererScopeId,
     getSourcererScopeById,
-    initializeSourcererScope,
     isIndexPatternsLoading,
     kibanaIndexPatterns,
     setActiveSourcererScopeId,

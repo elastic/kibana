@@ -117,6 +117,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
       id: '',
       isOpen: false,
     },
+    [CONSTANTS.sourcerer]: {},
   },
   setInitialStateFromUrl: dispatchSetInitialStateFromUrl(mockDispatch),
   updateTimeline: (jest.fn() as unknown) as DispatchUpdateTimeline,

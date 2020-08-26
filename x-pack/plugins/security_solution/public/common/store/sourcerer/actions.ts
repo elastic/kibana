@@ -15,10 +15,6 @@ export const setSource = actionCreator<{
   payload: ManageScopeInit;
 }>('SET_SOURCE');
 
-export const setIsSourceLoading = actionCreator<{ id: SourcererScopeName; payload: boolean }>(
-  'SET_IS_SOURCE_LOADING'
-);
-
 export const setActiveSourcererScopeId = actionCreator<{ payload: SourcererScopeName }>(
   'SET_ACTIVE_SOURCE_GROUP_ID'
 );

@@ -18,7 +18,7 @@ export const mockPatterns = [
   'journalbeat-*',
 ];
 
-export const mockSourcererScopes = sourcererModel.sourcerScopePatterns;
+export const mockSourcererScopes = sourcererModel.sourcererScopePatterns;
 
 export const mockSource = (testId: SourcererScopeName.default | SourcererScopeName.host) => ({
   data: {
