@@ -43,7 +43,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   onConfig,
   scope,
   syntaxHelpDocsLink,
-}: UrlDrilldownCollectConfig) => {
+}) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const urlTemplate = config.url.template ?? '';
   const compiledUrl = React.useMemo(() => {

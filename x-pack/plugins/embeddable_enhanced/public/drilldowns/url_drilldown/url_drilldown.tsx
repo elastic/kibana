@@ -24,6 +24,7 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
 import { getContextScope, getEventScope, getMockEventScope } from './url_drilldown_scope';
+import { txtUrlDrilldownDisplayName } from './i18n';
 
 interface UrlDrilldownDeps {
   getGlobalScope: () => UrlDrilldownGlobalScope;
@@ -51,7 +52,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
 
   readonly minimalLicense = 'gold';
 
-  public readonly getDisplayName = () => 'Go to URL';
+  public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
   public readonly euiIcon = 'link';
 
@@ -65,16 +66,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     context,
   }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const scope = React.useMemo(
-      () =>
-        urlDrilldownBuildScope({
-          globalScope: this.deps.getGlobalScope(),
-          contextScope: getContextScope(context),
-          eventScope: getMockEventScope(context.triggers),
-        }),
-      [context]
-    );
-
+    const scope = React.useMemo(() => this.buildEditorScope(context), [context]);
     return (
       <UrlDrilldownCollectConfig
         config={config}
@@ -96,25 +88,14 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     config: Config,
     context: ActionFactoryContext
   ): config is Config => {
-    const { isValid } = urlDrilldownValidateUrlTemplate(
-      config.url,
-      urlDrilldownBuildScope({
-        globalScope: this.deps.getGlobalScope(),
-        contextScope: getContextScope(context),
-        eventScope: getMockEventScope(context.triggers),
-      })
-    );
+    const { isValid } = urlDrilldownValidateUrlTemplate(config.url, this.buildEditorScope(context));
     return isValid;
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     const { isValid, error } = urlDrilldownValidateUrlTemplate(
       config.url,
-      urlDrilldownBuildScope({
-        globalScope: this.deps.getGlobalScope(),
-        contextScope: getContextScope(context),
-        eventScope: await getEventScope(context, this.deps),
-      })
+      await this.buildRuntimeScope(context)
     );
 
     if (!isValid) {
@@ -127,30 +108,37 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return Promise.resolve(isValid);
   };
 
-  public readonly getHref = async (config: Config, context: ActionContext) => {
-    return urlDrilldownCompileUrl(
-      config.url.template,
-      urlDrilldownBuildScope({
-        globalScope: this.deps.getGlobalScope(),
-        contextScope: getContextScope(context),
-        eventScope: await getEventScope(context, this.deps),
-      })
-    );
-  };
+  public readonly getHref = async (config: Config, context: ActionContext) =>
+    urlDrilldownCompileUrl(config.url.template, await this.buildRuntimeScope(context));
 
   public readonly execute = async (config: Config, context: ActionContext) => {
     const url = await urlDrilldownCompileUrl(
       config.url.template,
-      urlDrilldownBuildScope({
-        globalScope: this.deps.getGlobalScope(),
-        contextScope: getContextScope(context),
-        eventScope: await getEventScope(context, this.deps, { allowPrompts: true }),
-      })
+      await this.buildRuntimeScope(context, { allowPrompts: true })
     );
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {
       await this.deps.navigateToUrl(url);
     }
+  };
+
+  private buildEditorScope = (context: ActionFactoryContext) => {
+    return urlDrilldownBuildScope({
+      globalScope: this.deps.getGlobalScope(),
+      contextScope: getContextScope(context),
+      eventScope: getMockEventScope(context.triggers),
+    });
+  };
+
+  private buildRuntimeScope = async (
+    context: ActionContext,
+    opts: { allowPrompts: boolean } = { allowPrompts: false }
+  ) => {
+    return urlDrilldownBuildScope({
+      globalScope: this.deps.getGlobalScope(),
+      contextScope: getContextScope(context),
+      eventScope: await getEventScope(context, this.deps, opts),
+    });
   };
 }

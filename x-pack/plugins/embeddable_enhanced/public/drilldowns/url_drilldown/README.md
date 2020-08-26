@@ -6,8 +6,11 @@ By using variables in url template result url can be dynamic and depend on user'
 URL drilldown has 3 sources for variables:
 
 - Global static variables like, for example, `kibanaUrl`. Such variables won’t change depending on a place where url drilldown is used.
-- Context variables are dynamic and different depending on where drilldown is created and used. For example:
+- Context variables are dynamic and different depending on where drilldown is created and used.
 - Event variables depend on a trigger context. These variables are dynamically extracted from the action context when drilldown is executed.
+
+Difference between `event` and `context` variables, is that real `context` variables are available during drilldown creation (e.g. embeddable panel),
+but `event` variables mapped from trigger context. Since there is no trigger context during drilldown creation, we have to provide some _mock_ variables for validating and previewing the URL.
 
 In current implementation url drilldown has to be used inside the embeddable and with `ValueClickTrigger` or `RangeSelectTrigger`.
 

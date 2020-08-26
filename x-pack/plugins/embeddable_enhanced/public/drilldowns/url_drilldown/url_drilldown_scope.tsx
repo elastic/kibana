@@ -5,21 +5,8 @@
  */
 
 /**
- * This file contains all the logic for mapping from trigger's context and environment context to variables for URL drilldown scope
- * URL drilldown has 3 sources for variables:
- *
- * - Global static variables like, for example, `kibanaUrl`. Such variables won’t change depending on a place where url drilldown is used.
- * - Context variables are dynamic and different depending on where drilldown is created and used. For example:
- * - Event variables depend on a trigger context. These variables are dynamically extracted from the action context when drilldown is executed.
- *
- * At this point context variables are extracted from `embeddable` and event variables are extracted from trigger's context.
- * Only 2 triggers are supported at this point: VALUE_CLICK_TRIGGER and RANGE_SELECT_TRIGGER
- *
- * In future URL drilldown implementation will provide extension points
- * for injecting more variables into context and to support more triggers
- * https://github.com/elastic/kibana/issues/55324
- *
- * For now possible variables and logic for extracting those are hardcoded and all contained in this file.
+ * This file contains all the logic for mapping from trigger's context and action factory context to variables for URL drilldown scope,
+ * Please refer to ./README.md for explanation of different scope sources
  */
 
 import React from 'react';
@@ -50,7 +37,7 @@ type ContextScopeInput = ActionContext | ActionFactoryContext;
 
 /**
  * Part of context scope extracted from an embeddable
- * Expose on the scope as: `{{context.panel.id}}` `{{context.panel.filters.[0]}}`
+ * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`
  */
 interface EmbeddableUrlDrilldownContextScope {
   id: string;
