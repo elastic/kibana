@@ -49,7 +49,7 @@ describe('usage collector handle es response data', () => {
           'shape',
         ],
       },
-      templates: {
+      templatesUsage: {
         total: 3,
         by_name: {
           'APM Template': 2,
@@ -70,7 +70,7 @@ describe('usage collector handle es response data', () => {
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
       elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
       functions: { total: 1, in_use: ['toast'], per_element: { avg: 1, min: 1, max: 1 } },
-      templates: {
+      templatesUsage: {
         total: 1,
         by_name: {
           'APM Template': 1,
@@ -92,7 +92,7 @@ describe('usage collector handle es response data', () => {
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
       elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
       functions: { total: 1, in_use: ['markdown'], per_element: { avg: 1, min: 1, max: 1 } },
-      templates: {
+      templatesUsage: {
         total: 0,
         by_name: {},
       },
@@ -109,7 +109,7 @@ describe('usage collector handle es response data', () => {
       pages: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } },
       elements: undefined,
       functions: undefined,
-      templates: {
+      templatesUsage: {
         total: 1,
         by_name: {
           'APM Template': 1,

@@ -44,7 +44,7 @@ interface WorkpadTelemetry {
       max: number;
     };
   };
-  templates?: {
+  templatesUsage?: {
     total: number;
     by_name: Record<string, number>;
   };
@@ -181,7 +181,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     pages: pagesInfo,
     elements: elementsInfo,
     functions: functionsInfo,
-    templates: templatesInfo,
+    templatesUsage: templatesInfo,
   };
 }
 
