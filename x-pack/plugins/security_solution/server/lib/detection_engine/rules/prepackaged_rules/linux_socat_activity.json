@@ -6,6 +6,7 @@
   "false_positives": [
     "Socat is a dual-use tool that can be used for benign or malicious activity. Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools, and frameworks. Usage by web servers is more likely to be suspicious."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -25,5 +26,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
