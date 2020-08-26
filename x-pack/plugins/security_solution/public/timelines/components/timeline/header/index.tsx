@@ -27,6 +27,7 @@ import {
   TimelineStatusLiteralWithNull,
 } from '../../../../../common/types/timeline';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { sourcererModel } from '../../../../common/store/sourcerer';
 
 interface Props {
   browserFields: BrowserFields;
@@ -101,7 +102,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         />
       </>
     )}
-    <Sourcerer />
+    <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
   </>
 );
 

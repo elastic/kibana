@@ -58,10 +58,7 @@ export const getSourceDefaults = (
 const { sourcererScopes: foo, ...rest } = sourcererModel.initialSourcererState;
 const initialUseSourcerer: UseSourcerer = {
   ...rest,
-  getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => {
-    console.log('dear lord dont call this shit', id);
-    return getSourceDefaults(id, []);
-  },
+  getSourcererScopeById: (id: sourcererModel.SourcererScopeName) => getSourceDefaults(id, []),
   setActiveSourcererScopeId: () => noop,
   updateSourcererScopeIndices: () => noop,
 };
@@ -221,7 +218,6 @@ export const useSourcerer = (): UseSourcerer => {
           })
         );
         try {
-          console.log('apollo query', selectedPatterns);
           const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
             context: {
               fetchOptions: {
@@ -281,7 +277,9 @@ export const useSourcerer = (): UseSourcerer => {
       }
 
       fetchSource().then(() =>
-        activeSourcererScopeId !== id ? setActiveSourcererScopeId(id) : null
+        id !== SourcererScopeName.timeline && activeSourcererScopeId !== id
+          ? setActiveSourcererScopeId(id)
+          : null
       );
 
       return () => {
@@ -335,52 +333,42 @@ export const useSourcerer = (): UseSourcerer => {
         return sourcererModel.SourcererScopeName.default;
     }
   }, [routeProps.pageName]);
+  const initializeScope = useCallback(
+    (scopeToInit: SourcererScopeName) => {
+      if (!doesSourcererScopeExist(scopeToInit)) {
+        console.log('initialize from scope', scopeToInit);
+        initializeSourcererScope({
+          id: scopeToInit,
+          scopePatterns: sourcererModel.sourcererScopePatterns[scopeToInit],
+          selectedPatterns: sourcererModel.sourcererScopePatterns[scopeToInit],
+        });
+      } else {
+        // may exist if initialized by URL state
+        console.log('initialize from url', scopeToInit);
+        initializeSourcererScope({
+          id: scopeToInit,
+          scopePatterns: sourcererModel.sourcererScopePatterns[scopeToInit],
+          selectedPatterns: sourcererScopes[scopeToInit]?.selectedPatterns ?? [],
+        });
+      }
+    },
+    [doesSourcererScopeExist, initializeSourcererScope, sourcererScopes]
+  );
   const getSourcererScopeById = useCallback(
     (id: sourcererModel.SourcererScopeName): ManageScope => {
-      console.log('getSourcererScopeById', {
-        id,
-        sourcererScopes,
-      });
-      if (sourcererScopes[id] != null) {
-        return sourcererScopes[id];
-      } else {
-        console.log('SHOULD I INITIALIZE?', id, {
-          activeScopeByPage,
-          activeSourcererScopeId,
-        });
+      const sourcererById = sourcererScopes[id];
+      if (sourcererById != null) {
+        return sourcererById;
       }
       return getSourceDefaults(id, getDefaultIndex());
     },
-    [activeScopeByPage, activeSourcererScopeId, getDefaultIndex, sourcererScopes]
-  );
-  const initializeScope = useCallback(
-    (activeScope: SourcererScopeName) => {
-      if (!doesSourcererScopeExist(activeScope)) {
-        console.log('initialize from scope');
-        initializeSourcererScope({
-          id: activeScope,
-          scopePatterns: sourcererModel.sourcererScopePatterns[activeScope],
-          selectedPatterns: sourcererModel.sourcererScopePatterns[activeScope],
-        });
-      } else if (getSourcererScopeById(activeScope) != null) {
-        console.log('initialize from url');
-        const { loading, selectedPatterns } = getSourcererScopeById(activeScope);
-        if (loading) {
-          initializeSourcererScope({
-            id: activeScope,
-            scopePatterns: sourcererModel.sourcererScopePatterns[activeScope],
-            selectedPatterns,
-          });
-        }
-      }
-      console.count(`sourcerer initializeScope`);
-    },
-    [doesSourcererScopeExist, getSourcererScopeById, initializeSourcererScope]
+    [getDefaultIndex, sourcererScopes]
   );
 
   useEffect(() => {
     if (!isIndexPatternsLoading) {
       initializeScope(activeScopeByPage);
+      initializeScope(sourcererModel.SourcererScopeName.timeline);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeScopeByPage, isIndexPatternsLoading]);

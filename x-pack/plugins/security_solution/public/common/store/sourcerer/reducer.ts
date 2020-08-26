@@ -30,18 +30,15 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     isIndexPatternsLoading: payload,
   }))
-  .case(setSource, (state, { id, payload }) => {
-    console.log('setSource', { id, payload });
-    return {
-      ...state,
-      sourcererScopes: {
-        ...state.sourcererScopes,
-        [id]: {
-          ...getSourceDefaults(id, payload.selectedPatterns),
-          ...state.sourcererScopes[id],
-          ...payload,
-        },
+  .case(setSource, (state, { id, payload }) => ({
+    ...state,
+    sourcererScopes: {
+      ...state.sourcererScopes,
+      [id]: {
+        ...getSourceDefaults(id, payload.selectedPatterns),
+        ...state.sourcererScopes[id],
+        ...payload,
       },
-    };
-  })
+    },
+  }))
   .build();

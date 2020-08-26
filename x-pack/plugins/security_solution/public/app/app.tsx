@@ -56,9 +56,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
                 <ApolloClientContext.Provider value={apolloClient}>
                   <ThemeProvider theme={theme}>
                     <MlCapabilitiesProvider>
-                      <PageRouter history={history}>
-                        <SourcererProvider>{children}</SourcererProvider>
-                      </PageRouter>
+                      <PageRouter history={history}>{children}</PageRouter>
                     </MlCapabilitiesProvider>
                   </ThemeProvider>
                   <ErrorToastDispatcher />

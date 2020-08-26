@@ -155,7 +155,6 @@ export const makeMapStateToProps = () => {
       (acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }),
       {}
     );
-    // console.count('url state selectedPatterns');
 
     return {
       urlState: {
