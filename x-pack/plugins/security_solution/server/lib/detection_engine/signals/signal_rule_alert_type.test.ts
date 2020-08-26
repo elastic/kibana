@@ -37,6 +37,7 @@ jest.mock('./utils');
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
+jest.mock('./../../../../common/detection_engine/utils');
 
 const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
   alertId: ruleAlert.id,
