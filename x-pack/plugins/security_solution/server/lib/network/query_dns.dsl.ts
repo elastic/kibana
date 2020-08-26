@@ -6,8 +6,9 @@
 
 import { isEmpty } from 'lodash/fp';
 
+import { assertUnreachable } from '../../../common/utility_types';
 import { Direction, NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkDnsRequestOptions } from './index';
 

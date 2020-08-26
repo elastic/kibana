@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
   help: i18n.translate('xpack.canvas.functions.dropdownControlHelpText', {
-    defaultMessage: 'Configures a drop-down filter control element.',
+    defaultMessage: 'Configures a dropdown filter control element.',
   }),
   args: {
     filterColumn: i18n.translate(
@@ -22,7 +22,7 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
     ),
     valueColumn: i18n.translate('xpack.canvas.functions.dropdownControl.args.valueColumnHelpText', {
       defaultMessage:
-        'The column or field from which to extract the unique values for the drop-down control.',
+        'The column or field from which to extract the unique values for the dropdown control.',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
       defaultMessage: 'The group name for the filter.',
