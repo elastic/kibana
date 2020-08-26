@@ -21,7 +21,7 @@ const KibanaAuthHeader = 'Basic 123';
 
 describe('createEnterpriseSearchRequestHandler', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    jest.clearAllMocks();
     fetchMock.mockReset();
   });
 
