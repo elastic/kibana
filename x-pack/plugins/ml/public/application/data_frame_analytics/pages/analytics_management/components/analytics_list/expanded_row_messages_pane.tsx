@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { useRefreshAnalyticsList } from '../../../../common';
@@ -20,45 +20,34 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const getMessagesFactory = () => {
-    let concurrentLoads = 0;
-    return async function getMessages() {
-      try {
-        concurrentLoads++;
+  const getMessages = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const messagesResp = await ml.dataFrameAnalytics.getAnalyticsAuditMessages(analyticsId);
+      setIsLoading(false);
+      setMessages(messagesResp);
+    } catch (error) {
+      setIsLoading(false);
+      setErrorMessage(
+        i18n.translate('xpack.ml.dfAnalyticsList.analyticsDetails.messagesPane.errorMessage', {
+          defaultMessage: 'Messages could not be loaded',
+        })
+      );
+    }
+  }, []);
 
-        if (concurrentLoads > 1) {
-          return;
-        }
+  useEffect(() => {
+    getMessages();
+  }, []);
 
-        setIsLoading(true);
-        const messagesResp = await ml.dataFrameAnalytics.getAnalyticsAuditMessages(analyticsId);
-        setIsLoading(false);
-        setMessages(messagesResp);
-
-        concurrentLoads--;
-
-        if (concurrentLoads > 0) {
-          concurrentLoads = 0;
-          getMessages();
-        }
-      } catch (error) {
-        setIsLoading(false);
-        setErrorMessage(
-          i18n.translate('xpack.ml.dfAnalyticsList.analyticsDetails.messagesPane.errorMessage', {
-            defaultMessage: 'Messages could not be loaded',
-          })
-        );
-      }
-    };
-  };
-  useRefreshAnalyticsList({ onRefresh: getMessagesFactory() });
+  useRefreshAnalyticsList({ onRefresh: getMessages });
 
   return (
     <JobMessages
       messages={messages}
       loading={isLoading}
       error={errorMessage}
-      refreshMessage={getMessagesFactory()}
+      refreshMessage={getMessages}
     />
   );
 };

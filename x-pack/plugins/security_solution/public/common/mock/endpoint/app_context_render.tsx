@@ -17,7 +17,7 @@ import { apolloClientObservable, kibanaObservable } from '../test_providers';
 import { createStore, State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
-import { createKibanaContextProviderMock } from '../kibana_react';
+import { createKibanaContextProviderMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;

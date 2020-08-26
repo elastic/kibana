@@ -58,8 +58,8 @@ export async function runDockerGenerator(
     'kibana-docker',
     build.isOss() ? `oss` : `default${ubiImageFlavor}`
   );
-  const dockerOutputDir = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker.tar.gz`
+  const dockerTargetFilename = config.resolveFromTarget(
+    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image.tar.gz`
   );
   const scope: TemplateContext = {
     artifactTarball,
@@ -69,7 +69,7 @@ export async function runDockerGenerator(
     artifactsDir,
     imageTag,
     dockerBuildDir,
-    dockerOutputDir,
+    dockerTargetFilename,
     baseOSImage,
     ubiImageFlavor,
     dockerBuildDate,

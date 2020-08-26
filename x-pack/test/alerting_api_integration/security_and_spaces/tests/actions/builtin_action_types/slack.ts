@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import http from 'http';
 import getPort from 'get-port';
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
@@ -15,27 +16,30 @@ import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simu
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const config = getService('config');
+  const configService = getService('config');
 
   describe('slack action', () => {
     let simulatedActionId = '';
-
     let slackSimulatorURL: string = '';
     let slackServer: http.Server;
-    let proxyServer: any;
+    let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
+
     // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
-      const availablePort = await getPort({ port: 9000 });
-      slackServer.listen(availablePort);
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      if (!slackServer.listening) {
+        slackServer.listen(availablePort);
+      }
       slackSimulatorURL = `http://localhost:${availablePort}`;
-
-      proxyServer = getHttpProxyServer(slackSimulatorURL, () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
+      proxyServer = await getHttpProxyServer(
+        slackSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
+      );
     });
 
     it('should return 200 when creating a slack action successfully', async () => {
@@ -94,7 +98,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should respond with a 400 Bad Request when creating a slack action with a non whitelisted webhookUrl', async () => {
+    it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
       await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
@@ -111,7 +115,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });
@@ -233,7 +237,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     after(() => {
       slackServer.close();
-      proxyServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }
