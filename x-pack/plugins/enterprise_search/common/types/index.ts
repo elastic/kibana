@@ -13,6 +13,8 @@ export interface IInitialAppData {
   configuredLimits?: IConfiguredLimits;
   appSearch?: IAppSearchAccount;
   workplaceSearch?: {
+    canCreateInvitations: boolean;
+    isFederatedAuth: boolean;
     organization: IOrganization;
     fpAccount: IWorkplaceSearchAccount;
   };
