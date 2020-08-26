@@ -31,6 +31,7 @@ export interface ClientConfigType {
 }
 export interface ClientData extends IInitialAppData {
   externalUrl: IExternalUrl;
+  errorConnecting?: boolean;
 }
 
 export interface PluginsSetup {
@@ -123,6 +124,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       this.hasInitialized = true;
     } catch {
+      this.data.errorConnecting = true;
       // The plugin will attempt to re-fetch config data on page change
     }
   }
