@@ -5,15 +5,16 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiRange, EuiSelect } from '@elastic/eui';
+import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { createMockedIndexPattern } from '../../../mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { FiltersIndexPatternColumn } from '.';
-import { filtersOperation } from '../../index';
+import { filtersOperation } from '../index';
 import { IndexPatternPrivateState } from '../../../types';
+import { FilterPopover } from './filter_popover';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -77,7 +78,8 @@ describe('filters', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = filtersOperation.toEsAggsConfig(
         state.layers.first.columns.col1 as FiltersIndexPatternColumn,
-        'col1'
+        'col1',
+        state.indexPatterns['1']
       );
       expect(esAggsConfig).toEqual(
         expect.objectContaining({
@@ -107,11 +109,6 @@ describe('filters', () => {
           name: 'test',
           displayName: 'test',
           type: 'document',
-          aggregationRestrictions: {
-            terms: {
-              agg: 'terms',
-            },
-          },
         })
       ).toEqual({
         dataType: 'number',
@@ -120,7 +117,7 @@ describe('filters', () => {
       });
     });
 
-    it('should not return an operation if field type is not document', () => {
+    it('should not return operation if field type is not document', () => {
       expect(
         filtersOperation.getPossibleOperationForField({
           aggregatable: false,
@@ -133,22 +130,196 @@ describe('filters', () => {
     });
   });
 
-  describe('buildColumn', () => {
-    it('should use type from the passed field', () => {
-      const filtersColumn = filtersOperation.buildColumn({
-        layerId: 'first',
-        suggestedPriority: undefined,
-        indexPattern: createMockedIndexPattern(),
-        field: {
-          aggregatable: true,
-          searchable: true,
-          type: 'boolean',
-          displayName: 'test',
-          name: 'test',
-        },
-        columns: {},
+  describe('popover param editor', () => {
+    // @ts-expect-error
+    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    jest.mock('../../../../../../../../src/plugins/data/public', () => ({
+      QueryStringInput: () => {
+        return 'QueryStringInput';
+      },
+    }));
+    describe('Modify search query', () => {
+      it('should correctly show existing filters ', () => {
+        const setStateSpy = jest.fn();
+        const instance = mount(
+          <InlineOptions
+            {...defaultProps}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
+            layerId="first"
+          />
+        );
+        expect(
+          instance
+            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .at(0)
+            .text()
+        ).toEqual('More than one');
+        expect(
+          instance
+            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .at(2)
+            .text()
+        ).toEqual('src : 2');
       });
-      expect(filtersColumn.dataType).toEqual('boolean');
+
+      it('should update state when changing a filter', () => {
+        const setStateSpy = jest.fn();
+        const instance = mount(
+          <InlineOptions
+            {...defaultProps}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        act(() => {
+          instance.find(FilterPopover).first().prop('setFilter')!({
+            input: {
+              query: 'dest : 5',
+              language: 'lucene',
+            },
+            label: 'Dest5',
+          });
+        });
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    filters: [
+                      {
+                        input: {
+                          query: 'dest : 5',
+                          language: 'lucene',
+                        },
+                        label: 'Dest5',
+                      },
+                      {
+                        input: {
+                          language: 'kuery',
+                          query: 'src : 2',
+                        },
+                        label: '',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('should add label to duplicated filter', () => {
+        const setStateSpy = jest.fn();
+        const instance = mount(
+          <InlineOptions
+            {...defaultProps}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        act(() => {
+          instance.find(FilterPopover).first().prop('setFilter')!({
+            input: {
+              language: 'kuery',
+              query: 'src : 2',
+            },
+            label: '',
+          });
+        });
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    filters: [
+                      {
+                        input: {
+                          language: 'kuery',
+                          query: 'src : 2',
+                        },
+                        label: 'src : 2 [1]',
+                      },
+                      {
+                        input: {
+                          language: 'kuery',
+                          query: 'src : 2',
+                        },
+                        label: '',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('should remove search query', () => {
+        const setStateSpy = jest.fn();
+        const instance = mount(
+          <InlineOptions
+            {...defaultProps}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as FiltersIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        instance
+          .find('[data-test-subj="indexPattern-filters-existingFilterDelete"]')
+          .at(2)
+          .simulate('click');
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    filters: [
+                      {
+                        input: {
+                          language: 'kuery',
+                          query: 'bytes >= 1',
+                        },
+                        label: 'More than one',
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
     });
   });
 });
