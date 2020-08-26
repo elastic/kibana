@@ -48,7 +48,7 @@ guidelines]
 * Write all new code on
 {kib-repo}blob/{branch}/src/core/README.md[the
 platform], and following
-{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions]
+{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions].
 * _Always_ use the `SavedObjectClient` for reading and writing Saved
 Objects.
 * Add `README`s to all your plugins and services.
