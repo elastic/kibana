@@ -31,10 +31,14 @@ project {
       param("subnet", "teamcity")
       param("growingId", "true")
       param("agent_pool_id", "-2")
-      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
+      param("sourceProject", "elastic-kibana-184716")
+//      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
+      param("source-id", "kibana-teamcity-dev-")
       param("network", "teamcity")
       param("preemptible", "false")
-      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
+//      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
+      param("sourceImageFamily", "kibana-teamcity-dev-agents")
+//      param("sourceImageFamily", "kibana-ci-elastic-dev")
       param("zone", "us-central1-a")
       param("profileId", "kibana-brianseeders")
       param("diskType", "pd-ssd")
@@ -42,6 +46,7 @@ project {
       param("maxInstances", "10")
       param("imageType", "ImageFamily")
       param("machineType", "n2-standard-16")
+      param("diskSizeGb", "")
     }
     feature {
       id = "kibana-brianseeders"
