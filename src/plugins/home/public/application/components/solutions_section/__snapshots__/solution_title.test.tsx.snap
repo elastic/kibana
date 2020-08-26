@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SolutionTitle renders the title section of the solution panel 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    className="eui-textCenter"
+  >
+    <EuiToken
+      className="homSolutionPanel__icon"
+      fill="light"
+      iconType="logoKibana"
+      shape="circle"
+      size="l"
+    />
+    <EuiTitle
+      className="eui-textInheritColor"
+      size="s"
+    >
+      <h3>
+        Kibana
+      </h3>
+    </EuiTitle>
+    <EuiText
+      size="s"
+    >
+      <p
+        className="homSolutionPanel__subtitle"
+      >
+        Visualize & analyze
+         
+        <EuiIcon
+          type="sortRight"
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -12,7 +12,6 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -32,7 +31,7 @@ import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
@@ -61,7 +60,7 @@ export class UptimePlugin
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
         path: '/app/uptime#/',
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { UuidService, UuidServiceSetup } from './uuid_service';
+export * from './manage_data';

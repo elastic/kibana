@@ -100,78 +100,80 @@ export function Header({
     <>
       <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
-        <EuiHeader
-          theme="dark"
-          position="fixed"
-          sections={[
-            {
-              items: [
-                <HeaderLogo
-                  href={homeHref}
-                  forceNavigation$={observables.forceAppSwitcherNavigation$}
-                  navLinks$={observables.navLinks$}
-                  navigateToApp={application.navigateToApp}
-                />,
-              ],
-              borders: 'none',
-            },
-            {
-              ...(observables.navControlsCenter$ && {
-                items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
-              }),
-              borders: 'none',
-            },
-            {
-              items: [
-                <HeaderHelpMenu
-                  helpExtension$={observables.helpExtension$}
-                  helpSupportUrl$={observables.helpSupportUrl$}
-                  kibanaDocLink={kibanaDocLink}
-                  kibanaVersion={kibanaVersion}
-                />,
-                <HeaderNavControls navControls$={observables.navControlsRight$} />,
-              ],
-              borders: 'none',
-            },
-          ]}
-        />
-
-        <EuiHeader position="fixed">
-          <EuiHeaderSection grow={false}>
-            <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-              <EuiHeaderSectionItemButton
-                data-test-subj="toggleNavButton"
-                aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                  defaultMessage: 'Toggle primary navigation',
-                })}
-                onClick={() => setIsNavOpen(!isNavOpen)}
-                aria-expanded={isNavOpen}
-                aria-pressed={isNavOpen}
-                aria-controls={navId}
-                ref={toggleCollapsibleNavRef}
-              >
-                <EuiIcon type="menu" size="m" />
-              </EuiHeaderSectionItemButton>
-            </EuiHeaderSectionItem>
-
-            <EuiHeaderSectionItem border="right" />
-
-            <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
-          </EuiHeaderSection>
-
-          <HeaderBreadcrumbs
-            appTitle$={observables.appTitle$}
-            breadcrumbs$={observables.breadcrumbs$}
+        <div id="globalHeaderBars">
+          <EuiHeader
+            theme="dark"
+            position="fixed"
+            sections={[
+              {
+                items: [
+                  <HeaderLogo
+                    href={homeHref}
+                    forceNavigation$={observables.forceAppSwitcherNavigation$}
+                    navLinks$={observables.navLinks$}
+                    navigateToApp={application.navigateToApp}
+                  />,
+                ],
+                borders: 'none',
+              },
+              {
+                ...(observables.navControlsCenter$ && {
+                  items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
+                }),
+                borders: 'none',
+              },
+              {
+                items: [
+                  <HeaderHelpMenu
+                    helpExtension$={observables.helpExtension$}
+                    helpSupportUrl$={observables.helpSupportUrl$}
+                    kibanaDocLink={kibanaDocLink}
+                    kibanaVersion={kibanaVersion}
+                  />,
+                  <HeaderNavControls navControls$={observables.navControlsRight$} />,
+                ],
+                borders: 'none',
+              },
+            ]}
           />
 
-          <HeaderBadge badge$={observables.badge$} />
+          <EuiHeader position="fixed">
+            <EuiHeaderSection grow={false}>
+              <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+                <EuiHeaderSectionItemButton
+                  data-test-subj="toggleNavButton"
+                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                    defaultMessage: 'Toggle primary navigation',
+                  })}
+                  onClick={() => setIsNavOpen(!isNavOpen)}
+                  aria-expanded={isNavOpen}
+                  aria-pressed={isNavOpen}
+                  aria-controls={navId}
+                  ref={toggleCollapsibleNavRef}
+                >
+                  <EuiIcon type="menu" size="m" />
+                </EuiHeaderSectionItemButton>
+              </EuiHeaderSectionItem>
 
-          <EuiHeaderSection side="right">
-            <EuiHeaderSectionItem border="none">
-              {/* TODO  app content goes here */}
-            </EuiHeaderSectionItem>
-          </EuiHeaderSection>
-        </EuiHeader>
+              <EuiHeaderSectionItem border="right" />
+
+              <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+            </EuiHeaderSection>
+
+            <HeaderBreadcrumbs
+              appTitle$={observables.appTitle$}
+              breadcrumbs$={observables.breadcrumbs$}
+            />
+
+            <HeaderBadge badge$={observables.badge$} />
+
+            <EuiHeaderSection side="right">
+              <EuiHeaderSectionItem border="none">
+                {/* TODO  app content goes here */}
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
+          </EuiHeader>
+        </div>
 
         <CollapsibleNav
           appId$={application.currentAppId$}
