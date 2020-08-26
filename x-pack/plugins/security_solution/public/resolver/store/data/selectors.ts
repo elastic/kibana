@@ -182,8 +182,8 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
  * @param potentiallyLongString A string to seed with zero-width spaces so it wraps nicely
  */
 function addWordBreakSpaces(potentiallyLongString: string): string {
-  // Seed boundaries beetween word and non-word characters with Zero-width spaces to allow for text to be wrapped when it overflow its container.
-
+  // Seed boundaries beetween word and non-word characters with Zero-width spaces to allow
+  //  for text to be wrapped when it overflows its container.
   return potentiallyLongString.replace(/(\w\W)|(\W\w)/g, (boundary: string) => {
     return `${boundary[0]}\u200b${boundary[1]}`;
   });
