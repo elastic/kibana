@@ -27,7 +27,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
     defaultMessage: `Lens is a simpler way to create basic visualizations`,
   }),
   icon: 'lensApp',
-  stage: 'beta',
+  stage: 'production',
   appExtensions: {
     visualizations: {
       docTypes: ['lens'],
@@ -42,7 +42,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
           editUrl: getEditPath(id),
           editApp: 'lens',
           icon: 'lensApp',
-          stage: 'beta',
+          stage: 'production',
           savedObjectType: type,
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };

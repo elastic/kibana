@@ -89,6 +89,7 @@ export class TelemetryPlugin implements Plugin {
       config$,
       currentKibanaVersion,
       isDev,
+      logger: this.logger,
       router,
       telemetryCollectionManager,
     });
