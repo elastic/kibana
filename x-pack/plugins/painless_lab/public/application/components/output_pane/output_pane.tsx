@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiTabbedContentTab } from '@elastic/eui';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
