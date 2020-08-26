@@ -14,7 +14,7 @@ import {
   BarSeriesStyle,
 } from '@elastic/charts';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
-import { colorTransformer, MetricsExplorerColor } from '../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { createMetricLabel } from './helpers/create_metric_label';
 import {
   MetricsExplorerOptionsMetric,
@@ -41,9 +41,7 @@ export const MetricExplorerSeriesChart = (props: Props) => {
 };
 
 export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opacity }: Props) => {
-  const color =
-    (metric.color && colorTransformer(metric.color)) ||
-    colorTransformer(MetricsExplorerColor.color0);
+  const color = (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0);
 
   const yAccessors = Array.isArray(id)
     ? id.map((i) => getMetricId(metric, i)).slice(id.length - 1, id.length)
@@ -84,9 +82,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opac
 };
 
 export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) => {
-  const color =
-    (metric.color && colorTransformer(metric.color)) ||
-    colorTransformer(MetricsExplorerColor.color0);
+  const color = (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0);
 
   const yAccessors = Array.isArray(id)
     ? id.map((i) => getMetricId(metric, i)).slice(id.length - 1, id.length)

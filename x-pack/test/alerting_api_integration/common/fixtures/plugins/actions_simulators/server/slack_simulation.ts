@@ -64,6 +64,9 @@ export async function initPlugin() {
         response.statusCode = 400;
         response.end('unknown request to slack simulator');
       });
+    } else {
+      response.writeHead(400, { 'Content-Type': 'text/plain' });
+      response.end('Not supported http method to request slack simulator');
     }
   });
 }
