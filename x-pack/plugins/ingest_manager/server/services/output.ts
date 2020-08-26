@@ -15,7 +15,7 @@ let cachedAdminUser: null | { username: string; password: string } = null;
 
 class OutputService {
   public async getDefaultOutput(soClient: SavedObjectsClientContract) {
-    return await soClient.find<Output>({
+    return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
@@ -42,6 +42,7 @@ class OutputService {
     }
 
     return {
+      id: outputs.saved_objects[0].id,
       ...outputs.saved_objects[0].attributes,
     };
   }
