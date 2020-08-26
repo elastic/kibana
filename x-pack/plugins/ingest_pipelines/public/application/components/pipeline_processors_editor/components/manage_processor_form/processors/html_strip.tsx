@@ -19,7 +19,7 @@ export const HtmlStrip: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.htmlStripForm.fieldNameHelpText',
-          { defaultMessage: 'Field to remove HTML tags from' }
+          { defaultMessage: 'Field to remove HTML tags from.' }
         )}
       />
 
