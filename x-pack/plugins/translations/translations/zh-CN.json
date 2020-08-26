@@ -2881,8 +2881,6 @@
     "savedObjects.saveDuplicateRejectedDescription": "已拒绝使用重复标题保存确认",
     "savedObjects.saveModal.cancelButtonLabel": "取消",
     "savedObjects.saveModal.descriptionLabel": "描述",
-    "savedObjects.saveModal.duplicateTitleDescription": "单击“{confirmSaveLabel}”将会使用此重复标题保存 {objectType}。",
-    "savedObjects.saveModal.duplicateTitleLabel": "具有标题“{title}”的 {objectType} 已存在",
     "savedObjects.saveModal.saveAsNewLabel": "另存为新的 {objectType}",
     "savedObjects.saveModal.saveButtonLabel": "保存",
     "savedObjects.saveModal.saveTitle": "保存 {objectType}",
