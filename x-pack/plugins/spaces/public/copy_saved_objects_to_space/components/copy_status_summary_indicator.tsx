@@ -47,7 +47,7 @@ const renderIcon = (props: Props) => {
   if (successful) {
     return (
       <EuiIconTip
-        type={'check'}
+        type={'checkInCircleFilled'}
         color={'success'}
         iconProps={{
           'data-test-subj': getDataTestSubj('success'),
@@ -66,7 +66,7 @@ const renderIcon = (props: Props) => {
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
-        type={'cross'}
+        type={'alert'}
         color={'danger'}
         iconProps={{
           'data-test-subj': getDataTestSubj('failed'),

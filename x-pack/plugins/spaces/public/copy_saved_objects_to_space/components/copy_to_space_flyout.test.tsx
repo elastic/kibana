@@ -609,7 +609,7 @@ describe('CopyToSpaceFlyout', () => {
           values={Object {}}
         />,
         "data-test-subj": "cts-object-result-error-my-viz",
-        "type": "cross",
+        "type": "alert",
       }
     `);
 

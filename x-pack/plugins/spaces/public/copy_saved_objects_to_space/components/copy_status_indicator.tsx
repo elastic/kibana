@@ -45,7 +45,7 @@ export const CopyStatusIndicator = (props: Props) => {
         defaultMessage="Saved object copied successfully."
       />
     );
-    return <EuiIconTip type={'check'} color={'success'} content={message} />;
+    return <EuiIconTip type={'checkInCircleFilled'} color={'success'} content={message} />;
   }
 
   if (successful && pendingObjectRetry) {
@@ -74,7 +74,7 @@ export const CopyStatusIndicator = (props: Props) => {
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
-        type={'cross'}
+        type={'alert'}
         color={'danger'}
         data-test-subj={`cts-object-result-error-${objectResult.id}`}
         content={
