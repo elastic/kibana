@@ -42,5 +42,19 @@ describe('Pagination', () => {
       const fields = builder.buildQueryFields('');
       expect(fields).not.toHaveProperty('search_after');
     });
+
+    it('creates the sort field in ascending order', () => {
+      const builder = PaginationBuilder.createBuilder(100);
+      expect(builder.buildQueryFields('a').sort).toContainEqual({ '@timestamp': 'asc' });
+      expect(builder.buildQueryFields('', 'asc').sort).toContainEqual({ '@timestamp': 'asc' });
+    });
+
+    it('creates the sort field in descending order', () => {
+      const builder = PaginationBuilder.createBuilder(100);
+      expect(builder.buildQueryFields('a', 'desc').sort).toStrictEqual([
+        { '@timestamp': 'desc' },
+        { a: 'asc' },
+      ]);
+    });
   });
 });

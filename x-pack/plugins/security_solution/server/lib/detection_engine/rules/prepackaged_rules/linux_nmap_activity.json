@@ -6,6 +6,7 @@
   "false_positives": [
     "Security testing tools and frameworks may run `Nmap` in the course of security auditing. Some normal use of this command may originate from security engineers and network or server administrators. Use of nmap by ordinary users is uncommon."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -25,5 +26,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }
