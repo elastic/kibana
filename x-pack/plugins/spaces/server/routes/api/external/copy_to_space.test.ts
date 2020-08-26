@@ -191,6 +191,21 @@ describe('copy to space', () => {
       );
     });
 
+    it(`does not allow "overwrite" to be used with "createNewCopies"`, async () => {
+      const payload = {
+        spaces: ['a-space'],
+        objects: [{ type: 'foo', id: 'bar' }],
+        overwrite: true,
+        createNewCopies: true,
+      };
+
+      const { copyToSpace } = await setup();
+
+      expect(() =>
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [createNewCopies]"`);
+    });
+
     it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
@@ -205,40 +220,6 @@ describe('copy to space', () => {
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
-    });
-
-    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
-      const payload = {
-        spaces: ['a-space'],
-        objects: [
-          { type: 'globalType', id: 'bar' },
-          { type: 'visualization', id: 'bar' },
-        ],
-      };
-
-      const { copyToSpace } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({
-        body: payload,
-        method: 'post',
-      });
-
-      const response = await copyToSpace.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status } = response;
-
-      expect(status).toEqual(200);
-      expect(importSavedObjectsFromStream).toHaveBeenCalledTimes(1);
-      const [importCallOptions] = (importSavedObjectsFromStream as jest.Mock).mock.calls[0];
-
-      expect(importCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
     });
 
     it('copies to multiple spaces', async () => {
@@ -365,58 +346,6 @@ describe('copy to space', () => {
       );
     });
 
-    it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
-      const payload = {
-        retries: {
-          ['a-space']: [
-            {
-              type: 'visualization',
-              id: 'bar',
-              overwrite: true,
-            },
-            {
-              type: 'globalType',
-              id: 'bar',
-              overwrite: true,
-            },
-          ],
-        },
-        objects: [
-          {
-            type: 'globalType',
-            id: 'bar',
-          },
-          { type: 'visualization', id: 'bar' },
-        ],
-      };
-
-      const { resolveConflicts } = await setup();
-
-      const request = httpServerMock.createKibanaRequest({
-        body: payload,
-        method: 'post',
-      });
-
-      const response = await resolveConflicts.routeHandler(
-        mockRouteContext,
-        request,
-        kibanaResponseFactory
-      );
-
-      const { status } = response;
-
-      expect(status).toEqual(200);
-      expect(resolveSavedObjectsImportErrors).toHaveBeenCalledTimes(1);
-      const [
-        resolveImportErrorsCallOptions,
-      ] = (resolveSavedObjectsImportErrors as jest.Mock).mock.calls[0];
-
-      expect(resolveImportErrorsCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
-    });
-
     it('resolves conflicts for multiple spaces', async () => {
       const payload = {
         objects: [{ type: 'visualization', id: 'bar' }],
@@ -459,19 +388,13 @@ describe('copy to space', () => {
         resolveImportErrorsFirstCallOptions,
       ] = (resolveSavedObjectsImportErrors as jest.Mock).mock.calls[0];
 
-      expect(resolveImportErrorsFirstCallOptions).toMatchObject({
-        namespace: 'a-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
+      expect(resolveImportErrorsFirstCallOptions).toMatchObject({ namespace: 'a-space' });
 
       const [
         resolveImportErrorsSecondCallOptions,
       ] = (resolveSavedObjectsImportErrors as jest.Mock).mock.calls[1];
 
-      expect(resolveImportErrorsSecondCallOptions).toMatchObject({
-        namespace: 'b-space',
-        supportedTypes: ['visualization', 'dashboard', 'index-pattern'],
-      });
+      expect(resolveImportErrorsSecondCallOptions).toMatchObject({ namespace: 'b-space' });
     });
   });
 });

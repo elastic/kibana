@@ -105,7 +105,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       // which is a less frustrating UX.
       if (valid) {
         watcherESApp.enable();
-        watcherHome.showOnHomePage = true;
       } else {
         watcherESApp.disable();
       }
