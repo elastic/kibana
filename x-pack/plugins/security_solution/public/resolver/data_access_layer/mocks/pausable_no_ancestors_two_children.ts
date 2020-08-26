@@ -49,8 +49,8 @@ interface Metadata {
 export function pausableNoAncestorsTwoChildren(): {
   dataAccessLayer: DataAccessLayer;
   metadata: Metadata;
-  pause: (pausableRequests?: PausableRequests) => void;
-  resume: (pausableRequests?: PausableRequests) => void;
+  pause: (pausableRequests: PausableRequests) => void;
+  resume: (pausableRequests: PausableRequests) => void;
 } {
   const metadata: Metadata = {
     databaseDocumentID: '_id',

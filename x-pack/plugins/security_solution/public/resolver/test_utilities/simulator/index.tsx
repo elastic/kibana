@@ -17,7 +17,6 @@ import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
-import { ResolverTree } from '../../../../common/endpoint/types';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.

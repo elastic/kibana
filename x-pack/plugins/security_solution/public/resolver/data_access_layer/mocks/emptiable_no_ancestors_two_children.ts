@@ -17,6 +17,7 @@ import {
 import { DataAccessLayer } from '../../types';
 
 interface EmptiableRequests {
+  indexPatterns?: boolean;
   relatedEvents?: boolean;
   resolverTree?: boolean;
   entities?: boolean;

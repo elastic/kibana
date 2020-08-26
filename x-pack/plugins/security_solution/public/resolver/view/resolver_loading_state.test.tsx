@@ -11,7 +11,6 @@ import '../test_utilities/extend_jest';
 
 describe('Resolver: data loading and resolution states', () => {
   let simulator: Simulator;
-  let dbDocumentId: string;
   const resolverComponentInstanceID = 'resolver-loading-resolution-states';
 
   describe('When entities data is being requested', () => {
@@ -20,7 +19,6 @@ describe('Resolver: data loading and resolution states', () => {
         metadata: { databaseDocumentID },
         dataAccessLayer,
         pause,
-        resume,
       } = pausableNoAncestorsTwoChildren();
       pause({ entities: true });
       simulator = new Simulator({
@@ -53,7 +51,6 @@ describe('Resolver: data loading and resolution states', () => {
         metadata: { databaseDocumentID },
         dataAccessLayer,
         pause,
-        resume,
       } = pausableNoAncestorsTwoChildren();
       pause({ resolverTree: true });
       simulator = new Simulator({
