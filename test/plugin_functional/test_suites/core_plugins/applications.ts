@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await appsMenu.linkExists('Chromeless')).to.be(false);
     });
 
-    it.skip('navigating to chromeless application hides chrome', async () => {
+    it('navigating to chromeless application hides chrome', async () => {
       await PageObjects.common.navigateToApp('chromeless');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
