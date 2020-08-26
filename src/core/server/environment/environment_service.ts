@@ -17,25 +17,27 @@
  * under the License.
  */
 
-import { resolveInstanceUuid } from './resolve_uuid';
+import { take } from 'rxjs/operators';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
+import { PathConfigType, config as pathConfigDef } from '../path';
+import { HttpConfigType, config as httpConfigDef } from '../http';
+import { resolveInstanceUuid } from './resolve_uuid';
+import { createDataFolder } from './create_data_folder';
 
 /**
- * APIs to access the application's instance uuid.
- *
- * @public
+ * @internal
  */
-export interface UuidServiceSetup {
+export interface InternalEnvironmentServiceSetup {
   /**
    * Retrieve the Kibana instance uuid.
    */
-  getInstanceUuid(): string;
+  instanceUuid: string;
 }
 
 /** @internal */
-export class UuidService {
+export class EnvironmentService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
   private uuid: string = '';
@@ -46,13 +48,21 @@ export class UuidService {
   }
 
   public async setup() {
+    const [pathConfig, serverConfig] = await Promise.all([
+      this.configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
+      this.configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),
+    ]);
+
+    await createDataFolder({ pathConfig, logger: this.log });
+
     this.uuid = await resolveInstanceUuid({
-      configService: this.configService,
+      pathConfig,
+      serverConfig,
       logger: this.log,
     });
 
     return {
-      getInstanceUuid: () => this.uuid,
+      instanceUuid: this.uuid,
     };
   }
 }

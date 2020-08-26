@@ -496,6 +496,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const results = await legacyClient.callAsInternalUser('ml.updateDataFrameAnalytics', {
           body: request.body,
           analyticsId,
+          ...getAuthorizationHeader(request),
         });
         return response.ok({
           body: results,
