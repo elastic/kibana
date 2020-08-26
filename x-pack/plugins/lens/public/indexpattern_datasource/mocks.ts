@@ -11,6 +11,7 @@ export const createMockedIndexPattern = (): IndexPattern => ({
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: false,
   fields: [
     {
       name: 'timestamp',
@@ -70,6 +71,7 @@ export const createMockedRestrictedIndexPattern = () => ({
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: true,
   fields: [
     {
       name: 'timestamp',

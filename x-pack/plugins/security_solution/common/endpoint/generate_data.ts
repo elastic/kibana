@@ -302,6 +302,12 @@ export interface TreeOptions {
   generations?: number;
   children?: number;
   relatedEvents?: RelatedEventInfo[] | number;
+  /**
+   * If true then the related events will be created with timestamps that preserve the
+   * generation order, meaning the first event will always have a timestamp number less
+   * than the next related event
+   */
+  relatedEventsOrdered?: boolean;
   relatedAlerts?: number;
   percentWithRelated?: number;
   percentTerminated?: number;
@@ -322,6 +328,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     generations: options?.generations ?? 2,
     children: options?.children ?? 2,
     relatedEvents: options?.relatedEvents ?? 5,
+    relatedEventsOrdered: options?.relatedEventsOrdered ?? false,
     relatedAlerts: options?.relatedAlerts ?? 3,
     percentWithRelated: options?.percentWithRelated ?? 30,
     percentTerminated: options?.percentTerminated ?? 100,
@@ -809,7 +816,8 @@ export class EndpointDocGenerator {
       for (const relatedEvent of this.relatedEventsGenerator(
         node,
         opts.relatedEvents,
-        secBeforeEvent
+        secBeforeEvent,
+        opts.relatedEventsOrdered
       )) {
         eventList.push(relatedEvent);
       }
@@ -877,6 +885,8 @@ export class EndpointDocGenerator {
         addRelatedAlerts(ancestor, numAlertsPerNode, processDuration, events);
       }
     }
+    timestamp = timestamp + 1000;
+
     events.push(
       this.generateAlert(
         timestamp,
@@ -961,7 +971,12 @@ export class EndpointDocGenerator {
         });
       }
       if (this.randomN(100) < opts.percentWithRelated) {
-        yield* this.relatedEventsGenerator(child, opts.relatedEvents, processDuration);
+        yield* this.relatedEventsGenerator(
+          child,
+          opts.relatedEvents,
+          processDuration,
+          opts.relatedEventsOrdered
+        );
         yield* this.relatedAlertsGenerator(child, opts.relatedAlerts, processDuration);
       }
     }
@@ -973,13 +988,17 @@ export class EndpointDocGenerator {
    * @param relatedEvents - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
    *  or a number which defines the number of related events and will default to random categories
    * @param processDuration - maximum number of seconds after process event that related event timestamp can be
+   * @param ordered - if true the events will have an increasing timestamp, otherwise their timestamp will be random but
+   *  guaranteed to be greater than or equal to the originating event
    */
   public *relatedEventsGenerator(
     node: Event,
     relatedEvents: RelatedEventInfo[] | number = 10,
-    processDuration: number = 6 * 3600
+    processDuration: number = 6 * 3600,
+    ordered: boolean = false
   ) {
     let relatedEventsInfo: RelatedEventInfo[];
+    let ts = node['@timestamp'] + 1;
     if (typeof relatedEvents === 'number') {
       relatedEventsInfo = [{ category: RelatedEventCategory.Random, count: relatedEvents }];
     } else {
@@ -995,7 +1014,12 @@ export class EndpointDocGenerator {
           eventInfo = OTHER_EVENT_CATEGORIES[event.category];
         }
 
-        const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+        if (ordered) {
+          ts += this.randomN(processDuration) * 1000;
+        } else {
+          ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+        }
+
         yield this.generateEvent({
           timestamp: ts,
           entityID: node.process.entity_id,
