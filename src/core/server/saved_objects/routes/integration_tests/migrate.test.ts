@@ -24,7 +24,7 @@ describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(async () => {
-    root = kbnTestServer.createRoot({ migrations: { skip: true } });
+    root = kbnTestServer.createRoot({ migrations: { skip: true }, plugins: { initialize: false } });
     await root.setup();
     await root.start();
     migratorInstanceMock.runMigrations.mockClear();

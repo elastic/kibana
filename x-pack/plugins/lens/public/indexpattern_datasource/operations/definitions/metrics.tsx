@@ -51,7 +51,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
     buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       dataType: 'number',
       operationType: type,
       suggestedPriority,
@@ -64,11 +64,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     onFieldChange: (oldColumn, indexPattern, field) => {
       return {
         ...oldColumn,
-        label: ofName(field.name),
+        label: ofName(field.displayName),
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId) => ({
+    toEsAggsConfig: (column, columnId, _indexPattern) => ({
       id: columnId,
       enabled: true,
       type: column.operationType,
