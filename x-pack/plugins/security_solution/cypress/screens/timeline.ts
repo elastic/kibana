@@ -82,4 +82,4 @@ export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
 export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
 
-export const FIRST_TIMELINE = `${TIMELINES_TABLE} tr td input`;
+export const FIRST_TIMELINE = `[data-test-subj="checkboxSelectRow-0162c130-78be-11ea-9718-118a926974a4"]`;
