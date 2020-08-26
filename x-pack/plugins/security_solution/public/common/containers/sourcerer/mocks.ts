@@ -18,7 +18,7 @@ export const mockPatterns = [
   'journalbeat-*',
 ];
 
-export const mockSourceGroups = sourcererModel.sourceGroupSettings;
+export const mockSourcererScopes = sourcererModel.sourcerScopePatterns;
 
 export const mockSource = (testId: SourcererScopeName.default | SourcererScopeName.host) => ({
   data: {
@@ -31,7 +31,7 @@ export const mockSource = (testId: SourcererScopeName.default | SourcererScopeNa
             category: '_id',
             description: 'Each document has an _id that uniquely identifies it',
             example: 'Y-6TfmcB0WOhS6qyMv3s',
-            indexes: mockSourceGroups[testId],
+            indexes: mockSourcererScopes[testId],
             name: '_id',
             searchable: true,
             type: 'string',
@@ -50,11 +50,13 @@ export const mockSource = (testId: SourcererScopeName.default | SourcererScopeNa
   stale: false,
 });
 
-export const mockSourceGroup = (testId: SourcererScopeName.default | SourcererScopeName.host) => {
-  const indexes = mockSourceGroups[testId];
+export const mockSourcererScope = (
+  testId: SourcererScopeName.default | SourcererScopeName.host
+) => {
+  const indexes = mockSourcererScopes[testId];
   return {
-    ...getSourceDefaults(testId, mockSourceGroups[testId]),
-    scopePatterns: mockSourceGroups[testId],
+    ...getSourceDefaults(testId, mockSourcererScopes[testId]),
+    scopePatterns: mockSourcererScopes[testId],
     browserFields: {
       _id: {
         fields: {

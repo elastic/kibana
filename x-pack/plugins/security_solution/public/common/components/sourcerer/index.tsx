@@ -19,26 +19,26 @@ import {
   EuiSelectableOption,
   EuiSelectableOptionCheckedType,
 } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useManageSource } from '../../containers/sourcerer';
+import { useSourcererContext } from '../../containers/sourcerer';
 import * as i18n from './translations';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
 import { ADD_INDEX_PATH } from '../../../../common/constants';
 const ON: EuiSelectableOptionCheckedType = 'on';
 export const MaybeSourcerer = React.memo(() => {
   const {
-    activeSourceGroupId,
+    activeSourcererScopeId,
     kibanaIndexPatterns,
-    getManageSourceGroupById,
+    getSourcererScopeById,
     isIndexPatternsLoading,
-    updateSourceGroupIndices,
-  } = useManageSource();
+    updateSourcererScopeIndices,
+  } = useSourcererContext();
   const {
     scopePatterns,
     selectedPatterns: selectedOptions,
     loading: loadingIndices,
-  } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
-    getManageSourceGroupById,
-    activeSourceGroupId,
+  } = useMemo(() => getSourcererScopeById(activeSourcererScopeId), [
+    getSourcererScopeById,
+    activeSourcererScopeId,
   ]);
 
   const loading = useMemo(() => loadingIndices || isIndexPatternsLoading, [
@@ -48,9 +48,9 @@ export const MaybeSourcerer = React.memo(() => {
 
   const onChangeIndexPattern = useCallback(
     (newIndexPatterns: string[]) => {
-      updateSourceGroupIndices(activeSourceGroupId, newIndexPatterns);
+      updateSourcererScopeIndices(activeSourcererScopeId, newIndexPatterns);
     },
-    [activeSourceGroupId, updateSourceGroupIndices]
+    [activeSourcererScopeId, updateSourcererScopeIndices]
   );
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);

@@ -6,20 +6,20 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { ManageSourceInit, SourceGroupsType } from './model';
+import { ManageScopeInit, SourcererScopeName } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
 export const setSource = actionCreator<{
-  id: SourceGroupsType;
-  payload: ManageSourceInit;
+  id: SourcererScopeName;
+  payload: ManageScopeInit;
 }>('SET_SOURCE');
 
-export const setIsSourceLoading = actionCreator<{ id: SourceGroupsType; payload: boolean }>(
+export const setIsSourceLoading = actionCreator<{ id: SourcererScopeName; payload: boolean }>(
   'SET_IS_SOURCE_LOADING'
 );
 
-export const setActiveSourceGroupId = actionCreator<{ payload: SourceGroupsType }>(
+export const setActiveSourcererScopeId = actionCreator<{ payload: SourcererScopeName }>(
   'SET_ACTIVE_SOURCE_GROUP_ID'
 );
 

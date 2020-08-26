@@ -7,27 +7,27 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { mockPatterns, mockSourceGroup } from '../../containers/sourcerer/mocks';
+import { mockPatterns, mockSourcererScope } from '../../containers/sourcerer/mocks';
 import { MaybeSourcerer } from './index';
 import * as i18n from './translations';
 import { ADD_INDEX_PATH } from '../../../../common/constants';
 
-const updateSourceGroupIndices = jest.fn();
+const updateSourcererScopeIndices = jest.fn();
 const mockManageSource = {
-  activeSourceGroupId: SourcererScopeName.default,
+  activeSourcererScopeId: SourcererScopeName.default,
   kibanaIndexPatterns: mockPatterns,
-  getManageSourceGroupById: jest.fn().mockReturnValue(mockSourceGroup(SourcererScopeName.default)),
-  initializeSourceGroup: jest.fn(),
+  getSourcererScopeById: jest.fn().mockReturnValue(mockSourcererScope(SourcererScopeName.default)),
+  initializeSourcererScope: jest.fn(),
   isIndexPatternsLoading: false,
-  setActiveSourceGroupId: jest.fn(),
-  updateSourceGroupIndices,
+  setActiveSourcererScopeId: jest.fn(),
+  updateSourcererScopeIndices,
 };
 jest.mock('../../containers/sourcerer', () => {
   const original = jest.requireActual('../../containers/sourcerer');
 
   return {
     ...original,
-    useManageSource: () => mockManageSource,
+    useSourcererContext: () => mockManageSource,
   };
 });
 
@@ -57,7 +57,7 @@ describe('Sourcerer component', () => {
       wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('options')
     ).toEqual(mockOptions);
   });
-  it('onChange calls updateSourceGroupIndices', () => {
+  it('onChange calls updateSourcererScopeIndices', () => {
     const wrapper = mount(<MaybeSourcerer />);
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
 
@@ -67,7 +67,7 @@ describe('Sourcerer component', () => {
       .prop('onChange');
     // @ts-ignore
     switcherOnChange([mockOptions[0], mockOptions[1]]);
-    expect(updateSourceGroupIndices).toHaveBeenCalledWith(SourcererScopeName.default, [
+    expect(updateSourcererScopeIndices).toHaveBeenCalledWith(SourcererScopeName.default, [
       mockOptions[0].value,
       mockOptions[1].value,
     ]);

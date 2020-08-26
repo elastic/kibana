@@ -5,13 +5,13 @@
  */
 
 import { State } from '../types';
-import { ManageSourceGroupById, SourceGroupsType } from './model';
+import { SourcererScopeById, SourcererScopeName } from './model';
 
-export const activeSourceGroupIdSelector = ({ sourcerer }: State): SourceGroupsType =>
-  sourcerer.activeSourceGroupId;
+export const activeSourcererScopeIdSelector = ({ sourcerer }: State): SourcererScopeName =>
+  sourcerer.activeSourcererScopeId;
 export const kibanaIndexPatternsSelector = ({ sourcerer }: State): string[] =>
   sourcerer.kibanaIndexPatterns;
 export const isIndexPatternsLoadingSelector = ({ sourcerer }: State): boolean =>
   sourcerer.isIndexPatternsLoading;
-export const sourceGroupsSelector = ({ sourcerer }: State): ManageSourceGroupById =>
-  sourcerer.sourceGroups;
+export const sourcerScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
+  sourcerer.sourcerScopes;

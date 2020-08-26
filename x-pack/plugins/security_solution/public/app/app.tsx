@@ -27,7 +27,7 @@ import { ApolloClientContext } from '../common/utils/apollo_context';
 import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
-import { ManageSource } from '../common/containers/sourcerer';
+import { SourcererProvider } from '../common/containers/sourcerer';
 interface StartAppComponent extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
@@ -57,7 +57,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
                   <ThemeProvider theme={theme}>
                     <MlCapabilitiesProvider>
                       <PageRouter history={history}>
-                        <ManageSource>{children}</ManageSource>
+                        <SourcererProvider>{children}</SourcererProvider>
                       </PageRouter>
                     </MlCapabilitiesProvider>
                   </ThemeProvider>

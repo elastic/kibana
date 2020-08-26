@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo } from 'react';
-import { useManageSource } from './index';
+import { useSourcererContext } from './index';
 
 interface PassedProps extends React.PropsWithChildren<unknown> {
   sourcererIndexPatterns: string[];
@@ -12,10 +12,10 @@ interface PassedProps extends React.PropsWithChildren<unknown> {
 export const withSourcerer = (BaseComponent: React.ComponentType<PassedProps>) => (
   props: unknown
 ) => {
-  const { activeSourceGroupId, getManageSourceGroupById } = useManageSource();
-  const { selectedPatterns } = useMemo(() => getManageSourceGroupById(activeSourceGroupId), [
-    getManageSourceGroupById,
-    activeSourceGroupId,
+  const { activeSourcererScopeId, getSourcererScopeById } = useSourcererContext();
+  const { selectedPatterns } = useMemo(() => getSourcererScopeById(activeSourcererScopeId), [
+    getSourcererScopeById,
+    activeSourcererScopeId,
   ]);
   return <BaseComponent {...props} sourcererIndexPatterns={selectedPatterns} />;
 };
