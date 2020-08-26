@@ -84,6 +84,7 @@ const initialState: IndexPatternPrivateState = {
       id: '1',
       title: 'idx1',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
@@ -134,6 +135,7 @@ const initialState: IndexPatternPrivateState = {
       id: '2',
       title: 'idx2',
       timeFieldName: 'timestamp',
+      hasRestrictions: true,
       fields: [
         {
           name: 'timestamp',
@@ -191,6 +193,7 @@ const initialState: IndexPatternPrivateState = {
       id: '3',
       title: 'idx3',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
@@ -322,8 +325,20 @@ describe('IndexPattern Data Panel', () => {
           isFirstExistenceFetch: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
-            a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },
-            b: { id: 'b', title: 'bbb', timeFieldName: 'btime', fields: [] },
+            a: {
+              id: 'a',
+              title: 'aaa',
+              timeFieldName: 'atime',
+              fields: [],
+              hasRestrictions: false,
+            },
+            b: {
+              id: 'b',
+              title: 'bbb',
+              timeFieldName: 'btime',
+              fields: [],
+              hasRestrictions: false,
+            },
           },
           layers: {
             1: {

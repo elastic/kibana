@@ -13,7 +13,7 @@ import { CONTEXT, CSS } from '../../constants';
 export const help: FunctionHelp<FunctionFactory<typeof render>> = {
   help: i18n.translate('xpack.canvas.functions.renderHelpText', {
     defaultMessage:
-      'Render the {CONTEXT} as a specific element and sets element level options, such as background and border styling.',
+      'Renders the {CONTEXT} as a specific element and sets element level options, such as background and border styling.',
     values: {
       CONTEXT,
     },

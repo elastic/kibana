@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
@@ -18,7 +18,7 @@ import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './prov
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('Providers', () => {
   const isLoading: boolean = true;

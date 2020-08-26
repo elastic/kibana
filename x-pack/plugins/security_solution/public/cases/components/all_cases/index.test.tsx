@@ -15,7 +15,6 @@ import { useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { createUseKibanaMock } from '../../../common/mock/kibana_react';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -28,7 +27,7 @@ jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
@@ -97,23 +96,16 @@ describe('AllCases', () => {
   });
   /* eslint-enable no-console */
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     navigateToApp = jest.fn();
-    const kibanaMock = createUseKibanaMock()();
-    useKibanaMock.mockReturnValue({
-      ...kibanaMock,
-      services: {
-        application: {
-          navigateToApp,
-        },
-      },
-    });
+    useKibanaMock().services.application.navigateToApp = navigateToApp;
     useUpdateCasesMock.mockReturnValue(defaultUpdateCases);
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     moment.tz.setDefault('UTC');
   });
+
   it('should render AllCases', () => {
     const wrapper = mount(
       <TestProviders>
