@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFormRow,
-  EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,7 +30,6 @@ const initialPopoverState = {
   isOpen: false,
   openId: null,
   addingToGroupId: null,
-  tabId: null,
 };
 
 export function LayerPanel(
@@ -173,46 +171,33 @@ export function LayerPanel(
             >
               <>
                 {group.accessors.map((accessor) => {
-                  const tabs = [
-                    {
-                      id: 'datasource',
-                      name: i18n.translate('xpack.lens.editorFrame.quickFunctionsLabel', {
-                        defaultMessage: 'Quick functions',
-                      }),
-                      content: (
+                  const dimensionEditor = (
+                    <NativeRenderer
+                      render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                      nativeProps={{
+                        ...layerDatasourceConfigProps,
+                        core: props.core,
+                        columnId: accessor,
+                        filterOperations: group.filterOperations,
+                      }}
+                    />
+                  );
+
+                  let extraDimensionEditor;
+                  if (activeVisualization.renderDimensionEditor && group.enableDimensionEditor) {
+                    extraDimensionEditor = (
+                      <div key={accessor} className="lnsLayerPanel__styleEditor">
                         <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                          render={activeVisualization.renderDimensionEditor}
                           nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: accessor,
-                            filterOperations: group.filterOperations,
+                            ...layerVisualizationConfigProps,
+                            groupId: group.groupId,
+                            accessor,
+                            setState: props.updateVisualization,
                           }}
                         />
-                      ),
-                    },
-                  ];
-
-                  if (activeVisualization.renderDimensionEditor && group.enableDimensionEditor) {
-                    tabs.push({
-                      id: 'visualization',
-                      name: i18n.translate('xpack.lens.editorFrame.formatStyleLabel', {
-                        defaultMessage: 'Format & style',
-                      }),
-                      content: (
-                        <div className="lnsLayerPanel__styleEditor">
-                          <NativeRenderer
-                            render={activeVisualization.renderDimensionEditor}
-                            nativeProps={{
-                              ...layerVisualizationConfigProps,
-                              groupId: group.groupId,
-                              accessor,
-                              setState: props.updateVisualization,
-                            }}
-                          />
-                        </div>
-                      ),
-                    });
+                      </div>
+                    );
                   }
 
                   return (
@@ -291,15 +276,24 @@ export function LayerPanel(
                                     isOpen: true,
                                     openId: accessor,
                                     addingToGroupId: null, // not set for existing dimension
-                                    tabId: 'datasource',
                                   });
                                 }
                               },
                             }}
                           />
                         }
-                        panel={<>{tabs.map((tab) => tab.content)}</>}
-                        panelTitle={`${group.groupLabel} configuration`}
+                        panel={
+                          <>
+                            {dimensionEditor}
+                            {extraDimensionEditor}
+                          </>
+                        }
+                        panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                          defaultMessage: '{groupLabel} configuration',
+                          values: {
+                            groupLabel: group.groupLabel,
+                          },
+                        })}
                       />
 
                       <EuiButtonIcon
@@ -405,7 +399,6 @@ export function LayerPanel(
                                   isOpen: true,
                                   openId: newId,
                                   addingToGroupId: group.groupId,
-                                  tabId: 'datasource',
                                 });
                               }
                             }}
@@ -444,7 +437,6 @@ export function LayerPanel(
                                 isOpen: true,
                                 openId: newId,
                                 addingToGroupId: null, // clear now that dimension exists
-                                tabId: popoverState.tabId ?? 'datasource',
                               });
                             },
                           }}

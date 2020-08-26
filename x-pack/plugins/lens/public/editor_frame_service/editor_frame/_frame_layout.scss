@@ -42,14 +42,13 @@
   flex-basis: 25%;
   background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
   min-width: $lnsPanelMinWidth + $euiSizeXL;
-  max-height: 100%;
   max-width: $euiFormMaxWidth + $euiSizeXXL;
+  max-height: 100%;
 
   .lnsConfigPanel {
     @include euiScrollBar;
     padding: $euiSize 0 $euiSize $euiSize;
     overflow-x: hidden;
     overflow-y: scroll;
-
   }
 }

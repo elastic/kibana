@@ -1,18 +1,13 @@
 .lnsIndexPatternDimensionEditor {
-  // width: $euiSize * 30;
-  // padding: $euiSizeS;
-  // max-width: 100%;
   height: 100%;
 }
 
-.lnsIndexPatternDimensionEditor__left,
-.lnsIndexPatternDimensionEditor__right {
+.lnsIndexPatternDimensionEditor__section {
   padding: $euiSizeS;
 }
 
-.lnsIndexPatternDimensionEditor__left {
+.lnsIndexPatternDimensionEditor__section--shaded {
   background-color: $euiColorLightestShade;
-  // width: $euiSize * 8;
 }
 
 .lnsIndexPatternDimensionEditor__columns {

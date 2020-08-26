@@ -7,7 +7,6 @@ import './dimension_popover.scss';
 
 import React from 'react';
 import {
-  EuiIcon,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiTitle,
@@ -43,7 +42,6 @@ export function DimensionPopover({
       isOpen: false,
       openId: null,
       addingToGroupId: null,
-      tabId: null,
     });
   };
 

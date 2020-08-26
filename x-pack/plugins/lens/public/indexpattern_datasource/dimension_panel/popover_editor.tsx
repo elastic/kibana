@@ -9,16 +9,12 @@ import _ from 'lodash';
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiListGroup,
-  EuiCallOut,
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import classNames from 'classnames';
 import { EuiFormLabel } from '@elastic/eui';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionEditorProps, OperationFieldSupportMatrix } from './dimension_panel';
@@ -226,7 +222,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
 
   return (
     <div id={columnId}>
-      <div className="lnsIndexPatternDimensionEditor__left">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>Choose a function</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiListGroup
@@ -237,8 +233,19 @@ export function PopoverEditor(props: PopoverEditorProps) {
         />
       </div>
       <EuiSpacer size="s" />
-      <div className="lnsIndexPatternDimensionEditor__left">
-        <EuiFormRow label="Choose a field" fullWidth>
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+        <EuiFormRow
+          label="Choose a field"
+          fullWidth
+          isInvalid={Boolean(incompatibleSelectedOperationType)}
+          error={
+            selectedColumn
+              ? i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+                  defaultMessage: 'To use this function, select a different field.',
+                })
+              : undefined
+          }
+        >
           <FieldSelect
             currentIndexPattern={currentIndexPattern}
             existingFields={state.existingFields}
@@ -309,20 +316,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
             }}
           />
         </EuiFormRow>
-        {incompatibleSelectedOperationType && selectedColumn && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              data-test-subj="indexPattern-invalid-operation"
-              title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                defaultMessage: 'To use this function, select a different field.',
-              })}
-              color="danger"
-              size="s"
-              iconType="sortUp"
-            />
-          </>
-        )}
 
         {!incompatibleSelectedOperationType && ParamEditor && (
           <>
@@ -346,7 +339,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
 
       <EuiSpacer size="s" />
 
-      <div className="lnsIndexPatternDimensionEditor__right">
+      <div className="lnsIndexPatternDimensionEditor__section">
         {!incompatibleSelectedOperationType && selectedColumn && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
