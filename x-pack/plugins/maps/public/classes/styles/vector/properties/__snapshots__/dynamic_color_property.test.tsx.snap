@@ -327,99 +327,27 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
 `;
 
 exports[`renderFieldMetaPopover Should disable toggle when field is not backed by geojson source 1`] = `
-<FieldMetaPopover>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressedSwitch"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      disabled={true}
-      label="Calculate color ramp range from indices"
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Sigma"
-    labelType="label"
-  >
-    <EuiRange
-      compressed={true}
-      disabled={false}
-      fullWidth={false}
-      isLoading={false}
-      levels={Array []}
-      max={5}
-      min={1}
-      onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
-      showTicks={true}
-      showValue={false}
-      step={0.25}
-      tickInterval={1}
-      value={3}
-    />
-  </EuiFormRow>
-</FieldMetaPopover>
+<OrdinalFieldMetaPopover
+  fieldMetaOptions={
+    Object {
+      "isEnabled": true,
+    }
+  }
+  onChange={[Function]}
+  styleName="lineColor"
+  switchDisabled={true}
+/>
 `;
 
 exports[`renderFieldMetaPopover Should enable toggle when field is backed by geojson-source 1`] = `
-<FieldMetaPopover>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressedSwitch"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      disabled={false}
-      label="Calculate color ramp range from indices"
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Sigma"
-    labelType="label"
-  >
-    <EuiRange
-      compressed={true}
-      disabled={false}
-      fullWidth={false}
-      isLoading={false}
-      levels={Array []}
-      max={5}
-      min={1}
-      onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
-      showTicks={true}
-      showValue={false}
-      step={0.25}
-      tickInterval={1}
-      value={3}
-    />
-  </EuiFormRow>
-</FieldMetaPopover>
+<OrdinalFieldMetaPopover
+  fieldMetaOptions={
+    Object {
+      "isEnabled": true,
+    }
+  }
+  onChange={[Function]}
+  styleName="lineColor"
+  switchDisabled={false}
+/>
 `;
