@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
@@ -1188,7 +1188,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
           .prop('value')
       ).toEqual(0);
@@ -1224,7 +1224,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       act(() => {
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
           .prop('onChange')!({ target: { value: '0' } });
       });
