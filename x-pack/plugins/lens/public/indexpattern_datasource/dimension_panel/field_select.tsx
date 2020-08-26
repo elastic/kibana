@@ -74,7 +74,7 @@ export function FieldSelect({
     function fieldNamesToOptions(items: string[]) {
       return items
         .map((field) => ({
-          label: field,
+          label: fieldMap[field].displayName,
           value: {
             type: 'field',
             field,
@@ -105,7 +105,7 @@ export function FieldSelect({
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnFieldSelect__option--nonExistant': !exists,
           }),
-          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${value.field}`,
         }));
     }
 
@@ -161,7 +161,7 @@ export function FieldSelect({
           ? selectedColumnSourceField
             ? [
                 {
-                  label: selectedColumnSourceField,
+                  label: fieldMap[selectedColumnSourceField].displayName,
                   value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]
@@ -181,7 +181,7 @@ export function FieldSelect({
       }}
       renderOption={(option, searchValue) => {
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={null}>
               <LensFieldIcon
                 type={((option.value as unknown) as { dataType: DataType }).dataType}

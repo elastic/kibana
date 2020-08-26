@@ -5,39 +5,35 @@
  */
 
 import {
-  Plugin,
-  PluginInitializerContext,
+  AppMountParameters,
   CoreSetup,
   CoreStart,
-  AppMountParameters,
   HttpSetup,
+  Plugin,
+  PluginInitializerContext,
 } from 'src/core/public';
-
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
-import {
-  getPublicUrl,
-  ExternalUrl,
-  IExternalUrl,
-} from './applications/shared/enterprise_search_url';
+import { IInitialAppData } from '../common/types';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
+import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
 import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
 }
-export interface ClientData {
+export interface ClientData extends IInitialAppData {
   externalUrl: IExternalUrl;
+  errorConnecting?: boolean;
 }
 
 export interface PluginsSetup {
@@ -125,10 +121,15 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
-    // TODO: Rename to something more generic once we start fetching more data than just external_url from this endpoint
-    const publicUrl = await getPublicUrl(http);
+    try {
+      const { publicUrl, ...initialData } = await http.get('/api/enterprise_search/config_data');
+      this.data = { ...this.data, ...initialData };
+      if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
 
-    if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
-    this.hasInitialized = true;
+      this.hasInitialized = true;
+    } catch {
+      this.data.errorConnecting = true;
+      // The plugin will attempt to re-fetch config data on page change
+    }
   }
 }

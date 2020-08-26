@@ -18,9 +18,10 @@
  */
 
 import { Plugin, PluginConfigDescriptor } from 'kibana/server';
-import { PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { configSchema, ConfigSchema } from '../config';
+import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -49,7 +50,9 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup> {
     this._initializerContext = initializerContext;
   }
 
-  public setup() {
+  public setup(core: CoreSetup) {
+    core.uiSettings.register(getUiSettings());
+
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
     return {

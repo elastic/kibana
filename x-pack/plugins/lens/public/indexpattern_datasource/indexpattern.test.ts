@@ -21,39 +21,46 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'start_date',
+        displayName: 'start_date',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'dest',
+        displayName: 'dest',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -64,9 +71,11 @@ const expectedIndexPatterns = {
     id: '2',
     title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: true,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -81,6 +90,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -106,6 +116,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -119,12 +130,15 @@ const expectedIndexPatterns = {
   },
 };
 
-function stateFromPersistedState(
-  persistedState: IndexPatternPersistedState
-): IndexPatternPrivateState {
+type IndexPatternBaseState = Omit<
+  IndexPatternPrivateState,
+  'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
+>;
+
+function enrichBaseState(baseState: IndexPatternBaseState): IndexPatternPrivateState {
   return {
-    currentIndexPatternId: persistedState.currentIndexPatternId,
-    layers: persistedState.layers,
+    currentIndexPatternId: baseState.currentIndexPatternId,
+    layers: baseState.layers,
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
     existingFields: {},
@@ -133,7 +147,10 @@ function stateFromPersistedState(
 }
 
 describe('IndexPattern Data Source', () => {
-  let persistedState: IndexPatternPersistedState;
+  let baseState: Omit<
+    IndexPatternPrivateState,
+    'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
+  >;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
@@ -144,7 +161,7 @@ describe('IndexPattern Data Source', () => {
       charts: chartPluginMock.createSetupContract(),
     });
 
-    persistedState = {
+    baseState = {
       currentIndexPatternId: '1',
       layers: {
         first: {
@@ -215,9 +232,37 @@ describe('IndexPattern Data Source', () => {
 
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      const state = stateFromPersistedState(persistedState);
+      const state = enrichBaseState(baseState);
 
-      expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
+      expect(indexPatternDatasource.getPersistableState(state)).toEqual({
+        state: {
+          layers: {
+            first: {
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'My Op',
+                  dataType: 'string',
+                  isBucketed: true,
+
+                  // Private
+                  operationType: 'terms',
+                  sourceField: 'op',
+                  params: {
+                    size: 5,
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                  },
+                },
+              },
+            },
+          },
+        },
+        savedObjectReferences: [
+          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
+          { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
+        ],
+      });
     });
   });
 
@@ -228,7 +273,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should generate an expression for an aggregated query', async () => {
-      const queryPersistedState: IndexPatternPersistedState = {
+      const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -257,7 +302,7 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = stateFromPersistedState(queryPersistedState);
+      const state = enrichBaseState(queryBaseState);
 
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
         Object {
@@ -302,7 +347,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
-      const queryPersistedState: IndexPatternPersistedState = {
+      const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -341,14 +386,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = stateFromPersistedState(queryPersistedState);
+      const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
     it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
-      const queryPersistedState: IndexPatternPersistedState = {
+      const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -377,7 +422,7 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = stateFromPersistedState(queryPersistedState);
+      const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
@@ -480,55 +525,14 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#getMetadata', () => {
-    it('should return the title of the index patterns', () => {
-      expect(
-        indexPatternDatasource.getMetaData({
-          indexPatternRefs: [],
-          existingFields: {},
-          isFirstExistenceFetch: false,
-          indexPatterns: expectedIndexPatterns,
-          layers: {
-            first: {
-              indexPatternId: '1',
-              columnOrder: [],
-              columns: {},
-            },
-            second: {
-              indexPatternId: '2',
-              columnOrder: [],
-              columns: {},
-            },
-          },
-          currentIndexPatternId: '1',
-        })
-      ).toEqual({
-        filterableIndexPatterns: [
-          {
-            id: '1',
-            title: 'my-fake-index-pattern',
-          },
-          {
-            id: '2',
-            title: 'my-fake-restricted-pattern',
-          },
-        ],
-      });
-    });
-  });
-
   describe('#getPublicAPI', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      const initialState = stateFromPersistedState(persistedState);
+      const initialState = enrichBaseState(baseState);
       publicAPI = indexPatternDatasource.getPublicAPI({
         state: initialState,
         layerId: 'first',
-        dateRange: {
-          fromDate: 'now-30d',
-          toDate: 'now',
-        },
       });
     });
 

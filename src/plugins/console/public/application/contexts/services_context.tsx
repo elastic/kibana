@@ -17,22 +17,25 @@
  * under the License.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { NotificationsSetup } from 'kibana/public';
-import { History, Storage, Settings } from '../../services';
+import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
+import { EsHostService } from '../lib';
+
+interface ContextServices {
+  history: History;
+  storage: Storage;
+  settings: Settings;
+  notifications: NotificationsSetup;
+  objectStorageClient: ObjectStorageClient;
+  trackUiMetric: MetricsTracker;
+  esHostService: EsHostService;
+}
 
 export interface ContextValue {
-  services: {
-    history: History;
-    storage: Storage;
-    settings: Settings;
-    notifications: NotificationsSetup;
-    objectStorageClient: ObjectStorageClient;
-    trackUiMetric: MetricsTracker;
-  };
-  elasticsearchUrl: string;
+  services: ContextServices;
   docLinkVersion: string;
 }
 
@@ -44,6 +47,11 @@ interface ContextProps {
 const ServicesContext = createContext<ContextValue>(null as any);
 
 export function ServicesContextProvider({ children, value }: ContextProps) {
+  useEffect(() => {
+    // Fire and forget, we attempt to init the host service once.
+    value.services.esHostService.init();
+  }, [value.services.esHostService]);
+
   return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;
 }
 
