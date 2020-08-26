@@ -6,8 +6,8 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
-import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
@@ -16,7 +16,7 @@ import { ApiCallByIdProps, ApiCallByListIdProps } from '../types';
 
 import { ExceptionsApi, useApi } from './use_api';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('useApi', () => {
   const onErrorMock = jest.fn();

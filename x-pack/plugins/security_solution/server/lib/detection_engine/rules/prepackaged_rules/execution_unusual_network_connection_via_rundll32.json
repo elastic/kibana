@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies unusual instances of rundll32.exe making outbound network connections. This may indicate adversarial activity and may identify malicious DLLs.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

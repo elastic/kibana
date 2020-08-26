@@ -17,6 +17,11 @@ interface PaginationCursor {
 }
 
 /**
+ * The sort direction for the timestamp field
+ */
+export type TimeSortDirection = 'asc' | 'desc';
+
+/**
  * Defines the sorting fields for queries that leverage pagination
  */
 export type SortFields = [
@@ -158,10 +163,14 @@ export class PaginationBuilder {
    * Helper for creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFieldsAsInterface(tiebreaker: string): PaginationFields {
-    const sort: SortFields = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+  buildQueryFieldsAsInterface(
+    tiebreaker: string,
+    timeSort: TimeSortDirection = 'asc'
+  ): PaginationFields {
+    const sort: SortFields = [{ '@timestamp': timeSort }, { [tiebreaker]: 'asc' }];
     let searchAfter: SearchAfterFields | undefined;
     if (this.timestamp && this.eventID) {
       searchAfter = [this.timestamp, this.eventID];
@@ -174,11 +183,12 @@ export class PaginationBuilder {
    * Creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFields(tiebreaker: string): JsonObject {
+  buildQueryFields(tiebreaker: string, timeSort: TimeSortDirection = 'asc'): JsonObject {
     const fields: JsonObject = {};
-    const pagination = this.buildQueryFieldsAsInterface(tiebreaker);
+    const pagination = this.buildQueryFieldsAsInterface(tiebreaker, timeSort);
     fields.sort = pagination.sort;
     fields.size = pagination.size;
     if (pagination.searchAfter) {
