@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -20,6 +20,7 @@ import {
   EuiContextMenuItem,
   EuiIcon,
   EuiPortal,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
@@ -33,11 +34,13 @@ import {
   useUrlParams,
   useLink,
   useBreadcrumbs,
+  useLicense,
 } from '../../../hooks';
 import { SearchBar, ContextMenuActions } from '../../../components';
 import { AgentStatusKueryHelper } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AgentReassignAgentPolicyFlyout, AgentHealth, AgentUnenrollProvider } from '../components';
+import { AgentBulkActions, SelectionMode } from './components/bulk_actions';
 
 const REFRESH_INTERVAL_MS = 5000;
 
@@ -142,12 +145,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
+  const licenseService = useLicense();
+  const license = licenseService.getLicenseInformation();
+  const isGoldPlus = license?.isAvailable && license?.isActive && license?.hasAtLeast('gold');
 
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
   // Table and search states
-  const [search, setSearch] = useState(defaultKuery);
+  const [search, setSearch] = useState<string>(defaultKuery);
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
+  const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
+  const tableRef = useRef<EuiBasicTable<Agent>>(null);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
 
   // Policies state for filtering
@@ -399,7 +408,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
-      <EuiFlexGroup alignItems={'center'}>
+
+      {/* Search and filter bar */}
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={6}>
@@ -510,9 +521,29 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
+
+      {/* Agent total and bulk actions */}
+      <AgentBulkActions
+        totalAgents={totalAgents}
+        shownAgents={agents?.length || 0}
+        selectionMode={selectionMode}
+        setSelectionMode={setSelectionMode}
+        currentQuery={search}
+        selectedAgents={selectedAgents}
+        setSelectedAgents={(newAgents: Agent[]) => {
+          if (tableRef?.current) {
+            tableRef.current.setSelection(newAgents);
+            setSelectionMode('manual');
+          }
+        }}
+      />
+      <EuiSpacer size="xs" />
+      <EuiHorizontalRule margin="none" />
+
+      {/* Agent list table */}
       <EuiBasicTable<Agent>
+        ref={tableRef}
         className="fleet__agentList__table"
         data-test-subj="fleetAgentListTable"
         loading={isLoading}
@@ -551,6 +582,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           totalItemCount: totalAgents,
           pageSizeOptions,
         }}
+        isSelectable={true}
+        selection={
+          isGoldPlus
+            ? {
+                onSelectionChange: (newAgents: Agent[]) => {
+                  setSelectedAgents(newAgents);
+                  setSelectionMode('manual');
+                },
+              }
+            : undefined
+        }
         onChange={({ page }: { page: { index: number; size: number } }) => {
           const newPagination = {
             ...pagination,
