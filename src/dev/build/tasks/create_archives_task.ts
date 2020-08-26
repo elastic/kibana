@@ -21,7 +21,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter, CiStatsMetrics } from '@kbn/dev-utils';
 
 import { mkdirp, compressTar, compressZip, Task } from '../lib';
 
@@ -47,17 +47,16 @@ export const CreateArchives: Task = {
           archives.push({
             format: 'zip',
             path: destination,
-          });
-
-          await compressZip({
-            source,
-            destination,
-            archiverOptions: {
-              zlib: {
-                level: 9,
+            fileCount: await compressZip({
+              source,
+              destination,
+              archiverOptions: {
+                zlib: {
+                  level: 9,
+                },
               },
-            },
-            createRootDirectory: true,
+              createRootDirectory: true,
+            }),
           });
           break;
 
@@ -65,18 +64,17 @@ export const CreateArchives: Task = {
           archives.push({
             format: 'tar',
             path: destination,
-          });
-
-          await compressTar({
-            source,
-            destination,
-            archiverOptions: {
-              gzip: true,
-              gzipOptions: {
-                level: 9,
+            fileCount: await compressTar({
+              source,
+              destination,
+              archiverOptions: {
+                gzip: true,
+                gzipOptions: {
+                  level: 9,
+                },
               },
-            },
-            createRootDirectory: true,
+              createRootDirectory: true,
+            }),
           });
           break;
 
@@ -85,19 +83,22 @@ export const CreateArchives: Task = {
       }
     }
 
-    const reporter = CiStatsReporter.fromEnv(log);
-    if (reporter.isEnabled()) {
-      await reporter.metrics(
-        await Promise.all(
-          archives.map(async ({ format, path }) => {
-            return {
-              group: `${build.isOss() ? 'oss ' : ''}distributable size`,
-              id: format,
-              value: (await asyncStat(path)).size,
-            };
-          })
-        )
-      );
+    const metrics: CiStatsMetrics = [];
+    for (const { format, path, fileCount } of archives) {
+      metrics.push({
+        group: `${build.isOss() ? 'oss ' : ''}distributable size`,
+        id: format,
+        value: (await asyncStat(path)).size,
+      });
+
+      metrics.push({
+        group: `${build.isOss() ? 'oss ' : ''}distributable file count`,
+        id: 'total',
+        value: fileCount,
+      });
     }
+    log.debug('archive metrics:', metrics);
+
+    await CiStatsReporter.fromEnv(log).metrics(metrics);
   },
 };

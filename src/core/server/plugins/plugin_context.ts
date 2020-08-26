@@ -184,6 +184,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     status: {
       core$: deps.status.core$,
+      overall$: deps.status.overall$,
     },
     uiSettings: {
       register: deps.uiSettings.register,
