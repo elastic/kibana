@@ -17,8 +17,27 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { SolutionPanel } from './solution_panel';
 
-export const readFile = promisify(Fs.readFile);
-export const writeFile = promisify(Fs.writeFile);
+const solutionEntry = {
+  id: 'kibana',
+  title: 'Kibana',
+  subtitle: 'Visualize & analyze',
+  descriptions: ['Analyze data in dashboards'],
+  icon: 'logoKibana',
+  path: 'kibana_landing_page',
+  order: 1,
+};
+
+const addBasePathMock = (path: string) => (path ? path : 'path');
+
+describe('SolutionPanel', () => {
+  test('renders the solution panel for the given solution', () => {
+    const component = shallow(
+      <SolutionPanel addBasePath={addBasePathMock} solution={solutionEntry} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+});
