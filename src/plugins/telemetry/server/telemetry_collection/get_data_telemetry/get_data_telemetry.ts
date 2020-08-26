@@ -32,9 +32,9 @@ export interface DataTelemetryBasePayload {
 }
 
 export interface DataTelemetryDocument extends DataTelemetryBasePayload {
-  dataset?: {
-    name?: string;
-    type?: DataTelemetryType | 'unknown' | string; // The union of types is to help autocompletion with some known `dataset.type`s
+  data_stream?: {
+    dataset?: string;
+    type?: DataTelemetryType | string; // The union of types is to help autocompletion with some known `data_stream.type`s
   };
   package?: {
     name: string;
@@ -49,8 +49,8 @@ export interface DataTelemetryIndex {
   name: string;
   packageName?: string; // Populated by Ingest Manager at `_meta.package.name`
   managedBy?: string; // Populated by Ingest Manager at `_meta.managed_by`
-  datasetName?: string; // To be obtained from `mappings.dataset.name` if it's a constant keyword
-  datasetType?: string; // To be obtained from `mappings.dataset.type` if it's a constant keyword
+  dataStreamDataset?: string; // To be obtained from `mappings.data_stream.dataset` if it's a constant keyword
+  dataStreamType?: string; // To be obtained from `mappings.data_stream.type` if it's a constant keyword
   shipper?: string; // To be obtained from `_meta.beat` if it's set
   isECS?: boolean; // Optional because it can't be obtained via Monitoring.
 
@@ -64,8 +64,8 @@ type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U]
 
 type DataDescriptor = AtLeastOne<{
   packageName: string;
-  datasetName: string;
-  datasetType: string;
+  dataStreamDataset: string;
+  dataStreamType: string;
   shipper: string;
   patternName: DataPatternName; // When found from the list of the index patterns
 }>;
@@ -75,24 +75,24 @@ function findMatchingDescriptors({
   shipper,
   packageName,
   managedBy,
-  datasetName,
-  datasetType,
+  dataStreamDataset,
+  dataStreamType,
 }: DataTelemetryIndex): DataDescriptor[] {
   // If we already have the data from the indices' mappings...
   if (
     [shipper, packageName].some(Boolean) ||
-    (managedBy === 'ingest-manager' && [datasetType, datasetName].some(Boolean))
+    (managedBy === 'ingest-manager' && [dataStreamType, dataStreamDataset].some(Boolean))
   ) {
     return [
       {
         ...(shipper && { shipper }),
         ...(packageName && { packageName }),
-        ...(datasetName && { datasetName }),
-        ...(datasetType && { datasetType }),
+        ...(dataStreamDataset && { dataStreamDataset }),
+        ...(dataStreamType && { dataStreamType }),
       } as AtLeastOne<{
         packageName: string;
-        datasetName: string;
-        datasetType: string;
+        dataStreamDataset: string;
+        dataStreamType: string;
         shipper: string;
       }>, // Using casting here because TS doesn't infer at least one exists from the if clause
     ];
@@ -149,15 +149,17 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
   for (const indexCandidate of indexCandidates) {
     const matchingDescriptors = findMatchingDescriptors(indexCandidate);
     for (const {
-      datasetName,
-      datasetType,
+      dataStreamDataset,
+      dataStreamType,
       packageName,
       shipper,
       patternName,
     } of matchingDescriptors) {
-      const key = `${datasetName}-${datasetType}-${packageName}-${shipper}-${patternName}`;
+      const key = `${dataStreamDataset}-${dataStreamType}-${packageName}-${shipper}-${patternName}`;
       acc.set(key, {
-        ...((datasetName || datasetType) && { dataset: { name: datasetName, type: datasetType } }),
+        ...((dataStreamDataset || dataStreamType) && {
+          data_stream: { dataset: dataStreamDataset, type: dataStreamType },
+        }),
         ...(packageName && { package: { name: packageName } }),
         ...(shipper && { shipper }),
         ...(patternName && { pattern_name: patternName }),
@@ -198,9 +200,9 @@ interface IndexMappings {
         managed_by?: string; // Typically "ingest-manager"
       };
       properties: {
-        dataset?: {
+        data_stream?: {
           properties: {
-            name?: {
+            dataset?: {
               type: string;
               value?: string;
             };
@@ -242,10 +244,10 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
           // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
           '*.mappings.properties.ecs.properties.version.type',
 
-          // If `dataset.type` is a `constant_keyword`, it can be reported as a type
-          '*.mappings.properties.dataset.properties.type.value',
-          // If `dataset.name` is a `constant_keyword`, it can be reported as the dataset
-          '*.mappings.properties.dataset.properties.name.value',
+          // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
+          '*.mappings.properties.data_stream.properties.type.value',
+          // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
+          '*.mappings.properties.data_stream.properties.dataset.value',
         ],
       }),
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
@@ -265,8 +267,10 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
         shipper: indexMappings[name]?.mappings?._meta?.beat,
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,
         managedBy: indexMappings[name]?.mappings?._meta?.managed_by,
-        datasetName: indexMappings[name]?.mappings?.properties.dataset?.properties.name?.value,
-        datasetType: indexMappings[name]?.mappings?.properties.dataset?.properties.type?.value,
+        dataStreamDataset:
+          indexMappings[name]?.mappings?.properties.data_stream?.properties.dataset?.value,
+        dataStreamType:
+          indexMappings[name]?.mappings?.properties.data_stream?.properties.type?.value,
       };
 
       const stats = (indexStats?.indices || {})[name];

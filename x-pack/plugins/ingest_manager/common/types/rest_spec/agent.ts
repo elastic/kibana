@@ -113,7 +113,7 @@ export interface PutAgentReassignRequest {
   params: {
     agentId: string;
   };
-  body: { config_id: string };
+  body: { policy_id: string };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -154,7 +154,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    configId?: string;
+    policyId?: string;
   };
 }
 

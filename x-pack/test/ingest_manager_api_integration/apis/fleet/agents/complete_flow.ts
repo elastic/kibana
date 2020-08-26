@@ -77,8 +77,8 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(checkinApiResponse.actions).length(1);
       expect(checkinApiResponse.actions[0].type).be('CONFIG_CHANGE');
-      const configChangeAction = checkinApiResponse.actions[0];
-      const defaultOutputApiKey = configChangeAction.data.config.outputs.default.api_key;
+      const policyChangeAction = checkinApiResponse.actions[0];
+      const defaultOutputApiKey = policyChangeAction.data.config.outputs.default.api_key;
 
       // Ack actions
       await supertestWithoutAuth
@@ -92,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
               type: 'ACTION_RESULT',
               subtype: 'ACKNOWLEDGED',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
-              action_id: configChangeAction.id,
+              action_id: policyChangeAction.id,
               agent_id: enrollmentResponse.item.id,
               message: 'hello',
               payload: 'payload',
