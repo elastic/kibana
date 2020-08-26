@@ -17,8 +17,25 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
+import { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
 
-export const readFile = promisify(Fs.readFile);
-export const writeFile = promisify(Fs.writeFile);
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<InternalEnvironmentServiceSetup> = {
+    instanceUuid: 'uuid',
+  };
+  return setupContract;
+};
+
+type EnvironmentServiceContract = PublicMethodsOf<EnvironmentService>;
+const createMock = () => {
+  const mocked: jest.Mocked<EnvironmentServiceContract> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockResolvedValue(createSetupContractMock());
+  return mocked;
+};
+
+export const environmentServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

@@ -17,25 +17,24 @@
  * under the License.
  */
 
-import { UuidService, UuidServiceSetup } from './uuid_service';
+import { mkdir } from './fs';
+import { Logger } from '../logging';
+import { PathConfigType } from '../path';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<UuidServiceSetup> = {
-    getInstanceUuid: jest.fn().mockImplementation(() => 'uuid'),
-  };
-  return setupContract;
-};
-
-type UuidServiceContract = PublicMethodsOf<UuidService>;
-const createMock = () => {
-  const mocked: jest.Mocked<UuidServiceContract> = {
-    setup: jest.fn(),
-  };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
-  return mocked;
-};
-
-export const uuidServiceMock = {
-  create: createMock,
-  createSetupContract: createSetupContractMock,
-};
+export async function createDataFolder({
+  pathConfig,
+  logger,
+}: {
+  pathConfig: PathConfigType;
+  logger: Logger;
+}): Promise<void> {
+  const dataFolder = pathConfig.data;
+  try {
+    // Create the data directory (recursively, if the a parent dir doesn't exist).
+    // If it already exists, does nothing.
+    await mkdir(dataFolder, { recursive: true });
+  } catch (e) {
+    logger.error(`Error trying to create data folder at ${dataFolder}: ${e}`);
+    throw e;
+  }
+}

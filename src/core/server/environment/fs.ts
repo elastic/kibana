@@ -17,23 +17,9 @@
  * under the License.
  */
 
-import { getUiSettingDefaults } from './server/ui_setting_defaults';
+import Fs from 'fs';
+import { promisify } from 'util';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'kibana',
-    config: function (Joi) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        index: Joi.string().default('.kibana'),
-        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
-        // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
-        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
-      }).default();
-    },
-
-    uiExports: {
-      uiSettingDefaults: getUiSettingDefaults(),
-    },
-  });
-}
+export const readFile = promisify(Fs.readFile);
+export const writeFile = promisify(Fs.writeFile);
+export const mkdir = promisify(Fs.mkdir);
