@@ -136,7 +136,6 @@ export async function getTile({
           const props = resultFeatures[i].properties;
           if (props !== null) {
             props[FEATURE_ID_PROPERTY_NAME] = resultFeatures[i].id;
-            props[KBN_TOO_MANY_FEATURES_PROPERTY] = false;
           }
         }
       }
