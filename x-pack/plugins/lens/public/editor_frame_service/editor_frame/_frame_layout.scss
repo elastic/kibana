@@ -11,7 +11,7 @@
 
 .lnsFrameLayout__pageContent {
   display: flex;
-  overflow: auto;
+  overflow: hidden;
   flex-grow: 1;
 }
 
@@ -39,11 +39,15 @@
 }
 
 .lnsFrameLayout__sidebar--right {
-  @include euiScrollBar;
   background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
   min-width: $lnsPanelMinWidth + $euiSizeXL;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  padding: $euiSize 0 $euiSize $euiSize;
   max-height: 100%;
+
+  .lnsConfigPanel {
+    @include euiScrollBar;
+    padding: $euiSize 0 $euiSize $euiSize;
+    overflow-x: hidden;
+    overflow-y: scroll;
+
+  }
 }
