@@ -46,7 +46,6 @@ import {
   IBulkUploader,
   PluginsSetup,
   PluginsStart,
-  LegacyAPI,
   LegacyRequest,
 } from './types';
 

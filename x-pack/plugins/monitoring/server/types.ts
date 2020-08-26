@@ -33,10 +33,6 @@ export interface MonitoringElasticsearchConfig {
   hosts: string[];
 }
 
-export interface LegacyAPI {
-  getServerStatus: () => string;
-}
-
 export interface PluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
