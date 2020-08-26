@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Gets the correct filename if panel titles are hidden', async () => {
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles'); // panel titles are hidden
+      await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
       const savedSearchPanel = await find.byCssSelector(
         '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
       ); // panel title is hidden
