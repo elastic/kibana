@@ -30,13 +30,14 @@ const compressArtifact = async (artifact: InternalArtifactCompleteSchema) => {
 export const getInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
-  opts?: { compress: boolean }
+  opts?: { compress: boolean },
+  artifactName: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME
 ): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact(
     getTranslatedExceptionListMock(),
     os,
     schemaVersion,
-    ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    artifactName
   );
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
