@@ -136,7 +136,7 @@ export class SearchInterceptor {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.setupTimers({
+      const { combinedSignal, cleanup } = this.setupAbortSignal({
         abortSignal: options?.signal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
@@ -153,7 +153,13 @@ export class SearchInterceptor {
   /**
    * @internal
    */
-  protected setupTimers({ abortSignal, timeout }: { abortSignal?: AbortSignal; timeout?: number }) {
+  protected setupAbortSignal({
+    abortSignal,
+    timeout,
+  }: {
+    abortSignal?: AbortSignal;
+    timeout?: number;
+  }) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
