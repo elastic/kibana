@@ -62,7 +62,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.bytes', {
       defaultMessage: 'Bytes',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.bytes', {
       defaultMessage:
         'Converts a human-readable byte value to its value in bytes. If the field is an array of strings, the processor converts all members of the array.',
     }),
@@ -73,7 +73,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.circle', {
       defaultMessage: 'Circle',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.circle', {
       defaultMessage:
         'Converts circle definitions of shapes to regular polygons that approximate them. The error distance determines the accuracy of the polygon that represents the circle.',
     }),
@@ -84,7 +84,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.convert', {
       defaultMessage: 'Convert',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.convert', {
       defaultMessage:
         'Converts a field in the currently ingested document to a different type, such as converting a string to an integer.',
     }),
@@ -95,7 +95,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.csv', {
       defaultMessage: 'CSV',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.csv', {
       defaultMessage: 'Extracts fields from a CSV line in a single text field within a document.',
     }),
   },
@@ -105,7 +105,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.date', {
       defaultMessage: 'Date',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.date', {
       defaultMessage:
         'Parses dates from fields and uses the date or timestamp as the timestamp for the document.',
     }),
@@ -116,7 +116,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
       defaultMessage: 'Date index name',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.dateIndexName', {
       defaultMessage:
         'Points documents to the correct time-based index, based on a date or timestamp field in a document using the date math support in index names.',
     }),
@@ -127,7 +127,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.dissect', {
       defaultMessage: 'Dissect',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.dissect', {
       defaultMessage:
         'Matches a single text field against a defined pattern to extract structured fields out of a single text field within a document.',
     }),
@@ -138,7 +138,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.dotExpander', {
       defaultMessage: 'Dot expander',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.dotExpander', {
       defaultMessage:
         'Expands a field containing dot notation into an object field and makes these fields accessible by other processors in the pipeline.',
     }),
@@ -149,7 +149,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.drop', {
       defaultMessage: 'Drop',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.append', {
+    helpText: i18n.translate('xpack.ingestPipelines.processors.helpText.drop', {
       defaultMessage:
         'Drops the document without raising any errors. Useful for preventing documents from getting indexed based other conditions.',
     }),
