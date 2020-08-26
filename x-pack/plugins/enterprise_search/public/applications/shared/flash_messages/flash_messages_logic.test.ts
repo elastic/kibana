@@ -27,11 +27,11 @@ describe('FlashMessagesLogic', () => {
 
   describe('setFlashMessages()', () => {
     it('sets an array of messages', () => {
-      const messages = [
+      const messages: IFlashMessage[] = [
         { type: 'success', message: 'Hello world!!' },
         { type: 'error', message: 'Whoa nelly!', description: 'Uh oh' },
         { type: 'info', message: 'Everything is fine, nothing is ruined' },
-      ] as IFlashMessage[];
+      ];
 
       FlashMessagesLogic.mount();
       FlashMessagesLogic.actions.setFlashMessages(messages);
@@ -61,7 +61,7 @@ describe('FlashMessagesLogic', () => {
 
   describe('setQueuedMessages()', () => {
     it('sets an array of messages', () => {
-      const queuedMessage = { type: 'error', message: 'You deleted a thing' } as IFlashMessage;
+      const queuedMessage: IFlashMessage = { type: 'error', message: 'You deleted a thing' };
 
       FlashMessagesLogic.mount();
       FlashMessagesLogic.actions.setQueuedMessages(queuedMessage);
