@@ -218,7 +218,7 @@ export function LayerPanel(
                       key={accessor}
                       className={classNames('lnsLayerPanel__dimension', {
                         // eslint-disable-next-line @typescript-eslint/naming-convention
-                        'lnsLayerPanel__dimension-hidden':
+                        'lnsLayerPanel__dimension-isHidden':
                           isDraggedOperation(dragDropContext.dragging) &&
                           accessor === dragDropContext.dragging.columnId,
                       })}
@@ -228,7 +228,7 @@ export function LayerPanel(
                           isDraggedOperation(dragDropContext.dragging) &&
                           group.groupId !== dragDropContext.dragging.groupId
                         ) {
-                          return 'lnsLayerPanel__dimension-replace';
+                          return 'lnsLayerPanel__dimension-isReplacing';
                         }
                         return '';
                       }}

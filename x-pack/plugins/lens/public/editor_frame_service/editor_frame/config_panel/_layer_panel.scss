@@ -27,11 +27,11 @@
   overflow: hidden;
 }
 
-.lnsLayerPanel__dimension-hidden {
-  visibility: hidden;
+.lnsLayerPanel__dimension-isHidden {
+  opacity: 0;
 }
 
-.lnsLayerPanel__dimension-replace {
+.lnsLayerPanel__dimension-isReplacing {
   text-decoration: line-through;
 }
 
