@@ -441,7 +441,7 @@ export class IndexPattern implements IIndexPattern {
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters),
-      fields: this.mapping.sourceFilters._serialize!(this.sourceFilters),
+      fields: this.mapping.fields._serialize!(this.fields),
       fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
       type: this.type,
       typeMeta: this.mapping.typeMeta._serialize!(this.mapping),
