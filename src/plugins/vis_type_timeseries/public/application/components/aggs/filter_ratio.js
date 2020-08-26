@@ -35,7 +35,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { getDataStart } from '../../../services';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 
 const isFieldHistogram = (fields, indexPattern, field) => {
@@ -65,8 +65,8 @@ export const FilterRatioAgg = (props) => {
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const defaults = {
-    numerator: { query: '', language: getDefaultQueryLanguage() },
-    denominator: { query: '', language: getDefaultQueryLanguage() },
+    numerator: getDataStart().query.queryString.getDefaultQuery(),
+    denominator: getDataStart().query.queryString.getDefaultQuery(),
     metric_agg: 'count',
   };
 
