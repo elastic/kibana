@@ -10,6 +10,8 @@ import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import './outlier_exploration.scss';
+
 import {
   useColorRange,
   COLOR_RANGE,

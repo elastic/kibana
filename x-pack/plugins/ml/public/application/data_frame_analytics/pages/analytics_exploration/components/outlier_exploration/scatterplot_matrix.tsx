@@ -19,11 +19,30 @@ export const ScatterplotMatrix: FC<UseIndexDataReturnType> = (props) => {
   const htmlId = htmlIdGenerator()();
 
   useEffect(() => {
-    const columns = props.visibleColumns.filter((column) => column !== 'ml.outlier_score').sort();
+    const columns = props.visibleColumns
+      .filter((column) => {
+        const columnInfo = props.columnsWithCharts.find(
+          (columnWithChart) => columnWithChart.id === column
+        );
+        return column !== 'ml.outlier_score' && columnInfo?.schema === 'numeric';
+      })
+      .sort()
+      .map((column) => column.split('-').join('_'));
 
     // TODO we want more results than just what's visible in data grid
     scatterplotMatrixVegaLiteSpec.spec.data = {
-      values: props.tableItems,
+      values: props.tableItems.map((item) => {
+        return Object.entries(item).reduce((p, [key, value]) => {
+          const columnName = key.split('-').join('_');
+          if (columns.includes(columnName)) {
+            p[columnName] = value;
+          }
+          if (columnName === 'ml') {
+            p.ml = { outlier_score: item.ml.outlier_score };
+          }
+          return p;
+        }, {} as Record<string, any>);
+      }),
     };
 
     scatterplotMatrixVegaLiteSpec.repeat = {
