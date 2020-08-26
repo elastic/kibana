@@ -570,7 +570,6 @@ describe('state_helpers', () => {
     const indexPattern: IndexPattern = {
       id: 'test',
       title: '',
-      hasRestrictions: true,
       fields: [
         {
           name: 'fieldA',

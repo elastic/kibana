@@ -95,7 +95,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       },
     };
   },
-  toEsAggsConfig: (column, columnId, _indexPattern) => ({
+  toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,
     type: 'terms',

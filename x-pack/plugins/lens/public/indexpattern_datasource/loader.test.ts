@@ -40,7 +40,6 @@ const indexPattern1 = ({
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
-  hasRestrictions: false,
   fields: [
     {
       name: 'timestamp',
@@ -106,7 +105,6 @@ const indexPattern2 = ({
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
-  hasRestrictions: true,
   fields: [
     {
       name: 'timestamp',
@@ -735,9 +733,9 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
         indexPatterns: [
-          { id: '1', title: '1', fields: [], hasRestrictions: false },
-          { id: '2', title: '1', fields: [], hasRestrictions: false },
-          { id: '3', title: '1', fields: [], hasRestrictions: false },
+          { id: '1', title: '1', fields: [] },
+          { id: '2', title: '1', fields: [] },
+          { id: '3', title: '1', fields: [] },
         ],
         setState,
         dslQuery,
@@ -785,9 +783,9 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
         indexPatterns: [
-          { id: '1', title: '1', fields: [], hasRestrictions: false },
-          { id: '2', title: '1', fields: [], hasRestrictions: false },
-          { id: 'c', title: '1', fields: [], hasRestrictions: false },
+          { id: '1', title: '1', fields: [] },
+          { id: '2', title: '1', fields: [] },
+          { id: 'c', title: '1', fields: [] },
         ],
         setState,
         dslQuery,
@@ -819,7 +817,6 @@ describe('loader', () => {
           {
             id: '1',
             title: '1',
-            hasRestrictions: false,
             fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
           },
         ],

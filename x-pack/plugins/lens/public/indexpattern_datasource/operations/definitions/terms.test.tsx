@@ -13,7 +13,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from './index';
-import { IndexPatternPrivateState, IndexPattern } from '../../types';
+import { IndexPatternPrivateState } from '../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -69,8 +69,7 @@ describe('terms', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = termsOperation.toEsAggsConfig(
         state.layers.first.columns.col1 as TermsIndexPatternColumn,
-        'col1',
-        {} as IndexPattern
+        'col1'
       );
       expect(esAggsConfig).toEqual(
         expect.objectContaining({

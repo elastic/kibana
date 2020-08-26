@@ -19,7 +19,6 @@ export interface IndexPattern {
       params: unknown;
     }
   >;
-  hasRestrictions: boolean;
 }
 
 export interface IndexPatternField {

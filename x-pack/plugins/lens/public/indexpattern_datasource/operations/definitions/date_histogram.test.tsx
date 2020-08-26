@@ -55,7 +55,6 @@ describe('date_histogram', () => {
           id: '1',
           title: 'Mock Indexpattern',
           timeFieldName: 'timestamp',
-          hasRestrictions: false,
           fields: [
             {
               name: 'timestamp',
@@ -70,7 +69,6 @@ describe('date_histogram', () => {
         2: {
           id: '2',
           title: 'Mock Indexpattern 2',
-          hasRestrictions: false,
           fields: [
             {
               name: 'other_timestamp',
@@ -231,50 +229,13 @@ describe('date_histogram', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = dateHistogramOperation.toEsAggsConfig(
         state.layers.first.columns.col1 as DateHistogramIndexPatternColumn,
-        'col1',
-        state.indexPatterns['1']
+        'col1'
       );
       expect(esAggsConfig).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({
             interval: '42w',
             field: 'timestamp',
-            useNormalizedEsInterval: true,
-          }),
-        })
-      );
-    });
-
-    it('should not use normalized es interval for rollups', () => {
-      const esAggsConfig = dateHistogramOperation.toEsAggsConfig(
-        state.layers.first.columns.col1 as DateHistogramIndexPatternColumn,
-        'col1',
-        {
-          ...state.indexPatterns['1'],
-          fields: [
-            {
-              name: 'timestamp',
-              displayName: 'timestamp',
-              aggregatable: true,
-              searchable: true,
-              type: 'date',
-              aggregationRestrictions: {
-                date_histogram: {
-                  agg: 'date_histogram',
-                  time_zone: 'UTC',
-                  calendar_interval: '42w',
-                },
-              },
-            },
-          ],
-        }
-      );
-      expect(esAggsConfig).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            interval: '42w',
-            field: 'timestamp',
-            useNormalizedEsInterval: false,
           }),
         })
       );
@@ -339,7 +300,6 @@ describe('date_histogram', () => {
         {
           title: '',
           id: '',
-          hasRestrictions: true,
           fields: [
             {
               name: 'dateField',
@@ -383,7 +343,6 @@ describe('date_histogram', () => {
         {
           title: '',
           id: '',
-          hasRestrictions: false,
           fields: [
             {
               name: 'dateField',

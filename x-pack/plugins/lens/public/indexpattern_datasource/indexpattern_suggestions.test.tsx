@@ -20,7 +20,6 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
-    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
@@ -69,7 +68,6 @@ const expectedIndexPatterns = {
   2: {
     id: '2',
     title: 'my-fake-restricted-pattern',
-    hasRestrictions: true,
     timeFieldName: 'timestamp',
     fields: [
       {
@@ -324,7 +322,6 @@ describe('IndexPattern Data Source suggestions', () => {
             1: {
               id: '1',
               title: 'no timefield',
-              hasRestrictions: false,
               fields: [
                 {
                   name: 'bytes',
@@ -535,7 +532,6 @@ describe('IndexPattern Data Source suggestions', () => {
             1: {
               id: '1',
               title: 'no timefield',
-              hasRestrictions: false,
               fields: [
                 {
                   name: 'bytes',
@@ -1354,7 +1350,6 @@ describe('IndexPattern Data Source suggestions', () => {
           1: {
             id: '1',
             title: 'my-fake-index-pattern',
-            hasRestrictions: false,
             fields: [
               {
                 name: 'field1',
@@ -1498,7 +1493,6 @@ describe('IndexPattern Data Source suggestions', () => {
           1: {
             id: '1',
             title: 'my-fake-index-pattern',
-            hasRestrictions: false,
             fields: [
               {
                 name: 'field1',
@@ -1561,7 +1555,6 @@ describe('IndexPattern Data Source suggestions', () => {
           1: {
             id: '1',
             title: 'my-fake-index-pattern',
-            hasRestrictions: false,
             fields: [
               {
                 name: 'field1',

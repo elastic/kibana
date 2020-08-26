@@ -91,7 +91,6 @@ export async function loadIndexPatterns({
         timeFieldName,
         fieldFormatMap,
         fields: newFields,
-        hasRestrictions: !!typeMeta?.aggs,
       };
 
       return {
@@ -335,7 +334,6 @@ export async function syncExistingFields({
     title: string;
     fields: IndexPatternField[];
     timeFieldName?: string | null;
-    hasRestrictions: boolean;
   }>;
   fetchJson: HttpSetup['post'];
   setState: SetState;
@@ -345,12 +343,6 @@ export async function syncExistingFields({
   showNoDataPopover: () => void;
 }) {
   const existenceRequests = indexPatterns.map((pattern) => {
-    if (pattern.hasRestrictions) {
-      return {
-        indexPatternTitle: pattern.title,
-        existingFieldNames: pattern.fields.map((field) => field.name),
-      };
-    }
     const body: Record<string, string | object> = {
       dslQuery,
       fromDate: dateRange.fromDate,
