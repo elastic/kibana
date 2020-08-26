@@ -66,13 +66,17 @@ export function filterAnalytics(
       }
     } else {
       // filter other clauses, i.e. the filters for type and status
-      if (Array.isArray(c.value as Value[])) {
-        // job type value and status value is an array of job types
-        // @ts-ignore
-        js = items.filter((item) => c.value.some((value) => value === item[c.field]));
+      if (Array.isArray(c.value)) {
+        // job type value and status value are an array of string(s) e.g. c.value => ['failed', 'stopped']
+        js = items.filter((item) =>
+          (c.value as Value[]).includes(
+            item[c.field as keyof Pick<typeof item, 'job_type' | 'state'>]
+          )
+        );
       } else {
-        // @ts-ignore
-        js = items.filter((item) => item[c.field] === c.value);
+        js = items.filter(
+          (item) => item[c.field as keyof Pick<typeof item, 'job_type' | 'state'>] === c.value
+        );
       }
     }
 

@@ -10,7 +10,7 @@ import sortBy from 'lodash/sortBy';
 import { DataFrameAnalyticsListColumn } from './common';
 
 const PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [2, 5, 10, 25, 50];
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 interface AnalyticsBasicTableSettings {
   pageIndex: number;
