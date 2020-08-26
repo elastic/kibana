@@ -48,7 +48,13 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
-        await testSubjects.click('importSavedObjectsOverwriteToggle');
+        const radio = await testSubjects.find(
+          'savedObjectsManagement-importModeControl-overwriteRadioGroup'
+        );
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to go up one level and click the parent div
+        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
+        await div.click();
       } else {
         log.debug(`Leaving overwriteAll alone`);
       }

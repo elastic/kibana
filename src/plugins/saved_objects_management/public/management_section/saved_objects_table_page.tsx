@@ -25,6 +25,7 @@ import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
@@ -34,6 +35,7 @@ const SavedObjectsTablePage = ({
   allowedTypes,
   serviceRegistry,
   actionRegistry,
+  columnRegistry,
   setBreadcrumbs,
 }: {
   coreStart: CoreStart;
@@ -41,6 +43,7 @@ const SavedObjectsTablePage = ({
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
+  columnRegistry: SavedObjectsManagementColumnServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }) => {
   const capabilities = coreStart.application.capabilities;
@@ -62,6 +65,7 @@ const SavedObjectsTablePage = ({
       allowedTypes={allowedTypes}
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}
+      columnRegistry={columnRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
       search={dataStart.search}
