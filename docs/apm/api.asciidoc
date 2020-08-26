@@ -41,7 +41,7 @@ users interacting with APM APIs must have <<apm-app-api-user,sufficient privileg
 
 * The API endpoint uses the `GET` or `HEAD` operations
 * The path is whitelisted using the <<settings, `server.xsrf.whitelist`>> setting
-* XSRF protections are disabled using the `server.xsrf.disableProtection` setting
+* XSRF protections are disabled using the <<settings, `server.xsrf.disableProtection`>> setting
 
 `Content-Type: application/json`::
   Applicable only when you send a payload in the API request.

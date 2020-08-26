@@ -592,6 +592,9 @@ The `server.xsrf.whitelist` setting requires the following format:
 [cols="2*<"]
 |===
 
+| `status.xsrf.disableProtection:`
+ | Setting this to `true` will completely disable XSRF protection in Kibana. This is not recommended. *Default: `false`*
+
 | `status.allowAnonymous:`
  | If authentication is enabled,
 setting this to `true` enables unauthenticated users to access the {kib}
