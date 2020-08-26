@@ -54,6 +54,36 @@ TitleHr.displayName = 'TitleHR';
 const noWBRTagSupport = document.createElement('wbr') instanceof HTMLUnknownElement;
 
 /**
+ * Take description list entries and prepare them for display by
+ * replacing Zero-Width spaces with <wbr /> tags.
+ *
+ * @param entries {title: string, description: string}[]
+ */
+function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
+  return noWBRTagSupport
+    ? entries
+    : entries.map((entry) => {
+        return {
+          ...entry,
+          title: (
+            <>
+              {entry.title.split('\u200b').map((titlePart, i) => {
+                return i ? (
+                  <>
+                    <wbr />
+                    {titlePart}
+                  </>
+                ) : (
+                  <>{titlePart}</>
+                );
+              })}
+            </>
+          ),
+        };
+      });
+}
+
+/**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
@@ -272,27 +302,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
          * Both will hint breaking opportunities, but <wbr/> do not copy/paste
          * so it's preferable to use them if the UA allows it.
          */
-        const displayEntries = noWBRTagSupport
-          ? entries
-          : entries.map((entry) => {
-              return {
-                ...entry,
-                title: (
-                  <>
-                    {entry.title.split('\u200b').map((titlePart, i) => {
-                      return i ? (
-                        <>
-                          <wbr />
-                          {titlePart}
-                        </>
-                      ) : (
-                        <>{titlePart}</>
-                      );
-                    })}
-                  </>
-                ),
-              };
-            });
+        const displayEntries = entriesForDisplay(entries);
         return (
           <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
