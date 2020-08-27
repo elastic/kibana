@@ -26,20 +26,19 @@ import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_rea
 import { PolicyFromES } from '../../services/policies/types';
 import { filterItems } from '../../services';
 import { TableContent } from './components/table_content';
-import { UseRequestResponse } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 interface Props {
   policies: PolicyFromES[];
   history: RouteComponentProps['history'];
   navigateToApp: ApplicationStart['navigateToApp'];
-  sendRequest: UseRequestResponse['sendRequest'];
+  updatePolicies: () => void;
 }
 
 export const PolicyTable: React.FunctionComponent<Props> = ({
   policies,
   history,
   navigateToApp,
-  sendRequest,
+  updatePolicies,
 }) => {
   const [confirmModal, setConfirmModal] = useState<ReactNode | null>();
   const [filter, setFilter] = useState<string>();
@@ -72,7 +71,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           navigateToApp={navigateToApp}
           setConfirmModal={setConfirmModal}
           handleDelete={() => {
-            sendRequest();
+            updatePolicies();
             setConfirmModal(null);
           }}
           history={history}

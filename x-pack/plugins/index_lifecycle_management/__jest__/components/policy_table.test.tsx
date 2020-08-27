@@ -80,7 +80,7 @@ describe('policy table', () => {
         policies={policies}
         history={scopedHistoryMock.create()}
         navigateToApp={jest.fn()}
-        sendRequest={jest.fn()}
+        updatePolicies={jest.fn()}
       />
     );
   });
@@ -91,7 +91,7 @@ describe('policy table', () => {
         policies={[]}
         history={scopedHistoryMock.create()}
         navigateToApp={jest.fn()}
-        sendRequest={jest.fn()}
+        updatePolicies={jest.fn()}
       />
     );
     const rendered = mountWithIntl(component);

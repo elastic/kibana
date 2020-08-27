@@ -70,7 +70,7 @@ export const PolicyTable: React.FunctionComponent<Props & RouteComponentProps> =
       policies={policies || []}
       history={history}
       navigateToApp={navigateToApp}
-      sendRequest={sendRequest}
+      updatePolicies={sendRequest}
     />
   );
 };
