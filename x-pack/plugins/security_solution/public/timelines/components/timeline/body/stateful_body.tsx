@@ -169,10 +169,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (selectAll) {
+      if (selectAll && !isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [onSelectAll, selectAll]);
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (

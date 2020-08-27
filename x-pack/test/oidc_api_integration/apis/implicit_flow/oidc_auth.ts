@@ -151,9 +151,13 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
   });
