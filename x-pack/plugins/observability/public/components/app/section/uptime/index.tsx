@@ -182,7 +182,7 @@ function UptimeBarSeries({
       />
       <Axis
         id="y-axis"
-        gridLine={{ visible: false }}
+        gridLine={{ visible: true }}
         position={Position.Left}
         tickFormat={(x: any) => numeral(x).format('0a')}
       />
