@@ -586,7 +586,7 @@ The `server.xsrf.whitelist` setting requires the following format:
 [cols="2*<"]
 |===
 
-| [[settings-xsrf-disableProtection]] `status.xsrf.disableProtection:`
+| [[settings-xsrf-disableProtection]] `server.xsrf.disableProtection:`
  | Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended. *Default: `false`*
 
 | `status.allowAnonymous:`
