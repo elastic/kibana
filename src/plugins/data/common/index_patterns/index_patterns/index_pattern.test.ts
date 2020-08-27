@@ -43,7 +43,20 @@ jest.mock('../../field_mapping', () => {
       id: true,
       title: true,
       fieldFormatMap: {
+        _serialize: jest.fn().mockImplementation(() => {}),
         _deserialize: jest.fn().mockImplementation(() => []),
+      },
+      fields: {
+        _serialize: jest.fn().mockImplementation(() => {}),
+        _deserialize: jest.fn().mockImplementation((fields) => fields),
+      },
+      sourceFilters: {
+        _serialize: jest.fn().mockImplementation(() => {}),
+        _deserialize: jest.fn().mockImplementation(() => undefined),
+      },
+      typeMeta: {
+        _serialize: jest.fn().mockImplementation(() => {}),
+        _deserialize: jest.fn().mockImplementation(() => undefined),
       },
     })),
   };
