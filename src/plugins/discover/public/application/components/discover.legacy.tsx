@@ -200,7 +200,11 @@ export function DiscoverLegacy({
                         />
                       </h2>
                       {rows && rows.length && (
-                        <div className="dscDiscover">
+                        <div
+                          className="dscDiscover"
+                          data-search-description={opts.savedSearch.description}
+                          data-search-title={opts.savedSearch.lastSavedTitle}
+                        >
                           <DocTableLegacy
                             ariaLabelledBy="documentsAriaLabel"
                             columns={state.columns}
