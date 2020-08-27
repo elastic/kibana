@@ -56,23 +56,31 @@ export class EnterpriseSearchRequestHandler {
       response: KibanaResponseFactory
     ) => {
       try {
+        // Set up API URL
         params = params ?? (request.query ? `?${querystring.stringify(request.query)}` : '');
         const url = encodeURI(this.enterpriseSearchUrl + path + params);
 
-        const apiResponse = await fetch(url, {
-          headers: { Authorization: request.headers.authorization as string },
-        });
+        // Set up API options
+        const { method } = request.route;
+        const headers = { Authorization: request.headers.authorization as string };
+        const body = Object.keys(request.body as object).length
+          ? JSON.stringify(request.body)
+          : undefined;
+
+        // Call the Enterprise Search API and pass back response to the front-end
+        const apiResponse = await fetch(url, { method, headers, body });
 
         if (apiResponse.url.endsWith('/login')) {
           throw new Error('Cannot authenticate Enterprise Search user');
         }
 
-        const body = await apiResponse.json();
+        const { status } = apiResponse;
+        const json = await apiResponse.json();
 
-        if (hasValidData(body)) {
-          return response.ok({ body });
+        if (hasValidData(json)) {
+          return response.custom({ statusCode: status, body: json });
         } else {
-          this.log.debug(`Invalid data received from <${url}>: ${JSON.stringify(body)}`);
+          this.log.debug(`Invalid data received from <${url}>: ${JSON.stringify(json)}`);
           throw new Error('Invalid data received');
         }
       } catch (e) {
