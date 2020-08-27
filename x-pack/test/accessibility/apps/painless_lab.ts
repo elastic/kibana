@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.common.navigateToApp('painlessLab');
       await a11y.testAppSnapshot();
-      expect(await testSubjects.exists('painless_lab')).to.be(true);
-    });
+      });
 
     it('click on the output button', async () => {
       const painlessTabsOutput = await find.byCssSelector(
