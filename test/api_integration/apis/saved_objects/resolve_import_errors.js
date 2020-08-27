@@ -25,6 +25,23 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('resolve_import_errors', () => {
+    // mock success results including metadata
+    const indexPattern = {
+      type: 'index-pattern',
+      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+    };
+    const visualization = {
+      type: 'visualization',
+      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+    };
+    const dashboard = {
+      type: 'dashboard',
+      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+      meta: { title: 'Requests', icon: 'dashboardApp' },
+    };
+
     describe('without kibana index', () => {
       // Cleanup data that got created in import
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -72,6 +89,11 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
+              successResults: [
+                { ...indexPattern, overwrite: true },
+                { ...visualization, overwrite: true },
+                { ...dashboard, overwrite: true },
+              ],
             });
           });
       });
@@ -109,9 +131,8 @@ export default function ({ getService }) {
                   id: '1',
                   type: 'wigwags',
                   title: 'my title',
-                  error: {
-                    type: 'unsupported_type',
-                  },
+                  meta: { title: 'my title' },
+                  error: { type: 'unsupported_type' },
                 },
               ],
             });
@@ -175,9 +196,9 @@ export default function ({ getService }) {
                   id: '1',
                   type: 'visualization',
                   title: 'My favorite vis',
+                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
                   error: {
                     type: 'missing_references',
-                    blocking: [],
                     references: [
                       {
                         type: 'index-pattern',
@@ -234,7 +255,15 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 3 });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
+              });
             });
         });
 
@@ -254,7 +283,11 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 1 });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 1,
+                successResults: [{ ...visualization, overwrite: true }],
+              });
             });
         });
 
@@ -298,6 +331,13 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 1,
+                successResults: [
+                  {
+                    type: 'visualization',
+                    id: '1',
+                    meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  },
+                ],
               });
             });
           await supertest
