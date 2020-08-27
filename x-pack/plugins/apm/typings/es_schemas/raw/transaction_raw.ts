@@ -54,7 +54,6 @@ export interface TransactionRaw extends APMBaseDoc {
 
   // Shared by errors and transactions
   container?: Container;
-  ecs?: { version?: string };
   host?: Host;
   http?: Http;
   kubernetes?: Kubernetes;

@@ -19,7 +19,6 @@ export type AgentName =
   | 'ruby';
 
 export interface Agent {
-  ephemeral_id?: string;
   name: AgentName;
   version: string;
 }

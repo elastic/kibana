@@ -184,12 +184,10 @@ export async function transactionGroupsFetcher(
 }
 
 export interface TransactionGroup {
-  name?: string;
-  key?: Record<string, any> | string;
+  key: Record<string, any> | string;
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
   p95: number | undefined;
   impact: number;
-  impactRelative?: number;
   sample: Transaction;
 }

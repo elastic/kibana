@@ -9,10 +9,7 @@ export interface Service {
   environment?: string;
   framework?: {
     name: string;
-    version?: string;
-  };
-  node?: {
-    name?: string;
+    version: string;
   };
   runtime?: {
     name: string;
@@ -22,5 +19,4 @@ export interface Service {
     name: string;
     version?: string;
   };
-  version?: string;
 }

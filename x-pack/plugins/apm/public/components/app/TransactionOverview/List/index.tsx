@@ -19,16 +19,9 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
-// Truncate both the link and the child span (the tooltip anchor.) The link so
-// it doesn't overflow, and the anchor so we get the ellipsis.
 const TransactionNameLink = styled(TransactionDetailLink)`
-  font-family: ${fontFamilyCode};
-  white-space: nowrap;
   ${truncate('100%')};
-
-  > span {
-    ${truncate('100%')};
-  }
+  font-family: ${fontFamilyCode};
 `;
 
 interface Props {
@@ -48,20 +41,20 @@ export function TransactionList({ items, isLoading }: Props) {
         sortable: true,
         render: (_, { sample }: TransactionGroup) => {
           return (
-            <TransactionNameLink
-              serviceName={sample.service.name}
-              transactionId={sample.transaction.id}
-              traceId={sample.trace.id}
-              transactionName={sample.transaction.name}
-              transactionType={sample.transaction.type}
+            <EuiToolTip
+              id="transaction-name-link-tooltip"
+              content={sample.transaction.name || NOT_AVAILABLE_LABEL}
             >
-              <EuiToolTip
-                id="transaction-name-link-tooltip"
-                content={sample.transaction.name || NOT_AVAILABLE_LABEL}
+              <TransactionNameLink
+                serviceName={sample.service.name}
+                transactionId={sample.transaction.id}
+                traceId={sample.trace.id}
+                transactionName={sample.transaction.name}
+                transactionType={sample.transaction.type}
               >
-                <>{sample.transaction.name || NOT_AVAILABLE_LABEL}</>
-              </EuiToolTip>
-            </TransactionNameLink>
+                {sample.transaction.name || NOT_AVAILABLE_LABEL}
+              </TransactionNameLink>
+            </EuiToolTip>
           );
         },
       },
