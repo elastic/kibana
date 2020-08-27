@@ -1,0 +1,32 @@
+package builds
+
+import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+
+object Lint : BuildType({
+  name = "Lint"
+  paused = true
+  description = "Executes Linting, such as eslint and sasslint"
+
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-2-", "RQ_AGENT_NAME")
+  }
+
+  steps {
+    script {
+      name = "Sasslint"
+      scriptContent = """
+                #!/bin/bash
+                yarn run grunt run:sasslint
+            """.trimIndent()
+    }
+
+    script {
+      name = "ESLint"
+      scriptContent = """
+                #!/bin/bash
+                yarn run grunt run:eslint
+            """.trimIndent()
+    }
+  }
+})
