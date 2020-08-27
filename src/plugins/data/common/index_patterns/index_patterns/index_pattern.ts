@@ -555,7 +555,7 @@ export class IndexPattern implements IIndexPattern {
 
             // Set the updated response on this object
             serverChangedKeys.forEach((key) => {
-              // @ts-expect-error
+              // @ts-ignore
               this[key] = samePattern[key];
             });
             this.version = samePattern.version;
