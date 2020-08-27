@@ -15,8 +15,6 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { TRANSFORM_STATE } from '../../../../../../common';
 
 import { DeleteAction } from './use_delete_action';
 
