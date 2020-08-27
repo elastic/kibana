@@ -14,8 +14,6 @@ import { StepAboutRule } from '.';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 
@@ -164,33 +162,34 @@ describe('StepAboutRuleComponent', () => {
       .first()
       .simulate('change', { target: { value: 'Test name text' } });
 
-    wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click').update();
-    await waitFor(() => {
-      const expected: Omit<AboutStepRule, 'isNew'> = {
-        author: [],
-        isAssociatedToEndpointList: false,
-        isBuildingBlock: false,
-        license: '',
-        ruleNameOverride: '',
-        timestampOverride: '',
-        description: 'Test description text',
-        falsePositives: [''],
-        name: 'Test name text',
-        note: '',
-        references: [''],
-        riskScore: { value: 50, mapping: [], isMappingChecked: false },
-        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: 'none', name: 'none', reference: 'none' },
-            technique: [],
-          },
-        ],
-      };
-      expect(stepDataMock.mock.calls[1][1]).toEqual(expected);
+    await act(async () => {
+      wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click').update();
     });
+    const expected: AboutStepRule = {
+      author: [],
+      isAssociatedToEndpointList: false,
+      isBuildingBlock: false,
+      license: '',
+      ruleNameOverride: '',
+      timestampOverride: '',
+      description: 'Test description text',
+      falsePositives: [''],
+      name: 'Test name text',
+      note: '',
+      references: [''],
+      riskScore: { value: 50, mapping: [], isMappingChecked: false },
+      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      tags: [],
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ],
+    };
+
+    expect(stepDataMock.mock.calls[0][1]).toEqual(expected);
   });
 
   test('it allows user to set the risk score as a number (and not a string)', async () => {
@@ -251,6 +250,6 @@ describe('StepAboutRuleComponent', () => {
         },
       ],
     };
-    expect(stepDataMock.mock.calls[1][1]).toEqual(expected);
+    expect(stepDataMock.mock.calls[0][1]).toEqual(expected);
   });
 });
