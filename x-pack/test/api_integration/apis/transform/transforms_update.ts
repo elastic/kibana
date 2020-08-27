@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
       count: 1,
       id: 'the-transform-1',
       source: {
-        index: ['farequote-*'],
+        index: ['ft_farequote'],
         query: { match_all: {} },
       },
     },
@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
   function getTransformUpdateConfig() {
     return {
       source: {
-        index: 'farequote-2*',
+        index: 'ft_*',
         query: {
           term: {
             airline: {
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(transformUpdateResponseBody.id).to.eql(expected.transformOriginalConfig.id);
       expect(transformUpdateResponseBody.source).to.eql({
         ...expectedUpdateConfig.source,
-        index: ['farequote-2*'],
+        index: ['ft_*'],
       });
       expect(transformUpdateResponseBody.description).to.eql(expectedUpdateConfig.description);
       expect(transformUpdateResponseBody.settings).to.eql({});
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(transformUpdatedConfig.id).to.eql(expected.transformOriginalConfig.id);
       expect(transformUpdatedConfig.source).to.eql({
         ...expectedUpdateConfig.source,
-        index: ['farequote-2*'],
+        index: ['ft_*'],
       });
       expect(transformUpdatedConfig.description).to.eql(expectedUpdateConfig.description);
       expect(transformUpdatedConfig.settings).to.eql({});

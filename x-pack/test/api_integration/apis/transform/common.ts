@@ -20,7 +20,7 @@ export function generateTransformConfig(transformId: string): PutTransformsReque
   const destinationIndex = generateDestIndex(transformId);
 
   return {
-    source: { index: ['farequote-*'] },
+    source: { index: ['ft_farequote'] },
     pivot: {
       group_by: { airline: { terms: { field: 'airline' } } },
       aggregations: { '@timestamp.value_count': { value_count: { field: '@timestamp' } } },
