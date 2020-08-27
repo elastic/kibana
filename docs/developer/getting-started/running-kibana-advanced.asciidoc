@@ -53,7 +53,7 @@ Unsupported URL Type: link:packages/eslint-config-kibana
 
 you’re likely running `npm`. To install dependencies in {kib} you
 need to run `yarn kbn bootstrap`. For more info, see
-link:#setting-up-your-development-environment[Setting Up Your
+link:#development-getting-started[Setting Up Your
 Development Environment] above.
 
 [discrete]

@@ -25,7 +25,7 @@ Also you need to configure the hosts your agent is going to use to comunication 
 
 ### Getting started
 
-See the Kibana docs for [how to set up your dev environment](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#setting-up-your-development-environment), [run Elasticsearch](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#running-elasticsearch), and [start Kibana](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#running-kibana)
+See the Kibana docs for [how to set up your dev environment](https://www.elastic.co/guide/en/kibana/master/development-getting-started.html)
 
 One common development workflow is:
 
