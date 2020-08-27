@@ -32,10 +32,10 @@ const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
 const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-7.5.0.zip`);
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
-expect.addSnapshotSerializer(createStripAnsiSerializer());
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/yarn run v[\d\.]+/g, 'yarn run <version>'));
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 beforeEach(async () => {
   await del([PLUGIN_DIR, TMP_DIR]);
