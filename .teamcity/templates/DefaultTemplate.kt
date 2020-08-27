@@ -37,7 +37,7 @@ object DefaultTemplate : Template({
 
   requirements {
     // equals("system.cloud.profile_id", "kibana-brianseeders")
-    startsWith("teamcity.agent.name", "kibana-standard-4-")
+    startsWith("teamcity.agent.name", "kibana-standard-4-", "RQ_AGENT_NAME")
   }
 
   params {

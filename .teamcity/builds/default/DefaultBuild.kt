@@ -9,7 +9,7 @@ object DefaultBuild : BuildType({
   description = "Generates Default Build Distribution artifact"
 
   requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-16-")
+    startsWith("teamcity.agent.name", "kibana-standard-16-", "RQ_AGENT_NAME")
   }
 
   artifactRules = "+:install/kibana/**/* => kibana-default.tar.gz"

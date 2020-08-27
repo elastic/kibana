@@ -11,7 +11,7 @@ object OssBuild : BuildType({
   artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
 
   requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-16-")
+    startsWith("teamcity.agent.name", "kibana-standard-16-", "RQ_AGENT_NAME")
   }
 
   steps {
