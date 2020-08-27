@@ -113,7 +113,6 @@ export interface SearchSourceDependencies {
   getConfig: GetConfigFn;
   search: ISearchGeneric;
   http: HttpStart;
-  esShardTimeout: number;
   loadingCount$: BehaviorSubject<number>;
 }
 
@@ -228,10 +227,9 @@ export class SearchSource {
    * @return {Observable<SearchResponse<unknown>>}
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
-    const { search, esShardTimeout, getConfig } = this.dependencies;
+    const { search, getConfig } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
-      esShardTimeout,
       getConfig,
     });
 

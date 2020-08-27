@@ -22,14 +22,13 @@ import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 
-export function getSearchParams(getConfig: GetConfigFn, esShardTimeout: number = 0) {
+export function getSearchParams(getConfig: GetConfigFn) {
   return {
     rest_total_hits_as_int: true,
     ignore_unavailable: true,
     ignore_throttled: getIgnoreThrottled(getConfig),
     max_concurrent_shard_requests: getMaxConcurrentShardRequests(getConfig),
     preference: getPreference(getConfig),
-    timeout: getTimeout(esShardTimeout),
   };
 }
 
@@ -50,19 +49,15 @@ export function getPreference(getConfig: GetConfigFn) {
     : undefined;
 }
 
-export function getTimeout(esShardTimeout: number) {
-  return esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined;
-}
-
 /** @public */
 // TODO: Could provide this on runtime contract with dependencies
 // already wired up.
 export function getSearchParamsFromRequest(
   searchRequest: SearchRequest,
-  dependencies: { esShardTimeout: number; getConfig: GetConfigFn }
+  dependencies: { getConfig: GetConfigFn }
 ): ISearchRequestParams {
-  const { esShardTimeout, getConfig } = dependencies;
-  const searchParams = getSearchParams(getConfig, esShardTimeout);
+  const { getConfig } = dependencies;
+  const searchParams = getSearchParams(getConfig);
 
   return {
     index: searchRequest.index.title || searchRequest.index,

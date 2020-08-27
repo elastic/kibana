@@ -22,7 +22,6 @@ export {
   getSearchParams,
   getSearchParamsFromRequest,
   getPreference,
-  getTimeout,
   getIgnoreThrottled,
   getMaxConcurrentShardRequests,
 } from './get_search_params';
