@@ -85,19 +85,6 @@ export const DeleteActionModal: FC<DeleteAction> = ({
 
   const deleteModalContent = (
     <>
-      <p>
-        {items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED ? (
-          <FormattedMessage
-            id="xpack.transform.transformList.forceDeleteModalBody"
-            defaultMessage="Force delete this transform? The transform will be deleted regardless of its current state."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.transform.transformList.deleteModalBody"
-            defaultMessage="Delete this transform?"
-          />
-        )}
-      </p>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           {userCanDeleteIndex && (
