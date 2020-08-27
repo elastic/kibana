@@ -109,7 +109,7 @@ export const calculateHistogramInterval = ({
   values,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
-  let calculatedInterval = isAuto ? 1 : parseFloat(interval);
+  let calculatedInterval = isAuto ? 0 : parseFloat(interval);
 
   if (values) {
     const diff = values.max - values.min;
@@ -131,5 +131,7 @@ export const calculateHistogramInterval = ({
     }
   }
 
-  return calculatedInterval;
+  const defaultValueForUnspecifiedInterval = 1;
+
+  return calculatedInterval || defaultValueForUnspecifiedInterval;
 };
