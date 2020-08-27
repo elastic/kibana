@@ -5,7 +5,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
