@@ -81,15 +81,6 @@ it('builds a generated plugin into a viable archive', async () => {
      │ succ 1 bundles compiled successfully after <time>
      info copying source into the build and converting with babel
      info running yarn to install dependencies
-
-
-    info No lockfile found.
-    [1/4] Resolving packages...
-    [2/4] Fetching packages...
-    [3/4] Linking dependencies...
-    [4/4] Building fresh packages...
-
-
      info compressing plugin into [fooTestPlugin-7.5.0.zip]
     Done in <time>."
   `);

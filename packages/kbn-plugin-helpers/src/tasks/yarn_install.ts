@@ -28,27 +28,13 @@ const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cm
 
 export async function yarnInstall({ log, buildDir, config }: BuildContext) {
   const pkgJson = Path.resolve(buildDir, 'package.json');
-  const yarnLock = Path.resolve(buildDir, 'yarn.lock');
 
   if (config?.skipInstallDependencies || !Fs.existsSync(pkgJson)) {
     return;
   }
 
-  if (yarnLock) {
-    log.info('running yarn to install dependencies\n\n');
-
-    await execa(winVersion('yarn'), ['install', '--production', '--pure-lockfile'], {
-      cwd: buildDir,
-      stdio: 'inherit',
-    });
-  } else {
-    log.info('running npm to install dependencies\n\n');
-
-    await execa(winVersion('npm'), ['install', '--production'], {
-      cwd: buildDir,
-      stdio: 'inherit',
-    });
-  }
-
-  log.write('\n');
+  log.info('running yarn to install dependencies');
+  await execa(winVersion('yarn'), ['install', '--production', '--pure-lockfile'], {
+    cwd: buildDir,
+  });
 }
