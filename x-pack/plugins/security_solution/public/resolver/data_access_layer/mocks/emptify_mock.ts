@@ -36,7 +36,7 @@ export function emptifyMock<T>(
     dataAccessLayer: DataAccessLayer;
     metadata: Metadata<T>;
   },
-  dataShouldBeEmpty?: EmptiableRequests | EmptiableRequests[]
+  dataShouldBeEmpty?: EmptiableRequests[]
 ): {
   dataAccessLayer: DataAccessLayer;
   metadata: Metadata<T>;
@@ -47,41 +47,42 @@ export function emptifyMock<T>(
       /**
        * Fetch related events for an entity ID
        */
-      async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      async relatedEvents(...args): Promise<ResolverRelatedEvents> {
         return dataShouldBeEmpty?.includes('relatedEvents')
           ? Promise.resolve({
-              entityID,
+              entityID: args[0],
               events: [],
               nextEvent: null,
             })
-          : dataAccessLayer.relatedEvents(entityID);
+          : dataAccessLayer.relatedEvents(...args);
       },
 
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
+      async resolverTree(...args): Promise<ResolverTree> {
         return dataShouldBeEmpty?.includes('resolverTree')
           ? Promise.resolve(mockTreeWithNoProcessEvents())
-          : // @ts-ignore - ignore the argument requirement for dataAccessLayer
-            Promise.resolve(dataAccessLayer.resolverTree());
+          : dataAccessLayer.resolverTree(...args);
       },
 
       /**
        * Get an array of index patterns that contain events.
        */
-      indexPatterns(): string[] {
-        return dataShouldBeEmpty?.includes('indexPatterns') ? [] : dataAccessLayer.indexPatterns();
+      indexPatterns(...args): string[] {
+        return dataShouldBeEmpty?.includes('indexPatterns')
+          ? []
+          : dataAccessLayer.indexPatterns(...args);
       },
 
       /**
        * Get entities matching a document.
        */
-      async entities(): Promise<ResolverEntityIndex> {
+      async entities(...args): Promise<ResolverEntityIndex> {
         return dataShouldBeEmpty?.includes('entities')
           ? Promise.resolve([])
           : // @ts-ignore - ignore the argument requirement for dataAccessLayer
-            dataAccessLayer.entities();
+            dataAccessLayer.entities(...args);
       },
     },
   };

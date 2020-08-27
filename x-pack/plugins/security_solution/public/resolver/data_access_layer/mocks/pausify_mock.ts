@@ -36,81 +36,88 @@ export function pausifyMock<T>({
 }): {
   dataAccessLayer: DataAccessLayer;
   metadata: Metadata<T>;
-  pause: (pausableRequests: PausableRequests) => void;
-  resume: (pausableRequests: PausableRequests) => void;
+  pause: (pausableRequests: PausableRequests[]) => void;
+  resume: (pausableRequests: PausableRequests[]) => void;
 } {
   let relatedEventsPromise = Promise.resolve();
   let resolverTreePromise = Promise.resolve();
   let entitiesPromise = Promise.resolve();
 
-  let relatedEventsResolver: () => void;
-  let resolverTreeResolver: () => void;
-  let entitiesResolver: () => void;
+  let relatedEventsResolver: (() => void) | null;
+  let resolverTreeResolver: (() => void) | null;
+  let entitiesResolver: (() => void) | null;
 
   return {
     metadata,
-    pause: (pausableRequests: PausableRequests | PausableRequests[]) => {
+    pause: (pausableRequests: PausableRequests[]) => {
       const pauseRelatedEventsRequest = pausableRequests.includes('relatedEvents');
       const pauseResolverTreeRequest = pausableRequests.includes('resolverTree');
       const pauseEntitiesRequest = pausableRequests.includes('entities');
 
-      if (pauseRelatedEventsRequest) {
+      if (pauseRelatedEventsRequest && !relatedEventsResolver) {
         relatedEventsPromise = new Promise((resolve) => {
           relatedEventsResolver = resolve;
         });
       }
-      if (pauseResolverTreeRequest) {
+      if (pauseResolverTreeRequest && !resolverTreeResolver) {
         resolverTreePromise = new Promise((resolve) => {
           resolverTreeResolver = resolve;
         });
       }
-      if (pauseEntitiesRequest) {
+      if (pauseEntitiesRequest && !entitiesResolver) {
         entitiesPromise = new Promise((resolve) => {
           entitiesResolver = resolve;
         });
       }
     },
-    resume: (pausableRequests: PausableRequests | PausableRequests[]) => {
+    resume: (pausableRequests: PausableRequests[]) => {
       const resumeEntitiesRequest = pausableRequests.includes('entities');
       const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
       const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
 
-      if (resumeEntitiesRequest && entitiesResolver) entitiesResolver();
-      if (resumeResolverTreeRequest && resolverTreeResolver) resolverTreeResolver();
-      if (resumeRelatedEventsRequest && relatedEventsResolver) relatedEventsResolver();
+      if (resumeEntitiesRequest && entitiesResolver) {
+        entitiesResolver();
+        entitiesResolver = null;
+      }
+      if (resumeResolverTreeRequest && resolverTreeResolver) {
+        resolverTreeResolver();
+        resolverTreeResolver = null;
+      }
+      if (resumeRelatedEventsRequest && relatedEventsResolver) {
+        relatedEventsResolver();
+        relatedEventsResolver = null;
+      }
     },
     dataAccessLayer: {
       /**
        * Fetch related events for an entity ID
        */
-      async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      async relatedEvents(...args): Promise<ResolverRelatedEvents> {
         await relatedEventsPromise;
-        return dataAccessLayer.relatedEvents(entityID);
+        return dataAccessLayer.relatedEvents(...args);
       },
 
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
+      async resolverTree(...args): Promise<ResolverTree> {
         await resolverTreePromise;
-        // @ts-ignore - ignore the argument requirement for dataAccessLayer
-        return dataAccessLayer.resolverTree();
+        return dataAccessLayer.resolverTree(...args);
       },
 
       /**
        * Get an array of index patterns that contain events.
        */
-      indexPatterns(): string[] {
-        return dataAccessLayer.indexPatterns();
+      indexPatterns(...args): string[] {
+        return dataAccessLayer.indexPatterns(...args);
       },
 
       /**
        * Get entities matching a document.
        */
-      async entities(): Promise<ResolverEntityIndex> {
+      async entities(...args): Promise<ResolverEntityIndex> {
         await entitiesPromise;
-        // @ts-ignore - ignore the argument requirement for dataAccessLayer
-        return dataAccessLayer.entities();
+        return dataAccessLayer.entities(...args);
       },
     },
   };

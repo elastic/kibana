@@ -21,7 +21,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         pause,
       } = pausifyMock(noAncestorsTwoChildren());
-      pause('entities');
+      pause(['entities']);
       simulator = new Simulator({
         dataAccessLayer,
         databaseDocumentID,
@@ -51,7 +51,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         pause,
       } = pausifyMock(noAncestorsTwoChildren());
-      pause('resolverTree');
+      pause(['resolverTree']);
       simulator = new Simulator({
         dataAccessLayer,
         databaseDocumentID,
@@ -60,8 +60,6 @@ describe('Resolver: data loading and resolution states', () => {
     });
 
     it('should display a loading state', async () => {
-      // Trigger a loading state by requesting data based on a new DocumentID.
-      // There really is no way to do this in the view besides changing the url, so triggering the action instead
       await expect(
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
@@ -81,7 +79,7 @@ describe('Resolver: data loading and resolution states', () => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = emptifyMock(noAncestorsTwoChildren(), 'entities');
+      } = emptifyMock(noAncestorsTwoChildren(), ['entities']);
 
       simulator = new Simulator({
         dataAccessLayer,
@@ -110,7 +108,7 @@ describe('Resolver: data loading and resolution states', () => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = emptifyMock(noAncestorsTwoChildren(), 'resolverTree');
+      } = emptifyMock(noAncestorsTwoChildren(), ['resolverTree']);
 
       simulator = new Simulator({
         dataAccessLayer,
