@@ -11,7 +11,7 @@ import { TruncatedContent } from './';
 
 const content = 'foobarbaz';
 
-describe('TableHeader', () => {
+describe('TruncatedContent', () => {
   it('renders with no truncation', () => {
     const wrapper = shallow(<TruncatedContent length={4} content="foo" />);
 
