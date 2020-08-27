@@ -50,11 +50,10 @@ it('builds a generated plugin into a viable archive', async () => {
     [require.resolve('../../../../scripts/generate_plugin'), '-y', '--name', 'fooTestPlugin'],
     {
       cwd: REPO_ROOT,
-      all: true,
     }
   );
 
-  expect(generateProc.all).toMatchInlineSnapshot(`
+  expect(generateProc.stdout).toMatchInlineSnapshot(`
     " succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
@@ -63,10 +62,9 @@ it('builds a generated plugin into a viable archive', async () => {
 
   const buildProc = await execa('yarn', ['build', '--kibana-version', '7.5.0'], {
     cwd: PLUGIN_DIR,
-    all: true,
   });
 
-  expect(buildProc.all).toMatchInlineSnapshot(`
+  expect(buildProc.stdout).toMatchInlineSnapshot(`
     "yarn run <version>
     $ yarn plugin-helpers build --kibana-version 7.5.0
     $ node ../../scripts/plugin_helpers build --kibana-version 7.5.0
