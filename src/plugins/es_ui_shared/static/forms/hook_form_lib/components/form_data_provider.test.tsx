@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed } from '../shared_imports';
@@ -36,13 +36,14 @@ describe('<FormDataProvider />', () => {
       return (
         <Form form={form}>
           <UseField path="name" defaultValue="Initial value" data-test-subj="nameField" />
-          <UseField path="lastName" defaultValue="Initial value" data-test-subj="lastNameField" />
           <FormDataProvider>
             {(formData) => {
               onFormData(formData);
               return null;
             }}
           </FormDataProvider>
+          {/* Putting one field below to make sure the order in the DOM does not affect behaviour */}
+          <UseField path="lastName" defaultValue="Initial value" data-test-subj="lastNameField" />
         </Form>
       );
     };
@@ -92,6 +93,63 @@ describe('<FormDataProvider />', () => {
     expect(formDataUpdated).toEqual({
       name: 'updated value',
       lastName: 'updated value',
+    });
+  });
+
+  test('should subscribe to the latest updated form data when mounting late', async () => {
+    const onFormData = jest.fn();
+
+    const TestComp = () => {
+      const { form } = useForm();
+      const [isOn, setIsOn] = useState(false);
+
+      return (
+        <Form form={form}>
+          <UseField path="name" defaultValue="Initial value" data-test-subj="nameField" />
+          <button onClick={() => setIsOn(true)} data-test-subj="btn">
+            Toggle On
+          </button>
+          {isOn && (
+            <FormDataProvider>
+              {(formData) => {
+                onFormData(formData);
+                return null;
+              }}
+            </FormDataProvider>
+          )}
+        </Form>
+      );
+    };
+
+    const setup = registerTestBed(TestComp, {
+      memoryRouter: { wrapComponent: false },
+    });
+
+    const {
+      form: { setInputValue },
+      find,
+    } = setup() as TestBed;
+
+    expect(onFormData.mock.calls.length).toBe(0); // Not present in the DOM yet
+
+    // Make some changes to the form fields
+    await act(async () => {
+      setInputValue('nameField', 'updated value');
+    });
+
+    // Update state to trigger the mounting of the FormDataProvider
+    await act(async () => {
+      find('btn').simulate('click').update();
+    });
+
+    expect(onFormData.mock.calls.length).toBe(1);
+
+    const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
+      OnUpdateHandler
+    >;
+
+    expect(formDataUpdated).toEqual({
+      name: 'updated value',
     });
   });
 
