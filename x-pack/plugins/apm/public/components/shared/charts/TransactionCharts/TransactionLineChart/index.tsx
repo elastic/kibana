@@ -19,7 +19,7 @@ interface Props {
   height?: number;
   stacked?: boolean;
   onHover?: () => void;
-  onToggleLegend?: (visibleSeries: TimeSeries[]) => void;
+  onToggleLegend?: (disabledSeriesState: boolean[]) => void;
 }
 
 function TransactionLineChart(props: Props) {

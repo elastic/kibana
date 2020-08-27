@@ -8,64 +8,39 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { flatten, isEmpty } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import {
-  asDecimal,
-  getDurationFormatter,
-  tpmUnit,
-} from '../../../../utils/formatters';
+import { asDecimal, tpmUnit } from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { BrowserLineChart } from './BrowserLineChart';
 import { DurationByCountryMap } from './DurationByCountryMap';
+import {
+  getResponseTimeTickFormatter,
+  getResponseTimeTooltipFormatter,
+} from './helper';
+import { MLHeader } from './ml_header';
 import { TransactionLineChart } from './TransactionLineChart';
+import { useFormatter } from './use_formatter';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
   location: Location;
   urlParams: IUrlParams;
-}
-
-const ShiftedIconWrapper = styled.span`
-  padding-right: 5px;
-  position: relative;
-  top: -1px;
-  display: inline-block;
-`;
-
-const ShiftedEuiText = styled(EuiText)`
-  position: relative;
-  top: 5px;
-`;
-
-export function getMaxY(responseTimeSeries: TimeSeries[]) {
-  const coordinates = flatten(
-    responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
-  );
-
-  const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
-
-  return Math.max(...numbers, 0);
 }
 
 export function TransactionCharts({
@@ -84,82 +59,16 @@ export function TransactionCharts({
       : NOT_AVAILABLE_LABEL;
   };
 
-  function renderMLHeader(hasValidMlLicense: boolean | undefined) {
-    const { mlJobId } = charts;
-
-    if (!hasValidMlLicense || !mlJobId) {
-      return null;
-    }
-
-    const { serviceName, kuery, transactionType } = urlParams;
-    if (!serviceName) {
-      return null;
-    }
-
-    const hasKuery = !isEmpty(kuery);
-    const icon = hasKuery ? (
-      <EuiIconTip
-        aria-label="Warning"
-        type="alert"
-        color="warning"
-        content="The Machine learning results are hidden when the search bar is used for filtering"
-      />
-    ) : (
-      <EuiIconTip
-        content={i18n.translate(
-          'xpack.apm.metrics.transactionChart.machineLearningTooltip',
-          {
-            defaultMessage:
-              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores ≥ 75.',
-          }
-        )}
-      />
-    );
-
-    return (
-      <EuiFlexItem grow={false}>
-        <ShiftedEuiText size="xs">
-          <ShiftedIconWrapper>{icon}</ShiftedIconWrapper>
-          <span>
-            {i18n.translate(
-              'xpack.apm.metrics.transactionChart.machineLearningLabel',
-              {
-                defaultMessage: 'Machine learning:',
-              }
-            )}{' '}
-          </span>
-          <MLJobLink
-            jobId={mlJobId}
-            serviceName={serviceName}
-            transactionType={transactionType}
-          >
-            View Job
-          </MLJobLink>
-        </ShiftedEuiText>
-      </EuiFlexItem>
-    );
-  }
-  const { responseTimeSeries, tpmSeries } = charts;
   const { transactionType } = urlParams;
-  const maxY = getMaxY(responseTimeSeries);
-  let formatter = getDurationFormatter(maxY);
 
-  function onToggleLegend(visibleSeries: TimeSeries[]) {
-    if (!isEmpty(visibleSeries)) {
-      // recalculate the formatter based on the max Y from the visible series
-      const maxVisibleY = getMaxY(visibleSeries);
-      formatter = getDurationFormatter(maxVisibleY);
-    }
-  }
+  const { responseTimeSeries, tpmSeries } = charts;
 
-  function getResponseTimeTickFormatter(t: number) {
-    return formatter(t).formatted;
-  }
+  const { formatter, setDisabledSeriesState } = useFormatter(
+    responseTimeSeries
+  );
 
-  function getResponseTimeTooltipFormatter(coordinate: Coordinate) {
-    return isValidCoordinateValue(coordinate.y)
-      ? formatter(coordinate.y).formatted
-      : NOT_AVAILABLE_LABEL;
+  function onToggleLegend(disabledSeriesStates: boolean[]) {
+    setDisabledSeriesState(disabledSeriesStates);
   }
 
   return (
@@ -175,15 +84,18 @@ export function TransactionCharts({
                   </EuiTitle>
                 </EuiFlexItem>
                 <LicenseContext.Consumer>
-                  {(license) =>
-                    renderMLHeader(license?.getFeature('ml').isAvailable)
-                  }
+                  {(license) => (
+                    <MLHeader
+                      hasValidMlLicense={license?.getFeature('ml').isAvailable}
+                      mlJobId={charts.mlJobId}
+                    />
+                  )}
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
               <TransactionLineChart
                 series={responseTimeSeries}
-                tickFormatY={getResponseTimeTickFormatter}
-                formatTooltipValue={getResponseTimeTooltipFormatter}
+                tickFormatY={getResponseTimeTickFormatter(formatter)}
+                formatTooltipValue={getResponseTimeTooltipFormatter(formatter)}
                 onToggleLegend={onToggleLegend}
               />
             </React.Fragment>

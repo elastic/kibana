@@ -80,11 +80,7 @@ export class InnerCustomPlot extends PureComponent {
       });
 
       if (typeof this.props.onToggleLegend === 'function') {
-        //Filters out disabled series
-        const availableSeries = this.props.series.filter(
-          (serie, index) => !nextSeriesEnabledState[index]
-        );
-        this.props.onToggleLegend(availableSeries);
+        this.props.onToggleLegend(nextSeriesEnabledState);
       }
 
       return {
