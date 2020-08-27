@@ -17,6 +17,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = [
   'any',
   'copySavedObjectsIntoSpace',
   'findSavedObjects',
+  'shareSavedObjectsIntoSpace',
 ];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
@@ -30,6 +31,9 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   findSavedObjects: (authorization) => {
     return [authorization.actions.savedObject.get('config', 'find')];
   },
+  shareSavedObjectsIntoSpace: (authorization) => [
+    authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
+  ],
 };
 
 export class SpacesClient {

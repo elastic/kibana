@@ -22,7 +22,7 @@ import { useMonitorId } from '../../../hooks';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 import { useAnomalyAlert } from './use_anomaly_alert';
 import { ConfirmAlertDeletion } from './confirm_alert_delete';
-import { deleteAlertAction } from '../../../state/actions/alerts';
+import { deleteAnomalyAlertAction } from '../../../state/alerts/alerts';
 
 interface Props {
   hasMLJob: boolean;
@@ -52,7 +52,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const [isConfirmAlertDeleteOpen, setIsConfirmAlertDeleteOpen] = useState(false);
 
   const deleteAnomalyAlert = () =>
-    dispatch(deleteAlertAction.get({ alertId: anomalyAlert?.id as string }));
+    dispatch(deleteAnomalyAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
   const showLoading = isMLJobCreating || isMLJobLoading;
 

@@ -91,6 +91,7 @@ export function getPluginPrivileges() {
     admin: {
       ...privilege,
       api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
         all: savedObjects,
@@ -100,6 +101,7 @@ export function getPluginPrivileges() {
     user: {
       ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      catalogue: [PLUGIN_ID],
       ui: userMlCapabilitiesKeys,
       savedObject: {
         all: [],

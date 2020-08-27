@@ -20,7 +20,7 @@ export const EDIT_EXCEPTION_SAVE_BUTTON = i18n.translate(
 export const EDIT_EXCEPTION_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.editException.editExceptionTitle',
   {
-    defaultMessage: 'Edit Exception',
+    defaultMessage: 'Edit Rule Exception',
   }
 );
 

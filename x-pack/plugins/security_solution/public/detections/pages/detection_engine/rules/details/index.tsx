@@ -138,7 +138,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const { detailName: ruleId } = useParams();
+  const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;

@@ -37,6 +37,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import { useMount } from 'react-use';
+import { DocLinksStart } from 'src/core/public';
 
 import { useKibana } from '../../../../kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -67,7 +68,7 @@ function DateRangesParamEditor({
   setValue,
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
-  const { services } = useKibana();
+  const { services } = useKibana<{ docLinks: DocLinksStart }>();
   const [ranges, setRanges] = useState(() =>
     value.map((range) => ({ ...range, id: generateId() }))
   );

@@ -84,7 +84,7 @@ const EditRulePageComponent: FC = () => {
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const initLoading = userInfoLoading || listsConfigLoading;
-  const { detailName: ruleId } = useParams();
+  const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [loading, rule] = useRule(ruleId);
 
   const [initForm, setInitForm] = useState(false);

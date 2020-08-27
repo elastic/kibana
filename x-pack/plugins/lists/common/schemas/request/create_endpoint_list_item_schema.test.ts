@@ -31,6 +31,7 @@ describe('create_endpoint_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "description"', () => {
     const payload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -43,6 +44,7 @@ describe('create_endpoint_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "name"', () => {
     const payload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -55,6 +57,7 @@ describe('create_endpoint_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "type"', () => {
     const payload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -145,6 +148,7 @@ describe('create_endpoint_list_item_schema', () => {
   test('it should fail validation when supplied an undefined for "entries"', () => {
     const inputPayload = getCreateEndpointListItemSchemaMock();
     const outputPayload = getCreateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.entries;
     outputPayload.entries = [];
     const decoded = createEndpointListItemSchema.decode(inputPayload);

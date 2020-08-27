@@ -14,7 +14,7 @@ import { RuleAlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
-import { parseScheduleDates } from '../signals/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/utils';
 
 export const rulesNotificationAlertType = ({
   logger,
@@ -64,8 +64,8 @@ export const rulesNotificationAlertType = ({
       from: fromInMs,
       to: toInMs,
       id: ruleAlertSavedObject.id,
-      kibanaSiemAppUrl: (ruleAlertParams.meta as { kibana_siem_app_url?: string })
-        .kibana_siem_app_url,
+      kibanaSiemAppUrl: (ruleAlertParams.meta as { kibana_siem_app_url?: string } | undefined)
+        ?.kibana_siem_app_url,
     });
 
     logger.info(
