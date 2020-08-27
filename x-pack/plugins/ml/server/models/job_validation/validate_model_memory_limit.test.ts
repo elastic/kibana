@@ -208,6 +208,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
+    // @ts-expect-error
     delete mlInfoResponse.limits.max_model_memory_limit;
     // @ts-expect-error
     job.analysis_limits.model_memory_limit = '10mb';

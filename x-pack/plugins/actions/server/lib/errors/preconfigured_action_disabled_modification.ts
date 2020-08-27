@@ -9,7 +9,8 @@ import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export type PreconfiguredActionDisabledFrom = 'update' | 'delete';
 
-export class PreconfiguredActionDisabledModificationError extends Error
+export class PreconfiguredActionDisabledModificationError
+  extends Error
   implements ErrorThatHandlesItsOwnResponse {
   public readonly disabledFrom: PreconfiguredActionDisabledFrom;
 

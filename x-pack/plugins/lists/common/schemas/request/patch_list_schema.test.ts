@@ -25,6 +25,7 @@ describe('patch_list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getPathListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = patchListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

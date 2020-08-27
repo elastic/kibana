@@ -25,7 +25,8 @@ export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
  * This is "Explore underlying data" action which appears in popup context
  * menu when user clicks a value in visualization or brushes a time range.
  */
-export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDataChartActionContext>
+export class ExploreDataChartAction
+  extends AbstractExploreDataAction<ExploreDataChartActionContext>
   implements Action<ExploreDataChartActionContext> {
   public readonly id = ACTION_EXPLORE_DATA_CHART;
 

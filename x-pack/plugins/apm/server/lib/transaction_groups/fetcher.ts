@@ -110,6 +110,7 @@ export async function transactionGroupsFetcher(
 
   const isTopTraces = options.type === 'top_traces';
 
+  // @ts-expect-error
   delete projection.body.aggs;
 
   // traces overview is hardcoded to 10000

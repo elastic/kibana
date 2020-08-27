@@ -8,17 +8,26 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { HttpStart, DocLinksStart, NotificationsStart, ApplicationStart } from 'src/core/public';
 import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
+  TriggersAndActionsUIPublicPluginStart,
 } from '../../../../triggers_actions_ui/public';
-
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
 
 interface Props {
   focusInput: () => void;
 }
+interface KibanaDeps {
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  application: ApplicationStart;
+  docLinks: DocLinksStart;
+  http: HttpStart;
+  notifications: NotificationsStart;
+}
+
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
@@ -30,7 +39,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
       http,
       notifications,
     },
-  } = useKibana();
+  } = useKibana<KibanaDeps>();
 
   const dispatch = useDispatch();
 

@@ -562,6 +562,7 @@ module.exports = require("path");
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolingLogCollectingWriter = exports.parseLogLevel = exports.pickLevelFromFlags = exports.ToolingLogTextWriter = exports.ToolingLog = void 0;
 var tooling_log_1 = __webpack_require__(6);
 Object.defineProperty(exports, "ToolingLog", { enumerable: true, get: function () { return tooling_log_1.ToolingLog; } });
 var tooling_log_text_writer_1 = __webpack_require__(110);

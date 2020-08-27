@@ -24,8 +24,7 @@ export interface ActionFactoryDefinition<
     triggers: SupportedTriggers[];
   },
   ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
->
-  extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
+> extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
