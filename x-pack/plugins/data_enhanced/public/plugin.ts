@@ -40,7 +40,6 @@ export class DataEnhancedPlugin
         uiSettings: core.uiSettings,
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
-        loadingCount$: new BehaviorSubject(0),
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );

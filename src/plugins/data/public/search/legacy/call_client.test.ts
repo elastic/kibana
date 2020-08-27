@@ -23,6 +23,7 @@ import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { FetchHandlers } from '../fetch';
 import { handleResponse } from '../fetch/handle_response';
+import { BehaviorSubject } from 'rxjs';
 
 const mockAbortFn = jest.fn();
 jest.mock('../fetch/handle_response', () => ({
@@ -60,6 +61,7 @@ describe('callClient', () => {
       legacySearchService: {},
       config: { get: jest.fn() },
       esShardTimeout: 0,
+      loadingCount$: new BehaviorSubject(0),
     } as FetchHandlers;
 
     callClient(searchRequests, [], args);

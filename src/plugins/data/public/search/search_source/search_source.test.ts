@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { GetConfigFn } from 'src/plugins/data/common';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
@@ -70,6 +70,7 @@ describe('SearchSource', () => {
       search: mockSearchMethod,
       esShardTimeout: 30000,
       http: coreMock.createStart().http,
+      loadingCount$: new BehaviorSubject(0),
     };
   });
 

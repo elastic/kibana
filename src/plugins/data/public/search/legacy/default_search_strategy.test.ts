@@ -21,6 +21,7 @@ import { HttpStart } from 'src/core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { SearchStrategySearchParams } from './types';
+import { BehaviorSubject } from 'rxjs';
 
 const { search } = defaultSearchStrategy;
 
@@ -47,6 +48,7 @@ describe('defaultSearchStrategy', function () {
         config: {
           get: jest.fn(),
         },
+        loadingCount$: new BehaviorSubject(0) as any,
       };
     });
 

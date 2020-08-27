@@ -34,7 +34,6 @@ export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
-  loadingCount$: BehaviorSubject<number>;
   usageCollector?: SearchUsageCollector;
 }
 
@@ -49,7 +48,7 @@ export class SearchInterceptor {
    * Observable that emits when the number of pending requests changes.
    * @internal
    */
-  protected pendingCount$!: BehaviorSubject<number>;
+  protected pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
@@ -79,7 +78,7 @@ export class SearchInterceptor {
     protected readonly deps: SearchInterceptorDeps,
     protected readonly requestTimeout?: number
   ) {
-    this.pendingCount$ = deps.loadingCount$;
+    this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
