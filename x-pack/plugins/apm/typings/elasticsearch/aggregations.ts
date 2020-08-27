@@ -293,10 +293,9 @@ interface AggregationResponsePart<
       }
     | undefined;
   composite: {
-    after_key: Record<
-      GetCompositeKeys<TAggregationOptionsMap>,
-      string | number
-    >;
+    after_key: {
+      [key in GetCompositeKeys<TAggregationOptionsMap>]: TAggregationOptionsMap;
+    };
     buckets: Array<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;

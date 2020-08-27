@@ -6,6 +6,10 @@
 
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+} from '../../../../common/elasticsearch_fieldnames';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -16,6 +20,63 @@ describe('data telemetry collection tasks', () => {
     'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
     /* eslint-enable @typescript-eslint/naming-convention */
   } as ApmIndicesConfig;
+
+  describe('environments', () => {
+    const task = tasks.find((t) => t.name === 'environments');
+
+    it('returns environment information', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        aggregations: {
+          environments: {
+            buckets: [
+              {
+                key: 'production',
+              },
+              {
+                key: 'testing',
+              },
+            ],
+          },
+          service_environments: {
+            buckets: [
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-node',
+                  [SERVICE_ENVIRONMENT]: 'production',
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-node',
+                  [SERVICE_ENVIRONMENT]: null,
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-java',
+                  [SERVICE_ENVIRONMENT]: 'production',
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-rum',
+                  [SERVICE_ENVIRONMENT]: null,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(await task?.executor({ search, indices } as any)).toEqual({
+        environments: {
+          services_with_multiple_environments: 1,
+          services_without_environment: 2,
+          top_environments: ['production', 'testing'],
+        },
+      });
+    });
+  });
 
   describe('aggregated_transactions', () => {
     const task = tasks.find((t) => t.name === 'aggregated_transactions');

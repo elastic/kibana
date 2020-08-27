@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ValuesType } from 'utility-types';
-import { flatten, merge, sortBy, sum } from 'lodash';
+import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
 import { AggregationOptionsByType } from '../../../../typings/elasticsearch/aggregations';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
@@ -292,6 +292,87 @@ export const tasks: TelemetryTask[] = [
         [region]: getBucketKeys(aggregations[region]),
       };
       return { cloud };
+    },
+  },
+  {
+    name: 'environments',
+    executor: async ({ indices, search }) => {
+      const response = await search({
+        index: [indices['apm_oss.transactionIndices']],
+        body: {
+          query: {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
+            },
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                size: 5,
+              },
+            },
+            service_environments: {
+              composite: {
+                size: 1000,
+                sources: [
+                  {
+                    [SERVICE_ENVIRONMENT]: {
+                      terms: {
+                        field: SERVICE_ENVIRONMENT,
+                        missing_bucket: true,
+                      },
+                    },
+                  },
+                  {
+                    [SERVICE_NAME]: {
+                      terms: {
+                        field: SERVICE_NAME,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      });
+
+      const topEnvironments =
+        response.aggregations?.environments.buckets.map(
+          (bucket) => bucket.key
+        ) ?? [];
+      const serviceEnvironments: Record<string, Array<string | null>> = {};
+
+      const buckets = response.aggregations?.service_environments.buckets ?? [];
+
+      buckets.forEach((bucket) => {
+        const serviceName = bucket.key['service.name'];
+        const environment = bucket.key['service.environment'] as string | null;
+
+        const environments = serviceEnvironments[serviceName] ?? [];
+
+        serviceEnvironments[serviceName] = environments.concat(environment);
+      });
+
+      const servicesWithoutEnvironment = Object.keys(
+        pickBy(serviceEnvironments, (environments) =>
+          environments.includes(null)
+        )
+      );
+
+      const servicesWithMultipleEnvironments = Object.keys(
+        pickBy(serviceEnvironments, (environments) => environments.length > 1)
+      );
+
+      return {
+        environments: {
+          services_without_environment: servicesWithoutEnvironment.length,
+          services_with_multiple_environments:
+            servicesWithMultipleEnvironments.length,
+          top_environments: topEnvironments as string[],
+        },
+      };
     },
   },
   {
