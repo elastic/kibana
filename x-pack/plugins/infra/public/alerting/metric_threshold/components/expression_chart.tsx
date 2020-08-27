@@ -28,7 +28,7 @@ import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
-import { MetricsExplorerColor, colorTransformer } from '../../../../common/color_palette';
+import { Color, colorTransformer } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricExpression, AlertContextMeta } from '../types';
@@ -80,7 +80,7 @@ export const ExpressionChart: React.FC<Props> = ({
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
-    color: MetricsExplorerColor.color0,
+    color: Color.color0,
   };
   const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
@@ -176,7 +176,7 @@ export const ExpressionChart: React.FC<Props> = ({
             style={{
               line: {
                 strokeWidth: 2,
-                stroke: colorTransformer(MetricsExplorerColor.color1),
+                stroke: colorTransformer(Color.color1),
                 opacity: 1,
               },
             }}
@@ -186,7 +186,7 @@ export const ExpressionChart: React.FC<Props> = ({
               <RectAnnotation
                 id="lower-threshold"
                 style={{
-                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  fill: colorTransformer(Color.color1),
                   opacity,
                 }}
                 dataValues={[
@@ -207,7 +207,7 @@ export const ExpressionChart: React.FC<Props> = ({
               <RectAnnotation
                 id="lower-threshold"
                 style={{
-                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  fill: colorTransformer(Color.color1),
                   opacity,
                 }}
                 dataValues={[
@@ -224,7 +224,7 @@ export const ExpressionChart: React.FC<Props> = ({
               <RectAnnotation
                 id="upper-threshold"
                 style={{
-                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  fill: colorTransformer(Color.color1),
                   opacity,
                 }}
                 dataValues={[
@@ -244,7 +244,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <RectAnnotation
               id="upper-threshold"
               style={{
-                fill: colorTransformer(MetricsExplorerColor.color1),
+                fill: colorTransformer(Color.color1),
                 opacity,
               }}
               dataValues={[
@@ -263,7 +263,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <RectAnnotation
               id="upper-threshold"
               style={{
-                fill: colorTransformer(MetricsExplorerColor.color1),
+                fill: colorTransformer(Color.color1),
                 opacity,
               }}
               dataValues={[

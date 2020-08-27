@@ -84,6 +84,11 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     }, {} as any);
   }
 
+  // If it's defined as signature { [key: string]: OtherInterface }
+  if (ts.isIndexSignatureDeclaration(node) && node.type) {
+    return { '@@INDEX@@': getDescriptor(node.type, program) };
+  }
+
   if (ts.SyntaxKind.FirstNode === node.kind) {
     return getDescriptor((node as any).right, program);
   }

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -35,6 +37,7 @@ const mapping = [
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   const mockJira = {
     config: {
@@ -80,7 +83,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
       );
     });
-
     describe('Jira - Action Creation', () => {
       it('should return 200 when creating a jira action successfully', async () => {
         const { body: createdAction } = await supertest
@@ -292,6 +294,9 @@ export default function jiraTest({ getService }: FtrProviderContext) {
 
     describe('Jira - Executor', () => {
       let simulatedActionId: string;
+      let proxyServer: httpProxy | undefined;
+      let proxyHaveBeenCalled = false;
+
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/action')
@@ -307,6 +312,14 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             secrets: mockJira.secrets,
           });
         simulatedActionId = body.id;
+
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {
+            proxyHaveBeenCalled = true;
+          }
+        );
       });
 
       describe('Validation', () => {
@@ -529,6 +542,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
+          expect(proxyHaveBeenCalled).to.equal(true);
           expect(body).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
@@ -540,6 +554,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             },
           });
         });
+      });
+
+      after(() => {
+        if (proxyServer) {
+          proxyServer.close();
+        }
       });
     });
   });
