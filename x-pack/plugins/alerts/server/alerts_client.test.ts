@@ -510,7 +510,7 @@ describe('create()', () => {
 
   test('should trim alert name when creating API key', async () => {
     const data = getMockData({ name: ' my alert name ' });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -523,7 +523,7 @@ describe('create()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+    savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2521,7 +2521,7 @@ describe('update()', () => {
   });
 
   it('should trim alert name in the API key name', async () => {
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -2534,7 +2534,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
