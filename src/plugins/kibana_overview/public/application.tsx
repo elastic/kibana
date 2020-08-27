@@ -25,7 +25,7 @@ import { KibanaOverviewApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  { navigation, newsfeed }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -34,6 +34,7 @@ export const renderApp = (
       notifications={notifications}
       http={http}
       navigation={navigation}
+      newsfeed$={newsfeed.api$}
     />,
     element
   );

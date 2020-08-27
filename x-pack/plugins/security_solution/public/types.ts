@@ -8,7 +8,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public';
+import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -37,7 +37,7 @@ export interface StartPlugins {
   inspector: InspectorStart;
   ingestManager?: IngestManagerStart;
   lists?: ListsPluginStart;
-  newsfeed?: NewsfeedStart;
+  newsfeed?: NewsfeedPublicPluginStart;
   triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;
 }

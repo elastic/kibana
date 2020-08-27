@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { FC, useState, useEffect } from 'react';
+import { Observable } from 'rxjs';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -31,6 +32,7 @@ import {
   EuiHorizontalRule,
   EuiScreenReaderOnly,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -89,8 +91,24 @@ const apps = {
   },
 };
 
-export const Overview: FC = () => {
+interface Props {
+  newsfeed$: Observable<FetchResult | null | void>;
+}
+
+export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
+  const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+
+  useEffect(() => {
+    function handleStatusChange(fetchResult: FetchResult | void | null) {
+      setNewsFetchResult(fetchResult);
+    }
+
+    const subscription = newsfeed$.subscribe((res: FetchResult | void | null) => {
+      handleStatusChange(res);
+    });
+    return () => subscription.unsubscribe();
+  }, [newsfeed$]);
 
   const { addBasePath, indexPatternService, uiSettings } = getServices();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
@@ -170,6 +188,21 @@ export const Overview: FC = () => {
     );
   };
 
+  const renderFeedItem = ({ title, description, link, publishOn }) => (
+    <div key={title}>
+      <EuiTitle size="xs">
+        <EuiLink href={link}>{title}</EuiLink>
+      </EuiTitle>
+      <EuiText size="xs" color="subdued">
+        <p>{publishOn.format('MMM DD, YYYY')}</p>
+      </EuiText>
+      <EuiText size="xs">
+        <p>{description}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+    </div>
+  );
+
   const renderAppCard = (appId: string) => {
     const app = apps[appId];
     return (
@@ -225,6 +258,7 @@ export const Overview: FC = () => {
                   />
                 </h2>
               </EuiTitle>
+              {newsFetchResult ? newsFetchResult.feedItems.slice(0, 3).map(renderFeedItem) : null}
             </section>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>

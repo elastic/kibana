@@ -63,6 +63,7 @@ export class KibanaOverviewPlugin
           toastNotifications: core.notifications.toasts,
           uiSettings: core.uiSettings,
         });
+
         // Render the application
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
