@@ -19,7 +19,8 @@ import {
 
 const FileDetails = styled.div`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
-  padding: ${px(units.half)} 0;
+  line-height: 1.5; /* matches the line-hight of the accordion container button */
+  padding: ${px(units.eighth)} 0;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;

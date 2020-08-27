@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
@@ -42,13 +41,11 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         if (group.isLibraryFrame && groups.length > 1) {
           return (
             <Fragment key={i}>
-              <EuiSpacer size="m" />
               <LibraryStacktrace
                 id={i.toString()}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
               />
-              <EuiSpacer size="m" />
             </Fragment>
           );
         }
@@ -56,7 +53,6 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         // non-library frame
         return group.stackframes.map((stackframe, idx) => (
           <Fragment key={`${i}-${idx}`}>
-            {idx > 0 && <EuiSpacer size="m" />}
             <StackframeComponent
               codeLanguage={codeLanguage}
               id={`${i}-${idx}`}
@@ -66,7 +62,6 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
           </Fragment>
         ));
       })}
-      <EuiSpacer size="m" />
     </Fragment>
   );
 }

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiAccordion } from '@elastic/eui';
 import {
   Stackframe as StackframeType,
   StackframeWithLineContext,
@@ -16,9 +16,10 @@ import {
   fontFamilyCode,
   fontSize,
 } from '../../../style/variables';
-import { FrameHeading } from './FrameHeading';
 import { Context } from './Context';
+import { FrameHeading } from './FrameHeading';
 import { Variables } from './Variables';
+import { px, units } from '../../../style/variables';
 
 const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
@@ -30,6 +31,11 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
     isLibraryFrame
       ? theme.eui.euiColorEmptyShade
       : theme.eui.euiColorLightestShade};
+`;
+
+// Indent the non-context frames the same amount as the accordion control
+const NoContextFrameHeadingWrapper = styled.div`
+  margin-left: ${px(units.unit + units.half + units.eighth)};
 `;
 
 interface Props {
@@ -49,11 +55,13 @@ export function Stackframe({
 }: Props) {
   if (!hasLineContext(stackframe)) {
     return (
-      <FrameHeading
-        codeLanguage={codeLanguage}
-        stackframe={stackframe}
-        isLibraryFrame={isLibraryFrame}
-      />
+      <NoContextFrameHeadingWrapper>
+        <FrameHeading
+          codeLanguage={codeLanguage}
+          stackframe={stackframe}
+          isLibraryFrame={isLibraryFrame}
+        />
+      </NoContextFrameHeadingWrapper>
     );
   }
 

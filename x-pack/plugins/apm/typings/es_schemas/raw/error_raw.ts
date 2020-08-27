@@ -23,6 +23,10 @@ interface Processor {
 }
 
 export interface Exception {
+  attributes?: {
+    response?: string;
+  };
+  code?: string;
   message?: string; // either message or type are given
   type?: string;
   module?: string;
