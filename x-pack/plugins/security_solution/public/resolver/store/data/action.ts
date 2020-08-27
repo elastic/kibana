@@ -60,38 +60,10 @@ interface ServerReturnedRelatedEventData {
   readonly payload: ResolverRelatedEvents;
 }
 
-/**
- * Used by `useStateSyncingActions` hook.
- * This is dispatched when external sources provide new parameters for Resolver.
- * When the component receives a new 'databaseDocumentID' prop, this is fired.
- */
-interface AppReceivedNewExternalProperties {
-  type: 'appReceivedNewExternalProperties';
-  /**
-   * Defines the externally provided properties that Resolver acknowledges.
-   */
-  payload: {
-    /**
-     * the `_id` of an ES document. This defines the origin of the Resolver graph.
-     */
-    databaseDocumentID?: string;
-    /**
-     * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
-     */
-    resolverComponentInstanceID: string;
-
-    /**
-     * The `search` part of the URL of this page.
-     */
-    locationSearch: string;
-  };
-}
-
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
   | ServerFailedToReturnRelatedEventData
   | ServerReturnedRelatedEventData
-  | AppReceivedNewExternalProperties
   | AppRequestedResolverData
   | AppAbortedResolverDataRequest;
