@@ -25,7 +25,6 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
-jest.mock('ui/new_platform');
 function setup({
   urlParams,
   serviceTransactionTypes,
