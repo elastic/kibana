@@ -136,7 +136,7 @@ class TimelineQueryComponent extends QueryTemplate<
       },
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex,
+      defaultIndex: defaultIndex.filter((i) => i !== NO_ALERT_INDEX),
       docValueFields: docValueFields ?? [],
       inspect: isInspected,
       queryDeduplication,
