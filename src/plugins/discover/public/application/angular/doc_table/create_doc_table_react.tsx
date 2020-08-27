@@ -93,8 +93,8 @@ export function DocTableLegacy(renderProps: any) {
                 infinite-scroll="true"
                 filter="onFilter"
                 data-shared-item
-                data-title="{{opts.savedSearch.lastSavedTitle}}"
-                data-description="{{opts.savedSearch.description}}"
+                data-title="searchTitle"
+                data-description="searchDescription"
                 data-test-subj="discoverDocTable"
                 minimum-visible-rows="minimumVisibleRows"
                 render-complete
