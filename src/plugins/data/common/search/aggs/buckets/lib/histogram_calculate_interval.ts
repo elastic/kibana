@@ -111,6 +111,11 @@ export const calculateHistogramInterval = ({
   const isAuto = isAutoInterval(interval);
   let calculatedInterval = isAuto ? 0 : parseFloat(interval);
 
+  // should return NaN on non-numeric or invalid values
+  if (Number.isNaN(calculatedInterval)) {
+    return calculatedInterval;
+  }
+
   if (values) {
     const diff = values.max - values.min;
 
