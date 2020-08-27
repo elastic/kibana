@@ -169,6 +169,7 @@ export class TaskManager {
       pollInterval$,
       startingMaxWorkers: opts.config.max_workers,
       startingPollInterval: opts.config.poll_interval,
+      logger: this.logger,
       storeErrors$: this.store.errors$,
     });
 

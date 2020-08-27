@@ -5,6 +5,7 @@
  */
 
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { Logger } from '../types';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 const THROUGHPUT_CHECK_INTERVAL = 10 * 1000;
@@ -13,18 +14,21 @@ const MAX_WORKERS_INCREASE_PERCENTAGE = 1.05;
 const POLL_INTERVAL_REDUCTION_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
+interface DynamicConfiguration<T> {
+  startingValue: T;
+  currentValue: T;
+  observable$: BehaviorSubject<T>;
+}
+
 export class ThroughputManager {
   private isStarted: boolean = false;
-  private readonly maxWorkers$: BehaviorSubject<number>;
-  private readonly pollInterval$: BehaviorSubject<number>;
-  private readonly startingMaxWorkers: number;
-  private readonly startingPollInterval: number;
-  private currentMaxWorkers: number;
-  private currentPollInterval: number;
-  private readonly storeErrors$: Observable<Error>;
   private storeErrorsSubscription?: Subscription;
   private errorCountSinceLastInterval: number = 0;
   private throughputCheckIntervalId?: NodeJS.Timeout;
+  private readonly logger: Logger;
+  private readonly maxWorkers: DynamicConfiguration<number>;
+  private readonly pollInterval: DynamicConfiguration<number>;
+  private readonly storeErrors$: Observable<Error>;
 
   constructor(opts: {
     maxWorkers$: BehaviorSubject<number>;
@@ -32,15 +36,20 @@ export class ThroughputManager {
     startingMaxWorkers: number;
     startingPollInterval: number;
     storeErrors$: Observable<Error>;
+    logger: Logger;
   }) {
-    this.maxWorkers$ = opts.maxWorkers$;
-    this.pollInterval$ = opts.pollInterval$;
-    this.startingMaxWorkers = opts.startingMaxWorkers;
-    this.startingPollInterval = opts.startingPollInterval;
+    this.logger = opts.logger;
     this.storeErrors$ = opts.storeErrors$;
-
-    this.currentMaxWorkers = this.startingMaxWorkers;
-    this.currentPollInterval = this.startingPollInterval;
+    this.maxWorkers = {
+      startingValue: opts.startingMaxWorkers,
+      currentValue: opts.startingMaxWorkers,
+      observable$: opts.maxWorkers$,
+    };
+    this.pollInterval = {
+      startingValue: opts.startingPollInterval,
+      currentValue: opts.startingPollInterval,
+      observable$: opts.pollInterval$,
+    };
   }
 
   public start() {
@@ -74,34 +83,40 @@ export class ThroughputManager {
   }
 
   private checkThroughput() {
-    const newMaxWorkers =
+    const newMaxWorkersMultiple =
       this.errorCountSinceLastInterval > 0
-        ? this.currentMaxWorkers * MAX_WORKERS_REDUCTION_PERCENTAGE
-        : Math.max(
-            this.currentMaxWorkers * MAX_WORKERS_INCREASE_PERCENTAGE,
-            this.startingMaxWorkers
-          );
-    const newPollInterval =
+        ? MAX_WORKERS_REDUCTION_PERCENTAGE
+        : MAX_WORKERS_INCREASE_PERCENTAGE;
+    const newMaxWorkers = Math.max(
+      this.maxWorkers.startingValue,
+      this.maxWorkers.currentValue * newMaxWorkersMultiple
+    );
+
+    const newPollIntervalMultiple =
       this.errorCountSinceLastInterval > 0
-        ? this.currentPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE
-        : Math.min(
-            this.currentPollInterval * POLL_INTERVAL_REDUCTION_PERCENTAGE,
-            this.startingPollInterval
-          );
-    if (newMaxWorkers !== this.currentMaxWorkers) {
-      console.log(
-        `Throughput manager changing max workers from ${this.currentMaxWorkers} to ${newMaxWorkers}`
+        ? POLL_INTERVAL_INCREASE_PERCENTAGE
+        : POLL_INTERVAL_REDUCTION_PERCENTAGE;
+    const newPollInterval = Math.min(
+      this.pollInterval.startingValue,
+      this.pollInterval.currentValue * newPollIntervalMultiple
+    );
+
+    if (newMaxWorkers !== this.maxWorkers.currentValue) {
+      this.logger.info(
+        `Throughput manager changing max workers from ${this.maxWorkers.currentValue} to ${newMaxWorkers}`
       );
-      this.maxWorkers$.next(newMaxWorkers);
-      this.currentMaxWorkers = newMaxWorkers;
+      this.maxWorkers.observable$.next(newMaxWorkers);
+      this.maxWorkers.currentValue = newMaxWorkers;
     }
-    if (newPollInterval !== this.currentPollInterval) {
-      console.log(
-        `Throughput manager changing poll interval from ${this.currentPollInterval} to ${newPollInterval}`
+
+    if (newPollInterval !== this.pollInterval.currentValue) {
+      this.logger.info(
+        `Throughput manager changing poll interval from ${this.pollInterval.currentValue} to ${newPollInterval}`
       );
-      this.pollInterval$.next(newPollInterval);
-      this.currentPollInterval = newPollInterval;
+      this.pollInterval.observable$.next(newPollInterval);
+      this.pollInterval.currentValue = newPollInterval;
     }
+
     this.errorCountSinceLastInterval = 0;
   }
 }
