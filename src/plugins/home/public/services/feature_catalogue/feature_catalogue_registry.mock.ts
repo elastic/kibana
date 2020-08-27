@@ -25,6 +25,7 @@ import {
 const createSetupMock = (): jest.Mocked<FeatureCatalogueRegistrySetup> => {
   const setup = {
     register: jest.fn(),
+    registerSolution: jest.fn(),
   };
   return setup;
 };
@@ -34,6 +35,7 @@ const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> =>
     setup: jest.fn(),
     start: jest.fn(),
     get: jest.fn(() => []),
+    getSolutions: jest.fn(() => []),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

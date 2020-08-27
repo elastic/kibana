@@ -10,7 +10,6 @@ installNode=$1
 
 dir="$(pwd)"
 cacheDir="$HOME/.kibana"
-downloads="$cacheDir/downloads"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
@@ -134,34 +133,14 @@ export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudf
 
 export CHECKS_REPORTER_ACTIVE=false
 
-###
-### Download Chrome and install to this shell
-###
-
-# Available using the version information search at https://omahaproxy.appspot.com/
-chromeVersion=84
-
-mkdir -p "$downloads"
-
-if [ -d $cacheDir/chrome-$chromeVersion/chrome-linux ]; then
-  echo " -- Chrome already downloaded and extracted"
-else
-  mkdir -p "$cacheDir/chrome-$chromeVersion"
-
-  echo " -- Downloading and extracting Chrome"
-  curl -o "$downloads/chrome.zip" -L "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/chrome_$chromeVersion.zip"
-  unzip -o "$downloads/chrome.zip" -d "$cacheDir/chrome-$chromeVersion"
-  export PATH="$cacheDir/chrome-$chromeVersion/chrome-linux:$PATH"
-fi
-
 # This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
-if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
-  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
-  export DETECT_CHROMEDRIVER_VERSION=true
-  export CHROMEDRIVER_FORCE_DOWNLOAD=true
-else
-  echo "Chrome not detected, installing default chromedriver binary for the package version"
-fi
+# if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+#   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+#   export DETECT_CHROMEDRIVER_VERSION=true
+#   export CHROMEDRIVER_FORCE_DOWNLOAD=true
+# else
+#   echo "Chrome not detected, installing default chromedriver binary for the package version"
+# fi
 
 ### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
 if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then

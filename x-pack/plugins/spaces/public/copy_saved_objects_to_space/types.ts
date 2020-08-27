@@ -8,6 +8,7 @@ import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/pu
 
 export interface CopyOptions {
   includeRelated: boolean;
+  createNewCopies: boolean;
   overwrite: boolean;
   selectedSpaceIds: string[];
 }
