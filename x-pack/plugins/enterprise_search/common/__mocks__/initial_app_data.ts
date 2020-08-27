@@ -29,6 +29,8 @@ export const DEFAULT_INITIAL_APP_DATA = {
     },
   },
   workplaceSearch: {
+    canCreateInvitations: true,
+    isFederatedAuth: false,
     organization: {
       name: 'ACME Donuts',
       defaultOrgName: 'My Organization',

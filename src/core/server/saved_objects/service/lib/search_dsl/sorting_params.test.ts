@@ -178,6 +178,20 @@ describe('searchDsl/getSortParams', () => {
         });
       });
     });
+    describe('sortField is root simple property with single type', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved'], 'type', 'desc')).toEqual({
+          sort: [
+            {
+              type: {
+                order: 'desc',
+                unmapped_type: 'text',
+              },
+            },
+          ],
+        });
+      });
+    });
     describe('sortField is root simple property with multiple type', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type', 'desc')).toEqual({

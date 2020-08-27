@@ -18,15 +18,12 @@ const createTestCases = () => {
   const exportableTypes = [
     cases.singleNamespaceObject,
     cases.singleNamespaceType,
+    cases.multiNamespaceObject,
+    cases.multiNamespaceType,
     cases.namespaceAgnosticObject,
     cases.namespaceAgnosticType,
   ];
-  const nonExportableTypes = [
-    cases.multiNamespaceObject,
-    cases.multiNamespaceType,
-    cases.hiddenObject,
-    cases.hiddenType,
-  ];
+  const nonExportableTypes = [cases.hiddenObject, cases.hiddenType];
   const allTypes = exportableTypes.concat(nonExportableTypes);
   return { exportableTypes, nonExportableTypes, allTypes };
 };

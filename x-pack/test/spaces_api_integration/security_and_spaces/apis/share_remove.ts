@@ -29,7 +29,7 @@ const createTestCases = (spaceId: string) => {
   // Test cases to check removing the target namespace from different saved objects
   let namespaces = [spaceId];
   const singleSpace = [
-    { id: CASES.DEFAULT_SPACE_ONLY.id, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { id: CASES.DEFAULT_ONLY.id, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { id: CASES.SPACE_1_ONLY.id, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
     { id: CASES.SPACE_2_ONLY.id, namespaces, ...fail404(spaceId !== SPACE_2_ID) },
     { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ...fail404(spaceId === SPACE_2_ID) },

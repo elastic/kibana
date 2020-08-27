@@ -1,5 +1,73 @@
-@include euiBreakpoint('xs', 's', 'm') {
-  .homHome__synopsisItem {
-    flex-basis: 100% !important;
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+// Local page variables
+$homePageWidth: 1200px;
+
+.homWrapper {
+  background-color: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
+}
+
+.homHeader {
+  background-color: $euiPageBackgroundColor;
+  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
+}
+
+.homHeader__inner {
+  margin: 0 auto;
+  max-width: $homePageWidth;
+  padding: $euiSizeXL $euiSize;
+
+  .homHeader--hasSolutions & {
+    padding-bottom: $euiSizeXL + $euiSizeL;
+  }
+}
+
+#homHeader__title {
+  @include euiBreakpoint('xs', 's') {
+    text-align: center;
+  }
+}
+
+.homHeader__actionItem {
+  @include euiBreakpoint('xs', 's') {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+
+.homContent {
+  margin: 0 auto;
+  max-width: $homePageWidth;
+  padding: $euiSizeXL $euiSize;
+  width: 100%;
+}
+
+.homData--expanded {
+  flex-direction: column;
+
+  &,
+  & > * {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
   }
 }

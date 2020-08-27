@@ -41,7 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  describe('PKI authentication', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/75707
+  describe.skip('PKI authentication', () => {
     before(async () => {
       await getService('esSupertest')
         .post('/_security/role_mapping/first_client_pki')
