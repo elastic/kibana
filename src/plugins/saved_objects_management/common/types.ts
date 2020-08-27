@@ -18,6 +18,7 @@
  */
 
 import { SavedObject } from 'src/core/types';
+import { SavedObjectsNamespaceType } from 'src/core/public';
 
 /**
  * The metadata injected into a {@link SavedObject | saved object} when returning
@@ -28,6 +29,7 @@ export interface SavedObjectMetadata {
   title?: string;
   editUrl?: string;
   inAppUrl?: { path: string; uiCapabilitiesPath: string };
+  namespaceType?: SavedObjectsNamespaceType;
 }
 
 /**

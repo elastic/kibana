@@ -557,6 +557,49 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   exceptions_list: [],
 });
 
+export const getWebHookAction = () => ({
+  actionTypeId: '.webhook',
+  config: {
+    method: 'post',
+    url: 'http://localhost',
+  },
+  secrets: {
+    user: 'example',
+    password: 'example',
+  },
+  name: 'Some connector',
+});
+
+export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
+  ...getSimpleRule(),
+  throttle: 'rule',
+  actions: [
+    {
+      group: 'default',
+      id,
+      params: {
+        body: '{}',
+      },
+      action_type_id: '.webhook',
+    },
+  ],
+});
+
+export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
+  ...getSimpleRuleOutput(),
+  throttle: 'rule',
+  actions: [
+    {
+      action_type_id: '.webhook',
+      group: 'default',
+      id: actionId,
+      params: {
+        body: '{}',
+      },
+    },
+  ],
+});
+
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,

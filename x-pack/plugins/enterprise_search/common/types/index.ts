@@ -5,17 +5,14 @@
  */
 
 import { IAccount as IAppSearchAccount } from './app_search';
-import { IAccount as IWorkplaceSearchAccount, IOrganization } from './workplace_search';
+import { IWorkplaceSearchInitialData } from './workplace_search';
 
 export interface IInitialAppData {
   readOnlyMode?: boolean;
   ilmEnabled?: boolean;
   configuredLimits?: IConfiguredLimits;
   appSearch?: IAppSearchAccount;
-  workplaceSearch?: {
-    organization: IOrganization;
-    fpAccount: IWorkplaceSearchAccount;
-  };
+  workplaceSearch?: IWorkplaceSearchInitialData;
 }
 
 export interface IConfiguredLimits {

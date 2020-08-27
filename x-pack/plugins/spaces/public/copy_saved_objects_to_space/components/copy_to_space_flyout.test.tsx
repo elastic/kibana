@@ -17,6 +17,7 @@ import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { ToastsApi } from 'src/core/public';
+import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -73,8 +74,8 @@ const setup = async (opts: SetupOpts = {}) => {
         name: 'My Viz',
       },
     ],
-    meta: { icon: 'dashboard', title: 'foo' },
-  };
+    meta: { icon: 'dashboard', title: 'foo', namespaceType: 'single' },
+  } as SavedObjectsManagementRecord;
 
   const wrapper = mountWithIntl(
     <CopySavedObjectsToSpaceFlyout
@@ -184,11 +185,13 @@ describe('CopyToSpaceFlyout', () => {
             type: 'index-pattern',
             id: 'conflicting-ip',
             error: { type: 'conflict' },
+            meta: {},
           },
           {
             type: 'visualization',
             id: 'my-viz',
             error: { type: 'conflict' },
+            meta: {},
           },
         ],
       },
@@ -223,8 +226,12 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
-    overwriteButton.simulate('click');
+    const overwriteSwitch = findTestSubject(
+      wrapper,
+      `cts-overwrite-conflict-index-pattern:conflicting-ip`
+    );
+    expect(overwriteSwitch.props()['aria-checked']).toEqual(false);
+    overwriteSwitch.simulate('click');
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
 
@@ -282,6 +289,7 @@ describe('CopyToSpaceFlyout', () => {
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       ['space-1', 'space-2'],
       true,
+      false,
       true
     );
 
@@ -309,21 +317,45 @@ describe('CopyToSpaceFlyout', () => {
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
         success: true,
-        successCount: 3,
+        successCount: 5,
       },
       'space-2': {
         success: false,
         successCount: 1,
         errors: [
+          // regular conflict without destinationId
           {
             type: 'index-pattern',
             id: 'conflicting-ip',
             error: { type: 'conflict' },
+            meta: {},
           },
+          // regular conflict with destinationId
+          {
+            type: 'search',
+            id: 'conflicting-search',
+            error: { type: 'conflict', destinationId: 'another-search' },
+            meta: {},
+          },
+          // ambiguous conflict
+          {
+            type: 'canvas-workpad',
+            id: 'conflicting-canvas',
+            error: {
+              type: 'ambiguous_conflict',
+              destinations: [
+                { id: 'another-canvas', title: 'foo', updatedAt: undefined },
+                { id: 'yet-another-canvas', title: 'bar', updatedAt: undefined },
+              ],
+            },
+            meta: {},
+          },
+          // negative test case (skip)
           {
             type: 'visualization',
             id: 'my-viz',
             error: { type: 'conflict' },
+            meta: {},
           },
         ],
       },
@@ -358,8 +390,15 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
-    overwriteButton.simulate('click');
+    [
+      'index-pattern:conflicting-ip',
+      'search:conflicting-search',
+      'canvas-workpad:conflicting-canvas',
+    ].forEach((id) => {
+      const overwriteSwitch = findTestSubject(wrapper, `cts-overwrite-conflict-${id}`);
+      expect(overwriteSwitch.props()['aria-checked']).toEqual(false);
+      overwriteSwitch.simulate('click');
+    });
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
 
@@ -372,16 +411,148 @@ describe('CopyToSpaceFlyout', () => {
     expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalledWith(
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       {
-        'space-2': [{ type: 'index-pattern', id: 'conflicting-ip', overwrite: true }],
+        'space-1': [],
+        'space-2': [
+          { type: 'index-pattern', id: 'conflicting-ip', overwrite: true },
+          {
+            type: 'search',
+            id: 'conflicting-search',
+            overwrite: true,
+            destinationId: 'another-search',
+          },
+          {
+            type: 'canvas-workpad',
+            id: 'conflicting-canvas',
+            overwrite: true,
+            destinationId: 'another-canvas',
+          },
+        ],
       },
-      true
+      true,
+      false
     );
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
   });
 
-  it('displays an error when missing references are encountered', async () => {
+  it('displays a warning when missing references are encountered', async () => {
+    const {
+      wrapper,
+      onClose,
+      mockSpacesManager,
+      mockToastNotifications,
+      savedObjectToCopy,
+    } = await setup();
+
+    mockSpacesManager.copySavedObjects.mockResolvedValue({
+      'space-1': {
+        success: false,
+        successCount: 1,
+        errors: [
+          // my-viz-1 just has a missing_references error
+          {
+            type: 'visualization',
+            id: 'my-viz-1',
+            error: {
+              type: 'missing_references',
+              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
+            },
+            meta: {},
+          },
+          // my-viz-2 has both a missing_references error and a conflict error
+          {
+            type: 'visualization',
+            id: 'my-viz-2',
+            error: {
+              type: 'missing_references',
+              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
+            },
+            meta: {},
+          },
+          {
+            type: 'visualization',
+            id: 'my-viz-2',
+            error: { type: 'conflict' },
+            meta: {},
+          },
+        ],
+        successResults: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
+      },
+    });
+
+    // Using props callback instead of simulating clicks,
+    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
+    const spaceSelector = wrapper.find(SelectableSpacesControl);
+
+    act(() => {
+      spaceSelector.props().onChange(['space-1']);
+    });
+
+    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+
+    await act(async () => {
+      startButton.simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(ProcessingCopyToSpace)).toHaveLength(1);
+
+    const spaceResult = findTestSubject(wrapper, `cts-space-result-space-1`);
+    spaceResult.simulate('click');
+
+    const errorIconTip1 = spaceResult.find(
+      'EuiIconTip[data-test-subj="cts-object-result-missing-references-my-viz-1"]'
+    );
+    expect(errorIconTip1.props()).toMatchInlineSnapshot(`
+      Object {
+        "color": "warning",
+        "content": <FormattedMessage
+          defaultMessage="Saved object has missing references; it will be copied, but one or more of its references are broken."
+          id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesMessage"
+          values={Object {}}
+        />,
+        "data-test-subj": "cts-object-result-missing-references-my-viz-1",
+        "type": "link",
+      }
+    `);
+
+    const myViz2Icon = 'EuiIconTip[data-test-subj="cts-object-result-missing-references-my-viz-2"]';
+    expect(spaceResult.find(myViz2Icon)).toHaveLength(0);
+
+    // TODO: test for a missing references icon by selecting overwrite for the my-viz-2 conflict
+
+    const finishButton = findTestSubject(wrapper, 'cts-finish-button');
+    await act(async () => {
+      finishButton.simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalledWith(
+      [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
+      {
+        'space-1': [
+          { type: 'dashboard', id: 'my-dash', overwrite: false },
+          {
+            type: 'visualization',
+            id: 'my-viz-1',
+            overwrite: false,
+            ignoreMissingReferences: true,
+          },
+        ],
+      },
+      true,
+      false
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+  });
+
+  it('displays an error when an unresolvable error is encountered', async () => {
     const { wrapper, onClose, mockSpacesManager, mockToastNotifications } = await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
@@ -396,11 +567,8 @@ describe('CopyToSpaceFlyout', () => {
           {
             type: 'visualization',
             id: 'my-viz',
-            error: {
-              type: 'missing_references',
-              blocking: [],
-              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
-            },
+            error: { type: 'unknown', message: 'some error message', statusCode: 400 },
+            meta: {},
           },
         ],
       },
@@ -441,7 +609,7 @@ describe('CopyToSpaceFlyout', () => {
           values={Object {}}
         />,
         "data-test-subj": "cts-object-result-error-my-viz",
-        "type": "cross",
+        "type": "alert",
       }
     `);
 

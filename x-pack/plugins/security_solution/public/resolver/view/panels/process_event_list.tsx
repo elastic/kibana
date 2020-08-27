@@ -10,18 +10,13 @@ import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from 
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
-import {
-  CrumbInfo,
-  formatDate,
-  StyledBreadcrumbs,
-  BoldCode,
-  StyledTime,
-} from './panel_content_utilities';
+import { formatDate, StyledBreadcrumbs, BoldCode, StyledTime } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
+import { CrumbInfo } from '../../types';
 
 /**
  * This view presents a list of related events of a given type for a given process.
