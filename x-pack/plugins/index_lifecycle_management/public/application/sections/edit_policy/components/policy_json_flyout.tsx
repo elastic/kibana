@@ -18,21 +18,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { Policy } from '../../../services/policies/types';
 
 interface Props {
   close: () => void;
-  // TODO add types for lifecycle after policy is typed
-  lifecycle: any;
+  policy: Policy;
   policyName: string;
 }
 
-export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
-  close,
-  lifecycle,
-  policyName,
-}) => {
-  // @ts-ignore until store is typed
-  const getEsJson = ({ phases }) => {
+export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ close, policy, policyName }) => {
+  const getEsJson = ({ phases }: Policy) => {
     return JSON.stringify(
       {
         policy: {
@@ -45,7 +40,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
   };
 
   const endpoint = `PUT _ilm/policy/${policyName || '<policyName>'}`;
-  const request = `${endpoint}\n${getEsJson(lifecycle)}`;
+  const request = `${endpoint}\n${getEsJson(policy)}`;
 
   return (
     <EuiFlyout maxWidth={480} onClose={close}>

@@ -5,41 +5,52 @@
  */
 
 import './selectable_spaces_control.scss';
-import React, { Fragment, useState } from 'react';
-import { EuiSelectable, EuiLoadingSpinner } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSelectable, EuiSelectableOption, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { SpaceAvatar } from '../../space_avatar';
 import { Space } from '../../../common/model/space';
 
 interface Props {
   spaces: Space[];
   selectedSpaceIds: string[];
+  disabledSpaceIds: Set<string>;
   onChange: (selectedSpaceIds: string[]) => void;
   disabled?: boolean;
 }
 
-interface SpaceOption {
-  label: string;
-  prepend?: any;
-  checked: 'on' | 'off' | null;
-  ['data-space-id']: string;
-  disabled?: boolean;
-}
+type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 export const SelectableSpacesControl = (props: Props) => {
-  const [options, setOptions] = useState<SpaceOption[]>([]);
-
-  //  TODO: update once https://github.com/elastic/eui/issues/2071 is fixed
-  if (options.length === 0) {
-    setOptions(
-      props.spaces.map((space) => ({
-        label: space.name,
-        prepend: <SpaceAvatar space={space} size={'s'} />,
-        checked: props.selectedSpaceIds.includes(space.id) ? 'on' : null,
-        ['data-space-id']: space.id,
-        ['data-test-subj']: `cts-space-selector-row-${space.id}`,
-      }))
-    );
+  if (props.spaces.length === 0) {
+    return <EuiLoadingSpinner />;
   }
+
+  const disabledIndicator = (
+    <EuiIconTip
+      content={
+        <FormattedMessage
+          id="xpack.spaces.management.copyToSpace.selectSpacesControl.disabledTooltip"
+          defaultMessage="The object already exists in this space and cannot be copied here"
+        />
+      }
+      position="left"
+      type="iInCircle"
+    />
+  );
+
+  const options = props.spaces.map<SpaceOption>((space) => {
+    const disabled = props.disabledSpaceIds.has(space.id);
+    return {
+      label: space.name,
+      prepend: <SpaceAvatar space={space} size={'s'} />,
+      append: disabled ? disabledIndicator : null,
+      checked: props.selectedSpaceIds.includes(space.id) ? 'on' : undefined,
+      disabled,
+      ['data-space-id']: space.id,
+      ['data-test-subj']: `cts-space-selector-row-${space.id}`,
+    };
+  });
 
   function updateSelectedSpaces(selectedOptions: SpaceOption[]) {
     if (props.disabled) return;
@@ -49,17 +60,11 @@ export const SelectableSpacesControl = (props: Props) => {
       .map((opt) => opt['data-space-id']);
 
     props.onChange(selectedSpaceIds);
-    // TODO: remove once https://github.com/elastic/eui/issues/2071 is fixed
-    setOptions(selectedOptions);
-  }
-
-  if (options.length === 0) {
-    return <EuiLoadingSpinner />;
   }
 
   return (
     <EuiSelectable
-      options={options as any[]}
+      options={options}
       onChange={(newOptions) => updateSelectedSpaces(newOptions as SpaceOption[])}
       listProps={{
         bordered: true,
