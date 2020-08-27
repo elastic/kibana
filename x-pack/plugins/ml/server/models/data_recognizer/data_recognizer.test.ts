@@ -8,11 +8,7 @@ import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
-const callAs = () => {
-  return new Promise((resolve) => {
-    resolve({ body: {} });
-  }) as Promise<any>;
-};
+const callAs = () => Promise.resolve({ body: {} });
 
 const mlClusterClient = ({
   asCurrentUser: callAs,

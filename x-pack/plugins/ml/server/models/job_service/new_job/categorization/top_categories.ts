@@ -33,7 +33,7 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
         },
       },
     });
-    // @ts-ignore total is a object here
+    // @ts-ignore total is an object here
     return body?.hits?.total?.value ?? 0;
   }
 

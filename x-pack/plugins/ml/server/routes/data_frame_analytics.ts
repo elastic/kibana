@@ -212,9 +212,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
             id: analyticsId,
             body: request.body,
           },
-          {
-            ...getAuthorizationHeader(request),
-          }
+          getAuthorizationHeader(request)
         );
         return response.ok({
           body,
@@ -250,9 +248,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           {
             body: request.body,
           },
-          {
-            ...getAuthorizationHeader(request),
-          }
+          getAuthorizationHeader(request)
         );
         return response.ok({
           body,
@@ -505,9 +501,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
             id: analyticsId,
             body: request.body,
           },
-          {
-            ...getAuthorizationHeader(request),
-          }
+          getAuthorizationHeader(request)
         );
         return response.ok({
           body,
