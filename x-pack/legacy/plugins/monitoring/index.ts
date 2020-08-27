@@ -12,7 +12,7 @@ import { config } from './config';
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
-const deps = ['kibana', 'elasticsearch', 'xpack_main'];
+const deps = ['elasticsearch', 'xpack_main'];
 export const monitoring = (kibana: any) => {
   return new kibana.Plugin({
     require: deps,
