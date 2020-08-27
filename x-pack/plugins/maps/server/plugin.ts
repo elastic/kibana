@@ -27,7 +27,7 @@ import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
-import { ConfigSchema } from '../../../../src/plugins/maps_legacy/config';
+import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -51,7 +51,7 @@ export class MapsPlugin implements Plugin {
   _initHomeData(
     home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
-    mapsLegacyConfig: ConfigSchema
+    mapsLegacyConfig: MapsLegacyConfig
   ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
