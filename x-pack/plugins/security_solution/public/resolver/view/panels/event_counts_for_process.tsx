@@ -8,10 +8,11 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
-import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
+import { StyledBreadcrumbs } from './panel_content_utilities';
 
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import { CrumbInfo } from '../../types';
 
 /**
  * This view gives counts for all the related events of a process grouped by related event type.

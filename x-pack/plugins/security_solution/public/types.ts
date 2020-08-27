@@ -24,7 +24,7 @@ import { AppFrontendLibs } from './common/lib/lib';
 import { ResolverPluginSetup } from './resolver/types';
 
 export interface SetupPlugins {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;

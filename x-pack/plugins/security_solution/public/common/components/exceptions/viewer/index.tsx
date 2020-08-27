@@ -322,11 +322,13 @@ const ExceptionsViewerComponent = ({
         exceptionListTypeToEdit != null && (
           <EditExceptionModal
             ruleName={ruleName}
+            ruleId={ruleId}
             ruleIndices={ruleIndices}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
             onConfirm={handleOnConfirmExceptionModal}
+            onRuleChange={onRuleChange}
           />
         )}
 
