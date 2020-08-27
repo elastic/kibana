@@ -1,17 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "types/intl_format_cache.d.ts",
-    "types/intl_relativeformat.d.ts"
+    "src",
+    "types"
   ],
   "exclude": [
     "target"
   ],
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
     "types": [
       "jest",
       "node"

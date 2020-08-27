@@ -1,8 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-test"
+  },
   "include": [
-    "types/**/*",
-    "src/**/*",
+    "types",
+    "src",
     "index.d.ts"
   ]
 }
