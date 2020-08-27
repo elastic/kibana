@@ -19,6 +19,22 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
       attributes: agentPolicyAttributes,
     };
   });
+  mock.find.mockImplementation(async (options) => {
+    return {
+      saved_objects: [
+        {
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          attributes: {},
+          type: 'ingest_manager_settings',
+          score: 1,
+          references: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 1,
+    };
+  });
 
   return mock;
 }
@@ -43,7 +59,7 @@ jest.mock('./output', () => {
 
 describe('agent policy', () => {
   describe('getFullAgentPolicy', () => {
-    it('should return a policy without monitoring if not monitoring is not enabled', async () => {
+    it('should return a policy without monitoring if monitoring is not enabled', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
       });
