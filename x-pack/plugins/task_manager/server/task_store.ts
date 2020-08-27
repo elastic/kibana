@@ -121,7 +121,7 @@ export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
   public readonly taskManagerId: string;
-  public readonly errors$: Subject<Error> = new Subject<Error>();
+  public readonly errors$ = new Subject<Error>();
 
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
@@ -444,7 +444,7 @@ export class TaskStore {
   public async get(id: string): Promise<ConcreteTaskInstance> {
     let result;
     try {
-      result = await this.savedObjectsRepository.get('task', id);
+      result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
     } catch (e) {
       this.errors$.next(e);
       throw e;
