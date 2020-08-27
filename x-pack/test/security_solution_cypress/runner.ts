@@ -11,7 +11,18 @@ import { withProcRunner } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from './ftr_provider_context';
 
-export async function SiemCypressTestRunner({ getService }: FtrProviderContext) {
+export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrProviderContext) {
+  await SecuritySolutionCypressTestRunner('run', { getService });
+}
+
+export async function SecuritySolutionCypressVisualTestRunner({ getService }: FtrProviderContext) {
+  await SecuritySolutionCypressTestRunner('open', { getService });
+}
+
+export async function SecuritySolutionCypressTestRunner(
+  argument: string,
+  { getService }: FtrProviderContext
+) {
   const log = getService('log');
   const config = getService('config');
   const esArchiver = getService('esArchiver');
@@ -22,7 +33,7 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:run'],
+      args: [`cypress:${argument}`],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
