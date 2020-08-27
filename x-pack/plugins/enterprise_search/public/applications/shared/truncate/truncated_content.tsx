@@ -8,6 +8,8 @@ import React from 'react';
 
 import { truncate, truncateBeginning } from './';
 
+import './truncated_content.scss';
+
 interface ITruncatedContentProps {
   content: string;
   length: number;
