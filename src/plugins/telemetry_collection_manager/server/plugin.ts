@@ -107,6 +107,9 @@ export class TelemetryCollectionManagerPlugin
         throw Error('esCluster name must be set for the getCluster method.');
       }
       if (!esClientGetter) {
+        this.logger.warn(
+          `esClient getter method returns ${esClientGetter} for ${title} collection.`
+        );
         throw Error('esClient getter method not set.');
       }
       if (!clusterDetailsGetter) {

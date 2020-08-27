@@ -20,6 +20,7 @@ import {
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
+  IClusterClient,
 } from 'kibana/server';
 import {
   LOGGING_TAG,
@@ -71,6 +72,7 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
+  private elasticsearchClient: IClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -141,9 +143,14 @@ export class Plugin {
 
     // Initialize telemetry
     if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
-        maxBucketSize: config.ui.max_bucket_size,
-      });
+      registerMonitoringCollection(
+        plugins.telemetryCollectionManager,
+        this.cluster,
+        () => this.elasticsearchClient,
+        {
+          maxBucketSize: config.ui.max_bucket_size,
+        }
+      );
     }
 
     // Register collector objects for stats to show up in the APIs
