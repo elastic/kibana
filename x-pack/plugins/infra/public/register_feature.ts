@@ -22,7 +22,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
     }),
     icon: 'metricsApp',
     path: `/app/metrics`,
-    showOnHomePage: true,
+    showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
   });
 
@@ -37,7 +37,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
     }),
     icon: 'logsApp',
     path: `/app/logs`,
-    showOnHomePage: true,
+    showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
   });
 };

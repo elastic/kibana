@@ -136,6 +136,7 @@ class TutorialDirectoryUi extends React.Component {
       }
 
       return {
+        id: tutorialConfig.id,
         category: tutorialConfig.category,
         icon: icon,
         name: tutorialConfig.name,
@@ -149,6 +150,7 @@ class TutorialDirectoryUi extends React.Component {
 
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
+      id: 'sample_data',
       name: this.props.intl.formatMessage({
         id: 'home.tutorial.card.sampleDataTitle',
         defaultMessage: 'Sample Data',
@@ -214,6 +216,7 @@ class TutorialDirectoryUi extends React.Component {
             return (
               <EuiFlexItem key={tutorial.name}>
                 <Synopsis
+                  id={tutorial.id}
                   iconType={tutorial.icon}
                   description={tutorial.description}
                   title={tutorial.name}

@@ -6,7 +6,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 import * as api from './api';
 import { ruleMock } from './mock';
@@ -16,7 +16,7 @@ import {
   useDissasociateExceptionList,
 } from './use_dissasociate_exception_list';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('useDissasociateExceptionList', () => {
   const onError = jest.fn();
