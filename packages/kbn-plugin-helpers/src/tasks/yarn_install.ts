@@ -17,30 +17,24 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export * from './tooling_log';
-export * from './serializers';
-export {
-  CA_CERT_PATH,
-  ES_KEY_PATH,
-  ES_CERT_PATH,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
-  ES_EMPTYPASSWORD_P12_PATH,
-  ES_NOPASSWORD_P12_PATH,
-  KBN_KEY_PATH,
-  KBN_CERT_PATH,
-  KBN_P12_PATH,
-  KBN_P12_PASSWORD,
-} from './certs';
-export { REPO_ROOT } from './repo_root';
-export { KbnClient } from './kbn_client';
-export * from './run';
-export * from './axios';
-export * from './stdio';
-export * from './ci_stats_reporter';
-export * from './plugin_list';
-export * from './simple_kibana_platform_plugin_discovery';
-export * from './streams';
-export * from './babel';
-export * from './parse_kibana_platform_plugin';
+import Fs from 'fs';
+import Path from 'path';
+
+import execa from 'execa';
+
+import { BuildContext } from '../build_context';
+
+const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cmd` : path);
+
+export async function yarnInstall({ log, buildDir, config }: BuildContext) {
+  const pkgJson = Path.resolve(buildDir, 'package.json');
+
+  if (config?.skipInstallDependencies || !Fs.existsSync(pkgJson)) {
+    return;
+  }
+
+  log.info('running yarn to install dependencies');
+  await execa(winVersion('yarn'), ['install', '--production', '--pure-lockfile'], {
+    cwd: buildDir,
+  });
+}
