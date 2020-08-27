@@ -1,6 +1,5 @@
 #!/bin/groovy
 
-env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = 'true'
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
