@@ -11,7 +11,9 @@
   white-space: nowrap;
 
   &__tooltip {
-    @include position('vertical');
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     left: -3px;
     margin-top: -1px;
     background: $euiColorEmptyShade;
