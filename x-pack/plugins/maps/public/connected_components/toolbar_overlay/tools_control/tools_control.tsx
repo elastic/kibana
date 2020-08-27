@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+// @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';
 import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
@@ -74,7 +75,13 @@ export class ToolsControl extends Component<Props, State> {
     this.setState({ isPopoverOpen: false });
   };
 
-  _initiateShapeDraw = (options: DrawState) => {
+  _initiateShapeDraw = (options: {
+    geometryLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+    geoFieldType: ES_GEO_FIELD_TYPE;
+    relation: ES_SPATIAL_RELATIONS;
+  }) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.POLYGON,
       ...options,
@@ -82,7 +89,13 @@ export class ToolsControl extends Component<Props, State> {
     this._closePopover();
   };
 
-  _initiateBoundsDraw = (options: DrawState) => {
+  _initiateBoundsDraw = (options: {
+    geometryLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+    geoFieldType: ES_GEO_FIELD_TYPE;
+    relation: ES_SPATIAL_RELATIONS;
+  }) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.BOUNDS,
       ...options,
@@ -90,7 +103,11 @@ export class ToolsControl extends Component<Props, State> {
     this._closePopover();
   };
 
-  _initiateDistanceDraw = (options: DrawState) => {
+  _initiateDistanceDraw = (options: {
+    filterLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+  }) => {
     this.props.initiateDraw({
       drawType: DRAW_TYPE.DISTANCE,
       ...options,
