@@ -25,7 +25,6 @@ import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
-import { CrumbInfo } from '../../types';
 import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 const StyledLimitWarning = styled(LimitWarning)`
