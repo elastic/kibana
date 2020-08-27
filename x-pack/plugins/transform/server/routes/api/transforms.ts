@@ -36,7 +36,14 @@ import {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
-import { TransformsResponseSchema } from '../../../common/api_schemas/transforms';
+import {
+  GetTransformsResponseSchema,
+  postTransformsPreviewRequestSchema,
+  PostTransformsPreviewRequestSchema,
+  putTransformsRequestSchema,
+  PutTransformsRequestSchema,
+  PutTransformsResponseSchema,
+} from '../../../common/api_schemas/transforms';
 
 import { RouteDependencies } from '../../types';
 
@@ -109,7 +116,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  router.get(
+  router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}/_stats'),
       validate: { params: transformIdParamSchema },
@@ -131,21 +138,18 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     })
   );
   registerTransformsAuditMessagesRoutes(routeDependencies);
-  router.put(
+  router.put<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
     {
       path: addBasePath('transforms/{transformId}'),
       validate: {
         params: transformIdParamSchema,
-        body: schema.maybe(schema.any()),
+        body: putTransformsRequestSchema,
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { transformId } = req.params as TransformIdParamSchema;
 
-      const response: {
-        transformsCreated: Array<{ transform: string }>;
-        errors: any[];
-      } = {
+      const response: PutTransformsResponseSchema = {
         transformsCreated: [],
         errors: [],
       };
@@ -217,11 +221,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  router.post(
+  router.post<undefined, undefined, PostTransformsPreviewRequestSchema>(
     {
       path: addBasePath('transforms/_preview'),
       validate: {
-        body: schema.maybe(schema.any()),
+        body: postTransformsPreviewRequestSchema,
       },
     },
     license.guardApiRoute(previewTransformHandler)
@@ -266,7 +270,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 const getTransforms = async (
   options: { transformId?: string },
   callAsCurrentUser: CallCluster
-): Promise<TransformsResponseSchema> => {
+): Promise<GetTransformsResponseSchema> => {
   return await callAsCurrentUser('transform.getTransforms', options);
 };
 

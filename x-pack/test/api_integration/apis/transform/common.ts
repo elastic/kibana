@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { CreateRequestBody } from '../../../../plugins/transform/public/app/common/transform';
+import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -16,7 +16,7 @@ export function generateDestIndex(transformId: string): string {
   return `user-${transformId}`;
 }
 
-export function generateTransformConfig(transformId: string): CreateRequestBody {
+export function generateTransformConfig(transformId: string): PutTransformsRequestSchema {
   const destinationIndex = generateDestIndex(transformId);
 
   return {

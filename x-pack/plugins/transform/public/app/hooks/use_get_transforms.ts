@@ -6,8 +6,10 @@
 
 import { HttpFetchError } from 'src/core/public';
 
-import { isTransformsResponseSchema } from '../../../common/api_schemas/transforms';
-import { isTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
+import {
+  isGetTransformsResponseSchema,
+  isGetTransformsStatsResponseSchema,
+} from '../../../common/api_schemas/type_guards';
 import { TRANSFORM_MODE } from '../../../common/constants';
 import { isTransformStats } from '../../../common/types/transform_stats';
 
@@ -39,14 +41,14 @@ export const useGetTransforms = (
       try {
         const transformConfigs = await api.getTransforms();
 
-        if (!isTransformsResponseSchema(transformConfigs)) {
+        if (!isGetTransformsResponseSchema(transformConfigs)) {
           throw transformConfigs;
         }
 
         const transformStats = await api.getTransformsStats();
 
         const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
-          const stats = isTransformsStatsResponseSchema(transformStats)
+          const stats = isGetTransformsStatsResponseSchema(transformStats)
             ? transformStats.transforms.find((d) => config.id === d.id)
             : undefined;
 

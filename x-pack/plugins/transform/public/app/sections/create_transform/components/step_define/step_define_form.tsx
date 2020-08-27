@@ -33,7 +33,7 @@ import {
 } from '../../../../common/data_grid';
 
 import {
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
@@ -88,7 +88,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     toastNotifications,
   };
 
-  const previewRequest = getPreviewRequestBody(
+  const previewRequest = getPreviewTransformRequestBody(
     indexPattern.title,
     pivotQuery,
     pivotGroupByArr,

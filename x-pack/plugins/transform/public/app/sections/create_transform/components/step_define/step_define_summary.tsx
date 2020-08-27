@@ -18,7 +18,7 @@ import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getPivotQuery,
   getPivotPreviewDevConsoleStatement,
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
@@ -44,7 +44,7 @@ export const StepDefineSummary: FC<Props> = ({
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(searchQuery);
 
-  const previewRequest = getPreviewRequestBody(
+  const previewRequest = getPreviewTransformRequestBody(
     searchItems.indexPattern.title,
     pivotQuery,
     pivotGroupByArr,

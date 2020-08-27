@@ -13,11 +13,12 @@ import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
+import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { dictionaryToArray } from '../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../shared_imports';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
+  formatHumanReadableDateTimeSeconds,
   getErrorMessage,
   multiColumnSortFactory,
   useDataGrid,
@@ -27,12 +28,11 @@ import {
 } from '../../shared_imports';
 
 import {
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotGroupByConfig,
   PivotQuery,
-  PreviewMappings,
   PivotAggsConfig,
 } from '../common';
 
@@ -74,21 +74,23 @@ export const usePivotData = (
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UseIndexDataReturnType => {
-  const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
+  const [previewMappingsProperties, setPreviewMappingsProperties] = useState<
+    PreviewMappingsProperties
+  >({});
   const api = useApi();
 
   const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
   const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
-  const columnKeys = Object.keys(previewMappings.properties).filter(
-    (key) => previewMappings.properties[key].type !== 'object'
+  const columnKeys = Object.keys(previewMappingsProperties).filter(
+    (key) => previewMappingsProperties[key].type !== 'object'
   );
   columnKeys.sort(sortColumns(groupByArr));
 
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
-    const field = previewMappings.properties[id];
+    const field = previewMappingsProperties[id];
 
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
     // To fall back to the default string schema it needs to be undefined.
@@ -160,11 +162,16 @@ export const usePivotData = (
     setStatus(INDEX_STATUS.LOADING);
 
     try {
-      const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
+      const previewRequest = getPreviewTransformRequestBody(
+        indexPatternTitle,
+        query,
+        groupByArr,
+        aggsArr
+      );
       const resp = await api.getTransformsPreview(previewRequest);
       setTableItems(resp.preview);
       setRowCount(resp.preview.length);
-      setPreviewMappings(resp.generated_dest_index.mappings);
+      setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
       setStatus(INDEX_STATUS.LOADED);
 
       if (resp.preview.length === 0) {
@@ -179,7 +186,7 @@ export const usePivotData = (
       setErrorMessage(getErrorMessage(e));
       setTableItems([]);
       setRowCount(0);
-      setPreviewMappings({ properties: {} });
+      setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
     }
   };
@@ -236,19 +243,19 @@ export const usePivotData = (
 
       if (
         [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS].includes(
-          previewMappings.properties[columnId].type
+          previewMappingsProperties[columnId].type
         )
       ) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
 
-      if (previewMappings.properties[columnId].type === ES_FIELD_TYPES.BOOLEAN) {
+      if (previewMappingsProperties[columnId].type === ES_FIELD_TYPES.BOOLEAN) {
         return cellValue ? 'true' : 'false';
       }
 
       return cellValue;
     };
-  }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappings.properties]);
+  }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappingsProperties]);
 
   return {
     ...dataGrid,

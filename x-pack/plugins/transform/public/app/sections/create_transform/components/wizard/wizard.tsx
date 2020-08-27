@@ -12,7 +12,7 @@ import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
 import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
-import { getCreateRequestBody } from '../../../../common';
+import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
@@ -151,7 +151,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     }
   }, []);
 
-  const transformConfig = getCreateRequestBody(
+  const transformConfig = getCreateTransformRequestBody(
     indexPattern.title,
     stepDefineState,
     stepDetailsState

@@ -86,9 +86,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
   });
 
   test('should include previously nonexisting attributes', () => {
-    const transformConfigMock = getTransformConfigMock();
-    delete transformConfigMock.description;
-    delete transformConfigMock.frequency;
+    const { description, frequency, ...transformConfigMock } = getTransformConfigMock();
 
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-new-description'),

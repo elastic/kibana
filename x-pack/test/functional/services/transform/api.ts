@@ -7,9 +7,9 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
 import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
-import type { TransformStats } from '../../../../plugins/transform/public/app/common';
-import type { CreateRequestBody } from '../../../../plugins/transform/public/app/common/transform';
+import type { TransformStats } from '../../../../plugins/transform/common/types/transform_stats';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -167,7 +167,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       return await esSupertest.get(`/_transform/${transformId}`).expect(expectedCode);
     },
 
-    async createTransform(transformId: string, transformConfig: CreateRequestBody) {
+    async createTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
       log.debug(`Creating transform with id '${transformId}'...`);
       await esSupertest.put(`/_transform/${transformId}`).send(transformConfig).expect(200);
 
@@ -202,7 +202,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest.post(`/_transform/${transformId}/_start`).expect(200);
     },
 
-    async createAndRunTransform(transformId: string, transformConfig: CreateRequestBody) {
+    async createAndRunTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
       await this.createTransform(transformId, transformConfig);
       await this.startTransform(transformId);
       if (transformConfig.sync === undefined) {

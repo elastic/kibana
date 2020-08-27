@@ -23,13 +23,18 @@ import type {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import { TransformIdParamSchema } from '../../../common/api_schemas/common';
-import type { TransformsResponseSchema } from '../../../common/api_schemas/transforms';
-import type { TransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
-import { PreviewRequestBody, TransformId } from '../../../common/types/transform';
+import type {
+  GetTransformsResponseSchema,
+  PostTransformsPreviewRequestSchema,
+  PostTransformsPreviewResponseSchema,
+  PutTransformsRequestSchema,
+  PutTransformsResponseSchema,
+} from '../../../common/api_schemas/transforms';
+import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
+import { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
-import { GetTransformsResponse } from '../common';
 
 import { EsIndex } from './use_api_types';
 import { SavedSearchQuery } from './use_search_items';
@@ -49,21 +54,24 @@ export const useApi = () => {
     () => ({
       getTransform({
         transformId,
-      }: TransformIdParamSchema): Promise<TransformsResponseSchema | HttpFetchError> {
+      }: TransformIdParamSchema): Promise<GetTransformsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms/${transformId}`);
       },
-      getTransforms(): Promise<TransformsResponseSchema | HttpFetchError> {
+      getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms`);
       },
       getTransformStats(
         transformId: TransformId
-      ): Promise<TransformsStatsResponseSchema | HttpFetchError> {
+      ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
       },
-      getTransformsStats(): Promise<TransformsStatsResponseSchema | HttpFetchError> {
+      getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
         return http.get(`${API_BASE_PATH}transforms/_stats`);
       },
-      createTransform(transformId: TransformId, transformConfig: any): Promise<any> {
+      createTransform(
+        transformId: TransformId,
+        transformConfig: PutTransformsRequestSchema
+      ): Promise<PutTransformsResponseSchema> {
         return http.put(`${API_BASE_PATH}transforms/${transformId}`, {
           body: JSON.stringify(transformConfig),
         });
@@ -80,7 +88,9 @@ export const useApi = () => {
           body: JSON.stringify(reqBody),
         });
       },
-      getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
+      getTransformsPreview(
+        obj: PostTransformsPreviewRequestSchema
+      ): Promise<PostTransformsPreviewResponseSchema> {
         return http.post(`${API_BASE_PATH}transforms/_preview`, {
           body: JSON.stringify(obj),
         });

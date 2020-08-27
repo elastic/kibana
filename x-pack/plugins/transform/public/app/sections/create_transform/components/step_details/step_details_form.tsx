@@ -25,7 +25,11 @@ import { useDocumentationLinks } from '../../../../hooks/use_documentation_links
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
-import { getPivotQuery, getPreviewRequestBody, isTransformIdValid } from '../../../../common';
+import {
+  getPivotQuery,
+  getPreviewTransformRequestBody,
+  isTransformIdValid,
+} from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 import { delayValidator } from '../../../../common/validators';
 import { StepDefineExposedState } from '../step_define/common';
@@ -140,7 +144,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
           const pivotAggsArr = dictionaryToArray(aggList);
           const pivotGroupByArr = dictionaryToArray(groupByList);
           const pivotQuery = getPivotQuery(searchQuery);
-          const previewRequest = getPreviewRequestBody(
+          const previewRequest = getPreviewTransformRequestBody(
             searchItems.indexPattern.title,
             pivotQuery,
             pivotGroupByArr,

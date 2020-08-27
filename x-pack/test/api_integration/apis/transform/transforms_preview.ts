@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 
-import type { PreviewRequestBody } from '../../../../plugins/transform/public/app/common/transform';
+import type { PostTransformsPreviewRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
@@ -26,9 +26,8 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   function getTransformPreviewConfig() {
-    const config = generateTransformConfig('the-dummy-id');
-    delete config.dest;
-    return config as PreviewRequestBody;
+    const { dest, ...config } = generateTransformConfig('the-dummy-id');
+    return config as PostTransformsPreviewRequestSchema;
   }
 
   describe('/api/transform/transforms/_preview', function () {

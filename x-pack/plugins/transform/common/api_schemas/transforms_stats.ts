@@ -8,22 +8,14 @@ import { TypeOf } from '@kbn/config-schema';
 
 import { TransformStats } from '../types/transform_stats';
 
-import { transformsRequestSchema } from './transforms';
+import { getTransformsRequestSchema } from './transforms';
 
-export const transformsStatsRequestSchema = transformsRequestSchema;
+export const getTransformsStatsRequestSchema = getTransformsRequestSchema;
 
-export type TransformsRequestSchema = TypeOf<typeof transformsStatsRequestSchema>;
+export type GetTransformsRequestSchema = TypeOf<typeof getTransformsStatsRequestSchema>;
 
-export interface TransformsStatsResponseSchema {
+export interface GetTransformsStatsResponseSchema {
   node_failures?: object;
   count: number;
   transforms: TransformStats[];
 }
-
-export const isTransformsStatsResponseSchema = (arg: any): arg is TransformsStatsResponseSchema => {
-  return (
-    {}.hasOwnProperty.call(arg, 'count') &&
-    {}.hasOwnProperty.call(arg, 'transforms') &&
-    Array.isArray(arg.transforms)
-  );
-};

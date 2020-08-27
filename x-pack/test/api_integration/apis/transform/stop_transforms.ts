@@ -6,6 +6,7 @@
 import expect from '@kbn/expect';
 
 import type { StopTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/stop_transforms';
+import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -20,17 +21,18 @@ export default ({ getService }: FtrProviderContext) => {
   const transform = getService('transform');
 
   async function createAndRunTransform(transformId: string) {
-    const config = generateTransformConfig(transformId);
-
     // to be able to test stopping transforms,
-    // we create a slowly continuous transform so it doesn't
-    // stop automatically.
-    config.settings = {
-      docs_per_second: 100,
-      max_page_search_size: 100,
-    };
-    config.sync = {
-      time: { field: '@timestamp' },
+    // we create a slow continuous transform
+    // so it doesn't stop automatically.
+    const config: PutTransformsRequestSchema = {
+      ...generateTransformConfig(transformId),
+      settings: {
+        docs_per_second: 10,
+        max_page_search_size: 10,
+      },
+      sync: {
+        time: { field: '@timestamp' },
+      },
     };
 
     await transform.api.createAndRunTransform(transformId, config);

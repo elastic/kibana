@@ -6,7 +6,7 @@
 
 import { HttpFetchError } from 'kibana/public';
 
-import { PreviewRequestBody, TransformId } from '../../../../common/types/transform';
+import { TransformId } from '../../../../common/types/transform';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -19,36 +19,46 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../../common/api_schemas/stop_transforms';
-import type { TransformsResponseSchema } from '../../../../common/api_schemas/transforms';
-import type { TransformsStatsResponseSchema } from '../../../../common/api_schemas/transforms_stats';
+import type {
+  GetTransformsResponseSchema,
+  PostTransformsPreviewRequestSchema,
+  PutTransformsRequestSchema,
+  PutTransformsResponseSchema,
+} from '../../../../common/api_schemas/transforms';
+import type { GetTransformsStatsResponseSchema } from '../../../../common/api_schemas/transforms_stats';
 import { TransformIdParamSchema } from '../../../../common/api_schemas/common';
 
 const apiFactory = () => ({
-  getTransform(params: TransformIdParamSchema): Promise<TransformsResponseSchema | HttpFetchError> {
+  getTransform(
+    params: TransformIdParamSchema
+  ): Promise<GetTransformsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
       resolve({ count: 0, transforms: [] });
     });
   },
-  getTransforms(): Promise<TransformsResponseSchema | HttpFetchError> {
+  getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
       resolve({ count: 0, transforms: [] });
     });
   },
   getTransformStats(
     transformId: TransformId
-  ): Promise<TransformsStatsResponseSchema | HttpFetchError> {
+  ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
       resolve({ count: 0, transforms: [] });
     });
   },
-  getTransformsStats(): Promise<TransformsStatsResponseSchema | HttpFetchError> {
+  getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
       resolve({ count: 0, transforms: [] });
     });
   },
-  createTransform(transformId: TransformId, transformConfig: any): Promise<any> {
+  createTransform(
+    transformId: TransformId,
+    transformConfig: PutTransformsRequestSchema
+  ): Promise<PutTransformsResponseSchema | HttpFetchError> {
     return new Promise((resolve, reject) => {
-      resolve([]);
+      resolve({ transformsCreated: [], errors: [] });
     });
   },
   deleteTransforms(
@@ -58,7 +68,7 @@ const apiFactory = () => ({
       resolve({});
     });
   },
-  getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
+  getTransformsPreview(obj: PostTransformsPreviewRequestSchema): Promise<any> {
     return new Promise((resolve, reject) => {
       resolve([]);
     });

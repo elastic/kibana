@@ -28,7 +28,6 @@ export {
 export { TRANSFORM_LIST_COLUMN, TransformListAction, TransformListRow } from './transform_list';
 export { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
 export { getDiscoverUrl } from './navigation';
-export { GetTransformsResponse, PreviewData, PreviewMappings } from './pivot_preview';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
@@ -61,8 +60,8 @@ export {
 } from './pivot_group_by';
 export {
   defaultQuery,
-  getPreviewRequestBody,
-  getCreateRequestBody,
+  getPreviewTransformRequestBody,
+  getCreateTransformRequestBody,
   getPivotQuery,
   isDefaultQuery,
   isMatchAllQuery,

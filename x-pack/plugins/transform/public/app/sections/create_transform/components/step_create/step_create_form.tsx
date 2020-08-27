@@ -30,7 +30,7 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import { isTransformsStatsResponseSchema } from '../../../../../../common/api_schemas/transforms_stats';
+import { isGetTransformsStatsResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../shared_imports';
@@ -254,7 +254,7 @@ export const StepCreateForm: FC<Props> = React.memo(
           try {
             const stats = await api.getTransformStats(transformId);
             if (
-              isTransformsStatsResponseSchema(stats) &&
+              isGetTransformsStatsResponseSchema(stats) &&
               Array.isArray(stats.transforms) &&
               stats.transforms.length > 0
             ) {
