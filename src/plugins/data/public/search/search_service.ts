@@ -94,8 +94,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      // TODO: we don't need this, apply on the server
-      esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
       http,
       loadingCount$,
