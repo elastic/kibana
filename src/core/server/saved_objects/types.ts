@@ -24,7 +24,9 @@ import { PropertyValidators } from './validation';
 
 export {
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
@@ -42,6 +44,7 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
 } from '../../types';
@@ -79,6 +82,11 @@ export interface SavedObjectsFindOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
+  /**
+   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
+   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
+   */
+  rootSearchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
@@ -171,9 +179,6 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
  *  * single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace.
  *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
  *  * agnostic: this type of saved object is global.
- *
- * Note: do not write logic that uses this value directly; instead, use the appropriate accessors in the
- * {@link SavedObjectTypeRegistry | type registry}.
  *
  * @public
  */

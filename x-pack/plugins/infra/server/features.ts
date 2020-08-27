@@ -18,7 +18,7 @@ export const METRICS_FEATURE = {
   icon: 'metricsApp',
   navLinkId: 'metrics',
   app: ['infra', 'metrics', 'kibana'],
-  catalogue: ['infraops'],
+  catalogue: ['infraops', 'metrics'],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -26,7 +26,7 @@ export const METRICS_FEATURE = {
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
-      catalogue: ['infraops'],
+      catalogue: ['infraops', 'metrics'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -42,7 +42,7 @@ export const METRICS_FEATURE = {
     },
     read: {
       app: ['infra', 'metrics', 'kibana'],
-      catalogue: ['infraops'],
+      catalogue: ['infraops', 'metrics'],
       api: ['infra'],
       savedObject: {
         all: [],
@@ -68,12 +68,12 @@ export const LOGS_FEATURE = {
   icon: 'logsApp',
   navLinkId: 'logs',
   app: ['infra', 'logs', 'kibana'],
-  catalogue: ['infralogging'],
+  catalogue: ['infralogging', 'logs'],
   alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
-      catalogue: ['infralogging'],
+      catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -86,7 +86,7 @@ export const LOGS_FEATURE = {
     },
     read: {
       app: ['infra', 'logs', 'kibana'],
-      catalogue: ['infralogging'],
+      catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       alerting: {
         all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
