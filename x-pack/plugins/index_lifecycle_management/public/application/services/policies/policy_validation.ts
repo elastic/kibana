@@ -9,12 +9,14 @@ import { validateHotPhase } from './hot_phase';
 import { validateWarmPhase } from './warm_phase';
 import { validateColdPhase } from './cold_phase';
 import { validateDeletePhase } from './delete_phase';
+import { validateFrozenPhase } from './frozen_phase';
+
 import {
   ColdPhase,
   DeletePhase,
   FrozenPhase,
   HotPhase,
-  Phase,
+  CommonPhaseSettings,
   Policy,
   PolicyFromES,
   WarmPhase,
@@ -109,7 +111,7 @@ export const policyNameAlreadyUsedErrorMessage = i18n.translate(
     defaultMessage: 'That policy name is already used.',
   }
 );
-export type PhaseValidationErrors<T extends Phase> = {
+export type PhaseValidationErrors<T extends CommonPhaseSettings> = {
   [P in keyof Partial<T>]: string[];
 };
 
@@ -158,13 +160,14 @@ export const validatePolicy = (
   const hotPhaseErrors = validateHotPhase(policy.phases.hot);
   const warmPhaseErrors = validateWarmPhase(policy.phases.warm);
   const coldPhaseErrors = validateColdPhase(policy.phases.cold);
-  const frozenPhaseErrors = validateColdPhase(policy.phases.frozen);
+  const frozenPhaseErrors = validateFrozenPhase(policy.phases.frozen);
   const deletePhaseErrors = validateDeletePhase(policy.phases.delete);
   const isValid =
     policyNameErrors.length === 0 &&
     Object.keys(hotPhaseErrors).length === 0 &&
     Object.keys(warmPhaseErrors).length === 0 &&
     Object.keys(coldPhaseErrors).length === 0 &&
+    Object.keys(frozenPhaseErrors).length === 0 &&
     Object.keys(deletePhaseErrors).length === 0;
   return [
     isValid,

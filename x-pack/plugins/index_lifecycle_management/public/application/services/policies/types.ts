@@ -110,52 +110,61 @@ export interface Policy {
   };
 }
 
-export interface Phase {
+export interface CommonPhaseSettings {
   phaseEnabled: boolean;
 }
-export interface HotPhase extends Phase {
+
+export interface PhaseWithMinAge {
+  selectedMinimumAge: string;
+  selectedMinimumAgeUnits: string;
+}
+
+export interface PhaseWithAllocationAction {
+  selectedNodeAttrs: string;
+  selectedReplicaCount: string;
+}
+
+export interface PhaseWithIndexPriority {
+  phaseIndexPriority: string;
+}
+
+export interface HotPhase extends CommonPhaseSettings {
   rolloverEnabled: boolean;
   selectedMaxSizeStored: string;
   selectedMaxSizeStoredUnits: string;
   selectedMaxDocuments: string;
   selectedMaxAge: string;
   selectedMaxAgeUnits: string;
-  phaseIndexPriority: string;
 }
 
-export interface WarmPhase extends Phase {
+export interface WarmPhase
+  extends CommonPhaseSettings,
+    PhaseWithMinAge,
+    PhaseWithAllocationAction,
+    PhaseWithIndexPriority {
   warmPhaseOnRollover: boolean;
-  selectedMinimumAge: string;
-  selectedMinimumAgeUnits: string;
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
   shrinkEnabled: boolean;
   selectedPrimaryShardCount: string;
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
-  phaseIndexPriority: string;
 }
 
-export interface ColdPhase extends Phase {
-  selectedMinimumAge: string;
-  selectedMinimumAgeUnits: string;
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
+export interface ColdPhase
+  extends CommonPhaseSettings,
+    PhaseWithMinAge,
+    PhaseWithAllocationAction,
+    PhaseWithIndexPriority {
   freezeEnabled: boolean;
-  phaseIndexPriority: string;
 }
 
-export interface FrozenPhase extends Phase {
-  selectedMinimumAge: string;
-  selectedMinimumAgeUnits: string;
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
+export interface FrozenPhase
+  extends CommonPhaseSettings,
+    PhaseWithMinAge,
+    PhaseWithAllocationAction,
+    PhaseWithIndexPriority {
   freezeEnabled: boolean;
-  phaseIndexPriority: string;
 }
 
-export interface DeletePhase extends Phase {
-  selectedMinimumAge: string;
-  selectedMinimumAgeUnits: string;
+export interface DeletePhase extends CommonPhaseSettings, PhaseWithMinAge {
   waitForSnapshotPolicy: string;
 }
