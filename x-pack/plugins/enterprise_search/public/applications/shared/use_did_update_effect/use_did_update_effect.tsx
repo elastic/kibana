@@ -8,11 +8,9 @@
  * Sometimes we don't want to fire the initial useEffect call.
  * This custom Hook only fires after the intial render has completed.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, DependencyList } from 'react';
 
-type TInput = string | number | object | Function | boolean | null | undefined;
-
-export const useDidUpdateEffect = (fn: Function, inputs: TInput[]) => {
+export const useDidUpdateEffect = (fn: Function, inputs: DependencyList) => {
   const didMountRef = useRef(false);
 
   useEffect(() => {
