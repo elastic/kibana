@@ -20,6 +20,8 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail400, fail409 } = testCaseFailures;
+const unresolvableConflict = (condition?: boolean) =>
+  condition !== false ? { fail409Param: 'unresolvableConflict' } : {};
 
 const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
@@ -34,9 +36,18 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite || (spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID)),
+      ...unresolvableConflict(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
     },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail409(!overwrite || spaceId !== SPACE_1_ID) },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail409(!overwrite || spaceId !== SPACE_2_ID) },
+    {
+      ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
+      ...fail409(!overwrite || spaceId !== SPACE_1_ID),
+      ...unresolvableConflict(spaceId !== SPACE_1_ID),
+    },
+    {
+      ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
+      ...fail409(!overwrite || spaceId !== SPACE_2_ID),
+      ...unresolvableConflict(spaceId !== SPACE_2_ID),
+    },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     CASES.NEW_SINGLE_NAMESPACE_OBJ,
     CASES.NEW_MULTI_NAMESPACE_OBJ,

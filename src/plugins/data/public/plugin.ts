@@ -177,7 +177,7 @@ export class DataPublicPlugin
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
       },
-      onError: notifications.toasts.addError,
+      onError: notifications.toasts.addError.bind(notifications.toasts),
       onRedirectNoIndexPattern: onRedirectNoIndexPattern(
         application.capabilities,
         application.navigateToApp,

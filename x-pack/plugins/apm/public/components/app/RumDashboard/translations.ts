@@ -16,9 +16,6 @@ export const I18LABELS = {
   pageViews: i18n.translate('xpack.apm.rum.dashboard.pageViews', {
     defaultMessage: 'Page views',
   }),
-  dateTime: i18n.translate('xpack.apm.rum.dashboard.dateTime.label', {
-    defaultMessage: 'Date / Time',
-  }),
   percPageLoaded: i18n.translate('xpack.apm.rum.dashboard.pagesLoaded.label', {
     defaultMessage: 'Pages loaded',
   }),
