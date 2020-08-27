@@ -61,28 +61,24 @@ it('builds a generated plugin into a viable archive', async () => {
     "
   `);
 
-  const buildProc = await execa('yarn', ['build', '--kibana-version', '7.5.0'], {
-    cwd: PLUGIN_DIR,
-    all: true,
-    env: {
-      // prevent yarn from silencing itself on CI
-      YARN_SILENT: '0',
-    },
-  });
+  const buildProc = await execa(
+    process.execPath,
+    ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
+    {
+      cwd: PLUGIN_DIR,
+      all: true,
+    }
+  );
 
   expect(buildProc.all).toMatchInlineSnapshot(`
-    "yarn run <version>
-    $ yarn plugin-helpers build --kibana-version 7.5.0
-    $ node ../../scripts/plugin_helpers build --kibana-version 7.5.0
-     info deleting the build and target directories
+    " info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
      │ succ 1 bundles compiled successfully after <time>
      info copying source into the build and converting with babel
      info running yarn to install dependencies
-     info compressing plugin into [fooTestPlugin-7.5.0.zip]
-    Done in <time>."
+     info compressing plugin into [fooTestPlugin-7.5.0.zip]"
   `);
 
   await decompress(PLUGIN_ARCHIVE, TMP_DIR);
