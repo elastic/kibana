@@ -29,6 +29,9 @@ import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
   SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnService,
+  SavedObjectsManagementColumnServiceSetup,
+  SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
@@ -36,11 +39,13 @@ import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
+  columns: SavedObjectsManagementColumnServiceSetup;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
 export interface SavedObjectsManagementPluginStart {
   actions: SavedObjectsManagementActionServiceStart;
+  columns: SavedObjectsManagementColumnServiceStart;
 }
 
 export interface SetupDependencies {
@@ -64,6 +69,7 @@ export class SavedObjectsManagementPlugin
       StartDependencies
     > {
   private actionService = new SavedObjectsManagementActionService();
+  private columnService = new SavedObjectsManagementColumnService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
@@ -71,6 +77,7 @@ export class SavedObjectsManagementPlugin
     { home, management }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
+    const columnSetup = this.columnService.setup();
 
     if (home) {
       home.featureCatalogue.register({
@@ -111,15 +118,18 @@ export class SavedObjectsManagementPlugin
 
     return {
       actions: actionSetup,
+      columns: columnSetup,
       serviceRegistry: this.serviceRegistry,
     };
   }
 
   public start(core: CoreStart, { data }: StartDependencies) {
     const actionStart = this.actionService.start();
+    const columnStart = this.columnService.start();
 
     return {
       actions: actionStart,
+      columns: columnStart,
     };
   }
 }
