@@ -464,6 +464,7 @@ export class DashboardAppController {
                 );
               } else if ('input' in incomingEmbeddable) {
                 const input = incomingEmbeddable.input;
+                // @ts-expect-error
                 delete input.id;
                 const explicitInput = {
                   savedVis: input,
