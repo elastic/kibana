@@ -55,7 +55,7 @@ export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string[];
   filterQuery?: string;
-  sourceId?: string;
+  sourceId: string;
   filterQueryText?: string;
   alertOnNoData?: boolean;
 }
