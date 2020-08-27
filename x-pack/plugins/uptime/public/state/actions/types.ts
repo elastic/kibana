@@ -6,6 +6,7 @@
 
 import { Action } from 'redux-actions';
 import { IHttpFetchError } from 'src/core/public';
+import { Alert } from '../../../../triggers_actions_ui/public';
 
 export interface AsyncAction<Payload, SuccessPayload> {
   get: (payload: Payload) => Action<Payload>;
@@ -52,4 +53,11 @@ export interface DeleteJobResults {
     [status: string]: boolean;
     error?: any;
   };
+}
+
+export interface AlertsResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Alert[];
 }
