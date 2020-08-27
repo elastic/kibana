@@ -195,6 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('Group metrics by terms: extension.raw');
         await PageObjects.visualBuilder.setMetricsGroupByTerms('extension.raw');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems1 = await PageObjects.visualBuilder.getLegendItemsContent();
         expect(legendItems1).to.eql(finalLegendItems);
 
@@ -208,6 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Go back in browser history');
         await browser.goBack();
         await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue('Everything');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems2 = await PageObjects.visualBuilder.getLegendItemsContent();
         expect(legendItems2).to.eql(initialLegendItems);
 
