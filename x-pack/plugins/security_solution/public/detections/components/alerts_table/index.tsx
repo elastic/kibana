@@ -82,8 +82,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   signalsIndex,
   to,
 }) => {
-  const [selectAll, setSelectAll] = useState(false);
-
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
@@ -92,6 +90,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
+  const { initializeTimeline, setSelectAll, setIndexToAdd } = useManageTimeline();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -113,8 +112,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       }
       return null;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+    [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
   );
 
   const setEventsLoadingCallback = useCallback(
@@ -169,12 +167,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
-    if (!isSelectAllChecked) {
-      setShowClearSelectionAction(false);
+    if (isSelectAllChecked) {
+      setSelectAll({
+        id: timelineId,
+        selectAll: false,
+      });
     } else {
-      setSelectAll(false);
+      setShowClearSelectionAction(false);
     }
-  }, [isSelectAllChecked]);
+  }, [isSelectAllChecked, setSelectAll, timelineId]);
 
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
@@ -190,17 +191,23 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
     clearSelected!({ id: timelineId });
-    setSelectAll(false);
+    setSelectAll({
+      id: timelineId,
+      selectAll: false,
+    });
     setShowClearSelectionAction(false);
   }, [clearSelected, setSelectAll, setShowClearSelectionAction, timelineId]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
   // as scope of response data required to actually set selectedEvents
-  const selectAllCallback = useCallback(() => {
-    setSelectAll(true);
+  const selectAllOnAllPagesCallback = useCallback(() => {
+    setSelectAll({
+      id: timelineId,
+      selectAll: true,
+    });
     setShowClearSelectionAction(true);
-  }, [setSelectAll, setShowClearSelectionAction]);
+  }, [setSelectAll, setShowClearSelectionAction, timelineId]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
     async (
@@ -242,7 +249,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           clearSelection={clearSelectionCallback}
           hasIndexWrite={hasIndexWrite}
           currentFilter={filterGroup}
-          selectAll={selectAllCallback}
+          selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
           onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
@@ -260,7 +267,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       showBuildingBlockAlerts,
       onShowBuildingBlockAlertsChanged,
       loadingEventIds.length,
-      selectAllCallback,
+      selectAllOnAllPagesCallback,
       selectedEventIds,
       showClearSelectionAction,
       updateAlertsStatusCallback,
@@ -276,7 +283,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, filterGroup]);
   const { filterManager } = useKibana().services.data.query;
-  const { initializeTimeline, setIndexToAdd } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
@@ -287,7 +293,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       id: timelineId,
       indexToAdd: defaultIndices,
       loadingText: i18n.LOADING_ALERTS,
-      selectAll: canUserCRUD ? selectAll : false,
+      selectAll: false,
       queryFields: requiredFieldsForActions,
       title: '',
     });

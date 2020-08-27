@@ -161,6 +161,22 @@ export interface IndexedProcessNode extends BBox {
 }
 
 /**
+ * A type describing the shape of section titles and entries for description lists
+ */
+export type SectionData = Array<{
+  sectionTitle: string;
+  entries: Array<{ title: string; description: string }>;
+}>;
+
+/**
+ * The two query parameters we read/write on to control which view the table presents:
+ */
+export interface CrumbInfo {
+  crumbId: string;
+  crumbEvent: string;
+}
+
+/**
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {

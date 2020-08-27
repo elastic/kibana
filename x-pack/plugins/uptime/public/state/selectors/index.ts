@@ -18,6 +18,8 @@ export const monitorDetailsSelector = (state: AppState, summary: any) => {
   return state.monitor.monitorDetailsList[summary.monitor_id];
 };
 
+export const monitorDetailsLoadingSelector = (state: AppState) => state.monitor.loading;
+
 export const monitorLocationsSelector = (state: AppState, monitorId: string) => {
   return state.monitor.monitorLocationsList?.get(monitorId);
 };
@@ -92,5 +94,3 @@ export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchTe
 export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;
 
 export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
-
-export const alertSelector = ({ alerts }: AppState) => alerts.alert;

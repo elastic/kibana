@@ -62,6 +62,11 @@ type ActionManageTimeline =
       type: 'SET_INDEX_TO_ADD';
       id: string;
       payload: string[];
+    }
+  | {
+      type: 'SET_SELECT_ALL';
+      id: string;
+      payload: boolean;
     };
 
 export const getTimelineDefaults = (id: string) => ({
@@ -99,6 +104,15 @@ const reducerManageTimeline = (
           indexToAdd: action.payload,
         },
       } as ManageTimelineById;
+    case 'SET_SELECT_ALL':
+      return {
+        ...state,
+        [action.id]: {
+          ...state[action.id],
+          selectAll: action.payload,
+        },
+      } as ManageTimelineById;
+
     case 'SET_IS_LOADING':
       return {
         ...state,
@@ -120,6 +134,7 @@ export interface UseTimelineManager {
   isManagedTimeline: (id: string) => boolean;
   setIndexToAdd: (indexToAddArgs: { id: string; indexToAdd: string[] }) => void;
   setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
+  setSelectAll: (selectAllArgs: { id: string; selectAll: boolean }) => void;
 }
 
 export const useTimelineManager = (
@@ -156,6 +171,14 @@ export const useTimelineManager = (
     });
   }, []);
 
+  const setSelectAll = useCallback(({ id, selectAll }: { id: string; selectAll: boolean }) => {
+    dispatch({
+      type: 'SET_SELECT_ALL',
+      id,
+      payload: selectAll,
+    });
+  }, []);
+
   const getTimelineFilterManager = useCallback(
     (id: string): FilterManager | undefined => state[id]?.filterManager,
     [state]
@@ -189,6 +212,7 @@ export const useTimelineManager = (
     isManagedTimeline,
     setIndexToAdd,
     setIsTimelineLoading,
+    setSelectAll,
   };
 };
 
@@ -200,6 +224,7 @@ const init = {
   isManagedTimeline: () => false,
   setIndexToAdd: () => undefined,
   setIsTimelineLoading: () => noop,
+  setSelectAll: () => noop,
 };
 
 const ManageTimelineContext = createContext<UseTimelineManager>(init);
