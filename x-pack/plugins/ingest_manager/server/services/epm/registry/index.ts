@@ -17,8 +17,8 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { cacheGet, cacheSet, getCacheKey, cacheHas } from './cache';
-import { ArchiveEntry, untarBuffer } from './extract';
+import { cacheGet, cacheSet, cacheHas, getArchiveKey, setArchiveKey } from './cache';
+import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
@@ -182,17 +182,20 @@ async function extract(
   onEntry: (entry: ArchiveEntry) => void
 ) {
   const archiveBuffer = await getOrFetchArchiveBuffer(pkgName, pkgVersion);
+  const archiveKey = getArchiveKey(pkgName, pkgVersion);
+  // shouldn't be possible since getOrFetchArchiveBuffer -> fetchArchiveBuffer sets the key
+  if (!archiveKey) throw new Error('no archive key');
+  const isZip = archiveKey.endsWith('.zip');
+  const libExtract = isZip ? unzipBuffer : untarBuffer;
 
-  return untarBuffer(archiveBuffer, filter, onEntry);
+  return libExtract(archiveBuffer, filter, onEntry);
 }
 
 async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
-  // assume .tar.gz for now. add support for .zip if/when we need it
-  const key = getCacheKey(`${pkgName}-${pkgVersion}`);
-  let buffer = cacheGet(key);
+  const key = getArchiveKey(pkgName, pkgVersion);
+  let buffer = key && cacheGet(key);
   if (!buffer) {
     buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
-    cacheSet(key, buffer);
   }
 
   if (buffer) {
@@ -203,16 +206,21 @@ async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Pro
 }
 
 export async function ensureCachedArchiveInfo(name: string, version: string) {
-  const pkgkey = getCacheKey(`${name}-${version}`);
-  if (!cacheHas(pkgkey)) {
+  const pkgkey = getArchiveKey(name, version);
+  if (!pkgkey || !cacheHas(pkgkey)) {
     await getArchiveInfo(name, version);
   }
 }
 
 async function fetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
   const { download: archivePath } = await fetchInfo(pkgName, pkgVersion);
-  const registryUrl = getRegistryUrl();
-  return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
+  const archiveUrl = `${getRegistryUrl()}${archivePath}`;
+  const buffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+
+  setArchiveKey(pkgName, pkgVersion, archivePath);
+  cacheSet(archivePath, buffer);
+
+  return buffer;
 }
 
 export function getAsset(key: string) {
