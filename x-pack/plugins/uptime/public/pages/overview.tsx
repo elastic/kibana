@@ -76,7 +76,6 @@ export const OverviewPageComponent = React.memo(
     return (
       <>
         <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
-        <EditMonitorFlyout />
         <EmptyState>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>

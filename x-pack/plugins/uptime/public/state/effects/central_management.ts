@@ -14,6 +14,7 @@ import {
   postMonitorConfig,
   fetchAgentPolicies,
   fetchAgentPolicyDetail,
+  getMonitorCmDetails,
 } from '../api/central_management';
 import {
   postMonitorConfig as postMonitorAction,
@@ -24,11 +25,14 @@ import {
   getImAgentPolicyDetail,
   getImAgentPolicyDetailSuccess,
   getImAgentPolicyDetailFail,
+  getMonitorCmData,
+  monitorCmDataNotFound,
+  postMonitorConfigFail,
+  postMonitorConfigSuccess,
+  putMonitorCmData,
 } from '../actions/central_management';
 import { CENTRAL_CONFIG } from '../../../common/constants';
-import { postMonitorConfigSuccess } from '../actions/central_management';
 import { kibanaService } from '../kibana_service';
-import { postMonitorConfigFail } from '../actions/central_management';
 
 function* mapFieldsToConfig(fields: PostPackagePolicyParams): any {
   return {
@@ -122,6 +126,22 @@ export function* performMonitorConfigPost() {
         title: 'Error saving policy',
       });
       yield put(postMonitorConfigFail(e));
+    }
+  });
+}
+
+export function* fetchMonitorCmDetails() {
+  yield takeLatest(String(getMonitorCmData), function* (action: Action<string>) {
+    try {
+      // TODO: store the data from the API in the store?
+      const getResult = yield call(getMonitorCmDetails, action.payload);
+      yield put(putMonitorCmData(action.payload));
+    } catch (e) {
+      if (e.body.statusCode === 404) {
+        yield put(monitorCmDataNotFound(action.payload));
+      } else {
+        throw e;
+      }
     }
   });
 }

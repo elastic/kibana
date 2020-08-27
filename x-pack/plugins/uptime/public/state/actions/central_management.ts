@@ -6,6 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { AgentPolicy } from '../../../../ingest_manager/common';
+import { MonitorSummary } from '../../../common/runtime_types';
 
 export interface AgentPolicyPage {
   items: AgentPolicy[];
@@ -29,7 +30,9 @@ export const postMonitorConfigSuccess = createAction('POST MONITOR CONFIG SUCCES
 
 export const postMonitorConfigFail = createAction<Error>('POST MONITOR CONFIG FAIL');
 
-export const showEditMonitorFlyout = createAction('SHOW EDIT MONITOR FLYOUT');
+export const createManagedMonitor = createAction('SHOW EDIT MONITOR FLYOUT');
+
+export const editManagedMonitor = createAction<MonitorSummary>('EDIT MANAGED MONITOR');
 
 export const hideEditMonitorFlyout = createAction('HIDE EDIT MONITOR FLYOUT');
 
@@ -48,3 +51,9 @@ export const getImAgentPolicyDetailSuccess = createAction<AgentPolicy>(
 );
 
 export const getImAgentPolicyDetailFail = createAction<Error>('GET IM AGENT POLICY DETAIL FAIL');
+
+export const getMonitorCmData = createAction<string>('GET CM MONITOR DATA');
+
+export const putMonitorCmData = createAction<any>('PUT CM MONITOR DATA');
+
+export const monitorCmDataNotFound = createAction<any>('MONITOR CM DATA NOT FOUND');

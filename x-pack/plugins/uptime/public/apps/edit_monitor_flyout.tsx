@@ -20,6 +20,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
+  EuiPortal,
   EuiSelect,
   EuiSpacer,
   EuiTextColor,
@@ -39,9 +40,11 @@ import {
 import { CentralManagementState } from '../state/reducers/central_management';
 import { CENTRAL_CONFIG } from '../../common/constants';
 import { AgentPolicy } from '../../../ingest_manager/common';
+import { MonitorSummary } from '../../common/runtime_types';
 
 interface EditMonitorFlyoutComponentProps {
   centralManagement: CentralManagementState;
+  monitorToEdit: MonitorSummary;
   onClose: () => void;
   onSubmit: () => void;
   postMonitorConfig: (params: PostPackagePolicyParams) => void;
@@ -120,8 +123,10 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
   const { centralManagement } = props;
   const { updateAgentPolicyDetails } = props;
   const { agentPolicyDetail } = centralManagement;
-  const [name, setName] = useState<string>('');
-  const [url, setUrl] = useState<string>('');
+  const [name, setName] = useState<string>(
+    centralManagement.monitorToEdit?.state.monitor.name ?? ''
+  );
+  const [url, setUrl] = useState<string>(centralManagement.monitorToEdit?.state.url.full ?? '');
   const [periodCount, setPeriodCount] = useState<string>('30');
   const [periodUnit, setPeriodUnit] = useState<string>(props.scheduleUnit ?? DEFAULT_UNIT_VALUE);
   const [customTags, setCustomTags] = useState<string[]>([]);
@@ -150,124 +155,126 @@ export const EditMonitorFlyoutComponent: React.FC<EditMonitorFlyoutComponentProp
   }, [agentPolicyDetail, packagePolicyName, setPackagePolicyName]);
 
   return (
-    <EuiFlyout aria-labelledby="Edit monitor flyout" onClose={props.onClose}>
-      <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle>
-          <h2 id="uptime-central-management-flyout-title">Edit monitor</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiForm component="form">
-          <EuiFormRow fullWidth={true} label="Name">
-            <EuiFieldText
-              fullWidth={true}
-              isInvalid={isNameInvalid}
-              name="name"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-            />
-          </EuiFormRow>
-          <EuiFormRow fullWidth={true} label="URL">
-            <EuiFieldText
-              fullWidth={true}
-              isInvalid={isUrlInvalid}
-              name="url"
-              onChange={(e) => setUrl(e.target.value)}
-              value={url}
-            />
-          </EuiFormRow>
-          <EuiFormRow fullWidth={true} label="Ping every">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFieldText
-                  fullWidth={true}
-                  name="periodCount"
-                  isInvalid={isPeriodCountInvalid}
-                  onChange={(e) => setPeriodCount(e.target.value)}
-                  value={periodCount}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSelect
-                  options={periodUnitOptions}
-                  onChange={(e) => setPeriodUnit(e.target.value)}
-                  value={periodUnit}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiFormRow fullWidth={true} label="Tags">
-            {/* TODO: add the output of this component to the params we ship to IM */}
-            <EuiComboBox
-              customOptionText="Add {searchValue} as a new tag."
-              fullWidth={true}
-              options={customTags.concat(props.tags).map((tag) => ({ label: tag }))}
-              onChange={(e) => setSelectedTags(e)}
-              onCreateOption={(search) => {
-                const sanitized = search.trim().toLowerCase();
-                if (!sanitized) return;
-                setCustomTags([...customTags, sanitized]);
-                setSelectedTags(selectedTags.concat({ label: sanitized }));
-              }}
-              selectedOptions={selectedTags}
-            />
-          </EuiFormRow>
-          <EuiSpacer />
-          <EuiAccordion
-            id="uptime-central-management-advanced"
-            buttonContent={<EuiTextColor color="secondary">Advanced options</EuiTextColor>}
-          >
-            <EuiSpacer size="l" />
-            <AgentPolicySelect
-              centralManagement={centralManagement}
-              selectedAgentPolicy={selectedAgentPolicy}
-              setSelectedAgentPolicy={setSelectedAgentPolicy}
-            />
-            {/* TODO: provide error message when package name is already taken. */}
-            <EuiFormRow fullWidth={true} label="Package policy name">
+    <EuiPortal>
+      <EuiFlyout aria-labelledby="Edit monitor flyout" onClose={props.onClose} ownFocus={true}>
+        <EuiFlyoutHeader hasBorder={true}>
+          <EuiTitle>
+            <h2 id="uptime-central-management-flyout-title">Edit monitor</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiForm component="form">
+            <EuiFormRow fullWidth={true} label="Name">
               <EuiFieldText
                 fullWidth={true}
-                name="packagePolicyName"
-                isInvalid={isPackageNameInvalid}
-                onChange={(e) => setPackagePolicyName(e.target.value)}
-                value={packagePolicyName}
+                isInvalid={isNameInvalid}
+                name="name"
+                onChange={(e) => setName(e.target.value)}
+                value={name}
               />
             </EuiFormRow>
-          </EuiAccordion>
-        </EuiForm>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={props.onClose}>Cancel</EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isDisabled={
-                isNameInvalid ||
-                isUrlInvalid ||
-                isPeriodCountInvalid ||
-                isPackageNameInvalid ||
-                !selectedAgentPolicy
-              }
-              fill
-              onClick={() =>
-                props.postMonitorConfig({
-                  agentPolicyId: selectedAgentPolicy!,
-                  packagePolicyName,
-                  name,
-                  schedule: periodCount + periodUnit,
-                  url,
-                })
-              }
-              type="submit"
+            <EuiFormRow fullWidth={true} label="URL">
+              <EuiFieldText
+                fullWidth={true}
+                isInvalid={isUrlInvalid}
+                name="url"
+                onChange={(e) => setUrl(e.target.value)}
+                value={url}
+              />
+            </EuiFormRow>
+            <EuiFormRow fullWidth={true} label="Ping every">
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFieldText
+                    fullWidth={true}
+                    name="periodCount"
+                    isInvalid={isPeriodCountInvalid}
+                    onChange={(e) => setPeriodCount(e.target.value)}
+                    value={periodCount}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSelect
+                    options={periodUnitOptions}
+                    onChange={(e) => setPeriodUnit(e.target.value)}
+                    value={periodUnit}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiFormRow fullWidth={true} label="Tags">
+              {/* TODO: add the output of this component to the params we ship to IM */}
+              <EuiComboBox
+                customOptionText="Add {searchValue} as a new tag."
+                fullWidth={true}
+                options={customTags.concat(props.tags).map((tag) => ({ label: tag }))}
+                onChange={(e) => setSelectedTags(e)}
+                onCreateOption={(search) => {
+                  const sanitized = search.trim().toLowerCase();
+                  if (!sanitized) return;
+                  setCustomTags([...customTags, sanitized]);
+                  setSelectedTags(selectedTags.concat({ label: sanitized }));
+                }}
+                selectedOptions={selectedTags}
+              />
+            </EuiFormRow>
+            <EuiSpacer />
+            <EuiAccordion
+              id="uptime-central-management-advanced"
+              buttonContent={<EuiTextColor color="secondary">Advanced options</EuiTextColor>}
             >
-              Save
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+              <EuiSpacer size="l" />
+              <AgentPolicySelect
+                centralManagement={centralManagement}
+                selectedAgentPolicy={selectedAgentPolicy}
+                setSelectedAgentPolicy={setSelectedAgentPolicy}
+              />
+              {/* TODO: provide error message when package name is already taken. */}
+              <EuiFormRow fullWidth={true} label="Package policy name">
+                <EuiFieldText
+                  fullWidth={true}
+                  name="packagePolicyName"
+                  isInvalid={isPackageNameInvalid}
+                  onChange={(e) => setPackagePolicyName(e.target.value)}
+                  value={packagePolicyName}
+                />
+              </EuiFormRow>
+            </EuiAccordion>
+          </EuiForm>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={props.onClose}>Cancel</EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isDisabled={
+                  isNameInvalid ||
+                  isUrlInvalid ||
+                  isPeriodCountInvalid ||
+                  isPackageNameInvalid ||
+                  !selectedAgentPolicy
+                }
+                fill
+                onClick={() =>
+                  props.postMonitorConfig({
+                    agentPolicyId: selectedAgentPolicy!,
+                    packagePolicyName,
+                    name,
+                    schedule: periodCount + periodUnit,
+                    url,
+                  })
+                }
+                type="submit"
+              >
+                Save
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };
 

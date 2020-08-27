@@ -27,3 +27,7 @@ export const fetchAgentPolicyDetail = async (policyId: string) => {
 export const postMonitorConfig = async (payload: any) => {
   return await apiService.post(IM_API_PATH + PACKAGE_POLICIES_PATH, payload);
 };
+
+export const getMonitorCmDetails = async (monitorId: string) => {
+  return await apiService.get(IM_API_PATH + PACKAGE_POLICIES_PATH + `/${monitorId}`);
+};

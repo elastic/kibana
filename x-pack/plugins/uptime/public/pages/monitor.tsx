@@ -13,6 +13,7 @@ import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
 import { useMonitorId } from '../hooks';
 import { MonitorCharts } from '../components/monitor';
+import { EditMonitor } from '../components/monitor/management/edit_monitor';
 import { MonitorStatusDetails, PingList } from '../components/monitor';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { Ping } from '../../common/runtime_types/ping';
@@ -77,6 +78,8 @@ export const MonitorPage: React.FC = () => {
         }
         datePicker={true}
       />
+      <EuiSpacer size="s" />
+      <EditMonitor />
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />

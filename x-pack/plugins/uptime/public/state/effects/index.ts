@@ -5,7 +5,11 @@
  */
 
 import { fork } from 'redux-saga/effects';
-import { performImTasks, performMonitorConfigPost } from './central_management';
+import {
+  performImTasks,
+  performMonitorConfigPost,
+  fetchMonitorCmDetails,
+} from './central_management';
 import { fetchMonitorDetailsEffect } from './monitor';
 import { fetchOverviewFiltersEffect } from './overview_filters';
 import { fetchSnapshotCountEffect } from './snapshot';
@@ -38,4 +42,5 @@ export function* rootEffect() {
   yield fork(fetchIndexStatusEffect);
   yield fork(fetchCertificatesEffect);
   yield fork(fetchAlertsEffect);
+  yield fork(fetchMonitorCmDetails);
 }

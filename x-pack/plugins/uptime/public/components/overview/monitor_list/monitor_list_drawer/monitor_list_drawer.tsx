@@ -13,6 +13,7 @@ import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_ty
 import { ActionsPopover } from './actions_popover/actions_popover_container';
 import { EnabledAlerts } from './enabled_alerts';
 import { Alert } from '../../../../../../triggers_actions_ui/public';
+import { EditButton } from './edit_button';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -46,13 +47,16 @@ export function MonitorListDrawerComponent({
   return summary && summary.state.summaryPings ? (
     <ContainerDiv>
       <EuiFlexGroup>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem>
           <EuiText>
             <EuiLink href={monitorUrl} target="_blank">
               {monitorUrl}
               <EuiIcon size="s" type="popout" color="subbdued" />
             </EuiLink>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EditButton monitorId={summary.monitor_id} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ActionsPopover summary={summary} />

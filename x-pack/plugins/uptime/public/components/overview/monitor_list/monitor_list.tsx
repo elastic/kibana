@@ -35,6 +35,7 @@ import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 
 interface Props extends MonitorListProps {
+  editManagedMonitor: (monitor: MonitorSummary) => void;
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
@@ -51,13 +52,7 @@ export const noItemsMessage = (loading: boolean, filters?: string) => {
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
-export const MonitorListComponent: ({
-  filters,
-  monitorList: { list, error, loading },
-  linkParameters,
-  pageSize,
-  setPageSize,
-}: Props) => any = ({
+export const MonitorListComponent: React.FC<Props> = ({
   filters,
   monitorList: { list, error, loading },
   linkParameters,

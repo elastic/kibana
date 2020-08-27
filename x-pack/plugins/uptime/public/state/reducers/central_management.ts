@@ -8,7 +8,7 @@ import { handleActions } from 'redux-actions';
 import {
   hideEditMonitorFlyout,
   postMonitorConfig,
-  showEditMonitorFlyout,
+  createManagedMonitor,
   getImAgentPolicies,
   getImAgentPoliciesSuccess,
   getImAgentPoliciesFail,
@@ -17,9 +17,13 @@ import {
   getImAgentPolicyDetailFail,
   postMonitorConfigSuccess,
   postMonitorConfigFail,
+  editManagedMonitor,
+  putMonitorCmData,
+  monitorCmDataNotFound,
 } from '../actions/central_management';
 import { AgentPolicyPage } from '../actions/central_management';
 import { AgentPolicy } from '../../../../ingest_manager/common';
+import { MonitorSummary } from '../../../common/runtime_types';
 
 export interface CentralManagementState {
   agentPolicyPage: AgentPolicyPage;
@@ -29,6 +33,8 @@ export interface CentralManagementState {
   isEditFlyoutVisible: boolean;
   loadingAgentPolicies: boolean;
   loadingAgentPolicyDetail: boolean;
+  managedIdList: string[];
+  monitorToEdit?: MonitorSummary;
   savingConfiguration: boolean;
   saveConfigurationError?: Error;
 }
@@ -40,6 +46,7 @@ const initialState: CentralManagementState = {
   isEditFlyoutVisible: false,
   loadingAgentPolicies: false,
   loadingAgentPolicyDetail: false,
+  managedIdList: [],
   savingConfiguration: false,
 };
 
@@ -51,6 +58,7 @@ export const centralManagementReducer = handleActions<CentralManagementState, an
     }),
     [String(postMonitorConfigSuccess)]: (state) => ({
       ...state,
+      isEditFlyoutVisible: false,
       savingConfiguration: false,
       saveConfigurationError: undefined,
     }),
@@ -59,9 +67,15 @@ export const centralManagementReducer = handleActions<CentralManagementState, an
       savingConfiguration: false,
       saveConfigurationError: action.payload,
     }),
-    [String(showEditMonitorFlyout)]: (state) => ({
+    [String(createManagedMonitor)]: (state) => ({
       ...state,
       isEditFlyoutVisible: true,
+      monitorToEdit: undefined,
+    }),
+    [String(editManagedMonitor)]: (state, action) => ({
+      ...state,
+      isEditFlyoutVisible: true,
+      monitorToEdit: action.payload,
     }),
     [String(hideEditMonitorFlyout)]: (state) => ({
       ...state,
@@ -92,6 +106,14 @@ export const centralManagementReducer = handleActions<CentralManagementState, an
     [String(getImAgentPolicyDetailFail)]: (state, action) => ({
       ...state,
       agentPolicyDetailError: action.payload,
+    }),
+    [String(putMonitorCmData)]: (state, action) => ({
+      ...state,
+      managedIdList: [...state.managedIdList, action.payload],
+    }),
+    [String(monitorCmDataNotFound)]: (state, action) => ({
+      ...state,
+      managedIdList: state.managedIdList.filter((id) => id !== action.payload),
     }),
   },
   initialState

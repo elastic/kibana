@@ -11,6 +11,8 @@ import { monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
+import { MonitorSummary } from '../../../../common/runtime_types';
+import { editManagedMonitor } from '../../../state/actions/central_management';
 
 export interface MonitorListProps {
   filters?: string;
@@ -66,6 +68,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   return (
     <MonitorListComponent
       {...props}
+      editManagedMonitor={(monitor: MonitorSummary) => dispatch(editManagedMonitor(monitor))}
       monitorList={monitorList}
       pageSize={pageSize}
       setPageSize={setPageSize}

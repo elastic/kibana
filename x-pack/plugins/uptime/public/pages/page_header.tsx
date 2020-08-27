@@ -15,7 +15,7 @@ import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_co
 // import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 import { centralManagementSelector } from '../state/selectors';
-import { showEditMonitorFlyout, hideEditMonitorFlyout } from '../state/actions/central_management';
+import { createManagedMonitor, hideEditMonitorFlyout } from '../state/actions/central_management';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -65,7 +65,7 @@ export const PageHeader: React.FC<PageHeaderProps> = (props) => {
     if (isEditFlyoutVisible) {
       dispatch(hideEditMonitorFlyout());
     } else {
-      dispatch(showEditMonitorFlyout());
+      dispatch(createManagedMonitor());
     }
   }, [dispatch, isEditFlyoutVisible]);
   return <PageHeaderComponent {...props} toggleCentralManagement={to} />;

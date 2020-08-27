@@ -31,6 +31,7 @@ import {
 } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
+import { EditMonitorFlyout } from './edit_monitor_flyout';
 
 export interface UptimeAppColors {
   danger: string;
@@ -109,6 +110,7 @@ const Application = (props: UptimeAppProps) => {
                           <RedirectAppLinks application={core.application}>
                             <main>
                               <UptimeAlertsFlyoutWrapper />
+                              <EditMonitorFlyout />
                               <PageRouter />
                             </main>
                           </RedirectAppLinks>
