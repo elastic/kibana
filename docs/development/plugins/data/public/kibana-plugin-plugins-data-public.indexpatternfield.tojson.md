@@ -7,20 +7,21 @@
 <b>Signature:</b>
 
 ```typescript
-toJSON(): {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-    };
+toJSON();: {
+        number;
+        string | undefined;
+        string | undefined;
+        Record<string, string[]> | undefined;
+        string;
+        string;
+        string[] | undefined;
+        boolean;
+        boolean;
+        boolean;
+        boolean;
+        import("../types").IFieldSubType | undefined;
+        string | undefined;
+    }
 ```
 <b>Returns:</b>
 
@@ -37,5 +38,6 @@ toJSON(): {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        customLabel: string | undefined;
     }`
 

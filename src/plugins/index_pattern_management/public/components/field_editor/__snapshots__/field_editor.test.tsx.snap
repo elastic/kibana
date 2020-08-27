@@ -51,10 +51,10 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      label="Display Name"
+      label="Custom Label"
     >
       <eui-field-text
-        data-test-subj="editorFieldDisplayName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         value=""
       />
@@ -283,10 +283,10 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       script="doc.test.value"
     />
     <eui-form-row
-      label="Display Name"
+      label="Custom Label"
     >
       <eui-field-text
-        data-test-subj="editorFieldDisplayName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="test"
         value=""
@@ -567,10 +567,10 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      label="Display Name"
+      label="Custom Label"
     >
       <eui-field-text
-        data-test-subj="editorFieldDisplayName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="foobar"
         value=""
@@ -800,10 +800,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       script="doc.test.value"
     />
     <eui-form-row
-      label="Display Name"
+      label="Custom Label"
     >
       <eui-field-text
-        data-test-subj="editorFieldDisplayName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="test"
         value=""
@@ -1165,10 +1165,10 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <eui-form-row
-      label="Display Name"
+      label="Custom Label"
     >
       <eui-field-text
-        data-test-subj="editorFieldDisplayName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="foobar"
         value=""

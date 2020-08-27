@@ -31,7 +31,6 @@ describe('Field', function () {
     return new IndexPatternField(
       fieldValues.indexPattern as IndexPattern,
       { ...fieldValues, ...values },
-      'displayName',
       () => {}
     );
   }
@@ -147,7 +146,6 @@ describe('Field', function () {
     const field = new IndexPatternField(
       { fieldFormatMap: { name: {} } } as IndexPattern,
       fieldValues,
-      'displayName',
       () => {}
     );
     expect(flatten(field)).toMatchSnapshot();
@@ -161,7 +159,6 @@ describe('Field', function () {
         },
       } as IndexPattern,
       fieldValues,
-      'displayName',
       () => {}
     );
     expect(field.toSpec()).toMatchSnapshot();

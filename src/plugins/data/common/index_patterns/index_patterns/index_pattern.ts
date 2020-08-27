@@ -19,7 +19,7 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientCommon } from '../..';
+import { IndexPatternAttrs, SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
 import {
@@ -38,6 +38,7 @@ import { OnNotification, OnError, IIndexPatternsApiClient, IndexPatternAttribute
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
+import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -199,11 +200,11 @@ export class IndexPattern implements IIndexPattern {
     });
   }
   private getFieldSpecCustomLabel(name: string) {
-    const displayNameMap = this.attributes?.fields;
-    if (!displayNameMap || !displayNameMap[name]) {
+    const fields = this.attributes?.fields;
+    if (!fields || !fields[name]) {
       return;
     }
-    return displayNameMap[name].displayName;
+    return fields[name].customLabel;
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
@@ -466,7 +467,7 @@ export class IndexPattern implements IIndexPattern {
     const attribFields = {} as any;
     for (const field of this.fields) {
       if (field.customLabel) {
-        attribFields[field.name] = { displayName: field.customLabel };
+        attribFields[field.name] = { customLabel: field.customLabel };
       }
     }
     if (Object.keys(attribFields).length) {

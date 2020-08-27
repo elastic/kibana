@@ -604,7 +604,7 @@ export type FieldFormatsGetConfigFn = GetConfigFn;
 // @public (undocumented)
 export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
     // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void);
+    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], onNotification?: () => void);
     // (undocumented)
     readonly add: (field: FieldSpec) => void;
     // (undocumented)
@@ -633,6 +633,8 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        customLabel: string | undefined;
+        shortDotsEnable: boolean | undefined;
         format: any;
     }[];
     // (undocumented)
@@ -949,8 +951,10 @@ export class IndexPattern implements IIndexPattern {
     [key: string]: any;
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternAttrs" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    attributes: any;
+    attributes?: IndexPatternAttrs;
     // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
     // (undocumented)
@@ -1062,13 +1066,7 @@ export type IndexPatternAggRestrictions = Record<string, {
 // @public @deprecated
 export interface IndexPatternAttributes {
     // (undocumented)
-    attributes?: {
-        fields: {
-            [key: string]: {
-                displayName: string;
-            };
-        };
-    };
+    attributes?: IndexPatternAttrs;
     // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)
@@ -1092,7 +1090,7 @@ export interface IndexPatternAttributes {
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
     // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, onNotification: OnNotification);
+    constructor(indexPattern: IndexPattern, spec: FieldSpec, onNotification: OnNotification);
     // (undocumented)
     get aggregatable(): boolean;
     // (undocumented)
@@ -1102,7 +1100,10 @@ export class IndexPatternField implements IFieldType {
     get count(): number;
     set count(count: number);
     // (undocumented)
-    readonly displayName: string;
+    get customLabel(): string | undefined;
+    set customLabel(label: string | undefined);
+    // (undocumented)
+    get displayName(): any;
     // (undocumented)
     get esTypes(): string[] | undefined;
     // (undocumented)
@@ -1145,6 +1146,7 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        customLabel: string | undefined;
     };
     // (undocumented)
     toSpec(): {
@@ -1160,6 +1162,8 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        customLabel: string | undefined;
+        shortDotsEnable: boolean | undefined;
         format: any;
     };
     // (undocumented)

@@ -45,7 +45,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -127,7 +126,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
-  displayName: string;
+  customLabel: string;
 }
 
 export interface FieldEdiorProps {
@@ -167,7 +166,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
-      displayName: '',
+      customLabel: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -210,8 +209,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: indexPattern.fieldFormatMap[spec.name]?.type?.id,
-      displayName: indexPattern.attributes?.fields[spec.name]?.displayName || '',
+      fieldFormatId: indexPattern.fieldFormatMap
+        ? indexPattern.fieldFormatMap[spec.name]?.type?.id
+        : undefined,
+      customLabel: indexPattern.attributes?.fields[spec.name]?.customLabel || '',
       fieldFormatParams: format.params(),
     });
   }
@@ -417,21 +418,21 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   }
 
-  renderDisplayName() {
-    const { displayName, spec } = this.state;
+  renderCustomLabel() {
+    const { customLabel, spec } = this.state;
 
     return (
       <EuiFormRow
-        label={i18n.translate('indexPatternManagement.displayNameLabel', {
-          defaultMessage: 'Display Name',
+        label={i18n.translate('indexPatternManagement.customLabelLabel', {
+          defaultMessage: 'Custom Label',
         })}
       >
         <EuiFieldText
-          value={displayName || ''}
+          value={customLabel || ''}
           placeholder={spec.name}
-          data-test-subj="editorFieldDisplayName"
+          data-test-subj="editorFieldCustomLabel"
           onChange={(e) => {
-            this.setState({ displayName: e.target.value });
+            this.setState({ customLabel: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -804,7 +805,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId, displayName } = this.state;
+    const { fieldFormatId, customLabel } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -846,8 +847,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
 
-    if (field.customLabel !== displayName) {
-      field.customLabel = displayName;
+    if (field.customLabel !== customLabel) {
+      field.customLabel = customLabel;
       indexPattern.fields.update(field);
     }
 
@@ -911,7 +912,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
-          {this.renderDisplayName()}
+          {this.renderCustomLabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

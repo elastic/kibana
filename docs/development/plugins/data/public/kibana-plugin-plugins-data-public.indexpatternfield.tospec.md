@@ -7,21 +7,23 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec(): {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: any;
-    };
+toSpec();: {
+        number;
+        string | undefined;
+        string | undefined;
+        Record<string, string[]> | undefined;
+        string;
+        string;
+        string[] | undefined;
+        boolean;
+        boolean;
+        boolean;
+        boolean;
+        import("../types").IFieldSubType | undefined;
+        string | undefined;
+        boolean | undefined;
+        any;
+    }
 ```
 <b>Returns:</b>
 
@@ -38,6 +40,8 @@ toSpec(): {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
+        customLabel: string | undefined;
+        shortDotsEnable: boolean | undefined;
         format: any;
     }`
 

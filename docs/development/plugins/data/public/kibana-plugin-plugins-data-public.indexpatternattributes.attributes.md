@@ -7,11 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-attributes?: {
-        fields: {
-            [key: string;]: {
-                string;
-            }
-        }
-    }
+attributes?: IndexPatternAttrs;
 ```

@@ -607,14 +607,10 @@ export type IMetricAggType = MetricAggType;
 //
 // @public @deprecated
 export interface IndexPatternAttributes {
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternAttrs" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    attributes?: {
-        fields: {
-            [key: string]: {
-                displayName: string;
-            };
-        };
-    };
+    attributes?: IndexPatternAttrs;
     // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)

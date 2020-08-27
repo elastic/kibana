@@ -49,7 +49,6 @@ const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | un
   return new IndexPatternField(
     indexPattern as IndexPattern,
     (spec as unknown) as IndexPatternField['spec'],
-    spec.displayName as string,
     () => {}
   );
 };
