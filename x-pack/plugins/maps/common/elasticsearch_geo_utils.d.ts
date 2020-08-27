@@ -20,5 +20,6 @@ export function hitsToGeoJson(
   hits: Array<Record<string, unknown>>,
   flattenHit: (elasticSearchHit: Record<string, unknown>) => GeoJsonProperties,
   geoFieldName: string,
+  geoFieldType: ES_GEO_FIELD_TYPE,
   epochMillisFields: string[]
 ): FeatureCollection;
