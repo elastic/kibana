@@ -6,8 +6,7 @@
 
 import type { DefaultOperator } from 'elasticsearch';
 
-import { HttpFetchError } from 'src/core/public';
-
+import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 import type {
