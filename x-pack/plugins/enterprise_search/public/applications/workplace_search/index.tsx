@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
 import { KibanaContext, IKibanaContext } from '../index';
 import { HttpLogic, IHttpLogicValues } from '../shared/http';
+import { AppLogic, IAppActions, IAppValues } from './app_logic';
 import { Layout } from '../shared/layout';
 import { WorkplaceSearchNav } from './components/layout/nav';
 
@@ -20,21 +21,19 @@ import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { Overview } from './views/overview';
 
-export const WorkplaceSearch: React.FC<IInitialAppData> = () => {
+export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useContext(KibanaContext) as IKibanaContext;
+  return !config.host ? <WorkplaceSearchUnconfigured /> : <WorkplaceSearchConfigured {...props} />;
+};
+
+export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
+  const { hasInitialized } = useValues(AppLogic) as IAppValues;
+  const { initializeAppData } = useActions(AppLogic) as IAppActions;
   const { errorConnecting } = useValues(HttpLogic) as IHttpLogicValues;
 
-  if (!config.host)
-    return (
-      <Switch>
-        <Route exact path={SETUP_GUIDE_PATH}>
-          <SetupGuide />
-        </Route>
-        <Route>
-          <Redirect to={SETUP_GUIDE_PATH} />
-        </Route>
-      </Switch>
-    );
+  useEffect(() => {
+    if (!hasInitialized) initializeAppData(props);
+  }, [hasInitialized]);
 
   return (
     <Switch>
@@ -61,3 +60,14 @@ export const WorkplaceSearch: React.FC<IInitialAppData> = () => {
     </Switch>
   );
 };
+
+export const WorkplaceSearchUnconfigured: React.FC = () => (
+  <Switch>
+    <Route exact path={SETUP_GUIDE_PATH}>
+      <SetupGuide />
+    </Route>
+    <Route>
+      <Redirect to={SETUP_GUIDE_PATH} />
+    </Route>
+  </Switch>
+);

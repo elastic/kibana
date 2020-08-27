@@ -39,17 +39,27 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 }
 
 /**
- *  Get the field params based on the types and searchFields
+ *  Get the field params based on the types, searchFields, and rootSearchFields
  */
-function getFieldsForTypes(types: string[], searchFields?: string[]) {
-  if (!searchFields || !searchFields.length) {
+function getFieldsForTypes(
+  types: string[],
+  searchFields: string[] = [],
+  rootSearchFields: string[] = []
+) {
+  if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
     };
   }
 
-  let fields: string[] = [];
+  let fields = [...rootSearchFields];
+  fields.forEach((field) => {
+    if (field.indexOf('.') !== -1) {
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+  });
+
   for (const field of searchFields) {
     fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
@@ -119,6 +129,7 @@ interface QueryParams {
   type?: string | string[];
   search?: string;
   searchFields?: string[];
+  rootSearchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
@@ -134,6 +145,7 @@ export function getQueryParams({
   type,
   search,
   searchFields,
+  rootSearchFields,
   defaultSearchOperator,
   hasReference,
   kueryNode,
@@ -199,7 +211,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields),
+          ...getFieldsForTypes(types, searchFields, rootSearchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },
