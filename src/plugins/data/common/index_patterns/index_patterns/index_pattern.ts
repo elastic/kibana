@@ -226,8 +226,6 @@ export class IndexPattern implements IIndexPattern {
       response[name] = fieldMapping._deserialize(response[name]);
     });
 
-    // give index pattern all of the values
-    const fieldList = this.fields;
     this.title = response.title;
     this.timeFieldName = response.timeFieldName;
     this.intervalName = response.intervalName;
@@ -235,7 +233,6 @@ export class IndexPattern implements IIndexPattern {
     this.fieldFormatMap = response.fieldFormatMap;
     this.type = response.type;
     this.typeMeta = response.typeMeta;
-    this.fields = fieldList;
 
     if (!this.title && this.id) {
       this.title = this.id;
@@ -489,11 +486,14 @@ export class IndexPattern implements IIndexPattern {
   async save(saveAttempts: number = 0): Promise<void | Error> {
     if (!this.id) return;
     const body = this.prepBody();
-    // What keys changed since they last pulled the index pattern
-    const originalChangedKeys = Object.keys(body).filter(
-      // @ts-expect-error
-      (key) => body[key] !== this.originalBody[key]
-    );
+
+    const originalChangedKeys: string[] = [];
+    Object.entries(body).forEach(([key, value]) => {
+      if (value !== this.originalBody[key]) {
+        originalChangedKeys.push(key);
+      }
+    });
+
     return this.savedObjectsClient
       .update(savedObjectType, this.id, body, { version: this.version })
       .then((resp) => {
