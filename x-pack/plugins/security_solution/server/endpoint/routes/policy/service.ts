@@ -12,8 +12,17 @@ export function getESQueryPolicyResponseByHostID(hostID: string, index: string) 
   return {
     body: {
       query: {
-        match: {
-          'host.id': hostID,
+        bool: {
+          filter: {
+            term: {
+              'host.id': hostID,
+            },
+          },
+          must_not: {
+            term: {
+              'Endpoint.policy.applied.name': 'initial',
+            },
+          },
         },
       },
       sort: [
