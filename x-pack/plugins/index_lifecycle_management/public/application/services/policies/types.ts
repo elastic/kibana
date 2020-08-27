@@ -128,7 +128,7 @@ export interface PhaseWithIndexPriority {
   phaseIndexPriority: string;
 }
 
-export interface HotPhase extends CommonPhaseSettings {
+export interface HotPhase extends CommonPhaseSettings, PhaseWithIndexPriority {
   rolloverEnabled: boolean;
   selectedMaxSizeStored: string;
   selectedMaxSizeStoredUnits: string;

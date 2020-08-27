@@ -16,7 +16,6 @@ import {
   DeletePhase,
   FrozenPhase,
   HotPhase,
-  CommonPhaseSettings,
   Policy,
   PolicyFromES,
   WarmPhase,
@@ -111,7 +110,7 @@ export const policyNameAlreadyUsedErrorMessage = i18n.translate(
     defaultMessage: 'That policy name is already used.',
   }
 );
-export type PhaseValidationErrors<T extends CommonPhaseSettings> = {
+export type PhaseValidationErrors<T> = {
   [P in keyof Partial<T>]: string[];
 };
 
