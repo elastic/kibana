@@ -4,20 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DefaultOperator } from 'elasticsearch';
+import type { DefaultOperator } from 'elasticsearch';
 
 import { HttpFetchError } from 'src/core/public';
 
-import { PutTransformsRequestSchema } from '../../../common/api_schemas/transforms';
+import type { IndexPattern } from '../../../../../../src/plugins/data/public';
+
+import type {
+  PostTransformsPreviewRequestSchema,
+  PutTransformsRequestSchema,
+} from '../../../common/api_schemas/transforms';
+import type {
+  DateHistogramAgg,
+  HistogramAgg,
+  TermsAgg,
+} from '../../../common/types/pivot_group_by';
 import { dictionaryToArray } from '../../../common/types/common';
-import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
-import { PostTransformsPreviewRequestSchema } from '../../../common/api_schemas/transforms';
-import { SavedSearchQuery } from '../hooks/use_search_items';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
-
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { SavedSearchQuery } from '../hooks/use_search_items';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 
 import {
   getEsAggFromAggConfig,
