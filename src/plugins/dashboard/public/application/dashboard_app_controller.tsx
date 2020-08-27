@@ -25,8 +25,16 @@ import React, { useState, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
 
-import { Observable, pipe, Subscription, merge } from 'rxjs';
-import { filter, map, debounceTime, mapTo, startWith, switchMap } from 'rxjs/operators';
+import { Observable, pipe, Subscription, merge, combineLatest } from 'rxjs';
+import {
+  filter,
+  map,
+  debounceTime,
+  mapTo,
+  startWith,
+  switchMap,
+  distinctUntilKeyChanged,
+} from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
@@ -40,6 +48,7 @@ import {
   QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
+  IIndexPattern,
 } from '../../../data/public';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../../saved_objects/public';
 
@@ -58,6 +67,7 @@ import {
   ContainerOutput,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
+  EmbeddableOutput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -302,6 +312,30 @@ export class DashboardAppController {
       })
     );
 
+    const listenToAllIndexPatternOutputChanges = pipe(
+      filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+      map((container: DashboardContainer) => {
+        if ($scope.childIndexPatternsUpdateSubscription$) {
+          $scope.childIndexPatternsUpdateSubscription$.unsubscribe();
+        }
+
+        $scope.childIndexPatternsUpdateSubscription$ = combineLatest(
+          container.getChildIds().map((childId: string) => {
+            const embeddableInstance = container.getChild(childId);
+            if (isErrorEmbeddable(embeddableInstance)) return;
+            return (embeddableInstance.getOutput$() as Observable<
+              EmbeddableOutput & { indexPatterns: IIndexPattern[] }
+            >).pipe(
+              distinctUntilKeyChanged('indexPatterns'),
+              mapTo(container),
+              updateIndexPatternsOperator
+            );
+          })
+        ).subscribe();
+        return container;
+      })
+    );
+
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
       isEmptyInReadOnlyMode: boolean
@@ -412,6 +446,7 @@ export class DashboardAppController {
                 .pipe(
                   mapTo(dashboardContainer),
                   startWith(dashboardContainer), // to trigger initial index pattern update
+                  listenToAllIndexPatternOutputChanges, // to update index patterns whenever children change index patterns in their outputs.
                   updateIndexPatternsOperator
                 )
                 .subscribe()
