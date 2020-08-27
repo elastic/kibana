@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Accessibility Painless Lab Editor', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('painlessLab');
-      await a11y.testAppSnapshot();
-      });
+    });
 
     it('click on the output button', async () => {
       const painlessTabsOutput = await find.byCssSelector(
