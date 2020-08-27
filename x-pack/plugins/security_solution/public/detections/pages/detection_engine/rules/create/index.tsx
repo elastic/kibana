@@ -422,6 +422,7 @@ const CreateRulePageComponent: React.FC = () => {
             <EuiHorizontalRule margin="m" />
             <StepRuleActions
               addPadding={true}
+              defaultValues={stepsData.current[RuleStep.ruleActions].data}
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.ruleActions]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
