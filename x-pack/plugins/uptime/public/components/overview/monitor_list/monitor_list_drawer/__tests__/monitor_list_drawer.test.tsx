@@ -58,6 +58,7 @@ describe('MonitorListDrawer component', () => {
   });
 
   it('renders nothing when no check data is present', () => {
+    // @ts-expect-error According to the code, the property is optional
     delete summary.state.summaryPings;
     const component = shallowWithRouter(
       <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />

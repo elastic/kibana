@@ -45,7 +45,7 @@ export interface SavedObjectsManagementPluginStart {
 
 export interface SetupDependencies {
   management: ManagementSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export interface StartDependencies {
@@ -72,20 +72,22 @@ export class SavedObjectsManagementPlugin
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
 
-    home.featureCatalogue.register({
-      id: 'saved_objects',
-      title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
-        defaultMessage: 'Saved Objects',
-      }),
-      description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
-        defaultMessage:
-          'Import, export, and manage your saved searches, visualizations, and dashboards.',
-      }),
-      icon: 'savedObjectsApp',
-      path: '/app/management/kibana/objects',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.ADMIN,
-    });
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'saved_objects',
+        title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
+          defaultMessage: 'Saved Objects',
+        }),
+        description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
+          defaultMessage:
+            'Import, export, and manage your saved searches, visualizations, and dashboards.',
+        }),
+        icon: 'savedObjectsApp',
+        path: '/app/management/kibana/objects',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
 
     const kibanaSection = management.sections.section.kibana;
     kibanaSection.registerApp({
