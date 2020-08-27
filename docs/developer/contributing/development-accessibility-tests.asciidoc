@@ -1,7 +1,7 @@
 [[development-accessibility-tests]]
-==== Automated Accessibility Testing
+== Automated Accessibility Testing
 
-To write an accessibility test, use the provided accessibility service `getService('a11y')`. Accessibility tests are fairly straightforward to write as https://github.com/dequelabs/axe-core[axe] does most of the heavy lifting. In short, navigate to the UI that needs to be tested then call `testAppSnapshot();` from the service imported earlier which will make sure axe finds no failures. Navigate through every portion of the UI for the best coverage.
+To write an accessibility test, use the provided accessibility service `getService('a11y')`. Accessibility tests are fairly straightforward to write as https://github.com/dequelabs/axe-core[axe] does most of the heavy lifting. Navigate to the UI that you need to test, then call `testAppSnapshot();` from the service imported earlier to make sure axe finds no failures. Navigate through every portion of the UI for the best coverage.
 
 An example test might look like this:
 ["source","js"]
