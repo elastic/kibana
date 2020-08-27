@@ -46,7 +46,7 @@ export async function acknowledgeAgentActions(
 
   let actions;
   try {
-    actions = await getAgentActionByIds(soClient, actionIds);
+    actions = await getAgentActionByIds(soClient, actionIds, false);
   } catch (error) {
     if (Boom.isBoom(error) && error.output.statusCode === 404) {
       throw Boom.badRequest(`One or more actions cannot be found`);

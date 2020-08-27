@@ -52,7 +52,8 @@ export async function getAgentActionsForCheckin(
 
 export async function getAgentActionByIds(
   soClient: SavedObjectsClientContract,
-  actionIds: string[]
+  actionIds: string[],
+  decryptData: boolean = true
 ) {
   const actions = (
     await soClient.bulkGet<AgentActionSOAttributes>(
@@ -62,6 +63,10 @@ export async function getAgentActionByIds(
       }))
     )
   ).saved_objects.map(savedObjectToAgentAction);
+
+  if (!decryptData) {
+    return actions;
+  }
 
   return Promise.all(
     actions.map(async (action) => {
