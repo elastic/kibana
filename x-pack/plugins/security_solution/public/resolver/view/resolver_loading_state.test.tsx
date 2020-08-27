@@ -5,8 +5,9 @@
  */
 
 import { Simulator } from '../test_utilities/simulator';
-import { pausableNoAncestorsTwoChildren } from '../data_access_layer/mocks/pausable_no_ancestors_two_children';
-import { emptiableNoAncestorsTwoChildren } from '../data_access_layer/mocks/emptiable_no_ancestors_two_children';
+import { pausifyMock } from '../data_access_layer/mocks/pausify_mock';
+import { emptifyMock } from '../data_access_layer/mocks/emptify_mock';
+import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import '../test_utilities/extend_jest';
 
 describe('Resolver: data loading and resolution states', () => {
@@ -19,8 +20,8 @@ describe('Resolver: data loading and resolution states', () => {
         metadata: { databaseDocumentID },
         dataAccessLayer,
         pause,
-      } = pausableNoAncestorsTwoChildren();
-      pause({ entities: true });
+      } = pausifyMock(noAncestorsTwoChildren());
+      pause('entities');
       simulator = new Simulator({
         dataAccessLayer,
         databaseDocumentID,
@@ -29,8 +30,6 @@ describe('Resolver: data loading and resolution states', () => {
     });
 
     it('should display a loading state', async () => {
-      // Trigger a loading state by requesting data based on a new DocumentID.
-      // There really is no way to do this in the view besides changing the url, so triggering the action instead
       await expect(
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
@@ -51,8 +50,8 @@ describe('Resolver: data loading and resolution states', () => {
         metadata: { databaseDocumentID },
         dataAccessLayer,
         pause,
-      } = pausableNoAncestorsTwoChildren();
-      pause({ resolverTree: true });
+      } = pausifyMock(noAncestorsTwoChildren());
+      pause('resolverTree');
       simulator = new Simulator({
         dataAccessLayer,
         databaseDocumentID,
@@ -82,7 +81,7 @@ describe('Resolver: data loading and resolution states', () => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = emptiableNoAncestorsTwoChildren({ entities: true });
+      } = emptifyMock(noAncestorsTwoChildren(), 'entities');
 
       simulator = new Simulator({
         dataAccessLayer,
@@ -111,7 +110,7 @@ describe('Resolver: data loading and resolution states', () => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = emptiableNoAncestorsTwoChildren({ resolverTree: true });
+      } = emptifyMock(noAncestorsTwoChildren(), 'resolverTree');
 
       simulator = new Simulator({
         dataAccessLayer,
@@ -142,7 +141,7 @@ describe('Resolver: data loading and resolution states', () => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
-      } = emptiableNoAncestorsTwoChildren();
+      } = noAncestorsTwoChildren();
 
       simulator = new Simulator({
         dataAccessLayer,

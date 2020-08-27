@@ -9,17 +9,11 @@ import {
   ResolverTree,
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
-import { mockEndpointEvent } from '../../mocks/endpoint_event';
-import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
-interface PausableRequests {
-  relatedEvents?: boolean;
-  resolverTree?: boolean;
-  entities?: boolean;
-}
+type PausableRequests = 'relatedEvents' | 'resolverTree' | 'entities';
 
-interface Metadata {
+interface Metadata<T> {
   /**
    * The `_id` of the document being analyzed.
    */
@@ -27,36 +21,24 @@ interface Metadata {
   /**
    * A record of entityIDs to be used in tests assertions.
    */
-  entityIDs: {
-    /**
-     * The entityID of the node related to the document being analyzed.
-     */
-    origin: 'origin';
-    /**
-     * The entityID of the first child of the origin.
-     */
-    firstChild: 'firstChild';
-    /**
-     * The entityID of the second child of the origin.
-     */
-    secondChild: 'secondChild';
-  };
+  entityIDs: T;
 }
 
 /**
  * A simple mock dataAccessLayer that allows you to manually pause and resume a request.
  */
-export function pausableNoAncestorsTwoChildren(): {
+export function pausifyMock<T>({
+  metadata,
+  dataAccessLayer,
+}: {
   dataAccessLayer: DataAccessLayer;
-  metadata: Metadata;
+  metadata: Metadata<T>;
+}): {
+  dataAccessLayer: DataAccessLayer;
+  metadata: Metadata<T>;
   pause: (pausableRequests: PausableRequests) => void;
   resume: (pausableRequests: PausableRequests) => void;
 } {
-  const metadata: Metadata = {
-    databaseDocumentID: '_id',
-    entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
-  };
-
   let relatedEventsPromise = Promise.resolve();
   let resolverTreePromise = Promise.resolve();
   let entitiesPromise = Promise.resolve();
@@ -67,27 +49,35 @@ export function pausableNoAncestorsTwoChildren(): {
 
   return {
     metadata,
-    pause: ({ relatedEvents, resolverTree, entities }: PausableRequests) => {
-      if (relatedEvents) {
+    pause: (pausableRequests: PausableRequests | PausableRequests[]) => {
+      const pauseRelatedEventsRequest = pausableRequests.includes('relatedEvents');
+      const pauseResolverTreeRequest = pausableRequests.includes('resolverTree');
+      const pauseEntitiesRequest = pausableRequests.includes('entities');
+
+      if (pauseRelatedEventsRequest) {
         relatedEventsPromise = new Promise((resolve) => {
           relatedEventsResolver = resolve;
         });
       }
-      if (resolverTree) {
+      if (pauseResolverTreeRequest) {
         resolverTreePromise = new Promise((resolve) => {
           resolverTreeResolver = resolve;
         });
       }
-      if (entities) {
+      if (pauseEntitiesRequest) {
         entitiesPromise = new Promise((resolve) => {
           entitiesResolver = resolve;
         });
       }
     },
-    resume: ({ relatedEvents, resolverTree, entities }: PausableRequests) => {
-      if (entities && entitiesResolver) entitiesResolver();
-      if (resolverTree && resolverTreeResolver) resolverTreeResolver();
-      if (relatedEvents && relatedEventsResolver) relatedEventsResolver();
+    resume: (pausableRequests: PausableRequests | PausableRequests[]) => {
+      const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
+      const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
+      const resumeEntitiesRequest = pausableRequests.includes('entities');
+
+      if (resumeRelatedEventsRequest && entitiesResolver) entitiesResolver();
+      if (resumeResolverTreeRequest && resolverTreeResolver) resolverTreeResolver();
+      if (resumeEntitiesRequest && relatedEventsResolver) relatedEventsResolver();
     },
     dataAccessLayer: {
       /**
@@ -95,17 +85,7 @@ export function pausableNoAncestorsTwoChildren(): {
        */
       async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
         await relatedEventsPromise;
-        return Promise.resolve({
-          entityID,
-          events: [
-            mockEndpointEvent({
-              entityID,
-              name: 'event',
-              timestamp: 0,
-            }),
-          ],
-          nextEvent: null,
-        });
+        return dataAccessLayer.relatedEvents(entityID);
       },
 
       /**
@@ -113,20 +93,15 @@ export function pausableNoAncestorsTwoChildren(): {
        */
       async resolverTree(): Promise<ResolverTree> {
         await resolverTreePromise;
-        return Promise.resolve(
-          mockTreeWithNoAncestorsAnd2Children({
-            originID: metadata.entityIDs.origin,
-            firstChildID: metadata.entityIDs.firstChild,
-            secondChildID: metadata.entityIDs.secondChild,
-          })
-        );
+        // @ts-ignore - ignore the argument requirement for dataAccessLayer
+        return dataAccessLayer.resolverTree();
       },
 
       /**
        * Get an array of index patterns that contain events.
        */
       indexPatterns(): string[] {
-        return ['index pattern'];
+        return dataAccessLayer.indexPatterns();
       },
 
       /**
@@ -134,7 +109,8 @@ export function pausableNoAncestorsTwoChildren(): {
        */
       async entities(): Promise<ResolverEntityIndex> {
         await entitiesPromise;
-        return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+        // @ts-ignore - ignore the argument requirement for dataAccessLayer
+        return dataAccessLayer.entities();
       },
     },
   };
