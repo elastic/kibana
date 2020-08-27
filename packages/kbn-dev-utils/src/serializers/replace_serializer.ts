@@ -17,9 +17,20 @@
  * under the License.
  */
 
-export function plugin() {
-  return {
-    start() {},
-    stop() {},
-  };
+import { createRecursiveSerializer } from './recursive_serializer';
+
+type Replacer = (substring: string, ...args: any[]) => string;
+
+export function createReplaceSerializer(
+  toReplace: string | RegExp,
+  replaceWith: string | Replacer
+) {
+  return createRecursiveSerializer(
+    typeof toReplace === 'string'
+      ? (v: any) => typeof v === 'string' && v.includes(toReplace)
+      : (v: any) => typeof v === 'string' && toReplace.test(v),
+    typeof replaceWith === 'string'
+      ? (v: string) => v.replace(toReplace, replaceWith)
+      : (v: string) => v.replace(toReplace, replaceWith)
+  );
 }

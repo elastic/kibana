@@ -18,71 +18,113 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import execa from 'execa';
-import { createRecursiveSerializer, createStripAnsiSerializer } from '@kbn/dev-utils';
+import { createStripAnsiSerializer, REPO_ROOT, createReplaceSerializer } from '@kbn/dev-utils';
 import decompress from 'decompress';
 import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
-const FIXTURE_DIR = Path.resolve(__dirname, '__fixtures__');
+const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
+const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
+const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-7.5.0.zip`);
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
-const BASIC_UI_PLUGIN_DIR = Path.resolve(FIXTURE_DIR, 'foo');
-const BASIC_UI_PLUGIN_BUILD_DIR = Path.resolve(BASIC_UI_PLUGIN_DIR, 'build');
-const BASIC_UI_PLUGIN_ARCHIVE = Path.resolve(BASIC_UI_PLUGIN_BUILD_DIR, 'foo-7.5.0.zip');
-
-const TIME_RE = /[\d\.]+ sec/g;
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (s) => typeof s === 'string' && TIME_RE.test(s),
-    (s) => s.replace(TIME_RE, '<time>')
-  )
-);
+expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
+expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
+expect.addSnapshotSerializer(createReplaceSerializer(/yarn run v[\d\.]+/g, 'yarn run <version>'));
 
-beforeEach(async () => await del(BASIC_UI_PLUGIN_BUILD_DIR));
-afterEach(async () => await del(BASIC_UI_PLUGIN_BUILD_DIR));
+beforeEach(async () => {
+  await del([PLUGIN_DIR, TMP_DIR]);
+  Fs.mkdirSync(TMP_DIR);
+});
 
-it('builds the plugin into a viable archive', async () => {
-  const proc = await execa(
+afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
+
+it('builds a generated plugin into a viable archive', async () => {
+  const generateProc = await execa(
     process.execPath,
-    [require.resolve('../../../../scripts/plugin_helpers'), 'build', '--kibana-version', '7.5.0'],
+    [require.resolve('../../../../scripts/generate_plugin'), '-y', '--name', 'fooTestPlugin'],
     {
-      cwd: BASIC_UI_PLUGIN_DIR,
+      cwd: REPO_ROOT,
+      all: true,
     }
   );
 
-  expect(proc.stdout).toMatchInlineSnapshot(`
-    " info deleting the build and target directories
+  expect(generateProc.all).toMatchInlineSnapshot(`
+    " succ 🎉
+
+          Your plugin has been created in plugins/foo_test_plugin
+    "
+  `);
+
+  const buildProc = await execa('yarn', ['build', '--kibana-version', '7.5.0'], {
+    cwd: PLUGIN_DIR,
+    all: true,
+  });
+
+  expect(buildProc.all).toMatchInlineSnapshot(`
+    "yarn run <version>
+    $ yarn plugin-helpers build --kibana-version 7.5.0
+    $ node ../../scripts/plugin_helpers build --kibana-version 7.5.0
+     info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
      │ succ 1 bundles compiled successfully after <time>
      info copying source into the build and converting with babel
-     info compressing plugin into [foo-7.5.0.zip]"
-  `);
-  expect(proc.stderr).toMatchInlineSnapshot(`""`);
+     info running yarn to install dependencies
 
-  await decompress(BASIC_UI_PLUGIN_ARCHIVE, TMP_DIR);
+
+    info No lockfile found.
+    [1/4] Resolving packages...
+    [2/4] Fetching packages...
+    [3/4] Linking dependencies...
+    [4/4] Building fresh packages...
+
+
+     info compressing plugin into [fooTestPlugin-7.5.0.zip]
+    Done in <time>."
+  `);
+
+  await decompress(PLUGIN_ARCHIVE, TMP_DIR);
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));
 
   expect(files).toMatchInlineSnapshot(`
     Array [
-      "kibana/foo/kibana.json",
-      "kibana/foo/target/public/foo.plugin.js",
-      "kibana/foo/target/public/foo.plugin.js.br",
-      "kibana/foo/target/public/foo.plugin.js.gz",
+      "kibana/fooTestPlugin/common/index.js",
+      "kibana/fooTestPlugin/kibana.json",
+      "kibana/fooTestPlugin/package.json",
+      "kibana/fooTestPlugin/server/index.js",
+      "kibana/fooTestPlugin/server/plugin.js",
+      "kibana/fooTestPlugin/server/routes/index.js",
+      "kibana/fooTestPlugin/server/types.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
+      "kibana/fooTestPlugin/translations/ja-JP.json",
+      "kibana/fooTestPlugin/tsconfig.json",
     ]
   `);
 
-  expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana/foo/kibana.json'))).toMatchInlineSnapshot(`
+  expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
+    .toMatchInlineSnapshot(`
     Object {
-      "id": "foo",
+      "id": "fooTestPlugin",
       "kibanaVersion": "7.5.0",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [
+        "navigation",
+      ],
+      "server": true,
       "ui": true,
       "version": "1.0.0",
     }

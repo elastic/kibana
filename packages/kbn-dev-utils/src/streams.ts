@@ -41,7 +41,7 @@ export const transformFileStream = (
       Promise.resolve()
         .then(async () => {
           if (file.isDirectory()) {
-            return;
+            return cb(undefined, file);
           }
 
           if (!(file.contents instanceof Buffer)) {
