@@ -40,7 +40,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
     }
   );
   const deleteModalTitle = i18n.translate('xpack.transform.transformList.deleteModalTitle', {
-    defaultMessage: 'Delete {transformId}',
+    defaultMessage: 'Delete {transformId}?',
     values: { transformId: items[0] && items[0].config.id },
   });
   const bulkDeleteModalContent = (
