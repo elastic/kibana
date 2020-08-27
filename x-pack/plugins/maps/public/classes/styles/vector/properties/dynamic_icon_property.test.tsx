@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { shallow } from 'enzyme';
 
 jest.mock('ui/new_platform');

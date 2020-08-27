@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/plugin-generator').run(process.argv.slice(2));
+require('../src/setup_node_env/prebuilt_dev_only_entry');
+require('@kbn/plugin-generator').runCli();

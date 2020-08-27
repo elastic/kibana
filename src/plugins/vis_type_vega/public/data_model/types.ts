@@ -63,7 +63,7 @@ interface Mark {
 type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends KibanaConfig {
-  kibana: KibanaConfig;
+  kibana?: KibanaConfig;
   padding: Padding;
   projection: Projection;
   autosize: AutoSize;
@@ -103,8 +103,8 @@ export interface VegaSpec {
   encoding?: Encoding;
   mark?: string;
   title?: string;
-  autosize: AutoSize;
-  projections: Projection[];
+  autosize?: AutoSize;
+  projections?: Projection[];
   width?: number;
   height?: number;
   padding?: number | Padding;

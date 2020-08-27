@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ChildrenQuery } from './children';
-import { PaginationBuilder } from '../utils/pagination';
+import { ChildrenPaginationBuilder } from '../utils/children_pagination';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 describe('Children query', () => {
   it('constructs a legacy multi search query', () => {
-    const query = new ChildrenQuery(new PaginationBuilder(1), 'index-pattern', 'endpointID');
+    const query = new ChildrenQuery(
+      new ChildrenPaginationBuilder(1),
+      'index-pattern',
+      'endpointID'
+    );
     // using any here because otherwise ts complains that it doesn't know what bool and filter are
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const msearch: any = query.buildMSearch('1234');
@@ -20,7 +24,7 @@ describe('Children query', () => {
   });
 
   it('constructs a non-legacy multi search query', () => {
-    const query = new ChildrenQuery(new PaginationBuilder(1), 'index-pattern');
+    const query = new ChildrenQuery(new ChildrenPaginationBuilder(1), 'index-pattern');
     // using any here because otherwise ts complains that it doesn't know what bool and filter are
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const msearch: any = query.buildMSearch(['1234', '5678']);

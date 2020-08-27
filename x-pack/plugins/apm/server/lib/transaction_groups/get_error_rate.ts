@@ -12,12 +12,12 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getErrorRate({
   serviceName,
@@ -57,7 +57,12 @@ export async function getErrorRate({
       query: { bool: { filter } },
       aggs: {
         total_transactions: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: getBucketSize(start, end, 'auto').intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
           aggs: {
             erroneous_transactions: {
               filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } },
@@ -74,10 +79,14 @@ export async function getErrorRate({
 
   const erroneousTransactionsRate =
     resp.aggregations?.total_transactions.buckets.map(
-      ({ key, doc_count: totalTransactions, erroneous_transactions }) => {
+      ({
+        key,
+        doc_count: totalTransactions,
+        erroneous_transactions: erroneousTransactions,
+      }) => {
         const errornousTransactionsCount =
-          // @ts-ignore
-          erroneous_transactions.doc_count;
+          // @ts-expect-error
+          erroneousTransactions.doc_count;
         return {
           x: key,
           y: errornousTransactionsCount / totalTransactions,

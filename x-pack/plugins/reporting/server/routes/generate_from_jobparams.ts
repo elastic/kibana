@@ -10,6 +10,7 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
 import { HandlerErrorFunction, HandlerFunction } from './types';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
+import { CreateJobBaseParams } from '../types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -44,13 +45,13 @@ export function registerGenerateFromJobParams(
       },
     },
     userHandler(async (user, context, req, res) => {
-      let jobParamsRison: string | null;
+      let jobParamsRison: null | string = null;
 
       if (req.body) {
-        const { jobParams: jobParamsPayload } = req.body as { jobParams: string };
-        jobParamsRison = jobParamsPayload;
-      } else {
-        const { jobParams: queryJobParams } = req.query as { jobParams: string };
+        const { jobParams: jobParamsPayload } = req.body;
+        jobParamsRison = jobParamsPayload ? jobParamsPayload : null;
+      } else if (req.query?.jobParams) {
+        const { jobParams: queryJobParams } = req.query;
         if (queryJobParams) {
           jobParamsRison = queryJobParams;
         } else {
@@ -65,11 +66,11 @@ export function registerGenerateFromJobParams(
         });
       }
 
-      const { exportType } = req.params as { exportType: string };
+      const { exportType } = req.params;
       let jobParams;
 
       try {
-        jobParams = rison.decode(jobParamsRison) as object | null;
+        jobParams = rison.decode(jobParamsRison) as CreateJobBaseParams | null;
         if (!jobParams) {
           return res.customError({
             statusCode: 400,

@@ -38,7 +38,7 @@ export type StartSyncStateFnType = () => void;
 /**
  * @public
  */
-export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorage> {
+export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorage> {
   /**
    * stop state syncing
    */

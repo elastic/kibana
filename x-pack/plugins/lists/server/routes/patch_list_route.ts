@@ -32,7 +32,7 @@ export const patchListRoute = (router: IRouter): void => {
         const list = await lists.updateList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({
-            body: `list id: "${id}" found found`,
+            body: `list id: "${id}" not found`,
             statusCode: 404,
           });
         } else {

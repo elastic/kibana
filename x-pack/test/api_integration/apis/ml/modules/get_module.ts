@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 const moduleIds = [
   'apache_ecs',
@@ -32,7 +32,6 @@ const moduleIds = [
   'uptime_heartbeat',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');

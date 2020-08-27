@@ -25,7 +25,7 @@ export function dataAccessLayerFactory(
      * Used to get non-process related events for a node.
      */
     async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
-      return context.services.http.get(`/api/endpoint/resolver/${entityID}/events`, {
+      return context.services.http.post(`/api/endpoint/resolver/${entityID}/events`, {
         query: { events: 100 },
       });
     },

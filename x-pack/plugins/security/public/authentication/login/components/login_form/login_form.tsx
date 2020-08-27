@@ -29,7 +29,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
-import { parseNext } from '../../../../../common/parse_next';
 import { LoginSelector } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';
 
@@ -401,11 +400,25 @@ export class LoginForm extends Component<Props, State> {
       message: { type: MessageType.None },
     });
 
-    const { http } = this.props;
+    // We try to log in with the provider that uses login form and has the lowest order.
+    const providerToLoginWith = this.props.selector.providers.find(
+      (provider) => provider.usesLoginForm
+    )!;
 
     try {
-      await http.post('/internal/security/login', { body: JSON.stringify({ username, password }) });
-      window.location.href = parseNext(window.location.href, http.basePath.serverBasePath);
+      const { location } = await this.props.http.post<{ location: string }>(
+        '/internal/security/login',
+        {
+          body: JSON.stringify({
+            providerType: providerToLoginWith.type,
+            providerName: providerToLoginWith.name,
+            currentURL: window.location.href,
+            params: { username, password },
+          }),
+        }
+      );
+
+      window.location.href = location;
     } catch (error) {
       const message =
         (error as IHttpFetchError).response?.status === 401
@@ -432,17 +445,21 @@ export class LoginForm extends Component<Props, State> {
 
     try {
       const { location } = await this.props.http.post<{ location: string }>(
-        '/internal/security/login_with',
+        '/internal/security/login',
         { body: JSON.stringify({ providerType, providerName, currentURL: window.location.href }) }
       );
 
       window.location.href = location;
     } catch (err) {
-      this.props.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
-          defaultMessage: 'Could not perform login.',
-        }),
-      });
+      this.props.notifications.toasts.addError(
+        err?.body?.message ? new Error(err?.body?.message) : err,
+        {
+          title: i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
+            defaultMessage: 'Could not perform login.',
+          }),
+          toastMessage: err?.message,
+        }
+      );
 
       this.setState({ loadingState: { type: LoadingStateType.None } });
     }

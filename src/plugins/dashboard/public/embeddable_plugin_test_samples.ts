@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// eslint-disable-next-line
 export * from '../../../plugins/embeddable/public/lib/test_samples';

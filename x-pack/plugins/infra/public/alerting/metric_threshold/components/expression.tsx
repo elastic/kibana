@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertPreview } from '../../common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   Comparator,
   Aggregators,

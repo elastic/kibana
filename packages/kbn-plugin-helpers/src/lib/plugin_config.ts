@@ -43,7 +43,7 @@ export function pluginConfig(root: string = process.cwd()): PluginConfig {
     'tsconfig.json',
     'package.json',
     'index.{js,ts}',
-    '{lib,public,server,webpackShims,translations}/**/*',
+    '{lib,public,server,translations}/**/*',
   ];
 
   const kibanaExtraDir = resolve(root, '../../kibana');

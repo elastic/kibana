@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
 import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
@@ -325,7 +323,6 @@ export const queryTimelineById = <TCache>({
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
-      // eslint-disable-next-line
       .then((result) => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -366,6 +363,7 @@ export const queryTimelineById = <TCache>({
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
   duplicate,
   id,
+  forceNotes = false,
   from,
   notes,
   timeline,
@@ -410,7 +408,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }
 
-  if (!duplicate) {
+  if (!duplicate || forceNotes) {
     dispatch(
       dispatchAddNotes({
         notes:

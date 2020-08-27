@@ -57,7 +57,7 @@ export function ChangeIndexPattern({
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ width: 320 }}>
+        <div style={{ width: 320 }} data-test-subj="lnsChangeIndexPatternPopup">
           <EuiPopoverTitle>
             {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
               defaultMessage: 'Change index pattern',

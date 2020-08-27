@@ -13,7 +13,7 @@ import { wait as waitFor } from '@testing-library/react';
 import {
   fields,
   getField,
-} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 

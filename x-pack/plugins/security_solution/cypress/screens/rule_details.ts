@@ -10,6 +10,24 @@ export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteC
 
 export const ABOUT_MITRE = 4;
 
+export const ABOUT_OVERRIDE_FALSE_POSITIVES = 8;
+
+export const ABOUT_OVERRIDE_MITRE = 10;
+
+export const ABOUT_OVERRIDE_NAME_OVERRIDE = 9;
+
+export const ABOUT_OVERRIDE_RISK = 5;
+
+export const ABOUT_OVERRIDE_RISK_OVERRIDE = 6;
+
+export const ABOUT_OVERRIDE_SEVERITY_OVERRIDE = 1;
+
+export const ABOUT_OVERRIDE_TAGS = 12;
+
+export const ABOUT_OVERRIDE_TIMESTAMP_OVERRIDE = 11;
+
+export const ABOUT_OVERRIDE_URLS = 7;
+
 export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggleDescriptionText]';
 
 export const ABOUT_RISK = 1;

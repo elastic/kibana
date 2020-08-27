@@ -326,8 +326,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     }
   };
 
-  // this is actually a method but not recognized as such
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private handleVisibleChildrenChange = callWithoutRepeats(
     ({
       topChild,

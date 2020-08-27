@@ -24,6 +24,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
+  AlertStatus,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -41,6 +42,11 @@ import {
   WriteOperations,
   ReadOperations,
 } from './authorization/alerts_authorization';
+import { IEventLogClient } from '../../../plugins/event_log/server';
+import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
+import { alertStatusFromEventLog } from './lib/alert_status_from_event_log';
+import { IEvent } from '../../event_log/server';
+import { parseDuration } from '../common/parse_duration';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -67,6 +73,7 @@ export interface ConstructorOptions {
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
+  getEventLogClient: () => Promise<IEventLogClient>;
 }
 
 export interface MuteOptions extends IndexType {
@@ -132,6 +139,11 @@ interface UpdateOptions {
   };
 }
 
+interface GetAlertStatusParams {
+  id: string;
+  dateStart?: string;
+}
+
 export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
@@ -147,6 +159,7 @@ export class AlertsClient {
   ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
+  private readonly getEventLogClient: () => Promise<IEventLogClient>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
@@ -163,6 +176,7 @@ export class AlertsClient {
     encryptedSavedObjectsClient,
     getActionsClient,
     actionsAuthorization,
+    getEventLogClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -177,6 +191,7 @@ export class AlertsClient {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
     this.actionsAuthorization = actionsAuthorization;
+    this.getEventLogClient = getEventLogClient;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -269,6 +284,49 @@ export class AlertsClient {
     }
   }
 
+  public async getAlertStatus({ id, dateStart }: GetAlertStatusParams): Promise<AlertStatus> {
+    this.logger.debug(`getAlertStatus(): getting alert ${id}`);
+    const alert = await this.get({ id });
+    await this.authorization.ensureAuthorized(
+      alert.alertTypeId,
+      alert.consumer,
+      ReadOperations.GetAlertStatus
+    );
+
+    // default duration of status is 60 * alert interval
+    const dateNow = new Date();
+    const durationMillis = parseDuration(alert.schedule.interval) * 60;
+    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getAlertStatus(): search the event log for alert ${id}`);
+    let events: IEvent[];
+    try {
+      const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
+        page: 1,
+        per_page: 10000,
+        start: parsedDateStart.toISOString(),
+        end: dateNow.toISOString(),
+        sort_order: 'desc',
+      });
+      events = queryResults.data;
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertStatus(): error searching event log for alert ${id}: ${err.message}`
+      );
+      events = [];
+    }
+
+    return alertStatusFromEventLog({
+      alert,
+      events,
+      dateStart: parsedDateStart.toISOString(),
+      dateEnd: dateNow.toISOString(),
+    });
+  }
+
   public async find({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult> {
@@ -283,7 +341,6 @@ export class AlertsClient {
         ? `${options.filter} and ${authorizationFilter}`
         : authorizationFilter;
     }
-
     const {
       page,
       per_page: perPage,
@@ -295,6 +352,7 @@ export class AlertsClient {
       type: 'alert',
     });
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const authorizedData = data.map(({ id, attributes, updated_at, references }) => {
       ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
       return this.getAlertFromRaw(
@@ -386,11 +444,18 @@ export class AlertsClient {
           updateResult.scheduledTaskId &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
-          this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
-            this.logger.error(
-              `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-            );
-          });
+          this.taskManager
+            .runNow(updateResult.scheduledTaskId)
+            .then(() => {
+              this.logger.debug(
+                `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
+              );
+            })
+            .catch((err: Error) => {
+              this.logger.error(
+                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
+              );
+            });
         }
       })(),
     ]);
@@ -877,4 +942,25 @@ export class AlertsClient {
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
     return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
   }
+}
+
+function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
+  if (dateString === undefined) {
+    return defaultValue;
+  }
+
+  const parsedDate = parseIsoOrRelativeDate(dateString);
+  if (parsedDate === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerts.alertsClient.getAlertStatus.invalidDate', {
+        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
+        values: {
+          field: propertyName,
+          dateValue: dateString,
+        },
+      })
+    );
+  }
+
+  return parsedDate;
 }

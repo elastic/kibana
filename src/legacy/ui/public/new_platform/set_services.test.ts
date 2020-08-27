@@ -18,9 +18,7 @@
  */
 
 import { __reset__, __setup__, __start__, PluginsSetup, PluginsStart } from './new_platform';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import * as dataServices from '../../../../plugins/data/public/services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import * as visualizationsServices from '../../../../plugins/visualizations/public/services';
 import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';

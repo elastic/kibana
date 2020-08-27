@@ -5,3 +5,6 @@
  */
 
 export const DEFAULT_SOURCE_ID = 'default';
+export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
+export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
+export const TIMESTAMP_FIELD = '@timestamp';

@@ -34,6 +34,8 @@ import {
   ConditionalTypeValue,
   DurationOptions,
   DurationType,
+  IpOptions,
+  IpType,
   LiteralType,
   MapOfOptions,
   MapOfType,
@@ -105,6 +107,10 @@ function duration(options?: DurationOptions): Type<Duration> {
 
 function never(): Type<never> {
   return new NeverType();
+}
+
+function ip(options?: IpOptions): Type<string> {
+  return new IpType(options);
 }
 
 /**
@@ -207,6 +213,7 @@ export const schema = {
   conditional,
   contextRef,
   duration,
+  ip,
   literal,
   mapOf,
   maybe,

@@ -21,7 +21,8 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
@@ -47,7 +48,7 @@ import {
 } from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor: string = VISUALIZATION_COLORS[0];
+const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -55,7 +56,6 @@ const locToDirMap: Record<string, ControlsLocation> = {
   top: 'column-reverse',
   bottom: 'column',
 };
-const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER: string = 'elasticsearch';
@@ -117,8 +117,27 @@ export class VegaParser {
     if (this.isVegaLite !== undefined) throw new Error();
 
     if (typeof this.spec === 'string') {
-      this.spec = hjson.parse(this.spec, { legacyRoot: false });
+      const spec = hjson.parse(this.spec, { legacyRoot: false });
+
+      if (!spec.$schema) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
+            defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
+Vega (see {vegaSchemaUrl}) or 
+Vega-Lite (see {vegaLiteSchemaUrl}).
+The URL is an identifier only. Kibana and your browser will never access this URL.`,
+            values: {
+              schemaParam: '"$schema"',
+              vegaLiteSchemaUrl: 'https://vega.github.io/vega-lite/docs/spec.html#top-level',
+              vegaSchemaUrl:
+                'https://vega.github.io/vega/docs/specification/#top-level-specification-properties',
+            },
+          })
+        );
+      }
+      this.spec = spec;
     }
+
     if (!_.isPlainObject(this.spec)) {
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.invalidVegaSpecErrorMessage', {
@@ -126,7 +145,7 @@ export class VegaParser {
         })
       );
     }
-    this.isVegaLite = this._parseSchema();
+    this.isVegaLite = this.parseSchema(this.spec).isVegaLite;
     this.useHover = !this.isVegaLite;
 
     this._config = this._parseConfig();
@@ -159,7 +178,6 @@ export class VegaParser {
    */
   _compileVegaLite() {
     this.vlspec = this.spec;
-    // eslint-disable-next-line import/namespace
     const logger = vega.logger(vega.Warn); // note: eslint has a false positive here
     logger.warn = this._onWarning.bind(this);
     this.spec = vegaLite.compile(this.vlspec, logger).spec;
@@ -225,13 +243,13 @@ export class VegaParser {
         // and will be automatically updated on resize events.
         // We delete width & height if the autosize is set to "fit"
         // We also set useResize=true in case autosize=none, and width & height are not set
-        const autosize = this.spec.autosize.type || this.spec.autosize;
+        const autosize = this.spec.autosize?.type || this.spec.autosize;
         if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
           this.useResize = true;
         }
       }
 
-      if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
+      if (this.useResize && this.spec.padding && this.spec.autosize?.contains !== 'padding') {
         if (typeof this.spec.padding === 'object') {
           this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
           this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
@@ -498,23 +516,11 @@ export class VegaParser {
 
   /**
    * Parse Vega schema element
-   * @returns {boolean} is this a VegaLite schema?
+   * @returns {object} isVegaLite, libVersion
    * @private
    */
-  _parseSchema() {
-    if (!this.spec) return false;
-    if (!this.spec.$schema) {
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
-          defaultMessage:
-            'The input spec does not specify a {schemaParam}, defaulting to {defaultSchema}',
-          values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
-        })
-      );
-      this.spec.$schema = DEFAULT_SCHEMA;
-    }
-
-    const schema = schemaParser(this.spec.$schema);
+  private parseSchema(spec: VegaSpec) {
+    const schema = schemaParser(spec.$schema);
     const isVegaLite = schema.library === 'vega-lite';
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
@@ -532,7 +538,7 @@ export class VegaParser {
       );
     }
 
-    return isVegaLite;
+    return { isVegaLite, libVersion };
   }
 
   /**
@@ -654,6 +660,35 @@ export class VegaParser {
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
+
+    // provide right colors for light and dark themes
+    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'guide-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-subtitle',
+      'fill'
+    );
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
+    this._setDefaultValue('transparent', 'config', 'background');
   }
 
   /**

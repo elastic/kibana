@@ -4,6 +4,7 @@
     "xpack.actions": "plugins/actions",
     "xpack.uiActionsEnhanced": ["plugins/ui_actions_enhanced", "examples/ui_actions_enhanced_examples"],
     "xpack.alerts": "plugins/alerts",
+    "xpack.eventLog": "plugins/event_log",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
     "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
     "xpack.beatsManagement": ["legacy/plugins/beats_management", "plugins/beats_management"],

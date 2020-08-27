@@ -70,7 +70,6 @@ export const useExplorationResults = (
   useEffect(() => {
     getIndexData(jobConfig, dataGrid, searchQuery);
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
@@ -103,7 +102,6 @@ export const useExplorationResults = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,

@@ -17,27 +17,27 @@
  * under the License.
  */
 
-import { CoreStart } from '../../../../core/public';
+import { CoreSetup } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
 
 let searchInterceptor: SearchInterceptor;
-let mockCoreStart: MockedKeys<CoreStart>;
+let mockCoreSetup: MockedKeys<CoreSetup>;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 jest.useFakeTimers();
 
 describe('SearchInterceptor', () => {
   beforeEach(() => {
-    mockCoreStart = coreMock.createStart();
+    mockCoreSetup = coreMock.createSetup();
     searchInterceptor = new SearchInterceptor(
       {
-        toasts: mockCoreStart.notifications.toasts,
-        application: mockCoreStart.application,
-        uiSettings: mockCoreStart.uiSettings,
-        http: mockCoreStart.http,
+        toasts: mockCoreSetup.notifications.toasts,
+        startServices: mockCoreSetup.getStartServices(),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
       },
       1000
     );
@@ -46,7 +46,7 @@ describe('SearchInterceptor', () => {
   describe('search', () => {
     test('Observable should resolve if fetch is successful', async () => {
       const mockResponse: any = { result: 200 };
-      mockCoreStart.http.fetch.mockResolvedValueOnce(mockResponse);
+      mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
@@ -58,7 +58,7 @@ describe('SearchInterceptor', () => {
 
     test('Observable should fail if fetch has an error', async () => {
       const mockResponse: any = { result: 500 };
-      mockCoreStart.http.fetch.mockRejectedValueOnce(mockResponse);
+      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
@@ -72,7 +72,7 @@ describe('SearchInterceptor', () => {
     });
 
     test('Observable should fail if fetch times out (test merged signal)', async () => {
-      mockCoreStart.http.fetch.mockImplementationOnce((options: any) => {
+      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
         return new Promise((resolve, reject) => {
           options.signal.addEventListener('abort', () => {
             reject(new AbortError());
@@ -100,7 +100,7 @@ describe('SearchInterceptor', () => {
 
     test('Observable should fail if user aborts (test merged signal)', async () => {
       const abortController = new AbortController();
-      mockCoreStart.http.fetch.mockImplementationOnce((options: any) => {
+      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
         return new Promise((resolve, reject) => {
           options.signal.addEventListener('abort', () => {
             reject(new AbortError());
@@ -136,7 +136,7 @@ describe('SearchInterceptor', () => {
 
       const error = (e: any) => {
         expect(e).toBeInstanceOf(AbortError);
-        expect(mockCoreStart.http.fetch).not.toBeCalled();
+        expect(mockCoreSetup.http.fetch).not.toBeCalled();
         done();
       };
       response.subscribe({ error });
@@ -150,7 +150,7 @@ describe('SearchInterceptor', () => {
       pendingCount$.subscribe(pendingNext);
 
       const mockResponse: any = { result: 200 };
-      mockCoreStart.http.fetch.mockResolvedValue(mockResponse);
+      mockCoreSetup.http.fetch.mockResolvedValue(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
@@ -169,7 +169,7 @@ describe('SearchInterceptor', () => {
       pendingCount$.subscribe(pendingNext);
 
       const mockResponse: any = { result: 500 };
-      mockCoreStart.http.fetch.mockRejectedValue(mockResponse);
+      mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };

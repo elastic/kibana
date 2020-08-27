@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import _ from 'lodash';
 import React from 'react';
@@ -28,6 +27,7 @@ import {
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IJoin } from '../../../joins/join';
+import { IVectorStyle } from '../vector_style';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -48,22 +48,23 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getValueSuggestions(query: string): Promise<string[]>;
 }
 
-type fieldFormatter = (value: string | number | undefined) => string | number;
+export type FieldFormatter = (value: string | number | undefined) => string | number;
 
-export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
+export class DynamicStyleProperty<T>
+  extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
   static type = STYLE_TYPE.DYNAMIC;
 
   protected readonly _field: IField | null;
   protected readonly _layer: IVectorLayer;
-  protected readonly _getFieldFormatter: (fieldName: string) => null | fieldFormatter;
+  protected readonly _getFieldFormatter: (fieldName: string) => null | FieldFormatter;
 
   constructor(
     options: T,
     styleName: VECTOR_STYLES,
     field: IField | null,
     vectorLayer: IVectorLayer,
-    getFieldFormatter: (fieldName: string) => null | fieldFormatter
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter
   ) {
     super(options, styleName);
     this._field = field;
@@ -89,7 +90,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   getRangeFieldMeta() {
-    const style = this._layer.getStyle();
+    const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
     const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
@@ -114,7 +115,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   getCategoryFieldMeta() {
-    const style = this._layer.getStyle();
+    const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
     const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);

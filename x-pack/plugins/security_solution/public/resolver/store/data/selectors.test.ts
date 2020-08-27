@@ -15,7 +15,7 @@ import {
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
   mockTreeWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
-} from '../mocks/resolver_tree';
+} from '../../mocks/resolver_tree';
 import { uniquePidForProcess } from '../../models/process_event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 

@@ -23,7 +23,6 @@ import {
   mockAboutStepRule,
   mockDefineStepRule,
 } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';

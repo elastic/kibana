@@ -32,10 +32,10 @@ import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
+import { LegacyAPICaller } from '../core/server';
 import { CliArgs, Env } from '../core/server/config';
 import { Root } from '../core/server/root';
 import KbnServer from '../legacy/server/kbn_server';
-import { CallCluster } from '../legacy/core_plugins/elasticsearch';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -49,7 +49,6 @@ const DEFAULTS_SETTINGS = {
   },
   logging: { silent: true },
   plugins: {},
-  optimize: { enabled: false },
   migrations: { skip: true },
 };
 
@@ -76,9 +75,11 @@ export function createRootWithSettings(
       watch: false,
       repl: false,
       basePath: false,
-      optimize: false,
       runExamples: false,
       oss: true,
+      disableOptimizer: true,
+      cache: true,
+      dist: false,
       ...cliArgs,
     },
     isDevClusterMaster: false,
@@ -155,7 +156,7 @@ export interface TestElasticsearchServer {
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
   getClient: () => Client;
-  getCallCluster: () => CallCluster;
+  getCallCluster: () => LegacyAPICaller;
   getUrl: () => string;
 }
 
@@ -291,7 +292,6 @@ export function createTestServers({
       await root.start();
 
       const kbnServer = getKbnServer(root);
-      await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 
       return {
         root,

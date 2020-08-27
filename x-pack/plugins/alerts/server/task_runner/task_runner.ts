@@ -355,41 +355,53 @@ interface GenerateNewAndResolvedInstanceEventsParams {
 }
 
 function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const { currentAlertInstanceIds, originalAlertInstanceIds } = params;
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstanceIds,
+    originalAlertInstanceIds,
+  } = params;
+
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
-
-  for (const id of newIds) {
-    const message = `${params.alertLabel} created new instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
-  }
 
   for (const id of resolvedIds) {
     const message = `${params.alertLabel} resolved instance: '${id}'`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message);
   }
 
-  function logInstanceEvent(id: string, action: string, message: string) {
+  for (const id of newIds) {
+    const message = `${params.alertLabel} created new instance: '${id}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
+  }
+
+  for (const id of currentAlertInstanceIds) {
+    const message = `${params.alertLabel} active instance: '${id}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message);
+  }
+
+  function logInstanceEvent(instanceId: string, action: string, message: string) {
     const event: IEvent = {
       event: {
         action,
       },
       kibana: {
         alerting: {
-          instance_id: id,
+          instance_id: instanceId,
         },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
             type: 'alert',
-            id: params.alertId,
-            namespace: params.namespace,
+            id: alertId,
+            namespace,
           },
         ],
       },
       message,
     };
-    params.eventLogger.logEvent(event);
+    eventLogger.logEvent(event);
   }
 }
 

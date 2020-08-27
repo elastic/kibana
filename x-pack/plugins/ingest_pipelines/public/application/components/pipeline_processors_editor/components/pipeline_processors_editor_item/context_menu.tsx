@@ -26,6 +26,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const containerClasses = classNames({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__item--displayNone': hidden,
   });
 

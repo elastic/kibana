@@ -5,7 +5,10 @@
  */
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import _ from 'lodash';
+import get from 'lodash/get';
+import each from 'lodash/each';
+import last from 'lodash/last';
+import find from 'lodash/find';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -216,7 +219,7 @@ const getAggIntervals = async (
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations =
-    aggsPath.length > 0 ? _.get(respStats.aggregations, aggsPath) : respStats.aggregations;
+    aggsPath.length > 0 ? get(respStats.aggregations, aggsPath) : respStats.aggregations;
 
   return Object.keys(aggregations).reduce((p, aggName) => {
     const stats = [aggregations[aggName].min, aggregations[aggName].max];
@@ -300,9 +303,7 @@ export const getHistogramsForFields = async (
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations =
-    aggsPath.length > 0
-      ? _.get(respChartsData.aggregations, aggsPath)
-      : respChartsData.aggregations;
+    aggsPath.length > 0 ? get(respChartsData.aggregations, aggsPath) : respChartsData.aggregations;
 
   const chartsData: ChartData[] = fields.map(
     (field): ChartData => {
@@ -382,8 +383,8 @@ export class DataVisualizer {
     // To avoid checking for the existence of too many aggregatable fields in one request,
     // split the check into multiple batches (max 200 fields per request).
     const batches: string[][] = [[]];
-    _.each(aggregatableFields, (field) => {
-      let lastArray: string[] = _.last(batches) as string[];
+    each(aggregatableFields, (field) => {
+      let lastArray: string[] = last(batches) as string[];
       if (lastArray.length === AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE) {
         lastArray = [];
         batches.push(lastArray);
@@ -475,7 +476,7 @@ export class DataVisualizer {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
     const batchedFields: { [key: string]: Field[][] } = {};
-    _.each(fields, (field) => {
+    each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
         // getDocumentCountStats requires timeField - don't add to batched requests if not defined
@@ -487,7 +488,7 @@ export class DataVisualizer {
         if (batchedFields[fieldType] === undefined) {
           batchedFields[fieldType] = [[]];
         }
-        let lastArray: Field[] = _.last(batchedFields[fieldType]) as Field[];
+        let lastArray: Field[] = last(batchedFields[fieldType]) as Field[];
         if (lastArray.length === FIELDS_REQUEST_BATCH_SIZE) {
           lastArray = [];
           batchedFields[fieldType].push(lastArray);
@@ -496,7 +497,7 @@ export class DataVisualizer {
       }
     });
 
-    _.each(batchedFields, (lists) => {
+    each(batchedFields, (lists) => {
       batches.push(...lists);
     });
 
@@ -636,7 +637,7 @@ export class DataVisualizer {
       body,
     });
     const aggregations = resp.aggregations;
-    const totalCount = _.get(resp, ['hits', 'total'], 0);
+    const totalCount = get(resp, ['hits', 'total'], 0);
     const stats = {
       totalCount,
       aggregatableExistsFields: [] as FieldData[],
@@ -645,12 +646,12 @@ export class DataVisualizer {
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const sampleCount =
-      samplerShardSize > 0 ? _.get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
+      samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
-      const count = _.get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
+      const count = get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
       if (count > 0) {
-        const cardinality = _.get(
+        const cardinality = get(
           aggregations,
           [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
           0
@@ -745,12 +746,12 @@ export class DataVisualizer {
     });
 
     const buckets: { [key: string]: number } = {};
-    const dataByTimeBucket: Array<{ key: string; doc_count: number }> = _.get(
+    const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
       resp,
       ['aggregations', 'eventRate', 'buckets'],
       []
     );
-    _.each(dataByTimeBucket, (dataForTime) => {
+    each(dataByTimeBucket, (dataForTime) => {
       const time = dataForTime.key;
       buckets[time] = dataForTime.doc_count;
     });
@@ -851,12 +852,12 @@ export class DataVisualizer {
     const batchStats: NumericFieldStats[] = [];
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
-      const docCount = _.get(
+      const docCount = get(
         aggregations,
         [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
         0
       );
-      const fieldStatsResp = _.get(
+      const fieldStatsResp = get(
         aggregations,
         [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
         {}
@@ -867,20 +868,20 @@ export class DataVisualizer {
         topAggsPath.push('top');
       }
 
-      const topValues: Bucket[] = _.get(aggregations, [...topAggsPath, 'buckets'], []);
+      const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
 
       const stats: NumericFieldStats = {
         fieldName: field.fieldName,
         count: docCount,
-        min: _.get(fieldStatsResp, 'min', 0),
-        max: _.get(fieldStatsResp, 'max', 0),
-        avg: _.get(fieldStatsResp, 'avg', 0),
+        min: get(fieldStatsResp, 'min', 0),
+        max: get(fieldStatsResp, 'max', 0),
+        avg: get(fieldStatsResp, 'avg', 0),
         isTopValuesSampled:
           field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
         topValues,
         topValuesSampleSize: topValues.reduce(
           (acc, curr) => acc + curr.doc_count,
-          _.get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+          get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
         ),
         topValuesSamplerShardSize:
           field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
@@ -889,12 +890,12 @@ export class DataVisualizer {
       };
 
       if (stats.count > 0) {
-        const percentiles = _.get(
+        const percentiles = get(
           aggregations,
           [...aggsPath, `${safeFieldName}_percentiles`, 'values'],
           []
         );
-        const medianPercentile: { value: number; key: number } | undefined = _.find(percentiles, {
+        const medianPercentile: { value: number; key: number } | undefined = find(percentiles, {
           key: 50,
         });
         stats.median = medianPercentile !== undefined ? medianPercentile!.value : 0;
@@ -978,7 +979,7 @@ export class DataVisualizer {
         topAggsPath.push('top');
       }
 
-      const topValues: Bucket[] = _.get(aggregations, [...topAggsPath, 'buckets'], []);
+      const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
 
       const stats = {
         fieldName: field.fieldName,
@@ -987,7 +988,7 @@ export class DataVisualizer {
         topValues,
         topValuesSampleSize: topValues.reduce(
           (acc, curr) => acc + curr.doc_count,
-          _.get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
+          get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
         ),
         topValuesSamplerShardSize:
           field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
@@ -1046,12 +1047,12 @@ export class DataVisualizer {
     const batchStats: DateFieldStats[] = [];
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
-      const docCount = _.get(
+      const docCount = get(
         aggregations,
         [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
         0
       );
-      const fieldStatsResp = _.get(
+      const fieldStatsResp = get(
         aggregations,
         [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
         {}
@@ -1059,8 +1060,8 @@ export class DataVisualizer {
       batchStats.push({
         fieldName: field.fieldName,
         count: docCount,
-        earliest: _.get(fieldStatsResp, 'min', 0),
-        latest: _.get(fieldStatsResp, 'max', 0),
+        earliest: get(fieldStatsResp, 'min', 0),
+        latest: get(fieldStatsResp, 'max', 0),
       });
     });
 
@@ -1115,17 +1116,17 @@ export class DataVisualizer {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       const stats: BooleanFieldStats = {
         fieldName: field.fieldName,
-        count: _.get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),
+        count: get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),
         trueCount: 0,
         falseCount: 0,
       };
 
-      const valueBuckets: Array<{ [key: string]: number }> = _.get(
+      const valueBuckets: Array<{ [key: string]: number }> = get(
         aggregations,
         [...aggsPath, `${safeFieldName}_values`, 'buckets'],
         []
       );
-      _.forEach(valueBuckets, (bucket) => {
+      valueBuckets.forEach((bucket) => {
         stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
       });
 
@@ -1182,8 +1183,8 @@ export class DataVisualizer {
         // If the field is not in the _source (as will happen if the
         // field is populated using copy_to in the index mapping),
         // there will be no example to add.
-        // Use lodash _.get() to support field names containing dots.
-        const example: any = _.get(hits[i]._source, field);
+        // Use lodash get() to support field names containing dots.
+        const example: any = get(hits[i]._source, field);
         if (example !== undefined && stats.examples.indexOf(example) === -1) {
           stats.examples.push(example);
           if (stats.examples.length === maxExamples) {
@@ -1216,7 +1217,7 @@ export class DataVisualizer {
 
       // Look ahead to the last percentiles and process these too if
       // they don't add more than 50% to the value range.
-      const lastValue = (_.last(percentileBuckets) as any).value;
+      const lastValue = (last(percentileBuckets) as any).value;
       const upperBound = lowerBound + 1.5 * (lastValue - lowerBound);
       const filteredLength = percentileBuckets.length;
       for (let i = filteredLength; i < percentiles.length; i++) {
@@ -1237,7 +1238,7 @@ export class DataVisualizer {
 
       // Add in 0-5 and 95-100% if they don't add more
       // than 25% to the value range at either end.
-      const lastValue: number = (_.last(percentileBuckets) as any).value;
+      const lastValue: number = (last(percentileBuckets) as any).value;
       const maxDiff = 0.25 * (lastValue - lowerBound);
       if (lowerBound - dataMin < maxDiff) {
         percentileBuckets.splice(0, 0, percentiles[0]);

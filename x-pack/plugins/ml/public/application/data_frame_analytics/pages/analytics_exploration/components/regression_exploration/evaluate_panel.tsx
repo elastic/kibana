@@ -94,6 +94,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         mse,
@@ -131,6 +132,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         mse,
@@ -336,7 +338,16 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             {generalizationEval.error !== null && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="danger">
-                  {generalizationEval.error}
+                  {isTrainingFilter === true &&
+                  generalizationDocsCount === 0 &&
+                  generalizationEval.error.includes('No documents found')
+                    ? i18n.translate(
+                        'xpack.ml.dataframe.analytics.regressionExploration.evaluateNoTestingDocsError',
+                        {
+                          defaultMessage: 'No testing documents found',
+                        }
+                      )
+                    : generalizationEval.error}
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -419,7 +430,16 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             {trainingEval.error !== null && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="danger">
-                  {trainingEval.error}
+                  {isTrainingFilter === false &&
+                  trainingDocsCount === 0 &&
+                  trainingEval.error.includes('No documents found')
+                    ? i18n.translate(
+                        'xpack.ml.dataframe.analytics.regressionExploration.evaluateNoTrainingDocsError',
+                        {
+                          defaultMessage: 'No training documents found',
+                        }
+                      )
+                    : trainingEval.error}
                 </EuiText>
               </EuiFlexItem>
             )}

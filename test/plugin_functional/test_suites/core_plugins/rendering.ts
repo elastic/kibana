@@ -32,7 +32,6 @@ declare global {
   }
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const appsMenu = getService('appsMenu');
@@ -103,42 +102,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await find.waitForElementStale(loadingMessage);
 
       expect(await exists('renderingHeader')).to.be(true);
-    });
-
-    it('renders "legacy" application', async () => {
-      await navigateTo('/render/legacy_app');
-
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getLegacyMode(),
-        getUserSettings(),
-      ]);
-
-      expect(legacyMode).to.be(true);
-      expect(userSettings).to.not.be.empty();
-
-      await find.waitForElementStale(loadingMessage);
-
-      expect(await exists('legacyAppH1')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
-    });
-
-    it('renders "legacy" application without user settings', async () => {
-      await navigateTo('/render/legacy_app?includeUserSettings=false');
-
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getLegacyMode(),
-        getUserSettings(),
-      ]);
-
-      expect(legacyMode).to.be(true);
-      expect(userSettings).to.be.empty();
-
-      await find.waitForElementStale(loadingMessage);
-
-      expect(await exists('legacyAppH1')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
     });
 
     it('navigates between standard application and one with custom appRoute', async () => {

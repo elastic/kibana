@@ -3,5 +3,5 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "extraPublicDirs": ["common/kbn_base_url"]
+  "extraPublicDirs": ["common", "common/kbn_base_url"]
 }

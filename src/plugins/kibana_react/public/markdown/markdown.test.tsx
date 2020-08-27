@@ -24,14 +24,14 @@ import { Markdown } from './markdown';
 
 test('render', () => {
   const component = shallow(<Markdown />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('should never render html tags', () => {
   const component = shallow(
     <Markdown markdown="<div>I may be dangerous if rendered as html</div>" />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('should render links with parentheses correctly', () => {
@@ -65,19 +65,19 @@ describe('props', () => {
 
   test('markdown', () => {
     const component = shallow(<Markdown markdown={markdown} />);
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('openLinksInNewTab', () => {
     const component = shallow(<Markdown markdown={markdown} openLinksInNewTab={true} />);
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('whiteListedRules', () => {
     const component = shallow(
       <Markdown markdown={markdown} whiteListedRules={['backticks', 'emphasis']} />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('should update markdown when openLinksInNewTab prop change', () => {

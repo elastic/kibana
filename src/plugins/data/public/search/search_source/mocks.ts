@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  injectedMetadataServiceMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
+import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { ISearchSource, SearchSource } from './search_source';
 import { SearchSourceFields } from './types';
@@ -54,6 +51,8 @@ export const searchSourceMock = {
 
 export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
+    getConfig: uiSettingsServiceMock.createStartContract().get,
+    esShardTimeout: 30000,
     search: jest.fn(),
     legacySearch: {
       esClient: {
@@ -61,6 +60,4 @@ export const createSearchSourceMock = (fields?: SearchSourceFields) =>
         msearch: jest.fn(),
       },
     },
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
   });

@@ -93,7 +93,7 @@ describe('test agent acks services', () => {
     ]);
   });
 
-  it('should update config field on the agent if a config change is acknowledged', async () => {
+  it('should update config field on the agent if a policy change is acknowledged', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
     appContextService.start(({
@@ -117,7 +117,7 @@ describe('test agent acks services', () => {
           created_at: '2020-03-14T19:45:02.620Z',
           data: JSON.stringify({
             config: {
-              id: 'config1',
+              id: 'policy1',
               revision: 4,
               settings: {
                 monitoring: {
@@ -207,7 +207,7 @@ describe('test agent acks services', () => {
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
-        config_id: 'config1',
+        policy_id: 'policy1',
       } as unknown) as Agent,
       [
         {
@@ -224,10 +224,10 @@ describe('test agent acks services', () => {
     expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "config_revision": 4,
           "packages": Array [
             "system",
           ],
+          "policy_revision": 4,
         },
         "id": "id",
         "type": "fleet-agents",
@@ -235,7 +235,7 @@ describe('test agent acks services', () => {
     `);
   });
 
-  it('should not update config field on the agent if a config change for an old revision is acknowledged', async () => {
+  it('should not update config field on the agent if a policy change for an old revision is acknowledged', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
     appContextService.start(({
@@ -259,7 +259,7 @@ describe('test agent acks services', () => {
           created_at: '2020-03-14T19:45:02.620Z',
           data: JSON.stringify({
             config: {
-              id: 'config1',
+              id: 'policy1',
               revision: 4,
               settings: {
                 monitoring: {
@@ -349,8 +349,8 @@ describe('test agent acks services', () => {
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
-        config_id: 'config1',
-        config_revision: 100,
+        policy_id: 'policy1',
+        policy_revision: 100,
       } as unknown) as Agent,
       [
         {
