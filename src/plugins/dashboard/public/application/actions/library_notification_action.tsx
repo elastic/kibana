@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiBadge } from '@elastic/eui';
 import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { reactToUiComponent } from '../../../../kibana_react/public';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -32,20 +35,36 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
+  private displayName = i18n.translate('dashboard.panel.LibraryNotification', {
+    defaultMessage: 'Library',
+  });
+
+  private icon = 'folderCheck';
+
+  public readonly MenuItem = reactToUiComponent(() => (
+    <EuiBadge
+      data-test-subj={`embeddablePanelNotification-${this.id}`}
+      iconType={this.icon}
+      key={this.id}
+      style={{ marginTop: '2px', marginRight: '4px' }}
+      color="hollow"
+    >
+      {this.displayName}
+    </EuiBadge>
+  ));
+
   public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.LibraryNotification', {
-      defaultMessage: 'Library',
-    });
+    return this.displayName;
   }
 
   public getIconType({ embeddable }: LibraryNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return 'folderCheck';
+    return this.icon;
   }
 
   public getDisplayNameTooltip = ({ embeddable }: LibraryNotificationActionContext) => {

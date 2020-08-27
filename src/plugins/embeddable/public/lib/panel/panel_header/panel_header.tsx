@@ -31,6 +31,7 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
+import { uiToReactComponent } from '../../../../../kibana_react/public';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -64,18 +65,9 @@ function renderNotifications(
 ) {
   return notifications.map((notification) => {
     const context = { embeddable };
-    const iconType = notification.getIconType({ ...context, trigger: panelNotificationTrigger });
 
-    let badge = iconType ? (
-      <EuiBadge
-        data-test-subj={`embeddablePanelNotification-${notification.id}`}
-        iconType={iconType}
-        key={notification.id}
-        style={{ marginTop: '2px', marginRight: '4px' }}
-        color="hollow"
-      >
-        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
-      </EuiBadge>
+    let badge = notification.MenuItem ? (
+      React.createElement(uiToReactComponent(notification.MenuItem))
     ) : (
       <EuiNotificationBadge
         data-test-subj={`embeddablePanelNotification-${notification.id}`}
