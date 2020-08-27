@@ -8,7 +8,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { PLUGIN_ID, SETTINGS_API_ROUTES } from '../../constants';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 
-import { settingsService } from '../../services';
+import { settingsService, agentPolicyService } from '../../services';
 
 export const getSettingsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -42,6 +42,7 @@ export const putSettingsHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
+    await agentPolicyService.bumpAllAgentPolicies(soClient);
     const body = {
       success: true,
       item: settings,

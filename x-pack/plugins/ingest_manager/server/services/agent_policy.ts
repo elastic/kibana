@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_POLICY,
@@ -25,6 +25,7 @@ import { listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+import { getSettings } from './settings';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -260,6 +261,19 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     return this._update(soClient, id, {}, options?.user);
   }
+  public async bumpAllAgentPolicies(
+    soClient: SavedObjectsClientContract
+  ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      const attributes = policy.attributes;
+      attributes.revision = attributes.revision + 1;
+      return policy;
+    });
+    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+  }
 
   public async assignPackagePolicies(
     soClient: SavedObjectsClientContract,
@@ -388,9 +402,15 @@ class AgentPolicyService {
       throw new Error('Default output is not setup');
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
+    const settings = await getSettings(soClient);
 
     const fullAgentPolicy: FullAgentPolicy = {
       id: agentPolicy.id,
+      fleet: {
+        kibana: {
+          hosts: settings.kibana_url || [],
+        },
+      },
       outputs: {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
