@@ -51,7 +51,12 @@ type GetCompositeKeys<
 
 type CompositeOptionsSource = Record<
   string,
-  { terms: { field: string; missing_bucket?: boolean } } | undefined
+  | {
+      terms: ({ field: string } | { script: Script }) & {
+        missing_bucket?: boolean;
+      };
+    }
+  | undefined
 >;
 
 export interface AggregationOptionsByType {
