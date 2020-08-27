@@ -107,7 +107,7 @@ image::images/tutorial-visualize-pie-3.png[Final pie chart]
 [[visualize-geographic-information]]
 === Visualize geographic information
 
-To visualize geographic information in the log file data, use <<Maps>>.
+To visualize geographic information in the log file data, use <<maps,Maps>>.
 
 . Click *Create new*, then click *Maps* on the *New Visualization* window.
 
@@ -173,8 +173,6 @@ image::images/tutorial-visualize-md-2.png[]
 
 . Click *Save*, then enter `Markdown Example` in the *Title* field.
 
-Your dashboard looks like this:
-+
 [role="screenshot"]
 image::images/tutorial-dashboard.png[]
 

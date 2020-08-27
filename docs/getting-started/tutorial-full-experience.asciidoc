@@ -5,7 +5,7 @@ Ready to add data to {kib} and create your own dashboard? In this tutorial, you'
 
 * <<load-the-data-sets, Load data into Elasticsearch>>
 * <<tutorial-define-index, Define an index pattern>>
-* <<tutorial-discovering, Discover and explore data>>
+* <<explore-your-data, Discover and explore data>>
 * <<tutorial-visualizing, Visualize data>>
 
 [float]

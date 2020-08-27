@@ -1272,7 +1272,6 @@ The final Vega spec for this tutorial is here:
 ----
 ====
 
-[float]
 [[timelion-tutorial-create-time-series-visualizations]]
 === Timelion tutorial: Create time series visualizations
 
@@ -1452,7 +1451,6 @@ Change the position and style of the legend:
 image::images/timelion-customize04.png[]
 {nbsp}
 
-[float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
 === Timelion tutorial: Create visualizations with mathematical functions
 
@@ -1582,7 +1580,6 @@ Customize and format the visualization using functions:
 image::images/timelion-math05.png[]
 {nbsp}
 
-[float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
 === Timelion tutorial: Create visualizations with conditional logic and tracking trends
 
