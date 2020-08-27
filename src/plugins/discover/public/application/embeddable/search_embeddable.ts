@@ -78,7 +78,8 @@ interface SearchEmbeddableConfig {
   filterManager: FilterManager;
 }
 
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+export class SearchEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;

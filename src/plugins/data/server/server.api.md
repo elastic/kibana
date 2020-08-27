@@ -685,6 +685,10 @@ export interface ISearchOptions {
 //
 // @public (undocumented)
 export interface ISearchSetup {
+    // Warning: (ae-forgotten-export) The symbol "SearchEnhancements" needs to be exported by the entry point index.d.ts
+    //
+    // @internal (undocumented)
+    __enhance: (enhancements: SearchEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AggsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -855,6 +859,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
     constructor(initializerContext: PluginInitializerContext_2<ConfigSchema>);
     // (undocumented)
     setup(core: CoreSetup<DataPluginStartDependencies, PluginStart>, { expressions, usageCollection }: DataPluginSetupDependencies): {
+        __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
             register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
@@ -883,6 +888,8 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 //
 // @public (undocumented)
 export interface PluginSetup {
+    // @internal (undocumented)
+    __enhance: (enhancements: DataEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "FieldFormatsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1090,6 +1097,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:240:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:244:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:247:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:88:66 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

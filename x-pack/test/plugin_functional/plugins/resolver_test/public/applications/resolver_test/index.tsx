@@ -4,119 +4,95 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import { Router } from 'react-router-dom';
+
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
-import { IEmbeddable } from 'src/plugins/embeddable/public';
-import { useEffect } from 'react';
+import { AppMountParameters, CoreStart } from 'kibana/public';
+import { useMemo } from 'react';
 import styled from 'styled-components';
+import { I18nProvider } from '@kbn/i18n/react';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  DataAccessLayer,
+  ResolverPluginSetup,
+} from '../../../../../../../plugins/security_solution/public/resolver/types';
 
 /**
  * Render the Resolver Test app. Returns a cleanup function.
  */
 export function renderApp(
-  { element }: AppMountParameters,
-  embeddable: Promise<IEmbeddable | undefined>
+  coreStart: CoreStart,
+  parameters: AppMountParameters,
+  resolverPluginSetup: ResolverPluginSetup
 ) {
   /**
    * The application DOM node should take all available space.
    */
-  element.style.display = 'flex';
-  element.style.flexGrow = '1';
+  parameters.element.style.display = 'flex';
+  parameters.element.style.flexGrow = '1';
 
   ReactDOM.render(
-    <I18nProvider>
-      <AppRoot embeddable={embeddable} />
-    </I18nProvider>,
-    element
+    <AppRoot
+      coreStart={coreStart}
+      parameters={parameters}
+      resolverPluginSetup={resolverPluginSetup}
+    />,
+    parameters.element
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    ReactDOM.unmountComponentAtNode(parameters.element);
   };
 }
 
-const AppRoot = styled(
-  React.memo(
-    ({
-      embeddable: embeddablePromise,
-      className,
-    }: {
-      /**
-       * A promise which resolves to the Resolver embeddable.
-       */
-      embeddable: Promise<IEmbeddable | undefined>;
-      /**
-       * A `className` string provided by `styled`
-       */
-      className?: string;
-    }) => {
-      /**
-       * This state holds the reference to the embeddable, once resolved.
-       */
-      const [embeddable, setEmbeddable] = React.useState<IEmbeddable | undefined>(undefined);
-      /**
-       * This state holds the reference to the DOM node that will contain the embeddable.
-       */
-      const [renderTarget, setRenderTarget] = React.useState<HTMLDivElement | null>(null);
+const AppRoot = React.memo(
+  ({
+    coreStart,
+    parameters,
+    resolverPluginSetup,
+  }: {
+    coreStart: CoreStart;
+    parameters: AppMountParameters;
+    resolverPluginSetup: ResolverPluginSetup;
+  }) => {
+    const {
+      Provider,
+      storeFactory,
+      ResolverWithoutProviders,
+      mocks: {
+        dataAccessLayer: { noAncestorsTwoChildren },
+      },
+    } = resolverPluginSetup;
+    const dataAccessLayer: DataAccessLayer = useMemo(
+      () => noAncestorsTwoChildren().dataAccessLayer,
+      [noAncestorsTwoChildren]
+    );
 
-      /**
-       * Keep component state with the Resolver embeddable.
-       *
-       * If the reference to the embeddablePromise changes, we ignore the stale promise.
-       */
-      useEffect(() => {
-        /**
-         * A promise rejection function that will prevent a stale embeddable promise from being resolved
-         * as the current eembeddable.
-         *
-         * If the embeddablePromise itself changes before the old one is resolved, we cancel and restart this effect.
-         */
-        let cleanUp;
+    const store = useMemo(() => {
+      return storeFactory(dataAccessLayer);
+    }, [storeFactory, dataAccessLayer]);
 
-        const cleanupPromise = new Promise<never>((_resolve, reject) => {
-          cleanUp = reject;
-        });
+    return (
+      <I18nProvider>
+        <Router history={parameters.history}>
+          <KibanaContextProvider services={coreStart}>
+            <Provider store={store}>
+              <Wrapper>
+                <ResolverWithoutProviders
+                  databaseDocumentID=""
+                  resolverComponentInstanceID="test"
+                />
+              </Wrapper>
+            </Provider>
+          </KibanaContextProvider>
+        </Router>
+      </I18nProvider>
+    );
+  }
+);
 
-        /**
-         * Either set the embeddable in state, or cancel and restart this process.
-         */
-        Promise.race([cleanupPromise, embeddablePromise]).then((value) => {
-          setEmbeddable(value);
-        });
-
-        /**
-         * If `embeddablePromise` is changed, the cleanup function is run.
-         */
-        return cleanUp;
-      }, [embeddablePromise]);
-
-      /**
-       * Render the eembeddable into the DOM node.
-       */
-      useEffect(() => {
-        if (embeddable && renderTarget) {
-          embeddable.render(renderTarget);
-          /**
-           * If the embeddable or DOM node changes then destroy the old embeddable.
-           */
-          return () => {
-            embeddable.destroy();
-          };
-        }
-      }, [embeddable, renderTarget]);
-
-      return (
-        <div
-          className={className}
-          data-test-subj="resolverEmbeddableContainer"
-          ref={setRenderTarget}
-        />
-      );
-    }
-  )
-)`
+const Wrapper = styled.div`
   /**
    * Take all available space.
    */
