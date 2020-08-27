@@ -11,7 +11,7 @@ import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { DEFAULT_INDEX_KEY, NO_ALERT_INDEX } from '../../../common/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import {
   GetTimelineQuery,
@@ -28,6 +28,7 @@ import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
+import * as i18n from './translations';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -94,6 +95,7 @@ class TimelineQueryComponent extends QueryTemplate<
       startDate,
       queryDeduplication,
     } = this.props;
+
     const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex =
       indexPattern == null || (indexPattern != null && indexPattern.title === '')
@@ -102,6 +104,24 @@ class TimelineQueryComponent extends QueryTemplate<
             ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
           ]
         : indexPattern?.title.split(',') ?? [];
+
+    if (defaultIndex.length === 1 && defaultIndex[0] === NO_ALERT_INDEX) {
+      // Future developer, https://github.com/elastic/kibana/issues/73562
+      // So we do not want to query with a fake index because user we will have to give permission
+      // to this fake index for no good reason
+      return children!({
+        id,
+        inspect: { dsl: [JSON.stringify({ index: defaultIndex })], response: [''] },
+        refetch: this.wrappedRefetch,
+        loading: false,
+        totalCount: 0,
+        pageInfo: {},
+        events: [],
+        loadMore: this.wrappedLoadMore,
+        getUpdatedAt: this.getUpdatedAt,
+      });
+    }
+
     // Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
     // the apolloClient will perform queryDeduplication and prevent the first query from executing. A deep compare is not
     // performed on `indices`, so another field must be passed to circumvent this.
