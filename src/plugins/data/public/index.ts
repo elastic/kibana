@@ -360,7 +360,6 @@ export {
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
-  SearchResponse,
   SearchSourceFields,
   SortDirection,
   // expression functions and types
