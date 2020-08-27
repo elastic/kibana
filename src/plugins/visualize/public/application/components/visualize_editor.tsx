@@ -34,7 +34,7 @@ import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 
 export const VisualizeEditor = () => {
-  const { id: visualizationIdFromUrl } = useParams();
+  const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
