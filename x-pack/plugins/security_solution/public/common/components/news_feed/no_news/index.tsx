@@ -21,9 +21,10 @@ export const NoNews = React.memo(() => {
 
   return (
     <EuiText color="subdued" size="s">
-      {i18n.NO_NEWS_MESSAGE}{' '}
+      {canSeeAdvancedSettings ? i18n.NO_NEWS_MESSAGE_ADMIN : i18n.NO_NEWS_MESSAGE}
       {canSeeAdvancedSettings && (
         <>
+          {' '}
           <LinkAnchor
             onClick={goToKibanaSettings}
             href={`${getUrlForApp('management', { path: '/kibana/settings' })}`}
