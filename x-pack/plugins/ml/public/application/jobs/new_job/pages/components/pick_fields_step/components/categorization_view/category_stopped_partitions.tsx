@@ -22,8 +22,6 @@ export const CategoryStoppedPartitions: FC = () => {
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);
   const [stoppedPartitionsError, setStoppedPartitionsError] = useState<string | undefined>();
 
-  // using ref so this Subscription instance is only intialized once
-
   const columns = useMemo(
     () => [
       {
@@ -46,17 +44,15 @@ export const CategoryStoppedPartitions: FC = () => {
 
   const loadCategoryStoppedPartitions = useCallback(async () => {
     try {
-      const results = await ml.results.getCategoryStoppedPartitions([jobCreator.jobId]);
+      const { jobs } = await ml.results.getCategoryStoppedPartitions([jobCreator.jobId]);
 
       if (
-        results?.jobs !== undefined &&
-        !Array.isArray(results?.jobs) && // if jobs is object of jobId: [partitions]
-        Array.isArray(results?.jobs[jobCreator.jobId]) &&
-        results.jobs[jobCreator.jobId].length > 0
+        !Array.isArray(jobs) && // if jobs is object of jobId: [partitions]
+        Array.isArray(jobs[jobCreator.jobId]) &&
+        jobs[jobCreator.jobId].length > 0
       ) {
-        return results.jobs[jobCreator.jobId];
+        return jobs[jobCreator.jobId];
       }
-      return undefined;
     } catch (e) {
       const error = extractErrorProperties(e);
       // might get 404 because job has not been created yet and that's ok
