@@ -40,7 +40,6 @@ const Container = styled.div<IContainerStyleProps>`
   padding-bottom: ${px(units.plus)};
   margin-right: ${(props) => px(props.timelineMargins.right)};
   margin-left: ${(props) => px(props.timelineMargins.left)};
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
@@ -191,7 +190,10 @@ export function WaterfallItem({
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
-      onClick={onClick}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        onClick();
+      }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={{ left: `${left}%`, width: `${width}%` }}

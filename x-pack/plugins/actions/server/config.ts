@@ -5,7 +5,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { WhitelistedHosts, EnabledActionTypes } from './actions_config';
+import { AllowedHosts, EnabledActionTypes } from './actions_config';
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -16,16 +16,16 @@ const preconfiguredActionSchema = schema.object({
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  whitelistedHosts: schema.arrayOf(
-    schema.oneOf([schema.string({ hostname: true }), schema.literal(WhitelistedHosts.Any)]),
+  allowedHosts: schema.arrayOf(
+    schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
     {
-      defaultValue: [WhitelistedHosts.Any],
+      defaultValue: [AllowedHosts.Any],
     }
   ),
   enabledActionTypes: schema.arrayOf(
     schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
     {
-      defaultValue: [WhitelistedHosts.Any],
+      defaultValue: [AllowedHosts.Any],
     }
   ),
   preconfigured: schema.recordOf(schema.string(), preconfiguredActionSchema, {
