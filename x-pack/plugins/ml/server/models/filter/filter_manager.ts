@@ -136,11 +136,10 @@ export class FilterManager {
   }
 
   async newFilter(filter: FormFilter) {
-    const filterId = filter.filterId;
-    delete filter.filterId;
+    const { filterId, ...body } = filter;
     try {
       // Returns the newly created filter.
-      return await this._callAsInternalUser('ml.addFilter', { filterId, body: filter });
+      return await this._callAsInternalUser('ml.addFilter', { filterId, body });
     } catch (error) {
       throw Boom.badRequest(error);
     }

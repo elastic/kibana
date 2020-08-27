@@ -52,10 +52,9 @@ export async function getLocalUIFilters({
           buckets.map((bucket) => {
             return {
               name: bucket.key as string,
-              count:
-                'bucket_count' in bucket
-                  ? bucket.bucket_count.value
-                  : bucket.doc_count,
+              count: bucket.bucket_count
+                ? bucket.bucket_count.value
+                : bucket.doc_count,
             };
           }),
           'count',
