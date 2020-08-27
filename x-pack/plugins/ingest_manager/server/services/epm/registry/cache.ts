@@ -10,8 +10,10 @@ export const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
 export const cacheHas = (key: string) => cache.has(key);
 
 const archiveKeyCache: Map<string, string> = new Map();
-const stableKey = JSON.stringify;
+const stableKey = ({ name, version }: { name: string; version: string }) => `${name}-${version}`;
+
 export const getArchiveKey = (name: string, version: string) =>
   archiveKeyCache.get(stableKey({ name, version }));
+
 export const setArchiveKey = (name: string, version: string, location: string) =>
   archiveKeyCache.set(stableKey({ name, version }), location);
