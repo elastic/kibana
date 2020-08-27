@@ -499,8 +499,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     status: StatusServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
-    // (undocumented)
-    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -1778,6 +1776,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     env: {
         mode: EnvironmentMode;
         packageInfo: Readonly<PackageInfo>;
+        instanceUuid: string;
     };
     // (undocumented)
     logger: LoggerFactory;
@@ -2881,11 +2880,6 @@ export interface UserProvidedValues<T = any> {
     isOverridden?: boolean;
     // (undocumented)
     userValue?: T;
-}
-
-// @public
-export interface UuidServiceSetup {
-    getInstanceUuid(): string;
 }
 
 // @public
