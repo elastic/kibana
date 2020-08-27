@@ -56,10 +56,14 @@ describe('ESSearchSource', () => {
           getSearchRequestBody() {
             return { foobar: 'ES_DSL_PLACEHOLDER', params: this.setField.mock.calls };
           },
+          setParent() {},
         };
         const mockSearchService = {
           searchSource: {
             async create() {
+              return (mockSearchSource as unknown) as SearchSource;
+            },
+            createEmpty() {
               return (mockSearchSource as unknown) as SearchSource;
             },
           },
@@ -92,7 +96,7 @@ describe('ESSearchSource', () => {
           mode: 'relative',
         },
         sourceQuery: {
-          query: '',
+          query: 'tooltipField: foobar',
           language: 'KQL',
           queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
         },
@@ -107,7 +111,7 @@ describe('ESSearchSource', () => {
         );
         const urlTemplateWithMeta = await esSearchSource.getUrlTemplateWithMeta(searchFilters);
         expect(urlTemplateWithMeta.urlTemplate).toBe(
-          `rootdir/api/maps/mvt/getTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':fields,'1':!(tooltipField,styleField)),'5':('0':source,'1':!(tooltipField,styleField))))`
+          `rootdir/api/maps/mvt/getTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':fields,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))`
         );
       });
     });
