@@ -155,6 +155,7 @@ export function LayerPanel(
         {groups.map((group, index) => {
           const newId = generateId();
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+
           return (
             <EuiFormRow
               className="lnsLayerPanel__row"

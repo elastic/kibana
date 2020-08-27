@@ -102,6 +102,12 @@ export const DragDrop = (props: Props) => {
       {...props}
       dragging={droppable ? dragging : undefined}
       isDragging={!!(draggable && value === dragging)}
+      isNotDroppable={
+        // If the configuration has provided a droppable flag, but this particular item is not
+        // droppable, then it should be less prominent. Ignores items that are both
+        // draggable and drop targets
+        droppable === false && Boolean(dragging) && value !== dragging
+      }
       setDragging={setDragging}
     />
   );
@@ -112,6 +118,7 @@ const DragDropInner = React.memo(function DragDropInner(
     dragging: unknown;
     setDragging: (dragging: unknown) => void;
     isDragging: boolean;
+    isNotDroppable: boolean;
   }
 ) {
   const [state, setState] = useState({
@@ -128,6 +135,7 @@ const DragDropInner = React.memo(function DragDropInner(
     dragging,
     setDragging,
     isDragging,
+    isNotDroppable,
   } = props;
 
   const classes = classNames(
@@ -137,6 +145,7 @@ const DragDropInner = React.memo(function DragDropInner(
       'lnsDragDrop-isDropTarget': droppable,
       'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
       'lnsDragDrop-isDragging': isDragging,
+      'lnsDragDrop-isNotDroppable': isNotDroppable,
     },
     state.dragEnterClassNames
   );

@@ -128,6 +128,21 @@ describe('DragDrop', () => {
     expect(component).toMatchSnapshot();
   });
 
+  test('items that have droppable=false get special styling when another item is dragged', () => {
+    const component = mount(
+      <ChildDragDropProvider dragging={'ignored'} setDragging={() => {}}>
+        <DragDrop value="ignored" draggable={true} label="a">
+          Ignored
+        </DragDrop>
+        <DragDrop onDrop={(x: unknown) => {}} droppable={false}>
+          Hello!
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    expect(component.find('[data-test-subj="lnsDragDrop"]').at(1)).toMatchSnapshot();
+  });
+
   test('additional styles are reflected in the className until drop', () => {
     let dragging: string | undefined;
     const getAdditionalClasses = jest.fn().mockReturnValue('additional');
