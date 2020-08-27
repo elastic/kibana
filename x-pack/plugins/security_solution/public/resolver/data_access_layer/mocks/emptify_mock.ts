@@ -36,7 +36,7 @@ export function emptifyMock<T>(
     dataAccessLayer: DataAccessLayer;
     metadata: Metadata<T>;
   },
-  dataShouldBeEmpty?: EmptiableRequests[]
+  dataShouldBeEmpty: EmptiableRequests[]
 ): {
   dataAccessLayer: DataAccessLayer;
   metadata: Metadata<T>;
@@ -48,7 +48,7 @@ export function emptifyMock<T>(
        * Fetch related events for an entity ID
        */
       async relatedEvents(...args): Promise<ResolverRelatedEvents> {
-        return dataShouldBeEmpty?.includes('relatedEvents')
+        return dataShouldBeEmpty.includes('relatedEvents')
           ? Promise.resolve({
               entityID: args[0],
               events: [],
@@ -61,7 +61,7 @@ export function emptifyMock<T>(
        * Fetch a ResolverTree for a entityID
        */
       async resolverTree(...args): Promise<ResolverTree> {
-        return dataShouldBeEmpty?.includes('resolverTree')
+        return dataShouldBeEmpty.includes('resolverTree')
           ? Promise.resolve(mockTreeWithNoProcessEvents())
           : dataAccessLayer.resolverTree(...args);
       },
@@ -70,7 +70,7 @@ export function emptifyMock<T>(
        * Get an array of index patterns that contain events.
        */
       indexPatterns(...args): string[] {
-        return dataShouldBeEmpty?.includes('indexPatterns')
+        return dataShouldBeEmpty.includes('indexPatterns')
           ? []
           : dataAccessLayer.indexPatterns(...args);
       },
@@ -79,7 +79,7 @@ export function emptifyMock<T>(
        * Get entities matching a document.
        */
       async entities(...args): Promise<ResolverEntityIndex> {
-        return dataShouldBeEmpty?.includes('entities')
+        return dataShouldBeEmpty.includes('entities')
           ? Promise.resolve([])
           : dataAccessLayer.entities(...args);
       },
