@@ -24,6 +24,7 @@ import {
 } from './providers/anomaly_detectors';
 import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
+import { MLClusterClientUninitialized } from './errors';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -55,7 +56,7 @@ export function createSharedServices(
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
-  getClusterClient: () => IClusterClient
+  getClusterClient: () => IClusterClient | null
 ): SharedServices {
   const getRequestItems = getRequestItemsProvider(resolveMlCapabilities, getClusterClient);
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
@@ -96,7 +97,7 @@ export function createSharedServices(
 
 function getRequestItemsProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
-  getClusterClient: () => IClusterClient
+  getClusterClient: () => IClusterClient | null
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
@@ -105,12 +106,18 @@ function getRequestItemsProvider(
     // While https://github.com/elastic/kibana/issues/64588 exists we
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
+    const clusterClient = getClusterClient();
+
+    if (clusterClient === null) {
+      throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
+    }
+
     if (request instanceof KibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
-      scopedClient = getClusterClient().asScoped(request);
+      scopedClient = clusterClient.asScoped(request);
     } else {
       hasMlCapabilities = () => Promise.resolve();
-      const { asInternalUser } = getClusterClient();
+      const { asInternalUser } = clusterClient;
       scopedClient = {
         asInternalUser,
         asCurrentUser: asInternalUser,

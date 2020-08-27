@@ -58,13 +58,6 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
 
-  getClusterClient(): IClusterClient {
-    if (this.clusterClient === null) {
-      throw Error('????');
-    }
-    return this.clusterClient;
-  }
-
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
@@ -166,7 +159,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         plugins.spaces,
         plugins.cloud,
         resolveMlCapabilities,
-        () => this.getClusterClient()
+        () => this.clusterClient
       ),
     };
   }
