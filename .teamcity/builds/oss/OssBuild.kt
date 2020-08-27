@@ -10,6 +10,10 @@ object OssBuild : BuildType({
 
   artifactRules = "+:build/oss/kibana-build-oss/**/* => kibana-oss.tar.gz"
 
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-16-")
+  }
+
   steps {
     script {
       name = "Build OSS Distribution"

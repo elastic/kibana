@@ -8,6 +8,10 @@ object DefaultBuild : BuildType({
   paused = true
   description = "Generates Default Build Distribution artifact"
 
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-16-")
+  }
+
   artifactRules = "+:install/kibana/**/* => kibana-default.tar.gz"
 
   steps {
