@@ -132,6 +132,7 @@ export const SplitByTermsUI = ({
             }
           >
             <FieldSelect
+              data-test-subj="groupByField"
               indexPattern={indexPattern}
               onChange={handleSelectChange('terms_field')}
               value={model.terms_field}

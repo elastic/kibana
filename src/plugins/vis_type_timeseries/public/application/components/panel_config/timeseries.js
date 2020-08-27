@@ -44,6 +44,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
+
 class TimeseriesPanelConfigUi extends Component {
   constructor(props) {
     super(props);
@@ -401,7 +402,7 @@ class TimeseriesPanelConfigUi extends Component {
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage
@@ -430,7 +431,7 @@ class TimeseriesPanelConfigUi extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }
