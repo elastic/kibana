@@ -31,6 +31,8 @@ import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
+import { EnableMonitorAlert } from './columns/enable_alert';
+import { STATUS_ALERT_COLUMN } from './translations';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -49,7 +51,13 @@ export const noItemsMessage = (loading: boolean, filters?: string) => {
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
-export const MonitorListComponent: React.FC<Props> = ({
+export const MonitorListComponent: ({
+  filters,
+  monitorList: { list, error, loading },
+  linkParameters,
+  pageSize,
+  setPageSize,
+}: Props) => any = ({
   filters,
   monitorList: { list, error, loading },
   linkParameters,
@@ -69,7 +77,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         ...map,
         [id]: (
           <MonitorListDrawer
-            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)!}
           />
         ),
       };
@@ -133,6 +141,18 @@ export const MonitorListComponent: React.FC<Props> = ({
       },
       render: (histogramSeries: HistogramPoint[] | null) => (
         <MonitorBarSeries histogramSeries={histogramSeries} />
+      ),
+    },
+    {
+      align: 'center' as const,
+      field: '',
+      name: STATUS_ALERT_COLUMN,
+      width: '150px',
+      render: (item: MonitorSummary) => (
+        <EnableMonitorAlert
+          monitorId={item.monitor_id}
+          monitorName={item.state.monitor.name || item.monitor_id}
+        />
       ),
     },
     {
