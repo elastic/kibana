@@ -1,4 +1,5 @@
 /*
+
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
@@ -45,15 +46,14 @@ Cypress.Commands.add(
     prevSubject: 'element',
   },
   (input, fileName, fileType = 'text/plain') => {
-    cy.fixture(fileName)
-      .then((content) => Cypress.Blob.base64StringToBlob(content, fileType))
-      .then((blob) => {
-        const testFile = new File([blob], fileName, { type: fileType });
-        const dataTransfer = new DataTransfer();
+    cy.fixture(fileName).then((content) => {
+      const blob = Cypress.Blob.base64StringToBlob(content, fileType);
+      const testFile = new File([blob], fileName, { type: fileType });
+      const dataTransfer = new DataTransfer();
 
-        dataTransfer.items.add(testFile);
-        input[0].files = dataTransfer.files;
-        return input;
-      });
+      dataTransfer.items.add(testFile);
+      input[0].files = dataTransfer.files;
+      return input;
+    });
   }
 );
