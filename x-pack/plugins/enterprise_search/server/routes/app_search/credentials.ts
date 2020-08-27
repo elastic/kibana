@@ -15,6 +15,7 @@ interface ICredential {
   type: string;
   access_all_engines: boolean;
 }
+
 interface ICredentialsResponse {
   results: ICredential[];
   meta?: {
@@ -25,6 +26,15 @@ interface ICredentialsResponse {
       size: number;
     };
   };
+}
+
+interface ICredentialsDetailsResponse {
+  lmAccount: {
+    id: string;
+    key: string;
+  };
+  apiUrl: string;
+  apiTokens: ICredential[];
 }
 
 export function registerCredentialsRoutes({
@@ -44,6 +54,18 @@ export function registerCredentialsRoutes({
       path: '/as/credentials/collection',
       hasValidData: (body?: ICredentialsResponse) => {
         return Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number';
+      },
+    })
+  );
+  router.get(
+    {
+      path: '/api/app_search/credentials/details',
+      validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/credentials/details',
+      hasValidData: (body?: ICredentialsDetailsResponse) => {
+        return !!body?.apiUrl;
       },
     })
   );
