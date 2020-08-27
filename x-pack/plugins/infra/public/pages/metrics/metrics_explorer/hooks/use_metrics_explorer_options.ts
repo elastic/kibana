@@ -9,19 +9,14 @@ import { values } from 'lodash';
 import createContainer from 'constate';
 import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { MetricsExplorerColor } from '../../../../../common/color_palette';
+import { Color } from '../../../../../common/color_palette';
 import { metricsExplorerMetricRT } from '../../../../../common/http_api/metrics_explorer';
 
 const metricsExplorerOptionsMetricRT = t.intersection([
   metricsExplorerMetricRT,
   t.partial({
     rate: t.boolean,
-    color: t.keyof(
-      Object.fromEntries(values(MetricsExplorerColor).map((c) => [c, null])) as Record<
-        MetricsExplorerColor,
-        null
-      >
-    ),
+    color: t.keyof(Object.fromEntries(values(Color).map((c) => [c, null])) as Record<Color, null>),
     label: t.string,
   }),
 ]);
@@ -100,17 +95,17 @@ export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
     aggregation: 'avg',
     field: 'system.cpu.user.pct',
-    color: MetricsExplorerColor.color0,
+    color: Color.color0,
   },
   {
     aggregation: 'avg',
     field: 'kubernetes.pod.cpu.usage.node.pct',
-    color: MetricsExplorerColor.color1,
+    color: Color.color1,
   },
   {
     aggregation: 'avg',
     field: 'docker.cpu.total.pct',
-    color: MetricsExplorerColor.color2,
+    color: Color.color2,
   },
 ];
 

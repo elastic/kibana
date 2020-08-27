@@ -19,6 +19,7 @@ describe('CertificateForm', () => {
             heartbeatIndices: 'heartbeat-8*',
             certExpirationThreshold: 7,
             certAgeThreshold: 36,
+            defaultConnectors: [],
           }}
           fieldErrors={null}
           isDisabled={false}
@@ -37,6 +38,7 @@ describe('CertificateForm', () => {
           heartbeatIndices: 'heartbeat-8*',
           certExpirationThreshold: 7,
           certAgeThreshold: 36,
+          defaultConnectors: [],
         }}
         fieldErrors={null}
         isDisabled={false}
@@ -90,6 +92,7 @@ describe('CertificateForm', () => {
           heartbeatIndices: 'heartbeat-8*',
           certExpirationThreshold: 7,
           certAgeThreshold: 36,
+          defaultConnectors: [],
         }}
         fieldErrors={null}
         isDisabled={false}

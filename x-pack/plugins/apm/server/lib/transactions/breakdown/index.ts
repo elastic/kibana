@@ -36,7 +36,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, apmEventClient, start, end } = setup;
+  const { uiFiltersES, apmEventClient, start, end, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -104,7 +104,11 @@ export async function getTransactionBreakdown({
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs: subAggs,
         },
       },
