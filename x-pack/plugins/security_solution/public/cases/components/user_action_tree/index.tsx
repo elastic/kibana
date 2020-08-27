@@ -56,7 +56,7 @@ export const UserActionTree = React.memo(
     updateCase,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { commentId } = useParams();
+    const { commentId } = useParams<{ commentId?: string }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);

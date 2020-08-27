@@ -198,4 +198,28 @@ describe('SavedObjectsManagement', () => {
       expect(result).toEqual({ path: 'called', uiCapabilitiesPath: 'my.path' });
     });
   });
+
+  describe('getNamespaceType()', () => {
+    it('returns empty for unknown type', () => {
+      const result = management.getNamespaceType({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual(undefined);
+    });
+
+    it('returns explicit value', () => {
+      registerType({ name: 'foo', namespaceType: 'single' });
+
+      const result = management.getNamespaceType({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual('single');
+    });
+  });
 });
