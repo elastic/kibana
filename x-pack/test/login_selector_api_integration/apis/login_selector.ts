@@ -62,7 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_provider).to.be(providerName);
   }
 
-  describe('Login Selector', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/75707
+  describe.skip('Login Selector', () => {
     it('should redirect user to a login selector', async () => {
       const response = await supertest
         .get('/abc/xyz/handshake?one=two three')

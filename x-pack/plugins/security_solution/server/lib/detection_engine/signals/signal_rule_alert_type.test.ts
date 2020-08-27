@@ -17,6 +17,7 @@ import {
   getExceptions,
   sortExceptionItems,
 } from './utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/utils';
 import { RuleExecutorOptions } from './types';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
@@ -36,6 +37,7 @@ jest.mock('./utils');
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
+jest.mock('./../../../../common/detection_engine/utils');
 
 const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
   alertId: ruleAlert.id,
@@ -223,6 +225,105 @@ describe('rules_notification_alert_type', () => {
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
           signalsCount: 10,
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = {};
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      payload.params.meta = {};
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is undefined use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      delete ruleAlert.params.meta;
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      delete payload.params.meta;
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
+    it('should resolve results_link with a custom link', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
         })
       );
     });
