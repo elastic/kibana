@@ -9,7 +9,7 @@ import { Agent, AgentAction, AgentActionSOAttributes } from '../../../common/typ
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { savedObjectToAgentAction } from './saved_objects';
 import { appContextService } from '../app_context';
-import { esKuery } from '../../../../../../src/plugins/data/server';
+import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 export async function createAgentAction(
   soClient: SavedObjectsClientContract,
@@ -30,16 +30,16 @@ export async function getAgentActionsForCheckin(
   soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<AgentAction[]> {
-  const filter = esKuery.nodeTypes.function.buildNode('and', [
-    esKuery.nodeTypes.function.buildNode(
+  const filter = nodeTypes.function.buildNode('and', [
+    nodeTypes.function.buildNode(
       'not',
-      esKuery.nodeTypes.function.buildNode(
+      nodeTypes.function.buildNode(
         'is',
         `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
         '*'
       )
     ),
-    esKuery.nodeTypes.function.buildNode(
+    nodeTypes.function.buildNode(
       'is',
       `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`,
       agentId
@@ -94,16 +94,16 @@ export async function getAgentActionByIds(
 }
 
 export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
-  const filter = esKuery.nodeTypes.function.buildNode('and', [
-    esKuery.nodeTypes.function.buildNode(
+  const filter = nodeTypes.function.buildNode('and', [
+    nodeTypes.function.buildNode(
       'not',
-      esKuery.nodeTypes.function.buildNode(
+      nodeTypes.function.buildNode(
         'is',
         `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
         '*'
       )
     ),
-    esKuery.nodeTypes.function.buildNode(
+    nodeTypes.function.buildNode(
       'range',
       `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at`,
       {
