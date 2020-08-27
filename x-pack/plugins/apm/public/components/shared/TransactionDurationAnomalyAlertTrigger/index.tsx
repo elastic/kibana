@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiSelect } from '@elastic/eui';
+import { EuiExpression, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
@@ -69,6 +69,15 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   };
 
   const fields = [
+    <EuiExpression
+      description={i18n.translate(
+        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
+        {
+          defaultMessage: 'Service',
+        }
+      )}
+      value={serviceName}
+    />,
     <PopoverExpression
       value={getEnvironmentLabel(params.environment)}
       title={i18n.translate(
