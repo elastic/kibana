@@ -23,14 +23,6 @@ const BetaHeader = styled(`header`)`
   margin-bottom: 1em;
 `;
 
-/**
- * The two query parameters we read/write on to control which view the table presents:
- */
-export interface CrumbInfo {
-  crumbId: string;
-  crumbEvent: string;
-}
-
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
   &.euiBreadcrumbs {
     background-color: ${(props) => props.background};
