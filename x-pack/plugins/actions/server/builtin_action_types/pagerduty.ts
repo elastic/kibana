@@ -135,12 +135,12 @@ function valdiateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   try {
-    configurationUtilities.ensureWhitelistedUri(getPagerDutyApiUrl(configObject));
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
       defaultMessage: 'error configuring pagerduty action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -161,6 +161,7 @@ async function executor(
   const secrets = execOptions.secrets;
   const params = execOptions.params;
   const services = execOptions.services;
+  const proxySettings = execOptions.proxySettings;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -171,7 +172,7 @@ async function executor(
 
   let response;
   try {
-    response = await postPagerduty({ apiUrl, data, headers, services });
+    response = await postPagerduty({ apiUrl, data, headers, services, proxySettings }, logger);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
       defaultMessage: 'error posting pagerduty event',

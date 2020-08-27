@@ -36,6 +36,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   deprecations: ({ rename, unused }) => [
     rename('sessionTimeout', 'session.idleTimeout'),
     unused('authorization.legacyFallback.enabled'),
+    unused('authc.saml.maxRedirectURLSize'),
     // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
     (settings, fromPath, log) => {
       if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
@@ -63,6 +64,19 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
           'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.'
         );
       }
+      return settings;
+    },
+    (settings, fromPath, log) => {
+      const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
+        string,
+        any
+      >;
+      if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
+        log(
+          '`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` is deprecated and is no longer used'
+        );
+      }
+
       return settings;
     },
   ],

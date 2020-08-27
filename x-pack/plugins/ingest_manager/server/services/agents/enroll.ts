@@ -16,7 +16,7 @@ import { appContextService } from '../app_context';
 export async function enroll(
   soClient: SavedObjectsClientContract,
   type: AgentType,
-  configId: string,
+  agentPolicyId: string,
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
@@ -33,7 +33,7 @@ export async function enroll(
   const agentData: AgentSOAttributes = {
     shared_id: sharedId,
     active: true,
-    config_id: configId,
+    policy_id: agentPolicyId,
     type,
     enrolled_at: enrolledAt,
     user_provided_metadata: metadata?.userProvided ?? {},
@@ -64,7 +64,7 @@ export async function enroll(
     );
   }
 
-  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id, configId);
+  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
     access_api_key_id: accessAPIKey.id,

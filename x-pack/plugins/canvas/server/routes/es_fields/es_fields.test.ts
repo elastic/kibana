@@ -6,12 +6,8 @@
 
 import { initializeESFieldsRoute } from './es_fields';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import {
-  httpServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-  elasticsearchServiceMock,
-} from 'src/core/server/mocks';
+import { httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -27,14 +23,10 @@ describe('Retrieve ES Fields', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter();
-    initializeESFieldsRoute({
-      router,
-      logger: loggingSystemMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeESFieldsRoute(routerDeps);
 
-    routeHandler = router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
   it(`returns 200 with fields from existing index/index pattern`, async () => {

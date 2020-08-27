@@ -21,7 +21,7 @@ import {
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
-import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
+import { IngestManagerOverview, EPMApp, AgentPolicyApp, FleetApp, DataStreamApp } from './sections';
 import { DepsContext, ConfigContext, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { useCore, sendSetup, sendGetPermissionsCheck } from './hooks';
@@ -190,9 +190,9 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                       <EPMApp />
                     </DefaultLayout>
                   </Route>
-                  <Route path={PAGE_ROUTING_PATHS.configurations}>
-                    <DefaultLayout section="agent_config">
-                      <AgentConfigApp />
+                  <Route path={PAGE_ROUTING_PATHS.policies}>
+                    <DefaultLayout section="agent_policy">
+                      <AgentPolicyApp />
                     </DefaultLayout>
                   </Route>
                   <Route path={PAGE_ROUTING_PATHS.data_streams}>

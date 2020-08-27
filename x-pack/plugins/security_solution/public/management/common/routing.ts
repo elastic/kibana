@@ -13,6 +13,7 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
@@ -72,13 +73,21 @@ export const getEndpointDetailsPath = (
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
-export const getPoliciesPath = (search?: string) =>
-  `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
+export const getPoliciesPath = (search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
     tabName: AdministrationSubTab.policies,
   })}${appendSearch(search)}`;
+};
 
-export const getPolicyDetailPath = (policyId: string, search?: string) =>
-  `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+export const getPolicyDetailPath = (policyId: string, search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;
+};
+
+export const getTrustedAppsListPath = (search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
+    tabName: AdministrationSubTab.trustedApps,
+  })}${appendSearch(search)}`;
+};

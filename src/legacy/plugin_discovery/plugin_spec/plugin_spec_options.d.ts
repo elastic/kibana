@@ -24,12 +24,8 @@ import { SavedObjectsLegacyManagementDefinition } from '../../../core/server/sav
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
   injectDefaultVars?: (server: Server) => { [key: string]: any };
-  styleSheetPaths?: string;
   savedObjectsManagement?: SavedObjectsLegacyManagementDefinition;
   mappings?: unknown;
-  visTypes?: string[];
-  interpreter?: string[];
-  hacks?: string[];
 }
 
 export interface PluginSpecOptions {

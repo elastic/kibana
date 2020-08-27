@@ -17,6 +17,11 @@ import {
 } from './schemas/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import {
+  getCategorizerStatsSchema,
+  getCategorizerStoppedPartitionsSchema,
+} from './schemas/results_service_schema';
 
 function getAnomaliesTableData(legacyClient: ILegacyScopedClusterClient, payload: any) {
   const rs = resultsServiceProvider(legacyClient);
@@ -69,6 +74,19 @@ function getPartitionFieldsValues(legacyClient: ILegacyScopedClusterClient, payl
   const rs = resultsServiceProvider(legacyClient);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
+}
+
+function getCategorizerStats(legacyClient: ILegacyScopedClusterClient, params: any, query: any) {
+  const { jobId } = params;
+  const { partitionByValue } = query;
+  const rs = resultsServiceProvider(legacyClient);
+  return rs.getCategorizerStats(jobId, partitionByValue);
+}
+
+function getCategoryStoppedPartitions(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const { jobIds, fieldToBucket } = payload;
+  const rs = resultsServiceProvider(legacyClient);
+  return rs.getCategoryStoppedPartitions(jobIds, fieldToBucket);
 }
 
 /**
@@ -262,6 +280,68 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         });
       } catch (error) {
         return response.customError(wrapError(error));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {get} /api/ml/results/:jobId/categorizer_stats
+   * @apiName GetCategorizerStats
+   * @apiDescription Returns the categorizer stats for the specified job ID
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) getCategorizerStatsSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/results/{jobId}/categorizer_stats',
+      validate: {
+        params: jobIdSchema,
+        query: getCategorizerStatsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+      try {
+        const resp = await getCategorizerStats(legacyClient, request.params, request.query);
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {get} /api/ml/results/category_stopped_partitions
+   * @apiName GetCategoryStoppedPartitions
+   * @apiDescription Returns information on the partitions that have stopped being categorized due to the categorization status changing from ok to warn. Can return either the list of stopped partitions for each job, or just the list of job IDs.
+   * @apiSchema (body) getCategorizerStoppedPartitionsSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/results/category_stopped_partitions',
+      validate: {
+        body: getCategorizerStoppedPartitionsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+      try {
+        const resp = await getCategoryStoppedPartitions(legacyClient, request.body);
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
       }
     })
   );

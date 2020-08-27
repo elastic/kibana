@@ -55,7 +55,7 @@ export const calculateStatus$ = (
             };
           } else if (warningNodes.length > 0) {
             return {
-              level: ServiceStatusLevels.degraded,
+              level: ServiceStatusLevels.available,
               summary:
                 // Message should always be present, but this is a safe fallback
                 message ??

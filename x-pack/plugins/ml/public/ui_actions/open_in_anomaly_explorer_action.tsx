@@ -17,7 +17,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     getIconType(context: ActionContextMapping[typeof OPEN_IN_ANOMALY_EXPLORER_ACTION]): string {
-      return 'tableOfContents';
+      return 'visTable';
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.openInAnomalyExplorerTitle', {

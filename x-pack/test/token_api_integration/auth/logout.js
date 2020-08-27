@@ -20,7 +20,12 @@ export default function ({ getService }) {
     const response = await supertest
       .post('/internal/security/login')
       .set('kbn-xsrf', 'true')
-      .send({ username: 'elastic', password: 'changeme' });
+      .send({
+        providerType: 'token',
+        providerName: 'token',
+        currentURL: '/',
+        params: { username: 'elastic', password: 'changeme' },
+      });
 
     const cookie = extractSessionCookie(response);
     if (!cookie) {
@@ -68,7 +73,7 @@ export default function ({ getService }) {
         .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
-        .expect(400);
+        .expect(401);
     });
   });
 }

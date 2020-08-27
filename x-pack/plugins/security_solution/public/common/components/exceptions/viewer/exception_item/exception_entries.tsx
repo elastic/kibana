@@ -13,6 +13,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiHideFor,
   EuiBadge,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -58,6 +59,10 @@ const MyNestedValueContainer = styled.div`
 
 const MyNestedValue = styled.span`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+const ValueBadgeGroup = styled(EuiBadgeGroup)`
+  width: 100%;
 `;
 
 interface ExceptionEntriesComponentProps {
@@ -115,15 +120,15 @@ const ExceptionEntriesComponent = ({
         render: (values: string | string[] | null) => {
           if (Array.isArray(values)) {
             return (
-              <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="flexStart">
+              <ValueBadgeGroup gutterSize="xs">
                 {values.map((value) => {
                   return (
-                    <EuiFlexItem key={value} grow={false}>
-                      <EuiBadge color="#DDD">{value}</EuiBadge>
-                    </EuiFlexItem>
+                    <EuiBadge color="#DDD" key={value}>
+                      {value}
+                    </EuiBadge>
                   );
                 })}
-              </EuiFlexGroup>
+              </ValueBadgeGroup>
             );
           } else {
             return values ?? getEmptyValue();

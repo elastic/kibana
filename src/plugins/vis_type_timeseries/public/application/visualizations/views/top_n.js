@@ -110,7 +110,9 @@ export class TopN extends Component {
       const isPositiveValue = lastValue >= 0;
 
       const intervalLength = TopN.calcDomain(renderMode, min, max);
-      const width = 100 * (Math.abs(lastValue) / intervalLength);
+      // if both are 0, the division returns NaN causing unexpected behavior.
+      // For this it defaults to 0
+      const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
 
       const styles = reactcss(
         {

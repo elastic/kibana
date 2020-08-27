@@ -108,6 +108,8 @@ export const metricsExplorerResponseRT = rt.type({
   pageInfo: metricsExplorerPageInfoRT,
 });
 
+export type AfterKey = rt.TypeOf<typeof afterKeyObjectRT>;
+
 export type MetricsExplorerAggregation = rt.TypeOf<typeof metricsExplorerAggregationRT>;
 
 export type MetricsExplorerColumnType = rt.TypeOf<typeof metricsExplorerColumnTypeRT>;

@@ -26,8 +26,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should disable Map application save button', async () => {
-      // saving map should be a no-op because its diabled
-      await testSubjects.click('mapSaveButton');
+      const mapSaveButton = await testSubjects.find('mapSaveButton');
+      const isDisabled = await mapSaveButton.getAttribute('disabled');
+      expect(isDisabled).to.be('true');
 
       const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(true);

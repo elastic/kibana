@@ -27,6 +27,8 @@ import { TimelionVisComponent, TimelionVisComponentProp } from './components';
 import { TimelionOptions, TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+
 export const TIMELION_VIS_NAME = 'timelion';
 
 export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) {
@@ -63,6 +65,9 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     requestHandler: timelionRequestHandler,
     responseHandler: 'none',
     inspectorAdapters: {},
+    getSupportedTriggers: () => {
+      return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    },
     options: {
       showIndexSelection: false,
       showQueryBar: false,

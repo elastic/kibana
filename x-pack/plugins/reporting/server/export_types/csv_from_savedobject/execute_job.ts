@@ -41,7 +41,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
     const { jobParams } = jobPayload;
-    const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
+    const jobLogger = logger.clone(['immediate']);
     const generateCsv = createGenerateCsv(jobLogger);
     const { panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
 

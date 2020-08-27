@@ -21,7 +21,11 @@ import { OverlayStart } from 'kibana/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { createAction, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  ActionExecutionContext,
+  createAction,
+  UiActionsStart,
+} from '../../../../src/plugins/ui_actions/public';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';
@@ -37,7 +41,8 @@ export const ACTION_SHOWCASE_PLUGGABILITY = 'ACTION_SHOWCASE_PLUGGABILITY';
 export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABILITY>({
   type: ACTION_SHOWCASE_PLUGGABILITY,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
-  execute: async () => alert("Isn't that cool?!"),
+  execute: async (context: ActionExecutionContext) =>
+    alert(`Isn't that cool?! Triggered by ${context.trigger?.id} trigger`),
 });
 
 export interface PhoneContext {

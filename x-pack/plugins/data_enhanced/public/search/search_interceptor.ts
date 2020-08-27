@@ -14,14 +14,13 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
-import { IAsyncSearchRequest } from '../../common';
+import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
-   * @param application The `core.application` service
+   * @param deps `SearchInterceptorDeps`
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
   constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
@@ -77,10 +76,11 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     const { combinedSignal, cleanup } = this.setupTimers(options);
     const aborted$ = from(toPromise(combinedSignal));
+    const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
-    this.pendingCount$.next(++this.pendingCount);
+    this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+    return this.runSearch(request, combinedSignal, strategy).pipe(
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
         if (!response || (!response.isRunning && response.isPartial)) {
@@ -97,7 +97,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return this.runSearch({ id }, combinedSignal, options?.strategy);
+            return this.runSearch({ ...request, id }, combinedSignal, strategy);
           })
         );
       }),
@@ -113,7 +113,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         },
       }),
       finalize(() => {
-        this.pendingCount$.next(--this.pendingCount);
+        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
       })
     );
