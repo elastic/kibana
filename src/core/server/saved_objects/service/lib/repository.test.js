@@ -2043,31 +2043,17 @@ describe('SavedObjectsRepository', () => {
     describe('client calls', () => {
       it(`should use the ES delete action when not using a multi-namespace type`, async () => {
         await deleteSuccess(type, id);
+        expect(client.get).not.toHaveBeenCalled();
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use ES get action then delete action when using a multi-namespace type with no namespaces remaining`, async () => {
+      it(`should use ES get action then delete action when using a multi-namespace type`, async () => {
         await deleteSuccess(MULTI_NAMESPACE_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use ES get action then update action when using a multi-namespace type with one or more namespaces remaining`, async () => {
-        const mockResponse = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id });
-        mockResponse._source.namespaces = ['default', 'some-other-nameespace'];
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockResponse)
-        );
-        client.update.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'updated' })
-        );
-
-        await savedObjectsRepository.delete(MULTI_NAMESPACE_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
-        expect(client.update).toHaveBeenCalledTimes(1);
-      });
-
-      it(`includes the version of the existing document when type is multi-namespace`, async () => {
+      it(`includes the version of the existing document when using a multi-namespace type`, async () => {
         await deleteSuccess(MULTI_NAMESPACE_TYPE, id);
         const versionProperties = {
           if_seq_no: mockVersionProps._seq_no,
@@ -2169,19 +2155,18 @@ describe('SavedObjectsRepository', () => {
         expect(client.get).toHaveBeenCalledTimes(1);
       });
 
-      it(`throws when ES is unable to find the document during update`, async () => {
-        const mockResponse = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id });
-        mockResponse._source.namespaces = ['default', 'some-other-nameespace'];
+      it(`throws when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`, async () => {
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        response._source.namespaces = [namespace, 'bar-namespace'];
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockResponse)
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
-        client.update.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        await expect(
+          savedObjectsRepository.delete(MULTI_NAMESPACE_TYPE, id, { namespace })
+        ).rejects.toThrowError(
+          'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-
-        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
-        expect(client.update).toHaveBeenCalledTimes(1);
       });
 
       it(`throws when ES is unable to find the document during delete`, async () => {

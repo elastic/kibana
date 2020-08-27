@@ -553,7 +553,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
@@ -561,38 +561,11 @@ export class SavedObjectsRepository {
 
     if (this._registry.isMultiNamespace(type)) {
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
-      const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
-      const remainingNamespaces = existingNamespaces?.filter(
-        (x) => x !== SavedObjectsUtils.namespaceIdToString(namespace)
-      );
-
-      if (remainingNamespaces?.length) {
-        // if there is 1 or more namespace remaining, update the saved object
-        const time = this._getCurrentTime();
-
-        const doc = {
-          updated_at: time,
-          namespaces: remainingNamespaces,
-        };
-
-        const { statusCode } = await this.client.update(
-          {
-            id: rawId,
-            index: this.getIndexForType(type),
-            ...getExpectedVersionProperties(undefined, preflightResult),
-            refresh,
-            body: {
-              doc,
-            },
-          },
-          { ignore: [404] }
+      const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult) ?? [];
+      if (!force && existingNamespaces.length > 1) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-
-        if (statusCode === 404) {
-          // see "404s from missing index" above
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        return {};
       }
     }
 
