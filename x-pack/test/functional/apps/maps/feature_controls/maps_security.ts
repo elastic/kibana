@@ -181,8 +181,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('checkboxSelectAll');
       });
 
-      // This behavior was removed when the Maps app was migrated to NP
-      it.skip(`shows read-only badge`, async () => {
+      it(`shows read-only badge`, async () => {
         await globalNav.badgeExistsOrFail('Read only');
       });
 
