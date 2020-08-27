@@ -71,10 +71,16 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             endpointResponse.hosts,
             nonExistingPolicies(getState())
           );
-          if (missingPolicies !== undefined) {
+          if (missingPolicies.packagePolicy !== undefined) {
             dispatch({
               type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: missingPolicies,
+              payload: missingPolicies.packagePolicy,
+            });
+          }
+          if (missingPolicies.agentPolicy !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointAgentPolicies',
+              payload: missingPolicies.agentPolicy,
             });
           }
         } catch (error) {
@@ -258,7 +264,10 @@ const getNonExistingPoliciesForEndpointsList = async (
   const policyIdsToCheck = Array.from(
     new Set(
       hosts
-        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
+        .filter(
+          (host) =>
+            !currentNonExistingPolicies.packagePolicy[host.metadata.Endpoint.policy.applied.id]
+        )
         .map((host) => host.metadata.Endpoint.policy.applied.id)
     )
   );
@@ -279,22 +288,28 @@ const getNonExistingPoliciesForEndpointsList = async (
         )})`,
       },
     })
-  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentPolicy) => {
-    (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-      list[packagePolicy as string] = true;
-    });
-    return list;
-  }, {});
-
-  const nonExisting = policyIdsToCheck.reduce<EndpointState['nonExistingPolicies']>(
-    (list, policyId) => {
-      if (policiesFound[policyId]) {
-        return list;
-      }
-      list[policyId] = true;
+  ).items.reduce<EndpointState['nonExistingPolicies']>(
+    (list, agentPolicy) => {
+      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
+        list.packagePolicy[packagePolicy as string] = true;
+        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
+      });
       return list;
     },
-    {}
+    { packagePolicy: {}, agentPolicy: {} }
+  );
+
+  // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
+  const nonExisting = policyIdsToCheck.reduce<EndpointState['nonExistingPolicies']>(
+    (list, policyId) => {
+      if (policiesFound.packagePolicy[policyId]) {
+        list.agentPolicy[policyId] = policiesFound.agentPolicy[policyId];
+        return list;
+      }
+      list.packagePolicy[policyId] = true;
+      return list;
+    },
+    { packagePolicy: {}, agentPolicy: {} }
   );
 
   if (Object.keys(nonExisting).length === 0) {

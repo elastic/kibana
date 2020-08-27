@@ -34,7 +34,7 @@ export const EndpointPolicyLink = memo<
   }, [formatUrl, policyId]);
   const clickHandler = useNavigateByRouterEventHandler(toRoutePath, onClick);
 
-  if (missingPolicies[policyId]) {
+  if (missingPolicies.packagePolicy[policyId]) {
     return (
       <span className={otherProps.className} data-test-subj={otherProps['data-test-subj']}>
         {children}

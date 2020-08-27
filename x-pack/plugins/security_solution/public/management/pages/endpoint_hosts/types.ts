@@ -51,13 +51,18 @@ export interface EndpointState {
   /** Endpoint package info */
   endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** tracks the list of policies IDs used in Host metadata that may no longer exist */
-  nonExistingPolicies: Record<string, boolean>;
+  nonExistingPolicies: PolicyIds;
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** Is auto-refresh enabled */
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */
   autoRefreshInterval: number;
+}
+
+interface PolicyIds {
+  packagePolicy: Record<string, boolean>;
+  agentPolicy: Record<string, string>;
 }
 
 /**

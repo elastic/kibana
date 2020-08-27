@@ -81,6 +81,11 @@ interface ServerReturnedEndpointNonExistingPolicies {
   payload: EndpointState['nonExistingPolicies'];
 }
 
+interface ServerReturnedEndpointAgentPolicies {
+  type: 'serverReturnedEndpointAgentPolicies';
+  payload: EndpointState['nonExistingPolicies'];
+}
+
 interface ServerReturnedEndpointExistValue {
   type: 'serverReturnedEndpointExistValue';
   payload: boolean;
