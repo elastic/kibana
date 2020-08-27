@@ -20,6 +20,7 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpStart } from 'src/core/public';
 import { LoadingPage } from '../../loading_page';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -27,7 +28,7 @@ import { euiStyled } from '../../../../../observability/public';
 import { useTrialStatus } from '../../../hooks/use_trial_status';
 
 export const SubscriptionSplashContent: React.FC = () => {
-  const { services } = useKibana();
+  const { services } = useKibana<{ http: HttpStart }>();
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
 
   useEffect(() => {

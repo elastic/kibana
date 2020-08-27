@@ -62,7 +62,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     const kibana = useKibana();
-    const { tabName } = useParams();
+    const { tabName } = useParams<{ tabName: string }>();
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {

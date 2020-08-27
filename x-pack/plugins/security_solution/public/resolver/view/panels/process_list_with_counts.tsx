@@ -16,12 +16,13 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
+import { formatter, StyledBreadcrumbs } from './panel_content_utilities';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
+import { CrumbInfo } from '../../types';
 
 const StyledLimitWarning = styled(LimitWarning)`
   flex-flow: row wrap;

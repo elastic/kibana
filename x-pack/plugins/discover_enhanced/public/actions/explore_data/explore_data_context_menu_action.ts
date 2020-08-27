@@ -17,7 +17,8 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
  * This is "Explore underlying data" action which appears in the context
  * menu of a dashboard panel.
  */
-export class ExploreDataContextMenuAction extends AbstractExploreDataAction<EmbeddableContext>
+export class ExploreDataContextMenuAction
+  extends AbstractExploreDataAction<EmbeddableContext>
   implements Action<EmbeddableContext> {
   public readonly id = ACTION_EXPLORE_DATA;
 

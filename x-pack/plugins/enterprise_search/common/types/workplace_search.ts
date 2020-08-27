@@ -17,3 +17,10 @@ export interface IOrganization {
   name: string;
   defaultOrgName: string;
 }
+
+export interface IWorkplaceSearchInitialData {
+  canCreateInvitations: boolean;
+  isFederatedAuth: boolean;
+  organization: IOrganization;
+  fpAccount: IAccount;
+}

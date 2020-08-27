@@ -40,6 +40,7 @@ describe('read_rules', () => {
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const alertsClient = alertsClientMock.create();
       const result = getResult();
+      // @ts-expect-error
       delete result.alertTypeId;
       alertsClient.get.mockResolvedValue(result);
 

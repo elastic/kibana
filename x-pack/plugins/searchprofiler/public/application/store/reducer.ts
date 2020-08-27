@@ -39,7 +39,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
         indexName: value.indexName,
         operation: Object.freeze(restOfOperation),
         // prettier-ignore
-        shardName: `[${/* shard id */value.shard.id[0]}][${/* shard number */value.shard.id[2] }]`
+        shardName: `[${/* shard id */value.shard.id[0]}][${/* shard number */value.shard.id[2] }]`,
       };
     } else {
       nextState.highlightDetails = null;

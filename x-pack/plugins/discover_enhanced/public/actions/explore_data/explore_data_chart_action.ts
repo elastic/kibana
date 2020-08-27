@@ -5,7 +5,10 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
+import {
+  DiscoverUrlGeneratorState,
+  SearchInput,
+} from '../../../../../../src/plugins/discover/public';
 import {
   ApplyGlobalFilterActionContext,
   esFilters,
@@ -22,7 +25,8 @@ export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
  * This is "Explore underlying data" action which appears in popup context
  * menu when user clicks a value in visualization or brushes a time range.
  */
-export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDataChartActionContext>
+export class ExploreDataChartAction
+  extends AbstractExploreDataAction<ExploreDataChartActionContext>
   implements Action<ExploreDataChartActionContext> {
   public readonly id = ACTION_EXPLORE_DATA_CHART;
 
@@ -59,7 +63,7 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     if (embeddable) {
       state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
-      const input = embeddable.getInput();
+      const input = embeddable.getInput() as Readonly<SearchInput>;
 
       if (input.timeRange && !state.timeRange) state.timeRange = input.timeRange;
       if (input.query) state.query = input.query;

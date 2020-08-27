@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
+import { formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
   processPath,
   processPid,
@@ -31,6 +31,7 @@ import {
 import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
+import { CrumbInfo } from '../../types';
 
 const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
