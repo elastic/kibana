@@ -46,7 +46,7 @@ project {
       param("maxInstances", "20")
       param("imageType", "ImageFamily")
       param("machineType", "n2-standard-16")
-      param("diskSizeGb", "100")
+      param("diskSizeGb", "")
     }
     feature {
       id = "KIBANA_BRIANSEEDERS_STANDARD_4"
@@ -69,7 +69,7 @@ project {
       param("maxInstances", "20")
       param("imageType", "ImageFamily")
       param("machineType", "n2-standard-4")
-      param("diskSizeGb", "30")
+      param("diskSizeGb", "")
     }
     feature {
       id = "kibana-brianseeders"
