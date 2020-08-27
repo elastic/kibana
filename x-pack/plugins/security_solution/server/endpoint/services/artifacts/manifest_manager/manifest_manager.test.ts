@@ -13,7 +13,7 @@ import { getManifestManagerMock, ManifestManagerMockType } from './manifest_mana
 import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
-  jest.setTimeout(200000); // FIXME: remove before push/commit. Testing only
+  jest.setTimeout(200000); // FIXME:PT remove before push/commit. Testing only
 
   describe('ManifestManager sanity checks', () => {
     test('ManifestManager can retrieve and diff manifests', async () => {
@@ -281,11 +281,17 @@ describe('manifest_manager', () => {
       const oldManifest = await manifestManager.getLastComputedManifest();
       const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
-      const oldArtifactId = diffs[0].id;
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
+      const firstOldArtifactId = diffs.find((diff) => diff.type === 'delete')!.id;
+      const FirstNewArtifactId = diffs.find((diff) => diff.type === 'add')!.id;
 
-      const artifact = newManifest.getArtifact(newArtifactId)!;
+      // Compress all new artifacts
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
+
+      const artifact = newManifest.getArtifact(FirstNewArtifactId)!;
       if (isCompleteArtifact(artifact)) {
         await manifestManager.pushArtifacts([artifact]);
       } else {
@@ -293,7 +299,7 @@ describe('manifest_manager', () => {
       }
 
       await manifestManager.commit(newManifest);
-      await manifestManager.deleteArtifacts([oldArtifactId]);
+      await manifestManager.deleteArtifacts([firstOldArtifactId]);
 
       // created new artifact
       expect(savedObjectsClient.create.mock.calls[0][0]).toEqual(
@@ -308,7 +314,7 @@ describe('manifest_manager', () => {
       // deleted old artifact
       expect(savedObjectsClient.delete).toHaveBeenCalledWith(
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        oldArtifactId
+        firstOldArtifactId
       );
     });
 
