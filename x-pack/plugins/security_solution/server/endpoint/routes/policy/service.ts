@@ -7,6 +7,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { INITIAL_POLICY_ID } from './index';
 
 export function getESQueryPolicyResponseByHostID(hostID: string, index: string) {
   return {
@@ -20,7 +21,7 @@ export function getESQueryPolicyResponseByHostID(hostID: string, index: string) 
           },
           must_not: {
             term: {
-              'Endpoint.policy.applied.name': 'initial',
+              'Endpoint.policy.applied.id': INITIAL_POLICY_ID,
             },
           },
         },
