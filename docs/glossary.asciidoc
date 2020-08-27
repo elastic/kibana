@@ -151,7 +151,7 @@ that you are interested in.
 A navigation path that retains context (time range and filters)
 from the source to the destination, so you can view the data from a new perspective.
 A dashboard that shows the overall status of multiple data centers
-might have a drilldown to a dashboard for a single data center. See {kibana-ref}/drilldowns.html[Drilldowns].
+might have a drilldown to a dashboard for a single data center. See {kibana-ref}/dashboard.html[Drilldowns].
 // end::drilldown-def[]
 
 
