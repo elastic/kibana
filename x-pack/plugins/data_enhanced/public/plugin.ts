@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
@@ -39,6 +40,7 @@ export class DataEnhancedPlugin
         uiSettings: core.uiSettings,
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
+        loadingCount$: new BehaviorSubject(0),
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
