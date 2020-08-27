@@ -21,7 +21,7 @@ import {
 const defaultPlaceholderMessage = i18n.translate(
   'xpack.lens.indexPattern.filters.label.placeholder',
   {
-    defaultMessage: 'All requests',
+    defaultMessage: 'All records',
   }
 );
 
@@ -85,11 +85,11 @@ export const FilterPopover = ({
             placeholder={
               tempFilter.input.language === SEARCH_QUERY_LANGUAGE.KUERY
                 ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
-                    defaultMessage: 'e.g. {example}',
+                    defaultMessage: 'Example: {example}',
                     values: { example: 'method : "GET" or status : "404"' },
                   })
                 : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
-                    defaultMessage: 'e.g. {example}',
+                    defaultMessage: 'Example: {example}',
                     values: { example: 'method:GET OR status:404' },
                   })
             }

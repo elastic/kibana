@@ -97,14 +97,13 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
   getPossibleOperationForField: ({ type }) => {
     if (type === 'document') {
       return {
-        dataType: 'number',
+        dataType: 'string',
         isBucketed: true,
         scale: 'ordinal',
       };
     }
   },
   isTransferable: () => false,
-
   buildColumn({ suggestedPriority, field }) {
     return {
       label: searchQueryLabel,
@@ -129,13 +128,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
       filters: column.params.filters.length > 0 ? column.params.filters : [defaultSearchQuery],
     },
   }),
-  onFieldChange: (oldColumn, indexPattern, field) => {
-    return {
-      ...oldColumn,
-      label: field.displayName,
-      sourceField: field.name,
-    };
-  },
+
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
 
