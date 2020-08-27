@@ -28,13 +28,19 @@ import { displaySuccessToast, useStateToaster } from '../../../../../common/comp
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserInfo } from '../../../../components/user_info';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
-import { FormHook, FormData } from '../../../../../shared_imports';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
-import { formatRule } from '../create/helpers';
+import {
+  formatRule,
+  stepIsValid,
+  isDefineStep,
+  isAboutStep,
+  isScheduleStep,
+  isActionsStep,
+} from '../create/helpers';
 import {
   getStepsData,
   redirectToDetections,
@@ -42,32 +48,9 @@ import {
   userHasNoPermissions,
 } from '../helpers';
 import * as ruleI18n from '../translations';
-import {
-  RuleStep,
-  DefineStepRule,
-  AboutStepRule,
-  ScheduleStepRule,
-  ActionsStepRule,
-} from '../types';
+import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
-
-interface StepRuleForm {
-  isValid: boolean;
-}
-interface AboutStepRuleForm extends StepRuleForm {
-  data: AboutStepRule | null;
-}
-interface DefineStepRuleForm extends StepRuleForm {
-  data: DefineStepRule | null;
-}
-interface ScheduleStepRuleForm extends StepRuleForm {
-  data: ScheduleStepRule | null;
-}
-
-interface ActionsStepRuleForm extends StepRuleForm {
-  data: ActionsStepRule | null;
-}
 
 const EditRulePageComponent: FC = () => {
   const history = useHistory();
@@ -83,49 +66,48 @@ const EditRulePageComponent: FC = () => {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
-  const initLoading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
-  const [loading, rule] = useRule(ruleId);
+  const [ruleLoading, rule] = useRule(ruleId);
+  const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
   const [initForm, setInitForm] = useState(false);
-  const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
-    data: null,
-    isValid: false,
-  });
-  const [myDefineRuleForm, setMyDefineRuleForm] = useState<DefineStepRuleForm>({
-    data: null,
-    isValid: false,
-  });
-  const [myScheduleRuleForm, setMyScheduleRuleForm] = useState<ScheduleStepRuleForm>({
-    data: null,
-    isValid: false,
-  });
-  const [myActionsRuleForm, setMyActionsRuleForm] = useState<ActionsStepRuleForm>({
-    data: null,
-    isValid: false,
-  });
-  const [selectedTab, setSelectedTab] = useState<EuiTabbedContentTab>();
-  const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
+  const stepsForm = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: null,
     [RuleStep.aboutRule]: null,
     [RuleStep.scheduleRule]: null,
     [RuleStep.ruleActions]: null,
   });
+  const stepsData = useRef<RuleStepsFormData>({
+    [RuleStep.defineRule]: { isValid: false, data: undefined },
+    [RuleStep.aboutRule]: { isValid: false, data: undefined },
+    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
+    [RuleStep.ruleActions]: { isValid: false, data: undefined },
+  });
+  const defineStep = stepsData.current[RuleStep.defineRule];
+  const aboutStep = stepsData.current[RuleStep.aboutRule];
+  const scheduleStep = stepsData.current[RuleStep.scheduleRule];
+  const actionsStep = stepsData.current[RuleStep.ruleActions];
+  const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
+  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setStepsForm = useCallback(
-    (step: RuleStep, form: FormHook<FormData>) => {
+    <K extends keyof RuleStepsFormHooks>(step: K, form: RuleStepsFormHooks[K]) => {
       stepsForm.current[step] = form;
-      if (initForm && step === (selectedTab?.id as RuleStep) && form.isSubmitted === false) {
+      if (initForm && step === activeStep && form?.isSubmitted === false) {
         setInitForm(false);
         form.submit();
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [initForm, selectedTab]
+    [initForm, activeStep]
   );
+  const setStepData = useCallback(
+    <K extends keyof RuleStepsData>(step: K, data: RuleStepsData[K], isValid: boolean) => {
+      stepsData.current[step] = { ...stepsData.current[step], data, isValid };
+    },
+    []
+  );
+
   const tabs = useMemo(
     () => [
       {
@@ -135,13 +117,13 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading || initLoading} title={ruleI18n.DEFINITION}>
-              {myDefineRuleForm.data != null && (
+            <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
+              {defineStep.data != null && (
                 <StepDefineRule
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={myDefineRuleForm.data}
+                  defaultValues={defineStep.data}
                   setForm={setStepsForm}
                 />
               )}
@@ -157,14 +139,14 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading || initLoading} title={ruleI18n.ABOUT}>
-              {myAboutRuleForm.data != null && myDefineRuleForm.data != null && (
+            <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+              {aboutStep.data != null && defineStep.data != null && (
                 <StepAboutRule
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={myAboutRuleForm.data}
-                  defineRuleData={myDefineRuleForm.data}
+                  defaultValues={aboutStep.data}
+                  defineRuleData={defineStep.data}
                   setForm={setStepsForm}
                 />
               )}
@@ -180,13 +162,13 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading || initLoading} title={ruleI18n.SCHEDULE}>
-              {myScheduleRuleForm.data != null && (
+            <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+              {scheduleStep.data != null && (
                 <StepScheduleRule
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={myScheduleRuleForm.data}
+                  defaultValues={scheduleStep.data}
                   setForm={setStepsForm}
                 />
               )}
@@ -201,13 +183,13 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading || initLoading} title={ruleI18n.ACTIONS}>
-              {myActionsRuleForm.data != null && (
+            <StepPanel loading={loading} title={ruleI18n.ACTIONS}>
+              {actionsStep.data != null && (
                 <StepRuleActions
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={myActionsRuleForm.data}
+                  defaultValues={actionsStep.data}
                   setForm={setStepsForm}
                   actionMessageParams={actionMessageParams}
                 />
@@ -218,125 +200,76 @@ const EditRulePageComponent: FC = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      rule,
+      rule?.immutable,
       loading,
-      initLoading,
+      defineStep.data,
       isLoading,
-      myAboutRuleForm,
-      myDefineRuleForm,
-      myScheduleRuleForm,
-      myActionsRuleForm,
       setStepsForm,
-      stepsForm,
+      aboutStep.data,
+      scheduleStep.data,
+      actionsStep.data,
       actionMessageParams,
     ]
   );
 
   const onSubmit = useCallback(async () => {
-    const activeFormId = selectedTab?.id as RuleStep;
-    const activeForm = await stepsForm.current[activeFormId]?.submit();
-
-    const invalidForms = [
+    const activeForm = await stepsForm.current[activeStep]?.submit();
+    const invalidSteps = [
       RuleStep.aboutRule,
       RuleStep.defineRule,
       RuleStep.scheduleRule,
       RuleStep.ruleActions,
-    ].reduce<RuleStep[]>((acc, step) => {
-      if (
-        (step === activeFormId && activeForm != null && !activeForm?.isValid) ||
-        (step === RuleStep.aboutRule && !myAboutRuleForm.isValid) ||
-        (step === RuleStep.defineRule && !myDefineRuleForm.isValid) ||
-        (step === RuleStep.scheduleRule && !myScheduleRuleForm.isValid) ||
-        (step === RuleStep.ruleActions && !myActionsRuleForm.isValid)
-      ) {
-        return [...acc, step];
-      }
-      return acc;
-    }, []);
+    ].filter((step) => !stepIsValid(step === activeStep ? activeForm : stepsData.current[step]));
 
-    if (invalidForms.length === 0 && activeForm != null) {
+    if (invalidSteps.length === 0 && activeForm != null) {
       setTabHasError([]);
-      setRule({
-        ...formatRule(
-          (activeFormId === RuleStep.defineRule
-            ? activeForm.data
-            : myDefineRuleForm.data) as DefineStepRule,
-          (activeFormId === RuleStep.aboutRule
-            ? activeForm.data
-            : myAboutRuleForm.data) as AboutStepRule,
-          (activeFormId === RuleStep.scheduleRule
-            ? activeForm.data
-            : myScheduleRuleForm.data) as ScheduleStepRule,
-          (activeFormId === RuleStep.ruleActions
-            ? activeForm.data
-            : myActionsRuleForm.data) as ActionsStepRule,
-          rule
-        ),
-        ...(ruleId ? { id: ruleId } : {}),
-      });
+
+      if (
+        stepIsValid(defineStep) &&
+        stepIsValid(aboutStep) &&
+        stepIsValid(scheduleStep) &&
+        stepIsValid(actionsStep)
+      ) {
+        setRule({
+          ...formatRule(
+            isDefineStep(activeForm) ? activeForm.data : defineStep.data,
+            isAboutStep(activeForm) ? activeForm.data : aboutStep.data,
+            isScheduleStep(activeForm) ? activeForm.data : scheduleStep.data,
+            isActionsStep(activeForm) ? activeForm.data : actionsStep.data,
+            rule
+          ),
+          ...(ruleId ? { id: ruleId } : {}),
+        });
+      }
     } else {
-      setTabHasError(invalidForms);
+      setTabHasError(invalidSteps);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    stepsForm,
-    myAboutRuleForm,
-    myDefineRuleForm,
-    myScheduleRuleForm,
-    myActionsRuleForm,
-    selectedTab,
-    ruleId,
-  ]);
+  }, [activeStep, defineStep, aboutStep, scheduleStep, actionsStep, setRule, rule, ruleId]);
 
   useEffect(() => {
     if (rule != null) {
       const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
         rule,
       });
-      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
-      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
-      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
-      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
+      setStepData(RuleStep.defineRule, defineRuleData, true);
+      setStepData(RuleStep.aboutRule, aboutRuleData, true);
+      setStepData(RuleStep.scheduleRule, scheduleRuleData, true);
+      setStepData(RuleStep.ruleActions, ruleActionsData, true);
     }
-  }, [rule]);
+  }, [rule, setStepData]);
 
   const onTabClick = useCallback(
     async (tab: EuiTabbedContentTab) => {
-      if (selectedTab != null) {
-        const ruleStep = selectedTab.id as RuleStep;
-        const respForm = await stepsForm.current[ruleStep]?.submit();
+      const activeStepData = await stepsForm.current[activeStep]?.submit();
 
-        if (respForm != null) {
-          if (ruleStep === RuleStep.aboutRule) {
-            setMyAboutRuleForm({
-              data: respForm.data as AboutStepRule,
-              isValid: respForm.isValid,
-            });
-          } else if (ruleStep === RuleStep.defineRule) {
-            setMyDefineRuleForm({
-              data: respForm.data as DefineStepRule,
-              isValid: respForm.isValid,
-            });
-          } else if (ruleStep === RuleStep.scheduleRule) {
-            setMyScheduleRuleForm({
-              data: respForm.data as ScheduleStepRule,
-              isValid: respForm.isValid,
-            });
-          } else if (ruleStep === RuleStep.ruleActions) {
-            setMyActionsRuleForm({
-              data: respForm.data as ActionsStepRule,
-              isValid: respForm.isValid,
-            });
-          }
-        }
+      if (activeStepData != null) {
+        setStepData(activeStep, activeStepData.data, activeStepData.isValid);
       }
       setInitForm(true);
-      setSelectedTab(tab);
+      setActiveStep(tab.id as RuleStep);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedTab, stepsForm.current]
+    [activeStep, setStepData]
   );
 
   const goToDetailsRule = useCallback(
@@ -348,9 +281,11 @@ const EditRulePageComponent: FC = () => {
   );
 
   useEffect(() => {
-    const tabIndex = rule?.immutable ? 3 : 0;
-    setSelectedTab(tabs[tabIndex]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (rule?.immutable) {
+      setActiveStep(RuleStep.scheduleRule);
+    } else {
+      setActiveStep(RuleStep.defineRule);
+    }
   }, [rule]);
 
   if (isSaved) {
@@ -414,7 +349,7 @@ const EditRulePageComponent: FC = () => {
 
         <EuiTabbedContent
           initialSelectedTab={tabs[0]}
-          selectedTab={tabs.find((t) => t.id === selectedTab?.id)}
+          selectedTab={tabs.find((t) => t.id === activeStep)}
           onTabClick={onTabClick}
           tabs={tabs}
         />
@@ -439,7 +374,7 @@ const EditRulePageComponent: FC = () => {
               onClick={onSubmit}
               iconType="save"
               isLoading={isLoading}
-              isDisabled={initLoading}
+              isDisabled={loading}
             >
               {i18n.SAVE_CHANGES}
             </EuiButton>

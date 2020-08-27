@@ -27,6 +27,7 @@ import {
   AboutStepRuleJson,
   ActionsStepRuleJson,
   RuleStepsFormData,
+  RuleStep,
 } from '../types';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -50,8 +51,25 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
 };
 
 export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
-  formData: T
-): formData is { [K in keyof T]: Exclude<T[K], undefined> } => formData.isValid && !!formData.data;
+  formData?: T
+): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
+  !!formData?.isValid && !!formData.data;
+
+export const isDefineStep = (
+  formData: RuleStepsFormData[keyof RuleStepsFormData]
+): formData is RuleStepsFormData[RuleStep.defineRule] => has('ruleType', formData.data);
+
+export const isAboutStep = (
+  formData: RuleStepsFormData[keyof RuleStepsFormData]
+): formData is RuleStepsFormData[RuleStep.aboutRule] => has('name', formData.data);
+
+export const isScheduleStep = (
+  formData: RuleStepsFormData[keyof RuleStepsFormData]
+): formData is RuleStepsFormData[RuleStep.scheduleRule] => has('interval', formData.data);
+
+export const isActionsStep = (
+  formData: RuleStepsFormData[keyof RuleStepsFormData]
+): formData is RuleStepsFormData[RuleStep.ruleActions] => has('actions', formData.data);
 
 export interface RuleFields {
   anomalyThreshold: unknown;
