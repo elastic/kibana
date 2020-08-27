@@ -214,6 +214,28 @@ describe('#rawToSavedObject', () => {
     expect(actual).not.toHaveProperty('updated_at');
   });
 
+  test('if specified it copies the _source.originId property to originId', () => {
+    const originId = 'baz';
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        originId,
+      },
+    });
+    expect(actual).toHaveProperty('originId', originId);
+  });
+
+  test(`if _source.originId is unspecified it doesn't set originId`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('originId');
+  });
+
   test('it does not pass unknown properties through', () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'universe',
@@ -280,6 +302,7 @@ describe('#rawToSavedObject', () => {
         namespace: 'foo-namespace',
         updated_at: String(new Date()),
         references: [],
+        originId: 'baz',
       },
     };
 
@@ -456,6 +479,26 @@ describe('#savedObjectToRaw', () => {
     } as any);
 
     expect(actual._source).not.toHaveProperty('updated_at');
+  });
+
+  test('if specified it copies the originId property to _source.originId', () => {
+    const originId = 'baz';
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+      originId,
+    } as any);
+
+    expect(actual._source).toHaveProperty('originId', originId);
+  });
+
+  test(`if unspecified it doesn't add originId property to _source`, () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+    } as any);
+
+    expect(actual._source).not.toHaveProperty('originId');
   });
 
   test('it copies the migrationVersion property to _source.migrationVersion', () => {

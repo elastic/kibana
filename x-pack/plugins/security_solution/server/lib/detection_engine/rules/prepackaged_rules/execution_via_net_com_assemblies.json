@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "RegSvcs.exe and RegAsm.exe are Windows command line utilities that are used to register .NET Component Object Model (COM) assemblies. Adversaries can use RegSvcs.exe and RegAsm.exe to proxy execution of code through a trusted Windows utility.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -51,5 +52,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

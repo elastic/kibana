@@ -6,6 +6,7 @@
   "false_positives": [
     "Security tools and device drivers may run these programs in order to enumerate kernel modules. Use of these programs by ordinary users is uncommon. These can be exempted by process name or username."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -39,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }
