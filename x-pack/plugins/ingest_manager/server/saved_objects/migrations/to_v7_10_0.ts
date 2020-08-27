@@ -42,6 +42,7 @@ export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   AgentPolicy
 > = (agentPolicyDoc) => {
   agentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
+  // @ts-expect-error
   delete agentPolicyDoc.attributes.package_configs;
 
   return agentPolicyDoc;
@@ -66,6 +67,7 @@ export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
   PackagePolicy
 > = (packagePolicyDoc) => {
   packagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.config_id;
+  // @ts-expect-error
   delete packagePolicyDoc.attributes.config_id;
 
   return packagePolicyDoc;
