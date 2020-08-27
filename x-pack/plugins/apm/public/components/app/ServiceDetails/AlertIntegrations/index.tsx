@@ -101,7 +101,6 @@ export function AlertIntegrations(props: Props) {
       title: transactionDurationLabel,
       items: [
         {
-          icon: 'bell',
           name: createThresholdAlertLabel,
           onClick: () => {
             setAlertType(AlertType.TransactionDuration);
@@ -111,7 +110,6 @@ export function AlertIntegrations(props: Props) {
         ...(canReadAnomalies
           ? [
               {
-                icon: 'bell',
                 name: createAnomalyAlertAlertLabel,
                 onClick: () => {
                   setAlertType(AlertType.TransactionDurationAnomaly);
@@ -127,7 +125,6 @@ export function AlertIntegrations(props: Props) {
       title: errorRateLabel,
       items: [
         {
-          icon: 'bell',
           name: createThresholdAlertLabel,
           onClick: () => {
             setAlertType(AlertType.ErrorRate);
