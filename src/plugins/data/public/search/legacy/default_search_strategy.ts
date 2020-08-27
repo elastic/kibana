@@ -55,12 +55,13 @@ function msearch({ searchRequests, config, http, loadingCount$ }: SearchStrategy
     }
   };
 
-  const searching = http.post('/internal/_msearch', {
-    body: JSON.stringify({ searches: requests }),
-    signal: abortController.signal,
-  })
-  .then(({ body }) => body?.responses)
-  .finally(() => cleanup());
+  const searching = http
+    .post('/internal/_msearch', {
+      body: JSON.stringify({ searches: requests }),
+      signal: abortController.signal,
+    })
+    .then(({ body }) => body?.responses)
+    .finally(() => cleanup());
 
   return {
     abort: () => {

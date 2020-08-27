@@ -73,6 +73,7 @@ import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -91,7 +92,6 @@ import { getHighlightRequest } from '../../../common/field_formats';
 import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
-import { BehaviorSubject } from 'rxjs';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -115,7 +115,6 @@ export interface SearchSourceDependencies {
   http: HttpStart;
   esShardTimeout: number;
   loadingCount$: BehaviorSubject<number>;
-
 }
 
 /** @public **/

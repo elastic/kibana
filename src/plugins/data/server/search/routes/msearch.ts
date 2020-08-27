@@ -53,8 +53,7 @@ export function convertRequestBody(
       timeout,
       ...curr.body,
     });
-    req += `${header}\n${body}\n`;
-    return req;
+    return `${req}${header}\n${body}\n`;
   }, '');
 }
 

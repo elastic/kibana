@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
@@ -29,7 +30,6 @@ import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
-import { BehaviorSubject } from 'rxjs';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {

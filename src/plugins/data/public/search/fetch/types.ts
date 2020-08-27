@@ -18,8 +18,8 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { GetConfigFn } from '../../../common';
 import { BehaviorSubject } from 'rxjs';
+import { GetConfigFn } from '../../../common';
 
 /**
  * @internal
