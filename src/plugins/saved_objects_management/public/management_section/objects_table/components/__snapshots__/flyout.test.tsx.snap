@@ -213,6 +213,10 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "path": "/home/foo.ndjson",
           },
           "importCount": 0,
+          "importMode": Object {
+            "createNewCopies": false,
+            "overwrite": true,
+          },
           "indexPatterns": Array [
             Object {
               "id": "1",
@@ -222,9 +226,9 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             },
           ],
           "isLegacyFile": false,
-          "isOverwriteAllChecked": true,
           "loadingMessage": undefined,
           "status": "loading",
+          "successfulImports": Array [],
           "unmatchedReferences": Array [
             Object {
               "existingIndexPatternId": "MyIndexPattern*",
@@ -253,66 +257,6 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
     },
   ],
 }
-`;
-
-exports[`Flyout conflicts should handle errors 1`] = `
-<EuiCallOut
-  color="warning"
-  data-test-subj="importSavedObjectsFailedWarning"
-  iconType="help"
-  title={
-    <FormattedMessage
-      defaultMessage="Import failed"
-      id="savedObjectsManagement.objectsTable.flyout.importFailedTitle"
-      values={Object {}}
-    />
-  }
->
-  <p>
-    <FormattedMessage
-      defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
-      id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
-      values={
-        Object {
-          "failedImportCount": 1,
-          "totalImportCount": 1,
-        }
-      }
-    />
-  </p>
-  <p />
-</EuiCallOut>
-`;
-
-exports[`Flyout errors should display unsupported type errors properly 1`] = `
-<EuiCallOut
-  color="warning"
-  data-test-subj="importSavedObjectsFailedWarning"
-  iconType="help"
-  title={
-    <FormattedMessage
-      defaultMessage="Import failed"
-      id="savedObjectsManagement.objectsTable.flyout.importFailedTitle"
-      values={Object {}}
-    />
-  }
->
-  <p>
-    <FormattedMessage
-      defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
-      id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
-      values={
-        Object {
-          "failedImportCount": 1,
-          "totalImportCount": 1,
-        }
-      }
-    />
-  </p>
-  <p>
-    wigwags [id=1] unsupported type
-  </p>
-</EuiCallOut>
 `;
 
 exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
@@ -360,6 +304,9 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           />
         </p>
       </EuiCallOut>
+      <EuiSpacer
+        size="m"
+      />
     </span>
     <span>
       <EuiSpacer
@@ -601,7 +548,7 @@ exports[`Flyout should render import step 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
+        fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
@@ -616,6 +563,7 @@ exports[`Flyout should render import step 1`] = `
         <EuiFilePicker
           compressed={false}
           display="large"
+          fullWidth={true}
           initialPromptText={
             <FormattedMessage
               defaultMessage="Import"
@@ -629,23 +577,20 @@ exports[`Flyout should render import step 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
+        fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"
       >
-        <EuiSwitch
-          checked={true}
-          data-test-subj="importSavedObjectsOverwriteToggle"
-          label={
-            <FormattedMessage
-              defaultMessage="Automatically overwrite all saved objects?"
-              id="savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel"
-              values={Object {}}
-            />
+        <ImportModeControl
+          initialValues={
+            Object {
+              "createNewCopies": false,
+              "overwrite": true,
+            }
           }
-          name="overwriteAll"
-          onChange={[Function]}
+          isLegacyFile={false}
+          updateSelection={[Function]}
         />
       </EuiFormRow>
     </EuiForm>
@@ -688,4 +633,11 @@ exports[`Flyout should render import step 1`] = `
     </EuiFlexGroup>
   </EuiFlyoutFooter>
 </EuiFlyout>
+`;
+
+exports[`Flyout summary should display summary when import is complete 1`] = `
+<ImportSummary
+  failedImports={Symbol()}
+  successfulImports={Symbol()}
+/>
 `;

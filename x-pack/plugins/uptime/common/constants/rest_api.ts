@@ -24,6 +24,9 @@ export enum API_URLS {
   ML_DELETE_JOB = `/api/ml/jobs/delete_jobs`,
   ML_CAPABILITIES = '/api/ml/ml_capabilities',
   ML_ANOMALIES_RESULT = `/api/ml/results/anomalies_table_data`,
+
+  ALERT_ACTIONS = '/api/actions',
+  CREATE_ALERT = '/api/alerts/alert',
   ALERT = '/api/alerts/alert/',
   ALERTS_FIND = '/api/alerts/_find',
 }
