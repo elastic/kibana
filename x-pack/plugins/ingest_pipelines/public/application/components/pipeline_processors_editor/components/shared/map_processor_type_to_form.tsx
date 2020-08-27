@@ -40,6 +40,7 @@ interface FieldDescriptor {
    * A sentence case label that can be displayed to users
    */
   label: string;
+  description?: string;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;

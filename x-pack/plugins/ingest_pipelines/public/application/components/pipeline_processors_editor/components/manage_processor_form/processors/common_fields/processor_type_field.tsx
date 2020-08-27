@@ -69,79 +69,73 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
         let description = '';
+
         if (typeField.value?.length) {
           const type = typeField.value;
-          const descriptor = getProcessorDescriptor(type);
-          selectedOptions = descriptor
-            ? [{ label: descriptor.label, value: type }]
-            : // If there is no label for this processor type, just use the type as the label
-              [{ label: type, value: type }];
-          const processorDescriptor = getProcessorDescriptor(type);
-          if (processorDescriptor) {
-            selectedOptions = [{ label: proccesorDescriptor.label, value: type }];
-            description = proccesorDescriptor.description;
+          const procesorDescriptor = getProcessorDescriptor(type);
+          if (procesorDescriptor) {
+            description = procesorDescriptor.description || '';
+            selectedOptions = [{ label: procesorDescriptor.label, value: type }];
           } else {
             // If there is no label for this processor type, just use the type as the label
             selectedOptions = [{ label: type, value: type }];
           }
-
-          const error = typeField.getErrorsMessages();
-          const isInvalid = error ? Boolean(error.length) : false;
-
-          const onCreateComboOption = (value: string) => {
-            // Note: for now, all validations for a comboBox array item have to be synchronous
-            // If there is a need to support asynchronous validation, we'll work on it (and will need to update the <EuiComboBox /> logic).
-            const { isValid } = typeField.validate({
-              value,
-              validationType: VALIDATION_TYPES.ARRAY_ITEM,
-            }) as FieldValidateResponse;
-
-            if (!isValid) {
-              // Return false to explicitly reject the user's input.
-              return false;
-            }
-
-            typeField.setValue(value);
-          };
-
-          return (
-            <EuiFormRow
-              label={typeField.label}
-              labelAppend={typeField.labelAppend}
-              description={
-                typeof typeField.description === 'function'
-                  ? typeField.description()
-                  : typeField.description
-              }
-              error={error}
-              isInvalid={isInvalid}
-              fullWidth
-              data-test-subj="processorTypeSelector"
-            >
-              <EuiComboBox
-                fullWidth
-                placeholder={i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.typeField.typeFieldComboboxPlaceholder',
-                  {
-                    defaultMessage: 'Type and then hit "ENTER"',
-                  }
-                )}
-                options={processorTypesAndLabels}
-                selectedOptions={selectedOptions}
-                onCreateOption={onCreateComboOption}
-                onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {
-                  const [selection] = options;
-                  typeField.setValue(selection?.value! ?? '');
-                }}
-                noSuggestions={false}
-                singleSelection={{
-                  asPlainText: true,
-                }}
-                data-test-subj="input"
-              />
-            </EuiFormRow>
-          );
+        } else {
+          selectedOptions = [];
         }
+
+        const error = typeField.getErrorsMessages();
+        const isInvalid = error ? Boolean(error.length) : false;
+
+        const onCreateComboOption = (value: string) => {
+          // Note: for now, all validations for a comboBox array item have to be synchronous
+          // If there is a need to support asynchronous validation, we'll work on it (and will need to update the <EuiComboBox /> logic).
+          const { isValid } = typeField.validate({
+            value,
+            validationType: VALIDATION_TYPES.ARRAY_ITEM,
+          }) as FieldValidateResponse;
+
+          if (!isValid) {
+            // Return false to explicitly reject the user's input.
+            return false;
+          }
+
+          typeField.setValue(value);
+        };
+
+        return (
+          <EuiFormRow
+            label={typeField.label}
+            labelAppend={typeField.labelAppend}
+            helpText={description}
+            error={error}
+            isInvalid={isInvalid}
+            fullWidth
+            data-test-subj="processorTypeSelector"
+          >
+            <EuiComboBox
+              fullWidth
+              placeholder={i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.typeField.typeFieldComboboxPlaceholder',
+                {
+                  defaultMessage: 'Type and then hit "ENTER"',
+                }
+              )}
+              options={processorTypesAndLabels}
+              selectedOptions={selectedOptions}
+              onCreateOption={onCreateComboOption}
+              onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {
+                const [selection] = options;
+                typeField.setValue(selection?.value! ?? '');
+              }}
+              noSuggestions={false}
+              singleSelection={{
+                asPlainText: true,
+              }}
+              data-test-subj="input"
+            />
+          </EuiFormRow>
+        );
       }}
     </UseField>
   );
