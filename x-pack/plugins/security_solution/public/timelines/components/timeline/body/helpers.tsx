@@ -117,28 +117,30 @@ interface InvestigateInResolverActionProps {
   ecsData: Ecs;
 }
 
-export const InvestigateInResolverAction = React.memo<InvestigateInResolverActionProps>(
-  ({ timelineId, ecsData }) => {
-    const dispatch = useDispatch();
-    const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
-    const handleClick = useCallback(
-      ({ eventId }) =>
-        dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: eventId })),
-      [dispatch, timelineId]
-    );
+const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverActionProps> = ({
+  timelineId,
+  ecsData,
+}) => {
+  const dispatch = useDispatch();
+  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const handleClick = useCallback(
+    () => dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id })),
+    [dispatch, ecsData._id, timelineId]
+  );
 
-    return (
-      <ActionIconItem
-        ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
-        content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
-        dataTestSubj="investigate-in-resolver"
-        iconType="node"
-        id="investigateInResolver"
-        isDisabled={isDisabled}
-        onClick={handleClick}
-      />
-    );
-  }
-);
+  return (
+    <ActionIconItem
+      ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      dataTestSubj="investigate-in-resolver"
+      iconType="node"
+      id="investigateInResolver"
+      isDisabled={isDisabled}
+      onClick={handleClick}
+    />
+  );
+};
 
-InvestigateInResolverAction.displayName = 'InvestigateInResolverAction';
+InvestigateInResolverActionComponent.displayName = 'InvestigateInResolverActionComponent';
+
+export const InvestigateInResolverAction = React.memo(InvestigateInResolverActionComponent);

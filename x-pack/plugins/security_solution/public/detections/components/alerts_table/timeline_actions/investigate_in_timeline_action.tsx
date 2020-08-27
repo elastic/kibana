@@ -16,7 +16,10 @@ import { dispatchUpdateTimeline } from '../../../../timelines/components/open_ti
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
 
 import { CreateTimelineProps } from '../types';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
+import {
+  ACTION_INVESTIGATE_IN_TIMELINE,
+  ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
+} from '../translations';
 
 interface InvestigateInTimelineActionProps {
   ecsRowData: Ecs;
@@ -68,7 +71,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
 
   return (
     <ActionIconItem
-      ariaLabel="Send alert to timeline"
+      ariaLabel={ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL}
       content={ACTION_INVESTIGATE_IN_TIMELINE}
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"

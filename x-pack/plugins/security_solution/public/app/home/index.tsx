@@ -54,6 +54,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const [showTimeline] = useShowTimeline();
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
+  // side effect: this will attempt to create the signals index if it doesn't exist
   useUserInfo();
 
   return (

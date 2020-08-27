@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { EventsTd, EventsTdContent } from '../../styles';
@@ -18,39 +18,36 @@ interface ActionIconItemProps {
   content?: string;
   iconType?: string;
   isDisabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onClick?: any;
+  onClick?: (event: MouseEvent) => void;
   children?: React.ReactNode;
 }
 
-const ActionIconItemComponent = React.memo<ActionIconItemProps>(
-  ({
-    id,
-    width = DEFAULT_ICON_BUTTON_WIDTH,
-    dataTestSubj,
-    content,
-    ariaLabel,
-    iconType,
-    isDisabled = false,
-    onClick,
-    children,
-  }) => (
-    <EventsTd key={id}>
-      <EventsTdContent textAlign="center" width={width}>
-        {children ?? (
-          <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
-            <EuiButtonIcon
-              aria-label={ariaLabel}
-              data-test-subj={`${dataTestSubj}-button`}
-              iconType={iconType}
-              isDisabled={isDisabled}
-              onClick={onClick}
-            />
-          </EuiToolTip>
-        )}
-      </EventsTdContent>
-    </EventsTd>
-  )
+const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
+  id,
+  width = DEFAULT_ICON_BUTTON_WIDTH,
+  dataTestSubj,
+  content,
+  ariaLabel,
+  iconType,
+  isDisabled = false,
+  onClick,
+  children,
+}) => (
+  <EventsTd key={id}>
+    <EventsTdContent textAlign="center" width={width}>
+      {children ?? (
+        <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
+          <EuiButtonIcon
+            aria-label={ariaLabel}
+            data-test-subj={`${dataTestSubj}-button`}
+            iconType={iconType}
+            isDisabled={isDisabled}
+            onClick={onClick}
+          />
+        </EuiToolTip>
+      )}
+    </EventsTdContent>
+  </EventsTd>
 );
 
 ActionIconItemComponent.displayName = 'ActionIconItemComponent';

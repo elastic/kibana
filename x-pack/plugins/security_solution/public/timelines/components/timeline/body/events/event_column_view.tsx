@@ -149,16 +149,13 @@ export const EventColumnView = React.memo<Props>(
               />,
             ]
           : []),
-        ...(eventType === 'signal'
-          ? [
-              <AlertContextMenu
-                key="alert-context-menu"
-                ecsRowData={ecsData}
-                nonEcsRowData={data}
-                timelineId={timelineId}
-              />,
-            ]
-          : []),
+        <AlertContextMenu
+          key="alert-context-menu"
+          ecsRowData={ecsData}
+          nonEcsRowData={data}
+          timelineId={timelineId}
+          disabled={eventType !== 'signal'}
+        />,
       ],
       [
         associateNote,
