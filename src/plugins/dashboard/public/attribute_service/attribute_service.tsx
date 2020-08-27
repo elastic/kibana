@@ -180,18 +180,22 @@ export class AttributeService<
       };
 
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
-        showSaveModal(
-          <SavedObjectSaveModal
-            onSave={onSave}
-            onClose={() => reject()}
-            title={input.attributes.title}
-            showCopyOnSave={false}
-            objectType={this.type}
-            showDescription={false}
-          />,
-          this.i18nContext
-        );
+        this.showSaveModal(onSave, input.attributes.title, this.type);
       }
     });
   };
+
+  public showSaveModal(onSave, title, type) {
+    showSaveModal(
+      <SavedObjectSaveModal
+        onSave={onSave}
+        onClose={() => reject()}
+        title={title}
+        showCopyOnSave={false}
+        objectType={type}
+        showDescription={false}
+      />,
+      this.i18nContext
+    );
+  }
 }

@@ -163,7 +163,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, getAttributeService }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);

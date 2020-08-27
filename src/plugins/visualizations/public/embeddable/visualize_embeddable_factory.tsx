@@ -33,7 +33,8 @@ import {
   VisualizeByValueInput,
   VisualizeEmbeddable,
   VisualizeInput,
-  VisualizeOutput, VisualizeSavedObjectAttributes,
+  VisualizeOutput,
+  VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../vis';
@@ -120,6 +121,19 @@ export class VisualizeEmbeddableFactory
     return await this.deps.start().core.application.currentAppId$.pipe(first()).toPromise();
   }
 
+  private async getAttributeService() {
+    if (!this.attributeService) {
+      this.attributeService = await this.deps
+        .start()
+        .plugins.dashboard.getAttributeService<
+          VisualizeSavedObjectAttributes,
+          VisualizeByValueInput,
+          VisualizeByReferenceInput
+        >(this.type);
+    }
+    return this.attributeService!;
+  }
+
   public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
@@ -136,6 +150,7 @@ export class VisualizeEmbeddableFactory
         vis,
         input,
         await this.getAttributeService(),
+        savedVisualizations,
         parent
       );
     } catch (e) {
@@ -151,10 +166,12 @@ export class VisualizeEmbeddableFactory
       const visState = input.savedVis;
       const vis = new Vis(visState.type, visState);
       await vis.setState(visState);
+      const savedVisualizations = getSavedVisualizationsLoader();
       return createVisEmbeddableFromObject(this.deps)(
         vis,
         input,
         await this.getAttributeService(),
+        savedVisualizations,
         parent
       );
     } else {
@@ -164,18 +181,5 @@ export class VisualizeEmbeddableFactory
       });
       return undefined;
     }
-  }
-
-  private async getAttributeService() {
-    if (!this.attributeService) {
-      this.attributeService = await this.deps
-        .start()
-        .plugins.dashboard.getAttributeService<
-          VisualizeSavedObjectAttributes,
-          VisualizeByValueInput,
-          VisualizeByReferenceInput
-        >(this.type);
-    }
-    return this.attributeService!;
   }
 }

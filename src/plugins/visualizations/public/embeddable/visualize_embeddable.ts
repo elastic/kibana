@@ -51,6 +51,9 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
+import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { VisSavedObject } from '../types';
+import { OnSaveProps, SaveResult } from '../../../saved_objects/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -107,9 +110,18 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    {
+      vis,
+      editPath,
+      editUrl,
+      indexPatterns,
+      editable,
+      deps,
+      visualizations,
+    }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     attributeService: AttributeService,
+    savedVisualizationsLoader?: SavedVisualizationsLoader,
     parent?: IContainer
   ) {
     super(
@@ -131,6 +143,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
+    this.savedVisualizationsLoader = savedVisualizationsLoader;
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -400,12 +413,37 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   getInputAsValueType = async (): Promise<VisualizeByValueInput> => {
-    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.attributeService.getInputAsValueType(input);
+    const input = {
+      savedVis: this.vis.serialize(),
+    };
+    delete input.savedVis.id;
+    return input;
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.attributeService.getInputAsRefType(input, { showSaveModal: true });
+    return new Promise<RefType>((resolve, reject) => {
+      const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+        try {
+          const savedVis: VisSavedObject = await this.savedVisualizationsLoader.get({});
+          const saveOptions = {
+            confirmOverwrite: false,
+            returnToOrigin: true,
+          };
+          savedVis.title = props.newTitle;
+          savedVis.copyOnSave = props.newCopyOnSave || false;
+          savedVis.description = props.newDescription || '';
+          savedVis.searchSourceFields = this.vis?.data.searchSource?.getSerializedFields();
+          savedVis.visState = this.vis.serialize();
+          savedVis.uiStateJSON = this.vis.uiState.toString();
+          const id = await savedVis.save(saveOptions);
+          resolve({ savedObjectId: id });
+          return { id };
+        } catch (error) {
+          reject(error);
+          return { error };
+        }
+      };
+      this.attributeService.showSaveModal(onSave, '', 'visualization');
+    });
   };
 }

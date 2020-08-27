@@ -37,11 +37,13 @@ import {
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { AttributeService } from '../../../dashboard/public';
+import { SavedVisualizationsLoader } from '../saved_visualizations';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
   input: Partial<VisualizeInput> & { id: string },
   attributeService: AttributeService,
+  savedVisualizationsLoader: SavedVisualizationsLoader,
   parent?: IContainer
 ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
   const savedVisualizations = getSavedVisualizationsLoader();
@@ -85,6 +87,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       },
       input,
       attributeService,
+      savedVisualizationsLoader,
       parent
     );
   } catch (e) {
