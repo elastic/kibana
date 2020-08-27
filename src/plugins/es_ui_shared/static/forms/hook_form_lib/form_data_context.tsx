@@ -33,19 +33,17 @@ interface Props extends Context {
   children: React.ReactNode;
 }
 
-export const FormDataContextProvider = React.memo(
-  ({ children, getFormData$, getFormData }: Props) => {
-    const value = useMemo<Context>(
-      () => ({
-        getFormData,
-        getFormData$,
-      }),
-      [getFormData, getFormData$]
-    );
+export const FormDataContextProvider = ({ children, getFormData$, getFormData }: Props) => {
+  const value = useMemo<Context>(
+    () => ({
+      getFormData,
+      getFormData$,
+    }),
+    [getFormData, getFormData$]
+  );
 
-    return <FormDataContext.Provider value={value}>{children}</FormDataContext.Provider>;
-  }
-);
+  return <FormDataContext.Provider value={value}>{children}</FormDataContext.Provider>;
+};
 
 export function useFormDataContext<T extends FormData = FormData>() {
   return useContext<Context<T> | undefined>(FormDataContext);

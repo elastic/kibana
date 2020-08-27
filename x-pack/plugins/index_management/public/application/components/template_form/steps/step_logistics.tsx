@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   useForm,
+  useFormData,
   Form,
   getUseField,
   getFormRow,
@@ -118,7 +119,7 @@ interface LogisticsForm {
 }
 
 interface LogisticsFormInternal extends LogisticsForm {
-  __internal__: {
+  __int__: {
     addMeta: boolean;
   };
 }
@@ -133,14 +134,14 @@ interface Props {
 function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
   return {
     ...formData,
-    __internal__: {
+    __int__: {
       addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
     },
   };
 }
 
 function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
-  const { __internal__, ...rest } = formData;
+  const { __int__, ...rest } = formData;
   return rest;
 }
 
@@ -154,6 +155,11 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       deserializer: formDeserializer,
     });
     const { subscribe, submit, isSubmitted, isValid: isFormValid, getErrors: getFormErrors } = form;
+
+    const [{ '__int__.addMeta': addMeta }] = useFormData({
+      form,
+      watch: '__int__.addMeta',
+    });
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
@@ -296,34 +302,28 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                     defaultMessage="Use the _meta field to store any metadata you want."
                   />
                   <EuiSpacer size="m" />
-                  <UseField path="__internal__.addMeta" data-test-subj="metaToggle" />
+                  <UseField path="__int__.addMeta" data-test-subj="metaToggle" />
                 </>
               }
             >
-              <FormDataProvider pathsToWatch="__internal__.addMeta">
-                {({ '__internal__.addMeta': addMeta }) => {
-                  return (
-                    addMeta && (
-                      <UseField
-                        path="_meta"
-                        component={JsonEditorField}
-                        componentProps={{
-                          euiCodeEditorProps: {
-                            height: '280px',
-                            'aria-label': i18n.translate(
-                              'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
-                              {
-                                defaultMessage: '_meta field data editor',
-                              }
-                            ),
-                            'data-test-subj': 'metaField',
-                          },
-                        }}
-                      />
-                    )
-                  );
-                }}
-              </FormDataProvider>
+              {addMeta && (
+                <UseField
+                  path="_meta"
+                  component={JsonEditorField}
+                  componentProps={{
+                    euiCodeEditorProps: {
+                      height: '280px',
+                      'aria-label': i18n.translate(
+                        'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
+                        {
+                          defaultMessage: '_meta field data editor',
+                        }
+                      ),
+                      'data-test-subj': 'metaField',
+                    },
+                  }}
+                />
+              )}
             </FormRow>
           )}
         </Form>
