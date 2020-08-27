@@ -52,7 +52,11 @@ describe('MonitorListDrawer component', () => {
 
   it('renders nothing when no summary data is present', () => {
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toEqual({});
   });
@@ -61,14 +65,22 @@ describe('MonitorListDrawer component', () => {
     // @ts-expect-error According to the code, the property is optional
     delete summary.state.summaryPings;
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toEqual({});
   });
 
   it('renders a MonitorListDrawer when there is only one check', () => {
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toMatchSnapshot();
   });
@@ -89,7 +101,11 @@ describe('MonitorListDrawer component', () => {
     }
 
     const component = shallowWithRouter(
-      <MonitorListDrawerComponent summary={summary} monitorDetails={monitorDetails} />
+      <MonitorListDrawerComponent
+        summary={summary}
+        monitorDetails={monitorDetails}
+        loading={false}
+      />
     );
     expect(component).toMatchSnapshot();
   });

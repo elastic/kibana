@@ -142,7 +142,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   } while (afterKey !== undefined);
 
   return monitors
-    .filter((monitor: any) => monitor?.doc_count > numTimes)
+    .filter((monitor: any) => monitor?.doc_count >= numTimes)
     .map(({ key, doc_count: count, fields }: any) => ({
       ...key,
       count,
