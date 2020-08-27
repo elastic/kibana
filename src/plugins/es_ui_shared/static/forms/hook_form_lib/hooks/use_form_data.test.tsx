@@ -92,6 +92,46 @@ describe('useFormData() hook', () => {
     });
   });
 
+  describe('format form data', () => {
+    let testBed: TestBed;
+    let onChangeSpy: jest.Mock;
+
+    const getLastMockValue = () => {
+      return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn;
+    };
+
+    const TestComp = (props: Props) => {
+      const { form } = useForm();
+
+      return (
+        <Form form={form}>
+          <UseField path="user.firstName" defaultValue="John" />
+          <UseField path="user.lastName" defaultValue="Snow" />
+          <HookListenerComp {...props} />
+        </Form>
+      );
+    };
+
+    const setup = registerTestBed(TestComp, {
+      memoryRouter: { wrapComponent: false },
+    });
+
+    beforeEach(() => {
+      onChangeSpy = jest.fn();
+      testBed = setup({ onChange: onChangeSpy }) as TestBed;
+    });
+
+    test('should expose a handler to build the form data', () => {
+      const [_, format] = getLastMockValue();
+      expect(format()).toEqual({
+        user: {
+          firstName: 'John',
+          lastName: 'Snow',
+        },
+      });
+    });
+  });
+
   describe('options', () => {
     describe('watch', () => {
       let testBed: TestBed;
