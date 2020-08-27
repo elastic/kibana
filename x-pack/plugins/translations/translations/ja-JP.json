@@ -11140,7 +11140,6 @@
     "xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage": "インデックスパターン{destinationIndex}を削除する要求が確認されました。",
     "xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexSuccessMessage": "ディスティネーションインデックス{destinationIndex}を削除する要求が確認されました。",
     "xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle": "ディスティネーションインデックス{indexName}を削除",
-    "xpack.ml.dataframe.analyticsList.deleteModalBody": "この分析ジョブを削除してよろしいですか？",
     "xpack.ml.dataframe.analyticsList.deleteModalCancelButton": "キャンセル",
     "xpack.ml.dataframe.analyticsList.deleteModalDeleteButton": "削除",
     "xpack.ml.dataframe.analyticsList.deleteModalTitle": "{analyticsId}の削除",

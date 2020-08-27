@@ -40,7 +40,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
       <EuiConfirmModal
         data-test-subj="mlAnalyticsJobDeleteModal"
         title={i18n.translate('xpack.ml.dataframe.analyticsList.deleteModalTitle', {
-          defaultMessage: 'Delete {analyticsId}',
+          defaultMessage: 'Delete {analyticsId}?',
           values: { analyticsId: item.config.id },
         })}
         onCancel={closeModal}
@@ -60,13 +60,6 @@ export const DeleteActionModal: FC<DeleteAction> = ({
         defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         buttonColor="danger"
       >
-        <p>
-          <FormattedMessage
-            id="xpack.ml.dataframe.analyticsList.deleteModalBody"
-            defaultMessage="Are you sure you want to delete this analytics job?"
-          />
-        </p>
-
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             {userCanDeleteIndex && (
