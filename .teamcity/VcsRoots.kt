@@ -30,5 +30,5 @@ object DefaultRoot : GitVcsRoot({
 //  name = "kibana / teamcity"
   name = "https://github.com/brianseeders/kibana.git"
   url = "https://github.com/brianseeders/kibana.git"
-  branch = "refs/heads/teamcity"
+  branch = "refs/heads/teamcity-dev"
 })
