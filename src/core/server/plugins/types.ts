@@ -278,6 +278,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
+    instanceUuid: string;
   };
   logger: LoggerFactory;
   config: {
