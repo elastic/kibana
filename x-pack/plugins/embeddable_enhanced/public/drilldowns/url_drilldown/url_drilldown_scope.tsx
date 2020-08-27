@@ -19,6 +19,7 @@ import {
   EuiModalHeaderTitle,
   EuiRadioGroup,
 } from '@elastic/eui';
+import uniqBy from 'lodash/uniqBy';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
@@ -159,15 +160,11 @@ async function getEventScopeFromValueClickTriggerContext(
   opts: { allowPrompts: boolean } = { allowPrompts: false }
 ): Promise<ValueClickTriggerEventScope> {
   const negate = eventScopeInput.data.negate ?? false;
-  const { table, column: columnIndex, value } = await getSingleValue(
-    eventScopeInput.data.data,
-    deps,
-    opts
-  );
-  const column = table.columns[columnIndex];
+  const point = await getSingleValue(eventScopeInput.data.data, deps, opts);
+  const { key, value } = getKeyValueFromPoint(point);
   return cleanEmptyKeys({
-    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
-    value: toPrimitiveOrUndefined(value) as string | number | boolean,
+    key,
+    value,
     negate,
   });
 }
@@ -191,6 +188,17 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       negate: false,
     };
   }
+}
+
+function getKeyValueFromPoint(
+  point: ValueClickContext['data']['data'][0]
+): Pick<ValueClickTriggerEventScope, 'key' | 'value'> {
+  const { table, column: columnIndex, value } = point;
+  const column = table.columns[columnIndex];
+  return {
+    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+    value: toPrimitiveOrUndefined(value),
+  };
 }
 
 function toPrimitiveOrUndefined(v: unknown): string | number | boolean | undefined {
@@ -218,7 +226,10 @@ async function getSingleValue(
   deps: { getOpenModal: () => Promise<OverlayStart['openModal']> },
   opts: { allowPrompts: boolean } = { allowPrompts: false }
 ): Promise<ValueClickContext['data']['data'][0]> {
-  data = data.filter(Boolean);
+  data = uniqBy(data.filter(Boolean), (point) => {
+    const { key, value } = getKeyValueFromPoint(point);
+    return `${key}:${value}`;
+  });
   if (data.length === 0)
     throw new Error(`[trigger = "VALUE_CLICK_TRIGGER"][getSingleValue] no value to pick from`);
   if (data.length === 1) return Promise.resolve(data[0]);
@@ -254,12 +265,11 @@ function GetSingleValuePopup({
 }) {
   const values = data
     .map((point) => {
-      const { table, column: columnIndex, value } = point;
-      const column = table.columns[columnIndex];
+      const { key, value } = getKeyValueFromPoint(point);
       return {
         point,
-        id: column?.meta?.aggConfigParams?.field ?? '',
-        label: `${column?.meta?.aggConfigParams?.field ?? ''}:${toPrimitiveOrUndefined(value)}`,
+        id: key ?? '',
+        label: `${key}:${value}`,
       };
     })
     .filter((value) => Boolean(value.id));
