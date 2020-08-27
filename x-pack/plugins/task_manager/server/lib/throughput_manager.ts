@@ -103,7 +103,7 @@ export class ThroughputManager {
 
     if (newMaxWorkers !== this.maxWorkers.currentValue) {
       this.logger.info(
-        `Throughput manager changing max workers from ${this.maxWorkers.currentValue} to ${newMaxWorkers}`
+        `Throughput manager changing max workers from ${this.maxWorkers.currentValue} to ${newMaxWorkers} after seeing ${this.errorCountSinceLastInterval} errors`
       );
       this.maxWorkers.observable$.next(newMaxWorkers);
       this.maxWorkers.currentValue = newMaxWorkers;
@@ -111,7 +111,7 @@ export class ThroughputManager {
 
     if (newPollInterval !== this.pollInterval.currentValue) {
       this.logger.info(
-        `Throughput manager changing poll interval from ${this.pollInterval.currentValue} to ${newPollInterval}`
+        `Throughput manager changing poll interval from ${this.pollInterval.currentValue} to ${newPollInterval} after seeing ${this.errorCountSinceLastInterval} errors`
       );
       this.pollInterval.observable$.next(newPollInterval);
       this.pollInterval.currentValue = newPollInterval;
