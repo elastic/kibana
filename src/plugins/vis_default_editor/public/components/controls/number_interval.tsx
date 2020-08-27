@@ -27,6 +27,8 @@ import {
   EuiSwitch,
   EuiSwitchProps,
   EuiFieldNumberProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -63,13 +65,15 @@ const selectIntervalPlaceholder = i18n.translate(
     defaultMessage: 'Enter an interval',
   }
 );
-
 const autoIntervalIsUsedPlaceholder = i18n.translate(
   'visDefaultEditor.controls.numberInterval.autoInteralIsUsed',
   {
     defaultMessage: 'Auto interval is used',
   }
 );
+const useAutoIntervalLabel = i18n.translate('visDefaultEditor.controls.useAutoInterval', {
+  defaultMessage: 'Use auto interval',
+});
 
 function NumberIntervalParamEditor({
   agg,
@@ -83,14 +87,15 @@ function NumberIntervalParamEditor({
   const [autoChecked, setAutoChecked] = useState(isAutoInterval(value));
   const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
-  const isValid = value !== undefined && (isAutoInterval(value) || Number(value) >= min);
+  const isValid =
+    value !== '' && value !== undefined && (isAutoInterval(value) || Number(value) >= min);
 
   useEffect(() => {
     setValidity(isValid);
   }, [isValid, setValidity]);
 
   const onChange: EuiFieldNumberProps['onChange'] = useCallback(
-    ({ target }) => setValue(isNaN(target.valueAsNumber) ? undefined : target.valueAsNumber),
+    ({ target }) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
     [setValue]
   );
 
@@ -99,7 +104,7 @@ function NumberIntervalParamEditor({
       const isAutoSwitchChecked = e.target.checked;
 
       setAutoChecked(isAutoSwitchChecked);
-      setValue(isAutoSwitchChecked ? autoInterval : undefined);
+      setValue(isAutoSwitchChecked ? autoInterval : '');
     },
     [setAutoChecked, setValue]
   );
@@ -112,28 +117,32 @@ function NumberIntervalParamEditor({
       isInvalid={showValidation && !isValid}
       helpText={get(editorConfig, 'interval.help')}
     >
-      <EuiFieldNumber
-        value={value === undefined ? '' : value}
-        min={min}
-        step={base || 'any'}
-        data-test-subj={`visEditorInterval${agg.id}`}
-        isInvalid={showValidation && !isValid}
-        onChange={onChange}
-        onBlur={setTouched}
-        disabled={autoChecked}
-        fullWidth={true}
-        compressed
-        placeholder={autoChecked ? autoIntervalIsUsedPlaceholder : selectIntervalPlaceholder}
-        append={
+      <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>
+        <EuiFlexItem>
           <EuiSwitch
             className={'eui-alignMiddle'}
-            label="Auto"
+            label={useAutoIntervalLabel}
             onChange={onAutoSwitchChange}
             checked={autoChecked}
             compressed
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldNumber
+            value={value}
+            min={min}
+            step={base || 'any'}
+            data-test-subj={`visEditorInterval${agg.id}`}
+            isInvalid={showValidation && !isValid}
+            onChange={onChange}
+            onBlur={setTouched}
+            disabled={autoChecked}
+            fullWidth={true}
+            compressed
+            placeholder={autoChecked ? autoIntervalIsUsedPlaceholder : selectIntervalPlaceholder}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 }

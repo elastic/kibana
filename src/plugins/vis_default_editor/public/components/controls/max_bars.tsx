@@ -19,11 +19,12 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { isUndefined } from 'lodash';
-import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
+import { useKibana } from '../../../../kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
+import { UI_SETTINGS } from '../../../../data/public';
 
 export interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;
@@ -34,6 +35,26 @@ const autoPlaceholder = i18n.translate('visDefaultEditor.controls.maxBars.autoPl
   defaultMessage: 'Auto',
 });
 
+const label = (
+  <>
+    <FormattedMessage
+      id="visDefaultEditor.controls.maxBars.maxBarsLabel"
+      defaultMessage="Max bars"
+    />{' '}
+    <EuiIconTip
+      position="right"
+      content={
+        <FormattedMessage
+          id="visDefaultEditor.controls.maxBars.maxBarsHelpText"
+          defaultMessage="Intervals will be selected automatically based on the available data. The maximum number of bars can never be greater than the Advanced Setting's {histogramMaxBars}"
+          values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
+        />
+      }
+      type="questionInCircle"
+    />
+  </>
+);
+
 function MaxBarsParamEditor({
   disabled,
   iconTip,
@@ -43,13 +64,14 @@ function MaxBarsParamEditor({
   setValidity,
   setTouched,
 }: SizeParamEditorProps) {
-  const label = (
-    <>
-      <FormattedMessage id="visDefaultEditor.controls.maxSizeLabel" defaultMessage="Max Bars" />
-      {iconTip}
-    </>
-  );
-  const isValid = disabled || value === undefined || value === '' || Number(value) > 0;
+  const { services } = useKibana();
+  const uiSettingMaxBars = services.uiSettings?.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+  const isValid =
+    disabled ||
+    value === undefined ||
+    value === '' ||
+    Number(value) > 0 ||
+    value < uiSettingMaxBars;
 
   useEffect(() => {
     setValidity(isValid);
@@ -74,6 +96,7 @@ function MaxBarsParamEditor({
         onChange={onChange}
         fullWidth={true}
         compressed
+        max={uiSettingMaxBars}
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         disabled={disabled}

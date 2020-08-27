@@ -28,6 +28,7 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { ExtendedBounds } from './lib/extended_bounds';
+import { autoInterval } from './_interval_options';
 import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
 
 export interface AutoBounds {
@@ -103,6 +104,7 @@ export const getHistogramBucketAgg = ({
       },
       {
         name: 'interval',
+        default: autoInterval,
         modifyAggConfigOnSearchRequestStart(
           aggConfig: IBucketHistogramAggConfig,
           searchSource: any,

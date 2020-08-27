@@ -47,11 +47,10 @@ const roundInterval = (minInterval: number) => {
 };
 
 const calculateForGivenInterval = (
-  values: IntervalValuesRange,
+  diff: number,
   interval: number,
   maxBucketsUiSettings: CalculateHistogramIntervalParams['maxBucketsUiSettings']
 ) => {
-  const diff = values.max - values.min;
   const bars = diff / interval;
 
   if (bars > maxBucketsUiSettings) {
@@ -64,6 +63,7 @@ const calculateForGivenInterval = (
 };
 
 const calculateAutoInterval = (
+  diff: number,
   values: IntervalValuesRange,
   maxBucketsUiSettings: CalculateHistogramIntervalParams['maxBucketsUiSettings'],
   maxBucketsUserInput: CalculateHistogramIntervalParams['maxBucketsUserInput']
@@ -75,7 +75,6 @@ const calculateAutoInterval = (
     }, 0);
   };
 
-  const diff = values.max - values.min;
   let autoBuckets: number = 0;
 
   if (!maxBucketsUserInput) {
@@ -110,12 +109,16 @@ export const calculateHistogramInterval = ({
   values,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
-  let calculatedInterval = isAuto ? 0 : parseFloat(interval);
+  let calculatedInterval = isAuto ? 1 : parseFloat(interval);
 
   if (values) {
-    calculatedInterval = isAuto
-      ? calculateAutoInterval(values, maxBucketsUiSettings, maxBucketsUserInput)
-      : calculateForGivenInterval(values, calculatedInterval, maxBucketsUiSettings);
+    const diff = values.max - values.min;
+
+    if (diff) {
+      calculatedInterval = isAuto
+        ? calculateAutoInterval(diff, values, maxBucketsUiSettings, maxBucketsUserInput)
+        : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
+    }
   }
 
   if (intervalBase) {
