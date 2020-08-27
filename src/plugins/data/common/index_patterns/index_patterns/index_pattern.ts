@@ -527,8 +527,7 @@ export class IndexPattern implements IIndexPattern {
 
             const serverChangedKeys: string[] = [];
             Object.entries(updatedBody).forEach(([key, value]) => {
-              // @ts-ignore
-              if (value !== body[key] && value !== this.originalBody[key]) {
+              if (value !== (body as any)[key] && value !== this.originalBody[key]) {
                 serverChangedKeys.push(key);
               }
             });
@@ -555,8 +554,7 @@ export class IndexPattern implements IIndexPattern {
 
             // Set the updated response on this object
             serverChangedKeys.forEach((key) => {
-              // @ts-ignore
-              this[key] = samePattern[key];
+              (this as any)[key] = (samePattern as any)[key];
             });
             this.version = samePattern.version;
 
