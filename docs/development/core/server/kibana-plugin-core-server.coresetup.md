@@ -26,5 +26,4 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [savedObjects](./kibana-plugin-core-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) |
 |  [status](./kibana-plugin-core-server.coresetup.status.md) | <code>StatusServiceSetup</code> | [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) |
 |  [uiSettings](./kibana-plugin-core-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |
-|  [uuid](./kibana-plugin-core-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) |
 

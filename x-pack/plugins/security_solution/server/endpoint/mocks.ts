@@ -21,6 +21,7 @@ import {
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
+import { listMock } from '../../../lists/server/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -58,6 +59,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 > => {
   return {
     agentService: createMockAgentService(),
+    exceptionsListService: listMock.getExceptionListClient(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
