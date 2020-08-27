@@ -29,8 +29,10 @@ export declare class IndexPattern implements IIndexPattern
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined &#124; null</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
+|  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
+|  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string &#124; undefined</code> |  |
 |  [typeMeta](./kibana-plugin-plugins-data-public.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
 
 ## Methods
