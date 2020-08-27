@@ -18,6 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('painlessLab');
     });
 
+    it('renders the page without a11y errors', async () => {
+      await PageObjects.common.navigateToApp('painlessLab');
+      await a11y.testAppSnapshot();
+    });
+
     it('click on the output button', async () => {
       const painlessTabsOutput = await find.byCssSelector(
         '[data-test-subj="painlessTabs"] #output'
