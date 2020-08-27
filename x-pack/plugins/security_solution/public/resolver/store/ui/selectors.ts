@@ -38,7 +38,7 @@ export const breadcrumbParameters = createSelector(
   (state: ResolverUIState) => state.locationSearch,
   (state: ResolverUIState) => state.resolverComponentInstanceID,
   (locationSearch, resolverComponentInstanceID) => {
-    if (locationSearch === undefined) {
+    if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
       // Equivalent to `null`
       return {
         crumbId: '',
