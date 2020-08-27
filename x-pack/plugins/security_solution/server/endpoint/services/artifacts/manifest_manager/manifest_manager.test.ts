@@ -13,8 +13,6 @@ import { getManifestManagerMock, ManifestManagerMockType } from './manifest_mana
 import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
-  jest.setTimeout(200000); // FIXME:PT remove before push/commit. Testing only
-
   describe('ManifestManager sanity checks', () => {
     test('ManifestManager can retrieve and diff manifests', async () => {
       const manifestManager = getManifestManagerMock();
