@@ -65,8 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_type).to.be('token');
   }
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('SAML authentication', () => {
+  describe('SAML authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
       await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });

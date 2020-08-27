@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
-  // FAILING: https://github.com/elastic/kibana/issues/75707
-  describe.skip('OpenID Connect authentication', () => {
+  describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
       await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
