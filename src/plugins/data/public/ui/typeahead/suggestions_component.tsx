@@ -24,9 +24,9 @@ import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {
-  suggestionsListRequiredBottomSpace,
-  suggestionsListRequiredTopOffset,
-  suggestionsListRequiredWidth,
+  SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
+  SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
+  SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
 
 interface Props {
@@ -51,7 +51,7 @@ export class SuggestionsComponent extends Component<Props> {
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
       const isDescriptionFittable = Boolean(
-        this.props.queryBarRect && this.props.queryBarRect.width >= suggestionsListRequiredWidth
+        this.props.queryBarRect && this.props.queryBarRect.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH
       );
       return (
         <SuggestionComponent
@@ -140,9 +140,9 @@ export const StyledSuggestionsComponent = styled(SuggestionsComponent)`
     // reflects if the suggestions list has enough space below to be opened down
     const isSuggestionsListFittable =
       documentHeight - (queryBarRect.top + queryBarRect.height) >
-      suggestionsListRequiredBottomSpace;
+      SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
     const verticalListPosition = isSuggestionsListFittable
-      ? `top: ${window.scrollY + queryBarRect.bottom - suggestionsListRequiredTopOffset}px;`
+      ? `top: ${window.scrollY + queryBarRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
       : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
 
     return `left: ${queryBarRect.left}px;
