@@ -47,6 +47,7 @@ export interface FieldsAccordionProps {
   renderCallout: JSX.Element;
   exists: boolean;
   showExistenceFetchError?: boolean;
+  hideDetails?: boolean;
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -61,13 +62,20 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   fieldProps,
   renderCallout,
   exists,
+  hideDetails,
   showExistenceFetchError,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField) => (
-      <FieldItem {...fieldProps} key={field.name} field={field} exists={!!exists} />
+      <FieldItem
+        {...fieldProps}
+        key={field.name}
+        field={field}
+        exists={exists}
+        hideDetails={hideDetails}
+      />
     ),
-    [fieldProps, exists]
+    [fieldProps, exists, hideDetails]
   );
 
   return (

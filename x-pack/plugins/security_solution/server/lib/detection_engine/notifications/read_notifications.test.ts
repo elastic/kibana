@@ -41,6 +41,7 @@ describe('read_notifications', () => {
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const result = getNotificationResult();
+      // @ts-expect-error
       delete result.alertTypeId;
       alertsClient.get.mockResolvedValue(result);
 

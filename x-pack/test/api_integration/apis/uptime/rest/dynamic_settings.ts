@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         heartbeatIndices: 'myIndex1*',
         certAgeThreshold: 15,
         certExpirationThreshold: 5,
+        defaultConnectors: [],
       };
       const postResponse = await supertest
         .post(`/api/uptime/dynamic_settings`)
