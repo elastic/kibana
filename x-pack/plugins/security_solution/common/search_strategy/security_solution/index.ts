@@ -83,35 +83,6 @@ export interface DocValueFields {
   format: string;
 }
 
-export interface SearchResponse<T> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  _shards: ShardsResponse;
-  hits: {
-    total: TotalValue | number;
-    max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      _explanation?: Explanation;
-      fields?: string[];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      highlight?: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  aggregations?: any;
-}
-
 export interface Explanation {
   value: number;
   description: string;
@@ -128,8 +99,6 @@ export interface ShardsResponse {
   failed: number;
   skipped: number;
 }
-
-export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 
 export interface TotalHit {
   value: number;
@@ -157,11 +126,6 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
-}
-
-export interface SourceConfiguration {
-  /** The field mapping to use for this source */
-  fields: SourceFields;
 }
 
 /** A mapping of semantic fields to their document counterparts */
@@ -205,3 +169,5 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends AuthenticationsQuery.authentications
   ? AuthenticationsRequestOptions
   : never;
+
+export type StringOrNumber = string | number;

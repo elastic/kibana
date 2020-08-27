@@ -5,7 +5,17 @@
  */
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '..';
+import { UserEcs } from '../../../ecs/user';
+import {
+  CursorType,
+  Inspect,
+  Maybe,
+  PageInfoPaginated,
+  RequestOptionsPaginated,
+  StringOrNumber,
+  Hit,
+  TotalHit,
+} from '..';
 
 export enum AuthenticationsQuery {
   authentications = 'authentications',
@@ -38,27 +48,11 @@ export interface AuthenticationItem {
 
   successes: number;
 
-  user: UserEcsFields;
+  user: UserEcs;
 
   lastSuccess?: Maybe<LastSourceHost>;
 
   lastFailure?: Maybe<LastSourceHost>;
-}
-
-export interface UserEcsFields {
-  domain?: Maybe<string[] | string>;
-
-  id?: Maybe<string[] | string>;
-
-  name?: Maybe<string[]>;
-
-  full_name?: Maybe<string[] | string>;
-
-  email?: Maybe<string[] | string>;
-
-  hash?: Maybe<string[] | string>;
-
-  group?: Maybe<string[] | string>;
 }
 
 export interface LastSourceHost {
