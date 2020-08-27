@@ -24,7 +24,8 @@ export const PostTrustedAppCreateRequestSchema = {
         type: schema.literal('match'),
         operator: schema.literal('included'),
         value: schema.string({ minLength: 1 }),
-      })
+      }),
+      { minSize: 1 }
     ),
   }),
 };
