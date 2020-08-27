@@ -8,7 +8,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
 import { useMount } from 'react-use';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -20,9 +19,11 @@ import { AlertsContextValue } from '../../../../../../../triggers_actions_ui/pub
 import {
   AlertParams,
   Comparator,
+  ThresholdType,
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 import { Threshold } from './threshold';
 import { Criteria } from './criteria';
+import { TypeSwitcher } from './type_switcher';
 import { useSourceId } from '../../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../../containers/logs/log_source';
 import { GroupByExpression } from '../../../shared/group_by_expression/group_by_expression';
@@ -49,14 +50,26 @@ interface Props {
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
-const DEFAULT_EXPRESSION = {
+const DEFAULT_BASE_EXPRESSION = {
   threshold: {
     value: 75,
     comparator: Comparator.GT,
   },
-  criteria: [DEFAULT_CRITERIA],
   timeSize: 5,
   timeUnit: 'm',
+};
+
+const DEFAULT_COUNT_EXPRESSION = {
+  ...DEFAULT_BASE_EXPRESSION,
+  criteria: [DEFAULT_CRITERIA],
+};
+
+const DEFAULT_RATIO_EXPRESSION = {
+  ...DEFAULT_BASE_EXPRESSION,
+  criteria: [
+    [DEFAULT_CRITERIA],
+    [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
+  ],
 };
 
 export const ExpressionEditor: React.FC<Props> = (props) => {
@@ -131,7 +144,7 @@ export const Editor: React.FC<Props> = (props) => {
   ] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
   useMount(() => {
-    const mergedParams = { ...DEFAULT_EXPRESSION, ...alertParams };
+    const mergedParams = { ...DEFAULT_COUNT_EXPRESSION, ...alertParams };
     // Handle legacy case where "count" was used instead of "threshold"
     const convertedParams = {
       ...mergedParams,
@@ -202,17 +215,27 @@ export const Editor: React.FC<Props> = (props) => {
     [setAlertParams]
   );
 
+  const updateType = useCallback(
+    (type: ThresholdType) => {
+      // TODO: If the user has already configured some criteria, take them across
+      if (type === 'count') {
+        setAlertParams('criteria', [DEFAULT_CRITERIA]);
+      } else {
+        setAlertParams('criteria', [
+          [DEFAULT_CRITERIA],
+          [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
+        ]);
+      }
+    },
+    [setAlertParams]
+  );
+
   // Wait until the alert param defaults have been set and legacy params have been converted
   if (!hasSetDefaultsAndConvertedLegacyParams) return null;
 
   return (
     <>
-      <Threshold
-        comparator={alertParams.threshold?.comparator}
-        value={alertParams.threshold?.value}
-        updateThreshold={updateThreshold}
-        errors={errors.threshold as IErrorObject}
-      />
+      <TypeSwitcher criteria={alertParams.criteria} updateType={updateType} />
 
       <Criteria
         fields={supportedFields}
@@ -222,6 +245,13 @@ export const Editor: React.FC<Props> = (props) => {
         context={alertsContext}
         sourceId={sourceId}
         updateCriteria={updateCriteria}
+      />
+
+      <Threshold
+        comparator={alertParams.threshold?.comparator}
+        value={alertParams.threshold?.value}
+        updateThreshold={updateThreshold}
+        errors={errors.threshold as IErrorObject}
       />
 
       <ForLastExpression

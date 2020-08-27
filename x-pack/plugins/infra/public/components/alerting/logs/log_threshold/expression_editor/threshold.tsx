@@ -25,7 +25,11 @@ import {
 } from '../../../../../../common/alerting/logs/log_threshold/types';
 
 const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
-  defaultMessage: 'when',
+  defaultMessage: 'is',
+});
+
+const popoverTitle = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPopoverTitle', {
+  defaultMessage: 'Threshold',
 });
 
 const getComparatorOptions = (): Array<{
@@ -48,88 +52,56 @@ interface Props {
 }
 
 export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold, errors }) => {
-  const [isComparatorPopoverOpen, setComparatorPopoverOpenState] = useState(false);
-  const [isValuePopoverOpen, setIsValuePopoverOpen] = useState(false);
-
-  const documentCountValue = i18n.translate('xpack.infra.logs.alertFlyout.documentCountValue', {
-    defaultMessage: '{value, plural, one {log entry} other {log entries}}',
-    values: { value },
-  });
-
-  const documentCountSuffix = i18n.translate('xpack.infra.logs.alertFlyout.documentCountSuffix', {
-    defaultMessage: '{value, plural, one {occurs} other {occur}}',
-    values: { value },
-  });
+  const [isThresholdPopoverOpen, setThresholdPopoverOpenState] = useState(false);
 
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiPopover
-          id="comparator"
+          id="threshold"
           button={
             <EuiExpression
               description={thresholdPrefix}
               uppercase={true}
-              value={comparator ? ComparatorToi18nMap[comparator] : ''}
-              isActive={isComparatorPopoverOpen}
-              onClick={() => setComparatorPopoverOpenState(true)}
+              value={`${comparator ? ComparatorToi18nMap[comparator] : ''} ${value ? value : ''}`}
+              isActive={isThresholdPopoverOpen}
+              onClick={() => setThresholdPopoverOpenState(true)}
             />
           }
-          isOpen={isComparatorPopoverOpen}
-          closePopover={() => setComparatorPopoverOpenState(false)}
+          isOpen={isThresholdPopoverOpen}
+          closePopover={() => setThresholdPopoverOpenState(false)}
           ownFocus
           panelPaddingSize="s"
           anchorPosition="downLeft"
         >
-          <div>
-            <EuiPopoverTitle>{thresholdPrefix}</EuiPopoverTitle>
-            <EuiSelect
-              compressed
-              value={comparator}
-              onChange={(e) => updateThreshold({ comparator: e.target.value as Comparator })}
-              options={getComparatorOptions()}
-            />
-          </div>
+          <>
+            <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow>
+                  <EuiSelect
+                    compressed
+                    value={comparator}
+                    onChange={(e) => updateThreshold({ comparator: e.target.value as Comparator })}
+                    options={getComparatorOptions()}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
+                  <EuiFieldNumber
+                    compressed
+                    value={value}
+                    onChange={(e) => {
+                      const number = parseInt(e.target.value, 10);
+                      updateThreshold({ value: number ? number : undefined });
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         </EuiPopover>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="comparator"
-          button={
-            <EuiExpression
-              description={value}
-              uppercase={true}
-              value={documentCountValue}
-              isActive={isValuePopoverOpen}
-              onClick={() => setIsValuePopoverOpen(true)}
-              color={errors.value.length === 0 ? 'secondary' : 'danger'}
-            />
-          }
-          isOpen={isValuePopoverOpen}
-          closePopover={() => setIsValuePopoverOpen(false)}
-          ownFocus
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-        >
-          <div>
-            <EuiPopoverTitle>{documentCountValue}</EuiPopoverTitle>
-            <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
-              <EuiFieldNumber
-                compressed
-                value={value}
-                onChange={(e) => {
-                  const number = parseInt(e.target.value, 10);
-                  updateThreshold({ value: number ? number : undefined });
-                }}
-              />
-            </EuiFormRow>
-          </div>
-        </EuiPopover>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiExpression description={documentCountSuffix} value="" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

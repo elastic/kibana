@@ -5,8 +5,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
@@ -24,7 +25,14 @@ import { CriterionPreview } from './criterion_preview_chart';
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
-interface Props {
+const RATIO_SEPERATOR_TEXT = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.ratioCriteriaSeperator',
+  {
+    defaultMessage: 'To the count of log entries',
+  }
+);
+
+interface SharedProps {
   fields: IFieldType[];
   criteria?: AlertParams['criteria'];
   errors: IErrorObject;
@@ -34,7 +42,9 @@ interface Props {
   updateCriteria: (criteria: AlertParams['criteria']) => void;
 }
 
-export const Criteria: React.FC<Props> = (props) => {
+type CriteriaProps = SharedProps;
+
+export const Criteria: React.FC<CriteriaProps> = (props) => {
   const { criteria } = props;
   if (!criteria || criteria.length === 0) return null;
 
@@ -43,22 +53,22 @@ export const Criteria: React.FC<Props> = (props) => {
       {!Array.isArray(criteria[0]) ? (
         <CountCriteria {...props} criteria={criteria as CountCriteriaType} />
       ) : (
-        <RatioCriteria {...props} />
+        <RatioCriteria {...props} criteria={criteria as RatioCriteriaType} />
       )}
     </div>
   );
 };
 
 interface CriteriaWrapperProps {
-  alertParams: Partial<AlertParams>;
-  fields: IFieldType[];
+  alertParams: SharedProps['alertParams'];
+  fields: SharedProps['fields'];
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   addCriterion: () => void;
   criteria: CriteriaType;
-  errors: IErrorObject;
-  context: AlertsContext;
-  sourceId: string;
+  errors: SharedProps['errors'];
+  context: SharedProps['context'];
+  sourceId: SharedProps['sourceId'];
 }
 
 const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
@@ -103,11 +113,81 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
   );
 };
 
-const RatioCriteria = () => {
-  return null;
+interface RatioCriteriaProps {
+  alertParams: SharedProps['alertParams'];
+  fields: SharedProps['fields'];
+  criteria: RatioCriteriaType;
+  errors: SharedProps['errors'];
+  context: SharedProps['context'];
+  sourceId: SharedProps['sourceId'];
+  updateCriteria: (criteria: AlertParams['criteria']) => void;
+}
+
+const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
+  const { criteria, updateCriteria } = props;
+
+  const handleUpdateNumeratorCriteria = useCallback(
+    (criteriaParam: CriteriaType) => {
+      const nextCriteria: RatioCriteriaType = [criteriaParam, criteria[1]];
+      updateCriteria(nextCriteria);
+    },
+    [updateCriteria, criteria]
+  );
+
+  const handleUpdateDenominatorCriteria = useCallback(
+    (criteriaParam: CriteriaType) => {
+      const nextCriteria: RatioCriteriaType = [criteria[0], criteriaParam];
+      updateCriteria(nextCriteria);
+    },
+    [updateCriteria, criteria]
+  );
+
+  const {
+    updateCriterion: updateNumeratorCriterion,
+    addCriterion: addNumeratorCriterion,
+    removeCriterion: removeNumeratorCriterion,
+  } = useCriteriaState(criteria[0], handleUpdateNumeratorCriteria);
+
+  const {
+    updateCriterion: updateDenominatorCriterion,
+    addCriterion: addDenominatorCriterion,
+    removeCriterion: removeDenominatorCriterion,
+  } = useCriteriaState(criteria[0], handleUpdateDenominatorCriteria);
+
+  return (
+    <>
+      <CriteriaWrapper
+        {...props}
+        criteria={criteria[0]}
+        updateCriterion={updateNumeratorCriterion}
+        addCriterion={addNumeratorCriterion}
+        removeCriterion={removeNumeratorCriterion}
+      />
+
+      <EuiText color="secondary">{RATIO_SEPERATOR_TEXT.toUpperCase()}</EuiText>
+
+      <CriteriaWrapper
+        {...props}
+        criteria={criteria[1]}
+        updateCriterion={updateDenominatorCriterion}
+        addCriterion={addDenominatorCriterion}
+        removeCriterion={removeDenominatorCriterion}
+      />
+    </>
+  );
 };
 
-const CountCriteria: React.FC<Props & { criteria: CountCriteriaType }> = (props) => {
+interface CountCriteriaProps {
+  alertParams: SharedProps['alertParams'];
+  fields: SharedProps['fields'];
+  criteria: CountCriteriaType;
+  errors: SharedProps['errors'];
+  context: SharedProps['context'];
+  sourceId: SharedProps['sourceId'];
+  updateCriteria: (criteria: AlertParams['criteria']) => void;
+}
+
+const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
   const { criteria, updateCriteria } = props;
 
   const handleUpdateCriteria = useCallback(
@@ -164,7 +244,7 @@ const useCriteriaState = (
   return { updateCriterion, addCriterion, removeCriterion };
 };
 
-const AddCriterionButton = ({ addCriterion }) => {
+const AddCriterionButton = ({ addCriterion }: { addCriterion: () => void }) => {
   return (
     <div>
       <EuiButtonEmpty

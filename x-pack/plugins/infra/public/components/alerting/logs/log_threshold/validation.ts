@@ -61,40 +61,37 @@ export function validateExpression({
     );
   }
 
+  // TODO: Reinstate
   if (criteria && criteria.length > 0) {
     // Criteria validation
     criteria.forEach((criterion, idx: number) => {
-      const id = idx.toString();
-
-      errors.criteria[id] = {
-        field: [],
-        comparator: [],
-        value: [],
-      };
-
-      if (!criterion.field) {
-        errors.criteria[id].field.push(
-          i18n.translate('xpack.infra.logs.alertFlyout.error.criterionFieldRequired', {
-            defaultMessage: 'Field is required.',
-          })
-        );
-      }
-
-      if (!criterion.comparator) {
-        errors.criteria[id].comparator.push(
-          i18n.translate('xpack.infra.logs.alertFlyout.error.criterionComparatorRequired', {
-            defaultMessage: 'Comparator is required.',
-          })
-        );
-      }
-
-      if (!criterion.value) {
-        errors.criteria[id].value.push(
-          i18n.translate('xpack.infra.logs.alertFlyout.error.criterionValueRequired', {
-            defaultMessage: 'Value is required.',
-          })
-        );
-      }
+      // const id = idx.toString();
+      // errors.criteria[id] = {
+      //   field: [],
+      //   comparator: [],
+      //   value: [],
+      // };
+      // if (!criterion.field) {
+      //   errors.criteria[id].field.push(
+      //     i18n.translate('xpack.infra.logs.alertFlyout.error.criterionFieldRequired', {
+      //       defaultMessage: 'Field is required.',
+      //     })
+      //   );
+      // }
+      // if (!criterion.comparator) {
+      //   errors.criteria[id].comparator.push(
+      //     i18n.translate('xpack.infra.logs.alertFlyout.error.criterionComparatorRequired', {
+      //       defaultMessage: 'Comparator is required.',
+      //     })
+      //   );
+      // }
+      // if (!criterion.value) {
+      //   errors.criteria[id].value.push(
+      //     i18n.translate('xpack.infra.logs.alertFlyout.error.criterionValueRequired', {
+      //       defaultMessage: 'Value is required.',
+      //     })
+      //   );
+      // }
     });
   }
 

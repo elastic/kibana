@@ -1,0 +1,111 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiPopoverTitle,
+  EuiText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPopover,
+  EuiSelect,
+  EuiFieldNumber,
+  EuiExpression,
+  EuiFormRow,
+} from '@elastic/eui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IErrorObject } from '../../../../../../../triggers_actions_ui/public/types';
+import {
+  Comparator,
+  ComparatorToi18nMap,
+  AlertParams,
+  ThresholdType,
+} from '../../../../../../common/alerting/logs/log_threshold/types';
+
+const typePrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePrefix', {
+  defaultMessage: 'when the',
+});
+
+const countSuffix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeCountSuffix', {
+  defaultMessage: 'of log entries',
+});
+
+const ratioSuffix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeRatioSuffix', {
+  defaultMessage: 'of the count of log entries',
+});
+
+const countI18n = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeCount', {
+  defaultMessage: 'count',
+});
+
+const ratioI18n = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypeRatio', {
+  defaultMessage: 'ratio',
+});
+
+const getOptions = (): Array<{
+  value: ThresholdType;
+  text: string;
+}> => {
+  return [
+    { value: 'ratio', text: ratioI18n },
+    { value: 'count', text: countI18n },
+  ];
+};
+
+interface Props {
+  criteria: AlertParams['criteria'];
+  updateType: (type: ThresholdType) => void;
+}
+
+const getThresholdType = (criteria: AlertParams['criteria']): ThresholdType => {
+  return Array.isArray(criteria[0]) ? 'ratio' : 'count';
+};
+
+export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
+  const [isThresholdTypePopoverOpen, setThresholdTypePopoverOpenState] = useState(false);
+  const thresholdType = getThresholdType(criteria);
+
+  return (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          id="thresholdType"
+          button={
+            <>
+              <EuiExpression
+                description={typePrefix}
+                uppercase={true}
+                value={thresholdType === 'ratio' ? ratioI18n : countI18n}
+                isActive={isThresholdTypePopoverOpen}
+                onClick={() => setThresholdTypePopoverOpenState(true)}
+              />
+              <EuiText color="secondary">
+                {thresholdType === 'ratio' ? ratioSuffix.toUpperCase() : countSuffix.toUpperCase()}
+              </EuiText>
+            </>
+          }
+          isOpen={isThresholdTypePopoverOpen}
+          closePopover={() => setThresholdTypePopoverOpenState(false)}
+          ownFocus
+          panelPaddingSize="s"
+          anchorPosition="downLeft"
+        >
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                compressed
+                value={thresholdType}
+                onChange={(e) => updateType(thresholdType === 'ratio' ? 'count' : 'ratio')}
+                options={getOptions()}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

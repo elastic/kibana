@@ -9,6 +9,13 @@ import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearc
 
 export const LOG_DOCUMENT_COUNT_ALERT_TYPE_ID = 'logs.alert.document.count';
 
+const ThresholdTypeRT = rt.keyof({
+  count: null,
+  ratio: null,
+});
+
+export type ThresholdType = rt.TypeOf<typeof ThresholdTypeRT>;
+
 // Comparators //
 export enum Comparator {
   GT = 'more than',

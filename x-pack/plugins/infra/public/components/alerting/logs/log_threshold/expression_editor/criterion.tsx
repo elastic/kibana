@@ -103,8 +103,13 @@ export const Criterion: React.FC<Props> = ({
   updateCriterion,
   removeCriterion,
   canDelete,
-  errors,
+  errors: realErrors,
 }) => {
+  const errors = {
+    field: [],
+    comparator: [],
+    value: [],
+  };
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
 
