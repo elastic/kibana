@@ -22,6 +22,13 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+import { setDataStart } from '../../../services';
+import { dataPluginMock } from '../../../../../data/public/mocks';
+
+jest.mock('../query_bar_wrapper', () => ({
+  QueryBarWrapper: jest.fn(() => null),
+}));
+
 const runTest = (aggType, name, test, additionalProps = {}) => {
   describe(aggType, () => {
     const metric = {
@@ -55,6 +62,8 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
 };
 
 describe('Histogram Types', () => {
+  beforeAll(() => setDataStart(dataPluginMock.createStartContract()));
+
   describe('supported', () => {
     const shouldHaveHistogramSupport = (aggType, additionalProps = {}) => {
       runTest(
