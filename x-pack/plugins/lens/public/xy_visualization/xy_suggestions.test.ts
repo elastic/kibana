@@ -54,6 +54,18 @@ describe('xy_suggestions', () => {
     };
   }
 
+  function histogramCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        isBucketed: true,
+        label: `${columnId} histogram`,
+        scale: 'interval',
+      },
+    };
+  }
+
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
@@ -266,6 +278,33 @@ describe('xy_suggestions', () => {
           "seriesType": "bar_stacked",
           "splitAccessor": undefined,
           "x": "date",
+          "y": Array [
+            "bytes",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test('suggests all basic x y chart with histogram on x', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), histogramCol('duration')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": undefined,
+          "x": "duration",
           "y": Array [
             "bytes",
           ],

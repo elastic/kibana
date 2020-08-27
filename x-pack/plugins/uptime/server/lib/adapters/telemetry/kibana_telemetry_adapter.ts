@@ -8,7 +8,7 @@ import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
-import { APICaller } from '../framework';
+import { ESAPICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
 
 interface UptimeTelemetryCollector {
@@ -69,7 +69,7 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async (callCluster: APICaller) => {
+      fetch: async (callCluster: ESAPICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
           await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
@@ -125,7 +125,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: APICaller,
+    callCluster: ESAPICaller,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);

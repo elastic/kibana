@@ -8,7 +8,7 @@ import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestDefinition, TestSuite } from '../lib/types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -20,15 +20,28 @@ export interface ExportTestDefinition extends TestDefinition {
   request: ReturnType<typeof createRequest>;
 }
 export type ExportTestSuite = TestSuite<ExportTestDefinition>;
+interface SuccessResult {
+  type: string;
+  id: string;
+  originId?: string;
+}
 export interface ExportTestCase {
   title: string;
   type: string;
   id?: string;
-  successResult?: TestCase | TestCase[];
+  successResult?: SuccessResult | SuccessResult[];
   failure?: 400 | 403;
 }
 
-export const getTestCases = (spaceId?: string) => ({
+// additional sharedtype objects that exist but do not have common test cases defined
+const CID = 'conflict_';
+const CONFLICT_1_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}1` });
+const CONFLICT_2A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2a`, originId: `${CID}2` });
+const CONFLICT_2B_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2b`, originId: `${CID}2` });
+const CONFLICT_3_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}3` });
+const CONFLICT_4A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}4a`, originId: `${CID}4` });
+
+export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase } => ({
   singleNamespaceObject: {
     title: 'single-namespace object',
     ...(spaceId === SPACE_1_ID
@@ -36,7 +49,7 @@ export const getTestCases = (spaceId?: string) => ({
       : spaceId === SPACE_2_ID
       ? CASES.SINGLE_NAMESPACE_SPACE_2
       : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE),
-  } as ExportTestCase,
+  },
   singleNamespaceType: {
     // this test explicitly ensures that single-namespace objects from other spaces are not returned
     title: 'single-namespace type',
@@ -47,7 +60,7 @@ export const getTestCases = (spaceId?: string) => ({
         : spaceId === SPACE_2_ID
         ? CASES.SINGLE_NAMESPACE_SPACE_2
         : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
-  } as ExportTestCase,
+  },
   multiNamespaceObject: {
     title: 'multi-namespace object',
     ...(spaceId === SPACE_1_ID
@@ -55,30 +68,30 @@ export const getTestCases = (spaceId?: string) => ({
       : spaceId === SPACE_2_ID
       ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
       : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1),
-    failure: 400, // multi-namespace types cannot be exported yet
-  } as ExportTestCase,
+  },
   multiNamespaceType: {
     title: 'multi-namespace type',
     type: 'sharedtype',
-    // successResult:
-    //   spaceId === SPACE_1_ID
-    //     ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-    //     : spaceId === SPACE_2_ID
-    //     ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
-    //     : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
-    failure: 400, // multi-namespace types cannot be exported yet
-  } as ExportTestCase,
+    successResult: (spaceId === SPACE_1_ID
+      ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+      : spaceId === SPACE_2_ID
+      ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+      : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
+    )
+      .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
+      .flat(),
+  },
   namespaceAgnosticObject: {
     title: 'namespace-agnostic object',
     ...CASES.NAMESPACE_AGNOSTIC,
-  } as ExportTestCase,
+  },
   namespaceAgnosticType: {
     title: 'namespace-agnostic type',
     type: 'globaltype',
     successResult: CASES.NAMESPACE_AGNOSTIC,
-  } as ExportTestCase,
-  hiddenObject: { title: 'hidden object', ...CASES.HIDDEN, failure: 400 } as ExportTestCase,
-  hiddenType: { title: 'hidden type', type: 'hiddentype', failure: 400 } as ExportTestCase,
+  },
+  hiddenObject: { title: 'hidden object', ...CASES.HIDDEN, failure: 400 },
+  hiddenType: { title: 'hidden type', type: 'hiddentype', failure: 400 },
 });
 export const createRequest = ({ type, id }: ExportTestCase) =>
   id ? { objects: [{ type, id }] } : { type };
@@ -98,7 +111,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
-    const { type, id, successResult = { type, id }, failure } = testCase;
+    const { type, id, successResult = { type, id } as SuccessResult, failure } = testCase;
     if (failure === 403) {
       // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
       // The best that could be done here is to have an if statement to ensure at least one of the
@@ -125,11 +138,14 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       const ndjson = response.text.split('\n');
       const savedObjectsArray = Array.isArray(successResult) ? successResult : [successResult];
       expect(ndjson.length).to.eql(savedObjectsArray.length + 1);
-      for (let i = 0; i < savedObjectsArray.length; i++) {
+      for (let i = 0; i < ndjson.length - 1; i++) {
         const object = JSON.parse(ndjson[i]);
-        const { type: expectedType, id: expectedId } = savedObjectsArray[i];
-        expect(object.type).to.eql(expectedType);
-        expect(object.id).to.eql(expectedId);
+        const expected = savedObjectsArray.find((x) => x.id === object.id)!;
+        expect(expected).not.to.be(undefined);
+        expect(object.type).to.eql(expected.type);
+        if (object.originId) {
+          expect(object.originId).to.eql(expected.originId);
+        }
         expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
         // don't test attributes, version, or references
       }

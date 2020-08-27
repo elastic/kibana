@@ -25,6 +25,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
+    createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
 
@@ -56,10 +57,10 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
-    ].forEach((scenario) => {
-      resolveCopyToSpaceConflictsTest(`user with no access from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.noAccess,
+    ].forEach(({ spaceId, ...scenario }) => {
+      const definitionNoAccess = (user: { username: string; password: string }) => ({
+        spaceId,
+        user,
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 404,
@@ -81,226 +82,131 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
             statusCode: 404,
             response: expectNotFoundResponse,
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },
       });
-
-      resolveCopyToSpaceConflictsTest(`superuser from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.superuser,
+      const definitionUnauthorizedRead = (user: { username: string; password: string }) => ({
+        spaceId,
+        user,
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectNonOverriddenResponseWithReferences(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(spaceId),
           },
           withReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectOverriddenResponseWithReferences(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(spaceId),
           },
           withoutReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectOverriddenResponseWithoutReferences(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(spaceId),
           },
           withoutReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectNonOverriddenResponseWithoutReferences(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(spaceId),
+          },
+          nonExistentSpace: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
+          },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedRead'),
+        },
+      });
+      const definitionUnauthorizedWrite = (user: { username: string; password: string }) => ({
+        spaceId,
+        user,
+        tests: {
+          withReferencesNotOverwriting: {
+            statusCode: 200,
+            response: createExpectReadonlyAtSpaceWithReferencesResult(spaceId),
+          },
+          withReferencesOverwriting: {
+            statusCode: 200,
+            response: createExpectReadonlyAtSpaceWithReferencesResult(spaceId),
+          },
+          withoutReferencesOverwriting: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(spaceId),
+          },
+          withoutReferencesNotOverwriting: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(spaceId),
+          },
+          nonExistentSpace: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
+          },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedWrite'),
+        },
+      });
+      const definitionAuthorized = (user: { username: string; password: string }) => ({
+        spaceId,
+        user,
+        tests: {
+          withReferencesNotOverwriting: {
+            statusCode: 200,
+            response: createExpectNonOverriddenResponseWithReferences(spaceId),
+          },
+          withReferencesOverwriting: {
+            statusCode: 200,
+            response: createExpectOverriddenResponseWithReferences(spaceId),
+          },
+          withoutReferencesOverwriting: {
+            statusCode: 200,
+            response: createExpectOverriddenResponseWithoutReferences(spaceId),
+          },
+          withoutReferencesNotOverwriting: {
+            statusCode: 200,
+            response: createExpectNonOverriddenResponseWithoutReferences(spaceId),
           },
           nonExistentSpace: {
             statusCode: 200,
             response: createExpectOverriddenResponseWithoutReferences(
-              scenario.spaceId,
+              spaceId,
               NON_EXISTENT_SPACE_ID
             ),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'authorized'),
         },
       });
 
       resolveCopyToSpaceConflictsTest(
-        `rbac user with all globally from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          user: scenario.users.allGlobally,
-          tests: {
-            withReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectNonOverriddenResponseWithReferences(scenario.spaceId),
-            },
-            withReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectOverriddenResponseWithReferences(scenario.spaceId),
-            },
-            withoutReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectOverriddenResponseWithoutReferences(scenario.spaceId),
-            },
-            withoutReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectNonOverriddenResponseWithoutReferences(scenario.spaceId),
-            },
-            nonExistentSpace: {
-              statusCode: 200,
-              response: createExpectOverriddenResponseWithoutReferences(
-                scenario.spaceId,
-                NON_EXISTENT_SPACE_ID
-              ),
-            },
-          },
-        }
+        `user with no access from the ${spaceId} space`,
+        definitionNoAccess(scenario.users.noAccess)
       );
-
-      resolveCopyToSpaceConflictsTest(`dual-privileges user from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.dualAll,
-        tests: {
-          withReferencesNotOverwriting: {
-            statusCode: 200,
-            response: createExpectNonOverriddenResponseWithReferences(scenario.spaceId),
-          },
-          withReferencesOverwriting: {
-            statusCode: 200,
-            response: createExpectOverriddenResponseWithReferences(scenario.spaceId),
-          },
-          withoutReferencesOverwriting: {
-            statusCode: 200,
-            response: createExpectOverriddenResponseWithoutReferences(scenario.spaceId),
-          },
-          withoutReferencesNotOverwriting: {
-            statusCode: 200,
-            response: createExpectNonOverriddenResponseWithoutReferences(scenario.spaceId),
-          },
-          nonExistentSpace: {
-            statusCode: 200,
-            response: createExpectOverriddenResponseWithoutReferences(
-              scenario.spaceId,
-              NON_EXISTENT_SPACE_ID
-            ),
-          },
-        },
-      });
-
-      resolveCopyToSpaceConflictsTest(`legacy user from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.legacyAll,
-        tests: {
-          withReferencesNotOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
-          },
-          withReferencesOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
-          },
-          withoutReferencesOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
-          },
-          withoutReferencesNotOverwriting: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
-          },
-          nonExistentSpace: {
-            statusCode: 404,
-            response: expectNotFoundResponse,
-          },
-        },
-      });
-
       resolveCopyToSpaceConflictsTest(
-        `rbac user with read globally from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          user: scenario.users.readGlobally,
-          tests: {
-            withReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
-            },
-            withReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
-            },
-            withoutReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
-            },
-            withoutReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
-            },
-            nonExistentSpace: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
-                scenario.spaceId,
-                NON_EXISTENT_SPACE_ID
-              ),
-            },
-          },
-        }
+        `superuser from the ${spaceId} space`,
+        definitionAuthorized(scenario.users.superuser)
       );
-
       resolveCopyToSpaceConflictsTest(
-        `dual-privileges readonly user from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          user: scenario.users.dualRead,
-          tests: {
-            withReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
-            },
-            withReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
-            },
-            withoutReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
-            },
-            withoutReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
-            },
-            nonExistentSpace: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
-                scenario.spaceId,
-                NON_EXISTENT_SPACE_ID
-              ),
-            },
-          },
-        }
+        `rbac user with all globally from the ${spaceId} space`,
+        definitionAuthorized(scenario.users.allGlobally)
       );
-
       resolveCopyToSpaceConflictsTest(
-        `rbac user with all at space from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          user: scenario.users.allAtSpace,
-          tests: {
-            withReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithReferencesResult(scenario.spaceId),
-            },
-            withReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithReferencesResult(scenario.spaceId),
-            },
-            withoutReferencesOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
-            },
-            withoutReferencesNotOverwriting: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
-            },
-            nonExistentSpace: {
-              statusCode: 200,
-              response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
-                scenario.spaceId,
-                NON_EXISTENT_SPACE_ID
-              ),
-            },
-          },
-        }
+        `dual-privileges user from the ${spaceId} space`,
+        definitionAuthorized(scenario.users.dualAll)
+      );
+      resolveCopyToSpaceConflictsTest(
+        `legacy user from the ${spaceId} space`,
+        definitionNoAccess(scenario.users.legacyAll)
+      );
+      resolveCopyToSpaceConflictsTest(
+        `rbac user with read globally from the ${spaceId} space`,
+        definitionUnauthorizedWrite(scenario.users.readGlobally)
+      );
+      resolveCopyToSpaceConflictsTest(
+        `dual-privileges readonly user from the ${spaceId} space`,
+        definitionUnauthorizedWrite(scenario.users.dualRead)
+      );
+      resolveCopyToSpaceConflictsTest(
+        `rbac user with all at space from the ${spaceId} space`,
+        definitionUnauthorizedRead(scenario.users.allAtSpace)
       );
     });
   });

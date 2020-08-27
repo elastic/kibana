@@ -25,11 +25,14 @@ export {
   SavedObjectsManagementActionServiceSetup,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
+  SavedObjectsManagementColumnServiceSetup,
+  SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementServiceRegistryEntry,
 } from './services';
-export { ProcessedImportResponse, processImportResponse } from './lib';
+export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {

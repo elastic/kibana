@@ -11,6 +11,7 @@ import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
 import { ResolverChildNode, ResolverTree } from '../../../../common/endpoint/types';
+import * as eventModel from '../../../../common/endpoint/models/event';
 
 /**
  * Test the data reducer and selector.
@@ -172,6 +173,24 @@ describe('Resolver Data Middleware', () => {
           firstChildNodeInTree.id
         )(categoryToOverCount);
         expect(relatedEventsForOvercountedCategory.length).toBe(
+          eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
+        );
+      });
+      it('should return the correct related event detail metadata for a given related event', () => {
+        const relatedEventsByCategory = selectors.relatedEventsByCategory(store.getState());
+        const someRelatedEventForTheFirstChild = relatedEventsByCategory(firstChildNodeInTree.id)(
+          categoryToOverCount
+        )[0];
+        const relatedEventID = eventModel.eventId(someRelatedEventForTheFirstChild)!;
+        const relatedDisplayInfo = selectors.relatedEventDisplayInfoByEntityAndSelfID(
+          store.getState()
+        )(firstChildNodeInTree.id, relatedEventID);
+        const [, countOfSameType, , sectionData] = relatedDisplayInfo;
+        const hostEntries = sectionData.filter((section) => {
+          return section.sectionTitle === 'host';
+        })[0].entries;
+        expect(hostEntries).toContainEqual({ title: 'os.platform', description: 'Windows' });
+        expect(countOfSameType).toBe(
           eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
         );
       });

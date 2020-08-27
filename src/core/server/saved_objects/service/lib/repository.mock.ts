@@ -20,6 +20,7 @@
 import { ISavedObjectsRepository } from './repository';
 
 const create = (): jest.Mocked<ISavedObjectsRepository> => ({
+  checkConflicts: jest.fn(),
   create: jest.fn(),
   bulkCreate: jest.fn(),
   bulkUpdate: jest.fn(),
