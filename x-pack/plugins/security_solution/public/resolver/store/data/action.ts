@@ -75,7 +75,15 @@ interface AppReceivedNewExternalProperties {
      * the `_id` of an ES document. This defines the origin of the Resolver graph.
      */
     databaseDocumentID?: string;
+    /**
+     * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
+     */
     resolverComponentInstanceID: string;
+
+    /**
+     * The `search` part of the URL of this page.
+     */
+    locationSearch: string;
   };
 }
 
