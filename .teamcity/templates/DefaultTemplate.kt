@@ -40,6 +40,10 @@ object DefaultTemplate : Template({
     startsWith("teamcity.agent.name", "kibana-standard-4-", "RQ_AGENT_NAME")
   }
 
+  failureConditions {
+    executionTimeoutMin = 60
+  }
+
   params {
     param("env.CI", "true")
 
