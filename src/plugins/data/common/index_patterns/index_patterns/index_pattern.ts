@@ -524,11 +524,6 @@ export class IndexPattern implements IIndexPattern {
             // and ensure we ignore the key if the server response
             // is the same as the original response (since that is expected
             // if we made a change in that key)
-            /*
-            const serverChangedKeys = Object.keys(updatedBody).filter((key) => {
-              return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
-            });
-            */
 
             const serverChangedKeys: string[] = [];
             Object.entries(updatedBody).forEach(([key, value]) => {
