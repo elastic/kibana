@@ -90,7 +90,6 @@ export function runRoute(
           getFunction,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
-          esRequestTimeout: configManager.getEsRequestTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
           esDataClient: data.search.search,
         });

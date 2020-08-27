@@ -132,14 +132,9 @@ export default new Datasource('es', {
     const resp = await tlConfig.esDataClient(
       tlConfig.context,
       {
-        params: {
-          ...body,
-          waitForCompletionTimeout:
-            tlConfig.esRequestTimeout > 60000 ? `${tlConfig.esRequestTimeout}ms` : '1m',
-          keepAlive: tlConfig.esRequestTimeout > 60000 ? `${tlConfig.esRequestTimeout}ms` : '1m',
-        },
+        params: body,
       },
-      {}
+      { strategy: 'es' }
     );
 
     if (!resp.rawResponse._shards.total) {

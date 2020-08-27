@@ -41,7 +41,6 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
         });
       },
     },
-    esRequestTimeout: 30000,
   };
 }
 
