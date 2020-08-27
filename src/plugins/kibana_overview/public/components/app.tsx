@@ -17,23 +17,12 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import {
-  ChromeStart,
-  DocLinksStart,
-  HttpStart,
-  NotificationsSetup,
-  OverlayStart,
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-  ApplicationStart,
-} from 'kibana/public';
-import { CoreStart } from '../../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
-
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { CoreStart } from 'src/core/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Overview } from './overview';
 
 interface KibanaOverviewAppDeps {
@@ -41,29 +30,17 @@ interface KibanaOverviewAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
-  uiSettings: IUiSettingsClient;
+  newsfeed$: Observable<FetchResult | null | void>;
 }
 
-export const KibanaOverviewApp = ({
-  basename,
-  notifications,
-  http,
-  navigation,
-}: KibanaOverviewAppDeps) => {
-  console.log({ basename, notifications, http, navigation });
-
-  // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
-  return (
-    <Router basename={basename}>
-      <I18nProvider>
-        <Switch>
-          <Route exact path="/">
-            <Overview />
-          </Route>
-        </Switch>
-      </I18nProvider>
-    </Router>
-  );
-};
+export const KibanaOverviewApp = ({ basename, newsfeed$ }: KibanaOverviewAppDeps) => (
+  <Router basename={basename}>
+    <I18nProvider>
+      <Switch>
+        <Route exact path="/">
+          <Overview newsfeed$={newsfeed$} />
+        </Route>
+      </Switch>
+    </I18nProvider>
+  </Router>
+);

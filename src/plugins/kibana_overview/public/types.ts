@@ -20,16 +20,20 @@
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface AppPluginSetupDependencies {
   home: HomePublicPluginSetup;
 }
+
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  newsfeed: NewsfeedPublicPluginStart;
 }
