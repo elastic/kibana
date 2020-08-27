@@ -78,6 +78,17 @@ export async function getAgent(soClient: SavedObjectsClientContract, agentId: st
   return agent;
 }
 
+export async function getAgents(soClient: SavedObjectsClientContract, agentIds: string[]) {
+  const agentSOs = await soClient.bulkGet<AgentSOAttributes>(
+    agentIds.map((agentId) => ({
+      id: agentId,
+      type: AGENT_SAVED_OBJECT_TYPE,
+    }))
+  );
+  const agents = agentSOs.saved_objects.map(savedObjectToAgent);
+  return agents;
+}
+
 export async function getAgentByAccessAPIKeyId(
   soClient: SavedObjectsClientContract,
   accessAPIKeyId: string

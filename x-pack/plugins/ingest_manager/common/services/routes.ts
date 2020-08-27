@@ -126,6 +126,7 @@ export const agentRouteService = {
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
+  getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
 };

@@ -121,8 +121,19 @@ export interface PutAgentReassignRequest {
   body: { policy_id: string };
 }
 
+export interface PostBulkAgentReassignRequest {
+  body: { policy_id: string; agents: string[] | string };
+}
+
 export interface PutAgentReassignResponse {
   success: boolean;
+}
+
+export interface PostBulkAgentReassignResponse {
+  [key: string]: {
+    success: boolean;
+    error?: Error;
+  };
 }
 
 export interface GetOneAgentEventsRequest {

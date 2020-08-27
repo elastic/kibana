@@ -400,7 +400,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {agentToReassign && (
         <EuiPortal>
           <AgentReassignAgentPolicyFlyout
-            agent={agentToReassign}
+            agents={[agentToReassign]}
             onClose={() => {
               setAgentToReassignId(undefined);
               agentsRequest.sendRequest();

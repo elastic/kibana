@@ -13,9 +13,11 @@ import {
   EuiContextMenu,
   EuiButtonEmpty,
   EuiIcon,
+  EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
+import { AgentReassignAgentPolicyFlyout } from '../../components';
 
 const Divider = styled.div`
   width: 0;
@@ -52,9 +54,13 @@ export const AgentBulkActions: React.FunctionComponent<{
   selectedAgents,
   setSelectedAgents,
 }) => {
+  // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
   const openMenu = () => setIsMenuOpen(true);
+
+  // Actions states
+  const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
 
   const panels = [
     {
@@ -70,6 +76,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           icon: <EuiIcon type="pencil" size="m" />,
           onClick: () => {
             closeMenu();
+            setIsReassignFlyoutOpen(true);
           },
         },
         {
@@ -115,72 +122,84 @@ export const AgentBulkActions: React.FunctionComponent<{
   ];
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.ingestManager.agentBulkActions.totalAgents"
-            defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
-            values={{ count: totalAgents }}
+    <>
+      {isReassignFlyoutOpen && (
+        <EuiPortal>
+          <AgentReassignAgentPolicyFlyout
+            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
+            onClose={() => {
+              setIsReassignFlyoutOpen(false);
+            }}
           />
-        </EuiText>
-      </EuiFlexItem>
-      {(selectionMode === 'manual' && selectedAgents.length) ||
-      (selectionMode === 'query' && totalAgents > 0) ? (
-        <>
-          <FlexItem grow={false}>
-            <Divider />
-          </FlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="agentBulkActionsMenu"
-              button={
+        </EuiPortal>
+      )}
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.ingestManager.agentBulkActions.totalAgents"
+              defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
+              values={{ count: totalAgents }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {(selectionMode === 'manual' && selectedAgents.length) ||
+        (selectionMode === 'query' && totalAgents > 0) ? (
+          <>
+            <FlexItem grow={false}>
+              <Divider />
+            </FlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id="agentBulkActionsMenu"
+                button={
+                  <Button
+                    size="xs"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    flush="left"
+                    onClick={openMenu}
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentBulkActions.agentsSelected"
+                      defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
+                      values={{
+                        count: selectionMode === 'manual' ? selectedAgents.length : totalAgents,
+                      }}
+                    />
+                  </Button>
+                }
+                isOpen={isMenuOpen}
+                closePopover={closeMenu}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={panels} />
+              </EuiPopover>
+            </EuiFlexItem>
+            {selectionMode === 'manual' &&
+            selectedAgents.length === shownAgents &&
+            shownAgents < totalAgents ? (
+              <EuiFlexItem grow={false}>
                 <Button
                   size="xs"
-                  iconType="arrowDown"
-                  iconSide="right"
+                  iconType="pagesSelect"
+                  iconSide="left"
                   flush="left"
-                  onClick={openMenu}
+                  onClick={() => setSelectionMode('query')}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentBulkActions.agentsSelected"
-                    defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
-                    values={{
-                      count: selectionMode === 'manual' ? selectedAgents.length : totalAgents,
-                    }}
+                    id="xpack.ingestManager.agentBulkActions.selectAll"
+                    defaultMessage="Select everything on all pages"
                   />
                 </Button>
-              }
-              isOpen={isMenuOpen}
-              closePopover={closeMenu}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenu initialPanelId={0} panels={panels} />
-            </EuiPopover>
-          </EuiFlexItem>
-          {selectionMode === 'manual' &&
-          selectedAgents.length === shownAgents &&
-          shownAgents < totalAgents ? (
-            <EuiFlexItem grow={false}>
-              <Button
-                size="xs"
-                iconType="pagesSelect"
-                iconSide="left"
-                flush="left"
-                onClick={() => setSelectionMode('query')}
-              >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentBulkActions.selectAll"
-                  defaultMessage="Select everything on all pages"
-                />
-              </Button>
-            </EuiFlexItem>
-          ) : null}
-        </>
-      ) : (
-        <FlexItem grow={false} />
-      )}
-    </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
+          </>
+        ) : (
+          <FlexItem grow={false} />
+        )}
+      </EuiFlexGroup>
+    </>
   );
 };

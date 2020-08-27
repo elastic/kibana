@@ -15,6 +15,7 @@ import {
   PostAgentEnrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
+  PostBulkAgentReassignResponse,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -26,6 +27,7 @@ import {
   PostAgentEnrollRequestSchema,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
@@ -316,6 +318,41 @@ export const putAgentsReassignHandler: RequestHandler<
       success: true,
     };
     return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const postBulkAgentsReassignHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    // Reassign by array of IDs
+    if (Array.isArray(request.body.agents)) {
+      const result = await AgentService.reassignAgents(
+        soClient,
+        request.body.agents,
+        request.body.policy_id
+      );
+      const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
+        return {
+          ...acc,
+          [so.id]: {
+            success: so.error ? false : true,
+            error: so.error || undefined,
+          },
+        };
+      }, {});
+      return response.ok({ body });
+    } else {
+      throw new Error('Reassign by query not implemented yet');
+    }
   } catch (e) {
     return response.customError({
       statusCode: 500,

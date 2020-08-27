@@ -89,6 +89,13 @@ export const PutAgentReassignRequestSchema = {
   }),
 };
 
+export const PostBulkAgentReassignRequestSchema = {
+  body: schema.object({
+    policy_id: schema.string(),
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+  }),
+};
+
 export const GetOneAgentEventsRequestSchema = {
   params: schema.object({
     agentId: schema.string(),

@@ -24,6 +24,7 @@ import {
   GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -35,6 +36,7 @@ import {
   postAgentEnrollHandler,
   getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
+  postBulkAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
@@ -146,6 +148,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     putAgentsReassignHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+      validate: PostBulkAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsReassignHandler
   );
 
   // Get agent events

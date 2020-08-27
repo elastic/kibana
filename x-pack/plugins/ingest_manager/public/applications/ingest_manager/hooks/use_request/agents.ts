@@ -12,6 +12,8 @@ import {
   GetOneAgentEventsRequest,
   PutAgentReassignRequest,
   PutAgentReassignResponse,
+  PostBulkAgentReassignRequest,
+  PostBulkAgentReassignResponse,
   GetAgentsRequest,
   GetAgentsResponse,
   GetAgentStatusRequest,
@@ -79,6 +81,18 @@ export function sendPutAgentReassign(
   return sendRequest<PutAgentReassignResponse>({
     method: 'put',
     path: agentRouteService.getReassignPath(agentId),
+    body,
+    ...options,
+  });
+}
+
+export function sendPostBulkAgentReassign(
+  body: PostBulkAgentReassignRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostBulkAgentReassignResponse>({
+    method: 'post',
+    path: agentRouteService.getBulkReassignPath(),
     body,
     ...options,
   });
