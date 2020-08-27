@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { processFieldsMap } from '../../../common/ecs/ecs_fields';
+
 import { UncommonProcessesEdges } from '../../graphql/types';
-import { processFieldsMap } from '../ecs_fields';
 
 import { formatUncommonProcessesData, getHosts } from './elasticsearch_adapter';
 import { UncommonProcessBucket, UncommonProcessHit } from './types';

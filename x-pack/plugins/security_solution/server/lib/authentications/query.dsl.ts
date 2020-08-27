@@ -5,11 +5,12 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { hostFieldsMap, sourceFieldsMap } from '../../../common/ecs/ecs_fields';
+import { extendMap } from '../../../common/ecs/ecs_fields/extend_map';
 
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
-import { extendMap } from '../ecs_fields/extend_map';
+
 import { RequestOptionsPaginated } from '../framework';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {

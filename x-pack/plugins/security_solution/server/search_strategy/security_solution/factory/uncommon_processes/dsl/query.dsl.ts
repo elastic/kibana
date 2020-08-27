@@ -4,29 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../../../common/ecs/ecs_fields';
-
-import { createQueryFilterClauses } from '../../utils/build_query';
-import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { RequestOptionsPaginated } from '../framework';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
+import {
+  hostFieldsMap,
+  processFieldsMap,
+  userFieldsMap,
+} from '../../../../../../common/ecs/ecs_fields';
+import { RequestOptionsPaginated } from '../../../../../../common/search_strategy/security_solution';
+import { uncommonProcessesFields } from '../helpers';
 
 export const buildQuery = ({
   defaultIndex,
-  fields,
   filterQuery,
   pagination: { querySize },
-  sourceConfiguration: {
-    fields: { timestamp },
-  },
   timerange: { from, to },
 }: RequestOptionsPaginated) => {
-  const processUserFields = reduceFields(fields, { ...processFieldsMap, ...userFieldsMap });
-  const hostFields = reduceFields(fields, hostFieldsMap);
+  const processUserFields = reduceFields(uncommonProcessesFields, {
+    ...processFieldsMap,
+    ...userFieldsMap,
+  });
+  const hostFields = reduceFields(uncommonProcessesFields, hostFieldsMap);
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
       range: {
-        [timestamp]: {
+        '@timestamp': {
           gte: from,
           lte: to,
           format: 'strict_date_optional_time',

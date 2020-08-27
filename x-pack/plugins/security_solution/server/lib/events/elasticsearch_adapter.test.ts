@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { eventFieldsMap } from '../../../common/ecs/ecs_fields';
+
 import { EcsEdges, TimelineDetailsData } from '../../graphql/types';
-import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import {

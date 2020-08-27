@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { cloudFieldsMap, hostFieldsMap } from '../../../common/ecs/ecs_fields';
+
 import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { cloudFieldsMap, hostFieldsMap } from '../ecs_fields';
 
 import { buildFieldsTermAggregation } from './helpers';
 import { HostOverviewRequestOptions } from './types';

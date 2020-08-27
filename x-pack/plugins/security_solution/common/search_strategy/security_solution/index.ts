@@ -6,17 +6,19 @@
 
 import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
+import { HostsQueries } from './hosts';
+import { HostsRequestOptions, HostsStrategyResponse } from './hosts/all';
 import {
-  HostOverviewStrategyResponse,
-  HostOverviewRequestOptions,
-  HostFirstLastSeenStrategyResponse,
   HostFirstLastSeenRequestOptions,
-  HostsQueries,
-  HostsRequestOptions,
-  HostsStrategyResponse,
-} from './hosts';
-import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
+  HostFirstLastSeenStrategyResponse,
+} from './hosts/first_last_seen';
+import { HostOverviewRequestOptions, HostOverviewStrategyResponse } from './hosts/overview';
 
+import {
+  UncommonProcessesStrategyResponse,
+  UncommonProcessesRequestOptions,
+} from './hosts/uncommon_processes';
+import { NetworkQueries, NetworkTlsRequestOptions, NetworkTlsStrategyResponse } from './network';
 export * from './hosts';
 export * from './network';
 export type Maybe<T> = T | null;
@@ -114,6 +116,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostOverviewStrategyResponse
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenStrategyResponse
+  : T extends HostsQueries.uncommonProcesses
+  ? UncommonProcessesStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
   : never;
@@ -124,6 +128,30 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostOverviewRequestOptions
   : T extends HostsQueries.firstLastSeen
   ? HostFirstLastSeenRequestOptions
+  : T extends HostsQueries.uncommonProcesses
+  ? UncommonProcessesRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
   : never;
+
+export type StringOrNumber = string | number;
+
+export interface TotalHit {
+  value: number;
+  relation: string;
+}
+
+export interface Hit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+}
+
+export interface Hits<T, U> {
+  hits: {
+    total: T;
+    max_score: number | null;
+    hits: U[];
+  };
+}

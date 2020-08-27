@@ -11,9 +11,11 @@ import { SecuritySolutionFactory } from '../types';
 import { allHosts } from './all';
 import { overviewHost } from './overview';
 import { firstLastSeenHost } from './last_first_seen';
+import { uncommonProcesses } from '../uncommon_processes';
 
 export const hostsFactory: Record<HostsQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [HostsQueries.hosts]: allHosts,
   [HostsQueries.hostOverview]: overviewHost,
   [HostsQueries.firstLastSeen]: firstLastSeenHost,
+  [HostsQueries.uncommonProcesses]: uncommonProcesses,
 };
