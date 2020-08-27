@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
+import { formatDate, StyledBreadcrumbs, GeneratedText } from './panel_content_utilities';
 import {
   processPath,
   processPid,
@@ -36,6 +36,10 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 10em;
   }
+`;
+
+const StyledTitle = styled('h4')`
+  overflow-wrap: break-word;
 `;
 
 /**
@@ -113,7 +117,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       .map((entry) => {
         return {
           ...entry,
-          description: String(entry.description),
+          description: <GeneratedText>{String(entry.description)}</GeneratedText>,
         };
       });
 
@@ -162,13 +166,15 @@ export const ProcessDetails = memo(function ProcessDetails({
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h4 aria-describedby={titleID}>
+        <StyledTitle aria-describedby={titleID}>
           <CubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
             running={!isProcessTerminated}
           />
-          <span data-test-subj="resolver:node-detail:title">{processName}</span>
-        </h4>
+          <span data-test-subj="resolver:node-detail:title">
+            <GeneratedText>{processName}</GeneratedText>
+          </span>
+        </StyledTitle>
       </EuiTitle>
       <EuiText>
         <EuiTextColor color="subdued">

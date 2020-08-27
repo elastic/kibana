@@ -10,13 +10,7 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import {
-  CrumbInfo,
-  formatDate,
-  StyledBreadcrumbs,
-  BoldCode,
-  StyledTime,
-} from './panel_content_utilities';
+import { StyledBreadcrumbs, BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
@@ -89,6 +83,21 @@ const TitleHr = memo(() => {
   );
 });
 TitleHr.displayName = 'TitleHR';
+
+/**
+ * Take description list entries and prepare them for display by
+ * seeding with `<wbr />` tags.
+ *
+ * @param entries {title: string, description: string}[]
+ */
+function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
+  return entries.map((entry) => {
+    return {
+      description: <GeneratedText>{entry.description}</GeneratedText>,
+      title: <GeneratedText>{entry.title}</GeneratedText>,
+    };
+  });
+}
 
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
