@@ -40,8 +40,8 @@ users interacting with APM APIs must have <<apm-app-api-user,sufficient privileg
   By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
 
 * The API endpoint uses the `GET` or `HEAD` operations
-* The path is whitelisted using the <<settings, `server.xsrf.whitelist`>> setting
-* XSRF protections are disabled using the `server.xsrf.disableProtection` setting
+* The path is whitelisted using the <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting
+* XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
 
 `Content-Type: application/json`::
   Applicable only when you send a payload in the API request.
