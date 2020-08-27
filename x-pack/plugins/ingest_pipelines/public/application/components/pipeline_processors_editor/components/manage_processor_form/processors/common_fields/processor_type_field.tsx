@@ -107,7 +107,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
           <EuiFormRow
             label={typeField.label}
             labelAppend={typeField.labelAppend}
-            helpText={description}
+            helpText={typeof description === 'function' ? description() : description}
             error={error}
             isInvalid={isInvalid}
             fullWidth

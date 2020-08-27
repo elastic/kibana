@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
   Append,
@@ -40,7 +40,7 @@ interface FieldDescriptor {
    * A sentence case label that can be displayed to users
    */
   label: string;
-  description?: string;
+  description?: string | ReactNode;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
