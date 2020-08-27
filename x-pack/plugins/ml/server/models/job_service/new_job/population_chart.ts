@@ -51,15 +51,11 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       splitFieldName
     );
 
-    try {
-      const { body } = await asCurrentUser.search(json);
-      return processSearchResults(
-        body,
-        aggFieldNamePairs.map((af) => af.field)
-      );
-    } catch ({ body }) {
-      return { error: body };
-    }
+    const { body } = await asCurrentUser.search(json);
+    return processSearchResults(
+      body,
+      aggFieldNamePairs.map((af) => af.field)
+    );
   }
 
   return {
