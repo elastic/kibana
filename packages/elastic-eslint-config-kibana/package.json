@@ -5,15 +5,15 @@
   "main": ".eslintrc.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elastic/eslint-config-kibana.git"
+    "url": "git+https://github.com/elastic/kibana.git"
   },
   "keywords": [],
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/tree/master/packages/eslint-config-kibana"
+    "url": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/master/packages/eslint-config-kibana",
+  "homepage": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana",
   "peerDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.7.1",
     "@typescript-eslint/parser": "^3.7.1",

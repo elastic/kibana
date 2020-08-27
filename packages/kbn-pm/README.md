@@ -19,7 +19,7 @@ From a plugin perspective there are two different types of Kibana dependencies:
 runtime and static dependencies. Runtime dependencies are things that are
 instantiated at runtime and that are injected into the plugin, for example
 config and elasticsearch clients. Static dependencies are those dependencies
-that we want to `import`. `eslint-config-kibana` is one example of this, and
+that we want to `import`. `elastic-eslint-config-kibana` is one example of this, and
 it's actually needed because eslint requires it to be a separate package. But we
 also have dependencies like `datemath`, `flot`, `eui` and others that we
 control, but where we want to `import` them in plugins instead of injecting them

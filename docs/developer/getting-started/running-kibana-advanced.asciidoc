@@ -48,7 +48,7 @@ If you’re installing dependencies and seeing an error that looks
 something like
 
 ....
-Unsupported URL Type: link:packages/eslint-config-kibana
+Unsupported URL Type: link:packages/elastic-eslint-config-kibana
 ....
 
 you’re likely running `npm`. To install dependencies in {kib} you
