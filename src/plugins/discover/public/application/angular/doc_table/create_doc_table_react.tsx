@@ -93,13 +93,13 @@ export function DocTableLegacy(renderProps: any) {
                 infinite-scroll="true"
                 filter="onFilter"
                 data-shared-item
-                data-title="searchTitle"
-                data-description="searchDescription"
+                data-title="{{searchTitle}}"
+                data-description="{{searchDescription}}"
                 data-test-subj="discoverDocTable"
                 minimum-visible-rows="minimumVisibleRows"
                 render-complete
                 on-add-column="onAddColumn"
-                on-change-sort-order="setSortOrder"
+                on-change-sort-order="onSort"
                 on-move-column="moveColumn"
                 on-remove-column="onRemoveColumn"></doc_table>`,
     },

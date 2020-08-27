@@ -19,6 +19,7 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
@@ -177,7 +178,9 @@ export function DiscoverLegacy({
 
                   {opts.timefield && (
                     <section
-                      aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+                      aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+                        defaultMessage: 'Histogram of found documents',
+                      })}
                       className="dscTimechart"
                     >
                       {vis && rows.length !== 0 && (
@@ -200,11 +203,7 @@ export function DiscoverLegacy({
                         />
                       </h2>
                       {rows && rows.length && (
-                        <div
-                          className="dscDiscover"
-                          data-search-description={opts.savedSearch.description}
-                          data-search-title={opts.savedSearch.lastSavedTitle}
-                        >
+                        <div className="dscDiscover">
                           <DocTableLegacy
                             ariaLabelledBy="documentsAriaLabel"
                             columns={state.columns}
