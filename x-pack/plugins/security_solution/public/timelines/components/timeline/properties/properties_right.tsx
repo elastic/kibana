@@ -122,7 +122,6 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   usersViewing,
 }) => {
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -143,15 +142,13 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             repositionOnScroll
           >
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-              {capabilitiesCanUserCRUD && (
-                <EuiFlexItem grow={false}>
-                  <NewTimeline
-                    timelineId={timelineId}
-                    title={i18n.NEW_TIMELINE}
-                    closeGearMenu={onClosePopover}
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <NewTimeline
+                  timelineId={timelineId}
+                  title={i18n.NEW_TIMELINE}
+                  closeGearMenu={onClosePopover}
+                />
+              </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <NewTemplateTimeline
