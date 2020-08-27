@@ -211,8 +211,8 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['logstash*'],
-                privileges: ['read', 'view_index_metadata'],
+                names: ['logstash*', 'logstash-*'],
+                privileges: ['all', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],
@@ -232,16 +232,6 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
-        global_drilldown_all: {
-          kibana: [
-            {
-              feature: {
-                drilldown: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
         global_discover_read: {
           kibana: [
             {
@@ -258,6 +248,8 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 dashboard: ['all'],
+                saved_objects: ['all'],
+                indexPatterns: ['all'],
               },
               spaces: ['*'],
             },

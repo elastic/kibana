@@ -26,11 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dashboard Drilldowns', function () {
     before(async () => {
       log.debug('Dashboard Drilldowns:initTests');
-      await security.testUser.setRoles([
-        'global_drilldown_all',
-        'test_logstash_reader',
-        'global_dashboard_all',
-      ]);
+      await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
     });
@@ -53,6 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
         destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
       });
+
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
 
