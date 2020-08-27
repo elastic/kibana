@@ -19,7 +19,11 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ISavedObjectsRepository, SavedObjectsClient } from '../../../../../core/server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClient,
+  IClusterClient,
+} from '../../../../../core/server';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';

@@ -86,6 +86,7 @@ export class TelemetryCollectionManagerPlugin
       title,
       priority,
       esCluster,
+      esClientGetter,
       statsGetter,
       clusterDetailsGetter,
       licenseGetter,
@@ -105,6 +106,9 @@ export class TelemetryCollectionManagerPlugin
       if (!esCluster) {
         throw Error('esCluster name must be set for the getCluster method.');
       }
+      if (!esClientGetter) {
+        throw Error('esClient getter method not set.');
+      }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');
       }
@@ -118,6 +122,7 @@ export class TelemetryCollectionManagerPlugin
         clusterDetailsGetter,
         esCluster,
         title,
+        esClientGetter,
       });
       this.usageGetterMethodPriority = priority;
     }
