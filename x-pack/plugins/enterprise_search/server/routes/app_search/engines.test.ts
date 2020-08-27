@@ -38,7 +38,7 @@ describe('engine routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/collection',
-        params: encodeURI('?type=indexed&page[current]=1&page[size]=10'),
+        params: { type: 'indexed', 'page[current]': 1, 'page[size]': 10 },
         hasValidData: expect.any(Function),
       });
     });
@@ -48,7 +48,7 @@ describe('engine routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/collection',
-        params: encodeURI('?type=meta&page[current]=99&page[size]=10'),
+        params: { type: 'meta', 'page[current]': 99, 'page[size]': 10 },
         hasValidData: expect.any(Function),
       });
     });

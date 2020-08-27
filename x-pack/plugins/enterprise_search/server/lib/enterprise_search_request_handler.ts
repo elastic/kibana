@@ -21,7 +21,7 @@ interface IConstructorDependencies {
 }
 interface IRequestParams<ResponseBody> {
   path: string;
-  params?: string;
+  params?: object;
   hasValidData?: (body?: ResponseBody) => boolean;
 }
 export interface IEnterpriseSearchRequestHandler {
@@ -47,7 +47,7 @@ export class EnterpriseSearchRequestHandler {
 
   createRequest<ResponseBody>({
     path,
-    params,
+    params = {},
     hasValidData = () => true,
   }: IRequestParams<ResponseBody>) {
     return async (
@@ -57,13 +57,16 @@ export class EnterpriseSearchRequestHandler {
     ) => {
       try {
         // Set up API URL
-        params = params ?? (request.query ? `?${querystring.stringify(request.query)}` : '');
-        const url = encodeURI(this.enterpriseSearchUrl + path + params);
+        const queryParams = { ...request.query, ...params };
+        const queryString = !this.isEmptyObj(queryParams)
+          ? `?${querystring.stringify(queryParams)}`
+          : '';
+        const url = encodeURI(this.enterpriseSearchUrl + path + queryString);
 
         // Set up API options
         const { method } = request.route;
         const headers = { Authorization: request.headers.authorization as string };
-        const body = Object.keys(request.body as object).length
+        const body = !this.isEmptyObj(request.body as object)
           ? JSON.stringify(request.body)
           : undefined;
 
@@ -92,5 +95,10 @@ export class EnterpriseSearchRequestHandler {
         return response.customError({ statusCode: 502, body: errorMessage });
       }
     };
+  }
+
+  // Small helper
+  isEmptyObj(obj: object) {
+    return Object.keys(obj).length === 0;
   }
 }

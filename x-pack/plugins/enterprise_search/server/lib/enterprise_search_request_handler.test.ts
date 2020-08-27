@@ -86,12 +86,12 @@ describe('EnterpriseSearchRequestHandler', () => {
     it('passes custom params set by the handler, which override request params', async () => {
       const requestHandler = enterpriseSearchRequestHandler.createRequest({
         path: '/api/example',
-        params: '?some=custom&params=true',
+        params: { someQuery: true },
       });
-      await makeAPICall(requestHandler, { query: { overriden: true } });
+      await makeAPICall(requestHandler, { query: { someQuery: false } });
 
       EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-        'http://localhost:3002/api/example?some=custom&params=true'
+        'http://localhost:3002/api/example?someQuery=true'
       );
     });
   });
@@ -164,6 +164,11 @@ describe('EnterpriseSearchRequestHandler', () => {
         statusCode: 502,
       });
     });
+  });
+
+  it('has a helper for checking empty objects', async () => {
+    expect(enterpriseSearchRequestHandler.isEmptyObj({})).toEqual(true);
+    expect(enterpriseSearchRequestHandler.isEmptyObj({ empty: false })).toEqual(false);
   });
 });
 

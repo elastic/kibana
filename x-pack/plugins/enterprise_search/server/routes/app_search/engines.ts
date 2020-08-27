@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import querystring from 'querystring';
 import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
@@ -34,11 +33,11 @@ export function registerEnginesRoute({
 
       return enterpriseSearchRequestHandler.createRequest({
         path: '/as/engines/collection',
-        params: `?${querystring.stringify({
+        params: {
           type,
           'page[current]': pageIndex,
           'page[size]': ENGINES_PAGE_SIZE,
-        })}`,
+        },
         hasValidData: (body?: IEnginesResponse) =>
           Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
       })(context, request, response);
