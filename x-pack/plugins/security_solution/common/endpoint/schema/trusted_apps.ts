@@ -12,3 +12,9 @@ export const GetTrustedAppsRequestSchema = {
     per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
   }),
 };
+
+export const PostTrustedAppCreateRequestSchema = {
+  body: schema.object({
+    name: schema.string(),
+  }),
+};

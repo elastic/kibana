@@ -8,6 +8,7 @@ import { RequestHandler } from 'kibana/server';
 import {
   GetTrustedAppsListRequest,
   GetTrustedListAppsResponse,
+  PostTrustedAppCreateRequest,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem } from './utils';
@@ -45,5 +46,15 @@ export const getTrustedAppsListRouteHandler = (
       logger.error(error);
       return res.internalError({ body: error });
     }
+  };
+};
+
+export const getTrustedAppsCreateRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+  return async (constext, req, res) => {
+    return res.customError({
+      statusCode: 501,
+    });
   };
 };
