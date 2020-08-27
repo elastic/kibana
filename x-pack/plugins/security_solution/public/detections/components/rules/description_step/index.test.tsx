@@ -7,7 +7,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import {
-  StepRuleDescriptionComponent,
+  StepRuleDescription,
   addFilterStateIfNotThere,
   buildListItems,
   getDescriptionItem,
@@ -52,24 +52,24 @@ describe('description_step', () => {
     mockAboutStep = mockAboutStepRule();
   });
 
-  describe('StepRuleDescriptionComponent', () => {
+  describe('StepRuleDescription', () => {
     test('renders tow columns when "columns" is "multi"', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="multi" data={mockAboutStep} schema={schema} />
+        <StepRuleDescription columns="multi" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
     });
 
     test('renders single column when "columns" is "single"', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="single" data={mockAboutStep} schema={schema} />
+        <StepRuleDescription columns="single" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
     });
 
     test('renders one column with title and description split when "columns" is "singleSplit', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="singleSplit" data={mockAboutStep} schema={schema} />
+        <StepRuleDescription columns="singleSplit" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
       expect(

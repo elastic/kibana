@@ -6,7 +6,7 @@
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
-import React, { memo, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { RuleType } from '../../../../../common/detection_engine/types';
