@@ -81,8 +81,7 @@ export function emptifyMock<T>(
       async entities(...args): Promise<ResolverEntityIndex> {
         return dataShouldBeEmpty?.includes('entities')
           ? Promise.resolve([])
-          : // @ts-ignore - ignore the argument requirement for dataAccessLayer
-            dataAccessLayer.entities(...args);
+          : dataAccessLayer.entities(...args);
       },
     },
   };
