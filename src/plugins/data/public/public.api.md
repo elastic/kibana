@@ -1729,7 +1729,7 @@ export class SearchInterceptor {
     protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
     // @internal (undocumented)
-    protected setupAbortSignal({ abortSignal, timeout }: {
+    protected setupAbortSignal({ abortSignal, timeout, }: {
         abortSignal?: AbortSignal;
         timeout?: number;
     }): {
