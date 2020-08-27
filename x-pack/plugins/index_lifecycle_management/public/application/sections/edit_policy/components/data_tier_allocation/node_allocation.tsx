@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSelect,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiSpacer,
-  EuiLoadingSpinner,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { ListNodesRouteResponse } from '../../../../../../common/types';
 import { LearnMoreLink } from '../learn_more_link';
 import { ErrableFormRow } from '../form_errors';
-import { useLoadNodes } from '../../../../services/api';
 import { NodeAttrsDetails } from './node_attrs_details';
 import { ColdPhase, Phase, Phases, WarmPhase } from '../../../../services/policies/types';
 import { PhaseValidationErrors, propertyof } from '../../../../services/policies/policy_validation';
@@ -44,6 +37,7 @@ interface Props<T extends Phase> {
   phaseData: T;
   setPhaseData: (dataKey: keyof T & string, value: string) => void;
   isShowingErrors: boolean;
+  nodes: ListNodesRouteResponse['nodesByAttributes'];
 }
 export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
   phase,
@@ -51,59 +45,19 @@ export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
   errors,
   phaseData,
   isShowingErrors,
+  nodes,
 }: React.PropsWithChildren<Props<T>>) => {
-  const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
-
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
   );
 
   useEffect(() => {
-    const attrs = nodes && Object.keys(nodes);
-    if (attrs.length) {
+    const attrs = Object.keys(nodes);
+    if (attrs?.length) {
       const [first] = attrs;
       setPhaseData('selectedNodeAttrs', first);
     }
   }, [nodes, setPhaseData]);
-
-  if (isLoading) {
-    return (
-      <Fragment>
-        <EuiLoadingSpinner size="xl" />
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  }
-
-  if (error) {
-    const { statusCode, message } = error;
-    return (
-      <Fragment>
-        <EuiCallOut
-          style={{ maxWidth: 400 }}
-          title={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesLoadingFailedTitle"
-              defaultMessage="Unable to load node attributes"
-            />
-          }
-          color="danger"
-        >
-          <p>
-            {message} ({statusCode})
-          </p>
-          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
-              defaultMessage="Try again"
-            />
-          </EuiButton>
-        </EuiCallOut>
-
-        <EuiSpacer size="xl" />
-      </Fragment>
-    );
-  }
 
   const nodeOptions = Object.keys(nodes).map((attrs) => ({
     text: `${attrs} (${nodes[attrs].length})`,
