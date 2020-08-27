@@ -28,7 +28,6 @@ import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
-import * as i18n from './translations';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -108,7 +107,7 @@ class TimelineQueryComponent extends QueryTemplate<
     if (defaultIndex.length === 1 && defaultIndex[0] === NO_ALERT_INDEX) {
       // Future developer, https://github.com/elastic/kibana/issues/73562
       // So we do not want to query with a fake index because user we will have to give permission
-      // to this fake index for no good reason
+      // to this fake index for no good reason. Therefore, we will return no data.
       return children!({
         id,
         inspect: { dsl: [JSON.stringify({ index: defaultIndex })], response: [''] },

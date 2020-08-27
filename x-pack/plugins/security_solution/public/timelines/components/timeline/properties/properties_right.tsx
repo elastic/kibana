@@ -22,7 +22,6 @@ import {
   TimelineType,
 } from '../../../../../common/types/timeline';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { useKibana } from '../../../../common/lib/kibana';
 import { Note } from '../../../../common/lib/note';
 
 import { AssociateNote } from '../../notes/helpers';
@@ -121,7 +120,6 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   updateNote,
   usersViewing,
 }) => {
-  const uiCapabilities = useKibana().services.application.capabilities;
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
