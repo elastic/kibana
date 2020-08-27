@@ -32,7 +32,7 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { LegacyAPICaller } from '../core/server';
+import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 import KbnServer from '../../legacy/server/kbn_server';
