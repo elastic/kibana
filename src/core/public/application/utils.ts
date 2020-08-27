@@ -47,8 +47,8 @@ export const removeSlashes = (
 export const appendAppPath = (appBasePath: string, path: string = '') => {
   // Only prepend slash if not a hash or query path
   path = path === '' || path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
-  // Do not remove trailing slash when in hashbang
-  const removeTrailing = path.indexOf('#') === -1;
+  // Do not remove trailing slash when in hashbang or basePath
+  const removeTrailing = path.indexOf('#') === -1 && appBasePath.indexOf('#') === -1;
   return removeSlashes(`${appBasePath}${path}`, {
     trailing: removeTrailing,
     duplicates: true,

@@ -79,13 +79,14 @@ export const AppRouter: FunctionComponent<Props> = ({
               url,
             },
           }: RouteComponentProps<Params>) => {
+            const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
             return (
               <AppContainer
                 appPath={url}
-                appId={appId}
+                appId={id ?? appId}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                mounter={undefined}
+                mounter={mounter}
                 {...{ setAppLeaveHandler, setIsMounting }}
               />
             );
