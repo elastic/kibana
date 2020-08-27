@@ -28,6 +28,7 @@ const createManagementMock = () => {
     getTitle: jest.fn(),
     getEditUrl: jest.fn(),
     getInAppUrl: jest.fn(),
+    getNamespaceType: jest.fn(),
   };
   return mocked;
 };

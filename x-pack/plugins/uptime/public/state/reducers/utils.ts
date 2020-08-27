@@ -8,7 +8,7 @@ import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
 
 export function handleAsyncAction<ReducerState>(
-  storeKey: string,
+  storeKey: keyof ReducerState,
   asyncAction: AsyncAction<any, any>
 ) {
   return {
@@ -20,14 +20,16 @@ export function handleAsyncAction<ReducerState>(
       },
     }),
 
-    [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => ({
-      ...state,
-      [storeKey]: {
-        ...(state as any)[storeKey],
-        data: action.payload,
-        loading: false,
-      },
-    }),
+    [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => {
+      return {
+        ...state,
+        [storeKey]: {
+          ...(state as any)[storeKey],
+          data: action.payload,
+          loading: false,
+        },
+      };
+    },
 
     [String(asyncAction.fail)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
@@ -41,7 +43,7 @@ export function handleAsyncAction<ReducerState>(
   };
 }
 
-export function getAsyncInitialState(initialData = null) {
+export function asyncInitState(initialData = null) {
   return {
     data: initialData,
     loading: false,
