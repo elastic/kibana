@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../src/core/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { Config } from '../common';
 
 interface SetupDependencies {
@@ -28,7 +33,7 @@ export class DiscoverEnhancedPlugin
 
   public setup(core: CoreSetup, { usageCollection }: SetupDependencies) {
     if (!!usageCollection) {
-      usageCollection.makeUsageCollector<{
+      const collector = usageCollection.makeUsageCollector<{
         exploreDataInChartActionEnabled: boolean;
       }>({
         type: 'discoverEnhanced',
@@ -45,6 +50,7 @@ export class DiscoverEnhancedPlugin
           };
         },
       });
+      usageCollection.registerCollector(collector);
     }
   }
 

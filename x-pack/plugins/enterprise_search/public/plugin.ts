@@ -12,7 +12,7 @@ import {
   AppMountParameters,
   HttpSetup,
 } from 'src/core/public';
-
+import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -20,24 +20,26 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../common/constants';
+import { IInitialAppData } from '../common/types';
 import {
-  getPublicUrl,
-  ExternalUrl,
-  IExternalUrl,
-} from './applications/shared/enterprise_search_url';
+  ENTERPRISE_SEARCH_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+} from '../common/constants';
+import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
 import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
 }
-export interface ClientData {
+export interface ClientData extends IInitialAppData {
   externalUrl: IExternalUrl;
+  errorConnecting?: boolean;
 }
 
 export interface PluginsSetup {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
 }
 
@@ -90,25 +92,48 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    plugins.home.featureCatalogue.register({
-      id: APP_SEARCH_PLUGIN.ID,
-      title: APP_SEARCH_PLUGIN.NAME,
-      icon: AppSearchLogo,
-      description: APP_SEARCH_PLUGIN.DESCRIPTION,
-      path: APP_SEARCH_PLUGIN.URL,
-      category: FeatureCatalogueCategory.DATA,
-      showOnHomePage: true,
-    });
+    if (plugins.home) {
+      plugins.home.featureCatalogue.registerSolution({
+        id: ENTERPRISE_SEARCH_PLUGIN.ID,
+        title: ENTERPRISE_SEARCH_PLUGIN.NAME,
+        subtitle: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
+          defaultMessage: 'Search everything',
+        }),
+        icon: 'logoEnterpriseSearch',
+        descriptions: [
+          i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
+            defaultMessage: 'Build a powerful search experience.',
+          }),
+          i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription2', {
+            defaultMessage: 'Connect your users to relevant data.',
+          }),
+          i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription3', {
+            defaultMessage: 'Unify your team content.',
+          }),
+        ],
+        path: APP_SEARCH_PLUGIN.URL, // TODO: Change this to enterprise search overview page once available
+      });
 
-    plugins.home.featureCatalogue.register({
-      id: WORKPLACE_SEARCH_PLUGIN.ID,
-      title: WORKPLACE_SEARCH_PLUGIN.NAME,
-      icon: WorkplaceSearchLogo,
-      description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
-      path: WORKPLACE_SEARCH_PLUGIN.URL,
-      category: FeatureCatalogueCategory.DATA,
-      showOnHomePage: true,
-    });
+      plugins.home.featureCatalogue.register({
+        id: APP_SEARCH_PLUGIN.ID,
+        title: APP_SEARCH_PLUGIN.NAME,
+        icon: AppSearchLogo,
+        description: APP_SEARCH_PLUGIN.DESCRIPTION,
+        path: APP_SEARCH_PLUGIN.URL,
+        category: FeatureCatalogueCategory.DATA,
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: WORKPLACE_SEARCH_PLUGIN.ID,
+        title: WORKPLACE_SEARCH_PLUGIN.NAME,
+        icon: WorkplaceSearchLogo,
+        description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
+        path: WORKPLACE_SEARCH_PLUGIN.URL,
+        category: FeatureCatalogueCategory.DATA,
+        showOnHomePage: false,
+      });
+    }
   }
 
   public start(core: CoreStart) {}
@@ -119,10 +144,15 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
-    // TODO: Rename to something more generic once we start fetching more data than just external_url from this endpoint
-    const publicUrl = await getPublicUrl(http);
+    try {
+      const { publicUrl, ...initialData } = await http.get('/api/enterprise_search/config_data');
+      this.data = { ...this.data, ...initialData };
+      if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
 
-    if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
-    this.hasInitialized = true;
+      this.hasInitialized = true;
+    } catch {
+      this.data.errorConnecting = true;
+      // The plugin will attempt to re-fetch config data on page change
+    }
   }
 }

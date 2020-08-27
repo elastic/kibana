@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { DiscoverEnhancedPlugin } from './plugin';
 
 export { config } from './config';

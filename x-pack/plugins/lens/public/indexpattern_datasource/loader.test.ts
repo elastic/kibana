@@ -12,6 +12,8 @@ import {
   changeIndexPattern,
   changeLayerIndexPattern,
   syncExistingFields,
+  extractReferences,
+  injectReferences,
 } from './loader';
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import {
@@ -38,6 +40,7 @@ const indexPattern1 = ({
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: false,
   fields: [
     {
       name: 'timestamp',
@@ -103,6 +106,7 @@ const indexPattern2 = ({
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: true,
   fields: [
     {
       name: 'timestamp',
@@ -378,10 +382,8 @@ describe('loader', () => {
 
     it('should initialize from saved state', async () => {
       const savedState: IndexPatternPersistedState = {
-        currentIndexPatternId: '2',
         layers: {
           layerb: {
-            indexPatternId: '2',
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
@@ -407,7 +409,12 @@ describe('loader', () => {
       };
       const storage = createMockStorage({ indexPatternId: '1' });
       const state = await loadInitialState({
-        state: savedState,
+        persistedState: savedState,
+        references: [
+          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
+          { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
+          { name: 'another-reference', id: 'c', type: 'index-pattern' },
+        ],
         savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
@@ -422,12 +429,85 @@ describe('loader', () => {
         indexPatterns: {
           '2': sampleIndexPatterns['2'],
         },
-        layers: savedState.layers,
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: '2' } },
       });
 
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: '2',
       });
+    });
+  });
+
+  describe('saved object references', () => {
+    const state: IndexPatternPrivateState = {
+      currentIndexPatternId: 'b',
+      indexPatternRefs: [],
+      indexPatterns: {},
+      existingFields: {},
+      layers: {
+        a: {
+          indexPatternId: 'id-index-pattern-a',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'avg',
+              sourceField: 'myfield',
+            },
+          },
+        },
+        b: {
+          indexPatternId: 'id-index-pattern-b',
+          columnOrder: ['col2'],
+          columns: {
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+              operationType: 'avg',
+              sourceField: 'myfield2',
+            },
+          },
+        },
+      },
+      isFirstExistenceFetch: false,
+    };
+
+    it('should create a reference for each layer and for current index pattern', () => {
+      const { savedObjectReferences } = extractReferences(state);
+      expect(savedObjectReferences).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "b",
+            "name": "indexpattern-datasource-current-indexpattern",
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "id-index-pattern-a",
+            "name": "indexpattern-datasource-layer-a",
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "id-index-pattern-b",
+            "name": "indexpattern-datasource-layer-b",
+            "type": "index-pattern",
+          },
+        ]
+      `);
+    });
+
+    it('should restore layers', () => {
+      const { savedObjectReferences, state: persistedState } = extractReferences(state);
+      expect(injectReferences(persistedState, savedObjectReferences).layers).toEqual(state.layers);
+    });
+
+    it('should restore current index pattern', () => {
+      const { savedObjectReferences, state: persistedState } = extractReferences(state);
+      expect(injectReferences(persistedState, savedObjectReferences).currentIndexPatternId).toEqual(
+        state.currentIndexPatternId
+      );
     });
   });
 
@@ -655,9 +735,9 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
         indexPatterns: [
-          { id: '1', title: '1', fields: [] },
-          { id: '2', title: '1', fields: [] },
-          { id: '3', title: '1', fields: [] },
+          { id: '1', title: '1', fields: [], hasRestrictions: false },
+          { id: '2', title: '1', fields: [], hasRestrictions: false },
+          { id: '3', title: '1', fields: [], hasRestrictions: false },
         ],
         setState,
         dslQuery,
@@ -705,9 +785,9 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
         indexPatterns: [
-          { id: '1', title: '1', fields: [] },
-          { id: '2', title: '1', fields: [] },
-          { id: 'c', title: '1', fields: [] },
+          { id: '1', title: '1', fields: [], hasRestrictions: false },
+          { id: '2', title: '1', fields: [], hasRestrictions: false },
+          { id: 'c', title: '1', fields: [], hasRestrictions: false },
         ],
         setState,
         dslQuery,
@@ -739,6 +819,7 @@ describe('loader', () => {
           {
             id: '1',
             title: '1',
+            hasRestrictions: false,
             fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
           },
         ],

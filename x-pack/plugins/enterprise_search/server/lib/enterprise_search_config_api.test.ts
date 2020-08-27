@@ -11,6 +11,7 @@ const { Response } = jest.requireActual('node-fetch');
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 describe('callEnterpriseSearchConfigAPI', () => {
@@ -35,12 +36,51 @@ describe('callEnterpriseSearchConfigAPI', () => {
     },
     settings: {
       external_url: 'http://some.vanity.url/',
+      read_only_mode: false,
+      ilm_enabled: true,
+      configured_limits: {
+        max_document_byte_size: 102400,
+        max_engines_per_meta_engine: 15,
+      },
+      app_search: {
+        account_id: 'some-id-string',
+        onboarding_complete: true,
+      },
+      workplace_search: {
+        can_create_invitations: true,
+        is_federated_auth: false,
+        organization: {
+          name: 'ACME Donuts',
+          default_org_name: 'My Organization',
+        },
+        fp_account: {
+          id: 'some-id-string',
+          groups: ['Default', 'Cats'],
+          is_admin: true,
+          can_create_personal_sources: true,
+          is_curated: false,
+          viewed_onboarding_page: true,
+        },
+      },
     },
-    access: {
-      user: 'someuser',
-      products: {
+    current_user: {
+      name: 'someuser',
+      access: {
         app_search: true,
         workplace_search: false,
+      },
+      app_search_role: {
+        id: 'account_id:somestring|user_oid:somestring',
+        role_type: 'owner',
+        ability: {
+          access_all_engines: true,
+          destroy: ['session'],
+          manage: ['account_credentials', 'account_engines'], // etc
+          edit: ['LocoMoco::Account'], // etc
+          view: ['Engine'], // etc
+          credential_types: ['admin', 'private', 'search'],
+          available_role_types: ['owner', 'admin'],
+        },
       },
     },
   };
@@ -56,10 +96,62 @@ describe('callEnterpriseSearchConfigAPI', () => {
     });
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
-      publicUrl: 'http://some.vanity.url/',
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
+      },
+      publicUrl: 'http://some.vanity.url',
+      ...DEFAULT_INITIAL_APP_DATA,
+    });
+  });
+
+  it('falls back without error when data is unavailable', async () => {
+    fetchMock.mockImplementationOnce((url: string) => Promise.resolve(new Response('{}')));
+
+    expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      publicUrl: undefined,
+      readOnlyMode: false,
+      ilmEnabled: false,
+      configuredLimits: {
+        maxDocumentByteSize: undefined,
+        maxEnginesPerMetaEngine: undefined,
+      },
+      appSearch: {
+        accountId: undefined,
+        onBoardingComplete: false,
+        role: {
+          id: undefined,
+          roleType: undefined,
+          ability: {
+            accessAllEngines: false,
+            destroy: [],
+            manage: [],
+            edit: [],
+            view: [],
+            credentialTypes: [],
+            availableRoleTypes: [],
+          },
+        },
+      },
+      workplaceSearch: {
+        canCreateInvitations: false,
+        isFederatedAuth: false,
+        organization: {
+          name: undefined,
+          defaultOrgName: undefined,
+        },
+        fpAccount: {
+          id: undefined,
+          groups: [],
+          isAdmin: false,
+          canCreatePersonalSources: false,
+          isCurated: false,
+          viewedOnboardingPage: false,
+        },
       },
     });
   });

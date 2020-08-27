@@ -68,7 +68,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId) => ({
+    toEsAggsConfig: (column, columnId, _indexPattern) => ({
       id: columnId,
       enabled: true,
       type: column.operationType,

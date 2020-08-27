@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
-
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
-import { registerCspCollector } from './server/lib/csp_usage_collector';
-
-const mkdirAsync = promisify(Fs.mkdir);
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -40,23 +34,6 @@ export default function (kibana) {
 
     uiExports: {
       uiSettingDefaults: getUiSettingDefaults(),
-    },
-
-    preInit: async function (server) {
-      try {
-        // Create the data directory (recursively, if the a parent dir doesn't exist).
-        // If it already exists, does nothing.
-        await mkdirAsync(server.config().get('path.data'), { recursive: true });
-      } catch (err) {
-        server.log(['error', 'init'], err);
-        // Stop the server startup with a fatal error
-        throw err;
-      }
-    },
-
-    init: async function (server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      registerCspCollector(usageCollection, server);
     },
   });
 }

@@ -42,11 +42,13 @@ import { SavedObjectWithMetadata } from '../../../types';
 import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
+  SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
 
 export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
+  columnRegistry: SavedObjectsManagementColumnServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
@@ -54,6 +56,7 @@ export interface TableProps {
   filterOptions: any[];
   canDelete: boolean;
   onDelete: () => void;
+  onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -74,6 +77,7 @@ interface TableState {
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
+  isColumnDataLoaded: boolean;
 }
 
 export class Table extends PureComponent<TableProps, TableState> {
@@ -83,11 +87,21 @@ export class Table extends PureComponent<TableProps, TableState> {
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
+    isColumnDataLoaded: false,
   };
 
   constructor(props: TableProps) {
     super(props);
   }
+
+  componentDidMount() {
+    this.loadColumnData();
+  }
+
+  loadColumnData = async () => {
+    await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
+    this.setState({ isColumnDataLoaded: true });
+  };
 
   onChange = ({ query, error }: any) => {
     if (error) {
@@ -139,12 +153,14 @@ export class Table extends PureComponent<TableProps, TableState> {
       filterOptions,
       selectionConfig: selection,
       onDelete,
+      onActionRefresh,
       selectedSavedObjects,
       onTableChange,
       goInspectObject,
       onShowRelationships,
       basePath,
       actionRegistry,
+      columnRegistry,
     } = this.props;
 
     const pagination = {
@@ -224,10 +240,18 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      ...columnRegistry.getAll().map((column) => {
+        return {
+          ...column.euiColumn,
+          sortable: false,
+          'data-test-subj': `savedObjectsTableColumn-${column.id}`,
+        };
+      }),
       {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',
         }),
+        width: '80px',
         actions: [
           {
             name: i18n.translate(
@@ -274,6 +298,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                   this.setState({
                     activeAction: undefined,
                   });
+                  const { refreshOnFinish = () => false } = action;
+                  if (refreshOnFinish()) {
+                    onActionRefresh(object);
+                  }
                 });
 
                 if (action.euiAction.onClick) {
