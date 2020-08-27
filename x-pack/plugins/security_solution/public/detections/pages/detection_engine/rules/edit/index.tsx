@@ -348,18 +348,6 @@ const EditRulePageComponent: FC = () => {
   );
 
   useEffect(() => {
-    if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
-        rule,
-      });
-      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
-      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
-      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
-      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
-    }
-  }, [rule]);
-
-  useEffect(() => {
     const tabIndex = rule?.immutable ? 3 : 0;
     setSelectedTab(tabs[tabIndex]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
