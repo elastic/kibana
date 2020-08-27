@@ -26,7 +26,7 @@ import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { TransactionList } from './List';
+import { TransactionList } from './TransactionList';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { useRedirect } from './useRedirect';
 import { history } from '../../../utils/history';
