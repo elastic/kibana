@@ -316,22 +316,13 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     producer: 'alerts',
   };
 
-  if (!context && !state) {
-    return baseAlert;
-  }
+  if (!context && !state) return baseAlert;
 
-  const actionVariables = {
-    context: [{ name: context, description: `${id} context` }],
-    state: [{ name: state, description: `${id} state` }],
+  return {
+    ...baseAlert,
+    actionVariables: {
+      ...(context ? { context: [{ name: context, description: `${id} context` }] } : {}),
+      ...(state ? { state: [{ name: state, description: `${id} state` }] } : {}),
+    },
   };
-
-  if (!context) {
-    delete actionVariables.context;
-  }
-
-  if (!state) {
-    delete actionVariables.state;
-  }
-
-  return { ...baseAlert, actionVariables };
 }
