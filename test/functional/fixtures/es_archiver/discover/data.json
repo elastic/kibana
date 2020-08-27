@@ -11,7 +11,7 @@
         "attributes": {
           "fields": {
             "referer": {
-              "displayName": "Referer custom"
+              "customLabel": "Referer custom"
             }
           }
         }

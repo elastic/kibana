@@ -293,7 +293,7 @@ export default function ({ getService, getPageObjects }) {
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
-      it('should add a field with displayName, sort by it, display it correctly', async function () {
+      it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('referer');
