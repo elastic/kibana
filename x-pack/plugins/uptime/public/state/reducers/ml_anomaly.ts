@@ -14,25 +14,25 @@ import {
   AnomalyRecords,
   getMLCapabilitiesAction,
 } from '../actions';
-import { getAsyncInitialState, handleAsyncAction } from './utils';
-import { AsyncInitialState } from './types';
+import { asyncInitState, handleAsyncAction } from './utils';
+import { AsyncInitState } from './types';
 import { MlCapabilitiesResponse, JobExistResult } from '../../../../../plugins/ml/public';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
 
 export interface MLJobState {
-  mlJob: AsyncInitialState<JobExistResult>;
-  createJob: AsyncInitialState<CreateMLJobSuccess>;
-  deleteJob: AsyncInitialState<DeleteJobResults>;
-  anomalies: AsyncInitialState<AnomalyRecords>;
-  mlCapabilities: AsyncInitialState<MlCapabilitiesResponse>;
+  mlJob: AsyncInitState<JobExistResult>;
+  createJob: AsyncInitState<CreateMLJobSuccess>;
+  deleteJob: AsyncInitState<DeleteJobResults>;
+  anomalies: AsyncInitState<AnomalyRecords>;
+  mlCapabilities: AsyncInitState<MlCapabilitiesResponse>;
 }
 
 const initialState: MLJobState = {
-  mlJob: getAsyncInitialState(),
-  createJob: getAsyncInitialState(),
-  deleteJob: getAsyncInitialState(),
-  anomalies: getAsyncInitialState(),
-  mlCapabilities: getAsyncInitialState(),
+  mlJob: asyncInitState(),
+  createJob: asyncInitState(),
+  deleteJob: asyncInitState(),
+  anomalies: asyncInitState(),
+  mlCapabilities: asyncInitState(),
 };
 
 export const mlJobsReducer = handleActions<MLJobState>(

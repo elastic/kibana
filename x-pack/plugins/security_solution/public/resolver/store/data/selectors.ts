@@ -14,6 +14,7 @@ import {
   IndexedProcessNode,
   AABB,
   VisibleEntites,
+  SectionData,
 } from '../../types';
 import {
   isGraphableProcess,
@@ -29,11 +30,14 @@ import {
   ResolverNodeStats,
   ResolverRelatedEvents,
   SafeResolverEvent,
+  EndpointEvent,
+  LegacyEndpointEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
+import { formatDate } from '../../view/panels/panel_content_utilities';
 
 /**
  * If there is currently a request.
@@ -172,6 +176,100 @@ export const relatedEventsStats: (
 export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
   return data.relatedEvents;
 }
+
+/**
+ * A helper function to turn objects into EuiDescriptionList entries.
+ * This reflects the strategy of more or less "dumping" metadata for related processes
+ * in description lists with little/no 'prettification'. This has the obvious drawback of
+ * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
+ * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
+ *
+ * Given an object like: {a:{b: 1}, c: 'd'} it will yield title/description entries like so:
+ * {title: "a.b", description: "1"}, {title: "c", description: "d"}
+ *
+ * @param {object} obj The object to turn into `<dt><dd>` entries
+ */
+const objectToDescriptionListEntries = function* (
+  obj: object,
+  prefix = ''
+): Generator<{ title: string; description: string }> {
+  const nextPrefix = prefix.length ? `${prefix}.` : '';
+  for (const [metaKey, metaValue] of Object.entries(obj)) {
+    if (typeof metaValue === 'number' || typeof metaValue === 'string') {
+      yield { title: nextPrefix + metaKey, description: `${metaValue}` };
+    } else if (metaValue instanceof Array) {
+      yield {
+        title: nextPrefix + metaKey,
+        description: metaValue
+          .filter((arrayEntry) => {
+            return typeof arrayEntry === 'number' || typeof arrayEntry === 'string';
+          })
+          .join(','),
+      };
+    } else if (typeof metaValue === 'object') {
+      yield* objectToDescriptionListEntries(metaValue, nextPrefix + metaKey);
+    }
+  }
+};
+
+/**
+ * Returns a function that returns the information needed to display related event details based on
+ * the related event's entityID and its own ID.
+ */
+export const relatedEventDisplayInfoByEntityAndSelfID: (
+  state: DataState
+) => (
+  entityId: string,
+  relatedEventId: string | number
+) => [
+  EndpointEvent | LegacyEndpointEvent | undefined,
+  number,
+  string | undefined,
+  SectionData,
+  string
+] = createSelector(relatedEventsByEntityId, function relatedEventDetails(
+  /* eslint-disable no-shadow */
+  relatedEventsByEntityId
+  /* eslint-enable no-shadow */
+) {
+  return defaultMemoize((entityId: string, relatedEventId: string | number) => {
+    const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityId);
+    if (!relatedEventsForThisProcess) {
+      return [undefined, 0, undefined, [], ''];
+    }
+    const specificEvent = relatedEventsForThisProcess.events.find(
+      (evt) => eventModel.eventId(evt) === relatedEventId
+    );
+    // For breadcrumbs:
+    const specificCategory = specificEvent && eventModel.primaryEventCategory(specificEvent);
+    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
+      return eventModel.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
+    }, 0);
+
+    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
+    const { agent, ecs, process, ...relevantData } = specificEvent as ResolverEvent & {
+      // Type this with various unknown keys so that ts will let us delete those keys
+      ecs: unknown;
+      process: unknown;
+    };
+
+    let displayDate = '';
+    const sectionData: SectionData = Object.entries(relevantData)
+      .map(([sectionTitle, val]) => {
+        if (sectionTitle === '@timestamp') {
+          displayDate = formatDate(val);
+          return { sectionTitle: '', entries: [] };
+        }
+        if (typeof val !== 'object') {
+          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
+        }
+        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
+      })
+      .filter((v) => v.sectionTitle !== '' && v.entries.length);
+
+    return [specificEvent, countOfCategory, specificCategory, sectionData, displayDate];
+  });
+});
 
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
