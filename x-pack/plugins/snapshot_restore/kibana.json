@@ -4,18 +4,19 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "home",
     "licensing",
     "management"
   ],
   "optionalPlugins": [
     "usageCollection",
     "security",
-    "cloud"
+    "cloud",
+    "home"
   ],
   "configPath": ["xpack", "snapshot_restore"],
   "requiredBundles": [
     "esUiShared",
-    "kibanaReact"
+    "kibanaReact",
+    "home"
   ]
 }

@@ -20,6 +20,7 @@
 export {
   FeatureCatalogueCategory,
   FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
 } from './feature_catalogue_registry';

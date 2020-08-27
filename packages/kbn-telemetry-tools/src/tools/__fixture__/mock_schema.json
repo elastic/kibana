@@ -5,6 +5,22 @@
         "flat": {
           "type": "keyword"
         },
+        "my_index_signature_prop": {
+          "properties": {
+            "avg": {
+              "type": "number"
+            },
+            "count": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "min": {
+              "type": "number"
+            }
+          }
+        },
         "my_str": {
           "type": "text"
         },

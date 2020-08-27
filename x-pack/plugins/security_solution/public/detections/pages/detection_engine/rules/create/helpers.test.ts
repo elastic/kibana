@@ -132,6 +132,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
       };
+      // @ts-expect-error
       delete mockStepData.timeline.id;
 
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
@@ -180,6 +181,7 @@ describe('helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         },
       };
+      // @ts-expect-error
       delete mockStepData.timeline.title;
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
 

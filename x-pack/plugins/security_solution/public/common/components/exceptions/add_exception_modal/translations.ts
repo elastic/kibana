@@ -13,7 +13,7 @@ export const CANCEL = i18n.translate('xpack.securitySolution.exceptions.addExcep
 export const ADD_EXCEPTION = i18n.translate(
   'xpack.securitySolution.exceptions.addException.addException',
   {
-    defaultMessage: 'Add Exception',
+    defaultMessage: 'Add Rule Exception',
   }
 );
 

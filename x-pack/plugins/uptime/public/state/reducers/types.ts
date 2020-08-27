@@ -6,7 +6,7 @@
 
 import { IHttpFetchError } from 'src/core/public';
 
-export interface AsyncInitialState<ReduceStateType> {
+export interface AsyncInitState<ReduceStateType> {
   data: ReduceStateType | null;
   loading: boolean;
   error?: IHttpFetchError | null;

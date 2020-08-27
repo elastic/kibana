@@ -87,6 +87,7 @@ describe('found_exception_list_item_schema', () => {
 
   test('it should NOT accept an undefined for "page"', () => {
     const payload = getFoundExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.page;
     const decoded = foundExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -100,6 +101,7 @@ describe('found_exception_list_item_schema', () => {
 
   test('it should NOT accept an undefined for "per_page"', () => {
     const payload = getFoundExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.per_page;
     const decoded = foundExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -113,6 +115,7 @@ describe('found_exception_list_item_schema', () => {
 
   test('it should NOT accept an undefined for "total"', () => {
     const payload = getFoundExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.total;
     const decoded = foundExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -126,6 +129,7 @@ describe('found_exception_list_item_schema', () => {
 
   test('it should NOT accept an undefined for "data"', () => {
     const payload = getFoundExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.data;
     const decoded = foundExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
