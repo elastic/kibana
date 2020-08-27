@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { IBucketAggConfig } from './bucket_agg_type';
 
 export const autoInterval = 'auto';
-export const isAutoInterval = (value: unknown) => Boolean(value && value === autoInterval);
+export const isAutoInterval = (value: unknown) => Boolean(value === autoInterval);
 
 export const intervalOptions = [
   {

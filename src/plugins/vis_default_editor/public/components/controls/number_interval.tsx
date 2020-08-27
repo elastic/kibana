@@ -57,7 +57,7 @@ const label = (
 );
 
 const autoInterval = 'auto';
-const isAutoInterval = (value: unknown) => Boolean(value && value === autoInterval);
+const isAutoInterval = (value: unknown) => Boolean(value === autoInterval);
 
 const selectIntervalPlaceholder = i18n.translate(
   'visDefaultEditor.controls.numberInterval.selectIntervalPlaceholder',
