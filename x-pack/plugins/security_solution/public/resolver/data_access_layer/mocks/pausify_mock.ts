@@ -71,13 +71,13 @@ export function pausifyMock<T>({
       }
     },
     resume: (pausableRequests: PausableRequests | PausableRequests[]) => {
-      const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
-      const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
       const resumeEntitiesRequest = pausableRequests.includes('entities');
+      const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
+      const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
 
-      if (resumeRelatedEventsRequest && entitiesResolver) entitiesResolver();
+      if (resumeEntitiesRequest && entitiesResolver) entitiesResolver();
       if (resumeResolverTreeRequest && resolverTreeResolver) resolverTreeResolver();
-      if (resumeEntitiesRequest && relatedEventsResolver) relatedEventsResolver();
+      if (resumeRelatedEventsRequest && relatedEventsResolver) relatedEventsResolver();
     },
     dataAccessLayer: {
       /**

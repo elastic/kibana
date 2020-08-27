@@ -26,7 +26,7 @@ interface Metadata<T> {
 }
 
 /**
- * A simple mock dataAccessLayer that allows you to manually pause and resume a request.
+ * A simple mock dataAccessLayer that allows you to control whether a request comes back with data or empty.
  */
 export function emptifyMock<T>(
   {
