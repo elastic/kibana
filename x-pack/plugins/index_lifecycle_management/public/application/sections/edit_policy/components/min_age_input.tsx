@@ -28,7 +28,7 @@ function getTimingLabelForPhase(phase: keyof Phases) {
       });
 
     case 'frozen':
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeLabel', {
+      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseFrozen.minimumAgeLabel', {
         defaultMessage: 'Timing for frozen phase',
       });
 

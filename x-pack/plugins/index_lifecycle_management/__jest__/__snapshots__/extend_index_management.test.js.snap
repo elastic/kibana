@@ -77,6 +77,10 @@ Array [
         "view": "Warm",
       },
       Object {
+        "value": "frozen",
+        "view": "Frozen",
+      },
+      Object {
         "value": "cold",
         "view": "Cold",
       },
