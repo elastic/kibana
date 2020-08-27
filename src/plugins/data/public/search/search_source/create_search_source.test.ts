@@ -23,6 +23,7 @@ import { IIndexPattern } from '../../../common/index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
 import { coreMock } from '../../../../../core/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 describe('createSearchSource', () => {
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
@@ -36,6 +37,7 @@ describe('createSearchSource', () => {
       search: jest.fn(),
       esShardTimeout: 30000,
       http: coreMock.createStart().http,
+      loadingCount$: new BehaviorSubject(0),
     };
 
     indexPatternContractMock = ({

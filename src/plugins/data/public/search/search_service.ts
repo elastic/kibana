@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
@@ -88,12 +89,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
+    const loadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(loadingCount$);
+
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       // TODO: we don't need this, apply on the server
       esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
       http,
+      loadingCount$,
     };
 
     return {

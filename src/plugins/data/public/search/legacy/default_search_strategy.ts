@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-
 import { getPreference } from '../fetch';
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 
@@ -31,7 +29,7 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({ searchRequests, config, http }: SearchStrategySearchParams) {
+function msearch({ searchRequests, config, http, loadingCount$ }: SearchStrategySearchParams) {
   const requests = searchRequests.map(({ index, body }) => {
     return {
       header: {
@@ -45,9 +43,6 @@ function msearch({ searchRequests, config, http }: SearchStrategySearchParams) {
   const abortController = new AbortController();
   let resolved = false;
 
-  const loadingCount$ = new BehaviorSubject(0);
-  http.addLoadingCountSource(loadingCount$);
-
   // Start LoadingIndicator
   loadingCount$.next(loadingCount$.getValue() + 1);
 
@@ -60,18 +55,19 @@ function msearch({ searchRequests, config, http }: SearchStrategySearchParams) {
     }
   };
 
-  const searching = http.post('/internal/_msearch', {
-    body: JSON.stringify({ searches: requests }),
-    signal: abortController.signal,
-  });
-
-  searching.finally(() => cleanup());
+  const searching = http
+    .post('/internal/_msearch', {
+      body: JSON.stringify({ searches: requests }),
+      signal: abortController.signal,
+    })
+    .then(({ body }) => body?.responses)
+    .finally(() => cleanup());
 
   return {
     abort: () => {
       abortController.abort();
       cleanup();
     },
-    searching: searching.then(({ body }) => body?.responses),
+    searching,
   };
 }

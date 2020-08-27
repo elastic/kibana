@@ -73,6 +73,7 @@ import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
@@ -113,6 +114,7 @@ export interface SearchSourceDependencies {
   search: ISearchGeneric;
   http: HttpStart;
   esShardTimeout: number;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 /** @public **/
@@ -243,7 +245,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { http, getConfig } = this.dependencies;
+    const { http, getConfig, loadingCount$ } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -254,6 +256,7 @@ export class SearchSource {
       {
         http,
         config: { get: getConfig },
+        loadingCount$,
       }
     );
   }

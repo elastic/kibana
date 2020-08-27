@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { httpServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { ISearchSource, SearchSource } from './search_source';
@@ -55,4 +56,5 @@ export const createSearchSourceMock = (fields?: SearchSourceFields) =>
     esShardTimeout: 30000,
     search: jest.fn(),
     http: httpServiceMock.createStartContract(),
+    loadingCount$: new BehaviorSubject(0),
   });
