@@ -11,6 +11,8 @@ import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
+type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
+
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
@@ -72,9 +74,10 @@ export class SpacesManager {
   }
 
   public async copySavedObjects(
-    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    objects: SavedObject[],
     spaces: string[],
     includeReferences: boolean,
+    createNewCopies: boolean,
     overwrite: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
     return this.http.post('/api/spaces/_copy_saved_objects', {
@@ -82,22 +85,36 @@ export class SpacesManager {
         objects,
         spaces,
         includeReferences,
-        overwrite,
+        ...(createNewCopies ? { createNewCopies } : { overwrite }),
       }),
     });
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
+    objects: SavedObject[],
     retries: unknown,
-    includeReferences: boolean
+    includeReferences: boolean,
+    createNewCopies: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
     return this.http.post(`/api/spaces/_resolve_copy_saved_objects_errors`, {
       body: JSON.stringify({
         objects,
         includeReferences,
+        createNewCopies,
         retries,
       }),
+    });
+  }
+
+  public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
+    return this.http.post(`/api/spaces/_share_saved_object_add`, {
+      body: JSON.stringify({ object, spaces }),
+    });
+  }
+
+  public async shareSavedObjectRemove(object: SavedObject, spaces: string[]): Promise<void> {
+    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
+      body: JSON.stringify({ object, spaces }),
     });
   }
 

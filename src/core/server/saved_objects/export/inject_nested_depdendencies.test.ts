@@ -20,6 +20,7 @@
 import { SavedObject } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { getObjectReferencesToFetch, fetchNestedDependencies } from './inject_nested_depdendencies';
+import { SavedObjectsErrorHelpers } from '..';
 
 describe('getObjectReferencesToFetch()', () => {
   test('works with no saved objects', () => {
@@ -475,10 +476,8 @@ describe('injectNestedDependencies', () => {
         {
           id: '1',
           type: 'index-pattern',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '1').output
+            .payload,
           attributes: {},
           references: [],
         },

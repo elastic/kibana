@@ -13,6 +13,19 @@
         }
       }
     },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "number"
+        },
+        "errorCount": {
+          "type": "number"
+        },
+        "averageDuration": {
+          "type": "long"
+        }
+      }
+    },
     "sample-data": {
       "properties": {
         "installed": {
@@ -32,6 +45,1227 @@
         },
         "uninstalled": {
           "type": "keyword"
+        }
+      }
+    },
+    "application_usage": {
+      "properties": {
+        "dashboards": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "dev_tools": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "discover": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "home": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "management": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "short_url_redirect": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "timelion": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "visualize": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "apm": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "csm": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "canvas": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "dashboard_mode": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "appSearch": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "workplaceSearch": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "graph": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "logs": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "metrics": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "infra": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "ingestManager": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "lens": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "maps": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "ml": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "monitoring": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "observability-overview": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_account": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_access_agreement": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_capture_url": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_logged_out": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_login": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_logout": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_overwritten_session": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:overview": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:detections": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:hosts": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:network": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:timelines": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:case": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:administration": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "siem": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "space_selector": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "uptime": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        }
+      }
+    },
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean"
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean"
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean"
         }
       }
     },

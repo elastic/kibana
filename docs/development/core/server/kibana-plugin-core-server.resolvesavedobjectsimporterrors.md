@@ -9,14 +9,14 @@ Resolve and return saved object import errors. See the [options](./kibana-plugin
 <b>Signature:</b>
 
 ```typescript
-export declare function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+export declare function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, } | <code>SavedObjectsResolveImportErrorsOptions</code> |  |
+|  { readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, } | <code>SavedObjectsResolveImportErrorsOptions</code> |  |
 
 <b>Returns:</b>
 

@@ -62,6 +62,7 @@ const initialState: IndexPatternPrivateState = {
       id: '1',
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
@@ -103,6 +104,7 @@ const initialState: IndexPatternPrivateState = {
     '2': {
       id: '2',
       title: 'my-fake-restricted-pattern',
+      hasRestrictions: true,
       timeFieldName: 'timestamp',
       fields: [
         {
@@ -160,6 +162,7 @@ const initialState: IndexPatternPrivateState = {
       id: '3',
       title: 'my-compatible-pattern',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
