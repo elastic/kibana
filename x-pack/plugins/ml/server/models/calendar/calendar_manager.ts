@@ -70,13 +70,10 @@ export class CalendarManager {
   }
 
   async newCalendar(calendar: FormCalendar) {
-    const calendarId = calendar.calendarId;
-    const events = calendar.events;
-    delete calendar.calendarId;
-    delete calendar.events;
+    const { calendarId, events, ...newCalendar } = calendar;
     await this._callAsInternalUser('ml.addCalendar', {
       calendarId,
-      body: calendar,
+      body: newCalendar,
     });
 
     if (events.length) {

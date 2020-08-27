@@ -76,8 +76,11 @@ describe('send_email module', () => {
         rejectUnauthorizedCertificates: false,
       }
     );
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
@@ -123,8 +126,11 @@ describe('send_email module', () => {
         port: 1025,
       },
     });
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
@@ -166,8 +172,11 @@ describe('send_email module', () => {
         secure: true,
       },
     });
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
 
     const result = await sendEmail(mockLogger, sendEmailOptions);

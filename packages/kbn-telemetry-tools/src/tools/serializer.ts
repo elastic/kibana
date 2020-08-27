@@ -142,14 +142,11 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
   }
 
   if (ts.isUnionTypeNode(node)) {
-    const types = node.types.filter((typeNode) => {
-      return (
-        typeNode.kind !== ts.SyntaxKind.NullKeyword &&
-        typeNode.kind !== ts.SyntaxKind.UndefinedKeyword
-      );
-    });
+    const types = node.types.filter(discardNullOrUndefined);
 
-    const kinds = types.map((typeNode) => getDescriptor(typeNode, program));
+    const kinds = types
+      .map((typeNode) => getDescriptor(typeNode, program))
+      .filter(discardNullOrUndefined);
 
     const uniqueKinds = uniq(kinds, 'kind');
 
@@ -171,4 +168,10 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     default:
       throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}; ${node.getText()}`);
   }
+}
+
+function discardNullOrUndefined(typeNode: ts.TypeNode | Descriptor | DescriptorValue) {
+  return (
+    typeNode.kind !== ts.SyntaxKind.NullKeyword && typeNode.kind !== ts.SyntaxKind.UndefinedKeyword
+  );
 }
