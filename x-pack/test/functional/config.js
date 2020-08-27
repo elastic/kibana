@@ -221,6 +221,17 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_discover_read: {
           kibana: [
             {
@@ -267,6 +278,17 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],

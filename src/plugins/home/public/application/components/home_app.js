@@ -38,7 +38,7 @@ const RedirectToDefaultApp = () => {
   return null;
 };
 
-export function HomeApp({ directories }) {
+export function HomeApp({ directories, solutions }) {
   const {
     savedObjectsClient,
     getBasePath,
@@ -48,8 +48,6 @@ export function HomeApp({ directories }) {
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
-  const mlEnabled = environment.ml;
-  const apmUiEnabled = environment.apmUi;
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -87,8 +85,7 @@ export function HomeApp({ directories }) {
             <Home
               addBasePath={addBasePath}
               directories={directories}
-              apmUiEnabled={apmUiEnabled}
-              mlEnabled={mlEnabled}
+              solutions={solutions}
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
@@ -112,6 +109,18 @@ HomeApp.propTypes = {
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
       category: PropTypes.string.isRequired,
+      order: PropTypes.number,
+    })
+  ),
+  solutions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      subtitle: PropTypes.string.isRequired,
+      descriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      order: PropTypes.number,
     })
   ),
 };

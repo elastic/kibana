@@ -54,6 +54,7 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
       heartbeatIndices: schema.string(),
       certAgeThreshold: schema.number(),
       certExpirationThreshold: schema.number(),
+      defaultConnectors: schema.arrayOf(schema.string()),
     }),
   },
   writeAccess: true,

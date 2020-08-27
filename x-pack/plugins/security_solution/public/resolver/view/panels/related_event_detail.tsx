@@ -10,63 +10,30 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import {
-  CrumbInfo,
-  formatDate,
-  StyledBreadcrumbs,
-  BoldCode,
-  StyledTime,
-} from './panel_content_utilities';
+import { StyledBreadcrumbs, BoldCode, StyledTime } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
-
-/**
- * A helper function to turn objects into EuiDescriptionList entries.
- * This reflects the strategy of more or less "dumping" metadata for related processes
- * in description lists with little/no 'prettification'. This has the obvious drawback of
- * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
- * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
- *
- * Given an object like: {a:{b: 1}, c: 'd'} it will yield title/description entries like so:
- * {title: "a.b", description: "1"}, {title: "c", description: "d"}
- *
- * @param {object} obj The object to turn into `<dt><dd>` entries
- */
-const objectToDescriptionListEntries = function* (
-  obj: object,
-  prefix = ''
-): Generator<{ title: string; description: string }> {
-  const nextPrefix = prefix.length ? `${prefix}.` : '';
-  for (const [metaKey, metaValue] of Object.entries(obj)) {
-    if (typeof metaValue === 'number' || typeof metaValue === 'string') {
-      yield { title: nextPrefix + metaKey, description: `${metaValue}` };
-    } else if (metaValue instanceof Array) {
-      yield {
-        title: nextPrefix + metaKey,
-        description: metaValue
-          .filter((arrayEntry) => {
-            return typeof arrayEntry === 'number' || typeof arrayEntry === 'string';
-          })
-          .join(','),
-      };
-    } else if (typeof metaValue === 'object') {
-      yield* objectToDescriptionListEntries(metaValue, nextPrefix + metaKey);
-    }
-  }
-};
+import { CrumbInfo } from '../../types';
 
 // Adding some styles to prevent horizontal scrollbars, per request from UX review
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 8em;
+    overflow-wrap: break-word;
   }
   &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
     max-width: calc(100% - 8.5em);
     overflow-wrap: break-word;
   }
+`);
+
+// Also prevents horizontal scrollbars on long descriptive names
+const StyledDescriptiveName = memo(styled(EuiText)`
+  padding-right: 1em;
+  overflow-wrap: break-word;
 `);
 
 // Styling subtitles, per UX review:
@@ -89,6 +56,49 @@ const TitleHr = memo(() => {
   );
 });
 TitleHr.displayName = 'TitleHR';
+
+const GeneratedText = React.memo(function ({ children }) {
+  return <>{processedValue()}</>;
+
+  function processedValue() {
+    return React.Children.map(children, (child) => {
+      if (typeof child === 'string') {
+        const valueSplitByWordBoundaries = child.split(/\b/);
+
+        if (valueSplitByWordBoundaries.length < 2) {
+          return valueSplitByWordBoundaries[0];
+        }
+
+        return [
+          valueSplitByWordBoundaries[0],
+          ...valueSplitByWordBoundaries
+            .splice(1)
+            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value, index) {
+              return [...generatedTextMemo, value, <wbr />];
+            }, []),
+        ];
+      } else {
+        return child;
+      }
+    });
+  }
+});
+GeneratedText.displayName = 'GeneratedText';
+
+/**
+ * Take description list entries and prepare them for display by
+ * seeding with `<wbr />` tags.
+ *
+ * @param entries {title: string, description: string}[]
+ */
+function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
+  return entries.map((entry) => {
+    return {
+      description: <GeneratedText>{entry.description}</GeneratedText>,
+      title: <GeneratedText>{entry.title}</GeneratedText>,
+    };
+  });
+}
 
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
@@ -138,59 +148,16 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     }
   }, [relatedsReady, dispatch, processEntityId]);
 
-  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
-    processEntityId!
+  const [
+    relatedEventToShowDetailsFor,
+    countBySameCategory,
+    relatedEventCategory = naString,
+    sections,
+    formattedDate,
+  ] = useSelector(selectors.relatedEventDisplayInfoByEntityAndSelfId)(
+    processEntityId,
+    relatedEventId
   );
-
-  const [relatedEventToShowDetailsFor, countBySameCategory, relatedEventCategory] = useMemo(() => {
-    if (!relatedEventsForThisProcess) {
-      return [undefined, 0];
-    }
-    const specificEvent = relatedEventsForThisProcess.events.find(
-      (evt) => event.eventId(evt) === relatedEventId
-    );
-    // For breadcrumbs:
-    const specificCategory = specificEvent && event.primaryEventCategory(specificEvent);
-    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
-      return event.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
-    }, 0);
-    return [specificEvent, countOfCategory, specificCategory || naString];
-  }, [relatedEventsForThisProcess, naString, relatedEventId]);
-
-  const [sections, formattedDate] = useMemo(() => {
-    if (!relatedEventToShowDetailsFor) {
-      // This could happen if user relaods from URL param and requests an eventId that no longer exists
-      return [[], naString];
-    }
-    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
-    const {
-      agent,
-      ecs,
-      process,
-      ...relevantData
-    } = relatedEventToShowDetailsFor as ResolverEvent & {
-      // Type this with various unknown keys so that ts will let us delete those keys
-      ecs: unknown;
-      process: unknown;
-    };
-    let displayDate = '';
-    const sectionData: Array<{
-      sectionTitle: string;
-      entries: Array<{ title: string; description: string }>;
-    }> = Object.entries(relevantData)
-      .map(([sectionTitle, val]) => {
-        if (sectionTitle === '@timestamp') {
-          displayDate = formatDate(val);
-          return { sectionTitle: '', entries: [] };
-        }
-        if (typeof val !== 'object') {
-          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
-        }
-        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
-      })
-      .filter((v) => v.sectionTitle !== '' && v.entries.length);
-    return [sectionData, displayDate];
-  }, [relatedEventToShowDetailsFor, naString]);
 
   const waitCrumbs = useMemo(() => {
     return [
@@ -338,15 +305,18 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
-          values={{ subject, descriptor }}
-          defaultMessage="{descriptor} {subject}"
-        />
-      </EuiText>
+      <StyledDescriptiveName>
+        <GeneratedText>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
+            values={{ subject, descriptor }}
+            defaultMessage="{descriptor} {subject}"
+          />
+        </GeneratedText>
+      </StyledDescriptiveName>
       <EuiSpacer size="l" />
       {sections.map(({ sectionTitle, entries }, index) => {
+        const displayEntries = entriesForDisplay(entries);
         return (
           <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
@@ -364,7 +334,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
               align="left"
               titleProps={{ className: 'desc-title' }}
               compressed
-              listItems={entries}
+              listItems={displayEntries}
             />
             {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
           </Fragment>

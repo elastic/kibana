@@ -7,8 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-error?: {
-        message: string;
-        statusCode: number;
-    };
+error?: SavedObjectError;
 ```
