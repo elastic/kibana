@@ -77,9 +77,6 @@ export function DiscoverLegacy({
     }
     return moment(datetime).format(config.get('dateFormat'));
   };
-  if (!timeRange) {
-    return <div>Loading</div>;
-  }
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch } = opts;
 
@@ -165,17 +162,19 @@ export function DiscoverLegacy({
                     showResetButton={!!(savedSearch && savedSearch.id)}
                     onResetQuery={resetQuery}
                   />
+                  {timeRange && (
+                    <TimechartHeader
+                      from={toMoment(timeRange.from)}
+                      to={toMoment(timeRange.to)}
+                      options={intervalOptions}
+                      onChangeInterval={onChangeInterval}
+                      stateInterval={state.interval}
+                      showScaledInfo={bucketInterval.scaled}
+                      bucketIntervalDescription={bucketInterval.description}
+                      bucketIntervalScale={bucketInterval.scale}
+                    />
+                  )}
 
-                  <TimechartHeader
-                    from={toMoment(timeRange.from)}
-                    to={toMoment(timeRange.to)}
-                    options={intervalOptions}
-                    onChangeInterval={onChangeInterval}
-                    stateInterval={state.interval}
-                    showScaledInfo={bucketInterval.scaled}
-                    bucketIntervalDescription={bucketInterval.description}
-                    bucketIntervalScale={bucketInterval.scale}
-                  />
                   {opts.timefield && (
                     <section
                       aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
