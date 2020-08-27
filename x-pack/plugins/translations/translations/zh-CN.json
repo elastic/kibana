@@ -18197,7 +18197,6 @@
     "xpack.transform.transformList.showDetailsColumn.screenReaderDescription": "此列包含可单击控件，用于显示每个转换的更多详情",
     "xpack.transform.transformList.startedTransformBulkToolTip": "一个或多个选定数据帧转换已启动。",
     "xpack.transform.transformList.startedTransformToolTip": "{transformId} 已启动。",
-    "xpack.transform.transformList.startModalBody": "转换将增加集群的搜索和索引负荷。如果负荷超载，请停止转换。是否确定要启动{count, plural, one {这} other {这}} {count} 个 {count, plural, one {转换} other {转换}}？",
     "xpack.transform.transformList.startModalCancelButton": "取消",
     "xpack.transform.transformList.startModalStartButton": "启动",
     "xpack.transform.transformList.startModalTitle": "启动 {transformId}",

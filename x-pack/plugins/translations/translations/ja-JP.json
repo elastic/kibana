@@ -18190,7 +18190,6 @@
     "xpack.transform.transformList.showDetailsColumn.screenReaderDescription": "このカラムには変換ごとの詳細を示すクリック可能なコントロールが含まれます",
     "xpack.transform.transformList.startedTransformBulkToolTip": "1 つまたは複数の変換が既に開始済みです。",
     "xpack.transform.transformList.startedTransformToolTip": "{transformId} は既に開始済みです。",
-    "xpack.transform.transformList.startModalBody": "変換は、クラスターの検索とインデックスによる負荷を増やします。過剰な負荷が生じた場合は変換を停止してください。{count, plural, one {この} other {これら}} {count} 件の{count, plural, one {変換} other {変換}}を開始してよろしいですか？",
     "xpack.transform.transformList.startModalCancelButton": "キャンセル",
     "xpack.transform.transformList.startModalStartButton": "開始",
     "xpack.transform.transformList.startModalTitle": "{transformId} を開始",
