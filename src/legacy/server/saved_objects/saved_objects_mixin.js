@@ -39,14 +39,6 @@ export function savedObjectsMixin(kbnServer, server) {
 
   server.decorate('server', 'kibanaMigrator', migrator);
 
-  const warn = (message) => server.log(['warning', 'saved-objects'], message);
-  // we use kibana.index which is technically defined in the kibana plugin, so if
-  // we don't have the plugin (mainly tests) we can't initialize the saved objects
-  if (!kbnServer.pluginSpecs.some((p) => p.getId() === 'kibana')) {
-    warn('Saved Objects uninitialized because the Kibana plugin is disabled.');
-    return;
-  }
-
   const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
   const createRepository = (callCluster, includedHiddenTypes = []) => {
