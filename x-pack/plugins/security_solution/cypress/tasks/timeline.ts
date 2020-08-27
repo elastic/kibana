@@ -9,7 +9,7 @@ import {
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
   EXPORT_TIMELINE_ACTION,
-  FIRST_TIMELINE,
+  TIMELINE_CHECKBOX,
   HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
@@ -70,6 +70,12 @@ export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
+export const exportTimeline = (timelineId: string) => {
+  cy.get(TIMELINE_CHECKBOX(timelineId)).click({ force: true });
+  cy.get(BULK_ACTIONS).click({ force: true });
+  cy.get(EXPORT_TIMELINE_ACTION).click();
+};
+
 export const openTimelineFieldsBrowser = () => {
   cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
 };
@@ -128,13 +134,6 @@ export const resetFields = () => {
 
 export const waitForTimelinesPanelToBeLoaded = () => {
   cy.get(TIMELINES_TABLE).should('exist');
-};
-
-export const exportFirstTimeline = () => {
-  cy.get(FIRST_TIMELINE).first().click({ force: true });
-
-  cy.get(BULK_ACTIONS).first().click({ force: true });
-  cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
 export const waitForTimelineChanges = () => {

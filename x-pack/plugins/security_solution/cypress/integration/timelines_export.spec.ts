@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { exportFirstTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timeline';
+import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -26,11 +26,14 @@ describe('Export timelines', () => {
   it('Exports a custom timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
-    exportFirstTimeline();
 
-    cy.wait('@export').then((response) => {
-      cy.wrap(response.status).should('eql', 200);
-      cy.readFile(EXPECTED_EXPORTED_TIMELINE_PATH).then(($expectedExportedJson) => {
+    cy.readFile(EXPECTED_EXPORTED_TIMELINE_PATH).then(($expectedExportedJson) => {
+      const parsedJson = JSON.parse($expectedExportedJson);
+      const timelineId = parsedJson.savedObjectId;
+      exportTimeline(timelineId);
+
+      cy.wait('@export').then((response) => {
+        cy.wrap(response.status).should('eql', 200);
         cy.wrap(response.xhr.responseText).should('eql', $expectedExportedJson);
       });
     });
