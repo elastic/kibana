@@ -16,6 +16,7 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
