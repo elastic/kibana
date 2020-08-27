@@ -33,7 +33,7 @@ export function loadKibanaPlatformPlugin(pluginDir: string) {
 
   const isFixture = pluginDir.includes('__fixtures__');
   const isExample = Path.basename(parentDir) === 'examples';
-  const isRootPlugin = parentDir !== Path.resolve(REPO_ROOT, 'plugins');
+  const isRootPlugin = parentDir === Path.resolve(REPO_ROOT, 'plugins');
 
   if (isFixture || isExample || isRootPlugin) {
     return parseKibanaPlatformPlugin(Path.resolve(pluginDir, 'kibana.json'));
