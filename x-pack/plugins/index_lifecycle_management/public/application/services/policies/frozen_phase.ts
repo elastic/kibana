@@ -152,9 +152,9 @@ export const validateFrozenPhase = (phase: FrozenPhase): PhaseValidationErrors<F
 
   // min age needs to be a positive number
   if (!isNumber(phase.selectedMinimumAge)) {
-    phaseErrors.phaseIndexPriority = [numberRequiredMessage];
+    phaseErrors.selectedMinimumAge = [numberRequiredMessage];
   } else if (parseInt(phase.selectedMinimumAge, 10) < 0) {
-    phaseErrors.phaseIndexPriority = [positiveNumberRequiredMessage];
+    phaseErrors.selectedMinimumAge = [positiveNumberRequiredMessage];
   }
 
   return { ...phaseErrors };
