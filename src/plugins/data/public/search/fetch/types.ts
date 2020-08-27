@@ -19,6 +19,7 @@
 
 import { HttpStart } from 'src/core/public';
 import { GetConfigFn } from '../../../common';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * @internal
@@ -37,6 +38,7 @@ export interface FetchOptions {
 export interface FetchHandlers {
   config: { get: GetConfigFn };
   http: HttpStart;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 export interface SearchError {

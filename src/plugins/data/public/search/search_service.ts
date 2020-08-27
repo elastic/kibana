@@ -29,6 +29,7 @@ import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
+import { BehaviorSubject } from 'rxjs';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -46,6 +47,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private loadingCount$!: BehaviorSubject<number>;
 
   public setup(
     { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
@@ -54,6 +56,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
 
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
+
+    this.loadingCount$ = new BehaviorSubject(0);
 
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -65,6 +69,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       {
         toasts: notifications.toasts,
         http,
+        loadingCount$: this.loadingCount$,
         uiSettings,
         startServices: getStartServices(),
         usageCollector: this.usageCollector!,
@@ -101,6 +106,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       esShardTimeout: injectedMetadata.getInjectedVar('esShardTimeout') as number,
       search,
       http,
+      loadingCount$: this.loadingCount$,
     };
 
     return {

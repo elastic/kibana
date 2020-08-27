@@ -91,6 +91,7 @@ import { getHighlightRequest } from '../../../common/field_formats';
 import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
+import { BehaviorSubject } from 'rxjs';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -113,6 +114,8 @@ export interface SearchSourceDependencies {
   search: ISearchGeneric;
   http: HttpStart;
   esShardTimeout: number;
+  loadingCount$: BehaviorSubject<number>;
+
 }
 
 /** @public **/
@@ -243,7 +246,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
-    const { http, getConfig } = this.dependencies;
+    const { http, getConfig, loadingCount$ } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -254,6 +257,7 @@ export class SearchSource {
       {
         http,
         config: { get: getConfig },
+        loadingCount$,
       }
     );
   }
