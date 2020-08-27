@@ -9,14 +9,14 @@ Import saved objects from given stream. See the [options](./kibana-plugin-core-s
 <b>Signature:</b>
 
 ```typescript
-export declare function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+export declare function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, } | <code>SavedObjectsImportOptions</code> |  |
+|  { readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, } | <code>SavedObjectsImportOptions</code> |  |
 
 <b>Returns:</b>
 

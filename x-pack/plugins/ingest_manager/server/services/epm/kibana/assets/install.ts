@@ -14,7 +14,7 @@ import * as Registry from '../../registry';
 import { AssetType, KibanaAssetType, AssetReference } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 
-type SavedObjectToBe = Required<Omit<SavedObjectsBulkCreateObject, 'version'>> & {
+type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: AssetType;
 };
 export type ArchiveAsset = Pick<
@@ -48,7 +48,6 @@ export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   kibanaAssets: ArchiveAsset[];
-  isUpdate: boolean;
 }): Promise<SavedObject[]> {
   const { savedObjectsClient, kibanaAssets } = options;
 

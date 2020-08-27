@@ -14,26 +14,17 @@ import '../../../common/mock/match_media';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useAllCasesModal, UseAllCasesModalProps, UseAllCasesModalReturnedValues } from '.';
 import { TestProviders } from '../../../common/mock';
-import { createUseKibanaMock } from '../../../common/mock/kibana_react';
 
 jest.mock('../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useAllCasesModal', () => {
-  const navigateToApp = jest.fn(() => Promise.resolve());
+  let navigateToApp: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    const kibanaMock = createUseKibanaMock()();
-    useKibanaMock.mockImplementation(() => ({
-      ...kibanaMock,
-      services: {
-        application: {
-          navigateToApp,
-        },
-      },
-    }));
+    navigateToApp = jest.fn();
+    useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
   it('init', async () => {

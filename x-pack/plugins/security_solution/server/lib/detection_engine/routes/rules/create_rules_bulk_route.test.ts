@@ -161,6 +161,17 @@ describe('create_rules_bulk', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
+    test('allows rule type of query and custom from and interval', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock() }],
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
+    });
+
     test('disallows unknown rule type', async () => {
       const request = requestMock.create({
         method: 'post',
@@ -172,6 +183,22 @@ describe('create_rules_bulk', () => {
       expect(result.badRequest).toHaveBeenCalledWith(
         'Invalid value "unexpected_type" supplied to "type"'
       );
+    });
+
+    test('disallows invalid "from" param on rule', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        body: [
+          {
+            from: 'now-3755555555555555.67s',
+            interval: '5m',
+            ...getCreateRulesSchemaMock(),
+          },
+        ],
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
     });
   });
 });

@@ -16,6 +16,10 @@ export interface GetLatestMonitorParams {
 
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
+
+  observerLocation?: string;
+
+  status?: string;
 }
 
 // Get The monitor latest state sorted by timestamp with date range
@@ -25,6 +29,8 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   dateStart,
   dateEnd,
   monitorId,
+  observerLocation,
+  status,
 }) => {
   const params = {
     index: dynamicSettings.heartbeatIndices,
@@ -40,12 +46,14 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
                 },
               },
             },
+            ...(status ? [{ term: { 'monitor.status': status } }] : []),
             ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+            ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
           ],
         },
       },
       size: 1,
-      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http'],
+      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
       sort: {
         '@timestamp': { order: 'desc' },
       },

@@ -37,7 +37,6 @@ import {
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
-import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
@@ -486,7 +485,7 @@ export class ExplorerChartSingleMetric extends React.Component {
           label: i18n.translate('xpack.ml.explorer.singleMetricChart.scheduledEventsLabel', {
             defaultMessage: 'Scheduled events',
           }),
-          value: marker.scheduledEvents.map(mlEscape).join('<br/>'),
+          value: marker.scheduledEvents,
           seriesIdentifier: {
             key: seriesKey,
           },

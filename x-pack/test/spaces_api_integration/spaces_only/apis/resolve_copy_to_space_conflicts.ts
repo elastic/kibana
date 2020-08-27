@@ -19,6 +19,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
+    createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
     originSpaces,
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
@@ -51,6 +52,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
               NON_EXISTENT_SPACE_ID
             ),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId),
         },
       });
     });
