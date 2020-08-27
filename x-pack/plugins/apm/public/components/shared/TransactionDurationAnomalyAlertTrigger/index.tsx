@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiText, EuiSelect, EuiExpression } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
@@ -20,6 +20,10 @@ import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_REQUEST,
+} from '../../../../common/transaction_types';
 
 interface Params {
   windowSize: number;
@@ -42,15 +46,18 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const transactionTypes = useServiceTransactionTypes(urlParams);
   const { serviceName, start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
+  const supportedTransactionTypes = transactionTypes.filter((transactionType) =>
+    [TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST].includes(transactionType)
+  );
 
-  if (!transactionTypes.length || !serviceName) {
+  if (!supportedTransactionTypes.length || !serviceName) {
     return null;
   }
 
   const defaults: Params = {
     windowSize: 15,
     windowUnit: 'm',
-    transactionType: transactionTypes[0],
+    transactionType: supportedTransactionTypes[0], // 'page-load' for RUM, 'request' otherwise
     serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
     anomalyScore: 75,
@@ -62,19 +69,6 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   };
 
   const fields = [
-    <EuiExpression
-      description={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
-      value={
-        <EuiText className="eui-displayInlineBlock">
-          <h5>{serviceName}</h5>
-        </EuiText>
-      }
-    />,
     <PopoverExpression
       value={getEnvironmentLabel(params.environment)}
       title={i18n.translate(
@@ -88,27 +82,6 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
         value={params.environment}
         options={environmentOptions}
         onChange={(e) => setAlertParams('environment', e.target.value)}
-        compressed
-      />
-    </PopoverExpression>,
-    <PopoverExpression
-      value={params.transactionType}
-      title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.type',
-        {
-          defaultMessage: 'Type',
-        }
-      )}
-    >
-      <EuiSelect
-        value={params.transactionType}
-        options={transactionTypes.map((key) => {
-          return {
-            text: key,
-            value: key,
-          };
-        })}
-        onChange={(e) => setAlertParams('transactionType', e.target.value)}
         compressed
       />
     </PopoverExpression>,
