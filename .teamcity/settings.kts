@@ -60,6 +60,7 @@ project {
       param("description", "")
       param("next-hour", "")
       param("cloud-code", "google")
+      param("terminate-after-build", "true")
       param("terminate-idle-time", "30")
       param("enabled", "true")
       param("secure:accessKey", "credentialsJSON:447fdd4d-7129-46b7-9822-2e57658c7422")
