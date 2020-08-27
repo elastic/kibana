@@ -49,7 +49,7 @@ ____
 
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see
-{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}packages/kbn-pm].)
+{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm].)
 
 When switching branches which use different versions of npm packages you
 may need to run:
@@ -99,7 +99,7 @@ preserving data inbetween runs, running remote cluster, etc.
 [discrete]
 === Run {kib}
 
-In another terminal window, start up {kib}. Include developer examples by adding an optional `--run-examples` flag.
+In another terminal window, start up {kib}. Include {kib-repo}tree/{branch}/examples[developer examples] by adding an optional `--run-examples` flag.
 
 [source,bash]
 ----

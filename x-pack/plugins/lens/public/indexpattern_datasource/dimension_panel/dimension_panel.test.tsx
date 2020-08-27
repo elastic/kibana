@@ -42,9 +42,11 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasExistence: true,
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -52,6 +54,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -59,6 +62,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -66,6 +70,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -210,9 +215,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options).toHaveLength(2);
 
       expect(options![0].label).toEqual('Records');
-
       expect(options![1].options!.map(({ label }) => label)).toEqual([
-        'timestamp',
+        'timestampLabel',
         'bytes',
         'memory',
         'source',
@@ -239,7 +243,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .filter('[data-test-subj="indexPattern-dimension-field"]')
         .prop('options');
 
-      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
+      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
     });
 
     it('should indicate fields which are incompatible for the operation of the current column', () => {
@@ -277,7 +281,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
@@ -651,7 +655,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -769,7 +775,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -923,7 +931,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']
@@ -1095,12 +1103,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
               },
             },
           },
@@ -1145,12 +1153,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
                 params: {
                   format: { id: 'bytes', params: { decimals: 0 } },
                 },
@@ -1195,12 +1203,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
                 params: {
                   format: { id: 'bytes', params: { decimals: 2 } },
                 },
@@ -1249,16 +1257,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
           foo: {
             id: 'foo',
             title: 'Foo pattern',
+            hasRestrictions: false,
             fields: [
               {
                 aggregatable: true,
                 name: 'bar',
+                displayName: 'bar',
                 searchable: true,
                 type: 'number',
               },
               {
                 aggregatable: true,
                 name: 'mystring',
+                displayName: 'mystring',
                 searchable: true,
                 type: 'string',
               },

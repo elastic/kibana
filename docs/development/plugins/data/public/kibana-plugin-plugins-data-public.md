@@ -156,8 +156,6 @@
 |  [RangeFilterMeta](./kibana-plugin-plugins-data-public.rangefiltermeta.md) |  |
 |  [SavedQueryTimeFilter](./kibana-plugin-plugins-data-public.savedquerytimefilter.md) |  |
 |  [SearchBarProps](./kibana-plugin-plugins-data-public.searchbarprops.md) |  |
-|  [SearchRequest](./kibana-plugin-plugins-data-public.searchrequest.md) |  |
-|  [SearchResponse](./kibana-plugin-plugins-data-public.searchresponse.md) |  |
 |  [StatefulSearchBarProps](./kibana-plugin-plugins-data-public.statefulsearchbarprops.md) |  |
 |  [TabbedAggRow](./kibana-plugin-plugins-data-public.tabbedaggrow.md) | \* |
 |  [TimefilterContract](./kibana-plugin-plugins-data-public.timefiltercontract.md) |  |

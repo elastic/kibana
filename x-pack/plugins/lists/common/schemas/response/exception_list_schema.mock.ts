@@ -19,6 +19,11 @@ import {
   _VERSION,
 } from '../../constants.mock';
 import { ENDPOINT_LIST_ID } from '../..';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+} from '../../constants';
 
 import { ExceptionListSchema } from './exception_list_schema';
 
@@ -41,6 +46,15 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   updated_by: 'user_name',
   version: VERSION,
 });
+
+export const getTrustedAppsListSchemaMock = (): ExceptionListSchema => {
+  return {
+    ...getExceptionListSchemaMock(),
+    description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+  };
+};
 
 /**
  * This is useful for end to end tests where we remove the auto generated parts for comparisons
