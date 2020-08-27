@@ -113,9 +113,16 @@ describe('manifest_manager', () => {
         },
       ]);
 
-      const newArtifactId = diffs[1].id;
-      await newManifest.compressArtifact(newArtifactId);
-      const artifact = newManifest.getArtifact(newArtifactId)!;
+      const firstNewArtifactId = diffs.find((diff) => diff.type === 'add')!.id;
+
+      // Compress all `add` artifacts
+      for (const artifactDiff of diffs) {
+        if (artifactDiff.type === 'add') {
+          await newManifest.compressArtifact(artifactDiff.id);
+        }
+      }
+
+      const artifact = newManifest.getArtifact(firstNewArtifactId)!;
 
       if (isCompleteArtifact(artifact)) {
         await manifestManager.pushArtifacts([artifact]); // caches the artifact
@@ -123,7 +130,7 @@ describe('manifest_manager', () => {
         throw new Error('Artifact is missing a body.');
       }
 
-      const entry = JSON.parse(inflateSync(cache.get(newArtifactId)! as Buffer).toString());
+      const entry = JSON.parse(inflateSync(cache.get(firstNewArtifactId)! as Buffer).toString());
       expect(entry).toEqual({
         entries: [
           {
