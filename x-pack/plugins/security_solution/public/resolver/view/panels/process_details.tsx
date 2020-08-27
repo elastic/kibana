@@ -31,7 +31,8 @@ import {
 import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
-import { CrumbInfo, ResolverState } from '../../types';
+import { ResolverState } from '../../types';
+import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -49,10 +50,8 @@ const StyledTitle = styled('h4')`
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
-  pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
-  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
 }) {
   const processName = event.eventName(processEvent);
   const entityId = event.entityId(processEvent);
@@ -126,6 +125,8 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     return processDescriptionListData;
   }, [processEvent]);
+
+  const pushToQueryParams = useReplaceBreadcrumbParameters();
 
   const crumbs = useMemo(() => {
     return [

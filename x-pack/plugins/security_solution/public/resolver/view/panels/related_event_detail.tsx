@@ -16,7 +16,8 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
-import { CrumbInfo, ResolverState } from '../../types';
+import { ResolverState } from '../../types';
+import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 // Adding some styles to prevent horizontal scrollbars, per request from UX review
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
@@ -76,15 +77,13 @@ function entriesForDisplay(entries: Array<{ title: string; description: string }
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
-export const RelatedEventDetail = memo(function RelatedEventDetail({
+export const RelatedEventDetail = memo(function ({
   relatedEventId,
   parentEvent,
-  pushToQueryParams,
   countForParent,
 }: {
   relatedEventId: string;
   parentEvent: ResolverEvent;
-  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
   countForParent: number | undefined;
 }) {
   const processName = (parentEvent && event.eventName(parentEvent)) || '*';
@@ -129,6 +128,8 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
   ] = useSelector((state: ResolverState) =>
     selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(processEntityId, relatedEventId)
   );
+
+  const pushToQueryParams = useReplaceBreadcrumbParameters();
 
   const waitCrumbs = useMemo(() => {
     return [
@@ -247,9 +248,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         defaultMessage: 'Related event not found.',
       }
     );
-    return (
-      <PanelContentError translatedErrorMessage={errString} pushToQueryParams={pushToQueryParams} />
-    );
+    return <PanelContentError translatedErrorMessage={errString} />;
   }
 
   return (

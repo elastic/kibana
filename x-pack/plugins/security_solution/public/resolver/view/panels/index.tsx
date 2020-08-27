@@ -17,7 +17,6 @@ import { EventCountsForProcess } from './event_counts_for_process';
 import { ProcessDetails } from './process_details';
 import { ProcessListWithCounts } from './process_list_with_counts';
 import { RelatedEventDetail } from './related_event_detail';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 /**
  * The team decided to use this table to determine which breadcrumbs/view to display:
@@ -40,8 +39,6 @@ const PanelContent = memo(function PanelContent() {
   const { timestamp } = useContext(SideEffectContext);
 
   const queryParams = useSelector(selectors.breadcrumbParameters);
-
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
 
   const graphableProcesses = useSelector(selectors.graphableProcesses);
   const graphableProcessEntityIds = useMemo(() => {
@@ -166,16 +163,13 @@ const PanelContent = memo(function PanelContent() {
 
   const panelInstance = useMemo(() => {
     if (panelToShow === 'processDetails') {
-      return (
-        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
-      );
+      return <ProcessDetails processEvent={uiSelectedEvent!} />;
     }
 
     if (panelToShow === 'eventCountsForProcess') {
       return (
         <EventCountsForProcess
           processEvent={uiSelectedEvent!}
-          pushToQueryParams={pushToQueryParams}
           relatedStats={relatedStatsForIdFromParams!}
         />
       );
@@ -185,7 +179,6 @@ const PanelContent = memo(function PanelContent() {
       return (
         <ProcessEventList
           processEvent={uiSelectedEvent!}
-          pushToQueryParams={pushToQueryParams}
           relatedStats={relatedStatsForIdFromParams!}
           eventType={crumbEvent}
         />
@@ -200,21 +193,13 @@ const PanelContent = memo(function PanelContent() {
         <RelatedEventDetail
           relatedEventId={crumbId}
           parentEvent={uiSelectedEvent!}
-          pushToQueryParams={pushToQueryParams}
           countForParent={parentCount}
         />
       );
     }
     // The default 'Event List' / 'List of all processes' view
-    return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
-  }, [
-    uiSelectedEvent,
-    crumbEvent,
-    crumbId,
-    pushToQueryParams,
-    relatedStatsForIdFromParams,
-    panelToShow,
-  ]);
+    return <ProcessListWithCounts />;
+  }, [uiSelectedEvent, crumbEvent, crumbId, relatedStatsForIdFromParams, panelToShow]);
 
   return <>{panelInstance}</>;
 });

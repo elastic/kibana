@@ -59,7 +59,7 @@ export interface ResolverUIState {
   /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    */
-  readonly resolverComponentInstanceID: string;
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
