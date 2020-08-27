@@ -6,7 +6,7 @@
 
 import { IClusterClient, IScopedClusterClient } from 'kibana/server';
 // including KibanaRequest from 'kibana/server' causes an error
-// when being used with with instanceof
+// when being used with instanceof
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from '../../.././../../src/core/server/http';
 import { MlServerLicense } from '../lib/license';

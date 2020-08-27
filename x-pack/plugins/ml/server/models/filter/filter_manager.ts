@@ -139,7 +139,7 @@ export class FilterManager {
     const { filterId, ...body } = filter;
     try {
       // Returns the newly created filter.
-      const { body: resp } = await this._asInternalUser.ml.putFilter({ filterId, body });
+      const { body: resp } = await this._asInternalUser.ml.putFilter({ filter_id: filterId, body });
       return resp;
     } catch (error) {
       throw Boom.badRequest(error);

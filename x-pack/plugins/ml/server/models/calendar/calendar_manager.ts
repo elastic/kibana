@@ -72,7 +72,7 @@ export class CalendarManager {
   async newCalendar(calendar: FormCalendar) {
     const { calendarId, events, ...newCalendar } = calendar;
     await this._asInternalUser.ml.putCalendar({
-      calendarId,
+      calendar_id: calendarId,
       body: newCalendar,
     });
 
