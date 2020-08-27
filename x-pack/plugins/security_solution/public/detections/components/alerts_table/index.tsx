@@ -220,28 +220,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [dispatchToaster]
   );
 
-  const openAddExceptionModalCallback = useCallback(
-    ({
-      ruleName,
-      ruleIndices,
-      ruleId,
-      exceptionListType,
-      alertData,
-    }: AddExceptionModalBaseProps) => {
-      if (alertData !== null && alertData !== undefined) {
-        setShouldShowAddExceptionModal(true);
-        setAddExceptionModalState({
-          ruleName,
-          ruleId,
-          ruleIndices,
-          exceptionListType,
-          alertData,
-        });
-      }
-    },
-    [setShouldShowAddExceptionModal, setAddExceptionModalState]
-  );
-
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
     if (isSelectAllChecked) {
@@ -352,6 +330,74 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
+  const closeAddExceptionModal = useCallback(() => {
+    setShouldShowAddExceptionModal(false);
+    setAddExceptionModalState(addExceptionModalInitialState);
+  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
+
+  const onAddExceptionCancel = useCallback(() => {
+    closeAddExceptionModal();
+  }, [closeAddExceptionModal]);
+
+  const onAddExceptionConfirm = useCallback(
+    (refetch) => () => {
+      refetch();
+      closeAddExceptionModal();
+    },
+    [closeAddExceptionModal]
+  );
+
+  const openAddExceptionModalCallback = useCallback(
+    ({
+      ruleName,
+      ruleIndices,
+      ruleId,
+      exceptionListType,
+      alertData,
+    }: AddExceptionModalBaseProps) => {
+      if (alertData !== null && alertData !== undefined) {
+        setShouldShowAddExceptionModal(true);
+        setAddExceptionModalState({
+          ruleName,
+          ruleId,
+          ruleIndices,
+          exceptionListType,
+          alertData,
+        });
+      }
+    },
+    [setShouldShowAddExceptionModal, setAddExceptionModalState]
+  );
+
+  // Callback for creating the AddExceptionModal and allowing it
+  // access to the refetchQuery to update the page
+  const exceptionModalCallback = useCallback(
+    (refetchQuery: inputsModel.Refetch) => {
+      if (shouldShowAddExceptionModal) {
+        return (
+          <AddExceptionModal
+            ruleName={addExceptionModalState.ruleName}
+            ruleId={addExceptionModalState.ruleId}
+            ruleIndices={addExceptionModalState.ruleIndices}
+            exceptionListType={addExceptionModalState.exceptionListType}
+            alertData={addExceptionModalState.alertData}
+            onCancel={onAddExceptionCancel}
+            onConfirm={onAddExceptionConfirm(refetchQuery)}
+            alertStatus={filterGroup}
+          />
+        );
+      } else {
+        return <></>;
+      }
+    },
+    [
+      addExceptionModalState,
+      filterGroup,
+      onAddExceptionCancel,
+      onAddExceptionConfirm,
+      shouldShowAddExceptionModal,
+    ]
+  );
   // Send to Timeline / Update Alert Status Actions for each table row
   const additionalActions = useMemo(
     () => ({ ecsData, nonEcsData }: TimelineRowActionArgs) =>
@@ -378,13 +424,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       createTimelineCallback,
       dispatch,
       hasIndexWrite,
-      filterGroup,
-      setEventsLoadingCallback,
+      onAlertStatusUpdateFailure,
+      onAlertStatusUpdateSuccess,
       setEventsDeletedCallback,
+      setEventsLoadingCallback,
+      filterGroup,
       timelineId,
       updateTimelineIsLoading,
-      onAlertStatusUpdateSuccess,
-      onAlertStatusUpdateFailure,
       openAddExceptionModalCallback,
     ]
   );
@@ -432,19 +478,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [onFilterGroupChangedCallback]
   );
 
-  const closeAddExceptionModal = useCallback(() => {
-    setShouldShowAddExceptionModal(false);
-    setAddExceptionModalState(addExceptionModalInitialState);
-  }, [setShouldShowAddExceptionModal, setAddExceptionModalState]);
-
-  const onAddExceptionCancel = useCallback(() => {
-    closeAddExceptionModal();
-  }, [closeAddExceptionModal]);
-
-  const onAddExceptionConfirm = useCallback(() => closeAddExceptionModal(), [
-    closeAddExceptionModal,
-  ]);
-
   if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
     return (
       <EuiPanel>
@@ -465,19 +498,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}
+        exceptionsModal={exceptionModalCallback}
       />
-      {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
-        <AddExceptionModal
-          ruleName={addExceptionModalState.ruleName}
-          ruleId={addExceptionModalState.ruleId}
-          ruleIndices={addExceptionModalState.ruleIndices}
-          exceptionListType={addExceptionModalState.exceptionListType}
-          alertData={addExceptionModalState.alertData}
-          onCancel={onAddExceptionCancel}
-          onConfirm={onAddExceptionConfirm}
-          alertStatus={filterGroup}
-        />
-      )}
     </>
   );
 };
