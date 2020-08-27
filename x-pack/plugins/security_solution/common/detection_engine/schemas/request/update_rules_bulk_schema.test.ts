@@ -69,6 +69,7 @@ describe('update_rules_bulk_schema', () => {
 
   test('single array element with a missing value (risk_score) will not validate', () => {
     const singleItem = getUpdateRulesSchemaMock();
+    // @ts-expect-error
     delete singleItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem];
 
@@ -84,6 +85,7 @@ describe('update_rules_bulk_schema', () => {
   test('two array elements where the first is valid but the second is invalid (risk_score) will not validate', () => {
     const singleItem = getUpdateRulesSchemaMock();
     const secondItem = getUpdateRulesSchemaMock();
+    // @ts-expect-error
     delete secondItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
@@ -99,6 +101,7 @@ describe('update_rules_bulk_schema', () => {
   test('two array elements where the first is invalid (risk_score) but the second is valid will not validate', () => {
     const singleItem = getUpdateRulesSchemaMock();
     const secondItem = getUpdateRulesSchemaMock();
+    // @ts-expect-error
     delete singleItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 
@@ -114,7 +117,9 @@ describe('update_rules_bulk_schema', () => {
   test('two array elements where both are invalid (risk_score) will not validate', () => {
     const singleItem = getUpdateRulesSchemaMock();
     const secondItem = getUpdateRulesSchemaMock();
+    // @ts-expect-error
     delete singleItem.risk_score;
+    // @ts-expect-error
     delete secondItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
 

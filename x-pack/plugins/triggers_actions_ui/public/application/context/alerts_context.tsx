@@ -8,7 +8,7 @@ import React, { useContext, createContext } from 'react';
 import {
   HttpSetup,
   IUiSettingsClient,
-  ToastsApi,
+  ToastsStart,
   DocLinksStart,
   ApplicationStart,
 } from 'kibana/public';
@@ -22,10 +22,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: ToastsStart;
   uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
   docLinks: DocLinksStart;

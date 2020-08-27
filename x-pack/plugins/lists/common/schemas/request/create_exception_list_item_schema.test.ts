@@ -31,6 +31,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "description"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = createExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -43,6 +44,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "name"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = createExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -55,6 +57,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "type"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = createExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -67,6 +70,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "list_id"', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.list_id;
     const decoded = createExceptionListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
@@ -133,6 +137,7 @@ describe('create_exception_list_item_schema', () => {
   test('it should fail validation when supplied an undefined for "entries"', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.entries;
     outputPayload.entries = [];
     const decoded = createExceptionListItemSchema.decode(inputPayload);

@@ -19,7 +19,7 @@ import {
 } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../types';
-import { SpaceResult } from './space_result';
+import { SpaceResult, SpaceResultProcessing } from './space_result';
 import { summarizeCopyResult } from '..';
 
 interface Props {
@@ -33,6 +33,52 @@ interface Props {
   copyOptions: CopyOptions;
 }
 
+const renderCopyOptions = ({ createNewCopies, overwrite, includeRelated }: CopyOptions) => {
+  const createNewCopiesLabel = createNewCopies ? (
+    <FormattedMessage
+      id="xpack.spaces.management.copyToSpace.createNewCopiesLabel"
+      defaultMessage="Create new objects with random IDs"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.spaces.management.copyToSpace.dontCreateNewCopiesLabel"
+      defaultMessage="Check for existing objects"
+    />
+  );
+  const overwriteLabel = overwrite ? (
+    <FormattedMessage
+      id="xpack.spaces.management.copyToSpace.overwriteLabel"
+      defaultMessage="Automatically try to overwrite conflicts"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.spaces.management.copyToSpace.dontOverwriteLabel"
+      defaultMessage="Do not automatically try to overwrite conflicts"
+    />
+  );
+  const includeRelatedLabel = includeRelated ? (
+    <FormattedMessage
+      id="xpack.spaces.management.copyToSpace.includeRelatedLabel"
+      defaultMessage="Include related saved objects"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.spaces.management.copyToSpace.dontIncludeRelatedLabel"
+      defaultMessage="Do not include related saved objects"
+    />
+  );
+
+  return (
+    <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
+      <EuiListGroupItem iconType="copy" label={createNewCopiesLabel} />
+      {!createNewCopies && (
+        <EuiListGroupItem iconType={overwrite ? 'check' : 'cross'} label={overwriteLabel} />
+      )}
+      <EuiListGroupItem iconType={includeRelated ? 'check' : 'cross'} label={includeRelatedLabel} />
+    </EuiListGroup>
+  );
+};
+
 export const ProcessingCopyToSpace = (props: Props) => {
   function updateRetries(spaceId: string, updatedRetries: ImportRetry[]) {
     props.onRetriesChange({
@@ -43,46 +89,13 @@ export const ProcessingCopyToSpace = (props: Props) => {
 
   return (
     <div data-test-subj="copy-to-space-processing">
-      <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
-        <EuiListGroupItem
-          iconType={props.copyOptions.includeRelated ? 'check' : 'cross'}
-          label={
-            props.copyOptions.includeRelated ? (
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.includeRelatedLabel"
-                defaultMessage="Including related saved objects"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.dontIncludeRelatedLabel"
-                defaultMessage="Not including related saved objects"
-              />
-            )
-          }
-        />
-        <EuiListGroupItem
-          iconType={props.copyOptions.overwrite ? 'check' : 'cross'}
-          label={
-            props.copyOptions.overwrite ? (
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.overwriteLabel"
-                defaultMessage="Automatically overwriting saved objects"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.dontOverwriteLabel"
-                defaultMessage="Not overwriting saved objects"
-              />
-            )
-          }
-        />
-      </EuiListGroup>
+      {renderCopyOptions(props.copyOptions)}
       <EuiHorizontalRule margin="m" />
       <EuiText size="s">
         <h5>
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyResultsLabel"
-            defaultMessage="Copy results"
+            defaultMessage="Results"
           />
         </h5>
       </EuiText>
@@ -90,22 +103,22 @@ export const ProcessingCopyToSpace = (props: Props) => {
       {props.copyOptions.selectedSpaceIds.map((id) => {
         const space = props.spaces.find((s) => s.id === id) as Space;
         const spaceCopyResult = props.copyResult[space.id];
-        const summarizedSpaceCopyResult = summarizeCopyResult(
-          props.savedObject,
-          spaceCopyResult,
-          props.copyOptions.includeRelated
-        );
+        const summarizedSpaceCopyResult = summarizeCopyResult(props.savedObject, spaceCopyResult);
 
         return (
           <Fragment key={id}>
-            <SpaceResult
-              savedObject={props.savedObject}
-              space={space}
-              summarizedCopyResult={summarizedSpaceCopyResult}
-              retries={props.retries[space.id] || []}
-              onRetriesChange={(retries) => updateRetries(space.id, retries)}
-              conflictResolutionInProgress={props.conflictResolutionInProgress}
-            />
+            {summarizedSpaceCopyResult.processing ? (
+              <SpaceResultProcessing space={space} />
+            ) : (
+              <SpaceResult
+                savedObject={props.savedObject}
+                space={space}
+                summarizedCopyResult={summarizedSpaceCopyResult}
+                retries={props.retries[space.id] || []}
+                onRetriesChange={(retries) => updateRetries(space.id, retries)}
+                conflictResolutionInProgress={props.conflictResolutionInProgress}
+              />
+            )}
             <EuiSpacer size="s" />
           </Fragment>
         );

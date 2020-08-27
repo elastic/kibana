@@ -1204,6 +1204,7 @@ export class DataRecognizer {
       const job = jobs.find((j) => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
       if (job !== undefined) {
         // delete the job_id in the override as this shouldn't be overridden
+        // @ts-expect-error
         delete jobSpecificOverride.job_id;
         merge(job.config, jobSpecificOverride);
         processArrayValues(job.config, jobSpecificOverride);

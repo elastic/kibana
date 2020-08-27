@@ -9,6 +9,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -75,6 +76,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
+  }
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    const types = this.getUniqueObjectTypes(objects);
+    const args = { objects, options };
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, args, 'checkConflicts');
+
+    const response = await this.baseClient.checkConflicts(objects, options);
+    return response;
   }
 
   public async bulkCreate<T = unknown>(

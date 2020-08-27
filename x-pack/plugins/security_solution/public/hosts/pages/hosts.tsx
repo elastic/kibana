@@ -57,7 +57,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
     const { globalFullScreen } = useFullScreen();
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
-    const { tabName } = useParams();
+    const { tabName } = useParams<{ tabName: string }>();
     const tabsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;

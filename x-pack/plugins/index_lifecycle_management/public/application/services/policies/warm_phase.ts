@@ -96,6 +96,7 @@ export const warmPhaseToES = (
   // An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
   // They are mutually exclusive
   if (phase.warmPhaseOnRollover) {
+    // @ts-expect-error
     delete esPhase.min_age;
   }
 
@@ -109,6 +110,7 @@ export const warmPhaseToES = (
     };
   } else {
     if (esPhase.actions.allocate) {
+      // @ts-expect-error
       delete esPhase.actions.allocate.require;
     }
   }
@@ -118,6 +120,7 @@ export const warmPhaseToES = (
     esPhase.actions.allocate.number_of_replicas = parseInt(phase.selectedReplicaCount, 10);
   } else {
     if (esPhase.actions.allocate) {
+      // @ts-expect-error
       delete esPhase.actions.allocate.number_of_replicas;
     }
   }

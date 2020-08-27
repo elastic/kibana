@@ -30,7 +30,7 @@ export interface UseFetchOrCreateRuleExceptionListProps {
   http: HttpStart;
   ruleId: Rule['id'];
   exceptionListType: ExceptionListSchema['type'];
-  onError: (arg: Error) => void;
+  onError: (arg: Error, code: number | null, message: string | null) => void;
   onSuccess?: (ruleWasChanged: boolean) => void;
 }
 
@@ -179,7 +179,11 @@ export const useFetchOrCreateRuleExceptionList = ({
         if (isSubscribed) {
           setIsLoading(false);
           setExceptionList(null);
-          onError(error);
+          if (error.body != null) {
+            onError(error, error.body.status_code, error.body.message);
+          } else {
+            onError(error, null, null);
+          }
         }
       }
     }
