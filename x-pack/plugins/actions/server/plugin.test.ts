@@ -34,7 +34,7 @@ describe('Actions Plugin', () => {
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfigured: {},
-        rejectUnauthorizedCertificates: true,
+        proxyRejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

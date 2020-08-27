@@ -23,7 +23,7 @@ export function getProxyAgent(
       protocol: proxyUrl.protocol,
       headers: proxySettings.proxyHeaders,
       // do not fail on invalid certs if value is false
-      rejectUnauthorized: proxySettings.rejectUnauthorizedCertificates,
+      rejectUnauthorized: proxySettings.proxyRejectUnauthorizedCertificates,
     });
   } else {
     return new HttpProxyAgent(proxySettings.proxyUrl);

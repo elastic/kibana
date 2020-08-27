@@ -71,7 +71,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     if (proxySettings && !transportConfig.secure) {
       transportConfig.tls = {
         // do not fail on invalid certs if value is false
-        rejectUnauthorized: proxySettings?.rejectUnauthorizedCertificates,
+        rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
       };
     }
     if (proxySettings) {

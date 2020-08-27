@@ -65,7 +65,7 @@ describe('request', () => {
       logger,
       proxySettings: {
         proxyUrl: 'http://localhost:1212',
-        rejectUnauthorizedCertificates: false,
+        proxyRejectUnauthorizedCertificates: false,
       },
     });
 

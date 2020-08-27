@@ -73,7 +73,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://example.com',
-        rejectUnauthorizedCertificates: false,
+        proxyRejectUnauthorizedCertificates: false,
       }
     );
     delete sendEmailOptions.transport.service;
