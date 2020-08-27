@@ -13,4 +13,9 @@ export { PhaseErrorMessage } from './phase_error_message';
 export { PolicyJsonFlyout } from './policy_json_flyout';
 export { SetPriorityInput } from './set_priority_input';
 export { SnapshotPolicies } from './snapshot_policies';
-export { DataTierAllocation, NodeAllocation, NodeAttrsDetails } from './data_tier_allocation';
+export {
+  CustomDataTierAllocation,
+  NodeAllocation,
+  NodeAttrsDetails,
+} from './custom_data_tier_allocation';
+export { DescribedFormGroup } from './described_form_group';

@@ -5,53 +5,37 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
-import {
-  EuiButtonGroup,
-  EuiButtonGroupOption,
-  EuiSpacer,
-  EuiCode,
-  EuiText,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupOption, EuiText } from '@elastic/eui';
 
-import './data_tier_allocation.scss';
+import './custom_data_tier_allocation.scss';
 import { NodeAllocation } from './node_allocation';
 
 // TODO: Fix this
 type Props = any;
 
-type AllocationId = 'node-role' | 'custom-allocation' | 'default';
+type AllocationId = 'custom-allocation' | 'none';
 
 interface ButtonOption extends EuiButtonGroupOption {
   id: AllocationId;
 }
 
 const buttonOptions: ButtonOption[] = [
-  { id: 'node-role', label: 'Node role' },
   { id: 'custom-allocation', label: 'Custom' },
-  { id: 'default', label: 'Default' },
+  { id: 'none', label: 'None' },
 ];
 
-export const DataTierAllocation: FunctionComponent<Props> = (props) => {
-  const [selectedAllocationId, setSelectedAllocationId] = useState<AllocationId>('node-role');
+export const CustomDataTierAllocation: FunctionComponent<Props> = (props) => {
+  const [selectedAllocationId, setSelectedAllocationId] = useState<AllocationId>(
+    'custom-allocation'
+  );
 
   const contentMap: Record<AllocationId, React.ReactNode> = {
-    'node-role': (
-      <EuiText
-        className="indexLifecycleManagement__dataTierAllocation__contentBox__descriptionPanel"
-        size="s"
-      >
-        <p>
-          Allocate shards to nodes with the <EuiCode>data_warm</EuiCode> role.
-        </p>
-      </EuiText>
-    ),
     'custom-allocation': (
       <div className="indexLifecycleManagement__dataTierAllocation__contentBox__customAllocationPanel">
         <NodeAllocation {...props} />
       </div>
     ),
-    default: (
+    none: (
       <EuiText
         className="indexLifecycleManagement__dataTierAllocation__contentBox__descriptionPanel"
         size="s"

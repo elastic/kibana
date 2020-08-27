@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DataTierAllocation } from './data_tier_allocation';
+export { CustomDataTierAllocation } from './custom_data_tier_allocation';
 export { NodeAllocation } from './node_allocation';
 export { NodeAttrsDetails } from './node_attrs_details';

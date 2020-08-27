@@ -101,6 +101,7 @@ export interface Policy {
 export interface Phase {
   phaseEnabled: boolean;
 }
+
 export interface HotPhase extends Phase {
   rolloverEnabled: boolean;
   selectedMaxSizeStored: string;
@@ -111,7 +112,15 @@ export interface HotPhase extends Phase {
   phaseIndexPriority: string;
 }
 
-export interface WarmPhase extends Phase {
+interface PhaseWithAllocationAction extends Phase {
+  /**
+   * A flag used to indicate whether the policy is making use of custom
+   * allocation which bypasses ILM data tier allocation which uses node roles.
+   */
+  isUsingCustomPhaseAllocation: boolean;
+}
+
+export interface WarmPhase extends PhaseWithAllocationAction {
   warmPhaseOnRollover: boolean;
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
@@ -124,7 +133,7 @@ export interface WarmPhase extends Phase {
   phaseIndexPriority: string;
 }
 
-export interface ColdPhase extends Phase {
+export interface ColdPhase extends PhaseWithAllocationAction {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
   selectedNodeAttrs: string;
@@ -133,7 +142,7 @@ export interface ColdPhase extends Phase {
   phaseIndexPriority: string;
 }
 
-export interface DeletePhase extends Phase {
+export interface DeletePhase extends PhaseWithAllocationAction {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
   waitForSnapshotPolicy: string;
