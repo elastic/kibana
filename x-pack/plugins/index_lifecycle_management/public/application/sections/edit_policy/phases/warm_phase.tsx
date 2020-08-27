@@ -27,7 +27,7 @@ import {
   SetPriorityInput,
   MinAgeInput,
   CustomDataTierAllocation,
-  DescribedFormGroup,
+  DescribedFormField,
 } from '../components';
 
 import { Phases, WarmPhase as WarmPhaseInterface } from '../../../services/policies/types';
@@ -53,7 +53,10 @@ const phaseProperty = (propertyName: keyof WarmPhaseInterface) =>
   propertyof<WarmPhaseInterface>(propertyName);
 
 interface Props {
-  setPhaseData: (key: keyof WarmPhaseInterface & string, value: boolean | string) => void;
+  setPhaseData: (
+    key: keyof WarmPhaseInterface & string,
+    value: boolean | string | undefined
+  ) => void;
   phaseData: WarmPhaseInterface;
   isShowingErrors: boolean;
   errors?: PhaseValidationErrors<WarmPhaseInterface>;
@@ -150,14 +153,31 @@ export class WarmPhase extends PureComponent<Props> {
 
         {phaseData.phaseEnabled ? (
           <Fragment>
-            <DescribedFormGroup
-              title={<h3>Data tier allocation</h3>}
+            <DescribedFormField
+              title={
+                <h3>
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationTitle',
+                    { defaultMessage: 'Data tier allocation' }
+                  )}
+                </h3>
+              }
+              description={i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationDescription',
+                { defaultMessage: 'Allocate warm phase data to nodes in the cluster.' }
+              )}
               switchProps={{
-                checked: phaseData.isUsingCustomPhaseAllocation,
-                onChange: (v) => setPhaseData('isUsingCustomPhaseAllocation', v),
-                label: 'Customize data tier allocation',
+                initialValue: Boolean(phaseData.allocationType),
+                onChange: (v) => {
+                  if (!v) {
+                    setPhaseData('allocationType', undefined);
+                  }
+                },
+                label: i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocation.switchLabel',
+                  { defaultMessage: 'Customize data tier allocation' }
+                ),
               }}
-              description="Allocate warm phase data to nodes in the cluster."
               fullWidth
             >
               <EuiFormRow>
@@ -167,44 +187,64 @@ export class WarmPhase extends PureComponent<Props> {
                   errors={errors}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
+                  defaultAllocationValue="custom-allocation"
                 />
               </EuiFormRow>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                  <ErrableFormRow
-                    id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
-                    label={
-                      <Fragment>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel"
-                          defaultMessage="Number of replicas"
-                        />
-                        <OptionalLabel />
-                      </Fragment>
-                    }
-                    isShowingErrors={isShowingErrors}
-                    errors={errors?.selectedReplicaCount}
-                    helpText={i18n.translate(
-                      'xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText',
-                      {
-                        defaultMessage: 'By default, the number of replicas remains the same.',
-                      }
-                    )}
-                  >
-                    <EuiFieldNumber
-                      id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
-                      value={phaseData.selectedReplicaCount}
-                      onChange={(e) => {
-                        setPhaseData('selectedReplicaCount', e.target.value);
-                      }}
-                      min={0}
+            </DescribedFormField>
+            <DescribedFormField
+              title={
+                <h3>
+                  {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
+                    defaultMessage: 'Replicas',
+                  })}
+                </h3>
+              }
+              description={i18n.translate(
+                'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasDescription',
+                {
+                  defaultMessage:
+                    'Set the number of replicas. By default, the number of replicas remains the same.',
+                }
+              )}
+              switchProps={{
+                label: i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicase.switchLabel',
+                  { defaultMessage: 'Set replicas' }
+                ),
+                initialValue: Boolean(phaseData.selectedReplicaCount),
+                onChange: (v) => {
+                  if (!v) {
+                    setPhaseData('selectedReplicaCount', '');
+                  }
+                },
+              }}
+              fullWidth
+            >
+              <ErrableFormRow
+                id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
+                label={
+                  <Fragment>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel"
+                      defaultMessage="Number of replicas"
                     />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </DescribedFormGroup>
-            <DescribedFormGroup
+                    <OptionalLabel />
+                  </Fragment>
+                }
+                isShowingErrors={isShowingErrors}
+                errors={errors?.selectedReplicaCount}
+              >
+                <EuiFieldNumber
+                  id={`${warmProperty}-${phaseProperty('selectedReplicaCount')}`}
+                  value={phaseData.selectedReplicaCount}
+                  onChange={(e) => {
+                    setPhaseData('selectedReplicaCount', e.target.value);
+                  }}
+                  min={0}
+                />
+              </ErrableFormRow>
+            </DescribedFormField>
+            <EuiDescribedFormGroup
               title={
                 <h3>
                   <FormattedMessage
@@ -224,53 +264,56 @@ export class WarmPhase extends PureComponent<Props> {
               }
               fullWidth
               titleSize="xs"
-              switchProps={{
-                'data-test-subj': 'shrinkSwitch',
-                'aria-label': shrinkLabel,
-                'aria-controls': 'shrinkContent',
-                checked: phaseData.shrinkEnabled,
-                label: shrinkLabel,
-                onChange: (e) => {
-                  setPhaseData(phaseProperty('shrinkEnabled'), e.target.checked);
-                },
-              }}
             >
-              <div id="shrinkContent" aria-live="polite" role="region">
-                {phaseData.shrinkEnabled ? (
-                  <Fragment>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <ErrableFormRow
-                          id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
-                          label={i18n.translate(
-                            'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
-                            {
-                              defaultMessage: 'Number of primary shards',
-                            }
-                          )}
-                          isShowingErrors={isShowingErrors}
-                          errors={errors?.selectedPrimaryShardCount}
-                        >
-                          <EuiFieldNumber
+              <Fragment>
+                <EuiSwitch
+                  data-test-subj="shrinkSwitch"
+                  checked={phaseData.shrinkEnabled}
+                  onChange={(e) => {
+                    setPhaseData(phaseProperty('shrinkEnabled'), e.target.checked);
+                  }}
+                  label={shrinkLabel}
+                  aria-label={shrinkLabel}
+                  aria-controls="shrinkContent"
+                />
+
+                <div id="shrinkContent" aria-live="polite" role="region">
+                  {phaseData.shrinkEnabled ? (
+                    <Fragment>
+                      <EuiSpacer />
+                      <EuiFlexGroup>
+                        <EuiFlexItem grow={false}>
+                          <ErrableFormRow
                             id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
-                            value={phaseData.selectedPrimaryShardCount}
-                            onChange={(e) => {
-                              setPhaseData(
-                                phaseProperty('selectedPrimaryShardCount'),
-                                e.target.value
-                              );
-                            }}
-                            min={1}
-                          />
-                        </ErrableFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                  </Fragment>
-                ) : null}
-              </div>
-            </DescribedFormGroup>
+                            label={i18n.translate(
+                              'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
+                              {
+                                defaultMessage: 'Number of primary shards',
+                              }
+                            )}
+                            isShowingErrors={isShowingErrors}
+                            errors={errors?.selectedPrimaryShardCount}
+                          >
+                            <EuiFieldNumber
+                              id={`${warmProperty}-${phaseProperty('selectedPrimaryShardCount')}`}
+                              value={phaseData.selectedPrimaryShardCount}
+                              onChange={(e) => {
+                                setPhaseData(
+                                  phaseProperty('selectedPrimaryShardCount'),
+                                  e.target.value
+                                );
+                              }}
+                              min={1}
+                            />
+                          </ErrableFormRow>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer />
+                    </Fragment>
+                  ) : null}
+                </div>
+              </Fragment>
+            </EuiDescribedFormGroup>
             <EuiDescribedFormGroup
               title={
                 <h3>

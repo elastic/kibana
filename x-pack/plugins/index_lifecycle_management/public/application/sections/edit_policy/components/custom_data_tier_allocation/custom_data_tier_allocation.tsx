@@ -3,36 +3,69 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { FunctionComponent, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent, useEffect } from 'react';
 import { EuiButtonGroup, EuiButtonGroupOption, EuiText } from '@elastic/eui';
+
+import {
+  AllocationType,
+  Phase,
+  Phases,
+  WarmPhase,
+  ColdPhase,
+} from '../../../../services/policies/types';
 
 import './custom_data_tier_allocation.scss';
 import { NodeAllocation } from './node_allocation';
-
-// TODO: Fix this
-type Props = any;
-
-type AllocationId = 'custom-allocation' | 'none';
+import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 
 interface ButtonOption extends EuiButtonGroupOption {
-  id: AllocationId;
+  id: AllocationType;
 }
 
+const i18nTexts = {
+  allocationTypes: {
+    none: {
+      label: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.customDataTierAllocation.noneOptionLabel',
+        { defaultMessage: 'None' }
+      ),
+      description: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.customDataTierAllocation.noneOptionDescription',
+        { defaultMessage: 'Data in this phase will remain on the same node.' }
+      ),
+    },
+    custom: {
+      label: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.customDataTierAllocation.customOptionLabel',
+        { defaultMessage: 'Custom' }
+      ),
+    },
+  },
+};
+
 const buttonOptions: ButtonOption[] = [
-  { id: 'custom-allocation', label: 'Custom' },
-  { id: 'none', label: 'None' },
+  { id: 'custom-allocation', label: i18nTexts.allocationTypes.custom.label },
+  { id: 'none', label: i18nTexts.allocationTypes.none.label },
 ];
 
-export const CustomDataTierAllocation: FunctionComponent<Props> = (props) => {
-  const [selectedAllocationId, setSelectedAllocationId] = useState<AllocationId>(
-    'custom-allocation'
-  );
-
-  const contentMap: Record<AllocationId, React.ReactNode> = {
+interface Props<T extends Phase> {
+  phase: keyof Phases & string;
+  errors?: PhaseValidationErrors<T>;
+  defaultAllocationValue: AllocationType;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: string) => void;
+  isShowingErrors: boolean;
+}
+export const CustomDataTierAllocation: FunctionComponent<Props<WarmPhase | ColdPhase>> = ({
+  defaultAllocationValue,
+  setPhaseData,
+  ...restProps
+}) => {
+  const contentMap: Record<AllocationType, React.ReactNode> = {
     'custom-allocation': (
       <div className="indexLifecycleManagement__dataTierAllocation__contentBox__customAllocationPanel">
-        <NodeAllocation {...props} />
+        <NodeAllocation setPhaseData={setPhaseData} {...restProps} />
       </div>
     ),
     none: (
@@ -40,10 +73,20 @@ export const CustomDataTierAllocation: FunctionComponent<Props> = (props) => {
         className="indexLifecycleManagement__dataTierAllocation__contentBox__descriptionPanel"
         size="s"
       >
-        <p>Shards in this phase will be allocated on all data nodes.</p>
+        <p>{i18nTexts.allocationTypes.none.description}</p>
       </EuiText>
     ),
   };
+
+  useEffect(
+    () => {
+      if (restProps.phaseData.allocationType === undefined) {
+        setPhaseData('allocationType', defaultAllocationValue);
+      }
+    },
+    // Do this once only when mounting this component
+    [] /* eslint-disable-line react-hooks/exhaustive-deps */
+  );
 
   return (
     <div role="region">
@@ -53,12 +96,12 @@ export const CustomDataTierAllocation: FunctionComponent<Props> = (props) => {
       <EuiButtonGroup
         className="indexLifecycleManagement__dataTierAllocation__buttonGroup"
         color="primary"
-        idSelected={selectedAllocationId}
+        idSelected={restProps.phaseData.allocationType}
         options={buttonOptions}
-        onChange={(id) => setSelectedAllocationId(id as AllocationId)}
+        onChange={(id) => setPhaseData('allocationType', id as AllocationType)}
         isFullWidth
       />
-      {contentMap[selectedAllocationId]}
+      {contentMap[restProps.phaseData.allocationType!] ?? null}
     </div>
   );
 };

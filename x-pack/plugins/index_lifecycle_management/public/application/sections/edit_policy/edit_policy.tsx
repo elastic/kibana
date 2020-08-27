@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,7 +28,7 @@ import {
 
 import { toasts } from '../../services/notification';
 
-import { Policy, PolicyFromES } from '../../services/policies/types';
+import { Policy, PolicyFromES, Phases } from '../../services/policies/types';
 import {
   validatePolicy,
   ValidationErrors,
@@ -118,15 +118,23 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
 
-  const setPhaseData = (phase: 'hot' | 'warm' | 'cold' | 'delete', key: string, value: any) => {
-    setPolicy({
-      ...policy,
-      phases: {
-        ...policy.phases,
-        [phase]: { ...policy.phases[phase], [key]: value },
-      },
-    });
-  };
+  const setPhaseData = useCallback(
+    (phase: 'hot' | 'warm' | 'cold' | 'delete', key: string, value: any) => {
+      setPolicy((previousPolicy) => ({
+        ...previousPolicy,
+        phases: {
+          ...previousPolicy.phases,
+          [phase]: { ...previousPolicy.phases[phase], [key]: value },
+        },
+      }));
+    },
+    [setPolicy]
+  );
+
+  const setWarmPhaseData = useCallback(
+    (key: string, value: any) => setPhaseData('warm', key, value),
+    [setPhaseData]
+  );
 
   const setWarmPhaseOnRollover = (value: boolean) => {
     setPolicy({
@@ -286,7 +294,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({
             <WarmPhase
               errors={errors?.warm}
               isShowingErrors={isShowingErrors && !!errors && Object.keys(errors.warm).length > 0}
-              setPhaseData={(key, value) => setPhaseData('warm', key, value)}
+              setPhaseData={setWarmPhaseData}
               phaseData={policy.phases.warm}
               hotPhaseRolloverEnabled={policy.phases.hot.rolloverEnabled}
             />

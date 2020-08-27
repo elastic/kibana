@@ -60,6 +60,11 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
           phase.selectedReplicaCount = allocate.number_of_replicas.toString();
         }
       }
+      if (actions.migrate?.enabled === false) {
+        phase.allocationType = 'none';
+      } else if (phase.selectedNodeAttrs) {
+        phase.allocationType = 'custom-allocation';
+      }
     }
 
     if (actions.forcemerge) {
@@ -101,16 +106,18 @@ export const warmPhaseToES = (
 
   esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
 
-  if (phase.selectedNodeAttrs) {
+  if (phase.allocationType === 'custom-allocation' && phase.selectedNodeAttrs) {
     const [name, value] = phase.selectedNodeAttrs.split(':');
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
     esPhase.actions.allocate.require = {
       [name]: value,
     };
+  } else if (phase.allocationType === 'none') {
+    esPhase.actions.migrate = { enabled: false };
   } else {
-    if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
-    }
+    // Default
+    delete esPhase.actions.allocate;
+    delete esPhase.actions.migrate;
   }
 
   if (isNumber(phase.selectedReplicaCount)) {

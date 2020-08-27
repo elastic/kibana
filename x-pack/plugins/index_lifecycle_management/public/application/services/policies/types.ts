@@ -55,6 +55,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
+    migrate?: { enabled: boolean };
   };
 }
 
@@ -112,12 +113,14 @@ export interface HotPhase extends Phase {
   phaseIndexPriority: string;
 }
 
+export type AllocationType = 'custom-allocation' | 'none';
+
 interface PhaseWithAllocationAction extends Phase {
   /**
-   * A flag used to indicate whether the policy is making use of custom
-   * allocation which bypasses ILM data tier allocation which uses node roles.
+   * A string value indicating allocation type. If unspecified we assume the user
+   * wants to use default allocation.
    */
-  isUsingCustomPhaseAllocation: boolean;
+  allocationType?: AllocationType;
 }
 
 export interface WarmPhase extends PhaseWithAllocationAction {
@@ -142,7 +145,7 @@ export interface ColdPhase extends PhaseWithAllocationAction {
   phaseIndexPriority: string;
 }
 
-export interface DeletePhase extends PhaseWithAllocationAction {
+export interface DeletePhase extends Phase {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
   waitForSnapshotPolicy: string;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -58,6 +58,14 @@ export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
     null
   );
 
+  useEffect(() => {
+    const attrs = nodes && Object.keys(nodes);
+    if (attrs.length) {
+      const [first] = attrs;
+      setPhaseData('selectedNodeAttrs', first);
+    }
+  }, [nodes, setPhaseData]);
+
   if (isLoading) {
     return (
       <Fragment>
@@ -97,23 +105,13 @@ export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
     );
   }
 
-  let nodeOptions = Object.keys(nodes).map((attrs) => ({
+  const nodeOptions = Object.keys(nodes).map((attrs) => ({
     text: `${attrs} (${nodes[attrs].length})`,
     value: attrs,
   }));
 
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
-  if (nodeOptions.length) {
-    nodeOptions = [
-      {
-        text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.defaultNodeAllocation', {
-          defaultMessage: "Default allocation (don't use attributes)",
-        }),
-        value: '',
-      },
-      ...nodeOptions,
-    ];
-  }
+
   if (!nodeOptions.length) {
     return (
       <Fragment>

@@ -18,4 +18,4 @@ export {
   NodeAllocation,
   NodeAttrsDetails,
 } from './custom_data_tier_allocation';
-export { DescribedFormGroup } from './described_form_group';
+export { DescribedFormField } from './described_form_field';
