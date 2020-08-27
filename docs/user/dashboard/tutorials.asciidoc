@@ -1,7 +1,6 @@
 [[tutorials]]
 == Tutorials
 
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
 Learn how to use *Lens*, *Vega*, and *Timelion* by going through one of the step-by-step tutorials.
 
 [float]
@@ -46,12 +45,6 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 ==== Customize your visualization
 
 Make your visualization look exactly how you want with the customization options.
-=======
-Build custom visualizations using Vega and Vega-Lite, backed by one or more
-data sources including {es}, Elastic Map Service, URL,
-or static data. Use the {kib} extensions to Vega to embed Vega into
-your dashboard, and to add interactivity to the visualizations.
->>>>>>> master:docs/visualize/vega.asciidoc
 
 . Click *Average of taxful_total_price*, then change the *Label* to `Sales`.
 +
@@ -1279,16 +1272,10 @@ The final Vega spec for this tutorial is here:
 ----
 ====
 
-[float]
 [[timelion-tutorial-create-time-series-visualizations]]
 === Timelion tutorial: Create time series visualizations
 
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
 To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization.
-=======
-{kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
-with support for direct {es} queries specified as a `url`.
->>>>>>> master:docs/visualize/vega.asciidoc
 
 [float]
 [[define-the-functions]]
@@ -1353,7 +1340,6 @@ image::images/timelion-create03.png[]
 {nbsp}
 
 [float]
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
 [[add-a-title]]
 ==== Add a title
 
@@ -1374,26 +1360,6 @@ Add a meaningful title:
 ----------------------------------
 
 <1> `.title()` adds a title with a meaningful name. Titles make is easier for unfamiliar users to understand the purpose of the visualization.
-=======
-[[vega-esmfiles]]
-=== Access Elastic Map Service files
-
-Access the Elastic Map Service files via the same mechanism:
-
-[source,yaml]
-----
-url: {
-  // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
-  // Name of the file, exactly as in the Region map visualization
-  name: World Countries
-}
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
-// https://vega.github.io/vega/docs/marks/shape/
-format: {property: "features"}
-----
->>>>>>> master:docs/visualize/vega.asciidoc
 
 [role="screenshot"]
 image::images/timelion-customize01.png[]
@@ -1485,7 +1451,6 @@ Change the position and style of the legend:
 image::images/timelion-customize04.png[]
 {nbsp}
 
-[float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
 === Timelion tutorial: Create visualizations with mathematical functions
 
@@ -1615,7 +1580,6 @@ Customize and format the visualization using functions:
 image::images/timelion-math05.png[]
 {nbsp}
 
-[float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
 === Timelion tutorial: Create visualizations with conditional logic and tracking trends
 
@@ -1690,7 +1654,6 @@ To track the amount of memory used, create two thresholds:
 image::images/timelion-conditional02.png[]
 {nbsp}
 
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
 [float]
 [[conditional-determine-trend]]
 ==== Determine the trend
@@ -1729,9 +1692,6 @@ To determine the trend, create a new data series:
 ----------------------------------
 
 <1> `mvavg()` calculates the moving average over a specified period of time. In this example, `.mvavg(10)` creates a moving average with a window of 10 data points.
-=======
-To learn more about Vega and Vega-Lite, refer to the resources and examples.
->>>>>>> master:docs/visualize/vega.asciidoc
 
 [role="screenshot"]
 image::images/timelion-conditional03.png[]

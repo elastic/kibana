@@ -32,7 +32,7 @@ Quickly build several types of basic visualizations by simply dragging and dropp
 
 * *Tag cloud* &mdash; Displays words in a cloud, where the size of the word corresponds to its importance.
 
-<<TSVB,TSVB>>:: Visualizes time series data using pipeline aggregations.
+<<tsvb,TSVB>>:: Visualizes time series data using pipeline aggregations.
 
 <<timelion,Timelion>>:: Computes and combine data from multiple time series
 data sets.

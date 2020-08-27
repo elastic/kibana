@@ -15,79 +15,74 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 |===
 
 | Type 
-| Visualizations
-| Data table
-| Markdown
-| Lens
-| TSVB
-
-| Histogram 
-| X
-| X
-| X
-| 
-| 
-
-| Date histogram 
-| X
-| X
-| X
-| X
-| X
-
-| Date range 
-| X
-| X
-| X
-| 
-| 
-
-| Filter 
-| X
-| X
-| X
-| 
-| X
-
+| Histogram
+| Date histogram
+| Date range
+| Filter
 | Filters
-| X
-| X
-| X
-| 
-| X
-
-| GeoHash grid 
-| X
-| X
-| X
-| 
-| 
-
-| IP range 
-| X
-| X
-| X
-| 
-| 
-
-| Range 
-| X
-| X
-| X
-| 
-| 
-
+| GeoHash grid
+| IP range
+| Range
 | Terms
+| Significant terms
+
+| Visualizations
+| X
+| X
+| X
+| X
+| X
 | X
 | X
 | X
 | X
 | X
 
-| Significant terms 
+| Data table
 | X
 | X
 | X
+| X
+| X
+| X
+| X
+| X
+| X
+| X
+
+| Markdown
+| X
+| X
+| X
+| X
+| X
+| X
+| X
+| X
+| X
+| X
+
+| Lens
+| 
+| X
+| 
+| 
+| 
+| 
+| 
+| 
+| X
+| X
+
+| TSVB
+| 
+| X
+| 
+| X
+| X
+| 
+| 
+| 
 | X
 | X
 
@@ -102,60 +97,57 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 |===
 
 | Type 
-| Visualizations
-| Data table
-| Markdown
-| Lens
-| TSVB
-
 | Average and Sum 
-| X
-| X
-| X
-| X
-| X
-
 | Cardinality
-| X
-| X
-| X
-| X
-| X
-
 | Max and Min 
-| X
-| X
-| X
-| 
-| 
-
 | Percentiles 
-| X
-| X
-| X
-| 
-| X
-
 | Percentiles Rank
-| X
-| X
-| X
-| 
-| X
-
 | Top hits 
+| Value count
+
+| Visualizations
 | X
 | X
 | X
+| X
+| X
+| X
+| 
+
+| Data table
+| X
+| X
+| X
+| X
+| X
+| X
+
+| Markdown
+| X 
+| X
+| X
+| X
+| X
+| X
+| 
+
+| Lens
+| X
+| X
+| 
+| 
+| 
 | 
 | X
 
-| Value count
-| 
-| 
-| 
-| 
+| TSVB
 | X
+| X
+|  
+| X
+| X
+| X
+| 
 
 |===
 
@@ -168,66 +160,63 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 |===
 
 | Type 
-| Visualizations
-| Data table
-| Markdown
-| Lens
-| TSVB
-
 | Avg bucket
-| X
-| X
-| X
-| 
-| X
-
 | Derivative 
-| X
-| X
-| X
-| 
-| X
-
 | Max and min bucket 
-| X
-| X
-| X
-| 
-| X
-
-| Sum bucket 
-| X
-| X
-| X
-| 
-| X
-
+| Sum bucket
 | Moving average
-| X
-| X
-| X
-| 
-| X
-
 | Cumulative sum
+| Bucket script
+| Serial differencing
+
+| Visualizations
 | X
 | X
 | X
 | X
+| X
+| X
+| 
 | X
 
-| Bucket script 
-| 
-| 
-| 
+| Data table
+| X
+| X
+| X
+| X
+| X
+| X
 | 
 | X
 
-| Serial differencing 
+| Markdown 
+| X
+| X
+| X
 | X
 | X
 | X
 | 
+| X
+
+| Lens
+| 
+| 
+|  
+| 
+| 
+| X
+| 
+| 
+
+| TSVB 
+| X
+| X
+| X
+| X
+| X
+| X
+| X
 | X
 
 |===

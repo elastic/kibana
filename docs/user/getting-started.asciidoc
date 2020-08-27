@@ -44,13 +44,13 @@ If you uninstall and reinstall a data set, the timestamps change to reflect the 
 [float]
 == Next steps
 
-* To get a hands-on experience creating visualizations, follow the <<tutorial-sample-data, add sample data>> tutorial.
+* To get a hands-on experience creating visualizations, follow the <<explore-kibana-using-sample-data, add sample data>> tutorial.
 
 * If you're ready to load an actual data set and build a dashboard, follow the <<create-your-own-dashboard, Create your own dashboard>> tutorial.
 
 --
 
-include::{kib-repo-dir}/getting-started/add-sample-data.asciidoc[]
+include::{kib-repo-dir}/getting-started/tutorial-sample-data.asciidoc[]
 
 include::{kib-repo-dir}/getting-started/tutorial-full-experience.asciidoc[]
 

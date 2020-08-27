@@ -1,5 +1,6 @@
+[float]
 [[explore-underlying-data]]
-== Explore the underlying data for a visualization
+=== Explore the underlying data for a visualization
 
 ++++
 <titleabbrev>Explore the underlying data</titleabbrev>
@@ -14,7 +15,7 @@ menu or from the menu that appears when you interact with the chart.
 
 [float]
 [[explore-data-from-panel-context-menu]]
-=== Explore data from panel context menu
+==== Explore data from panel context menu
 
 The *Explore underlying data* action in the panel menu navigates you to Discover,
 carrying over the index pattern, filters, query, and time range for the visualization.
@@ -24,7 +25,7 @@ image::images/explore_data_context_menu.png[Explore underlying data from panel c
 
 [float]
 [[explore-data-from-chart]]
-=== Explore data from chart action
+==== Explore data from chart action
 
 Initiating *Explore underlying data* from the chart also navigates to Discover,
 carrying over the current context for the visualization. In addition, this action
