@@ -148,6 +148,50 @@ describe('useAddOrUpdateException', () => {
     });
   });
 
+  it('invokes "onError" if call to add exception item fails', async () => {
+    const mockError = new Error('error adding item');
+
+    addExceptionListItem = jest
+      .spyOn(listsApi, 'addExceptionListItem')
+      .mockRejectedValue(mockError);
+
+    await act(async () => {
+      const { rerender, result, waitForNextUpdate } = render();
+      const addOrUpdateItems = await waitForAddOrUpdateFunc({
+        rerender,
+        result,
+        waitForNextUpdate,
+      });
+      if (addOrUpdateItems) {
+        addOrUpdateItems(...addOrUpdateItemsArgs);
+      }
+      await waitForNextUpdate();
+      expect(onError).toHaveBeenCalledWith(mockError, null, null);
+    });
+  });
+
+  it('invokes "onError" if call to update exception item fails', async () => {
+    const mockError = new Error('error updating item');
+
+    updateExceptionListItem = jest
+      .spyOn(listsApi, 'updateExceptionListItem')
+      .mockRejectedValue(mockError);
+
+    await act(async () => {
+      const { rerender, result, waitForNextUpdate } = render();
+      const addOrUpdateItems = await waitForAddOrUpdateFunc({
+        rerender,
+        result,
+        waitForNextUpdate,
+      });
+      if (addOrUpdateItems) {
+        addOrUpdateItems(...addOrUpdateItemsArgs);
+      }
+      await waitForNextUpdate();
+      expect(onError).toHaveBeenCalledWith(mockError, null, null);
+    });
+  });
+
   describe('when alertIdToClose is not passed in', () => {
     it('should not update the alert status', async () => {
       await act(async () => {
