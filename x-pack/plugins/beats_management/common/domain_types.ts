@@ -41,7 +41,7 @@ export interface CMBeat {
   status?: BeatEvent;
   enrollment_token: string;
   active: boolean;
-  access_token: string;
+  access_token?: string;
   verified_on?: string;
   type: string;
   version?: string;
