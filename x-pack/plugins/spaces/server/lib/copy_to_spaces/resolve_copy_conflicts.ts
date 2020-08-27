@@ -5,18 +5,18 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject, CoreStart, KibanaRequest } from 'src/core/server';
+import { SavedObject, CoreStart, KibanaRequest, SavedObjectsImportRetry } from 'src/core/server';
 import {
   exportSavedObjectsToStream,
   resolveSavedObjectsImportErrors,
 } from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
-import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjects: CoreStart['savedObjects'],
@@ -26,8 +26,6 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   const { getTypeRegistry, getScopedClient } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
-
-  const eligibleTypes = getEligibleTypes(getTypeRegistry());
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
@@ -47,26 +45,24 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   const resolveConflictsForSpace = async (
     spaceId: string,
     objectsStream: Readable,
-    retries: Array<{
-      type: string;
-      id: string;
-      overwrite: boolean;
-      replaceReferences: Array<{ type: string; from: string; to: string }>;
-    }>
+    retries: SavedObjectsImportRetry[],
+    createNewCopies: boolean
   ) => {
     try {
       const importResponse = await resolveSavedObjectsImportErrors({
         namespace: spaceIdToNamespace(spaceId),
         objectLimit: getImportExportObjectLimit(),
         savedObjectsClient,
-        supportedTypes: eligibleTypes,
+        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         retries,
+        createNewCopies,
       });
 
       return {
         success: importResponse.success,
         successCount: importResponse.successCount,
+        successResults: importResponse.successResults,
         errors: importResponse.errors,
       };
     } catch (error) {
@@ -84,6 +80,10 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       includeReferences: options.includeReferences,
       objects: options.objects,
     });
+    const ineligibleTypes = getIneligibleTypes(getTypeRegistry());
+    const filteredObjects = exportedSavedObjects.filter(
+      ({ type }) => !ineligibleTypes.includes(type)
+    );
 
     for (const entry of Object.entries(options.retries)) {
       const [spaceId, entryRetries] = entry;
@@ -92,8 +92,9 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
 
       response[spaceId] = await resolveConflictsForSpace(
         spaceId,
-        createReadableStreamFromArray(exportedSavedObjects),
-        retries
+        createReadableStreamFromArray(filteredObjects),
+        retries,
+        options.createNewCopies
       );
     }
 

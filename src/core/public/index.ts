@@ -136,6 +136,7 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -144,12 +145,15 @@ export {
   SavedObjectsClient,
   SimpleSavedObject,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from './saved_objects';
 
 export {
