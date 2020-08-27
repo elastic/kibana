@@ -27,6 +27,7 @@ import {
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IJoin } from '../../../joins/join';
+import { IVectorStyle } from '../vector_style';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -49,7 +50,8 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
 
 export type FieldFormatter = (value: string | number | undefined) => string | number;
 
-export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
+export class DynamicStyleProperty<T>
+  extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
   static type = STYLE_TYPE.DYNAMIC;
 
@@ -88,7 +90,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   getRangeFieldMeta() {
-    const style = this._layer.getStyle();
+    const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
     const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
@@ -113,7 +115,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   getCategoryFieldMeta() {
-    const style = this._layer.getStyle();
+    const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
     const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);

@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import http from 'http';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
@@ -31,6 +33,7 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -69,6 +72,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
@@ -79,6 +84,14 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
+
+      proxyServer = await getHttpProxyServer(
+        webhookSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
     });
 
@@ -178,6 +191,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      expect(proxyHaveBeenCalled).to.equal(true);
       expect(result.status).to.eql('ok');
     });
 
@@ -241,6 +255,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     after(() => {
       webhookServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }
