@@ -100,8 +100,8 @@ describe('Metrics', function () {
       Object.defineProperty(process, 'pid', { get: pidMock }); //
 
       const hapiEvent = {
-        requests: { '5603': { total: 22, disconnects: 0, statusCodes: { '200': 22 } } },
-        responseTimes: { '5603': { avg: 1.8636363636363635, max: 4 } },
+        requests: { 5603: { total: 22, disconnects: 0, statusCodes: { 200: 22 } } },
+        responseTimes: { 5603: { avg: 1.8636363636363635, max: 4 } },
         osload: [2.20751953125, 2.02294921875, 1.89794921875],
         osmem: { total: 17179869184, free: 102318080 },
         osup: 1008991,
@@ -150,9 +150,9 @@ describe('Metrics', function () {
     it('parses event with missing fields / NaN for responseTimes.avg', async () => {
       const hapiEvent = {
         requests: {
-          '5603': { total: 22, disconnects: 0, statusCodes: { '200': 22 } },
+          5603: { total: 22, disconnects: 0, statusCodes: { 200: 22 } },
         },
-        responseTimes: { '5603': { avg: NaN, max: 4 } },
+        responseTimes: { 5603: { avg: NaN, max: 4 } },
         host: 'blahblah.local',
       };
 

@@ -287,6 +287,7 @@ describe('read_tags', () => {
       const result2 = getResult();
       result2.id = '99979e67-19a7-455f-b452-8eded6135716';
       result2.params.ruleId = 'rule-2';
+      // @ts-expect-error
       delete result2.tags;
 
       const result3 = getResult();

@@ -19,11 +19,11 @@ interface HeaderProps {
 const Header = styled.header.attrs(() => ({
   className: 'siemHeaderSection',
 }))<HeaderProps>`
-${({ height }) =>
-  height &&
-  css`
-    height: ${height}px;
-  `}
+  ${({ height }) =>
+    height &&
+    css`
+      height: ${height}px;
+    `}
   margin-bottom: ${({ height, theme }) => (height ? 0 : theme.eui.euiSizeL)};
   user-select: text;
 

@@ -106,18 +106,18 @@ const cornerVertices = [
 const resizeMultiplierHorizontal = { left: -1, center: 0, right: 1 };
 const resizeMultiplierVertical = { top: -1, center: 0, bottom: 1 };
 
-const xNames = { '-1': 'left', '0': 'center', '1': 'right' };
-const yNames = { '-1': 'top', '0': 'center', '1': 'bottom' };
+const xNames = { '-1': 'left', 0: 'center', 1: 'right' };
+const yNames = { '-1': 'top', 0: 'center', 1: 'bottom' };
 
 const bidirectionalCursors = {
-  '0': 'ns-resize',
-  '45': 'nesw-resize',
-  '90': 'ew-resize',
-  '135': 'nwse-resize',
-  '180': 'ns-resize',
-  '225': 'nesw-resize',
-  '270': 'ew-resize',
-  '315': 'nwse-resize',
+  0: 'ns-resize',
+  45: 'nesw-resize',
+  90: 'ew-resize',
+  135: 'nwse-resize',
+  180: 'ns-resize',
+  225: 'nesw-resize',
+  270: 'ew-resize',
+  315: 'nwse-resize',
 };
 
 const identityAABB = () => [

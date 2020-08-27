@@ -39,6 +39,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -132,6 +133,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -233,6 +235,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',
@@ -331,6 +334,7 @@ describe('buildBulkBody', () => {
       throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
       someKey: 'someValue',

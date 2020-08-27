@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useQueryStringKeys } from './use_query_string_keys';
-import { CrumbInfo } from './panels/panel_content_utilities';
+import { CrumbInfo } from '../types';
 
 export function useResolverQueryParams() {
   /**
