@@ -1774,6 +1774,8 @@ export interface SearchInterceptorDeps {
     // (undocumented)
     http: CoreSetup_2['http'];
     // (undocumented)
+    loadingCount$: BehaviorSubject<number>;
+    // (undocumented)
     startServices: Promise<[CoreStart, any, unknown]>;
     // (undocumented)
     toasts: ToastsSetup;
