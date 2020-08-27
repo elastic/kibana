@@ -497,7 +497,7 @@
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_1_default",
     "index": ".kibana",
@@ -510,12 +510,12 @@
       "namespaces": ["default"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_1_space_1",
     "index": ".kibana",
@@ -528,12 +528,12 @@
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_1_space_2",
     "index": ".kibana",
@@ -546,12 +546,12 @@
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_2_default",
     "index": ".kibana",
@@ -564,12 +564,12 @@
       "namespaces": ["default"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_2_space_1",
     "index": ".kibana",
@@ -582,12 +582,12 @@
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_2_space_2",
     "index": ".kibana",
@@ -600,12 +600,12 @@
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "id": "sharedtype:conflict_2_all",
     "index": ".kibana",
@@ -618,6 +618,6 @@
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
