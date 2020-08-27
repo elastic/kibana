@@ -43,41 +43,6 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
   const { savedObjects } = coreMock.createStart();
 
   const typeRegistry = savedObjectsTypeRegistryMock.create();
-  typeRegistry.getAllTypes.mockReturnValue([
-    {
-      name: 'visualization',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'dashboard',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'index-pattern',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'globalType',
-      namespaceType: 'agnostic',
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'space',
-      namespaceType: 'agnostic',
-      hidden: true,
-      mappings: { properties: {} },
-    },
-  ]);
-  typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-    typeRegistry.getAllTypes().some((t) => t.name === type && t.namespaceType === 'agnostic')
-  );
   savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
   savedObjects.getScopedClient.mockReturnValue(mockSavedObjectsClientContract);

@@ -151,7 +151,7 @@ export async function exportSavedObjectsToStream({
     exportSizeLimit,
     namespace,
   });
-  let exportedObjects = [];
+  let exportedObjects: Array<SavedObject<unknown>> = [];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
   if (includeReferencesDeep) {

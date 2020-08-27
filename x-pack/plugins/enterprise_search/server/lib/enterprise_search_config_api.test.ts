@@ -47,6 +47,8 @@ describe('callEnterpriseSearchConfigAPI', () => {
         onboarding_complete: true,
       },
       workplace_search: {
+        can_create_invitations: true,
+        is_federated_auth: false,
         organization: {
           name: 'ACME Donuts',
           default_org_name: 'My Organization',
@@ -136,6 +138,8 @@ describe('callEnterpriseSearchConfigAPI', () => {
         },
       },
       workplaceSearch: {
+        canCreateInvitations: false,
+        isFederatedAuth: false,
         organization: {
           name: undefined,
           defaultOrgName: undefined,

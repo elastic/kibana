@@ -164,9 +164,8 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
-      const isDateHistogram = col.meta?.type === 'date_histogram';
-      const timeFieldName =
-        negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
+      const isDate = col.meta?.type === 'date_histogram' || col.meta?.type === 'date_range';
+      const timeFieldName = negate && isDate ? undefined : col?.meta?.aggConfigParams?.field;
       const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 
       const data: LensFilterEvent['data'] = {
