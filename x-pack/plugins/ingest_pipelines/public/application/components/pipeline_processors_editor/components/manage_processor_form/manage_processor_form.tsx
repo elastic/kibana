@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FunctionComponent, memo, useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,13 +31,19 @@ import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
 import { ProcessorOutput } from './processor_output';
 
+interface Fields {
+  fields: { [key: string]: any };
+}
 export interface Props {
   isOnFailure: boolean;
   processor?: ProcessorInternal;
-  form: FormHook;
-  onClose: () => void;
+  form: FormHook<Fields>;
   onOpen: () => void;
   esDocsBasePath: string;
+  getDefaultProcessorOptions: () => Fields;
+  closeFlyout: () => void;
+  resetProcessors: () => void;
+  handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
 }
 
 const updateButtonLabel = i18n.translate(
@@ -108,129 +114,167 @@ const getFlyoutTitle = (isOnFailure: boolean, isExistingProcessor: boolean) => {
   );
 };
 
-export const ManageProcessorForm: FunctionComponent<Props> = memo(
-  ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
-    const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
-    const {
-      testOutputPerProcessor,
-      config: { selectedDocumentIndex, documents },
-    } = testPipelineData;
+export const ManageProcessorForm: FunctionComponent<Props> = ({
+  processor,
+  form,
+  isOnFailure,
+  onOpen,
+  esDocsBasePath,
+  getDefaultProcessorOptions,
+  closeFlyout,
+  handleSubmit,
+  resetProcessors,
+}) => {
+  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const {
+    testOutputPerProcessor,
+    config: { selectedDocumentIndex, documents },
+  } = testPipelineData;
 
-    const processorOutput =
-      processor &&
-      testOutputPerProcessor &&
-      testOutputPerProcessor[selectedDocumentIndex][processor.id];
+  const processorOutput =
+    processor &&
+    testOutputPerProcessor &&
+    testOutputPerProcessor[selectedDocumentIndex][processor.id];
 
-    const updateSelectedDocument = (index: number) => {
-      setCurrentTestPipelineData({
-        type: 'updateActiveDocument',
-        payload: {
-          config: {
-            selectedDocumentIndex: index,
-          },
+  const updateSelectedDocument = (index: number) => {
+    setCurrentTestPipelineData({
+      type: 'updateActiveDocument',
+      payload: {
+        config: {
+          selectedDocumentIndex: index,
         },
-      });
-    };
-
-    useEffect(
-      () => {
-        onOpen();
       },
-      [] /* eslint-disable-line react-hooks/exhaustive-deps */
+    });
+  };
+
+  useEffect(
+    () => {
+      onOpen();
+    },
+    [] /* eslint-disable-line react-hooks/exhaustive-deps */
+  );
+
+  const [activeTab, setActiveTab] = useState<TabType>('configuration');
+
+  let flyoutContent: React.ReactNode;
+
+  if (activeTab === 'output') {
+    flyoutContent = (
+      <ProcessorOutput
+        processorOutput={processorOutput}
+        documents={documents!}
+        selectedDocumentIndex={selectedDocumentIndex}
+        updateSelectedDocument={updateSelectedDocument}
+      />
     );
-
-    const [activeTab, setActiveTab] = useState<TabType>('configuration');
-
-    let flyoutContent: React.ReactNode;
-
-    if (activeTab === 'output') {
-      flyoutContent = (
-        <ProcessorOutput
-          processorOutput={processorOutput}
-          documents={documents!}
-          selectedDocumentIndex={selectedDocumentIndex}
-          updateSelectedDocument={updateSelectedDocument}
-        />
-      );
-    } else {
-      flyoutContent = <ProcessorSettingsFields processor={processor} />;
-    }
-
-    return (
-      <Form data-test-subj="processorSettingsForm" form={form}>
-        <EuiFlyout size="m" maxWidth={720} onClose={onClose}>
-          <EuiFlyoutHeader>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem>
-                <div>
-                  <EuiTitle size="m">
-                    <h2>{getFlyoutTitle(isOnFailure, Boolean(processor))}</h2>
-                  </EuiTitle>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <FormDataProvider pathsToWatch="type">
-                  {({ type }) => {
-                    const formDescriptor = getProcessorDescriptor(type as any);
-
-                    if (formDescriptor) {
-                      return (
-                        <DocumentationButton
-                          processorLabel={formDescriptor.label}
-                          docLink={esDocsBasePath + formDescriptor.docLinkPath}
-                        />
-                      );
-                    }
-                    return null;
-                  }}
-                </FormDataProvider>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {processor ? (
-              <>
-                <EuiTabs>
-                  {tabs.map((tab) => (
-                    <EuiTab
-                      onClick={() => {
-                        setActiveTab(tab.id);
-                      }}
-                      isSelected={tab.id === activeTab}
-                      key={tab.id}
-                      data-test-subj={`${tab.id}Tab`}
-                      disabled={
-                        (tab.id === 'output' && Boolean(testOutputPerProcessor) === false) ||
-                        Boolean(processorOutput) === false
-                      }
-                    >
-                      {tab.name}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
-                <EuiSpacer />
-              </>
-            ) : undefined}
-
-            {flyoutContent}
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose}>{cancelButtonLabel}</EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill data-test-subj="submitButton" onClick={form.submit}>
-                  {processor ? updateButtonLabel : addButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      </Form>
+  } else {
+    flyoutContent = (
+      <ProcessorSettingsFields
+        processor={processor}
+        getDefaultProcessorOptions={getDefaultProcessorOptions}
+      />
     );
-  },
-  (previous, current) => {
-    return previous.processor === current.processor;
   }
-);
+
+  return (
+    <Form data-test-subj="processorSettingsForm" form={form} onSubmit={handleSubmit}>
+      <EuiFlyout
+        size="m"
+        maxWidth={720}
+        onClose={() => {
+          resetProcessors();
+          closeFlyout();
+        }}
+      >
+        <EuiFlyoutHeader>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem>
+              <div>
+                <EuiTitle size="m">
+                  <h2>{getFlyoutTitle(isOnFailure, Boolean(processor))}</h2>
+                </EuiTitle>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FormDataProvider pathsToWatch="type">
+                {({ type }) => {
+                  const formDescriptor = getProcessorDescriptor(type as any);
+
+                  if (formDescriptor) {
+                    return (
+                      <DocumentationButton
+                        processorLabel={formDescriptor.label}
+                        docLink={esDocsBasePath + formDescriptor.docLinkPath}
+                      />
+                    );
+                  }
+                  return null;
+                }}
+              </FormDataProvider>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {processor ? (
+            <>
+              <EuiTabs>
+                {tabs.map((tab) => (
+                  <EuiTab
+                    onClick={async () => {
+                      if (tab.id === 'output') {
+                        await handleSubmit(false);
+                      } else {
+                        form.reset({ defaultValue: getDefaultProcessorOptions() });
+                      }
+                      setActiveTab(tab.id);
+                    }}
+                    isSelected={tab.id === activeTab}
+                    key={tab.id}
+                    data-test-subj={`${tab.id}Tab`}
+                    disabled={
+                      (tab.id === 'output' && Boolean(testOutputPerProcessor) === false) ||
+                      Boolean(processorOutput) === false
+                    }
+                  >
+                    {tab.name}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+              <EuiSpacer />
+            </>
+          ) : undefined}
+
+          {flyoutContent}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => {
+                  resetProcessors();
+                  closeFlyout();
+                }}
+              >
+                {cancelButtonLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                data-test-subj="submitButton"
+                onClick={async () => {
+                  if (activeTab === 'output') {
+                    return closeFlyout();
+                  }
+                  await handleSubmit();
+                }}
+              >
+                {processor ? updateButtonLabel : addButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </Form>
+  );
+};

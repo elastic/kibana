@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useCallback, useEffect } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 
 import { useForm, OnFormUpdateArg, FormData, useKibana } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
@@ -24,34 +24,61 @@ interface Props {
   onOpen: () => void;
   onClose: () => void;
   processor?: ProcessorInternal;
+  formData?: Omit<ProcessorInternal, 'id'>;
 }
 
 export const ManageProcessorForm: FunctionComponent<Props> = ({
   processor,
   onFormUpdate,
   onSubmit,
+  formData,
+  onClose,
   ...rest
 }) => {
   const { services } = useKibana();
 
+  const getDefaultProcessorOptions = () => {
+    let defaultFields;
+
+    if (formData) {
+      const { options } = formData;
+      defaultFields = { fields: options };
+    } else {
+      defaultFields = { fields: processor?.options ?? {} };
+    }
+
+    return defaultFields;
+  };
+
+  const { form } = useForm({
+    defaultValue: getDefaultProcessorOptions(),
+  });
+
   const handleSubmit = useCallback(
-    async (data: FormData, isValid: boolean) => {
+    async (shouldCloseFlyout: boolean = true) => {
+      const { isValid, data } = await form.submit();
+
       if (isValid) {
-        const { type, customOptions, fields } = data;
+        const { type, customOptions, fields } = data as FormData;
         onSubmit({
           type,
           options: customOptions ? customOptions : fields,
         });
+
+        if (shouldCloseFlyout) {
+          onClose();
+        }
       }
     },
-    [onSubmit]
+    [form, onClose, onSubmit]
   );
 
-  const maybeProcessorOptions = processor?.options;
-  const { form } = useForm({
-    defaultValue: { fields: maybeProcessorOptions ?? {} },
-    onSubmit: handleSubmit,
-  });
+  const resetProcessors = () => {
+    onSubmit({
+      type: processor!.type,
+      options: processor?.options || {},
+    });
+  };
 
   useEffect(() => {
     const subscription = form.subscribe(onFormUpdate);
@@ -68,7 +95,11 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
       {...rest}
       processor={processor}
       form={form}
+      getDefaultProcessorOptions={getDefaultProcessorOptions}
       esDocsBasePath={services.documentation.getEsDocsBasePath()}
+      closeFlyout={onClose}
+      resetProcessors={resetProcessors}
+      handleSubmit={handleSubmit}
     />
   );
 };

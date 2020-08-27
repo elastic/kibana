@@ -16,9 +16,13 @@ import { Custom } from './processors/custom';
 
 export interface Props {
   processor?: ProcessorInternal;
+  getDefaultProcessorOptions: () => void;
 }
 
-export const ProcessorSettingsFields: FunctionComponent<Props> = ({ processor }) => {
+export const ProcessorSettingsFields: FunctionComponent<Props> = ({
+  processor,
+  getDefaultProcessorOptions,
+}) => {
   return (
     <>
       <ProcessorTypeField initialType={processor?.type} />
@@ -41,7 +45,7 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({ processor })
                 </>
               );
             }
-            return <Custom defaultOptions={processor?.options} />;
+            return <Custom defaultOptions={getDefaultProcessorOptions()} />;
           }
 
           // If the user has not yet defined a type, we do not show any settings fields

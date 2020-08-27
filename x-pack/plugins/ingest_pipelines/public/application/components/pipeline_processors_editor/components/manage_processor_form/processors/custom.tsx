@@ -74,7 +74,7 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
       path="customOptions"
       component={XJsonEditor}
       config={customConfig}
-      defaultValue={defaultOptions}
+      defaultValue={defaultOptions.fields}
       componentProps={{
         editorProps: {
           'data-test-subj': 'processorOptionsEditor',
