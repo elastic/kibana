@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import partition from 'lodash/partition';
 import { UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
 import { getFlattenedObject } from '../../../../../../src/core/public';
 
@@ -26,6 +27,13 @@ export function buildScope<
   };
 }
 
+/**
+ * Builds list of variables for suggestion from scope
+ * keys sorted alphabetically, except {{event.$}} variables are pulled to the top
+ * @param scope
+ */
 export function buildScopeSuggestions(scope: UrlDrilldownGlobalScope): string[] {
-  return Object.keys(getFlattenedObject(scope));
+  const allKeys = Object.keys(getFlattenedObject(scope)).sort();
+  const [eventKeys, otherKeys] = partition(allKeys, (key) => key.startsWith('event'));
+  return [...eventKeys, ...otherKeys];
 }

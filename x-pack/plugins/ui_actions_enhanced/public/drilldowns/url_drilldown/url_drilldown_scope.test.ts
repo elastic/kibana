@@ -41,12 +41,12 @@ test('buildScopeSuggestions', () => {
     )
   ).toMatchInlineSnapshot(`
     Array [
-      "kibanaUrl",
-      "context.filters",
-      "context.query.query",
-      "context.query.language",
       "event.key",
       "event.value",
+      "context.filters",
+      "context.query.language",
+      "context.query.query",
+      "kibanaUrl",
     ]
   `);
 });

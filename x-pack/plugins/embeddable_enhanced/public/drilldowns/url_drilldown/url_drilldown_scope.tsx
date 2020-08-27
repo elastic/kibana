@@ -122,7 +122,7 @@ interface ValueClickTriggerEventScope {
   negate: boolean;
 }
 interface RangeSelectTriggerEventScope {
-  key?: string;
+  key: string;
   from?: string | number;
   to?: string | number;
 }
@@ -147,7 +147,7 @@ async function getEventScopeFromRangeSelectTriggerContext(
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return cleanEmptyKeys({
-    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
   });
@@ -180,14 +180,14 @@ async function getEventScopeFromValueClickTriggerContext(
 export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventScope {
   if (trigger === SELECT_RANGE_TRIGGER) {
     return {
-      key: '__testKey__',
+      key: 'event.key',
       from: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
       to: new Date().toISOString(),
     };
   } else {
     return {
-      key: '__testKey__',
-      value: '__testValue__',
+      key: 'event.key',
+      value: 'event.value',
       negate: false,
     };
   }
