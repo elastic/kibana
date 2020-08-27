@@ -34,7 +34,7 @@ const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
-expect.addSnapshotSerializer(createReplaceSerializer(/yarn run v[\d\.]+/g, 'yarn run <version>'));
+expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 beforeEach(async () => {
@@ -47,28 +47,31 @@ afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 it('builds a generated plugin into a viable archive', async () => {
   const generateProc = await execa(
     process.execPath,
-    [require.resolve('../../../../scripts/generate_plugin'), '-y', '--name', 'fooTestPlugin'],
+    ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
       cwd: REPO_ROOT,
+      all: true,
     }
   );
 
-  expect(generateProc.stdout).toMatchInlineSnapshot(`
+  expect(generateProc.all).toMatchInlineSnapshot(`
     " succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
     "
   `);
 
-  const buildProc = await execa('yarn', ['build', '--kibana-version', '7.5.0'], {
-    cwd: PLUGIN_DIR,
-  });
+  const buildProc = await execa(
+    process.execPath,
+    ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
+    {
+      cwd: PLUGIN_DIR,
+      all: true,
+    }
+  );
 
-  expect(buildProc.stdout).toMatchInlineSnapshot(`
-    "yarn run <version>
-    $ yarn plugin-helpers build --kibana-version 7.5.0
-    $ node ../../scripts/plugin_helpers build --kibana-version 7.5.0
-     info deleting the build and target directories
+  expect(buildProc.all).toMatchInlineSnapshot(`
+    " info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
@@ -77,15 +80,16 @@ it('builds a generated plugin into a viable archive', async () => {
      info running yarn to install dependencies
 
 
+    yarn install <version>
     info No lockfile found.
     [1/4] Resolving packages...
     [2/4] Fetching packages...
     [3/4] Linking dependencies...
     [4/4] Building fresh packages...
+    Done in <time>.
 
 
-     info compressing plugin into [fooTestPlugin-7.5.0.zip]
-    Done in <time>."
+     info compressing plugin into [fooTestPlugin-7.5.0.zip]"
   `);
 
   await decompress(PLUGIN_ARCHIVE, TMP_DIR);
