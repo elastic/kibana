@@ -125,6 +125,7 @@ function NumberIntervalParamEditor({
             onChange={onAutoSwitchChange}
             checked={autoChecked}
             compressed
+            data-test-subj={`visEditorIntervalSwitch${agg.id}`}
           />
         </EuiFlexItem>
         <EuiFlexItem>

@@ -49,6 +49,7 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
 export interface AggParamsHistogram extends BaseAggParams {
   field: string;
   interval: string;
+  maxBars?: number;
   intervalBase?: number;
   min_doc_count?: boolean;
   has_extended_bounds?: boolean;
