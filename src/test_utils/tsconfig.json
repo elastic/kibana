@@ -9,5 +9,8 @@
   },
   "include": [
     "."
+  ],
+  "exclude": [
+    "target"
   ]
 }
