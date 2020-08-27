@@ -120,8 +120,7 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
           }
         />
       }
-    >
-    </EuiConfirmModal>
+    />
   </EuiOverlayMask>
 </div>
 `;
