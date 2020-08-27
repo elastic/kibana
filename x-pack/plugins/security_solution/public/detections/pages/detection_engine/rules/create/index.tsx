@@ -310,6 +310,7 @@ const CreateRulePageComponent: React.FC = () => {
             extraAction={
               stepsData.current[RuleStep.defineRule].isValid && (
                 <EuiButtonEmpty
+                  data-test-subj="edit-define-rule"
                   iconType="pencil"
                   size="xs"
                   onClick={manageIsEditable.bind(null, RuleStep.defineRule)}
@@ -343,6 +344,7 @@ const CreateRulePageComponent: React.FC = () => {
             extraAction={
               stepsData.current[RuleStep.aboutRule].isValid && (
                 <EuiButtonEmpty
+                  data-test-subj="edit-about-rule"
                   iconType="pencil"
                   size="xs"
                   onClick={manageIsEditable.bind(null, RuleStep.aboutRule)}
