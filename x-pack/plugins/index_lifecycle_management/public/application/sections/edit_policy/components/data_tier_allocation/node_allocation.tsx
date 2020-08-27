@@ -32,13 +32,9 @@ const learnMoreLink = (
 );
 
 interface Props<T extends Phase> {
-  phase: keyof Phases & string;
-  errors?: PhaseValidationErrors<T>;
-  phaseData: T;
-  setPhaseData: (dataKey: keyof T & string, value: string) => void;
-  isShowingErrors: boolean;
   nodes: ListNodesRouteResponse['nodesByAttributes'];
 }
+
 export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
   phase,
   setPhaseData,

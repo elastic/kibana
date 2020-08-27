@@ -7,4 +7,4 @@
 export interface ListNodesRouteResponse {
   nodesByAttributes: { [attributePair: string]: string[] };
   nodesByRoles: { [roles: string]: string[] };
-};
+}

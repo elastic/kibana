@@ -6,6 +6,8 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { ListNodesRouteResponse } from '../../../common/types';
+
 import {
   UIM_POLICY_DELETE,
   UIM_POLICY_ATTACH_INDEX,
@@ -23,10 +25,10 @@ interface GenericObject {
 }
 
 export const useLoadNodes = () => {
-  return useRequest({
+  return useRequest<ListNodesRouteResponse>({
     path: `nodes/list`,
     method: 'get',
-    initialData: [],
+    initialData: { nodesByAttributes: {}, nodesByRoles: {} } as ListNodesRouteResponse,
   });
 };
 

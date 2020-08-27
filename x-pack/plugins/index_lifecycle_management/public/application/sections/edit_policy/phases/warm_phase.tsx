@@ -26,7 +26,7 @@ import {
   ErrableFormRow,
   SetPriorityInput,
   MinAgeInput,
-  CustomDataTierAllocation,
+  DataTierAllocation,
   DescribedFormField,
 } from '../components';
 
@@ -153,7 +153,7 @@ export class WarmPhase extends PureComponent<Props> {
 
         {phaseData.phaseEnabled ? (
           <Fragment>
-            <DescribedFormField
+            <EuiDescribedFormGroup
               title={
                 <h3>
                   {i18n.translate(
@@ -166,31 +166,18 @@ export class WarmPhase extends PureComponent<Props> {
                 'xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationDescription',
                 { defaultMessage: 'Allocate warm phase data to nodes in the cluster.' }
               )}
-              switchProps={{
-                initialValue: Boolean(phaseData.allocationType),
-                onChange: (v) => {
-                  if (!v) {
-                    setPhaseData('allocationType', undefined);
-                  }
-                },
-                label: i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocation.switchLabel',
-                  { defaultMessage: 'Customize data tier allocation' }
-                ),
-              }}
               fullWidth
             >
               <EuiFormRow>
-                <CustomDataTierAllocation
+                <DataTierAllocation
                   phase={warmProperty}
                   setPhaseData={setPhaseData}
                   errors={errors}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
-                  defaultAllocationValue="custom-allocation"
                 />
               </EuiFormRow>
-            </DescribedFormField>
+            </EuiDescribedFormGroup>
             <DescribedFormField
               title={
                 <h3>
