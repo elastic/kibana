@@ -152,7 +152,7 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
     updateCriterion: updateDenominatorCriterion,
     addCriterion: addDenominatorCriterion,
     removeCriterion: removeDenominatorCriterion,
-  } = useCriteriaState(criteria[0], handleUpdateDenominatorCriteria);
+  } = useCriteriaState(criteria[1], handleUpdateDenominatorCriteria);
 
   return (
     <>
