@@ -12,11 +12,15 @@ import {
   ALERT_TYPES_CONFIG,
   TRANSACTION_ALERT_AGGREGATION_TYPES,
 } from '../../../../common/alert_types';
-import { ALL_OPTION, useEnvironments } from '../../../hooks/useEnvironments';
+import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../../common/environment_filter_values';
 
 interface Params {
   windowSize: number;
@@ -54,7 +58,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     windowSize: 5,
     windowUnit: 'm',
     transactionType: transactionTypes[0],
-    environment: ALL_OPTION.value,
+    environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
   const params = {
@@ -64,11 +68,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const fields = [
     <PopoverExpression
-      value={
-        params.environment === ALL_OPTION.value
-          ? ALL_OPTION.text
-          : params.environment
-      }
+      value={getEnvironmentLabel(params.environment)}
       title={i18n.translate(
         'xpack.apm.transactionDurationAlertTrigger.environment',
         {
