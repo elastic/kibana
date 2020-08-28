@@ -141,6 +141,43 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodyToCompare).to.eql(getSimpleRuleOutput('rule-1'));
       });
 
+      it('should fail validation when importing a rule with malformed "from" params on the rules', async () => {
+        const stringifiedRule = JSON.stringify({
+          from: 'now-3755555555555555.67s',
+          interval: '5m',
+          ...getSimpleRule('rule-1'),
+        });
+        const fileNdJson = Buffer.from(stringifiedRule + '\n');
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', fileNdJson, 'rules.ndjson')
+          .expect(200);
+
+        expect(body.errors[0].error.message).to.eql('Failed to parse "from" on rule param');
+      });
+
+      it('should fail validation when importing two rules and one has a malformed "from" params', async () => {
+        const stringifiedRule = JSON.stringify({
+          from: 'now-3755555555555555.67s',
+          interval: '5m',
+          ...getSimpleRule('rule-1'),
+        });
+        const stringifiedRule2 = JSON.stringify({
+          ...getSimpleRule('rule-2'),
+        });
+        const fileNdJson = Buffer.from([stringifiedRule, stringifiedRule2].join('\n'));
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', fileNdJson, 'rules.ndjson')
+          .expect(200);
+
+        // should result in one success and a failure message
+        expect(body.success_count).to.eql(1);
+        expect(body.errors[0].error.message).to.eql('Failed to parse "from" on rule param');
+      });
+
       it('should be able to import two rules', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
