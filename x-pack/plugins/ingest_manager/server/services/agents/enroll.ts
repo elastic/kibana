@@ -20,7 +20,8 @@ export async function enroll(
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
-  validateAgentVersion(metadata);
+  const agentVersion = metadata?.local?.elastic?.agent?.version;
+  validateAgentVersion(agentVersion);
 
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
@@ -89,18 +90,21 @@ async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId
   return null;
 }
 
-export function validateAgentVersion(metadata?: { local: any; userProvided: any }) {
-  const kibanaVersion = semver.parse(appContextService.getKibanaVersion());
-  if (!kibanaVersion) {
-    throw Boom.badRequest('Kibana version is not set');
+export function validateAgentVersion(
+  agentVersion: string,
+  kibanaVersion = appContextService.getKibanaVersion()
+) {
+  const agentVersionParsed = semver.parse(agentVersion);
+  if (!agentVersionParsed) {
+    throw Boom.badRequest('Agent version not provided');
   }
 
-  const agentVersion = semver.parse(metadata?.local?.elastic?.agent?.version);
-  if (!agentVersion) {
-    throw Boom.badRequest('Agent version not provided in metadata.');
+  const kibanaVersionParsed = semver.parse(kibanaVersion);
+  if (!kibanaVersionParsed) {
+    throw Boom.badRequest('Kibana version is not set or provided');
   }
 
-  const diff = semver.diff(agentVersion.raw, kibanaVersion.raw);
+  const diff = semver.diff(agentVersion, kibanaVersion);
   switch (diff) {
     // section 1) very close versions, only patch release differences - all combos should work
     // Agent a.b.1 < Kibana a.b.2
@@ -116,14 +120,17 @@ export function validateAgentVersion(metadata?: { local: any; userProvided: any 
     // Agent a.9.x < Kibana a.11.x
     case 'preminor':
     case 'minor':
-      if (agentVersion.minor < kibanaVersion.minor && kibanaVersion.minor - agentVersion.minor <= 2)
+      if (
+        agentVersionParsed.minor < kibanaVersionParsed.minor &&
+        kibanaVersionParsed.minor - agentVersionParsed.minor <= 2
+      )
         return;
 
     // section 3) versions where Agent is a minor version or major version greater (newer) than the stack should not work:
     // Agent 7.10.x > Kibana 7.9.x
     // Agent 8.0.x > Kibana 7.9.x
     default:
-      if (semver.lte(agentVersion, kibanaVersion)) return;
+      if (semver.lte(agentVersionParsed, kibanaVersionParsed)) return;
       else throw Boom.badRequest('Agent version is not compatible with kibana version');
   }
 }
