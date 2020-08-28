@@ -13,8 +13,5 @@
     "src/plugins/data/server/index.ts",
     "src/plugins/data/public/index.ts",
     "typings"
-  ],
-   "references": [
-     { "path": "./src/test_utils" }
-   ]
+  ]
 }
