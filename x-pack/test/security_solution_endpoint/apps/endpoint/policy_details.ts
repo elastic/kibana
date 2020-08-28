@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const config = getService('config');
   const kbnTestServer = config.get('servers.kibana');
-  const { protocol, hostname, port } = config.get('servers.kibana');
+  const { protocol, hostname, port } = kbnTestServer;
 
   const kibanaUrl = Url.format({
     protocol,
