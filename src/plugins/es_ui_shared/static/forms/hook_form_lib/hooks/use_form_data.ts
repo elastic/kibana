@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { FormData, FormHook } from '../types';
 import { useFormDataContext, Context } from '../form_data_context';
@@ -26,11 +26,7 @@ interface Options {
   form?: FormHook<any>;
 }
 
-export type HookReturn<T extends object = FormData> = [
-  FormData,
-  FormHook<T>['getFormData'],
-  boolean
-];
+export type HookReturn<T extends object = FormData> = [FormData, () => T, boolean];
 
 export const useFormData = <T extends object = FormData>(options: Options = {}): HookReturn<T> => {
   const { watch, form } = options;
@@ -55,6 +51,14 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
   const previousRawData = useRef<FormData>(initialValue);
   const isMounted = useRef(false);
   const [formData, setFormData] = useState<FormData>(previousRawData.current);
+
+  // Create a new instance of the "formatFormData()" handler whenever the "formData" state changes
+  // so the consumer can interchangeably declare the "formData" state or the "format()" handler as
+  // dependency in his useEffect().
+  // This is the reason why we disable the react-hooks/exhaustive-deps rule
+  const formatFormData = useCallback(() => {
+    return getFormData({ unflatten: true });
+  }, [formData, getFormData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
@@ -84,8 +88,8 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
 
   if (!isMounted.current && Object.keys(formData).length === 0) {
     // No field has mounted yet
-    return [formData, getFormData, false];
+    return [formData, formatFormData, false];
   }
 
-  return [formData, getFormData, true];
+  return [formData, formatFormData, true];
 };
