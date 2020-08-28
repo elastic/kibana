@@ -18,7 +18,7 @@ import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { useResolverQueryParams } from './use_resolver_query_params';
+import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -242,7 +242,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const { pushToQueryParams } = useResolverQueryParams();
+    const pushToQueryParams = useReplaceBreadcrumbParameters();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current?.beginElement) {

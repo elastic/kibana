@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useQueryStringKeys } from './use_query_string_keys';
 import { CrumbInfo } from '../types';
 
-export function useResolverQueryParams() {
+/**
+ * @deprecated
+ * Update the browser's `search` with data from `queryStringState`. The URL search parameter names
+ * will include Resolver's `resolverComponentInstanceID`.
+ */
+export function useReplaceBreadcrumbParameters(): (queryStringState: CrumbInfo) => void {
   /**
    * This updates the breadcrumb nav and the panel view. It's supplied to each
    * panel content view to allow them to dispatch transitions to each other.
@@ -17,7 +22,7 @@ export function useResolverQueryParams() {
   const history = useHistory();
   const urlSearch = useLocation().search;
   const { idKey, eventKey } = useQueryStringKeys();
-  const pushToQueryParams = useCallback(
+  return useCallback(
     (queryStringState: CrumbInfo) => {
       const urlSearchParams = new URLSearchParams(urlSearch);
 
@@ -39,17 +44,4 @@ export function useResolverQueryParams() {
     },
     [history, urlSearch, idKey, eventKey]
   );
-  const queryParams: CrumbInfo = useMemo(() => {
-    const urlSearchParams = new URLSearchParams(urlSearch);
-    return {
-      // Use `''` for backwards compatibility with deprecated code.
-      crumbEvent: urlSearchParams.get(eventKey) ?? '',
-      crumbId: urlSearchParams.get(idKey) ?? '',
-    };
-  }, [urlSearch, idKey, eventKey]);
-
-  return {
-    pushToQueryParams,
-    queryParams,
-  };
 }
