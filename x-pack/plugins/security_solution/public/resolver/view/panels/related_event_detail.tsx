@@ -16,7 +16,7 @@ import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
-import { CrumbInfo } from '../../types';
+import { CrumbInfo, ResolverState } from '../../types';
 
 // Adding some styles to prevent horizontal scrollbars, per request from UX review
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
@@ -126,9 +126,8 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     relatedEventCategory = naString,
     sections,
     formattedDate,
-  ] = useSelector(selectors.relatedEventDisplayInfoByEntityAndSelfId)(
-    processEntityId,
-    relatedEventId
+  ] = useSelector((state: ResolverState) =>
+    selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(processEntityId, relatedEventId)
   );
 
   const waitCrumbs = useMemo(() => {
