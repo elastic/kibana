@@ -152,13 +152,15 @@ export class AlertingPlugin {
       );
     }
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
-
-    this.eventLogService = plugins.eventLog;
-    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
+
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.logger);
+
+    this.eventLogService = plugins.eventLog;
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    
 
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,

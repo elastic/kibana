@@ -6,16 +6,22 @@
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
+import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import {
+  Logger
+} from '../../../../../src/core/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  logger: Logger
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'single',
+    migrations: getMigrations(encryptedSavedObjects, logger),
     mappings: mappings.alert,
   });
 
