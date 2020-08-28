@@ -94,19 +94,36 @@ export function validateAgentVersion(metadata?: { local: any; userProvided: any 
   if (!kibanaVersion) {
     throw Boom.badRequest('Kibana version is not set');
   }
-  const version = semver.parse(metadata?.local?.elastic?.agent?.version);
-  if (!version) {
+
+  const agentVersion = semver.parse(metadata?.local?.elastic?.agent?.version);
+  if (!agentVersion) {
     throw Boom.badRequest('Agent version not provided in metadata.');
   }
 
-  if (!version || !semver.lte(formatVersion(version), formatVersion(kibanaVersion))) {
-    throw Boom.badRequest('Agent version is not compatible with kibana version');
-  }
-}
+  const diff = semver.diff(agentVersion.raw, kibanaVersion.raw);
+  switch (diff) {
+    // section 1) very close versions, only patch release differences - all combos should work
+    // Agent a.b.1 < Kibana a.b.2
+    // Agent a.b.2 > Kibana a.b.1
+    case null:
+    case 'prerelease':
+    case 'prepatch':
+    case 'patch':
+      return; // OK
 
-/**
- * used to remove prelease from version as includePrerelease in not working as expected
- */
-function formatVersion(version: semver.SemVer) {
-  return `${version.major}.${version.minor}.${version.patch}`;
+    // section 2) somewhat close versions, Agent minor release is 1 or 2 versions back and is older than the stack:
+    // Agent a.9.x < Kibana a.10.x
+    // Agent a.9.x < Kibana a.11.x
+    case 'preminor':
+    case 'minor':
+      if (agentVersion.minor < kibanaVersion.minor && kibanaVersion.minor - agentVersion.minor <= 2)
+        return;
+
+    // section 3) versions where Agent is a minor version or major version greater (newer) than the stack should not work:
+    // Agent 7.10.x > Kibana 7.9.x
+    // Agent 8.0.x > Kibana 7.9.x
+    default:
+      if (semver.lte(agentVersion, kibanaVersion)) return;
+      else throw Boom.badRequest('Agent version is not compatible with kibana version');
+  }
 }
