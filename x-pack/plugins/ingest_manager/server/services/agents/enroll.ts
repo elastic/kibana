@@ -131,6 +131,9 @@ export function validateAgentVersion(
     // Agent 8.0.x > Kibana 7.9.x
     default:
       if (semver.lte(agentVersionParsed, kibanaVersionParsed)) return;
-      else throw Boom.badRequest('Agent version is not compatible with kibana version');
+      else
+        throw Boom.badRequest(
+          `Agent version ${agentVersion} is not compatible with kibana version ${kibanaVersion}`
+        );
   }
 }
