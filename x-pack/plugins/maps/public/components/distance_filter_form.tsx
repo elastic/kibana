@@ -14,18 +14,25 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 import { GeoFieldWithIndex } from './geo_field_with_index';
+import { ActionSelect } from './action_select';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 
 interface Props {
   className?: string;
   buttonLabel: string;
   geoFields: GeoFieldWithIndex[];
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
   onSubmit: ({
+    actionId,
     filterLabel,
     indexPatternId,
     geoFieldName,
   }: {
+    actionId: string;
     filterLabel: string;
     indexPatternId: string;
     geoFieldName: string;
@@ -33,12 +40,14 @@ interface Props {
 }
 
 interface State {
+  actionId: string;
   selectedField: GeoFieldWithIndex | undefined;
   filterLabel: string;
 }
 
 export class DistanceFilterForm extends Component<Props, State> {
-  state = {
+  state: State = {
+    actionId: ACTION_GLOBAL_APPLY_FILTER,
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     filterLabel: '',
   };
@@ -53,11 +62,16 @@ export class DistanceFilterForm extends Component<Props, State> {
     });
   };
 
+  _onActionIdChange = (value: string) => {
+    this.setState({ actionId: value });
+  };
+
   _onSubmit = () => {
     if (!this.state.selectedField) {
       return;
     }
     this.props.onSubmit({
+      actionId: this.state.actionId,
       filterLabel: this.state.filterLabel,
       indexPatternId: this.state.selectedField.indexPatternId,
       geoFieldName: this.state.selectedField.geoFieldName,
@@ -84,6 +98,13 @@ export class DistanceFilterForm extends Component<Props, State> {
           selectedField={this.state.selectedField}
           fields={this.props.geoFields}
           onChange={this._onGeoFieldChange}
+        />
+
+        <ActionSelect
+          getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
+          value={this.state.actionId}
+          onChange={this._onActionIdChange}
         />
 
         <EuiSpacer size="m" />
