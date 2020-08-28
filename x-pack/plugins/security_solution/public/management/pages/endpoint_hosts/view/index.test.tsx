@@ -28,12 +28,6 @@ import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_u
 
 jest.mock('../../../../common/components/link_to');
 
-// jest.mock('./hooks', () => ({
-//   useEndpointSelector: () => ({
-//     autoRefreshInterval: 10,
-//   })
-// }));
-
 describe('when on the list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -252,7 +246,6 @@ describe('when on the list page', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75721
   describe('when polling on Endpoint List', () => {
     beforeEach(() => {
       reactTestingLibrary.act(() => {
