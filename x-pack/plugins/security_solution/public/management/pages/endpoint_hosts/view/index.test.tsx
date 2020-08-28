@@ -247,9 +247,10 @@ describe('when on the list page', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/75721
-  describe.skip('when polling on Endpoint List', () => {
-    beforeEach(async () => {
-      await reactTestingLibrary.act(() => {
+  describe('when polling on Endpoint List', () => {
+    beforeEach(() => {
+      jest.setTimeout(100000);
+      reactTestingLibrary.act(() => {
         const hostListData = mockEndpointResultList({ total: 4 }).hosts;
 
         setEndpointListApiMockImplementation(coreStart.http, {
