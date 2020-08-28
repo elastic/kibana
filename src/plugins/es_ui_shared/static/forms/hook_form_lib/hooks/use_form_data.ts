@@ -52,13 +52,9 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
   const isMounted = useRef(false);
   const [formData, setFormData] = useState<FormData>(previousRawData.current);
 
-  // Create a new instance of the "formatFormData()" handler whenever the "formData" state changes
-  // so the consumer can interchangeably declare the "formData" state or the "format()" handler as
-  // dependency in his useEffect().
-  // This is the reason why we disable the react-hooks/exhaustive-deps rule
   const formatFormData = useCallback(() => {
     return getFormData({ unflatten: true });
-  }, [formData, getFormData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getFormData]);
 
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
