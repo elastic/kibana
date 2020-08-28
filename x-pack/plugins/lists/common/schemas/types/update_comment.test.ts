@@ -32,6 +32,7 @@ describe('CommentsUpdate', () => {
 
     test('it should fail validation when supplied an undefined for "comment"', () => {
       const payload = getUpdateCommentMock();
+      // @ts-expect-error
       delete payload.comment;
       const decoded = updateComment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
