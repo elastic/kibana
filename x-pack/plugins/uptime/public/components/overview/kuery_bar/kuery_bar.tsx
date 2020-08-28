@@ -15,6 +15,7 @@ import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from './use_index_pattern';
 
@@ -55,7 +56,7 @@ export function KueryBar({
     services: {
       data: { autocomplete },
     },
-  } = useKibana();
+  } = useKibana<{ data: DataPublicPluginStart }>();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -102,8 +103,8 @@ export function KueryBar({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
-          selectionStart,
-          selectionEnd: selectionStart,
+          selectionStart: selectionStart || 0,
+          selectionEnd: selectionStart || 0,
           boolFilter: [
             {
               range: {

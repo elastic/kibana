@@ -918,8 +918,6 @@ export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor(id: string | undefined, { savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, shortDotsEnable, metaFields, }: IndexPatternDeps);
     // (undocumented)
-    [key: string]: any;
-    // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
@@ -978,6 +976,8 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     initFromSpec(spec: IndexPatternSpec): this;
     // (undocumented)
+    intervalName: string | undefined;
+    // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
     isTimeBasedWildcard(): boolean;
@@ -991,7 +991,14 @@ export class IndexPattern implements IIndexPattern {
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)
     prepBody(): {
-        [key: string]: any;
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: string | undefined;
+        fields: string | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: string | undefined;
     };
     // (undocumented)
     refreshFields(): Promise<void | Error | never[] | undefined>;
@@ -999,6 +1006,10 @@ export class IndexPattern implements IIndexPattern {
     removeScriptedField(fieldName: string): Promise<void | Error>;
     // (undocumented)
     save(saveAttempts?: number): Promise<void | Error>;
+    // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    sourceFilters?: SourceFilter[];
     // (undocumented)
     timeFieldName: string | undefined;
     // (undocumented)
@@ -1009,6 +1020,8 @@ export class IndexPattern implements IIndexPattern {
     toSpec(): IndexPatternSpec;
     // (undocumented)
     toString(): string;
+    // (undocumented)
+    type: string | undefined;
     // (undocumented)
     typeMeta?: IndexPatternTypeMeta;
     }

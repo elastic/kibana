@@ -9,12 +9,18 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   const VECTOR_SOURCE_ID = '67c1de2c-2fc5-4425-8983-094b589afe61';
 
   describe('point to point source', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_maps_all', 'geoconnections_data_reader']);
       await PageObjects.maps.loadSavedMap('pew pew demo');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should request source clusters for destination locations', async () => {
