@@ -40,17 +40,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
       );
 
+      await PageObjects.common.sleep(50000);
+
       // create drilldown
       await dashboardPanelActions.openContextMenu();
+      // console.log('open context menu--111');
+      await PageObjects.common.sleep(10000);
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
+      // console.log('open context menu---222');
+      await PageObjects.common.sleep(100001);
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
+      // console.log('open context menu---333');
+      await PageObjects.common.sleep(10002);
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
+      // console.log('open context menu---444');
+      await PageObjects.common.sleep(10003);
       await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
         drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
         destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
       });
 
+      await PageObjects.common.sleep(10000);
       await dashboardDrilldownsManage.saveChanges();
+      await PageObjects.common.sleep(10000);
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
 
       // check that drilldown notification badge is shown

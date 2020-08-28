@@ -19,7 +19,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('dashboard/drilldowns');
+      // await esArchiver.unload('dashboard/drilldowns');
     });
 
     loadTestFile(require.resolve('./dashboard_drilldowns'));

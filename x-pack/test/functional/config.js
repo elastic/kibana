@@ -248,13 +248,14 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 dashboard: ['all'],
-                saved_objects: ['all'],
-                indexPatterns: ['all'],
+                //saved_objects: ['all'],
+                //indexPatterns: ['all'],
               },
               spaces: ['*'],
             },
           ],
         },
+
         global_visualize_read: {
           kibana: [
             {
