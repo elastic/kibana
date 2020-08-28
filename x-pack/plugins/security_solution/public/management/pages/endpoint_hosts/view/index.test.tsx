@@ -28,6 +28,12 @@ import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_u
 
 jest.mock('../../../../common/components/link_to');
 
+// jest.mock('./hooks', () => ({
+//   useEndpointSelector: () => ({
+//     autoRefreshInterval: 10,
+//   })
+// }));
+
 describe('when on the list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -249,7 +255,6 @@ describe('when on the list page', () => {
   // FLAKY: https://github.com/elastic/kibana/issues/75721
   describe('when polling on Endpoint List', () => {
     beforeEach(() => {
-      jest.setTimeout(100000);
       reactTestingLibrary.act(() => {
         const hostListData = mockEndpointResultList({ total: 4 }).hosts;
 
@@ -257,11 +262,10 @@ describe('when on the list page', () => {
           endpointsResults: hostListData,
         });
 
-        const pollInterval = 10;
         store.dispatch({
           type: 'userUpdatedEndpointListRefreshOptions',
           payload: {
-            autoRefreshInterval: pollInterval,
+            autoRefreshInterval: 100,
           },
         });
       });
