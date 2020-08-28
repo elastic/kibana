@@ -25,76 +25,42 @@ project {
 
 
   features {
+    val agent = { x: ProjectFeature.() -> Unit ->
+      val y = ProjectFeature {
+        id = "yadda"
+        x()
+      }
+    }
+    // https://kotlinlang.org/docs/reference/type-safe-builders.html
 
-    feature {
-      id = "KIBANA_BRIANSEEDERS_STANDARD_16"
-      type = "CloudImage"
-      param("subnet", "teamcity")
-      param("growingId", "true")
-      param("agent_pool_id", "-2")
-      param("sourceProject", "elastic-kibana-184716")
+    val sizes = listOf("2", "4", "8", "16")
+
+    for (size in sizes) {
+      feature {
+        id = "KIBANA_BRIANSEEDERS_STANDARD_${size}"
+        type = "CloudImage"
+        param("subnet", "teamcity")
+        param("growingId", "true")
+        param("agent_pool_id", "-2")
+        param("sourceProject", "elastic-kibana-184716")
 //      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
-      param("source-id", "kibana-standard-16-")
-      param("network", "teamcity")
-      param("preemptible", "false")
+        param("source-id", "kibana-standard-${size}-")
+        param("network", "teamcity")
+        param("preemptible", "false")
 //      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
 //      param("sourceImageFamily", "kibana-teamcity-dev-agents")
-      param("sourceImageFamily", "kibana-ci-elastic-dev")
-      param("zone", "us-central1-a")
-      param("profileId", "kibana-brianseeders")
-      param("diskType", "pd-ssd")
-      param("machineCustom", "false")
-      param("maxInstances", "20")
-      param("imageType", "ImageFamily")
-      param("machineType", "n2-standard-16")
-      param("diskSizeGb", "")
+        param("sourceImageFamily", "kibana-ci-elastic-dev")
+        param("zone", "us-central1-a")
+        param("profileId", "kibana-brianseeders")
+        param("diskType", "pd-ssd")
+        param("machineCustom", "false")
+        param("maxInstances", "20")
+        param("imageType", "ImageFamily")
+        param("machineType", "n2-standard-${size}")
+        param("diskSizeGb", "")
+      }
     }
-    feature {
-      id = "KIBANA_BRIANSEEDERS_STANDARD_4"
-      type = "CloudImage"
-      param("subnet", "teamcity")
-      param("growingId", "true")
-      param("agent_pool_id", "-2")
-      param("sourceProject", "elastic-kibana-184716")
-//      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
-      param("source-id", "kibana-standard-4-")
-      param("network", "teamcity")
-      param("preemptible", "false")
-//      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
-//      param("sourceImageFamily", "kibana-teamcity-dev-agents")
-      param("sourceImageFamily", "kibana-ci-elastic-dev")
-      param("zone", "us-central1-a")
-      param("profileId", "kibana-brianseeders")
-      param("diskType", "pd-ssd")
-      param("machineCustom", "false")
-      param("maxInstances", "20")
-      param("imageType", "ImageFamily")
-      param("machineType", "n2-standard-4")
-      param("diskSizeGb", "")
-    }
-    feature {
-      id = "KIBANA_BRIANSEEDERS_STANDARD_2"
-      type = "CloudImage"
-      param("subnet", "teamcity")
-      param("growingId", "true")
-      param("agent_pool_id", "-2")
-      param("sourceProject", "elastic-kibana-184716")
-//      param("source-id", "elastic-kibana-ci-ubuntu-1804-lts-")
-      param("source-id", "kibana-standard-2-")
-      param("network", "teamcity")
-      param("preemptible", "false")
-//      param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
-//      param("sourceImageFamily", "kibana-teamcity-dev-agents")
-      param("sourceImageFamily", "kibana-ci-elastic-dev")
-      param("zone", "us-central1-a")
-      param("profileId", "kibana-brianseeders")
-      param("diskType", "pd-ssd")
-      param("machineCustom", "false")
-      param("maxInstances", "20")
-      param("imageType", "ImageFamily")
-      param("machineType", "n2-standard-2")
-      param("diskSizeGb", "")
-    }
+
     feature {
       id = "kibana-brianseeders"
       type = "CloudProfile"

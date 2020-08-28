@@ -8,6 +8,10 @@ object Jest : BuildType({
   paused = true
   description = "Executes Jest Unit Tests"
 
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-8-", "RQ_AGENT_NAME")
+  }
+
   steps {
     script {
       name = "Jest Unit"

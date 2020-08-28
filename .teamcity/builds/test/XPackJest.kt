@@ -8,6 +8,10 @@ object XPackJest : BuildType({
   paused = true
   description = "Executes X-Pack Jest Unit Tests"
 
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-standard-8-", "RQ_AGENT_NAME")
+  }
+
   steps {
     script {
       name = "X-Pack Jest Unit"
