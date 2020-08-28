@@ -4,6 +4,6 @@
     "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-telemetry-tools"
   },
   "include": [
-    "src"
+    "src/**/*",
   ]
 }

@@ -8,7 +8,7 @@
     "declarationMap": true
   },
   "include": [
-    "."
+    "public/**/*"
   ],
   "exclude": [
     "target"

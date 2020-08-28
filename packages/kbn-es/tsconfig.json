@@ -4,6 +4,6 @@
     "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-es"
   },
   "include": [
-    "src"
+    "src/**/*"
   ]
 }

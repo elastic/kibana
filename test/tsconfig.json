@@ -9,8 +9,9 @@
     ]
   },
   "include": [
-    ".",
+    "**/*",
     "../typings/elastic__node_crypto.d.ts",
+    "typings/**/*"
   ],
   "exclude": [
     "plugin_functional/plugins/**/*",

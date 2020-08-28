@@ -12,7 +12,7 @@
     ]
   },
   "include": [
-    "src"
+    "src/**/*"
   ],
   "exclude": [
     "target"
