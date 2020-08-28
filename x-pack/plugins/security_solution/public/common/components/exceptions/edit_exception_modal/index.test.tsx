@@ -77,6 +77,7 @@ describe('When the edit exception modal is opened', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={[]}
+            ruleId="123"
             ruleName={ruleName}
             exceptionListType={'endpoint'}
             onCancel={jest.fn()}
@@ -105,6 +106,7 @@ describe('When the edit exception modal is opened', () => {
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
               ruleIndices={['filebeat-*']}
+              ruleId="123"
               ruleName={ruleName}
               exceptionListType={'endpoint'}
               onCancel={jest.fn()}
@@ -147,6 +149,7 @@ describe('When the edit exception modal is opened', () => {
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
               ruleIndices={['filebeat-*']}
+              ruleId="123"
               ruleName={ruleName}
               exceptionListType={'endpoint'}
               onCancel={jest.fn()}
@@ -190,6 +193,7 @@ describe('When the edit exception modal is opened', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
+            ruleId="123"
             ruleName={ruleName}
             exceptionListType={'detection'}
             onCancel={jest.fn()}
@@ -229,6 +233,7 @@ describe('When the edit exception modal is opened', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
+            ruleId="123"
             ruleName={ruleName}
             exceptionListType={'detection'}
             onCancel={jest.fn()}
