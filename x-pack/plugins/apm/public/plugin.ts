@@ -145,8 +145,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/ErrorRateAlertTrigger')
+      alertParamsExpression: lazy(
+        () => import('./components/shared/ErrorRateAlertTrigger')
       ),
       validate: () => ({
         errors: [],
@@ -160,8 +160,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/TransactionDurationAlertTrigger')
+      alertParamsExpression: lazy(
+        () => import('./components/shared/TransactionDurationAlertTrigger')
       ),
       validate: () => ({
         errors: [],
@@ -175,8 +175,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Transaction duration anomaly',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/TransactionDurationAnomalyAlertTrigger')
+      alertParamsExpression: lazy(
+        () =>
+          import('./components/shared/TransactionDurationAnomalyAlertTrigger')
       ),
       validate: () => ({
         errors: [],
