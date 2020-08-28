@@ -33,6 +33,7 @@ describe('kibana_usage_collection', () => {
   const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));
 
   const usageCollectors: CollectorOptions[] = [];
+  const monitoring = undefined;
 
   const usageCollection = createUsageCollectionSetupMock();
   usageCollection.makeUsageCollector.mockImplementation((opts) => {
@@ -47,7 +48,7 @@ describe('kibana_usage_collection', () => {
   test('Runs the setup method without issues', () => {
     const coreSetup = coreMock.createSetup();
 
-    expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
+    expect(pluginInstance.setup(coreSetup, { usageCollection, monitoring })).toBe(undefined);
     usageCollectors.forEach(({ isReady }) => {
       expect(isReady()).toMatchSnapshot(); // Some should return false at this stage
     });
