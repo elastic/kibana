@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 
 import { EuiTabbedContent } from '@elastic/eui';
-
+import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import moment from 'moment-timezone';
@@ -35,8 +35,10 @@ interface Props {
   item: TransformListRow;
 }
 
+type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
+
 export const ExpandedRow: FC<Props> = ({ item }) => {
-  const stateValues = { ...item.stats };
+  const stateValues: StateValues = { ...item.stats };
   delete stateValues.stats;
   delete stateValues.checkpointing;
 
