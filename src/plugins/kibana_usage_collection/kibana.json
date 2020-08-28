@@ -6,5 +6,7 @@
   "requiredPlugins": [
     "usageCollection"
   ],
-  "optionalPlugins": []
+  "optionalPlugins": [
+    "monitoring"
+  ]
 }

@@ -149,7 +149,11 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config);
+      const getMetrics = async () => {
+        const coreStart = (await core.getStartServices())[0];
+        return coreStart.metrics.getOpsMetrics$();
+      };
+      registerCollectors(plugins.usageCollection, config, getMetrics);
     }
 
     // Always create the bulk uploader

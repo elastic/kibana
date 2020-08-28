@@ -42,6 +42,7 @@ import {
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
+  monitoring: any;
 }
 
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
@@ -57,8 +58,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.metric$ = new Subject<OpsMetrics>();
   }
 
-  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
-    this.registerUsageCollectors(usageCollection, coreSetup, this.metric$, (opts) =>
+  public setup(
+    coreSetup: CoreSetup,
+    { usageCollection, monitoring }: KibanaUsageCollectionPluginsDepsSetup
+  ) {
+    this.registerUsageCollectors(usageCollection, !!monitoring, coreSetup, this.metric$, (opts) =>
       coreSetup.savedObjects.registerType(opts)
     );
   }
@@ -77,6 +81,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
+    monitoringEnabled: boolean,
     coreSetup: CoreSetup,
     metric$: Subject<OpsMetrics>,
     registerType: SavedObjectsRegisterType
@@ -84,7 +89,9 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
 
-    registerOpsStatsCollector(usageCollection, metric$);
+    if (!monitoringEnabled) {
+      registerOpsStatsCollector(usageCollection, metric$);
+    }
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
