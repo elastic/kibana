@@ -24,6 +24,7 @@ import {
   CoreStart,
   Plugin,
   Logger,
+  IClusterClient,
 } from '../../../core/server';
 
 import {
@@ -107,10 +108,7 @@ export class TelemetryCollectionManagerPlugin
         throw Error('esCluster name must be set for the getCluster method.');
       }
       if (!esClientGetter) {
-        this.logger.warn(
-          `esClient getter method returns ${esClientGetter} for ${title} collection.`
-        );
-        throw Error('esClient getter method not set.');
+        throw Error('esClientGetter metod not set.');
       }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');
@@ -141,8 +139,24 @@ export class TelemetryCollectionManagerPlugin
     const callCluster = config.unencrypted
       ? collection.esCluster.asScoped(request).callAsCurrentUser
       : collection.esCluster.callAsInternalUser;
+    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
+    // Question: Do we need to add it? Now we have two clients, the legacy and new client.
+    const esClient = this.getScopedEsClientIfNeeded(collection.esClientGetter, config);
 
-    return { callCluster, start, end, usageCollection };
+    return { callCluster, start, end, usageCollection, esClient };
+  }
+
+  // not sure if we need to use the new client to get the stats collection config just yet.
+  private getScopedEsClientIfNeeded(
+    esClientGetter: () => IClusterClient | undefined,
+    config: StatsGetterConfig
+  ) {
+    if (esClientGetter() !== undefined) {
+      return config.unencrypted
+        ? esClientGetter()!.asScoped(config.request).asCurrentUser
+        : esClientGetter()!.asInternalUser;
+    }
+    return undefined;
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {

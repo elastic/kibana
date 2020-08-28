@@ -23,6 +23,7 @@ import {
   KibanaRequest,
   ILegacyClusterClient,
   IClusterClient,
+  ElasticsearchClient,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
@@ -73,6 +74,7 @@ export interface StatsCollectionConfig {
   callCluster: LegacyAPICaller;
   start: string | number;
   end: string | number;
+  esClient?: ElasticsearchClient;
 }
 
 export interface BasicStatsPayload {
