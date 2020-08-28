@@ -24,7 +24,6 @@ import {
   Field,
   Forms,
   JsonEditorField,
-  FormDataProvider,
 } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';

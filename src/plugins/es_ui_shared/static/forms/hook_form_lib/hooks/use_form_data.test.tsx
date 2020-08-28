@@ -93,7 +93,6 @@ describe('useFormData() hook', () => {
   });
 
   describe('format form data', () => {
-    let testBed: TestBed;
     let onChangeSpy: jest.Mock;
 
     const getLastMockValue = () => {
@@ -118,11 +117,11 @@ describe('useFormData() hook', () => {
 
     beforeEach(() => {
       onChangeSpy = jest.fn();
-      testBed = setup({ onChange: onChangeSpy }) as TestBed;
+      setup({ onChange: onChangeSpy });
     });
 
     test('should expose a handler to build the form data', () => {
-      const [_, format] = getLastMockValue();
+      const { 1: format } = getLastMockValue();
       expect(format()).toEqual({
         user: {
           firstName: 'John',
