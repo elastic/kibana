@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getFieldFormatsRegistry } from '../../../../../src/plugins/data/public/test_utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { setSetupServices, setStartServices } from './set_services';
