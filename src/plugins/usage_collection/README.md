@@ -63,7 +63,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async (callCluster: APICluster) => {
+        fetch: async (callCluster: APICluster, esClient: IClusterClient) => {
 
         // query ES and get some data
         // summarize the data into a model

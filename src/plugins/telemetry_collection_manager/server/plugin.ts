@@ -140,23 +140,12 @@ export class TelemetryCollectionManagerPlugin
       ? collection.esCluster.asScoped(request).callAsCurrentUser
       : collection.esCluster.callAsInternalUser;
     // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    // Question: Do we need to add it? Now we have two clients, the legacy and new client.
-    const esClient = this.getScopedEsClientIfNeeded(collection.esClientGetter, config);
+    // Problem: I need a Scopeable request to pass to asScoped.
+    const esClient = config.unencrypted
+      ? collection.esClientGetter()!.asScoped(config.request).asCurrentUser
+      : collection.esClientGetter()!.asInternalUser;
 
     return { callCluster, start, end, usageCollection, esClient };
-  }
-
-  // not sure if we need to use the new client to get the stats collection config just yet.
-  private getScopedEsClientIfNeeded(
-    esClientGetter: () => IClusterClient | undefined,
-    config: StatsGetterConfig
-  ) {
-    if (esClientGetter() !== undefined) {
-      return config.unencrypted
-        ? esClientGetter()!.asScoped(config.request).asCurrentUser
-        : esClientGetter()!.asInternalUser;
-    }
-    return undefined;
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
@@ -213,29 +202,33 @@ export class TelemetryCollectionManagerPlugin
     if (!this.usageCollection) {
       return [];
     }
-    for (const collection of this.collections) {
-      const statsCollectionConfig = this.getStatsCollectionConfig(
-        config,
-        collection,
-        this.usageCollection
-      );
-      try {
-        const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-        if (usageData.length) {
-          this.logger.debug(`Got Usage using ${collection.title} collection.`);
-          if (config.unencrypted) {
-            return usageData;
-          }
+    // call the esClientGetter and check if it returns undefined.
 
-          return encryptTelemetry(usageData.filter(isClusterOptedIn), {
-            useProdKey: this.isDistributable,
-          });
-        }
-      } catch (err) {
-        this.logger.debug(
-          `Failed to collect any usage with registered collection ${collection.title}.`
+    for (const collection of this.collections) {
+      if (collection.esClientGetter() !== undefined) {
+        const statsCollectionConfig = this.getStatsCollectionConfig(
+          config,
+          collection,
+          this.usageCollection
         );
-        // swallow error to try next collection;
+        try {
+          const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
+          if (usageData.length) {
+            this.logger.debug(`Got Usage using ${collection.title} collection.`);
+            if (config.unencrypted) {
+              return usageData;
+            }
+
+            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+              useProdKey: this.isDistributable,
+            });
+          }
+        } catch (err) {
+          this.logger.debug(
+            `Failed to collect any usage with registered collection ${collection.title}.`
+          );
+          // swallow error to try next collection;
+        }
       }
     }
 

@@ -24,6 +24,7 @@ import {
   ILegacyClusterClient,
   IClusterClient,
   ElasticsearchClient,
+  ScopeableRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
