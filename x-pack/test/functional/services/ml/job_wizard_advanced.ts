@@ -6,11 +6,11 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommon } from './common';
+import { MlCommonUI } from './common_ui';
 
 export function MachineLearningJobWizardAdvancedProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon
+  mlCommonUI: MlCommonUI
 ) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
@@ -54,7 +54,7 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async setQueryDelay(queryDelay: string) {
-      await mlCommon.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
+      await mlCommonUI.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -74,7 +74,7 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async setFrequency(frequency: string) {
-      await mlCommon.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
+      await mlCommonUI.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -94,7 +94,7 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async setScrollSize(scrollSize: string) {
-      await mlCommon.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
+      await mlCommonUI.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -303,7 +303,7 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async setDetectorDescription(description: string) {
-      await mlCommon.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
+      await mlCommonUI.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
       });
       await this.assertDetectorDescriptionValue(description);

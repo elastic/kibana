@@ -18,10 +18,11 @@
  */
 
 import { findIndex } from 'lodash';
-import { IFieldType, shortenDottedString } from '../../../common';
+import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
 import { OnNotification, FieldSpec } from '../types';
 import { IndexPattern } from '../index_patterns';
+import { shortenDottedString } from '../../utils';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
@@ -63,7 +64,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     indexPattern: IndexPattern,
     specs: FieldSpec[] = [],
     shortDotsEnable = false,
-    onNotification = () => {}
+    onNotification: OnNotification = () => {}
   ) {
     super();
     this.indexPattern = indexPattern;

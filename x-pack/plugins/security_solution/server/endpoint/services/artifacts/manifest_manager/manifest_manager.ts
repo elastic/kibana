@@ -6,7 +6,7 @@
 import semver from 'semver';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
-import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
+import { PackagePolicyServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
@@ -30,7 +30,7 @@ export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: ArtifactClient;
   exceptionListClient: ExceptionListClient;
-  packageConfigService: PackageConfigServiceInterface;
+  packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
   cache: LRU<string, Buffer>;
 }
@@ -47,7 +47,7 @@ export interface ManifestSnapshot {
 export class ManifestManager {
   protected artifactClient: ArtifactClient;
   protected exceptionListClient: ExceptionListClient;
-  protected packageConfigService: PackageConfigServiceInterface;
+  protected packagePolicyService: PackagePolicyServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
@@ -56,7 +56,7 @@ export class ManifestManager {
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
-    this.packageConfigService = context.packageConfigService;
+    this.packagePolicyService = context.packagePolicyService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
     this.cache = context.cache;
@@ -217,7 +217,7 @@ export class ManifestManager {
   }
 
   /**
-   * Dispatches the manifest by writing it to the endpoint package config, if different
+   * Dispatches the manifest by writing it to the endpoint package policy, if different
    * from the manifest already in the config.
    *
    * @param manifest The Manifest to dispatch.
@@ -234,39 +234,39 @@ export class ManifestManager {
     const errors: Error[] = [];
 
     while (paging) {
-      const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
+      const { items, total } = await this.packagePolicyService.list(this.savedObjectsClient, {
         page,
         perPage: 20,
         kuery: 'ingest-package-policies.package.name:endpoint',
       });
 
-      for (const packageConfig of items) {
+      for (const packagePolicy of items) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
-        if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
-          const oldManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
+        const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
+        if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
+          const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
             value: {},
           };
 
           const newManifestVersion = manifest.getSemanticVersion();
           if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-            newPackageConfig.inputs[0].config.artifact_manifest = {
+            newPackagePolicy.inputs[0].config.artifact_manifest = {
               value: serializedManifest,
             };
 
             try {
-              await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
+              await this.packagePolicyService.update(this.savedObjectsClient, id, newPackagePolicy);
               this.logger.debug(
-                `Updated package config ${id} with manifest version ${manifest.getSemanticVersion()}`
+                `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
               );
             } catch (err) {
               errors.push(err);
             }
           } else {
-            this.logger.debug(`No change in package config: ${id}`);
+            this.logger.debug(`No change in package policy: ${id}`);
           }
         } else {
-          errors.push(new Error(`Package config ${id} has no config.`));
+          errors.push(new Error(`Package Policy ${id} has no config.`));
         }
       }
       paging = (page - 1) * 20 + items.length < total;

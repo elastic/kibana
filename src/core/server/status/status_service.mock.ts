@@ -39,6 +39,7 @@ const availableCoreStatus: CoreStatus = {
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<StatusServiceSetup> = {
     core$: new BehaviorSubject(availableCoreStatus),
+    overall$: new BehaviorSubject(available),
   };
 
   return setupContract;

@@ -52,6 +52,7 @@ describe('read_endpoint_list_item_schema', () => {
     const payload: ReadEndpointListItemSchema & {
       namespace_type: string;
     } = { ...getReadEndpointListItemSchemaMock(), namespace_type: 'single' };
+    // @ts-expect-error
     delete payload.namespace_type;
     const decoded = readEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

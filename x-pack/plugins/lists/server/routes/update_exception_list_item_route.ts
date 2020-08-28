@@ -54,39 +54,46 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           namespace_type: namespaceType,
           tags,
         } = request.body;
-        const exceptionLists = getExceptionListClient(context);
-        const exceptionListItem = await exceptionLists.updateExceptionListItem({
-          _tags,
-          _version,
-          comments,
-          description,
-          entries,
-          id,
-          itemId,
-          meta,
-          name,
-          namespaceType,
-          tags,
-          type,
-        });
-        if (exceptionListItem == null) {
-          if (id != null) {
-            return siemResponse.error({
-              body: `list item id: "${id}" not found`,
-              statusCode: 404,
-            });
-          } else {
-            return siemResponse.error({
-              body: `list item item_id: "${itemId}" not found`,
-              statusCode: 404,
-            });
-          }
+        if (id == null && itemId == null) {
+          return siemResponse.error({
+            body: 'either id or item_id need to be defined',
+            statusCode: 404,
+          });
         } else {
-          const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          const exceptionLists = getExceptionListClient(context);
+          const exceptionListItem = await exceptionLists.updateExceptionListItem({
+            _tags,
+            _version,
+            comments,
+            description,
+            entries,
+            id,
+            itemId,
+            meta,
+            name,
+            namespaceType,
+            tags,
+            type,
+          });
+          if (exceptionListItem == null) {
+            if (id != null) {
+              return siemResponse.error({
+                body: `exception list item id: "${id}" does not exist`,
+                statusCode: 404,
+              });
+            } else {
+              return siemResponse.error({
+                body: `exception list item item_id: "${itemId}" does not exist`,
+                statusCode: 404,
+              });
+            }
           } else {
-            return response.ok({ body: validated ?? {} });
+            const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         }
       } catch (err) {

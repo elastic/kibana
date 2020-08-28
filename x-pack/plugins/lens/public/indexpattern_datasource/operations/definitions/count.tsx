@@ -26,7 +26,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: field.name,
+      label: field.displayName,
       sourceField: field.name,
     };
   },

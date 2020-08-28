@@ -129,12 +129,12 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     query,
     timeRange,
     filters,
-    refresh,
+    forceRefresh,
   }: {
     query?: Query;
     timeRange?: TimeRange;
     filters: Filter[];
-    refresh?: boolean;
+    forceRefresh?: boolean;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
@@ -144,7 +144,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
-        refresh,
+        forceRefresh,
       })
     );
   }
@@ -270,7 +270,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
       filters: this._prevFilters ?? [],
-      refresh: true,
+      forceRefresh: true,
     });
   }
 

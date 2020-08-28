@@ -44,8 +44,15 @@ describe('Lists', () => {
       expect(message.schema).toEqual(payload);
     });
 
+<<<<<<< HEAD
     test('it should validate a list with an "id"', () => {
       const payload = getListMockWithId();
+=======
+    test('it should NOT validate a list without an "id"', () => {
+      const payload = getListMock();
+      // @ts-expect-error
+      delete payload.id;
+>>>>>>> 69599e0b49ef44f174247adaa49f74bafc1c8735
       const decoded = list.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -55,6 +62,7 @@ describe('Lists', () => {
 
     test('it should NOT validate a list without "namespace_type"', () => {
       const payload = getListMock();
+      // @ts-expect-error
       delete payload.namespace_type;
       const decoded = list.decode(payload);
       const message = pipe(decoded, foldLeftRight);

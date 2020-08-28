@@ -22,7 +22,7 @@ import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-import { UI_SETTINGS } from '../../';
+import { UI_SETTINGS } from '../../constants';
 
 /**
  * Remove all of the whitespace between html tags

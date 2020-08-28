@@ -184,6 +184,12 @@ describe('BasicAuthenticationProvider', () => {
       );
     });
 
+    it('redirects to login view if state is `null`.', async () => {
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
+      );
+    });
+
     it('always redirects to the login page.', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')

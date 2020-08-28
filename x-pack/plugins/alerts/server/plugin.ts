@@ -38,6 +38,7 @@ import {
   findAlertRoute,
   getAlertRoute,
   getAlertStateRoute,
+  getAlertStatusRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -57,16 +58,17 @@ import {
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 
-const EVENT_LOG_PROVIDER = 'alerting';
+export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
   resolvedInstance: 'resolved-instance',
+  activeInstance: 'active-instance',
 };
 
 export interface PluginSetupContract {
@@ -92,6 +94,7 @@ export interface AlertingPluginsStart {
   taskManager: TaskManagerStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
+  eventLog: IEventLogClientService;
 }
 
 export class AlertingPlugin {
@@ -189,6 +192,7 @@ export class AlertingPlugin {
     findAlertRoute(router, this.licenseState);
     getAlertRoute(router, this.licenseState);
     getAlertStateRoute(router, this.licenseState);
+    getAlertStatusRoute(router, this.licenseState);
     listAlertTypesRoute(router, this.licenseState);
     updateAlertRoute(router, this.licenseState);
     enableAlertRoute(router, this.licenseState);
@@ -235,6 +239,7 @@ export class AlertingPlugin {
       },
       actions: plugins.actions,
       features: plugins.features,
+      eventLog: plugins.eventLog,
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {

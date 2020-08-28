@@ -12,9 +12,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
+import reduce from 'lodash/reduce';
+import each from 'lodash/each';
+import get from 'lodash/get';
 import d3 from 'd3';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
 import {
   getSeverityWithLow,
@@ -48,8 +52,6 @@ import {
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation,
 } from './timeseries_chart_annotations';
-
-import { i18n } from '@kbn/i18n';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -399,7 +401,7 @@ class TimeseriesChartIntl extends Component {
     if (zoomFrom) {
       focusLoadFrom = zoomFrom.getTime();
     } else {
-      focusLoadFrom = _.reduce(
+      focusLoadFrom = reduce(
         combinedData,
         (memo, point) => Math.min(memo, point.date.getTime()),
         new Date(2099, 12, 31).getTime()
@@ -410,11 +412,7 @@ class TimeseriesChartIntl extends Component {
     if (zoomTo) {
       focusLoadTo = zoomTo.getTime();
     } else {
-      focusLoadTo = _.reduce(
-        combinedData,
-        (memo, point) => Math.max(memo, point.date.getTime()),
-        0
-      );
+      focusLoadTo = reduce(combinedData, (memo, point) => Math.max(memo, point.date.getTime()), 0);
     }
     focusLoadTo = Math.min(focusLoadTo, contextXMax);
 
@@ -431,7 +429,7 @@ class TimeseriesChartIntl extends Component {
         min: moment(new Date(contextXScaleDomain[0])),
         max: moment(contextXScaleDomain[1]),
       };
-      if (!_.isEqual(newSelectedBounds, this.selectedBounds)) {
+      if (!isEqual(newSelectedBounds, this.selectedBounds)) {
         this.selectedBounds = newSelectedBounds;
         this.setContextBrushExtent(
           new Date(contextXScaleDomain[0]),
@@ -554,7 +552,7 @@ class TimeseriesChartIntl extends Component {
   renderFocusChart() {
     const {
       focusAggregationInterval,
-      focusAnnotationData,
+      focusAnnotationData: focusAnnotationDataOriginalPropValue,
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
@@ -566,6 +564,10 @@ class TimeseriesChartIntl extends Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
     } = this.props;
+
+    const focusAnnotationData = Array.isArray(focusAnnotationDataOriginalPropValue)
+      ? focusAnnotationDataOriginalPropValue
+      : [];
 
     if (focusChartData === undefined) {
       return;
@@ -764,7 +766,7 @@ class TimeseriesChartIntl extends Component {
       })
       .attr('class', (d) => {
         let markerClass = 'metric-value';
-        if (_.has(d, 'anomalyScore')) {
+        if (d.anomalyScore !== undefined) {
           markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
         }
         return markerClass;
@@ -887,14 +889,14 @@ class TimeseriesChartIntl extends Component {
       );
 
     const zoomOptions = [{ durationMs: autoZoomDuration, label: 'auto' }];
-    _.each(ZOOM_INTERVAL_OPTIONS, (option) => {
+    each(ZOOM_INTERVAL_OPTIONS, (option) => {
       if (option.duration.asSeconds() > minSecs && option.duration.asSeconds() < boundsSecs) {
         zoomOptions.push({ durationMs: option.duration.asMilliseconds(), label: option.label });
       }
     });
     xPos += zoomLabel.node().getBBox().width + 4;
 
-    _.each(zoomOptions, (option) => {
+    each(zoomOptions, (option) => {
       const text = zoomGroup
         .append('a')
         .attr('data-ms', option.durationMs)
@@ -960,7 +962,7 @@ class TimeseriesChartIntl extends Component {
     const combinedData =
       contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-    _.each(combinedData, (item) => {
+    each(combinedData, (item) => {
       valuesRange.min = Math.min(item.value, valuesRange.min);
       valuesRange.max = Math.max(item.value, valuesRange.max);
     });
@@ -973,7 +975,7 @@ class TimeseriesChartIntl extends Component {
       (contextForecastData !== undefined && contextForecastData.length > 0)
     ) {
       const boundsRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-      _.each(combinedData, (item) => {
+      each(combinedData, (item) => {
         boundsRange.min = Math.min(item.lower, boundsRange.min);
         boundsRange.max = Math.max(item.upper, boundsRange.max);
       });
@@ -1294,7 +1296,7 @@ class TimeseriesChartIntl extends Component {
     if (swimlaneData !== undefined && swimlaneData.length > 0) {
       // Adjust the earliest back to the time of the first swimlane point
       // if this is before the time filter minimum.
-      earliest = Math.min(_.first(swimlaneData).date.getTime(), bounds.min.valueOf());
+      earliest = Math.min(swimlaneData[0].date.getTime(), bounds.min.valueOf());
     }
 
     const contextAggMs = contextAggregationInterval.asMilliseconds();
@@ -1352,7 +1354,7 @@ class TimeseriesChartIntl extends Component {
     const formattedDate = formatHumanReadableDateTimeSeconds(marker.date);
     const tooltipData = [{ label: formattedDate }];
 
-    if (_.has(marker, 'anomalyScore')) {
+    if (marker.anomalyScore !== undefined) {
       const score = parseInt(marker.anomalyScore);
       const displayScore = score > 0 ? score : '< 1';
       tooltipData.push({
@@ -1387,7 +1389,7 @@ class TimeseriesChartIntl extends Component {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
         // Exposing those values in the tooltip with actual/typical labels might irritate users.
-        if (_.has(marker, 'actual') && marker.function !== 'rare') {
+        if (marker.actual !== undefined && marker.function !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           tooltipData.push({
@@ -1421,7 +1423,7 @@ class TimeseriesChartIntl extends Component {
             },
             valueAccessor: 'value',
           });
-          if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
+          if (marker.byFieldName !== undefined && marker.numberOfCauses !== undefined) {
             const numberOfCauses = marker.numberOfCauses;
             // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
             const byFieldName = mlEscape(marker.byFieldName);
@@ -1488,7 +1490,7 @@ class TimeseriesChartIntl extends Component {
       }
     } else {
       // TODO - need better formatting for small decimals.
-      if (_.get(marker, 'isForecast', false) === true) {
+      if (get(marker, 'isForecast', false) === true) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.predictionLabel',
@@ -1548,7 +1550,7 @@ class TimeseriesChartIntl extends Component {
       }
     }
 
-    if (_.has(marker, 'scheduledEvents')) {
+    if (marker.scheduledEvents !== undefined) {
       marker.scheduledEvents.forEach((scheduledEvent, i) => {
         tooltipData.push({
           label: i18n.translate(
@@ -1569,7 +1571,7 @@ class TimeseriesChartIntl extends Component {
       });
     }
 
-    if (_.has(marker, 'annotation')) {
+    if (marker.annotation !== undefined) {
       tooltipData.length = 0;
       // header
       tooltipData.push({

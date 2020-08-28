@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import { ControlsTab, ControlsTabUiProps } from './controls_tab';

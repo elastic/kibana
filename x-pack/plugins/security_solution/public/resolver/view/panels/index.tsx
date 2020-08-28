@@ -220,7 +220,7 @@ PanelContent.displayName = 'PanelContent';
 
 export const Panel = memo(function Event({ className }: { className?: string }) {
   return (
-    <EuiPanel className={className} data-test-subj="resolver:panel">
+    <EuiPanel className={className}>
       <PanelContent />
     </EuiPanel>
   );

@@ -61,7 +61,7 @@ function relativeToAbsolute(url: string): string {
 }
 
 let emsClient: EMSClient | null = null;
-let latestLicenseId: string | null = null;
+let latestLicenseId: string | undefined;
 export function getEMSClient(): EMSClient {
   if (!emsClient) {
     const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
@@ -93,7 +93,7 @@ export function getEMSClient(): EMSClient {
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
-    emsClient.addQueryParams({ license: licenseId });
+    emsClient.addQueryParams({ license: licenseId ? licenseId : '' });
   }
   return emsClient;
 }

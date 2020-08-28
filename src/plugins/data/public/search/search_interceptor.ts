@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
-import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
+import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
+import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
@@ -29,38 +30,42 @@ import { SearchUsageCollector } from './collectors';
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
 export interface SearchInterceptorDeps {
-  toasts: ToastsStart;
-  application: ApplicationStart;
-  http: CoreStart['http'];
-  uiSettings: CoreStart['uiSettings'];
+  toasts: ToastsSetup;
+  http: CoreSetup['http'];
+  uiSettings: CoreSetup['uiSettings'];
+  startServices: Promise<[CoreStart, any, unknown]>;
   usageCollector?: SearchUsageCollector;
 }
 
 export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
+   *  @internal
    */
   protected abortController = new AbortController();
 
   /**
-   * The number of pending search requests.
-   */
-  protected pendingCount = 0;
-
-  /**
    * Observable that emits when the number of pending requests changes.
+   * @internal
    */
-  protected pendingCount$ = new BehaviorSubject(this.pendingCount);
+  protected pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
+   * @internal
    */
   protected timeoutSubscriptions: Subscription = new Subscription();
 
   /**
    * The current long-running toast (if there is one).
+   * @internal
    */
   protected longRunningToast?: Toast;
+
+  /**
+   * @internal
+   */
+  protected application!: CoreStart['application'];
 
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
@@ -75,6 +80,10 @@ export class SearchInterceptor {
   ) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
+    this.deps.startServices.then(([coreStart]) => {
+      this.application = coreStart.application;
+    });
+
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
     this.getPendingCount$()
@@ -86,26 +95,32 @@ export class SearchInterceptor {
    * Returns an `Observable` over the current number of pending searches. This could mean that one
    * of the search requests is still in flight, or that it has only received partial responses.
    */
-  public getPendingCount$ = () => {
+  public getPendingCount$() {
     return this.pendingCount$.asObservable();
-  };
+  }
 
   protected runSearch(
     request: IEsSearchRequest,
-    signal: AbortSignal
+    signal: AbortSignal,
+    strategy?: string
   ): Observable<IEsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = id != null ? `/internal/search/es/${id}` : '/internal/search/es';
-    const method = 'POST';
-    const body = JSON.stringify(id != null ? {} : searchRequest);
-    const response = this.deps.http.fetch({ path, method, body, signal });
-    return from(response);
+    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
+    const body = JSON.stringify(searchRequest);
+    return from(
+      this.deps.http.fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      })
+    );
   }
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
+   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
    */
   public search(
     request: IEsSearchRequest,
@@ -118,11 +133,11 @@ export class SearchInterceptor {
       }
 
       const { combinedSignal, cleanup } = this.setupTimers(options);
-      this.pendingCount$.next(++this.pendingCount);
+      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-      return this.runSearch(request, combinedSignal).pipe(
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         finalize(() => {
-          this.pendingCount$.next(--this.pendingCount);
+          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
           cleanup();
         })
       );
@@ -166,13 +181,16 @@ export class SearchInterceptor {
     };
   }
 
+  /**
+   *  @internal
+   */
   protected showToast = () => {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {
         title: 'Your query is taking a while',
         text: getLongQueryNotification({
-          application: this.deps.application,
+          application: this.application,
         }),
       },
       {
@@ -181,6 +199,9 @@ export class SearchInterceptor {
     );
   };
 
+  /**
+   *  @internal
+   */
   protected hideToast = () => {
     if (this.longRunningToast) {
       this.deps.toasts.remove(this.longRunningToast);
@@ -191,3 +212,5 @@ export class SearchInterceptor {
     }
   };
 }
+
+export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

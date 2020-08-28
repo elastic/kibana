@@ -15,10 +15,7 @@ import React, {
   useRef,
 } from 'react';
 
-import { NotificationsSetup } from 'src/core/public';
-
 import { Processor } from '../../../../../common/types';
-import { ApiService } from '../../../services';
 
 import {
   EditorMode,
@@ -27,7 +24,6 @@ import {
   OnUpdateHandlerArg,
   ContextValue,
   ContextValueState,
-  Links,
   ProcessorInternal,
 } from '../types';
 
@@ -48,12 +44,11 @@ import {
 
 import { getValue } from '../utils';
 
+import { useTestPipelineContext } from './test_pipeline_context';
+
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
 export interface Props {
-  links: Links;
-  api: ApiService;
-  toasts: NotificationsSetup['toasts'];
   value: {
     processors: Processor[];
     onFailure?: Processor[];
@@ -66,9 +61,6 @@ export interface Props {
 }
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
-  links,
-  api,
-  toasts,
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
   onFlyoutOpen,
@@ -88,6 +80,12 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     [originalProcessors, originalOnFailureProcessors]
   );
   const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
+
+  const { updateTestOutputPerProcessor, testPipelineData } = useTestPipelineContext();
+
+  const {
+    config: { documents },
+  } = testPipelineData;
 
   useEffect(() => {
     if (initRef.current) {
@@ -130,8 +128,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       },
       getData: () =>
         serialize({
-          onFailure: onFailureProcessors,
-          processors,
+          pipeline: {
+            onFailure: onFailureProcessors,
+            processors,
+          },
         }),
     });
   }, [processors, onFailureProcessors, onUpdate, formState, mode]);
@@ -193,7 +193,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           break;
       }
     },
-    [processorsDispatch, setMode]
+    [processorsDispatch]
   );
 
   // Memoize the state object to ensure we do not trigger unnecessary re-renders and so
@@ -208,12 +208,15 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     };
   }, [mode, setMode, processorsState, processorsDispatch]);
 
+  // Update the test output whenever the processorsState changes (e.g., on move, update, delete)
+  // Note: updateTestOutputPerProcessor() will only simulate if the user has added sample documents
+  useEffect(() => {
+    updateTestOutputPerProcessor(documents, processorsState);
+  }, [documents, processorsState, updateTestOutputPerProcessor]);
+
   return (
     <PipelineProcessorsContext.Provider
       value={{
-        links,
-        api,
-        toasts,
         onTreeAction,
         state,
       }}

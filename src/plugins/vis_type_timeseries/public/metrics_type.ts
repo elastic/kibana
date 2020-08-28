@@ -25,6 +25,7 @@ import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -78,6 +79,9 @@ export const metricsVisDefinition = {
     showIndexSelection: false,
   },
   requestHandler: metricsRequestHandler,
+  getSupportedTriggers: () => {
+    return [VIS_EVENT_TO_TRIGGER.applyFilter];
+  },
   inspectorAdapters: {},
   responseHandler: 'none',
 };

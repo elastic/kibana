@@ -6,4 +6,4 @@
 
 export { installPipelines } from './install';
 
-export { deletePipelines, deletePipeline } from './remove';
+export { deletePreviousPipelines, deletePipeline } from './remove';
