@@ -35,10 +35,10 @@ export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => {
   const { getFormData, __getFormData$ } = form;
 
   return (
-    <FormProvider form={form}>
-      <FormDataContextProvider getFormData={getFormData} getFormData$={__getFormData$}>
+    <FormDataContextProvider getFormData={getFormData} getFormData$={__getFormData$}>
+      <FormProvider form={form}>
         <FormWrapper {...rest} />
-      </FormDataContextProvider>
-    </FormProvider>
+      </FormProvider>
+    </FormDataContextProvider>
   );
 };
