@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 // @ts-expect-error
 import { MBMap } from '../map/mb';
 // @ts-expect-error
@@ -37,7 +37,7 @@ const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
-  getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
+  getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   areLayersLoaded: boolean;
   cancelAllInFlightRequests: () => void;

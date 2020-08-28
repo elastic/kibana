@@ -116,8 +116,8 @@ export class FeatureProperties extends React.Component {
       id: 0,
       items: this.state.actions.map((action) => {
         const actionContext = this.props.getActionContext();
-        const iconType = action.getIconType ? action.getIconType(actionContext) : null;
-        const name = action.getDisplayName ? action.getDisplayName(actionContext) : action.id;
+        const iconType = action.getIconType(actionContext);
+        const name = action.getDisplayName(actionContext);
         return {
           name,
           icon: iconType ? <EuiIcon type={iconType} /> : null,

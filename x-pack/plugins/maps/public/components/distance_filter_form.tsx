@@ -14,7 +14,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 import { GeoFieldWithIndex } from './geo_field_with_index';
 import { ActionSelect } from './action_select';
@@ -24,7 +24,7 @@ interface Props {
   className?: string;
   buttonLabel: string;
   geoFields: GeoFieldWithIndex[];
-  getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
+  getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSubmit: ({
     actionId,

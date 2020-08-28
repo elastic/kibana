@@ -7,17 +7,17 @@
 import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, UiActionsActionDefinition } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 
 interface Props {
   value?: string;
   onChange: (value: string) => void;
-  getFilterActions?: () => Promise<UiActionsActionDefinition[]>;
+  getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
 }
 
 interface State {
-  actions: UiActionsActionDefinition[];
+  actions: Action[];
 }
 
 export class ActionSelect extends Component<Props, State> {
@@ -56,13 +56,13 @@ export class ActionSelect extends Component<Props, State> {
 
     const actionContext = this.props.getActionContext();
     const options = this.state.actions.map((action) => {
-      const iconType = action.getIconType ? action.getIconType(actionContext) : null;
+      const iconType = action.getIconType(actionContext);
       return {
         value: action.id,
         inputDisplay: (
           <div>
             {iconType ? <EuiIcon className="mapActionSelectIcon" type={iconType} /> : null}
-            {action.getDisplayName ? action.getDisplayName(actionContext) : action.id}
+            {action.getDisplayName(actionContext)}
           </div>
         ),
       };
