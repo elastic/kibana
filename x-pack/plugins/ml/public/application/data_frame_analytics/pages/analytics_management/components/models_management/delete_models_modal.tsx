@@ -15,7 +15,6 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
 import { ModelItemFull } from './models_list';
