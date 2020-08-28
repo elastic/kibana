@@ -18,6 +18,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Kibana Home view', async () => {
+      await retry.waitFor(
+        'home page visible',
+        async () => await testSubjects.exists('homeApp')
+      ); /* confirm you're on the correct page and that it's loaded */
       await a11y.testAppSnapshot(); /* this expects that there are no failures found by axe */
     });
 
