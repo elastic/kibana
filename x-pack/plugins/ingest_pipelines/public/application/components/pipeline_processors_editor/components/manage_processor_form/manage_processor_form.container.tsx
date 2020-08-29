@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect } from 'react';
 
 import { useForm, OnFormUpdateArg, FormData, useKibana } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';

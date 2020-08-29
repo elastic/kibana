@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { Document } from '../../../types';
-import { TestPipelineConfig } from '../test_pipeline_flyout';
+import { TestPipelineConfig } from '../test_pipeline_flyout.container';
 
 interface Props {
   handleTestPipeline: (

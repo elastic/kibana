@@ -12,7 +12,7 @@ import { DocumentsDropdown } from '../documents_dropdown';
 import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
 import { AddDocumentsButton } from './add_documents_button';
 import { TestOutputButton } from './test_output_button';
-import { TestPipelineFlyout } from './test_pipeline_flyout';
+import { TestPipelineFlyout } from './test_pipeline_flyout.container';
 
 const i18nTexts = {
   testPipelineActionsLabel: i18n.translate(

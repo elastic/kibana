@@ -15,7 +15,7 @@ import { getUseField, Field, JsonEditorField, useKibana } from '../../../../../.
 const UseField = getUseField({ component: Field });
 
 interface Props {
-  validateAndTestPipeline: () => void;
+  validateAndTestPipeline: () => Promise<void>;
   isRunningTest: boolean;
   isSubmitButtonDisabled: boolean;
 }
