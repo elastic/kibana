@@ -13,10 +13,12 @@ import {
   HostsRequestOptions,
   HostsStrategyResponse,
 } from './hosts';
+import { NetworkQueries, NetworkTlsStrategyResponse, NetworkTlsRequestOptions } from './network';
+
 export * from './hosts';
 export type Maybe<T> = T | null;
 
-export type FactoryQueryTypes = HostsQueries;
+export type FactoryQueryTypes = HostsQueries | NetworkQueries;
 
 export interface Inspect {
   dsl: string[];
@@ -100,10 +102,14 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
+  : T extends NetworkQueries.tls
+  ? NetworkTlsStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
+  : T extends NetworkQueries.tls
+  ? NetworkTlsRequestOptions
   : never;
