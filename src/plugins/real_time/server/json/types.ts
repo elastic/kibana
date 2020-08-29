@@ -34,7 +34,7 @@ export interface RealTimeJsonDriver {
    * @param op Operation to be commited.
    * @param snapshot Up-to-date snapshot with the latest operation applied.
    */
-  commit<T>(type: string, id: string, op: Json1Operation, snapshot: T): Promise<void>;
+  commit(type: string, id: string, operation: RealTimeOperation, snapshot: object): Promise<void>;
 
   /**
    * Retrieve the latest snapshot of the document.
@@ -42,7 +42,7 @@ export interface RealTimeJsonDriver {
    * @param type Saved object type, i.e. "collection" name.
    * @param id Id of the saved object, i.e. ID of the document.
    */
-  getSnapshot<T>(type: string, id: string): Promise<T>;
+  getSnapshot(type: string, id: string): Promise<object>;
 
   /**
    * Get all the latest operations starting from "from" operations all the way
@@ -50,9 +50,9 @@ export interface RealTimeJsonDriver {
    *
    * @param type Saved object type, i.e. "collection" name.
    * @param id Id of the saved object, i.e. ID of the document.
-   * @param from Sequence number starting from which to fetch the operations.
+   * @param min Sequence number starting from which to fetch the operations.
    */
-  getOps(type: string, id: string, from: number): Promise<RealTimeOperation>;
+  getOps(type: string, id: string, min: number): Promise<RealTimeOperation[]>;
 }
 
 export interface RealTimeOperation {
