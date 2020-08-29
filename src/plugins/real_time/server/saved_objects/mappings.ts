@@ -17,19 +17,33 @@
  * under the License.
  */
 
-export const opsMappings = {
-  properties: {
-    type: {
-      type: 'keyword',
-    },
-    savedObjectId: {
-      type: 'keyword',
-    },
-    version: {
-      type: 'integer',
-    },
-    operation: {
-      type: 'object',
+import { SavedObjectsType } from 'src/core/server';
+
+export const opsSavedObjectType: SavedObjectsType = {
+  name: 'ops',
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    importableAndExportable: true,
+    icon: 'tokenObject',
+    getTitle: (savedObject) => JSON.stringify(savedObject.attributes.operation),
+    defaultSearchField: 'title',
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      type: {
+        type: 'keyword',
+      },
+      id: {
+        type: 'keyword',
+      },
+      version: {
+        type: 'integer',
+      },
+      operation: {
+        type: 'object',
+      },
     },
   },
 };

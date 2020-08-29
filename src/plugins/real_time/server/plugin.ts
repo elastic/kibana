@@ -24,7 +24,7 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/server';
-import { opsMappings } from './saved_objects';
+import { opsSavedObjectType } from './saved_objects';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface RealTimePluginSetupDependencies {}
@@ -58,18 +58,7 @@ export class RealTimePlugin
 
     const { savedObjects } = core;
 
-    savedObjects.registerType({
-      name: 'ops',
-      hidden: false,
-      namespaceType: 'single',
-      mappings: opsMappings,
-      management: {
-        importableAndExportable: true,
-        icon: 'tokenObject',
-        getTitle: (savedObject) => JSON.stringify(savedObject.attributes.operation),
-        defaultSearchField: 'title',
-      },
-    });
+    savedObjects.registerType(opsSavedObjectType);
 
     return {};
   }
