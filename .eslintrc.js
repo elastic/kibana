@@ -296,10 +296,7 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: [
-                  '(src|x-pack)/plugins/*/server/**/*',
-                  '!x-pack/plugins/apm/**/*', // https://github.com/elastic/kibana/issues/67210
-                ],
+                target: ['(src|x-pack)/plugins/*/server/**/*'],
                 from: ['(src|x-pack)/plugins/*/public/**/*'],
                 errorMessage: `Server code can not import from public, use a common directory.`,
               },
@@ -517,7 +514,7 @@ module.exports = {
         'packages/kbn-interpreter/tasks/**/*.js',
         'packages/kbn-interpreter/src/plugin/**/*.js',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
@@ -604,7 +601,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',

@@ -23,6 +23,10 @@ import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
+export interface SearchEnhancements {
+  defaultStrategy: string;
+}
+
 export interface ISearchOptions {
   /**
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
@@ -37,21 +41,37 @@ export interface ISearchSetup {
    * Extension point exposed for other plugins to register their own search
    * strategies.
    */
-  registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
+  registerSearchStrategy: <
+    SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  >(
+    name: string,
+    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
+  ) => void;
 
   /**
    * Used internally for telemetry
    */
   usage?: SearchUsage;
+
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
-export interface ISearchStart {
+export interface ISearchStart<
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+> {
   aggs: AggsStart;
   /**
    * Get other registered search strategies. For example, if a new strategy needs to use the
    * already-registered ES search strategy, it can use this function to accomplish that.
    */
-  getSearchStrategy: (name: string) => ISearchStrategy;
+  getSearchStrategy: (
+    name: string
+  ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
     request: IKibanaSearchRequest,
@@ -63,11 +83,14 @@ export interface ISearchStart {
  * Search strategy interface contains a search method that takes in a request and returns a promise
  * that resolves to a response.
  */
-export interface ISearchStrategy {
+export interface ISearchStrategy<
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+> {
   search: (
     context: RequestHandlerContext,
-    request: IEsSearchRequest,
+    request: SearchStrategyRequest,
     options?: ISearchOptions
-  ) => Promise<IEsSearchResponse>;
+  ) => Promise<SearchStrategyResponse>;
   cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
 }

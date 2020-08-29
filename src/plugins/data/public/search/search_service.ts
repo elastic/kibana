@@ -103,9 +103,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search: ISearchGeneric = (request, options) => {
+    const search = ((request, options) => {
       return this.searchInterceptor.search(request, options);
-    };
+    }) as ISearchGeneric;
 
     const legacySearch = {
       esClient: this.esClient!,

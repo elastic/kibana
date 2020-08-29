@@ -25,16 +25,6 @@ export interface ShardFailureRequest {
   stored_fields: string[];
 }
 
-export interface ShardFailureResponse {
-  _shards: {
-    failed: number;
-    failures: ShardFailure[];
-    skipped: number;
-    successful: number;
-    total: number;
-  };
-}
-
 export interface ShardFailure {
   index: string;
   node: string;

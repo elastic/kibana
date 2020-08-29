@@ -34,7 +34,9 @@ export function replaceTokensInUrlValue(
   const urlValue = customUrlConfig.url_value;
   const timestamp = doc[timeFieldName];
   const timeRangeInterval =
-    'time_range' in customUrlConfig ? parseInterval(customUrlConfig.time_range) : null;
+    'time_range' in customUrlConfig && customUrlConfig.time_range
+      ? parseInterval(customUrlConfig.time_range)
+      : null;
   const record = { ...doc } as CustomUrlAnomalyRecordDoc;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);

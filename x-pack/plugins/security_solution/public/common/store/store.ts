@@ -13,6 +13,7 @@ import {
   Middleware,
   Dispatch,
   PreloadedState,
+  CombinedState,
 } from 'redux';
 
 import { createEpicMiddleware } from 'redux-observable';
@@ -30,6 +31,7 @@ import { Immutable } from '../../../common/endpoint/types';
 import { State } from './types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
+import { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
 
 type ComposeType = typeof compose;
 declare global {
@@ -56,7 +58,7 @@ export const createStore = (
 ): Store<State, Action> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  const middlewareDependencies = {
+  const middlewareDependencies: TimelineEpicDependencies<State> = {
     apolloClient$: apolloClient,
     kibana$: kibana,
     selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
@@ -80,7 +82,7 @@ export const createStore = (
     )
   );
 
-  epicMiddleware.run(createRootEpic<State>());
+  epicMiddleware.run(createRootEpic<CombinedState<State>>());
 
   return store;
 };
