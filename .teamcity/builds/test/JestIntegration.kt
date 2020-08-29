@@ -17,4 +17,12 @@ object JestIntegration : BuildType({
             """.trimIndent()
     }
   }
+
+  features {
+    feature {
+      type = "xml-report-plugin"
+      param("xmlReportParsing.reportType", "junit")
+      param("xmlReportParsing.reportDirs", "target/**/TEST-*.xml")
+    }
+  }
 })
