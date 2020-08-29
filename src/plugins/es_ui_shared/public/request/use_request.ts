@@ -44,7 +44,7 @@ export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
   { path, method, query, body, pollIntervalMs, initialData, deserializer }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
-  const scheduleRequestRef = useRef<() => void>();
+  const isMounted = useRef(false);
 
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
@@ -52,21 +52,16 @@ export const useRequest = <D = any, E = Error>(
   const [data, setData] = useState<any>(initialData);
 
   // Consumers can use isInitialRequest to implement a polling UX.
-  const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
-  const pollIntervalMsRef = useRef<number | undefined>();
+  const requestCountRef = useRef<number>(0);
+  const isInitialRequest = requestCountRef.current === 0;
   const pollIntervalIdRef = useRef<any>(null);
-
-  // We always want to use the most recently-set interval when scheduling the next request.
-  pollIntervalMsRef.current = pollIntervalMs;
 
   const clearPollInterval = useCallback(() => {
     if (pollIntervalIdRef.current) {
       clearTimeout(pollIntervalIdRef.current);
+      pollIntervalIdRef.current = null;
     }
   }, []);
-
-  // Tied to every render and bound to each request.
-  let isOutdatedRequest = false;
 
   // Convert our object to string to be able to compare them in our useMemo,
   // allowing the consumer to freely passed new objects to the hook on each
@@ -90,6 +85,9 @@ export const useRequest = <D = any, E = Error>(
     // data, to avoid doubled-up requests.
     clearPollInterval();
 
+    // Pull off request ID and increment request count.
+    const requestId = requestCountRef.current++;
+
     // We don't clear error or data, so it's up to the consumer to decide whether to display the
     // "old" error/data or loading state when a new request is in-flight.
     setIsLoading(true);
@@ -97,8 +95,11 @@ export const useRequest = <D = any, E = Error>(
     const response = await sendStatelessRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
-    // If an outdated request has resolved, ignore its outdated data.
-    if (isOutdatedRequest) {
+    const isOutdatedRequest = requestId !== requestCountRef.current - 1;
+    const isUnmounted = isMounted.current === false;
+
+    // Ignore outdated or irrelevant data.
+    if (isOutdatedRequest || isUnmounted) {
       return { data: null, error: null };
     }
 
@@ -110,39 +111,51 @@ export const useRequest = <D = any, E = Error>(
         : serializedResponseData;
       setData(responseData);
     }
+    // Setting isLoading to false also acts as a semaphore for scheduling the next poll request.
     setIsLoading(false);
-    setIsInitialRequest(false);
-
-    // If we're on an interval, we need to schedule the next request.
-    scheduleRequestRef.current!();
 
     return { data: serializedResponseData, error: responseError };
-  }, [requestBody, httpClient, deserializer, clearPollInterval, isOutdatedRequest]);
+  }, [requestBody, httpClient, deserializer, clearPollInterval]);
 
+  const scheduleRequest = useCallback(() => {
+    // If there's a scheduled poll request, this new one will supersede it.
+    clearPollInterval();
+
+    // Schedule next poll request.
+    if (pollIntervalMs) {
+      pollIntervalIdRef.current = setTimeout(sendRequest, pollIntervalMs);
+    }
+  }, [pollIntervalMs, sendRequest, clearPollInterval]);
+
+  // Send the request on component mount and whenever the dependencies of sendRequest() change.
   useEffect(() => {
     sendRequest();
   }, [sendRequest]);
 
-  scheduleRequestRef.current = () => {
-    // If there's a scheduled poll request, this new one should supersede it.
-    clearPollInterval();
-
-    // Schedule next poll request.
-    if (pollIntervalMsRef.current) {
-      pollIntervalIdRef.current = setTimeout(sendRequest, pollIntervalMsRef.current);
+  // Schedule the next poll request when the previous one completes.
+  useEffect(() => {
+    if (isMounted.current === false) {
+      // Don't schedule a request on component mount.
+      return;
     }
-  };
+
+    // When a request completes, attempt to schedule the next one. Note that we aren't re-scheduling
+    // a request whenever sendRequest's dependencies change.
+    if (!isLoading) {
+      scheduleRequest();
+    }
+  }, [isLoading, scheduleRequest]);
 
   useEffect(() => {
-    scheduleRequestRef.current!();
+    isMounted.current = true;
 
-    // Clean up timeout and mark in-flight requests as stale if the poll interval changes.
     return () => {
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-      isOutdatedRequest = true;
+      isMounted.current = false;
+
+      // Clean up on unmount.
       clearPollInterval();
     };
-  }, [pollIntervalMs]);
+  }, [clearPollInterval]);
 
   return {
     isInitialRequest,

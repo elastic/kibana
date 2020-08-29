@@ -51,10 +51,12 @@ describe('useRequest hook', () => {
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(1);
 
-        await advanceTime(REQUEST_TIME);
+        // We need to advance (1) the pollIntervalMs and (2) the request time.
+        await advanceTime(REQUEST_TIME * 2);
         expect(getSendRequestSpy().callCount).toBe(2);
 
-        await advanceTime(REQUEST_TIME);
+        // We need to advance (1) the pollIntervalMs and (2) the request time.
+        await advanceTime(REQUEST_TIME * 2);
         expect(getSendRequestSpy().callCount).toBe(3);
       });
     });
@@ -203,7 +205,7 @@ describe('useRequest hook', () => {
         expect(hookResult.error).toBeNull();
         expect(hookResult.data).toBe(getSuccessResponse().data);
 
-        act(() => setErrorResponse());
+        setErrorResponse();
         await completeRequest();
         expect(hookResult.isLoading).toBe(false);
         expect(hookResult.error).toBe(getErrorResponse().error);
@@ -252,32 +254,97 @@ describe('useRequest hook', () => {
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(3);
       });
+    });
+  });
 
-      it(`doesn't block requests that are in flight`, async () => {
-        const {
-          setupSuccessRequest,
-          advanceTime,
-          hookResult,
-          getSendRequestSpy,
-          getSuccessResponse,
-        } = helpers;
+  describe('request behavior', () => {
+    it('outdated responses are ignored by poll requests', async () => {
+      const {
+        setupSuccessRequest,
+        setErrorResponse,
+        advanceTime,
+        hookResult,
+        getErrorResponse,
+        getSendRequestSpy,
+      } = helpers;
+      const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
+      // Send initial request which will have a longer round-trip time.
+      setupSuccessRequest({}, [DOUBLE_REQUEST_TIME]);
 
-        const HALF_REQUEST_TIME = REQUEST_TIME * 0.5;
-        setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
+      // Send a new request which will have a shorter round-trip time.
+      setErrorResponse();
 
-        // We'll interrupt the poll with a sendRequest call before the original request resolves.
-        await advanceTime(HALF_REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(0);
-        act(() => {
-          hookResult.sendRequest();
-        });
+      // Fast-forward to a point where both requests have returned.
+      await advanceTime(DOUBLE_REQUEST_TIME);
 
-        // The original request will resolve and still set its result, despite the sendRequest call
-        // "interrupting" it.
-        await advanceTime(HALF_REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(1);
-        expect(hookResult.data).toBe(getSuccessResponse().data);
+      // Two requests were sent...
+      expect(getSendRequestSpy().callCount).toBe(2);
+      // ...but the error response is the one that takes precedence because it was *sent* more
+      // recently, despite the success response *returning* more recently.
+      expect(hookResult.error).toBe(getErrorResponse().error);
+      expect(hookResult.data).toBeUndefined();
+    });
+
+    it('outdated responses are ignored by manual requests', async () => {
+      const { setupSuccessRequest, advanceTime, hookResult, getSendRequestSpy } = helpers;
+
+      const HALF_REQUEST_TIME = REQUEST_TIME * 0.5;
+      setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
+
+      // Before the original request resolves, we make a manual sendRequest call.
+      await advanceTime(HALF_REQUEST_TIME);
+      expect(getSendRequestSpy().callCount).toBe(0);
+      act(() => {
+        hookResult.sendRequest();
       });
+
+      // The original quest resolves but it's been marked as outdated by the the manual sendRequest
+      // call "interrupts", so data is left undefined.
+      await advanceTime(HALF_REQUEST_TIME);
+      expect(getSendRequestSpy().callCount).toBe(1);
+      expect(hookResult.data).toBeUndefined();
+    });
+
+    it(`changing pollIntervalMs doesn't trigger a new request`, async () => {
+      const { setupErrorRequest, setErrorResponse, completeRequest, getSendRequestSpy } = helpers;
+      const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
+      // Send first request.
+      setupErrorRequest({ pollIntervalMs: REQUEST_TIME });
+
+      // Setting a new poll will schedule a second request, but not send one immediately.
+      setErrorResponse({ pollIntervalMs: DOUBLE_REQUEST_TIME });
+
+      // Complete initial request.
+      await completeRequest();
+
+      // Complete scheduled poll request.
+      await completeRequest();
+      expect(getSendRequestSpy().callCount).toBe(2);
+    });
+
+    it('when the path changes after a request is scheduled, the scheduled request is sent with that path', async () => {
+      const {
+        setupSuccessRequest,
+        completeRequest,
+        hookResult,
+        getErrorResponse,
+        setErrorResponse,
+        getSendRequestSpy,
+      } = helpers;
+
+      // Sned first request and schedule a request for the success path.
+      setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
+
+      // Change the path to the error path, sending a second request. pollIntervalMs is the same
+      // so the originally scheduled poll request won't be rescheduled.
+      setErrorResponse({ pollIntervalMs: REQUEST_TIME });
+
+      // Complete the initial two requests and the and one scheduled poll request.
+      await completeRequest();
+      await completeRequest();
+
+      expect(hookResult.error).toBe(getErrorResponse().error);
+      expect(getSendRequestSpy().callCount).toBe(3);
     });
   });
 });

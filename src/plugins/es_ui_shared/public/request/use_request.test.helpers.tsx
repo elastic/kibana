@@ -31,11 +31,11 @@ export interface UseRequestHelpers {
   completeRequest: () => Promise<void>;
   hookResult: UseRequestResponse;
   getSendRequestSpy: () => sinon.SinonStub;
-  setupSuccessRequest: (overrides?: {}) => void;
+  setupSuccessRequest: (overrides?: {}, requestTimings?: number[]) => void;
   getSuccessResponse: () => SendRequestResponse;
-  setupErrorRequest: (overrides?: {}) => void;
+  setupErrorRequest: (overrides?: {}, requestTimings?: number[]) => void;
   getErrorResponse: () => SendRequestResponse;
-  setErrorResponse: () => void;
+  setErrorResponse: (overrides?: {}) => void;
   setupErrorWithBodyRequest: (overrides?: {}) => void;
   getErrorWithBodyResponse: () => SendRequestResponse;
 }
@@ -86,7 +86,9 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
   const hookResult = {} as UseRequestResponse;
   const sendRequestSpy = sinon.stub();
 
-  const setupUseRequest = (config: UseRequestConfig) => {
+  const setupUseRequest = (config: UseRequestConfig, requestTimings?: number[]) => {
+    let requestCount = 0;
+
     const httpClient = {
       post: (path: string, options: HttpFetchOptions) => {
         return new Promise((resolve, reject) => {
@@ -98,7 +100,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
             } catch (e) {
               reject(e);
             }
-          }, REQUEST_TIME);
+          }, (requestTimings && requestTimings[requestCount++]) || REQUEST_TIME);
         });
       },
     };
@@ -130,8 +132,8 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
       query: undefined,
     })
     .resolves(successResponse);
-  const setupSuccessRequest = (overrides = {}) =>
-    setupUseRequest({ ...successRequest, ...overrides });
+  const setupSuccessRequest = (overrides = {}, requestTimings?: number[]) =>
+    setupUseRequest({ ...successRequest, ...overrides }, requestTimings);
   const getSuccessResponse = () => ({ data: successResponse.data, error: null });
 
   // Set up failed request helpers.
@@ -141,14 +143,15 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
       query: undefined,
     })
     .rejects(errorResponse);
-  const setupErrorRequest = (overrides = {}) => setupUseRequest({ ...errorRequest, ...overrides });
+  const setupErrorRequest = (overrides = {}, requestTimings?: number[]) =>
+    setupUseRequest({ ...errorRequest, ...overrides }, requestTimings);
   const getErrorResponse = () => ({
     data: null,
     error: errorResponse.response.data,
   });
   // We'll use this to change a success response to an error response, to test how the state changes.
-  const setErrorResponse = () => {
-    element.setProps({ requestConfig: { ...errorRequest } });
+  const setErrorResponse = (overrides = {}) => {
+    element.setProps({ requestConfig: { ...errorRequest, ...overrides } });
   };
 
   // Set up failed request helpers with the alternative error shape.
