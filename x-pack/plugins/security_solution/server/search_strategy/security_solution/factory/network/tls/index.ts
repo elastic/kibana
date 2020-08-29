@@ -35,7 +35,7 @@ export const networkTls: SecuritySolutionFactory<NetworkQueries.tls> = {
   ): Promise<NetworkTlsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.count.value', response.rawResponse);
-    const tlsEdges: TlsEdges[] = getTlsEdges(response, options);
+    const tlsEdges: TlsEdges[] = getTlsEdges(response);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = tlsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
