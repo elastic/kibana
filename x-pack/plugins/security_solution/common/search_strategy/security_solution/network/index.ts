@@ -6,9 +6,17 @@
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '..';
+import {
+  CursorType,
+  Inspect,
+  Maybe,
+  PageInfoPaginated,
+  RequestOptionsPaginated,
+  GenericBuckets,
+} from '..';
 
 export enum NetworkQueries {
+  http = 'http',
   tls = 'tls',
 }
 
@@ -76,6 +84,10 @@ export interface TlsSortField {
   direction: Direction;
 }
 
+export interface NetworkHttpSortField {
+  direction: Direction;
+}
+
 export interface NetworkTlsRequestOptions extends RequestOptionsPaginated {
   ip: string;
   flowTarget: FlowTargetSourceDest;
@@ -91,4 +103,69 @@ export interface NetworkTlsStrategyResponse extends IEsSearchResponse {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
+  ip?: string;
+  networkHttpSort: NetworkHttpSortField;
+  defaultIndex: string[];
+}
+
+export interface NetworkHttpStrategyResponse extends IEsSearchResponse {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpData {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpEdges {
+  node: NetworkHttpItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkHttpItem {
+  _id?: Maybe<string>;
+
+  domains: string[];
+
+  lastHost?: Maybe<string>;
+
+  lastSourceIp?: Maybe<string>;
+
+  methods: string[];
+
+  path?: Maybe<string>;
+
+  requestCount?: Maybe<number>;
+
+  statuses: string[];
+}
+
+export interface NetworkHttpBuckets {
+  key: string;
+  doc_count: number;
+  domains: {
+    buckets: GenericBuckets[];
+  };
+  methods: {
+    buckets: GenericBuckets[];
+  };
+  source: object;
+  status: {
+    buckets: GenericBuckets[];
+  };
 }
