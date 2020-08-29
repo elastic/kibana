@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MockRouter } from './router.mock';
-export {
-  mockConfig,
-  mockLogger,
-  mockRequestHandler,
-  mockDependencies,
-} from './routerDependencies.mock';
+import { HttpFetchOptions } from 'kibana/public';
+
+export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
+  pathname: string;
+  isCachable?: boolean;
+  method?: string;
+  body?: any;
+};
