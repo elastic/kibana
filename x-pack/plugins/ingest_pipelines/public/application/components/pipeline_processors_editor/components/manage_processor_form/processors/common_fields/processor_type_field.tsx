@@ -5,7 +5,7 @@
  */
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 
@@ -68,7 +68,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
-        let description = '';
+        let description: string | ReactNode = '';
 
         if (typeField.value?.length) {
           const type = typeField.value;
