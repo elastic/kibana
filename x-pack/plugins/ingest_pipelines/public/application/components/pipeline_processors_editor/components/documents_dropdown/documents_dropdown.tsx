@@ -46,7 +46,7 @@ interface Props {
   documents: Document[];
   selectedDocumentIndex: number;
   updateSelectedDocument: (index: number) => void;
-  openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
+  openFlyout?: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
 export const DocumentsDropdown: FunctionComponent<Props> = ({
@@ -55,27 +55,41 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
   updateSelectedDocument,
   openFlyout,
 }) => {
+  const shouldAppendActions = typeof openFlyout !== 'undefined';
+
   return (
     <div className="documentsDropdown">
-      <EuiSelect
-        compressed
-        options={getDocumentOptions(documents)}
-        value={selectedDocumentIndex}
-        onChange={(e) => {
-          updateSelectedDocument(Number(e.target.value));
-        }}
-        aria-label={i18nTexts.ariaLabel}
-        append={
-          <EuiToolTip content={i18nTexts.iconButtonLabel}>
-            <EuiButtonIcon
-              iconType="gear"
-              size="s"
-              aria-label={i18nTexts.iconButtonLabel}
-              onClick={() => openFlyout('documents')}
-            />
-          </EuiToolTip>
-        }
-      />
+      {shouldAppendActions ? (
+        <EuiSelect
+          compressed
+          options={getDocumentOptions(documents)}
+          value={selectedDocumentIndex}
+          onChange={(e) => {
+            updateSelectedDocument(Number(e.target.value));
+          }}
+          aria-label={i18nTexts.ariaLabel}
+          append={
+            <EuiToolTip content={i18nTexts.iconButtonLabel}>
+              <EuiButtonIcon
+                iconType="gear"
+                size="s"
+                aria-label={i18nTexts.iconButtonLabel}
+                onClick={() => openFlyout!('documents')}
+              />
+            </EuiToolTip>
+          }
+        />
+      ) : (
+        <EuiSelect
+          compressed
+          options={getDocumentOptions(documents)}
+          value={selectedDocumentIndex}
+          onChange={(e) => {
+            updateSelectedDocument(Number(e.target.value));
+          }}
+          aria-label={i18nTexts.ariaLabel}
+        />
+      )}
     </div>
   );
 };

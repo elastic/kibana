@@ -68,6 +68,12 @@ const i18nTexts = {
       defaultMessage: 'View ignored error',
     }
   ),
+  documentsDropdownLabel: i18n.translate(
+    'xpack.ingestPipelines.processorOutput.documentsDropdownLabel',
+    {
+      defaultMessage: 'Test:',
+    }
+  ),
 };
 
 export const ProcessorOutput: React.FunctionComponent<Props> = ({
@@ -117,22 +123,56 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
         </>
       )}
 
+      <EuiSpacer />
+
+      <EuiFlexGroup gutterSize="s" alignItems="baseline">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <span>
+              <strong>{i18nTexts.documentsDropdownLabel}</strong>
+            </span>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DocumentsDropdown
+            documents={documents}
+            selectedDocumentIndex={selectedDocumentIndex}
+            updateSelectedDocument={updateSelectedDocument}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <EuiAccordion
+        id="processor_input_accordion"
+        buttonContent={
+          <EuiText>
+            <p>{i18nTexts.prevProcessorLabel}</p>
+          </EuiText>
+        }
+      >
+        <>
+          <EuiSpacer />
+
+          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
+            {/* If there is no processorInput defined (e.g., it's the first processor), we provide the sample document */}
+            {JSON.stringify(
+              processorInput ? processorInput : documents[selectedDocumentIndex],
+              null,
+              2
+            )}
+          </EuiCodeBlock>
+        </>
+      </EuiAccordion>
+
       {currentResult && (
         <>
           <EuiSpacer />
 
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="baseline">
-            <EuiFlexItem>
-              <p>{i18nTexts.processorOutputLabel}</p>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DocumentsDropdown
-                documents={documents}
-                selectedDocumentIndex={selectedDocumentIndex}
-                updateSelectedDocument={updateSelectedDocument}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiText>
+            <p>{i18nTexts.processorOutputLabel}</p>
+          </EuiText>
 
           <EuiSpacer size="xs" />
 
@@ -166,30 +206,6 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({
           </EuiCodeBlock>
         </>
       )}
-
-      <EuiSpacer />
-
-      <EuiAccordion
-        id="prev_accordion"
-        buttonContent={
-          <EuiText>
-            <p>{i18nTexts.prevProcessorLabel}</p>
-          </EuiText>
-        }
-      >
-        <>
-          <EuiSpacer />
-
-          <EuiCodeBlock paddingSize="s" language="json" isCopyable>
-            {/* If there is no processorInput defined (e.g., it's the first processor), we provide the sample document */}
-            {JSON.stringify(
-              processorInput ? processorInput : documents[selectedDocumentIndex],
-              null,
-              2
-            )}
-          </EuiCodeBlock>
-        </>
-      </EuiAccordion>
 
       {ignoredError && (
         <>
