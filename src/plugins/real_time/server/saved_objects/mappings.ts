@@ -41,7 +41,7 @@ export const opsSavedObjectType: SavedObjectsType = {
       version: {
         type: 'integer',
       },
-      operation: {
+      op: {
         type: 'object',
       },
     },

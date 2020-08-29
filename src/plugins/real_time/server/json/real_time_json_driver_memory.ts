@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Doc } from 'ot-json1';
 import { RealTimeJsonDriver, RealTimeOperation } from './types';
 
 const clone = (x: unknown) => JSON.parse(JSON.stringify(x));
@@ -24,14 +25,14 @@ const clone = (x: unknown) => JSON.parse(JSON.stringify(x));
 interface Document {
   id: string;
   version: number;
-  snapshot: object;
+  snapshot: Doc;
+  operations: RealTimeOperation[];
 }
 
 /**
  * In-memory implementation of @type {RealTimeJsonDriver}.
  */
 export class RealTimeJsonDriverMemory implements RealTimeJsonDriver {
-  private readonly operations: RealTimeOperation[] = [];
   private readonly documents = new Map<string, Document>();
 
   private getKey(type: string, id: string) {
@@ -56,34 +57,45 @@ export class RealTimeJsonDriverMemory implements RealTimeJsonDriver {
     type: string,
     id: string,
     operation: RealTimeOperation,
-    snapshot: unknown
+    snapshot: Doc,
+    { create }: { create?: boolean } = {}
   ): Promise<void> {
-    const { document, key } = this.getDocument(type, id);
+    try {
+      const { document, key } = this.getDocument(type, id);
 
-    if (operation.version !== document.version + 1) {
-      throw new Error('INVALID_VERSION');
+      if (operation.version !== document.version + 1) {
+        throw new Error('INVALID_VERSION');
+      }
+
+      document.operations.push(clone(operation));
+
+      this.documents.set(key, {
+        id,
+        version: document.version + 1,
+        snapshot: clone(snapshot),
+        operations: document.operations,
+      });
+    } catch (error) {
+      if (!create || operation.version !== 0 || error.message !== 'NOT_FOUND') throw error;
+
+      const key = this.getKey(type, id);
+      this.documents.set(key, {
+        id,
+        snapshot: clone(snapshot),
+        version: 0,
+        operations: [clone(operation)],
+      });
     }
-
-    const newDocument: Document = {
-      id,
-      version: document.version + 1,
-      snapshot: clone(snapshot),
-    };
-
-    this.operations.push(clone(operation));
-    this.documents.set(key, newDocument);
   }
 
-  async getSnapshot(type: string, id: string): Promise<object> {
+  async getSnapshot(type: string, id: string): Promise<Doc> {
     const { document } = this.getDocument(type, id);
-    return document.snapshot;
+    return clone(document.snapshot);
   }
 
   async getOps(type: string, id: string, min: number): Promise<RealTimeOperation[]> {
-    // Assert that document exists.
-    this.getDocument(type, id);
-
-    const operations = this.operations.filter((op) => op.version >= min);
-    return operations;
+    const { document } = this.getDocument(type, id);
+    const operations = document.operations.filter((op) => op.version >= min);
+    return clone(operations);
   }
 }

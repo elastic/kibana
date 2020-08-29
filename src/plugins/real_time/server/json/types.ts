@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { JSONOp, Doc } from 'ot-json1';
+
 /**
  * Real time JSON client storage driver interface. This interface can be
  * implemented in-memory or to persist into Elasticsearch, or anywhere else.
@@ -34,7 +36,13 @@ export interface RealTimeJsonDriver {
    * @param op Operation to be commited.
    * @param snapshot Up-to-date snapshot with the latest operation applied.
    */
-  commit(type: string, id: string, operation: RealTimeOperation, snapshot: object): Promise<void>;
+  commit(
+    type: string,
+    id: string,
+    operation: RealTimeOperation,
+    snapshot: Doc,
+    options?: { create?: boolean }
+  ): Promise<void>;
 
   /**
    * Retrieve the latest snapshot of the document.
@@ -42,7 +50,7 @@ export interface RealTimeJsonDriver {
    * @param type Saved object type, i.e. "collection" name.
    * @param id Id of the saved object, i.e. ID of the document.
    */
-  getSnapshot(type: string, id: string): Promise<object>;
+  getSnapshot(type: string, id: string): Promise<Doc>;
 
   /**
    * Get all the latest operations starting from "from" operations all the way
@@ -79,10 +87,10 @@ export interface RealTimeOperation {
   /**
    * JSON1 OT operation.
    */
-  operation: Json1Operation;
+  op: JSONOp;
 }
 
-export type Json1Operation = object;
+export type Json1Operation = unknown[];
 
 /**
  * These fields are applied inline to every saved object managed by real_time
