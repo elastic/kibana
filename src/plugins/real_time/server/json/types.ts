@@ -17,9 +17,41 @@
  * under the License.
  */
 
-export interface RealTimeOperationsDriver {
+/**
+ * Real time JSON client storage driver interface. This interface can be
+ * implemented in-memory or to persist into Elasticsearch, or anywhere else.
+ *
+ * Operation sequence number strats from 0 and is incremented by one with each
+ * new successfully commited operation.
+ */
+export interface RealTimeJsonDriver {
+  /**
+   * Commit the latest operation to the persisten storage and update the snapshot.
+   * Should throw on error.
+   *
+   * @param type Saved object type, i.e. "collection" name.
+   * @param id Id of the saved object, i.e. ID of the document.
+   * @param op Operation to be commited.
+   * @param snapshot Up-to-date snapshot with the latest operation applied.
+   */
   commit<T>(type: string, id: string, op: Json1Operation, snapshot: T): Promise<void>;
+
+  /**
+   * Retrieve the latest snapshot of the document.
+   *
+   * @param type Saved object type, i.e. "collection" name.
+   * @param id Id of the saved object, i.e. ID of the document.
+   */
   getSnapshot<T>(type: string, id: string): Promise<T>;
+
+  /**
+   * Get all the latest operations starting from "from" operations all the way
+   * up to the latest operation.
+   *
+   * @param type Saved object type, i.e. "collection" name.
+   * @param id Id of the saved object, i.e. ID of the document.
+   * @param from Sequence number starting from which to fetch the operations.
+   */
   getOps(type: string, id: string, from: number): Promise<RealTimeOperation>;
 }
 
