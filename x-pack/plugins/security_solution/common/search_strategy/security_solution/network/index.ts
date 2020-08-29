@@ -5,6 +5,7 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { GeoEcs } from '../../../ecs/geo';
 
 import {
   CursorType,
@@ -18,6 +19,23 @@ import {
 export enum NetworkQueries {
   http = 'http',
   tls = 'tls',
+  topCountries = 'topCountries',
+}
+
+export enum NetworkTopTablesFields {
+  bytes_in = 'bytes_in',
+  bytes_out = 'bytes_out',
+  flows = 'flows',
+  destination_ips = 'destination_ips',
+  source_ips = 'source_ips',
+}
+
+export enum NetworkDnsFields {
+  dnsName = 'dnsName',
+  queryCount = 'queryCount',
+  uniqueDomains = 'uniqueDomains',
+  dnsBytesIn = 'dnsBytesIn',
+  dnsBytesOut = 'dnsBytesOut',
 }
 
 export interface TlsBuckets {
@@ -56,6 +74,13 @@ export interface TlsNode {
   ja3?: Maybe<string[]>;
 
   issuers?: Maybe<string[]>;
+}
+
+export enum FlowTarget {
+  client = 'client',
+  destination = 'destination',
+  server = 'server',
+  source = 'source',
 }
 
 export enum FlowTargetSourceDest {
@@ -119,6 +144,94 @@ export interface NetworkHttpStrategyResponse extends IEsSearchResponse {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface GeoItem {
+  geo?: Maybe<GeoEcs>;
+
+  flowTarget?: Maybe<FlowTargetSourceDest>;
+}
+
+export interface TopCountriesItemSource {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
+  networkTopCountriesSort: NetworkTopTablesSortField;
+  flowTarget: FlowTargetSourceDest;
+  ip?: string;
+}
+
+export interface NetworkTopCountriesStrategyResponse extends IEsSearchResponse {
+  edges: NetworkTopCountriesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesEdges {
+  node: NetworkTopCountriesItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopCountriesItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopCountriesItemSource>;
+
+  destination?: Maybe<TopCountriesItemDestination>;
+
+  network?: Maybe<TopNetworkTablesEcsField>;
+}
+
+export interface TopCountriesItemDestination {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface TopNetworkTablesEcsField {
+  bytes_in?: Maybe<number>;
+
+  bytes_out?: Maybe<number>;
+}
+
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
+
+  direction: Direction;
+}
+
+export interface NetworkTopCountriesBuckets {
+  country: string;
+  key: string;
+  bytes_in: {
+    value: number;
+  };
+  bytes_out: {
+    value: number;
+  };
+  flows: number;
+  destination_ips: number;
+  source_ips: number;
 }
 
 export interface NetworkHttpData {

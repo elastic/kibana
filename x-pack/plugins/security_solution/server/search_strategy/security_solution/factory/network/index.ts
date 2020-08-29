@@ -10,8 +10,10 @@ import { NetworkQueries } from '../../../../../common/search_strategy/security_s
 import { SecuritySolutionFactory } from '../types';
 import { networkHttp } from './http';
 import { networkTls } from './tls';
+import { networkTopCountries } from './top_countries';
 
 export const networkFactory: Record<NetworkQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [NetworkQueries.http]: networkHttp,
   [NetworkQueries.tls]: networkTls,
+  [NetworkQueries.topCountries]: networkTopCountries,
 };

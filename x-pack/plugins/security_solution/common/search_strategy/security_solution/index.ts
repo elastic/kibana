@@ -19,9 +19,12 @@ import {
   NetworkTlsRequestOptions,
   NetworkHttpStrategyResponse,
   NetworkHttpRequestOptions,
+  NetworkTopCountriesStrategyResponse,
+  NetworkTopCountriesRequestOptions,
 } from './network';
 
 export * from './hosts';
+export * from './network';
 export type Maybe<T> = T | null;
 
 export type FactoryQueryTypes = HostsQueries | NetworkQueries;
@@ -112,6 +115,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.http
   ? NetworkHttpStrategyResponse
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -122,6 +127,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.http
   ? NetworkHttpRequestOptions
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesRequestOptions
   : never;
 
 export interface GenericBuckets {
