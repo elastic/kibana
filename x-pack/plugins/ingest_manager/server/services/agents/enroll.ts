@@ -133,7 +133,7 @@ export function validateAgentVersion(
       if (semver.lte(agentVersionParsed, kibanaVersionParsed)) return;
       else
         throw Boom.badRequest(
-          `Agent version ${agentVersion} is not compatible with kibana version ${kibanaVersion}`
+          `Agent version ${agentVersion} is not compatible with Kibana version ${kibanaVersion}`
         );
   }
 }
