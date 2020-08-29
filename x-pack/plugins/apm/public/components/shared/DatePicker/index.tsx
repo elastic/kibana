@@ -89,7 +89,14 @@ export function DatePicker() {
     ...timePickerURLParams,
   };
   if (!isEqual(nextParams, timePickerURLParams)) {
-    updateUrl(nextParams);
+    // When the default parameters are not availbale in the url, replace it adding the necessary parameters.
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        ...nextParams,
+      }),
+    });
   }
 
   return (

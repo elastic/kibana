@@ -13,9 +13,7 @@
     "test:generate": "ts-node --project scripts/endpoint/cli_tsconfig.json scripts/endpoint/resolver_generator.ts"
   },
   "devDependencies": {
-    "@types/md5": "^2.2.0"
-  },
-  "dependencies": {
+    "@types/md5": "^2.2.0",
     "@types/rbush": "^3.0.0",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
     "querystring": "^0.2.0",
