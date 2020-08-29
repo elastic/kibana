@@ -47,10 +47,14 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
       const [, , selfStart] = await core.getStartServices();
 
       try {
-        const response = await selfStart.search.search(context, id ? { id } : searchRequest, {
-          signal,
-          strategy,
-        });
+        const response = await selfStart.search.search(
+          context,
+          { ...searchRequest, id },
+          {
+            signal,
+            strategy,
+          }
+        );
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({

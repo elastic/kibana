@@ -37,6 +37,10 @@ import {
 import { pick, deepFreeze } from '../../utils';
 import { CoreSetup, CoreStart } from '..';
 
+export interface InstanceInfo {
+  uuid: string;
+}
+
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
  * This facade should be safe to use across entire plugin lifespan.
@@ -53,7 +57,8 @@ import { CoreSetup, CoreStart } from '..';
 export function createPluginInitializerContext(
   coreContext: CoreContext,
   opaqueId: PluginOpaqueId,
-  pluginManifest: PluginManifest
+  pluginManifest: PluginManifest,
+  instanceInfo: InstanceInfo
 ): PluginInitializerContext {
   return {
     opaqueId,
@@ -64,6 +69,7 @@ export function createPluginInitializerContext(
     env: {
       mode: coreContext.env.mode,
       packageInfo: coreContext.env.packageInfo,
+      instanceUuid: instanceInfo.uuid,
     },
 
     /**
@@ -178,12 +184,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     status: {
       core$: deps.status.core$,
+      overall$: deps.status.overall$,
     },
     uiSettings: {
       register: deps.uiSettings.register,
-    },
-    uuid: {
-      getInstanceUuid: deps.uuid.getInstanceUuid,
     },
     getStartServices: () => plugin.startDependencies,
     auditTrail: deps.auditTrail,

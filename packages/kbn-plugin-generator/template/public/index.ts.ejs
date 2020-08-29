@@ -1,0 +1,14 @@
+import './index.scss';
+
+import { <%= upperCamelCase(name) %>Plugin } from './plugin';
+
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new <%= upperCamelCase(name) %>Plugin();
+}
+export {
+  <%= upperCamelCase(name) %>PluginSetup,
+  <%= upperCamelCase(name) %>PluginStart,
+} from './types';
+

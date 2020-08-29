@@ -133,12 +133,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/lens/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -302,10 +296,7 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: [
-                  '(src|x-pack)/plugins/*/server/**/*',
-                  '!x-pack/plugins/apm/**/*', // https://github.com/elastic/kibana/issues/67210
-                ],
+                target: ['(src|x-pack)/plugins/*/server/**/*'],
                 from: ['(src|x-pack)/plugins/*/public/**/*'],
                 errorMessage: `Server code can not import from public, use a common directory.`,
               },
@@ -406,7 +397,7 @@ module.exports = {
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
-                from: ['ui/**/*', 'uiExports/**/*'],
+                from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
               },
               {
@@ -463,14 +454,13 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': ['plugins', 'legacy/ui'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
@@ -524,7 +514,7 @@ module.exports = {
         'packages/kbn-interpreter/tasks/**/*.js',
         'packages/kbn-interpreter/src/plugin/**/*.js',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
         'x-pack/**/*.test.js',
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
@@ -611,8 +601,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        '**/webpackShims/**/*.js',
-        'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',

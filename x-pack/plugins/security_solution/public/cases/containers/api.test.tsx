@@ -159,7 +159,32 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags,
+          tags: ['"coke"', '"pepsi"'],
+          search: 'hello',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+    test('tags with weird chars get handled gracefully', async () => {
+      const weirdTags: string[] = ['(', '"double"'];
+
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          tags: weirdTags,
+          status: '',
+          search: 'hello',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters,
+          tags: ['"("', '"\\"double\\""'],
           search: 'hello',
         },
         signal: abortCtrl.signal,

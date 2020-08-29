@@ -25,10 +25,9 @@ import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import {
-  EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
+  EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
-import { RumHome } from '../../RumDashboard/RumHome';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics',
@@ -38,7 +37,7 @@ interface RouteParams {
   serviceName: string;
 }
 
-const renderAsRedirectTo = (to: string) => {
+export const renderAsRedirectTo = (to: string) => {
   return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{
@@ -251,15 +250,6 @@ export const routes: BreadcrumbRoute[] = [
       defaultMessage: 'Customize UI',
     }),
     name: RouteName.CUSTOMIZE_UI,
-  },
-  {
-    exact: true,
-    path: '/rum-preview',
-    component: () => <RumHome />,
-    breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
-      defaultMessage: 'Real User Monitoring',
-    }),
-    name: RouteName.RUM_OVERVIEW,
   },
   {
     exact: true,

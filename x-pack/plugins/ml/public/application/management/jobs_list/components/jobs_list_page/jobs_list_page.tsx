@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useState, Fragment, FC } from 'react';
+import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 
@@ -20,6 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public/';
+
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
@@ -30,6 +33,7 @@ import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/a
 import { AccessDeniedPage } from '../access_denied_page';
 
 interface Tab {
+  'data-test-subj': string;
   id: string;
   name: string;
   content: any;
@@ -38,6 +42,7 @@ interface Tab {
 function getTabs(isMlEnabledInSpace: boolean): Tab[] {
   return [
     {
+      'data-test-subj': 'mlStackManagementJobsListAnomalyDetectionTab',
       id: 'anomaly_detection_jobs',
       name: i18n.translate('xpack.ml.management.jobsList.anomalyDetectionTab', {
         defaultMessage: 'Anomaly detection',
@@ -50,6 +55,7 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
       ),
     },
     {
+      'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
       id: 'analytics_jobs',
       name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
         defaultMessage: 'Analytics',
@@ -67,7 +73,10 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
   ];
 }
 
-export const JobsListPage: FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
+export const JobsListPage: FC<{
+  coreStart: CoreStart;
+  history: ManagementAppMountParams['history'];
+}> = ({ coreStart, history }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
@@ -128,46 +137,51 @@ export const JobsListPage: FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
   return (
     <I18nContext>
       <KibanaContextProvider services={{ ...coreStart }}>
-        <EuiPageContent id="kibanaManagementMLSection">
-          <EuiTitle size="l">
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <h1>
-                  {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
-                    defaultMessage: 'Machine Learning Jobs',
-                  })}
-                </h1>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  target="_blank"
-                  iconType="help"
-                  iconSide="left"
-                  color="primary"
-                  href={
-                    currentTabId === 'anomaly_detection_jobs'
-                      ? anomalyDetectionJobsUrl
-                      : anomalyJobsUrl
-                  }
-                >
-                  {currentTabId === 'anomaly_detection_jobs'
-                    ? anomalyDetectionDocsLabel
-                    : analyticsDocsLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiTitle size="s">
-            <EuiText color="subdued">
-              {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
-                defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
-              })}
-            </EuiText>
-          </EuiTitle>
-          <EuiSpacer size="l" />
-          <EuiPageContentBody>{renderTabs()}</EuiPageContentBody>
-        </EuiPageContent>
+        <Router history={history}>
+          <EuiPageContent
+            id="kibanaManagementMLSection"
+            data-test-subj="mlPageStackManagementJobsList"
+          >
+            <EuiTitle size="l">
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <h1>
+                    {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
+                      defaultMessage: 'Machine Learning Jobs',
+                    })}
+                  </h1>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    target="_blank"
+                    iconType="help"
+                    iconSide="left"
+                    color="primary"
+                    href={
+                      currentTabId === 'anomaly_detection_jobs'
+                        ? anomalyDetectionJobsUrl
+                        : anomalyJobsUrl
+                    }
+                  >
+                    {currentTabId === 'anomaly_detection_jobs'
+                      ? anomalyDetectionDocsLabel
+                      : analyticsDocsLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiTitle size="s">
+              <EuiText color="subdued">
+                {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
+                  defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
+                })}
+              </EuiText>
+            </EuiTitle>
+            <EuiSpacer size="l" />
+            <EuiPageContentBody>{renderTabs()}</EuiPageContentBody>
+          </EuiPageContent>
+        </Router>
       </KibanaContextProvider>
     </I18nContext>
   );

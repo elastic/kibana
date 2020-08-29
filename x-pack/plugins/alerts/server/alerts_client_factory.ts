@@ -16,6 +16,7 @@ import { PluginStartContract as FeaturesPluginStart } from '../../features/serve
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { Space } from '../../spaces/server';
+import { IEventLogClientService } from '../../../plugins/event_log/server';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -28,6 +29,7 @@ export interface AlertsClientFactoryOpts {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
   features: FeaturesPluginStart;
+  eventLog: IEventLogClientService;
 }
 
 export class AlertsClientFactory {
@@ -42,6 +44,7 @@ export class AlertsClientFactory {
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private actions!: ActionsPluginStartContract;
   private features!: FeaturesPluginStart;
+  private eventLog!: IEventLogClientService;
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -58,10 +61,11 @@ export class AlertsClientFactory {
     this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
     this.actions = options.actions;
     this.features = options.features;
+    this.eventLog = options.eventLog;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
-    const { securityPluginSetup, actions, features } = this;
+    const { securityPluginSetup, actions, eventLog, features } = this;
     const spaceId = this.getSpaceId(request);
     const authorization = new AlertsAuthorization({
       authorization: securityPluginSetup?.authz,
@@ -134,6 +138,9 @@ export class AlertsClientFactory {
       },
       async getActionsClient() {
         return actions.getActionsClientWithRequest(request);
+      },
+      async getEventLogClient() {
+        return eventLog.getClient(request);
       },
     });
   }

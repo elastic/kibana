@@ -16,7 +16,7 @@ import {
   ResolverChildren,
 } from '../../../../../common/endpoint/types';
 import { createChild } from './node';
-import { PaginationBuilder } from './pagination';
+import { ChildrenPaginationBuilder } from './children_pagination';
 
 /**
  * This class helps construct the children structure when building a resolver tree.
@@ -162,7 +162,7 @@ export class ChildrenNodesHelper {
     for (const nodeEntityID of nodes.values()) {
       const cachedNode = this.entityToNodeCache.get(nodeEntityID);
       if (cachedNode) {
-        cachedNode.nextChild = PaginationBuilder.buildCursor(startEvents);
+        cachedNode.nextChild = ChildrenPaginationBuilder.buildCursor(startEvents);
       }
     }
   }

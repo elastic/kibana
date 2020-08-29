@@ -8,14 +8,18 @@ import { getSavedObjectFormat, Props } from './save';
 import { createMockDatasource, createMockVisualization } from '../mocks';
 import { esFilters, IIndexPattern, IFieldType } from '../../../../../../src/plugins/data/public';
 
+jest.mock('./expression_helpers');
+
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
-  mockVisualization.getPersistableState.mockImplementation((x) => x);
   const mockDatasource = createMockDatasource('a');
   const mockIndexPattern = ({ id: 'indexpattern' } as unknown) as IIndexPattern;
   const mockField = ({ name: '@timestamp' } as unknown) as IFieldType;
 
-  mockDatasource.getPersistableState.mockImplementation((x) => x);
+  mockDatasource.getPersistableState.mockImplementation((x) => ({
+    state: x,
+    savedObjectReferences: [],
+  }));
   const saveArgs: Props = {
     activeDatasources: {
       indexpattern: mockDatasource,
@@ -47,15 +51,17 @@ describe('save editor frame state', () => {
   it('transforms from internal state to persisted doc format', async () => {
     const datasource = createMockDatasource('a');
     datasource.getPersistableState.mockImplementation((state) => ({
-      stuff: `${state}_datasource_persisted`,
+      state: {
+        stuff: `${state}_datasource_persisted`,
+      },
+      savedObjectReferences: [],
     }));
+    datasource.toExpression.mockReturnValue('my | expr');
 
     const visualization = createMockVisualization();
-    visualization.getPersistableState.mockImplementation((state) => ({
-      things: `${state}_vis_persisted`,
-    }));
+    visualization.toExpression.mockReturnValue('vis | expr');
 
-    const doc = await getSavedObjectFormat({
+    const { doc, filterableIndexPatterns, isSaveable } = await getSavedObjectFormat({
       ...saveArgs,
       activeDatasources: {
         indexpattern: datasource,
@@ -74,27 +80,32 @@ describe('save editor frame state', () => {
       visualization,
     });
 
+    expect(filterableIndexPatterns).toEqual([]);
+    expect(isSaveable).toEqual(true);
     expect(doc).toEqual({
       id: undefined,
-      expression: '',
       state: {
-        datasourceMetaData: {
-          filterableIndexPatterns: [],
-        },
         datasourceStates: {
           indexpattern: {
             stuff: '2_datasource_persisted',
           },
         },
-        visualization: { things: '4_vis_persisted' },
+        visualization: '4',
         query: { query: '', language: 'lucene' },
         filters: [
           {
-            meta: { index: 'indexpattern' },
+            meta: { indexRefName: 'filter-index-pattern-0' },
             exists: { field: '@timestamp' },
           },
         ],
       },
+      references: [
+        {
+          id: 'indexpattern',
+          name: 'filter-index-pattern-0',
+          type: 'index-pattern',
+        },
+      ],
       title: 'bbb',
       type: 'lens',
       visualizationType: '3',

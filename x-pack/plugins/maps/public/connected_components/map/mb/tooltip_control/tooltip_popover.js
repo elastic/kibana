@@ -117,6 +117,8 @@ export class TooltipPopover extends Component {
   _renderTooltipContent = () => {
     const publicProps = {
       addFilters: this.props.addFilters,
+      getFilterActions: this.props.getFilterActions,
+      getActionContext: this.props.getActionContext,
       closeTooltip: this.props.closeTooltip,
       features: this.props.features,
       isLocked: this.props.isLocked,

@@ -39,9 +39,9 @@
           "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "infrastructure-ui-source": "2b2809653635caf490c93f090502d04c",
-          "ingest-agent-configs": "9326f99c977fd2ef5ab24b6336a0675c",
+          "ingest-agent-policies": "9326f99c977fd2ef5ab24b6336a0675c",
           "ingest-outputs": "8aa988c376e65443fefc26f1075e93a3",
-          "ingest-package-configs": "48e8bd97e488008e21c0b5a2367b83ad",
+          "ingest-package-policies": "48e8bd97e488008e21c0b5a2367b83ad",
           "ingest_manager_settings": "012cf278ec84579495110bb827d1ed09",
           "inventory-view": "88fc7e12fd1b45b6f0787323ce4f18d2",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
@@ -970,7 +970,7 @@
             "agent_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "data": {
@@ -1004,7 +1004,7 @@
             "active": {
               "type": "boolean"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "config_revision": {
@@ -1072,7 +1072,7 @@
             "api_key_id": {
               "type": "keyword"
             },
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1222,7 +1222,7 @@
             }
           }
         },
-        "ingest-agent-configs": {
+        "ingest-agent-policies": {
           "properties": {
             "description": {
               "type": "text"
@@ -1240,7 +1240,7 @@
             "namespace": {
               "type": "keyword"
             },
-            "package_configs": {
+            "package_policies": {
               "type": "keyword"
             },
             "revision": {
@@ -1286,9 +1286,9 @@
             }
           }
         },
-        "ingest-package-configs": {
+        "ingest-package-policies": {
           "properties": {
-            "config_id": {
+            "policy_id": {
               "type": "keyword"
             },
             "created_at": {
@@ -1320,9 +1320,9 @@
                     "config": {
                       "type": "flattened"
                     },
-                    "dataset": {
+                    "data_stream": {
                       "properties": {
-                        "name": {
+                        "dataset": {
                           "type": "keyword"
                         },
                         "type": {

@@ -8,9 +8,9 @@
 
 import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
 import { GraphControls } from './graph_controls';
@@ -18,11 +18,10 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { useResolverQueryParams } from './use_resolver_query_params';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
-import { entityId } from '../../../common/endpoint/models/event';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverProps } from '../types';
+import { ResolverProps, ResolverState } from '../types';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -35,6 +34,7 @@ export const ResolverWithoutProviders = React.memo(
     { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
     refToForward
   ) {
+    useResolverQueryParamCleaner();
     /**
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
@@ -46,9 +46,12 @@ export const ResolverWithoutProviders = React.memo(
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-      selectors.visibleNodesAndEdgeLines
-    )(timeAtRender);
+    const {
+      processNodePositions,
+      connectingEdgeLineSegments,
+    } = useSelector((state: ResolverState) =>
+      selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
+    );
     const terminatedProcesses = useSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
@@ -70,11 +73,6 @@ export const ResolverWithoutProviders = React.memo(
     const hasError = useSelector(selectors.hasError);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const { colorMap } = useResolverTheme();
-    const { cleanUpQueryParams } = useResolverQueryParams();
-
-    useEffectOnce(() => {
-      return () => cleanUpQueryParams();
-    });
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -114,7 +112,7 @@ export const ResolverWithoutProviders = React.memo(
               )
             )}
             {[...processNodePositions].map(([processEvent, position]) => {
-              const processEntityId = entityId(processEvent);
+              const processEntityId = entityIDSafeVersion(processEvent);
               return (
                 <ProcessEventDot
                   key={processEntityId}

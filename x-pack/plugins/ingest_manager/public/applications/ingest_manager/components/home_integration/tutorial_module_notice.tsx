@@ -28,7 +28,7 @@ export const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ modul
             <FormattedMessage
               id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText"
               defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Ingest Manager Beta.
-              To learn more about agent configurations and the new Elastic Agent, read our {blogPostLink}."
+              To learn more about agent policies and the new Elastic Agent, read our {blogPostLink}."
               values={{
                 notePrefix: (
                   <strong>

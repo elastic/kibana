@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { get } from 'lodash/fp';
 import sinon from 'sinon';
 import moment from 'moment';
 
@@ -12,6 +14,7 @@ import {
   defaultTimelineProps,
   apolloClient,
   mockTimelineApolloResult,
+  mockTimelineDetailsApollo,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../graphql/types';
@@ -37,7 +40,13 @@ describe('alert actions', () => {
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
 
-    jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResult);
+    jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
+      const id = get('variables.id', obj);
+      if (id != null) {
+        return Promise.resolve(mockTimelineApolloResult);
+      }
+      return Promise.resolve(mockTimelineDetailsApollo);
+    });
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -71,6 +80,7 @@ describe('alert actions', () => {
         });
         const expected = {
           from: '2018-11-05T18:58:25.937Z',
+          notes: null,
           timeline: {
             columns: [
               {

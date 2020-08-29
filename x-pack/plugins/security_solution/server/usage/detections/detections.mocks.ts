@@ -41,7 +41,7 @@ export const getMockJobSummaryResponse = () => [
   {
     id: 'other_job',
     description: 'a job that is custom',
-    groups: ['auditbeat', 'process'],
+    groups: ['auditbeat', 'process', 'security'],
     processed_record_count: 0,
     memory_status: 'ok',
     jobState: 'closed',
@@ -54,6 +54,19 @@ export const getMockJobSummaryResponse = () => [
   {
     id: 'another_job',
     description: 'another job that is custom',
+    groups: ['auditbeat', 'process', 'security'],
+    processed_record_count: 0,
+    memory_status: 'ok',
+    jobState: 'opened',
+    hasDatafeed: true,
+    datafeedId: 'datafeed-another',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'started',
+    isSingleMetricViewerJob: true,
+  },
+  {
+    id: 'irrelevant_job',
+    description: 'a non-security job',
     groups: ['auditbeat', 'process'],
     processed_record_count: 0,
     memory_status: 'ok',

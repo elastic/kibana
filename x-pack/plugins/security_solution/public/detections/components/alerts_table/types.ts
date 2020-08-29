@@ -7,7 +7,7 @@
 import ApolloClient from 'apollo-client';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
+import { Ecs, NoteResult, TimelineNonEcsData } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
 
@@ -63,6 +63,7 @@ export interface CreateTimelineProps {
   from: string;
   timeline: TimelineModel;
   to: string;
+  notes: NoteResult[] | null;
   ruleNote?: string;
 }
 

@@ -5,49 +5,42 @@
  */
 
 import { Observable } from 'rxjs';
-import {
-  LegacyClusterClient,
-  KibanaRequest,
-  SavedObjectsServiceStart,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
 import { SpacesServiceSetup } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
-const includedHiddenTypes = ['action', 'alert'];
-
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectsService: SavedObjectsServiceStart;
+  savedObjectProviderRegistry: SavedObjectProviderRegistry;
   spacesService?: SpacesServiceSetup;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClientService implements IEventLogClientService {
   private esContext: EsContext;
-  private savedObjectsService: SavedObjectsServiceStart;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
   private spacesService?: SpacesServiceSetup;
 
-  constructor({ esContext, savedObjectsService, spacesService }: EventLogServiceCtorParams) {
+  constructor({
+    esContext,
+    savedObjectProviderRegistry,
+    spacesService,
+  }: EventLogServiceCtorParams) {
     this.esContext = esContext;
-    this.savedObjectsService = savedObjectsService;
+    this.savedObjectProviderRegistry = savedObjectProviderRegistry;
     this.spacesService = spacesService;
   }
 
   getClient(request: KibanaRequest) {
-    const savedObjectsClient: SavedObjectsClientContract = this.savedObjectsService.getScopedClient(
-      request,
-      { includedHiddenTypes }
-    );
-
     return new EventLogClient({
       esContext: this.esContext,
-      savedObjectsClient,
+      savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClient(request),
       spacesService: this.spacesService,
       request,
     });

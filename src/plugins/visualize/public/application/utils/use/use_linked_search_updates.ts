@@ -22,24 +22,23 @@ import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
 import { Filter } from 'src/plugins/data/public';
-import { VisualizeServices, VisualizeAppStateContainer, SavedVisInstance } from '../../types';
+import {
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+} from '../../types';
 
 export const useLinkedSearchUpdates = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   appState: VisualizeAppStateContainer | null,
-  savedVisInstance: SavedVisInstance | undefined
+  visInstance: VisualizeEditorVisInstance | undefined
 ) => {
   useEffect(() => {
-    if (
-      appState &&
-      savedVisInstance &&
-      savedVisInstance.savedSearch &&
-      savedVisInstance.vis.data.searchSource
-    ) {
-      const { savedSearch } = savedVisInstance;
+    if (appState && visInstance && visInstance.savedSearch && visInstance.vis.data.searchSource) {
+      const { savedSearch } = visInstance;
       // SearchSource is a promise-based stream of search results that can inherit from other search sources.
-      const { searchSource } = savedVisInstance.vis.data;
+      const { searchSource } = visInstance.vis.data;
 
       const unlinkFromSavedSearch = () => {
         const searchSourceParent = savedSearch.searchSource;
@@ -70,5 +69,5 @@ export const useLinkedSearchUpdates = (
         eventEmitter.off('unlinkFromSavedSearch', unlinkFromSavedSearch);
       };
     }
-  }, [appState, eventEmitter, savedVisInstance, services.toastNotifications]);
+  }, [appState, eventEmitter, visInstance, services.toastNotifications]);
 };

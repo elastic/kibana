@@ -8,8 +8,7 @@
 import contentDisposition from 'content-disposition';
 import { get } from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import { statuses } from '../../lib/esqueue/constants/statuses';
-import { ExportTypesRegistry } from '../../lib/export_types_registry';
+import { ExportTypesRegistry, statuses } from '../../lib';
 import { ExportTypeDefinition, JobSource, TaskRunResult } from '../../types';
 
 type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
@@ -18,11 +17,11 @@ interface ErrorFromPayload {
   message: string;
 }
 
-// A camelCase version of TaskRunResult
+// interface of the API result
 interface Payload {
   statusCode: number;
   content: string | Buffer | ErrorFromPayload;
-  contentType: string;
+  contentType: string | null;
   headers: Record<string, any>;
 }
 

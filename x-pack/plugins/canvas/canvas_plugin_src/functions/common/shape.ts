@@ -34,7 +34,7 @@ interface Arguments {
   maintainAspect: boolean;
 }
 
-interface Output extends Arguments {
+export interface Output extends Arguments {
   type: 'shape';
 }
 

@@ -20,5 +20,5 @@ export function getFieldType(columns: DatatableColumn[], field?: string): string
   }
   const realField = unquoteString(field);
   const column = columns.find((dataTableColumn) => dataTableColumn.name === realField);
-  return column ? column.type : 'null';
+  return column ? column.meta.type : 'null';
 }

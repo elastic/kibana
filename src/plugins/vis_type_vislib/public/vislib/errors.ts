@@ -19,6 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { i18n } from '@kbn/i18n';
 import { KbnError } from '../../../kibana_utils/public';
 
 export class VislibError extends KbnError {
@@ -51,6 +52,10 @@ export class PieContainsAllZeros extends VislibError {
 
 export class NoResults extends VislibError {
   constructor() {
-    super('No results found');
+    super(
+      i18n.translate('visTypeVislib.vislib.errors.noResultsFoundTitle', {
+        defaultMessage: 'No results found',
+      })
+    );
   }
 }

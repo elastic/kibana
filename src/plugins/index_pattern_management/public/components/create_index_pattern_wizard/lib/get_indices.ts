@@ -38,7 +38,7 @@ const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
 
 export async function getIndices(
   http: HttpStart,
-  indexPatternCreationType: IndexPatternCreationConfig,
+  getIndexTags: IndexPatternCreationConfig['getIndexTags'],
   rawPattern: string,
   showAllIndices: boolean
 ): Promise<MatchedItem[]> {
@@ -73,7 +73,7 @@ export async function getIndices(
       return [];
     }
 
-    return responseToItemArray(response, indexPatternCreationType);
+    return responseToItemArray(response, getIndexTags);
   } catch {
     return [];
   }
@@ -81,7 +81,7 @@ export async function getIndices(
 
 export const responseToItemArray = (
   response: ResolveIndexResponse,
-  indexPatternCreationType: IndexPatternCreationConfig
+  getIndexTags: IndexPatternCreationConfig['getIndexTags']
 ): MatchedItem[] => {
   const source: MatchedItem[] = [];
 
@@ -89,7 +89,7 @@ export const responseToItemArray = (
     const tags: MatchedItem['tags'] = [{ key: 'index', name: indexLabel, color: 'default' }];
     const isFrozen = (index.attributes || []).includes(ResolveIndexResponseItemIndexAttrs.FROZEN);
 
-    tags.push(...indexPatternCreationType.getIndexTags(index.name));
+    tags.push(...getIndexTags(index.name));
     if (isFrozen) {
       tags.push({ name: frozenLabel, key: 'frozen', color: 'danger' });
     }

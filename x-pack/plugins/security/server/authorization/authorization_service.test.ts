@@ -13,8 +13,8 @@ import {
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
-import { BehaviorSubject } from 'rxjs';
-import { CoreStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import { Subject } from 'rxjs';
+import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
@@ -22,6 +22,7 @@ import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
 import { AuthorizationService } from '.';
 
+import { nextTick } from 'test_utils/enzyme_helpers';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -29,8 +30,6 @@ import {
 } from '../../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { nextTick } from 'test_utils/enzyme_helpers';
 
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;
@@ -68,7 +67,6 @@ it(`#setup returns exposed services`, () => {
   const authz = authorizationService.setup({
     http: mockCoreSetup.http,
     capabilities: mockCoreSetup.capabilities,
-    status: mockCoreSetup.status,
     clusterClient: mockClusterClient,
     license: mockLicense,
     loggers: loggingSystemMock.create(),
@@ -115,31 +113,19 @@ it(`#setup returns exposed services`, () => {
 });
 
 describe('#start', () => {
-  let statusSubject: BehaviorSubject<CoreStatus>;
-  let licenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
-  let mockLicense: jest.Mocked<SecurityLicense>;
+  let statusSubject: Subject<OnlineStatusRetryScheduler>;
   beforeEach(() => {
+    statusSubject = new Subject<OnlineStatusRetryScheduler>();
+
     const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
-
-    licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
-    mockLicense = licenseMock.create();
-    mockLicense.isEnabled.mockReturnValue(false);
-    mockLicense.features$ = licenseSubject;
-
-    statusSubject = new BehaviorSubject<CoreStatus>({
-      elasticsearch: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
-      savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
-    });
     const mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.status.core$ = statusSubject;
 
     const authorizationService = new AuthorizationService();
     authorizationService.setup({
       http: mockCoreSetup.http,
       capabilities: mockCoreSetup.capabilities,
-      status: mockCoreSetup.status,
       clusterClient: mockClusterClient,
-      license: mockLicense,
+      license: licenseMock.create(),
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
@@ -152,95 +138,64 @@ describe('#start', () => {
     const featuresStart = featuresPluginMock.createStart();
     featuresStart.getFeatures.mockReturnValue([]);
 
-    authorizationService.start({ clusterClient: mockClusterClient, features: featuresStart });
+    authorizationService.start({
+      clusterClient: mockClusterClient,
+      features: featuresStart,
+      online$: statusSubject.asObservable(),
+    });
 
     // ES and license aren't available yet.
     expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
   });
 
   it('registers cluster privileges', async () => {
-    // ES is available now, but not license.
-    statusSubject.next({
-      elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
-      savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
-    });
-    expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
-
-    // Both ES and license are available now.
-    mockLicense.isEnabled.mockReturnValue(true);
-    licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+    const retryScheduler = jest.fn();
+    statusSubject.next({ scheduleRetry: retryScheduler });
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
 
-    await nextTick();
-
     // New changes still trigger privileges re-registration.
-    licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+    statusSubject.next({ scheduleRetry: retryScheduler });
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
+    expect(retryScheduler).not.toHaveBeenCalled();
   });
 
   it('schedules retries if fails to register cluster privileges', async () => {
-    jest.useFakeTimers();
-
     mockRegisterPrivilegesWithCluster.mockRejectedValue(new Error('Some error'));
 
-    // Both ES and license are available.
-    mockLicense.isEnabled.mockReturnValue(true);
-    statusSubject.next({
-      elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
-      savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
-    });
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
+    const retryScheduler = jest.fn();
+    statusSubject.next({ scheduleRetry: retryScheduler });
+    await nextTick();
 
-    // Next retry isn't performed immediately, retry happens only after a timeout.
-    await nextTick();
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(100);
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
+    expect(retryScheduler).toHaveBeenCalledTimes(1);
 
-    // Delay between consequent retries is increasing.
+    statusSubject.next({ scheduleRetry: retryScheduler });
     await nextTick();
-    jest.advanceTimersByTime(100);
+
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
-    await nextTick();
-    jest.advanceTimersByTime(100);
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(3);
+    expect(retryScheduler).toHaveBeenCalledTimes(2);
 
     // When call finally succeeds retries aren't scheduled anymore.
     mockRegisterPrivilegesWithCluster.mockResolvedValue(undefined);
+    statusSubject.next({ scheduleRetry: retryScheduler });
     await nextTick();
-    jest.runAllTimers();
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
-    await nextTick();
-    jest.runAllTimers();
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(4);
 
-    // New changes still trigger privileges re-registration.
-    licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(5);
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(3);
+    expect(retryScheduler).toHaveBeenCalledTimes(2);
   });
 });
 
-it('#stop unsubscribes from license and ES updates.', () => {
+it('#stop unsubscribes from license and ES updates.', async () => {
   const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
-
-  const licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
-  const mockLicense = licenseMock.create();
-  mockLicense.isEnabled.mockReturnValue(false);
-  mockLicense.features$ = licenseSubject;
-
+  const statusSubject = new Subject<OnlineStatusRetryScheduler>();
   const mockCoreSetup = coreMock.createSetup();
-  mockCoreSetup.status.core$ = new BehaviorSubject<CoreStatus>({
-    elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
-    savedObjects: { level: ServiceStatusLevels.available, summary: 'Service is working' },
-  });
 
   const authorizationService = new AuthorizationService();
   authorizationService.setup({
     http: mockCoreSetup.http,
     capabilities: mockCoreSetup.capabilities,
-    status: mockCoreSetup.status,
     clusterClient: mockClusterClient,
-    license: mockLicense,
+    license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
@@ -252,12 +207,19 @@ it('#stop unsubscribes from license and ES updates.', () => {
 
   const featuresStart = featuresPluginMock.createStart();
   featuresStart.getFeatures.mockReturnValue([]);
-  authorizationService.start({ clusterClient: mockClusterClient, features: featuresStart });
+  authorizationService.start({
+    clusterClient: mockClusterClient,
+    features: featuresStart,
+    online$: statusSubject.asObservable(),
+  });
 
   authorizationService.stop();
 
-  // After stop we don't register privileges even if all requirements are met.
-  mockLicense.isEnabled.mockReturnValue(true);
-  licenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+  // After stop we don't register privileges even if status changes.
+  const retryScheduler = jest.fn();
+  statusSubject.next({ scheduleRetry: retryScheduler });
+  await nextTick();
+
   expect(mockRegisterPrivilegesWithCluster).not.toHaveBeenCalled();
+  expect(retryScheduler).not.toHaveBeenCalled();
 });

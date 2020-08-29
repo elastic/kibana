@@ -46,7 +46,7 @@ import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
-import { repeatImage } from './repeatImage';
+import { repeatImage } from './repeat_image';
 import { revealImage } from './revealImage';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
