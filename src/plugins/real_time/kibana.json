@@ -1,0 +1,10 @@
+{
+  "id": "realTime",
+  "server": true,
+  "ui": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["realTime"],
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
