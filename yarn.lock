@@ -21474,6 +21474,20 @@ ospath@1.2.2:
   resolved "https://registry.yarnpkg.com/ospath/-/ospath-1.2.2.tgz#1276639774a3f8ef2572f7fe4280e0ea4550c07b"
   integrity sha1-EnZjl3Sj+O8lcvf+QoDg6kVQwHs=
 
+ot-json1@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ot-json1/-/ot-json1-1.0.1.tgz#294ec53857493d7dc76bbfa338d34c31a67ead22"
+  integrity sha512-UWZxuZ1v3QYq2Rip3TD5rGxGPZscukB4qo5hwu6gP4gcB/wxExI7LoZen4ezxltB9JdkDmmMI6ihFQxbW+EmZQ==
+  dependencies:
+    ot-text-unicode "4"
+
+ot-text-unicode@4:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/ot-text-unicode/-/ot-text-unicode-4.0.0.tgz#778a327535c81ed265b36ebe1bd677f31bae1e32"
+  integrity sha512-W7ZLU8QXesY2wagYFv47zErXud3E93FGImmSGJsQnBzE+idcPPyo2u2KMilIrTwBh4pbCizy71qRjmmV6aDhcQ==
+  dependencies:
+    unicount "1.1"
+
 p-all@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/p-all/-/p-all-2.1.0.tgz#91419be56b7dee8fe4c5db875d55e0da084244a0"
@@ -28439,6 +28453,11 @@ unicode-trie@^2.0.0:
   dependencies:
     pako "^0.2.5"
     tiny-inflate "^1.0.0"
+
+unicount@1.1:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/unicount/-/unicount-1.1.0.tgz#396a3df661c19675a93861ac878c2c9c0042abf0"
+  integrity sha512-RlwWt1ywVW4WErPGAVHw/rIuJ2+MxvTME0siJ6lk9zBhpDfExDbspe6SRlWT3qU6AucNjotPl9qAJRVjP7guCQ==
 
 unified@^6.1.5:
   version "6.1.6"
