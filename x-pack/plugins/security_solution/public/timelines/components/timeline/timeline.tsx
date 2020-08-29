@@ -317,6 +317,7 @@ export const TimelineComponent: React.FC<Props> = ({
                     data={events}
                     docValueFields={docValueFields}
                     id={id}
+                    refetch={refetch}
                     sort={sort}
                     toggleColumn={toggleColumn}
                   />

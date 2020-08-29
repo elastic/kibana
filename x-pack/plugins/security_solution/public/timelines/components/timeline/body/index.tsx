@@ -6,6 +6,7 @@
 
 import React, { useMemo, useRef } from 'react';
 
+import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
@@ -57,6 +58,7 @@ export interface BodyProps {
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
+  refetch: inputsModel.Refetch;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   show: boolean;
@@ -103,6 +105,7 @@ export const Body = React.memo<BodyProps>(
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
+    refetch,
     selectedEventIds,
     show,
     showCheckboxes,
@@ -184,6 +187,7 @@ export const Body = React.memo<BodyProps>(
               onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
+              refetch={refetch}
               rowRenderers={rowRenderers}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}

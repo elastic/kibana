@@ -34,7 +34,7 @@ import { getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
-import { StoreState } from '../../../../../common/store';
+import { inputsModel, StoreState } from '../../../../../common/store';
 
 interface Props {
   actionsColumnWidth: number;
@@ -56,6 +56,7 @@ interface Props {
   onUnPinEvent: OnUnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   isEventPinned: boolean;
+  refetch: inputsModel.Refetch;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -122,6 +123,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   onRowSelected,
   onUnPinEvent,
   onUpdateColumns,
+  refetch,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -207,6 +209,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                     onPinEvent={onPinEvent}
                     onRowSelected={onRowSelected}
                     onUnPinEvent={onUnPinEvent}
+                    refetch={refetch}
                     selectedEventIds={selectedEventIds}
                     showCheckboxes={showCheckboxes}
                     showNotes={!!showNotes[event._id]}

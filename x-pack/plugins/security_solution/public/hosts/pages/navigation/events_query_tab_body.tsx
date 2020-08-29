@@ -14,7 +14,7 @@ import { hostsModel } from '../../store';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
@@ -41,7 +41,7 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'event.action';
 
-export const histogramConfigs: MatrixHisrogramConfigs = {
+export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,

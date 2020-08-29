@@ -28,6 +28,7 @@ import { InvestigateInTimelineAction } from '../../../../../detections/component
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { StoreState } from '../../../../../common/store/types';
+import { inputsModel } from '../../../../../common/store';
 import { TimelineId } from '../../../../../../common/types/timeline';
 
 import { TimelineModel } from '../../../../store/timeline/model';
@@ -52,6 +53,7 @@ interface Props {
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
+  refetch: inputsModel.Refetch;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   showNotes: boolean;
@@ -85,6 +87,7 @@ export const EventColumnView = React.memo<Props>(
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
+    refetch,
     selectedEventIds,
     showCheckboxes,
     showNotes,
@@ -155,6 +158,7 @@ export const EventColumnView = React.memo<Props>(
           nonEcsRowData={data}
           timelineId={timelineId}
           disabled={eventType !== 'signal'}
+          refetch={refetch}
         />,
       ],
       [
@@ -168,6 +172,7 @@ export const EventColumnView = React.memo<Props>(
         id,
         isEventPinned,
         isEventViewer,
+        refetch,
         showNotes,
         status,
         timelineId,

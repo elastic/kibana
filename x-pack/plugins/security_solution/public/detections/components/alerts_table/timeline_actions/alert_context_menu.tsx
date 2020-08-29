@@ -38,12 +38,14 @@ import {
   displaySuccessToast,
   displayErrorToast,
 } from '../../../../common/components/toasters';
+import { inputsModel } from '../../../../common/store';
 import { useUserData } from '../../user_info';
 
 interface AlertContextMenuProps {
   disabled: boolean;
   ecsRowData: Ecs;
   nonEcsRowData: TimelineNonEcsData[];
+  refetch: inputsModel.Refetch;
   timelineId: string;
 }
 
@@ -59,6 +61,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   disabled,
   ecsRowData,
   nonEcsRowData,
+  refetch,
   timelineId,
 }) => {
   const dispatch = useDispatch();
@@ -107,9 +110,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closeAddExceptionModal();
   }, [closeAddExceptionModal]);
 
-  const onAddExceptionConfirm = useCallback(() => closeAddExceptionModal(), [
-    closeAddExceptionModal,
-  ]);
+  const onAddExceptionConfirm = useCallback(() => {
+    refetch();
+    closeAddExceptionModal();
+  }, [refetch, closeAddExceptionModal]);
 
   const onAlertStatusUpdateSuccess = useCallback(
     (count: number, newStatus: Status) => {
