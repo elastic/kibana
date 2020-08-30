@@ -21,6 +21,8 @@ import {
   NetworkHttpRequestOptions,
   NetworkTopCountriesStrategyResponse,
   NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+  NetworkTopNFlowRequestOptions,
 } from './network';
 
 export * from './hosts';
@@ -117,6 +119,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkHttpStrategyResponse
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesStrategyResponse
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -129,9 +133,16 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkHttpRequestOptions
   : T extends NetworkQueries.topCountries
   ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
   : never;
 
 export interface GenericBuckets {
   key: string;
   doc_count: number;
+}
+
+export interface TotalValue {
+  value: number;
+  relation: string;
 }
