@@ -17,18 +17,65 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { RealTimeJsonClient } from '../json';
-import { RpcMessageSubscribe, RpcMessageComplete } from './types';
+import { RpcMessageSubscribe, RpcMessageComplete, RpcMessageError } from './types';
+import { ping } from './methods/ping';
 
 export interface RealTimeRpcParams {
   jsonClient: RealTimeJsonClient;
 }
 
+export type Method = (params: RealTimeRpcParams, payload: unknown) => Observable<unknown>;
+export type Methods = Record<string, undefined | Method>;
+
+export const isSubscribeMessage = (x: unknown): x is RpcMessageSubscribe => {
+  if (!Array.isArray(x) || (x.length !== 3 && x.length !== 2)) return false;
+
+  const [id, method] = x as RpcMessageSubscribe;
+
+  if (typeof id !== 'number') return false;
+  if (id < 1) return false;
+  if (Math.round(id) !== id) return false;
+
+  if (typeof method !== 'string') return false;
+  if (!method || method.length > 128) return false;
+
+  return true;
+};
+
 export class RealTimeRpc {
+  private methods: Methods = {
+    ping,
+  };
+
   constructor(public readonly params: RealTimeRpcParams) {}
 
-  public async executeMethod(message: RpcMessageSubscribe): Promise<RpcMessageComplete> {
-    const [id, payload] = message;
-    return [0, id, 'world'];
+  public async executeMethod(
+    message: RpcMessageSubscribe
+  ): Promise<RpcMessageComplete | RpcMessageError> {
+    if (!isSubscribeMessage(message)) {
+      throw new Error('Not a subscribe message');
+    }
+
+    const [id, name, payload] = message;
+
+    try {
+      if (!this.methods.hasOwnProperty(name)) {
+        throw new Error(`Unknown method [${name}].`);
+      }
+
+      const method = this.methods[name];
+      const observable = method!(this.params, payload).pipe(take(1));
+      const result = await observable.toPromise();
+
+      return [0, id, result];
+    } catch (error) {
+      const errorResponse = {
+        message: error instanceof Error ? error.message : String(error),
+      };
+      return [-1, id, errorResponse];
+    }
   }
 }
