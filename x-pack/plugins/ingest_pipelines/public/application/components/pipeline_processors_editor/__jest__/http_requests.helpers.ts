@@ -5,17 +5,8 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
-
-import { uiMetricService, apiService } from '../../../services';
 
 type HttpResponse = Record<string, any> | any[];
-
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
@@ -37,11 +28,6 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
 export const initHttpRequests = () => {
   const server = sinon.fakeServer.create();
-
-  // Initialize mock services
-  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  // @ts-ignore
-  apiService.setup(mockHttpClient, uiMetricService);
 
   server.respondImmediately = true;
 

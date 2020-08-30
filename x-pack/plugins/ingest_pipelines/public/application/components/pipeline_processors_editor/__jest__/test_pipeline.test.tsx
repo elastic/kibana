@@ -7,8 +7,7 @@
 import { Pipeline } from '../../../../../common/types';
 
 import { VerboseTestOutput, Document } from '../types';
-import { setup, SetupResult } from './test_pipeline.helpers';
-import { initHttpRequests } from './http_requests.helpers';
+import { setup, SetupResult, setupEnvironment } from './test_pipeline.helpers';
 import { DOCUMENTS, SIMULATE_RESPONSE, PROCESSORS } from './constants';
 
 interface ReqBody {
@@ -21,7 +20,7 @@ describe('Test pipeline', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();

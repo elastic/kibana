@@ -5,13 +5,26 @@
  */
 import { act } from 'react-dom/test-utils';
 import React from 'react';
+import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
+
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import { stubWebWorker } from '../../../../../../../test_utils/stub_web_worker';
+
+import {
+  breadcrumbService,
+  uiMetricService,
+  documentationService,
+  apiService,
+} from '../../../services';
+
 import {
   ProcessorsEditorContextProvider,
   Props,
@@ -20,12 +33,7 @@ import {
 } from '../';
 import { TestPipelineActions } from '../';
 
-import {
-  breadcrumbService,
-  uiMetricService,
-  documentationService,
-  apiService,
-} from '../../../services';
+import { initHttpRequests } from './http_requests.helpers';
 
 stubWebWorker();
 
@@ -93,7 +101,8 @@ const testBedSetup = registerTestBed<TestSubject>(
     <KibanaContextProvider services={appServices}>
       <ProcessorsEditorContextProvider {...props}>
         <TestPipelineActions />
-        <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
+        <ProcessorsEditor />
+        <GlobalOnFailureProcessorsEditor />
       </ProcessorsEditorContextProvider>
     </KibanaContextProvider>
   ),
@@ -179,6 +188,22 @@ export const setup = async (props: Props): Promise<SetupResult> => {
   return {
     ...testBed,
     actions: createActions(testBed),
+  };
+};
+
+const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+
+export const setupEnvironment = () => {
+  // Initialize mock services
+  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
+  // @ts-ignore
+  apiService.setup(mockHttpClient, uiMetricService);
+
+  const { server, httpRequestsMockHelpers } = initHttpRequests();
+
+  return {
+    server,
+    httpRequestsMockHelpers,
   };
 };
 
