@@ -96,7 +96,7 @@ export class RealTimePlugin
         savedObjectsClient,
       };
       const jsonClient = this.jsonClientProvider!.create(params);
-      const rpc = new RealTimeRpc({ jsonClient });
+      const rpc = new RealTimeRpc({ logger: this.logger, savedObjectsClient, jsonClient });
       const tagsContext: RealTimeRequestHandlerContext = {
         jsonClient,
         rpc,

@@ -55,7 +55,15 @@ export class RealTimePlugin
   public start(core: CoreStart, plugins: RealTimePluginStartDependencies): RealTimesPluginStart {
     core.http
       .post(`${REAL_TIME_API_PATH}/_rpc`, {
-        body: JSON.stringify([1, 'ping']),
+        body: JSON.stringify([
+          1,
+          'patch',
+          {
+            type: 'dashboard',
+            id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+            patch: [{ op: 'replace', path: '/title', value: 'foo bar' }],
+          },
+        ]),
       })
       .then((response) => {
         // eslint-disable-next-line
