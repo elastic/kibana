@@ -134,11 +134,6 @@ export const useRequest = <D = any, E = Error>(
 
   // Schedule the next poll request when the previous one completes.
   useEffect(() => {
-    if (isMounted.current === false) {
-      // Don't schedule a request on component mount.
-      return;
-    }
-
     // When a request completes, attempt to schedule the next one. Note that we aren't re-scheduling
     // a request whenever sendRequest's dependencies change.
     if (!isLoading) {
