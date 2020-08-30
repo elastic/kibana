@@ -23,8 +23,14 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
+  IContextProvider,
+  RequestHandler,
 } from '../../../../src/core/server';
 import { opsSavedObjectType } from './saved_objects';
+import { RealTimeRequestHandlerContext } from './types';
+import { RealTimeJsonClientProvider } from './json';
+import { RealTimeRpc } from './rpc';
+import { setupRoutes } from './router';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface RealTimePluginSetupDependencies {}
@@ -45,6 +51,7 @@ export class RealTimePlugin
       RealTimePluginStartDependencies
     > {
   private readonly logger: Logger;
+  private jsonClientProvider?: RealTimeJsonClientProvider;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'tags');
@@ -54,11 +61,19 @@ export class RealTimePlugin
     core: CoreSetup<RealTimePluginStartDependencies, unknown>,
     plugins: RealTimePluginSetupDependencies
   ): RealTimePluginSetup {
+    const { logger } = this;
+    const { http, savedObjects } = core;
+
     this.logger.debug('setup()');
 
-    const { savedObjects } = core;
+    this.jsonClientProvider = new RealTimeJsonClientProvider({ logger });
 
     savedObjects.registerType(opsSavedObjectType);
+
+    const router = http.createRouter();
+
+    http.registerRouteHandlerContext('realTime', this.createRouteHandlerContext(core, plugins));
+    setupRoutes({ router });
 
     return {};
   }
@@ -68,4 +83,26 @@ export class RealTimePlugin
 
     return {};
   }
+
+  private createRouteHandlerContext = (
+    setupCore: CoreSetup,
+    setupPlugins: RealTimePluginSetupDependencies
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'realTime'> => {
+    return async (context, request) => {
+      const [core] = await setupCore.getStartServices();
+      const { savedObjects } = core;
+      const savedObjectsClient = savedObjects.getScopedClient(request);
+      const params = {
+        savedObjectsClient,
+      };
+      const jsonClient = this.jsonClientProvider!.create(params);
+      const rpc = new RealTimeRpc({ jsonClient });
+      const tagsContext: RealTimeRequestHandlerContext = {
+        jsonClient,
+        rpc,
+      };
+
+      return tagsContext;
+    };
+  };
 }

@@ -23,6 +23,7 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
+import { REAL_TIME_API_PATH } from '../common';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface RealTimePluginSetupDependencies {}
@@ -52,6 +53,15 @@ export class RealTimePlugin
   }
 
   public start(core: CoreStart, plugins: RealTimePluginStartDependencies): RealTimesPluginStart {
+    core.http
+      .post(`${REAL_TIME_API_PATH}/_rpc`, {
+        body: JSON.stringify([1, 'hello', { foo: 'bar' }]),
+      })
+      .then((response) => {
+        // eslint-disable-next-line
+        console.log('real-time', response);
+      });
+
     return {};
   }
 }

@@ -19,7 +19,7 @@
 
 import { RealTimeJsonClient, RealTimeJsonClientParams } from './real_time_json_client';
 
-export class TagsClientProvider {
+export class RealTimeJsonClientProvider {
   constructor(private readonly initParams: Pick<RealTimeJsonClientParams, 'logger'>) {}
 
   public readonly create = (

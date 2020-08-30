@@ -21,7 +21,7 @@ import { RealTimeJsonClient } from '../json';
 import { RpcMessageSubscribe, RpcMessageComplete } from './types';
 
 export interface RealTimeRpcParams {
-  json: RealTimeJsonClient;
+  jsonClient: RealTimeJsonClient;
 }
 
 export class RealTimeRpc {
