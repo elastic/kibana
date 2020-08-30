@@ -17,6 +17,24 @@
  * under the License.
  */
 
-export * from './types';
-export * from './constants';
-export * from './rpc';
+import { Operation } from 'fast-json-patch';
+import { Future } from './types';
+
+type Method<Input, Output> = (input: Input) => Future<Output>;
+
+export interface IRealTimeRpcClient {
+  ping: Method<unknown, 'pong'>;
+  patch: Method<RpcPatchInput, RpcPatchOutput>;
+}
+
+export type JsonPatch = Operation[];
+
+export interface RpcPatchInput {
+  type: string;
+  id: string;
+  patch: JsonPatch;
+}
+
+export interface RpcPatchOutput {
+  document: unknown;
+}

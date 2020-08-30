@@ -61,7 +61,7 @@ export class RealTimePlugin
           {
             type: 'dashboard',
             id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-            patch: [{ op: 'replace', path: '/title', value: 'foo bar' }],
+            patch: [{ op: 'replace', path: '/title', value: 'foo bar 2' }],
           },
         ]),
       })

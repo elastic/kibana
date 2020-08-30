@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export * from './types';
-export * from './constants';
-export * from './rpc';
+import { RpcPatchInput } from '../../common';
+
+export const validatePatchPayload = (x: unknown): x is RpcPatchInput => {
+  if (typeof x !== 'object') throw new Error('Payload must be object');
+  if (typeof (x as RpcPatchInput).type !== 'string') throw new Error('Type must be string');
+  if (typeof (x as RpcPatchInput).id !== 'string') throw new Error('ID must be string');
+  if (!Array.isArray((x as RpcPatchInput).patch)) throw new Error('Patch must be an array.');
+  return true;
+};

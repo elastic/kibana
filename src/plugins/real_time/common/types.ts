@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { of } from 'rxjs';
-import { Method } from '../rpc';
+import { Observable } from 'rxjs';
 
-export const ping: Method = (params, payload) => of('pong');
+export type Future<T> = Promise<T> | Observable<T>;

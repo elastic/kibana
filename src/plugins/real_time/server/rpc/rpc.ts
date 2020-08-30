@@ -22,8 +22,7 @@ import { take } from 'rxjs/operators';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { RealTimeJsonClient } from '../json';
 import { RpcMessageSubscribe, RpcMessageComplete, RpcMessageError } from './types';
-import { ping } from './methods/ping';
-import { patch } from './methods/patch';
+import { RpcClient } from './rpc_client';
 
 export interface RealTimeRpcParams {
   logger: Logger;
@@ -32,7 +31,7 @@ export interface RealTimeRpcParams {
 }
 
 export type Future<T> = Promise<T> | Observable<T>;
-export type Method = (params: RealTimeRpcParams, payload: unknown) => Future<unknown>;
+export type Method = (payload: unknown) => Future<unknown>;
 export type Methods = Record<string, undefined | Method>;
 
 const isPromise = (x: unknown): x is Promise<unknown> =>
@@ -54,12 +53,11 @@ export const isSubscribeMessage = (x: unknown): x is RpcMessageSubscribe => {
 };
 
 export class RealTimeRpc {
-  private methods: Methods = {
-    ping,
-    patch,
-  };
+  private methods: Methods;
 
-  constructor(public readonly params: RealTimeRpcParams) {}
+  constructor(public readonly params: RealTimeRpcParams) {
+    this.methods = (new RpcClient(params) as unknown) as Methods;
+  }
 
   public async executeMethod(
     message: RpcMessageSubscribe
@@ -76,7 +74,7 @@ export class RealTimeRpc {
       }
 
       const method = this.methods[name];
-      const future = method!(this.params, payload);
+      const future = method!(payload);
       const promise = isPromise(future) ? future : future.pipe(take(1)).toPromise();
       const result = await promise;
 
