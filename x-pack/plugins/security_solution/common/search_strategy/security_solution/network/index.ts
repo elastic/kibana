@@ -9,23 +9,17 @@ import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common'
 import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '..';
 
 export * from './common';
+export * from './dns';
 export * from './http';
 export * from './top_countries';
 export * from './top_n_flow';
 
 export enum NetworkQueries {
+  dns = 'dns',
   http = 'http',
   tls = 'tls',
   topCountries = 'topCountries',
   topNFlow = 'topNFlow',
-}
-
-export enum NetworkDnsFields {
-  dnsName = 'dnsName',
-  queryCount = 'queryCount',
-  uniqueDomains = 'uniqueDomains',
-  dnsBytesIn = 'dnsBytesIn',
-  dnsBytesOut = 'dnsBytesOut',
 }
 
 export interface TlsBuckets {

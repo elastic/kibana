@@ -15,6 +15,8 @@ import {
 } from './hosts';
 import {
   NetworkQueries,
+  NetworkDnsStrategyResponse,
+  NetworkDnsRequestOptions,
   NetworkTlsStrategyResponse,
   NetworkTlsRequestOptions,
   NetworkHttpStrategyResponse,
@@ -113,6 +115,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.hostOverview
   ? HostOverviewStrategyResponse
+  : T extends NetworkQueries.dns
+  ? NetworkDnsStrategyResponse
   : T extends NetworkQueries.tls
   ? NetworkTlsStrategyResponse
   : T extends NetworkQueries.http
@@ -127,6 +131,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsRequestOptions
   : T extends HostsQueries.hostOverview
   ? HostOverviewRequestOptions
+  : T extends NetworkQueries.dns
+  ? NetworkDnsRequestOptions
   : T extends NetworkQueries.tls
   ? NetworkTlsRequestOptions
   : T extends NetworkQueries.http
