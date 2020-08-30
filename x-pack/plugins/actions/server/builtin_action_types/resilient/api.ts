@@ -12,6 +12,7 @@ import {
   GetIncidentApiHandlerArgs,
   ExternalServiceApi,
   Incident,
+  GetIncidentTypesHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -30,6 +31,11 @@ const getIncidentHandler = async ({
   mapping,
   params,
 }: GetIncidentApiHandlerArgs) => {};
+
+const getIncidentTypesHandler = async ({ externalService }: GetIncidentTypesHandlerArgs) => {
+  const res = await externalService.getIncidentTypes();
+  return res;
+};
 
 const pushToServiceHandler = async ({
   externalService,
@@ -157,4 +163,5 @@ export const api: ExternalServiceApi = {
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
+  incidentTypes: getIncidentTypesHandler,
 };

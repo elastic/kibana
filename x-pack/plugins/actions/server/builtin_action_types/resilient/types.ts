@@ -14,6 +14,7 @@ import {
   ExecutorSubActionPushParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionGetIncidentTypesParamsSchema,
 } from './schema';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -80,17 +81,24 @@ export interface CreateCommentParams {
   comment: Comment;
 }
 
+export type GetIncidentTypesResponse = Array<{ id: string; name: string }>;
+
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
+  getIncidentTypes: () => Promise<GetIncidentTypesResponse>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
   externalObject: Record<string, any>;
 }
+
+export type ExecutorSubActionGetIncidentTypesParams = TypeOf<
+  typeof ExecutorSubActionGetIncidentTypesParamsSchema
+>;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
@@ -119,11 +127,19 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionHandshakeParams;
 }
 
+export interface GetIncidentTypesHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionGetIncidentTypesParams;
+}
+
 export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+  incidentTypes: (args: GetIncidentTypesHandlerArgs) => Promise<GetIncidentTypesResponse>;
 }
+
+export type ResilientExecutorResultData = PushToServiceResponse | GetIncidentTypesResponse;
 
 export interface UpdateFieldText {
   text: string;

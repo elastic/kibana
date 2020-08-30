@@ -17,21 +17,36 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
 import { api } from './api';
-import { ExecutorParams, ExecutorSubActionPushParams } from './types';
+import {
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  ResilientPublicConfigurationType,
+  ResilientSecretConfigurationType,
+  ResilientExecutorResultData,
+  ExecutorSubActionGetIncidentTypesParams,
+} from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
 // TODO: to remove, need to support Case
 import { buildMap, mapParams } from '../case/utils';
-import { PushToServiceResponse } from './case_types';
 
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
+const supportedSubActions: string[] = ['pushToService', 'incidentTypes'];
+
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
+export function getActionType(
+  params: GetActionTypeParams
+): ActionType<
+  ResilientPublicConfigurationType,
+  ResilientSecretConfigurationType,
+  ExecutorParams,
+  ResilientExecutorResultData | {}
+> {
   const { logger, configurationUtilities } = params;
   return {
     id: '.resilient',
@@ -53,16 +68,24 @@ export function getActionType(params: GetActionTypeParams): ActionType {
 // action executor
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: ActionTypeExecutorOptions<
+    ResilientPublicConfigurationType,
+    ResilientSecretConfigurationType,
+    ExecutorParams
+  >
+): Promise<ActionTypeExecutorResult<ResilientExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
-  let data: PushToServiceResponse | null = null;
+  let data: ResilientExecutorResultData | null = null;
 
-  const externalService = createExternalService({
-    config,
-    secrets,
-  });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    logger,
+    execOptions.proxySettings
+  );
 
   if (!api[subAction]) {
     const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
@@ -70,7 +93,7 @@ async function executor(
     throw new Error(errorMessage);
   }
 
-  if (subAction !== 'pushToService') {
+  if (!supportedSubActions.includes(subAction)) {
     const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
@@ -95,6 +118,14 @@ async function executor(
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  if (subAction === 'incidentTypes') {
+    const incidentTypesParams = subActionParams as ExecutorSubActionGetIncidentTypesParams;
+    data = await api.incidentTypes({
+      externalService,
+      params: incidentTypesParams,
+    });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

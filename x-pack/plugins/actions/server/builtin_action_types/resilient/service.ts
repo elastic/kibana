@@ -28,10 +28,6 @@ import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
 import { ProxySettings } from '../../types';
 
-const BASE_URL = `rest`;
-const INCIDENT_URL = `incidents`;
-const COMMENT_URL = `comments`;
-
 const VIEW_INCIDENT_URL = `#incidents`;
 
 export const getValueTextContent = (
@@ -79,8 +75,10 @@ export const createExternalService = (
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
-  const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/orgs/${orgId}/${INCIDENT_URL}`;
-  const commentUrl = `${incidentUrl}/{inc_id}/${COMMENT_URL}`;
+  const orgUrl = `${urlWithoutTrailingSlash}/rest/orgs/${orgId}`;
+  const incidentUrl = `${orgUrl}/incident`;
+  const commentUrl = `${incidentUrl}/{inc_id}/comments`;
+  const incidentTypesUrl = `${orgUrl}/types/incident/fields/incident_type_ids`;
   const axiosInstance = axios.create({
     auth: { username: apiKeyId, password: apiKeySecret },
   });
@@ -232,11 +230,34 @@ export const createExternalService = (
     }
   };
 
+  const getIncidentTypes = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: incidentTypesUrl,
+        logger,
+        proxySettings,
+      });
+
+      const incidentTypes = res.data?.values ?? [];
+      return incidentTypes.map((type: { value: string; label: string }) => ({
+        id: type.value,
+        name: type.label,
+      }));
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}`)
+      );
+    }
+  };
+
   return {
     findIncidents,
     getIncident,
     createIncident,
     updateIncident,
     createComment,
+    getIncidentTypes,
   };
 };
