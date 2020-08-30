@@ -15,6 +15,7 @@ import {
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
   ExecutorSubActionGetIncidentTypesParamsSchema,
+  ExecutorSubActionGetSeverityParamsSchema,
 } from './schema';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -82,6 +83,7 @@ export interface CreateCommentParams {
 }
 
 export type GetIncidentTypesResponse = Array<{ id: string; name: string }>;
+export type GetSeverityResponse = Array<{ id: string; name: string }>;
 
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
@@ -90,6 +92,7 @@ export interface ExternalService {
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   getIncidentTypes: () => Promise<GetIncidentTypesResponse>;
+  getSeverity: () => Promise<GetSeverityResponse>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
@@ -98,6 +101,10 @@ export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
 
 export type ExecutorSubActionGetIncidentTypesParams = TypeOf<
   typeof ExecutorSubActionGetIncidentTypesParamsSchema
+>;
+
+export type ExecutorSubActionGetSeverityParams = TypeOf<
+  typeof ExecutorSubActionGetSeverityParamsSchema
 >;
 
 export interface ExternalServiceApiHandlerArgs {
@@ -132,14 +139,23 @@ export interface GetIncidentTypesHandlerArgs {
   params: ExecutorSubActionGetIncidentTypesParams;
 }
 
+export interface GetSeverityHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionGetSeverityParams;
+}
+
 export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
   incidentTypes: (args: GetIncidentTypesHandlerArgs) => Promise<GetIncidentTypesResponse>;
+  severity: (args: GetSeverityHandlerArgs) => Promise<GetSeverityResponse>;
 }
 
-export type ResilientExecutorResultData = PushToServiceResponse | GetIncidentTypesResponse;
+export type ResilientExecutorResultData =
+  | PushToServiceResponse
+  | GetIncidentTypesResponse
+  | GetSeverityResponse;
 
 export interface UpdateFieldText {
   text: string;

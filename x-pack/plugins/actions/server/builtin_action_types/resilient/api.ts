@@ -13,6 +13,7 @@ import {
   ExternalServiceApi,
   Incident,
   GetIncidentTypesHandlerArgs,
+  GetSeverityHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -34,6 +35,11 @@ const getIncidentHandler = async ({
 
 const getIncidentTypesHandler = async ({ externalService }: GetIncidentTypesHandlerArgs) => {
   const res = await externalService.getIncidentTypes();
+  return res;
+};
+
+const getSeverityHandler = async ({ externalService }: GetSeverityHandlerArgs) => {
+  const res = await externalService.getSeverity();
   return res;
 };
 
@@ -164,4 +170,5 @@ export const api: ExternalServiceApi = {
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
   incidentTypes: getIncidentTypesHandler,
+  severity: getSeverityHandler,
 };

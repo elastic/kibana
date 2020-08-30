@@ -24,6 +24,7 @@ import {
   ResilientSecretConfigurationType,
   ResilientExecutorResultData,
   ExecutorSubActionGetIncidentTypesParams,
+  ExecutorSubActionGetSeverityParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
@@ -36,7 +37,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['pushToService', 'incidentTypes'];
+const supportedSubActions: string[] = ['pushToService', 'incidentTypes', 'severity'];
 
 // action type definition
 export function getActionType(
@@ -125,6 +126,14 @@ async function executor(
     data = await api.incidentTypes({
       externalService,
       params: incidentTypesParams,
+    });
+  }
+
+  if (subAction === 'severity') {
+    const severityParams = subActionParams as ExecutorSubActionGetSeverityParams;
+    data = await api.severity({
+      externalService,
+      params: severityParams,
     });
   }
 

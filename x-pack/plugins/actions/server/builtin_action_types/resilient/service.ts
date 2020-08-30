@@ -78,7 +78,9 @@ export const createExternalService = (
   const orgUrl = `${urlWithoutTrailingSlash}/rest/orgs/${orgId}`;
   const incidentUrl = `${orgUrl}/incident`;
   const commentUrl = `${incidentUrl}/{inc_id}/comments`;
-  const incidentTypesUrl = `${orgUrl}/types/incident/fields/incident_type_ids`;
+  const incidentFieldsUrl = `${orgUrl}/types/incident/fields`;
+  const incidentTypesUrl = `${incidentFieldsUrl}/incident_type_ids`;
+  const severityUrl = `${incidentFieldsUrl}/severity_code`;
   const axiosInstance = axios.create({
     auth: { username: apiKeyId, password: apiKeySecret },
   });
@@ -252,6 +254,28 @@ export const createExternalService = (
     }
   };
 
+  const getSeverity = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: severityUrl,
+        logger,
+        proxySettings,
+      });
+
+      const incidentTypes = res.data?.values ?? [];
+      return incidentTypes.map((type: { value: string; label: string }) => ({
+        id: type.value,
+        name: type.label,
+      }));
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}`)
+      );
+    }
+  };
+
   return {
     findIncidents,
     getIncident,
@@ -259,5 +283,6 @@ export const createExternalService = (
     updateIncident,
     createComment,
     getIncidentTypes,
+    getSeverity,
   };
 };
