@@ -19,6 +19,10 @@
 
 import { JSONOp, Doc } from 'ot-json1';
 
+export interface IRealTimeJsonClient {
+  create(collection: string, id: string): Promise<void>;
+}
+
 /**
  * Real time JSON client storage driver interface. This interface can be
  * implemented in-memory or to persist into Elasticsearch, or anywhere else.
