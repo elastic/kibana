@@ -115,19 +115,20 @@ export class IndexPattern implements IIndexPattern {
     shortDotsEnable = false,
     metaFields = [],
   }: IndexPatternDeps) {
-    this.id = spec.id;
+    // set dependencies
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldFormats = fieldFormats;
+    this.apiClient = apiClient;
+    // set callbacks
     this.onNotification = onNotification;
     this.onError = onError;
-
+    // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
 
+    // initialize functionality
     this.fields = new FieldList(this, [], this.shortDotsEnable, this.onNotification);
-
-    this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
@@ -135,6 +136,23 @@ export class IndexPattern implements IIndexPattern {
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
     );
     this.formatField = this.formatHit.formatField;
+
+    // set values
+    this.id = spec.id;
+    const fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
+
+    this.version = spec.version;
+
+    this.title = spec.title || '';
+    this.timeFieldName = spec.timeFieldName;
+    this.sourceFilters = spec.sourceFilters;
+
+    this.fields.replaceAll(spec.fields || []);
+    this.typeMeta = spec.typeMeta;
+
+    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
+      return this.deserializeFieldFormatMap(mapping);
+    });
   }
 
   private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
@@ -185,8 +203,35 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  private fieldSpecsToFieldFormatMap = (fieldList: IndexPatternSpec['fields'] = []) =>
+    fieldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
+      if (fieldSpec.format) {
+        col[fieldSpec.name] = { ...fieldSpec.format };
+      }
+      return col;
+    }, {});
+
+  /*
+    const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
+    fieldList.forEach((field: FieldSpec) => {
+      if (field.format) {
+        fieldFormatMap[field.name as string] = { ...field.format };
+      }
+    });
+
+    fieldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
+      if (fieldSpec.format) {
+        col[fieldSpec.name] = { ...fieldSpec.format };
+      }
+      return col;
+    }, {});
+  }
+  */
+
+  // this is swallowed by constructor
   public initFromSpec(spec: IndexPatternSpec) {
     // create fieldFormatMap from field list
+    /*
     const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
     if (_.isArray(spec.fields)) {
       spec.fields.forEach((field: FieldSpec) => {
@@ -195,6 +240,8 @@ export class IndexPattern implements IIndexPattern {
         }
       });
     }
+    */
+    const fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
 
     this.version = spec.version;
 
@@ -282,6 +329,9 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
+  // loads saved object
+  // caches object state
+  // deserializes and sets values
   async init(forceFieldRefresh = false) {
     if (!this.id) {
       return this; // no id === no elasticsearch document
