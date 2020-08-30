@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { HttpSetup } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getFieldsByIssueType } from './api';
@@ -34,33 +34,38 @@ export const useGetFieldsByIssueType = ({
 }: Props): UseCreateIssueMetadata => {
   const [isLoading, setIsLoading] = useState(true);
   const [fields, setFields] = useState<Fields>({});
+  const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
-    let cancel = false;
+    let didCancel = false;
     const fetchData = async () => {
       if (!issueType) {
         setIsLoading(false);
         return;
       }
 
+      abortCtrl.current = new AbortController();
       setIsLoading(true);
       const res = await getFieldsByIssueType({
         http,
+        signal: abortCtrl.current.signal,
         connectorId: actionConnector.id,
         id: issueType,
       });
 
-      if (!cancel) {
+      if (!didCancel) {
         setIsLoading(false);
         setFields(res.data);
       }
     };
 
+    abortCtrl.current.abort();
     fetchData();
 
     return () => {
-      cancel = true;
+      didCancel = true;
       setIsLoading(false);
+      abortCtrl.current.abort();
     };
   }, [http, actionConnector, issueType]);
 
