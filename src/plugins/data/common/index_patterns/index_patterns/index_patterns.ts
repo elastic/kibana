@@ -186,7 +186,8 @@ export class IndexPatternsService {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
-    const indexPattern = new IndexPattern(spec.id, {
+    const indexPattern = new IndexPattern({
+      spec: { id: spec.id },
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
@@ -205,7 +206,8 @@ export class IndexPatternsService {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
-    const indexPattern = new IndexPattern(id, {
+    const indexPattern = new IndexPattern({
+      spec: { id },
       savedObjectsClient: this.savedObjectsClient,
       apiClient: this.apiClient,
       patternCache: indexPatternCache,

@@ -45,6 +45,7 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
 interface IndexPatternDeps {
+  spec?: IndexPatternSpec;
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
@@ -103,20 +104,18 @@ export class IndexPattern implements IIndexPattern {
     typeMeta: 'json',
   });
 
-  constructor(
-    id: string | undefined,
-    {
-      savedObjectsClient,
-      apiClient,
-      patternCache,
-      fieldFormats,
-      onNotification,
-      onError,
-      shortDotsEnable = false,
-      metaFields = [],
-    }: IndexPatternDeps
-  ) {
-    this.id = id;
+  constructor({
+    spec = {},
+    savedObjectsClient,
+    apiClient,
+    patternCache,
+    fieldFormats,
+    onNotification,
+    onError,
+    shortDotsEnable = false,
+    metaFields = [],
+  }: IndexPatternDeps) {
+    this.id = spec.id;
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldFormats = fieldFormats;
@@ -505,7 +504,8 @@ export class IndexPattern implements IIndexPattern {
           _.get(err, 'res.status') === 409 &&
           saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
         ) {
-          const samePattern = new IndexPattern(this.id, {
+          const samePattern = new IndexPattern({
+            spec: { id: this.id },
             savedObjectsClient: this.savedObjectsClient,
             apiClient: this.apiClient,
             patternCache: this.patternCache,

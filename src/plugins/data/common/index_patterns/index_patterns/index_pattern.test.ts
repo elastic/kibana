@@ -110,7 +110,8 @@ const apiClient = {
 
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
-  const indexPattern = new IndexPattern(id, {
+  const indexPattern = new IndexPattern({
+    spec: { id },
     savedObjectsClient: savedObjectsClient as any,
     apiClient,
     patternCache,
@@ -399,7 +400,8 @@ describe('IndexPattern', () => {
       },
     });
     // Create a normal index pattern
-    const pattern = new IndexPattern('foo', {
+    const pattern = new IndexPattern({
+      spec: { id: 'foo' },
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
@@ -414,7 +416,8 @@ describe('IndexPattern', () => {
     expect(get(pattern, 'version')).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern('foo', {
+    const samePattern = new IndexPattern({
+      spec: { id: 'foo' },
       savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,

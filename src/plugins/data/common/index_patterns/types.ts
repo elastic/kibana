@@ -169,8 +169,7 @@ export interface FieldSpec {
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
-
-  title: string;
+  title?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
   fields?: FieldSpec[];
