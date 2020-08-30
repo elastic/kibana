@@ -30,7 +30,7 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
   readOnly,
   docLinks,
 }) => {
-  // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
+  // TODO: remove incidentConfiguration later, when Case Resilient will move their fields to the level of action execution
   const { apiUrl, orgId, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
 
@@ -49,6 +49,7 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
         mapping: createDefaultMapping(connectorConfiguration.fields as any),
       });
     }
+
     if (!isCaseOwned) {
       editActionConfig('isCaseOwned', true);
     }
@@ -185,7 +186,7 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+      {consumer === 'case' && ( // TODO: remove this block later, when Case Resilient will move their fields to the level of action execution
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
