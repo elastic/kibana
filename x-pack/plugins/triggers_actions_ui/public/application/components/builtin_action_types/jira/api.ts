@@ -7,23 +7,6 @@
 import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 
-export async function getCreateIssueMetadata({
-  http,
-  signal,
-  connectorId,
-}: {
-  http: HttpSetup;
-  signal: AbortSignal;
-  connectorId: string;
-}): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'getCreateIssueMetadata', subActionParams: {} },
-    }),
-    signal,
-  });
-}
-
 export async function getIssueTypes({
   http,
   signal,
@@ -35,7 +18,7 @@ export async function getIssueTypes({
 }): Promise<Record<string, any>> {
   return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
-      params: { subAction: 'getIssueTypes', subActionParams: {} },
+      params: { subAction: 'issueTypes', subActionParams: {} },
     }),
     signal,
   });
@@ -54,7 +37,7 @@ export async function getFieldsByIssueType({
 }): Promise<Record<string, any>> {
   return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
-      params: { subAction: 'getFieldsByIssueType', subActionParams: { id } },
+      params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
     }),
     signal,
   });

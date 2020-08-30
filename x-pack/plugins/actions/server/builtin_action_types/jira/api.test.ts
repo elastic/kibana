@@ -340,9 +340,9 @@ describe('api', () => {
       });
     });
 
-    describe('getIssueTypes', () => {
+    describe('issueTypes', () => {
       test('it returns the issue types correctly', async () => {
-        const res = await api.getIssueTypes({
+        const res = await api.issueTypes({
           externalService,
           params: {},
         });
@@ -359,9 +359,9 @@ describe('api', () => {
       });
     });
 
-    describe('getFieldsByIssueType', () => {
+    describe('fieldsByIssueType', () => {
       test('it returns the issue types correctly', async () => {
-        const res = await api.getFieldsByIssueType({
+        const res = await api.fieldsByIssueType({
           externalService,
           params: { id: '10006' },
         });

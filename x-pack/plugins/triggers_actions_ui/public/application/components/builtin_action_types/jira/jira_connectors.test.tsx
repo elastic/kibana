@@ -6,7 +6,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DocLinksStart } from 'kibana/public';
-import JiraConnectorFields from './Jira_connectors';
+import JiraConnectorFields from './jira_connectors';
 import { JiraActionConnector } from './types';
 
 describe('JiraActionConnectorFields renders', () => {

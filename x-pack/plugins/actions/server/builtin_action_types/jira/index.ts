@@ -37,7 +37,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['pushToService', 'getIssueTypes', 'getFieldsByIssueType'];
+const supportedSubActions: string[] = ['pushToService', 'issueTypes', 'fieldsByIssueType'];
 
 // action type definition
 export function getActionType(
@@ -119,17 +119,17 @@ async function executor(
     logger.debug(`response push to service for incident id: ${data.id}`);
   }
 
-  if (subAction === 'getIssueTypes') {
+  if (subAction === 'issueTypes') {
     const getIssueTypesParams = subActionParams as ExecutorSubActionGetIssueTypesParams;
-    data = await api.getIssueTypes({
+    data = await api.issueTypes({
       externalService,
       params: getIssueTypesParams,
     });
   }
 
-  if (subAction === 'getFieldsByIssueType') {
+  if (subAction === 'fieldsByIssueType') {
     const getFieldsByIssueTypeParams = subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
-    data = await api.getFieldsByIssueType({
+    data = await api.fieldsByIssueType({
       externalService,
       params: getFieldsByIssueTypeParams,
     });

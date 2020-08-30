@@ -74,11 +74,11 @@ export const ExecutorParamsSchema = schema.oneOf([
     subActionParams: ExecutorSubActionPushParamsSchema,
   }),
   schema.object({
-    subAction: schema.literal('getIssueTypes'),
+    subAction: schema.literal('issueTypes'),
     subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
   }),
   schema.object({
-    subAction: schema.literal('getFieldsByIssueType'),
+    subAction: schema.literal('fieldsByIssueType'),
     subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
   }),
 ]);

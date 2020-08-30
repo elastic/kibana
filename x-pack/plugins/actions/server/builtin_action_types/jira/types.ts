@@ -150,8 +150,8 @@ export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
-  getIssueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
-  getFieldsByIssueType: (
+  issueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
+  fieldsByIssueType: (
     args: GetFieldsByIssueTypeHandlerArgs
   ) => Promise<GetFieldsByIssueTypeResponse>;
 }

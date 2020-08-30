@@ -177,6 +177,6 @@ export const api: ExternalServiceApi = {
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
-  getIssueTypes: getIssueTypesHandler,
-  getFieldsByIssueType: getFieldsByIssueTypeHandler,
+  issueTypes: getIssueTypesHandler,
+  fieldsByIssueType: getFieldsByIssueTypeHandler,
 };
