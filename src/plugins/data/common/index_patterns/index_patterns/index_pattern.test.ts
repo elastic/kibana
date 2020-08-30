@@ -150,8 +150,6 @@ describe('IndexPattern', () => {
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('addScriptedField');
       expect(indexPattern).toHaveProperty('removeScriptedField');
-      expect(indexPattern).toHaveProperty('toString');
-      expect(indexPattern).toHaveProperty('toJSON');
       expect(indexPattern).toHaveProperty('save');
 
       // properties

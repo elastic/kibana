@@ -31,7 +31,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern }) => {
   function openAdvancedJobWizard() {
     // TODO - pass the search string to the advanced job page as well as the index pattern
     //       (add in with new advanced job wizard?)
-    window.open(`#/jobs/new_job/advanced?index=${indexPattern}`, '_self');
+    window.open(`#/jobs/new_job/advanced?index=${indexPattern.id}`, '_self');
   }
 
   // Note we use display:none for the DataRecognizer section as it needs to be

@@ -61,7 +61,5 @@ export declare class IndexPattern implements IIndexPattern
 |  [refreshFields()](./kibana-plugin-plugins-data-public.indexpattern.refreshfields.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
 |  [save(saveAttempts)](./kibana-plugin-plugins-data-public.indexpattern.save.md) |  |  |
-|  [toJSON()](./kibana-plugin-plugins-data-public.indexpattern.tojson.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
-|  [toString()](./kibana-plugin-plugins-data-public.indexpattern.tostring.md) |  |  |
 
