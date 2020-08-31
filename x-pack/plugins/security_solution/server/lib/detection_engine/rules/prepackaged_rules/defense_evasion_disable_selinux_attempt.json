@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies potential attempts to disable Security-Enhanced Linux (SELinux), which is a Linux kernel security feature to support access control policies. Adversaries may disable security tools to avoid possible detection of their tools and activities.",
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

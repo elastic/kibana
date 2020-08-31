@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
-  EuiTitle,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiRadioGroup,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 interface Props {
@@ -21,6 +21,7 @@ interface Props {
 }
 
 function TransactionTypeFilter({ transactionTypes }: Props) {
+  const history = useHistory();
   const {
     urlParams: { transactionType },
   } = useUrlParams();

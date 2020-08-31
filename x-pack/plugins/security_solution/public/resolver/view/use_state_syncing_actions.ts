@@ -5,6 +5,7 @@
  */
 
 import { useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useResolverDispatch } from './use_resolver_dispatch';
 
 /**
@@ -22,10 +23,11 @@ export function useStateSyncingActions({
   resolverComponentInstanceID: string;
 }) {
   const dispatch = useResolverDispatch();
+  const locationSearch = useLocation().search;
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: { databaseDocumentID, resolverComponentInstanceID },
+      payload: { databaseDocumentID, resolverComponentInstanceID, locationSearch },
     });
-  }, [dispatch, databaseDocumentID, resolverComponentInstanceID]);
+  }, [dispatch, databaseDocumentID, resolverComponentInstanceID, locationSearch]);
 }

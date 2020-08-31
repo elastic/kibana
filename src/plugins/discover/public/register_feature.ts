@@ -30,7 +30,7 @@ export function registerFeature(home: HomePublicPluginSetup) {
     }),
     icon: 'discoverApp',
     path: '/app/discover#/',
-    showOnHomePage: true,
+    showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
   });
 }
