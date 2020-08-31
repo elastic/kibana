@@ -311,7 +311,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
-          meta: column.aggConfig,
+          meta: serializeAggConfig(column),
           formatHint: column.formatHint,
         };
         return cleanedColumn;

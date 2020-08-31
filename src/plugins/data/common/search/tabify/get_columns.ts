@@ -86,6 +86,7 @@ export function tabifyInternalToPublic(columns: TabbedAggColumnInternal[]): Tabb
         decoration: { ...column.aggConfigInstance.decorateTabify() },
       },
       formatHint: column.aggConfigInstance.toSerializedFieldFormat(),
+      indexPatternId: column.aggConfigInstance.getIndexPattern().id,
     };
   });
 }

@@ -1872,9 +1872,15 @@ export const syncQueryStateWithUrl: (query: Pick<QueryStart | QuerySetup, 'filte
 // @public (undocumented)
 export interface TabbedAggColumn {
     // (undocumented)
-    aggConfig: IAggConfig;
+    aggConfig: AggConfigSerialized & {
+        decoration?: Record<string, unknown>;
+    };
+    // (undocumented)
+    formatHint?: Record<string, unknown>;
     // (undocumented)
     id: string;
+    // (undocumented)
+    indexPatternId?: string;
     // (undocumented)
     name: string;
 }

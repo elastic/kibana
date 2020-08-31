@@ -16,7 +16,9 @@ export interface TabbedAggColumn
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [aggConfig](./kibana-plugin-plugins-data-public.tabbedaggcolumn.aggconfig.md) | <code>IAggConfig</code> |  |
+|  [aggConfig](./kibana-plugin-plugins-data-public.tabbedaggcolumn.aggconfig.md) | <code>AggConfigSerialized &amp; {</code><br/><code>        decoration?: Record&lt;string, unknown&gt;;</code><br/><code>    }</code> |  |
+|  [formatHint](./kibana-plugin-plugins-data-public.tabbedaggcolumn.formathint.md) | <code>Record&lt;string, unknown&gt;</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.tabbedaggcolumn.id.md) | <code>string</code> |  |
+|  [indexPatternId](./kibana-plugin-plugins-data-public.tabbedaggcolumn.indexpatternid.md) | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-public.tabbedaggcolumn.name.md) | <code>string</code> |  |
 

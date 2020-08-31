@@ -54,6 +54,7 @@ export interface TabbedAggColumn {
   };
   id: string;
   name: string;
+  indexPatternId?: string;
   formatHint?: Record<string, unknown>;
 }
 

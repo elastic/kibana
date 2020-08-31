@@ -18,16 +18,19 @@
  */
 
 import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
-import { IAggConfig } from '../../../../common';
+import { TabbedAggColumn } from '../../../../common';
 import { IndexPattern } from '../../../index_patterns';
 import { getSearchService } from '../../../../public/services';
 
 /** @internal */
-export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {
+export const serializeAggConfig = (aggColumn: TabbedAggColumn): KibanaDatatableColumnMeta => {
   return {
-    type: aggConfig.type.name,
-    indexPatternId: aggConfig.getIndexPattern().id,
-    aggConfigParams: aggConfig.serialize().params,
+    type: aggColumn.aggConfig.type,
+    indexPatternId: aggColumn.indexPatternId,
+    aggConfigParams: {
+      ...aggColumn.aggConfig.params,
+      decoration: aggColumn.aggConfig.decoration,
+    },
   };
 };
 

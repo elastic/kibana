@@ -80,7 +80,7 @@ describe('createFilter', () => {
         {
           id: '1-1',
           name: 'test',
-          aggConfig,
+          aggConfig: aggConfig.serialize(),
         },
       ],
       rows: [

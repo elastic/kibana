@@ -7,5 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-aggConfig: IAggConfig;
+aggConfig: AggConfigSerialized & {
+        decoration?: Record<string, unknown>;
+    };
 ```
