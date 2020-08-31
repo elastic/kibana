@@ -26,19 +26,18 @@ export function ServiceDetails({ tab }: Props) {
   const plugin = useApmPluginContext();
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
-
-  const canReadAlerts = !!plugin.core.application.capabilities.apm[
-    'alerting:show'
-  ];
-  const canSaveAlerts = !!plugin.core.application.capabilities.apm[
-    'alerting:save'
-  ];
+  const capabilities = plugin.core.application.capabilities;
+  const canReadAlerts = !!capabilities.apm['alerting:show'];
+  const canSaveAlerts = !!capabilities.apm['alerting:save'];
   const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
-
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-
-  const { core } = useApmPluginContext();
+  const isMlPluginEnabled = 'ml' in plugin.plugins;
+  const canReadAnomalies = !!(
+    isMlPluginEnabled &&
+    capabilities.ml.canAccessML &&
+    capabilities.ml.canGetJobs
+  );
 
   const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
     defaultMessage: 'Add data',
@@ -58,12 +57,15 @@ export function ServiceDetails({ tab }: Props) {
               <AlertIntegrations
                 canReadAlerts={canReadAlerts}
                 canSaveAlerts={canSaveAlerts}
+                canReadAnomalies={canReadAnomalies}
               />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
+              href={plugin.core.http.basePath.prepend(
+                '/app/home#/tutorial/apm'
+              )}
               size="s"
               color="primary"
               iconType="plusInCircle"
