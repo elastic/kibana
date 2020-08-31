@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MockRouter, mockConfig, mockLogger } from '../../__mocks__';
+import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
 import { registerCredentialsRoutes } from './credentials';
-
-jest.mock('../../lib/enterprise_search_request_handler', () => ({
-  createEnterpriseSearchRequestHandler: jest.fn(),
-}));
-import { createEnterpriseSearchRequestHandler } from '../../lib/enterprise_search_request_handler';
 
 describe('credentials routes', () => {
   describe('GET /api/app_search/credentials', () => {
@@ -22,16 +17,13 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({ method: 'get', payload: 'query' });
 
       registerCredentialsRoutes({
+        ...mockDependencies,
         router: mockRouter.router,
-        log: mockLogger,
-        config: mockConfig,
       });
     });
 
-    it('creates a handler with createEnterpriseSearchRequestHandler', () => {
-      expect(createEnterpriseSearchRequestHandler).toHaveBeenCalledWith({
-        config: mockConfig,
-        log: mockLogger,
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/credentials/collection',
         hasValidData: expect.any(Function),
       });
@@ -59,11 +51,7 @@ describe('credentials routes', () => {
           ],
         };
 
-        const {
-          hasValidData,
-        } = (createEnterpriseSearchRequestHandler as jest.Mock).mock.calls[0][0];
-
-        expect(hasValidData(response)).toBe(true);
+        expect(mockRequestHandler.hasValidData(response)).toBe(true);
       });
 
       it('should correctly validate that a response does not have data', () => {
@@ -71,10 +59,7 @@ describe('credentials routes', () => {
           foo: 'bar',
         };
 
-        const hasValidData = (createEnterpriseSearchRequestHandler as jest.Mock).mock.calls[0][0]
-          .hasValidData;
-
-        expect(hasValidData(response)).toBe(false);
+        expect(mockRequestHandler.hasValidData(response)).toBe(false);
       });
     });
 
