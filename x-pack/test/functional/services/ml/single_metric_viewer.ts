@@ -49,5 +49,11 @@ export function MachineLearningSingleMetricViewerProvider({ getService }: FtrPro
     async assertChartExsist() {
       await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
+
+    async assertAnnotationsExists(state: string) {
+      await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
+        timeout: 30 * 1000,
+      });
+    },
   };
 }

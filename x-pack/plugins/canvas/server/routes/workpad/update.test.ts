@@ -8,14 +8,10 @@ import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { workpads } from '../../../__tests__/fixtures/workpads';
 import { okResponse } from '../ok_response';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -38,14 +34,10 @@ describe('PUT workpad', () => {
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
 
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter();
-    initializeUpdateWorkpadRoute({
-      router,
-      logger: loggingSystemMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeUpdateWorkpadRoute(routerDeps);
 
-    routeHandler = router.put.mock.calls[0][1];
+    routeHandler = routerDeps.router.put.mock.calls[0][1];
   });
 
   afterEach(() => {
@@ -152,14 +144,11 @@ describe('update assets', () => {
 
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter();
-    initializeUpdateWorkpadAssetsRoute({
-      router,
-      logger: loggingSystemMock.create().get(),
-    });
 
-    routeHandler = router.put.mock.calls[0][1];
+    const routerDeps = getMockedRouterDeps();
+    initializeUpdateWorkpadAssetsRoute(routerDeps);
+
+    routeHandler = routerDeps.router.put.mock.calls[0][1];
   });
 
   afterEach(() => {

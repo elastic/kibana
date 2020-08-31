@@ -67,6 +67,12 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await testSubjects.existOrFail('mlAnomalyExplorerSwimlaneViewBy');
     },
 
+    async assertAnnotationsPanelExists(state: string) {
+      await testSubjects.existOrFail(`mlAnomalyExplorerAnnotationsPanel ${state}`, {
+        timeout: 30 * 1000,
+      });
+    },
+
     async openAddToDashboardControl() {
       await testSubjects.click('mlAnomalyTimelinePanelMenu');
       await testSubjects.click('mlAnomalyTimelinePanelAddToDashboardButton');
@@ -87,6 +93,10 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         true,
         'Anomaly swimlane should be displayed in dashboard'
       );
+    },
+
+    async refreshPage() {
+      await testSubjects.click('superDatePickerApplyTimeButton');
     },
 
     async waitForDashboardsToLoad() {

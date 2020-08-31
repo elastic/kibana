@@ -506,7 +506,7 @@ export class AnnotationsTable extends Component {
               <EuiButtonIcon
                 onClick={() => this.openSingleMetricView(annotation)}
                 disabled={!isDrillDownAvailable}
-                iconType="stats"
+                iconType="visLine"
                 aria-label={openInSingleMetricViewerAriaLabelText}
               />
             </EuiToolTip>

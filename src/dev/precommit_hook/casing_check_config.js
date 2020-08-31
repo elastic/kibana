@@ -113,6 +113,14 @@ export const IGNORE_DIRECTORY_GLOBS = [
 ];
 
 /**
+ * These patterns identify files which should have the extension stripped
+ * to reveal the actual name that should be checked.
+ *
+ * @type {Array}
+ */
+export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+
+/**
  * DO NOT ADD FILES TO THIS LIST!!
  *
  * Use the other configs if the file really shouldn't be snake_case.

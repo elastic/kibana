@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps } from '@elastic/eui';
 
+import { KibanaContext, IKibanaContext } from '../../index';
 import { letBrowserHandleEvent } from './link_events';
 
 /**
@@ -24,6 +25,10 @@ interface IEuiReactRouterProps {
 
 export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({ to, onClick, children }) => {
   const history = useHistory();
+  const { navigateToUrl } = useContext(KibanaContext) as IKibanaContext;
+
+  // Generate the correct link href (with basename etc. accounted for)
+  const href = history.createHref({ pathname: to });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
@@ -32,12 +37,9 @@ export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({ to, onCli
     // Prevent regular link behavior, which causes a browser refresh.
     event.preventDefault();
 
-    // Push the route to the history.
-    history.push(to);
+    // Perform SPA navigation.
+    navigateToUrl(href);
   };
-
-  // Generate the correct link href (with basename etc. accounted for)
-  const href = history.createHref({ pathname: to });
 
   const reactRouterProps = { href, onClick: reactRouterLinkClick };
   return React.cloneElement(children as React.ReactElement, reactRouterProps);

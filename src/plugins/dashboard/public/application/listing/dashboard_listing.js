@@ -115,7 +115,7 @@ export class DashboardListing extends React.Component {
                     sampleDataInstallLink: (
                       <EuiLink
                         onClick={() =>
-                          this.props.core.application.navigateTo('home', {
+                          this.props.core.application.navigateToApp('home', {
                             path: '#/tutorial_directory/sampleData',
                           })
                         }

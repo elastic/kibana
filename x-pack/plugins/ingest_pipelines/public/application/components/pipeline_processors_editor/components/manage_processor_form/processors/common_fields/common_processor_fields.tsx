@@ -16,11 +16,12 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
+import { to, from } from '../shared';
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
-  serializer: (v) => (v === false ? undefined : v),
-  deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
+  deserializer: to.booleanOrUndef,
+  serializer: from.defaultBoolToUndef(false),
   label: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
     {
@@ -62,7 +63,7 @@ export const CommonProcessorFields: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            language: 'painless',
+            languageId: 'painless',
             height: 75,
             options: { minimap: { enabled: false } },
           },

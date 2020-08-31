@@ -18,7 +18,7 @@ interface ReportingDocument {
   _seq_no: unknown;
   _primary_term: unknown;
   jobtype: string;
-  created_by: string | null;
+  created_by: string | false;
   payload: {
     headers: string; // encrypted headers
     objectType: string;
@@ -53,7 +53,7 @@ export class Report implements Partial<ReportingDocument> {
 
   public readonly jobtype: string;
   public readonly created_at?: string;
-  public readonly created_by?: string | null;
+  public readonly created_by?: string | false;
   public readonly payload: {
     headers: string; // encrypted headers
     objectType: string;

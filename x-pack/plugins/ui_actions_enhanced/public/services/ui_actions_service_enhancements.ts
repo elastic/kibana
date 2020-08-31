@@ -95,6 +95,7 @@ export class UiActionsServiceEnhancements {
     getHref,
     minimalLicense,
     supportedTriggers,
+    isCompatible,
   }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
     const actionFactory: ActionFactoryDefinition<
       Config,
@@ -119,6 +120,9 @@ export class UiActionsServiceEnhancements {
         getDisplayName: () => serializedAction.name,
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
+        isCompatible: isCompatible
+          ? async (context) => isCompatible(serializedAction.config, context)
+          : undefined,
       }),
     } as ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>;
 

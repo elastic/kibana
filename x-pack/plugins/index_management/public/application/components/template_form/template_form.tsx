@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
@@ -15,6 +15,7 @@ import {
   SimulateTemplateFlyoutContent,
   SimulateTemplateProps,
   simulateTemplateFlyoutProps,
+  SimulateTemplateFilters,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
@@ -98,6 +99,11 @@ export const TemplateForm = ({
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
+  const simulateTemplateFilters = useRef<SimulateTemplateFilters>({
+    mappings: true,
+    settings: true,
+    aliases: true,
+  });
 
   const indexTemplate = defaultValue ?? {
     name: '',
@@ -174,6 +180,7 @@ export const TemplateForm = ({
       delete outputTemplate.template.aliases;
     }
     if (Object.keys(outputTemplate.template).length === 0) {
+      // @ts-expect-error
       delete outputTemplate.template;
     }
 
@@ -234,6 +241,10 @@ export const TemplateForm = ({
     return template;
   }, [buildTemplateObject, indexTemplate, wizardContent]);
 
+  const onSimulateTemplateFiltersChange = useCallback((filters: SimulateTemplateFilters) => {
+    simulateTemplateFilters.current = filters;
+  }, []);
+
   const showPreviewFlyout = () => {
     addContentToGlobalFlyout<SimulateTemplateProps>({
       id: 'simulateTemplate',
@@ -241,6 +252,8 @@ export const TemplateForm = ({
       props: {
         getTemplate: getSimulateTemplate,
         onClose: closeFlyout,
+        filters: simulateTemplateFilters.current,
+        onFiltersChange: onSimulateTemplateFiltersChange,
       },
       flyoutProps: simulateTemplateFlyoutProps,
     });

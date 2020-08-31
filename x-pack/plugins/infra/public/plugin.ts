@@ -25,7 +25,9 @@ export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
-    registerFeatures(pluginsSetup.home);
+    if (pluginsSetup.home) {
+      registerFeatures(pluginsSetup.home);
+    }
 
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());

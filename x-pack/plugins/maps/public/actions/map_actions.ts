@@ -54,7 +54,7 @@ import {
   MapRefreshConfig,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { scaleBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds } from '../../common/elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {

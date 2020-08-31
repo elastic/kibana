@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
   Installation,
@@ -33,6 +33,7 @@ import {
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { PackageOutdatedError } from '../../../errors';
+import { getPackageSavedObjects } from './get';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -107,22 +108,24 @@ export async function installPackage({
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semver.lt(pkgVersion, latestPackage.version) && !force)
-    throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
+  // get the currently installed package
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const reinstall = pkgVersion === installedPkg?.attributes.version;
+  const reupdate = pkgVersion === installedPkg?.attributes.install_version;
 
+  // let the user install if using the force flag or this is a reinstall or reupdate due to intallation interruption
+  if (semver.lt(pkgVersion, latestPackage.version) && !force && !reinstall && !reupdate) {
+    throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
+  }
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
 
-  // get the currently installed package
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-
-  const reinstall = pkgVersion === installedPkg?.attributes.version;
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
-  // add the package installation to the saved object
+  // add the package installation to the saved object.
+  // if some installation already exists, just update install info
   if (!installedPkg) {
     await createInstallation({
       savedObjectsClient,
@@ -133,6 +136,12 @@ export async function installPackage({
       installed_kibana: [],
       installed_es: [],
       toSaveESIndexPatterns,
+    });
+  } else {
+    await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      install_version: pkgVersion,
+      install_status: 'installing',
+      install_started_at: new Date().toISOString(),
     });
   }
   const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
@@ -152,7 +161,6 @@ export async function installPackage({
     savedObjectsClient,
     pkgName,
     kibanaAssets,
-    isUpdate,
   });
 
   // the rest of the installation must happen in sequential order
@@ -172,7 +180,6 @@ export async function installPackage({
   // install or update the templates referencing the newly installed pipelines
   const installedTemplates = await installTemplates(
     registryPackageInfo,
-    isUpdate,
     callCluster,
     paths,
     savedObjectsClient
@@ -197,9 +204,14 @@ export async function installPackage({
   }));
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
   // update to newly installed version when all assets are successfully installed
-  if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
+  if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    install_version: pkgVersion,
+    install_status: 'installed',
+  });
   return [...installedKibanaAssetsRefs, ...installedPipelines, ...installedTemplateRefs];
 }
+
 const updateVersion = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
@@ -239,6 +251,9 @@ export async function createInstallation(options: {
       version: pkgVersion,
       internal,
       removable,
+      install_version: pkgVersion,
+      install_status: 'installing',
+      install_started_at: new Date().toISOString(),
     },
     { id: pkgName, overwrite: true }
   );
@@ -286,3 +301,28 @@ export const removeAssetsFromInstalledEsByType = async (
     installed_es: installedAssetsToSave,
   });
 };
+
+export async function ensurePackagesCompletedInstall(
+  savedObjectsClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+) {
+  const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
+    searchFields: ['install_status'],
+    search: 'installing',
+  });
+  const installingPromises = installingPackages.saved_objects.reduce<
+    Array<Promise<AssetReference[]>>
+  >((acc, pkg) => {
+    const startDate = pkg.attributes.install_started_at;
+    const nowDate = new Date().toISOString();
+    const elapsedTime = Date.parse(nowDate) - Date.parse(startDate);
+    const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
+    // reinstall package
+    if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
+      acc.push(installPackage({ savedObjectsClient, pkgkey, callCluster }));
+    }
+    return acc;
+  }, []);
+  await Promise.all(installingPromises);
+  return installingPackages;
+}

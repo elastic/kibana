@@ -1,47 +1,11 @@
-.lnsFieldItem {
-  @include euiFontSizeS;
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-  border-radius: $euiBorderRadius;
-  margin-bottom: $euiSizeXS;
-}
-
-.lnsFieldItem__popoverAnchor:hover,
-.lnsFieldItem__popoverAnchor:focus,
-.lnsFieldItem__popoverAnchor:focus-within {
-  @include euiBottomShadowMedium;
-  border-radius: $euiBorderRadius;
-  z-index: 2;
-}
-
 .lnsFieldItem--missing {
-  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
-  color: $euiColorDarkShade;
+  .lnsFieldItem__info {
+    background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+    color: $euiColorDarkShade;
+  }
 }
 
 .lnsFieldItem__info {
-  border-radius: $euiBorderRadius - 1px;
-  padding: $euiSizeS;
-  display: flex;
-  align-items: flex-start;
-  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
-    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
-
-  .lnsFieldItem__name {
-    margin-left: $euiSizeS;
-    flex-grow: 1;
-    word-break: break-word;
-  }
-
-  .lnsFieldListPanel__fieldIcon,
-  .lnsFieldItem__infoIcon {
-    flex-shrink: 0;
-  }
-
-  .lnsFieldListPanel__fieldIcon {
-    margin-top: $euiSizeXS / 2;
-    margin-right: $euiSizeXS / 2;
-  }
-
   .lnsFieldItem__infoIcon {
     visibility: hidden;
   }
@@ -54,10 +18,6 @@
       visibility: visible;
     }
   }
-}
-
-.lnsFieldItem__info-isOpen {
-  @include euiFocusRing;
 }
 
 .lnsFieldItem__topValue {

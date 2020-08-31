@@ -109,6 +109,7 @@ interface Props {
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
+  exceptionsModal?: (refetch: inputsModel.Refetch) => React.ReactNode;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -134,6 +135,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   toggleColumn,
   utilityBar,
   graphEventId,
+  exceptionsModal,
 }) => {
   const { globalFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -259,6 +261,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                       </HeaderFilterGroupWrapper>
                     )}
                   </HeaderSection>
+                  {exceptionsModal && exceptionsModal(refetch)}
                   {utilityBar && !resolverIsShowing(graphEventId) && (
                     <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
                   )}
@@ -335,5 +338,6 @@ export const EventsViewer = React.memo(
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
     prevProps.utilityBar === nextProps.utilityBar &&
-    prevProps.graphEventId === nextProps.graphEventId
+    prevProps.graphEventId === nextProps.graphEventId &&
+    prevProps.exceptionsModal === nextProps.exceptionsModal
 );
