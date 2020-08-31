@@ -310,6 +310,11 @@ export const breadcrumbParameters = composeSelectors(
   uiSelectors.breadcrumbParameters
 );
 
+export const panelViewAndParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.panelViewAndParameters
+);
+
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.

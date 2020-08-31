@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 import { ResolverUIState } from '../../types';
 import * as locationSearchModel from '../../models/location_search';
+import { defaultParameters } from '../../models/location_search';
 
 /**
  * id of the "current" tree node (fake-focused)
@@ -40,11 +41,14 @@ export const breadcrumbParameters = createSelector(
   (locationSearch, resolverComponentInstanceID) => {
     if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
       // Equivalent to `null`
-      return {
-        crumbId: '',
-        crumbEvent: '',
-      };
+      return defaultParameters();
     }
     return locationSearchModel.breadcrumbParameters(locationSearch, resolverComponentInstanceID);
   }
 );
+
+/**
+ * Which view should show in the panel, as well as what parameters should be used.
+ * Calculated using the query string
+ */
+export const panelViewAndParameters = createSelector();

@@ -604,3 +604,19 @@ export interface ResolverPluginSetup {
     };
   };
 }
+
+/**
+ * Parameters to control what panel content is shown. Can be encoded and decoded from the URL using methods in
+ * `models/location_search`
+ */
+export type PanelViewAndParameters =
+  | {
+      panelView: 'nodes';
+    }
+  | { panelView: 'nodeDetail'; panelParameters: { nodeID: string } }
+  | { panelView: 'nodeEvents'; panelParameters: { nodeID: string } }
+  | { panelView: 'nodeEventsOfType'; panelParameters: { nodeID: string; eventType: string } }
+  | {
+      panelView: 'eventDetail';
+      panelParameters: { nodeID: string; eventType: string; eventID: string };
+    };
