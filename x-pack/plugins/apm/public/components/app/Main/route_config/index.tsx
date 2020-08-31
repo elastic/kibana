@@ -38,14 +38,28 @@ interface RouteParams {
 }
 
 export const renderAsRedirectTo = (to: string) => {
-  return ({ location }: RouteComponentProps<RouteParams>) => (
-    <Redirect
-      to={{
-        ...location,
-        pathname: to,
-      }}
-    />
-  );
+  return ({ location }: RouteComponentProps<RouteParams>) => {
+    let resolvedUrl: URL | undefined;
+
+    // Redirect root URLs with a hash to support backward compatibility with URLs
+    // from before we switched to the non-hash platform history.
+    if (location.pathname === '' && location.hash.length > 0) {
+      // We just want the search and pathname so the host doesn't matter
+      resolvedUrl = new URL(location.hash.slice(1), 'http://localhost');
+      to = resolvedUrl.pathname;
+    }
+
+    return (
+      <Redirect
+        to={{
+          ...location,
+          hash: '',
+          pathname: to,
+          search: resolvedUrl ? resolvedUrl.search : location.search,
+        }}
+      />
+    );
+  };
 };
 
 export const routes: BreadcrumbRoute[] = [
