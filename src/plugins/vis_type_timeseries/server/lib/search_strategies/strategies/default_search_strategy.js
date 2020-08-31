@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { ES_SEARCH_STRATEGY } from '../../../../../data/server';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../default_search_capabilities';
 
@@ -23,7 +25,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
   name = 'default';
 
   constructor() {
-    super('es');
+    super(ES_SEARCH_STRATEGY);
   }
 
   checkForViability(req) {
