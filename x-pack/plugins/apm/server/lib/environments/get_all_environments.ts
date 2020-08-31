@@ -48,7 +48,7 @@ export async function getAllEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             size: 100,
-            missing: includeMissing ? ENVIRONMENT_NOT_DEFINED : undefined,
+            missing: includeMissing ? ENVIRONMENT_NOT_DEFINED.value : undefined,
           },
         },
       },
