@@ -6,7 +6,7 @@
 
 import { deserializeSnapshotDetails, serializeSnapshotConfig } from './snapshot_serialization';
 
-describe('Serialized and deserialize snapshots', () => {
+describe('Snapshot serialization and deserialization', () => {
   describe('deserializeSnapshotDetails', () => {
     test('deserializes a snapshot', () => {
       expect(
