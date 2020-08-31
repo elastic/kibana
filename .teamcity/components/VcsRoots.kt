@@ -22,7 +22,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 object DefaultRoot : GitVcsRoot({
 //  id(DslContext.projectName)
-    id("brianseeders-kibana")
+    id("brianseeders_kibana")
 
 //  name = "${DslContext.parentProjectId} (${DslContext.projectName})"
 //  url = "https://github.com/brianseeders/${DslContext.parentProjectId.toString().toLowerCase()}.git"
