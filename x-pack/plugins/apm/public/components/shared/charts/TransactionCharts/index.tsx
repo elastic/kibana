@@ -67,10 +67,6 @@ export function TransactionCharts({
     responseTimeSeries
   );
 
-  function onToggleLegend(disabledSeriesStates: boolean[]) {
-    setDisabledSeriesState(disabledSeriesStates);
-  }
-
   return (
     <>
       <EuiFlexGrid columns={2} gutterSize="s">
@@ -96,7 +92,7 @@ export function TransactionCharts({
                 series={responseTimeSeries}
                 tickFormatY={getResponseTimeTickFormatter(formatter)}
                 formatTooltipValue={getResponseTimeTooltipFormatter(formatter)}
-                onToggleLegend={onToggleLegend}
+                onToggleLegend={setDisabledSeriesState}
               />
             </React.Fragment>
           </EuiPanel>

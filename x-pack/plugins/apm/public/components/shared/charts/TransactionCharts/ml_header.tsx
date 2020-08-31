@@ -49,7 +49,13 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
       aria-label="Warning"
       type="alert"
       color="warning"
-      content="The Machine learning results are hidden when the search bar is used for filtering"
+      content={i18n.translate(
+        'xpack.apm.metrics.transactionChart.machineLearningTooltip.withKuery',
+        {
+          defaultMessage:
+            'The Machine learning results are hidden when the search bar is used for filtering',
+        }
+      )}
     />
   ) : (
     <EuiIconTip
