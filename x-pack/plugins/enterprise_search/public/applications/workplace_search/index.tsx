@@ -10,8 +10,8 @@ import { useActions, useValues } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
 import { KibanaContext, IKibanaContext } from '../index';
-import { HttpLogic, IHttpLogicValues } from '../shared/http';
-import { AppLogic, IAppActions, IAppValues } from './app_logic';
+import { HttpLogic } from '../shared/http';
+import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
 import { WorkplaceSearchNav } from './components/layout/nav';
 
@@ -27,9 +27,9 @@ export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
 };
 
 export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic) as IAppValues;
-  const { initializeAppData } = useActions(AppLogic) as IAppActions;
-  const { errorConnecting } = useValues(HttpLogic) as IHttpLogicValues;
+  const { hasInitialized } = useValues(AppLogic);
+  const { initializeAppData } = useActions(AppLogic);
+  const { errorConnecting } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
