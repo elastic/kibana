@@ -32,7 +32,8 @@ export const ExecutorSubActionSchema = schema.oneOf([
   schema.literal('getIncident'),
   schema.literal('pushToService'),
   schema.literal('handshake'),
-  schema.literal('getCreateIssueMetadata'),
+  schema.literal('issueTypes'),
+  schema.literal('fieldsByIssueType'),
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
