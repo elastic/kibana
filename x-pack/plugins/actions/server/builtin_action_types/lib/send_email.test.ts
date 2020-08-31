@@ -140,6 +140,9 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": undefined,
+          },
         },
       ]
     `);
