@@ -43,7 +43,7 @@ export interface PluginSetupContract {
   uiEnabled: boolean;
 }
 
-interface TimelionPluginStartDeps {
+export interface TimelionPluginStartDeps {
   data: PluginStart;
 }
 
@@ -85,14 +85,12 @@ export class Plugin {
       functions,
       getFunction,
       logger,
+      core,
     };
 
     functionsRoute(router, deps);
     validateEsRoute(router);
-
-    core.getStartServices().then(([_, depsStart]) => {
-      runRoute(router, { ...deps, data: (depsStart as TimelionPluginStartDeps).data });
-    });
+    runRoute(router, deps);
 
     core.uiSettings.register({
       'timelion:es.timefield': {
