@@ -6,7 +6,7 @@
 
 import { isEmpty } from 'lodash';
 import { serializedPhaseInitialization } from '../../constants';
-import { AllocateAction, ColdPhase, SerializedColdPhase } from './types';
+import { AllocateAction, FrozenPhase, SerializedFrozenPhase } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 import {
   numberRequiredMessage,
@@ -14,7 +14,7 @@ import {
   positiveNumberRequiredMessage,
 } from './policy_validation';
 
-const coldPhaseInitialization: ColdPhase = {
+const frozenPhaseInitialization: FrozenPhase = {
   phaseEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',
@@ -24,8 +24,8 @@ const coldPhaseInitialization: ColdPhase = {
   phaseIndexPriority: '',
 };
 
-export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhase => {
-  const phase = { ...coldPhaseInitialization };
+export const frozenPhaseFromES = (phaseSerialized?: SerializedFrozenPhase): FrozenPhase => {
+  const phase = { ...frozenPhaseInitialization };
   if (phaseSerialized === undefined || phaseSerialized === null) {
     return phase;
   }
@@ -66,10 +66,10 @@ export const coldPhaseFromES = (phaseSerialized?: SerializedColdPhase): ColdPhas
   return phase;
 };
 
-export const coldPhaseToES = (
-  phase: ColdPhase,
-  originalPhase: SerializedColdPhase | undefined
-): SerializedColdPhase => {
+export const frozenPhaseToES = (
+  phase: FrozenPhase,
+  originalPhase?: SerializedFrozenPhase
+): SerializedFrozenPhase => {
   if (!originalPhase) {
     originalPhase = { ...serializedPhaseInitialization };
   }
@@ -134,12 +134,12 @@ export const coldPhaseToES = (
   return esPhase;
 };
 
-export const validateColdPhase = (phase: ColdPhase): PhaseValidationErrors<ColdPhase> => {
+export const validateFrozenPhase = (phase: FrozenPhase): PhaseValidationErrors<FrozenPhase> => {
   if (!phase.phaseEnabled) {
     return {};
   }
 
-  const phaseErrors = {} as PhaseValidationErrors<ColdPhase>;
+  const phaseErrors = {} as PhaseValidationErrors<FrozenPhase>;
 
   // index priority is optional, but if it's set, it needs to be a positive number
   if (phase.phaseIndexPriority) {
