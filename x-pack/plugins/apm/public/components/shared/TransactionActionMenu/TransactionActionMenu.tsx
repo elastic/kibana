@@ -6,8 +6,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useMemo, useState } from 'react';
-import url from 'url';
+import React, { useMemo, useState } from 'react';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -84,40 +83,7 @@ export function TransactionActionMenu({ transaction }: Props) {
     basePath: core.http.basePath,
     location,
     urlParams,
-  }).map((sectionList) =>
-    sectionList.map((section) => ({
-      ...section,
-      actions: section.actions.map((action) => {
-        const { href } = action;
-
-        // use navigateToApp as a temporary workaround for faster navigation between observability apps.
-        // see https://github.com/elastic/kibana/issues/65682
-
-        return {
-          ...action,
-          onClick: (event: MouseEvent) => {
-            const parsed = url.parse(href);
-
-            const appPathname = core.http.basePath.remove(
-              parsed.pathname ?? ''
-            );
-
-            const [, , app, ...rest] = appPathname.split('/');
-
-            if (app === 'uptime' || app === 'metrics' || app === 'logs') {
-              event.preventDefault();
-              const search = parsed.search || '';
-
-              const path = `${rest.join('/')}${search}`;
-              core.application.navigateToApp(app, {
-                path,
-              });
-            }
-          },
-        };
-      }),
-    }))
-  );
+  });
 
   const closePopover = () => {
     setIsActionPopoverOpen(false);
@@ -186,7 +152,6 @@ export function TransactionActionMenu({ transaction }: Props) {
                               key={action.key}
                               label={action.label}
                               href={action.href}
-                              onClick={action.onClick}
                             />
                           ))}
                         </SectionLinks>
