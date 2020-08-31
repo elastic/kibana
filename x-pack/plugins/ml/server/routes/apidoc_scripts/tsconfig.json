@@ -5,7 +5,7 @@
     "target": "es6",
     "moduleResolution": "node"
   },
-  "files": [
+  "include": [
     "schema_worker.ts",
     "schema_parser.ts",
     "schema_extractor.ts",
