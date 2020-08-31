@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { ToolsControl } from './tools_control';
 import { isDrawingFilter } from '../../../selectors/map_selectors';
 import { updateDrawState } from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
+import { DrawState } from '../../../../common/descriptor_types';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     isDrawingFilter: isDrawingFilter(state),
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    initiateDraw: (options) => {
-      dispatch(updateDrawState(options));
+    initiateDraw: (drawState: DrawState) => {
+      dispatch<any>(updateDrawState(drawState));
     },
     cancelDraw: () => {
-      dispatch(updateDrawState(null));
+      dispatch<any>(updateDrawState(null));
     },
   };
 }

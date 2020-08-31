@@ -12401,7 +12401,6 @@
     "xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel": "取消",
     "xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel": "删除",
     "xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel": "删除",
-    "xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage": "是否确定要删除{selectedFilterListsLength, plural, one {此筛选列表} other {这些筛选列表}}",
     "xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle": "删除 {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# 个筛选列表}}",
     "xpack.ml.settings.filterLists.deleteFilterLists.deletingErrorMessage": "删除筛选列表 {filterListId} 时出错。{respMessage}",
     "xpack.ml.settings.filterLists.deleteFilterLists.deletingNotificationMessage": "正在删除 {filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# 个筛选列表}}",
