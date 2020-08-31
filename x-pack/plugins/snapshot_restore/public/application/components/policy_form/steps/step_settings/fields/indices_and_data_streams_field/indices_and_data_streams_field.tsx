@@ -25,7 +25,7 @@ import {
 
 import { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { useServices } from '../../../../../../app_context';
-import { PolicyValidation } from '../../../../../../services/validation';
+import { PolicyValidation, ValidatePolicyHelperData } from '../../../../../../services/validation';
 
 import { orderDataStreamsAndIndices } from '../../../../../lib';
 import { DataStreamBadge } from '../../../../../data_stream_badge';
@@ -39,7 +39,10 @@ interface Props {
   policy: SlmPolicyPayload;
   indices: string[];
   dataStreams: string[];
-  onUpdate: (arg: { indices?: string[] | string }) => void;
+  onUpdate: (
+    arg: { indices?: string[] | string },
+    validateHelperData: ValidatePolicyHelperData
+  ) => void;
   errors: PolicyValidation['errors'];
 }
 
@@ -53,7 +56,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
   dataStreams,
   indices,
   policy,
-  onUpdate,
+  onUpdate: _onUpdate,
   errors,
 }) => {
   const { i18n } = useServices();
@@ -65,6 +68,12 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
   const [isAllIndices, setIsAllIndices] = useState<boolean>(
     !config.indices || (Array.isArray(config.indices) && config.indices.length === 0)
   );
+
+  const onUpdate: Props['onUpdate'] = (data) => {
+    _onUpdate(data, {
+      validateIndicesCount: !isAllIndices,
+    });
+  };
 
   const [indicesAndDataStreamsSelection, setIndicesAndDataStreamsSelection] = useState<string[]>(
     () =>
