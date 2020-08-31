@@ -1,7 +1,8 @@
 [[edit-dashboards]]
 == Edit dashboards
 
-Now that you have added panels to your dashboard, you can add interactive filter panels, Markdown panels, drill down into the  and customize the layout.  
+Now that you have added panels to your dashboard, you can add filter panels to interact with the data, and Markdown panels to add context to the dashboard. 
+To make your dashboard look the way you want, use the editing options.
 
 [float]
 [[add-controls]]
