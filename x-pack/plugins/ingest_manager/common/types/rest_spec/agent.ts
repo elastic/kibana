@@ -7,11 +7,11 @@
 import {
   Agent,
   AgentAction,
+  NewAgentAction,
   NewAgentEvent,
   AgentEvent,
   AgentStatus,
   AgentType,
-  NewAgentAction,
 } from '../models';
 
 export interface GetAgentsRequest {

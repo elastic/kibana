@@ -21,33 +21,56 @@ export type AgentStatus =
   | 'unenrolling'
   | 'degraded';
 
-export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
+export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL';
+
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
   sent_at?: string;
 }
 
-export interface AgentAction extends NewAgentAction {
+export interface AgentAction {
+  type: AgentActionType;
+  data?: any;
+  sent_at?: string;
   id: string;
-  agent_id?: string;
-  policy_id?: string;
-  policy_revision?: number;
+  agent_id: string;
   created_at: string;
   ack_data?: any;
 }
 
-export interface AgentActionSOAttributes {
+export interface AgentPolicyAction {
+  id: string;
+  type: AgentActionType;
+  data?: any;
+  policy_id: string;
+  policy_revision: number;
+  created_at: string;
+  ack_data?: any;
+}
+
+interface CommonAgentActionSOAttributes {
   type: AgentActionType;
   sent_at?: string;
   timestamp?: string;
   created_at: string;
-  agent_id?: string;
-  policy_id?: string;
-  policy_revision?: number;
   data?: string;
   ack_data?: string;
 }
+
+export type BaseAgentActionSOAttributes = CommonAgentActionSOAttributes & {
+  agent_id?: string;
+  policy_id?: string;
+  policy_revision?: number;
+};
+
+export type AgentActionSOAttributes = CommonAgentActionSOAttributes & {
+  agent_id: string;
+};
+export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
+  policy_id: string;
+  policy_revision: number;
+};
 
 export interface NewAgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';

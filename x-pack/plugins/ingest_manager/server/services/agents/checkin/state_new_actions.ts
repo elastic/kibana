@@ -5,6 +5,7 @@
  */
 
 import { timer, from, Observable, TimeoutError } from 'rxjs';
+import { omit } from 'lodash';
 import {
   shareReplay,
   distinctUntilKeyChanged,
@@ -16,7 +17,7 @@ import {
   take,
 } from 'rxjs/operators';
 import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import { Agent, AgentAction, AgentSOAttributes } from '../../../types';
+import { Agent, AgentAction, AgentPolicyAction, AgentSOAttributes } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
   AGENT_SAVED_OBJECT_TYPE,
@@ -24,7 +25,11 @@ import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
 } from '../../../constants';
-import { getNewActionsSince, getLatestConfigChangeAction, getAgentActionByIds } from '../actions';
+import {
+  getNewActionsSince,
+  getLatestConfigChangeAction,
+  getAgentPolicyActionByIds,
+} from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -48,10 +53,10 @@ function getInternalUserSOClient() {
 }
 
 function createNewActionsSharedObservable(): Observable<AgentAction[]> {
+  const internalSOClient = getInternalUserSOClient();
+
   return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() => {
-      const internalSOClient = getInternalUserSOClient();
-
       return from(getNewActionsSince(internalSOClient, new Date().toISOString()));
     }),
     shareReplay({ refCount: true, bufferSize: 1 })
@@ -60,11 +65,14 @@ function createNewActionsSharedObservable(): Observable<AgentAction[]> {
 
 function createAgentPolicyActionSharedObservable(agentPolicyId: string) {
   const internalSOClient = getInternalUserSOClient();
+
   return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() => from(getLatestConfigChangeAction(internalSOClient, agentPolicyId))),
-    filter((data): data is AgentAction => data !== undefined),
+    filter((data): data is AgentPolicyAction => data !== undefined),
     distinctUntilKeyChanged('id'),
-    switchMap((data) => from(getAgentActionByIds(internalSOClient, [data.id]).then((r) => r[0]))),
+    switchMap((data) =>
+      from(getAgentPolicyActionByIds(internalSOClient, [data.id]).then((r) => r[0]))
+    ),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
@@ -95,13 +103,19 @@ async function getOrCreateAgentDefaultOutputAPIKey(
 async function createAgentActionFromPolicyAction(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  policyAction: AgentAction
+  policyAction: AgentPolicyAction
 ) {
-  // Faster than clone
-  const newAgentAction: AgentAction = JSON.parse(JSON.stringify(policyAction));
-
-  delete newAgentAction.policy_id;
-  delete newAgentAction.policy_revision;
+  const newAgentAction: AgentAction = Object.assign(
+    omit(
+      // Faster than clone
+      JSON.parse(JSON.stringify(policyAction)) as AgentPolicyAction,
+      'policy_id',
+      'policy_revision'
+    ),
+    {
+      agent_id: agent.id,
+    }
+  );
 
   // Mutate the policy to set the api token for this agent
   newAgentAction.data.config.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
@@ -109,14 +123,12 @@ async function createAgentActionFromPolicyAction(
     agent
   );
 
-  newAgentAction.agent_id = agent.id;
-
   return [newAgentAction];
 }
 
 export function agentCheckinStateNewActionsFactory() {
   // Shared Observables
-  const agentPolicies$ = new Map<string, Observable<AgentAction>>();
+  const agentPolicies$ = new Map<string, Observable<AgentPolicyAction>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
   const rateLimiter = createRateLimiter(

@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { Agent, AgentAction, AgentActionSOAttributes } from '../../../common/types/models';
+import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import {
+  Agent,
+  AgentAction,
+  AgentPolicyAction,
+  BaseAgentActionSOAttributes,
+  AgentActionSOAttributes,
+  AgentPolicyActionSOAttributes,
+} from '../../../common/types/models';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { savedObjectToAgentAction } from './saved_objects';
 import { appContextService } from '../app_context';
@@ -14,13 +21,37 @@ export async function createAgentAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentAction, 'id'>
 ): Promise<AgentAction> {
-  const so = await soClient.create<AgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
+  return createAction(soClient, newAgentAction);
+}
+
+export function createAgentPolicyAction(
+  soClient: SavedObjectsClientContract,
+  newAgentAction: Omit<AgentPolicyAction, 'id'>
+): Promise<AgentPolicyAction> {
+  return createAction(soClient, newAgentAction);
+}
+async function createAction(
+  soClient: SavedObjectsClientContract,
+  newAgentAction: Omit<AgentPolicyAction, 'id'>
+): Promise<AgentPolicyAction>;
+async function createAction(
+  soClient: SavedObjectsClientContract,
+  newAgentAction: Omit<AgentAction, 'id'>
+): Promise<AgentAction>;
+async function createAction(
+  soClient: SavedObjectsClientContract,
+  newAgentAction: Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>
+): Promise<AgentPolicyAction | AgentAction> {
+  const so = await soClient.create<BaseAgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
     ...newAgentAction,
     data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
     ack_data: newAgentAction.ack_data ? JSON.stringify(newAgentAction.ack_data) : undefined,
   });
 
-  const agentAction = savedObjectToAgentAction(so);
+  const agentAction =
+    so.attributes.agent_id !== undefined
+      ? savedObjectToAgentAction(so as SavedObject<AgentActionSOAttributes>)
+      : savedObjectToAgentAction(so as SavedObject<AgentPolicyActionSOAttributes>);
   agentAction.data = newAgentAction.data;
 
   return agentAction;
@@ -30,7 +61,7 @@ export async function getAgentActionsForCheckin(
   soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<AgentAction[]> {
-  const res = await soClient.find<AgentActionSOAttributes>({
+  const res = await soClient.find<BaseAgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * and ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id:${agentId}`,
   });
@@ -62,7 +93,7 @@ export async function getAgentActionByIds(
         type: AGENT_ACTION_SAVED_OBJECT_TYPE,
       }))
     )
-  ).saved_objects.map(savedObjectToAgentAction);
+  ).saved_objects.map((action) => savedObjectToAgentAction(action));
 
   if (!decryptData) {
     return actions;
@@ -83,20 +114,61 @@ export async function getAgentActionByIds(
   );
 }
 
+export async function getAgentPolicyActionByIds(
+  soClient: SavedObjectsClientContract,
+  actionIds: string[],
+  decryptData: boolean = true
+) {
+  const actions = (
+    await soClient.bulkGet<AgentPolicyActionSOAttributes>(
+      actionIds.map((actionId) => ({
+        id: actionId,
+        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      }))
+    )
+  ).saved_objects.map((action) => savedObjectToAgentAction(action));
+
+  if (!decryptData) {
+    return actions;
+  }
+
+  return Promise.all(
+    actions.map(async (action) => {
+      // Get decrypted actions
+      return savedObjectToAgentAction(
+        await appContextService
+          .getEncryptedSavedObjects()
+          .getDecryptedAsInternalUser<AgentPolicyActionSOAttributes>(
+            AGENT_ACTION_SAVED_OBJECT_TYPE,
+            action.id
+          )
+      );
+    })
+  );
+}
+
+function isAgentActionSavedObject(
+  so: SavedObject<BaseAgentActionSOAttributes>
+): so is SavedObject<AgentActionSOAttributes> {
+  return so.attributes.agent_id !== undefined;
+}
+
 export async function getNewActionsSince(soClient: SavedObjectsClientContract, timestamp: string) {
-  const res = await soClient.find<AgentActionSOAttributes>({
+  const res = await soClient.find<BaseAgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * AND ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.created_at >= "${timestamp}"`,
   });
 
-  return res.saved_objects.map(savedObjectToAgentAction);
+  return res.saved_objects
+    .filter(isAgentActionSavedObject)
+    .map((so) => savedObjectToAgentAction(so as SavedObject<AgentActionSOAttributes>));
 }
 
 export async function getLatestConfigChangeAction(
   soClient: SavedObjectsClientContract,
   policyId: string
 ) {
-  const res = await soClient.find<AgentActionSOAttributes>({
+  const res = await soClient.find<AgentPolicyActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     search: policyId,
     searchFields: ['policy_id'],
@@ -114,6 +186,6 @@ export interface ActionsService {
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,
-    newAgentAction: AgentActionSOAttributes
+    newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
 }

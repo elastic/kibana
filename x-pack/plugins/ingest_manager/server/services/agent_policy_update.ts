@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
-import { unenrollForAgentPolicyId, createAgentAction } from './agents';
+import { unenrollForAgentPolicyId, createAgentPolicyAction } from './agents';
 import { outputService } from './output';
 import { agentPolicyService } from './agent_policy';
 
@@ -29,7 +29,7 @@ export async function agentPolicyUpdateEventHandler(
 
   if (action === 'updated') {
     const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
-    if (!policy) {
+    if (!policy || !policy.revision) {
       return;
     }
     const packages = policy.inputs.reduce<string[]>((acc, input) => {
@@ -40,12 +40,11 @@ export async function agentPolicyUpdateEventHandler(
       return acc;
     }, []);
 
-    await createAgentAction(soClient, {
+    await createAgentPolicyAction(soClient, {
       type: 'CONFIG_CHANGE',
       data: { config: policy } as any,
       ack_data: { packages },
       created_at: new Date().toISOString(),
-      sent_at: undefined,
       policy_id: policy.id,
       policy_revision: policy.revision,
     });
