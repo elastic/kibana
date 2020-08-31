@@ -271,6 +271,8 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
+  toolbarPosition: 'left',
+
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>

@@ -18,6 +18,10 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
    * Smaller buttons also remove extra shadow for less prominence
    */
   size?: EuiButtonProps['size'];
+  /**
+   * Determines if the button will have a down arrow or not
+   */
+  hasArrow?: boolean;
 };
 
 export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
@@ -25,6 +29,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   className,
   fontWeight = 'normal',
   size = 'm',
+  hasArrow = true,
   ...rest
 }) => {
   const classes = classNames(
@@ -36,7 +41,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
     <EuiButton
       className={classes}
       iconSide="right"
-      iconType="arrowDown"
+      iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
         className: 'lnsToolbarButton__content',

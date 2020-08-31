@@ -82,7 +82,7 @@ export function WorkspacePanelWrapper({
             />
           </EuiFlexItem>
           {activeVisualization && activeVisualization.renderToolbar && (
-            <EuiFlexItem grow>
+            <EuiFlexItem grow={activeVisualization.toolbarPosition === 'right'}>
               <NativeRenderer
                 render={activeVisualization.renderToolbar}
                 nativeProps={{
