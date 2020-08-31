@@ -302,6 +302,15 @@ export const ariaFlowtoNodeID: (
 );
 
 /**
+ * The legacy `crumbEvent` and `crumbId` parameters.
+ * @deprecated
+ */
+export const breadcrumbParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.breadcrumbParameters
+);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */
