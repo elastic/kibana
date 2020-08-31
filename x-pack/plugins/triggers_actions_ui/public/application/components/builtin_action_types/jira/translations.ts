@@ -84,7 +84,7 @@ export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
 );
 
 export const MAPPING_FIELD_SUMMARY = i18n.translate(
-  'xpack.securitySolution.case.configureCases.mappingFieldSummary',
+  'xpack.triggersActionsUI.case.configureCases.mappingFieldSummary',
   {
     defaultMessage: 'Summary',
   }
