@@ -19,7 +19,7 @@
 
 import { PluginName } from '../plugins';
 import { PluginsStatusService } from './plugins_status';
-import { of, Observable } from 'rxjs';
+import { of, Observable, BehaviorSubject } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
 import { first } from 'rxjs/operators';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
@@ -244,17 +244,17 @@ describe('PluginStatusService', () => {
     });
   });
 
-  describe('getDepsStatus$', () => {
+  describe('getDependenciesStatus$', () => {
     it('only includes dependencies of specified plugin', async () => {
       const service = new PluginsStatusService({
         core$: coreAllAvailable$,
         pluginDependencies,
       });
-      expect(await service.getDepsStatus$('a').pipe(first()).toPromise()).toEqual({});
-      expect(await service.getDepsStatus$('b').pipe(first()).toPromise()).toEqual({
+      expect(await service.getDependenciesStatus$('a').pipe(first()).toPromise()).toEqual({});
+      expect(await service.getDependenciesStatus$('b').pipe(first()).toPromise()).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
       });
-      expect(await service.getDepsStatus$('c').pipe(first()).toPromise()).toEqual({
+      expect(await service.getDependenciesStatus$('c').pipe(first()).toPromise()).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
         b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
       });
@@ -264,7 +264,7 @@ describe('PluginStatusService', () => {
       const service = new PluginsStatusService({ core$: coreOneDegraded$, pluginDependencies });
       service.set('a', of({ level: ServiceStatusLevels.available, summary: 'a status' }));
 
-      expect(await service.getDepsStatus$('c').pipe(first()).toPromise()).toEqual({
+      expect(await service.getDependenciesStatus$('c').pipe(first()).toPromise()).toEqual({
         a: { level: ServiceStatusLevels.available, summary: 'a status' }, // a is available depsite savedObjects being degraded
         b: {
           level: ServiceStatusLevels.degraded,
@@ -278,8 +278,61 @@ describe('PluginStatusService', () => {
     it('throws error if unknown plugin passed', () => {
       const service = new PluginsStatusService({ core$: coreAllAvailable$, pluginDependencies });
       expect(() => {
-        service.getDepsStatus$('dont-exist');
+        service.getDependenciesStatus$('dont-exist');
       }).toThrowError();
+    });
+
+    it('debounces events in quick succession', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies,
+      });
+      const available: ServiceStatus = {
+        level: ServiceStatusLevels.available,
+        summary: 'a available',
+      };
+      const degraded: ServiceStatus = {
+        level: ServiceStatusLevels.degraded,
+        summary: 'a degraded',
+      };
+      const pluginA$ = new BehaviorSubject(available);
+      service.set('a', pluginA$);
+
+      const statusUpdates: Array<Record<string, ServiceStatus>> = [];
+      const subscription = service
+        .getDependenciesStatus$('b')
+        .subscribe((status) => statusUpdates.push(status));
+      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      pluginA$.next(degraded);
+      pluginA$.next(available);
+      pluginA$.next(degraded);
+      pluginA$.next(available);
+      pluginA$.next(degraded);
+      pluginA$.next(available);
+      pluginA$.next(degraded);
+      // Waiting for the debounce timeout should cut a new update
+      await delay(100);
+      pluginA$.next(available);
+      await delay(100);
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "a": Object {
+              "level": degraded,
+              "summary": "a degraded",
+            },
+          },
+          Object {
+            "a": Object {
+              "level": available,
+              "summary": "a available",
+            },
+          },
+        ]
+      `);
     });
   });
 });

@@ -2856,10 +2856,10 @@ export type StartServicesAccessor<TPluginsStart extends object = object, TStart 
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
+    dependencies$: Observable<Record<string, ServiceStatus>>;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "StatusSetup"
     derivedStatus$: Observable<ServiceStatus>;
     overall$: Observable<ServiceStatus>;
-    plugins$: Observable<Record<string, ServiceStatus>>;
     set(status$: Observable<ServiceStatus>): void;
 }
 

@@ -324,7 +324,7 @@ export class LegacyService implements CoreService {
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
         set: setupDeps.core.status.plugins.set.bind(null, 'legacy'),
-        plugins$: setupDeps.core.status.plugins.getDepsStatus$('legacy'),
+        dependencies$: setupDeps.core.status.plugins.getDependenciesStatus$('legacy'),
         derivedStatus$: setupDeps.core.status.plugins.getDerivedStatus$('legacy'),
       },
       uiSettings: {

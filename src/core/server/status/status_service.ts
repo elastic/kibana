@@ -39,14 +39,6 @@ interface SetupDeps {
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
 }
 
-const waitForMicrotasks = (numberOfTicks: number = 1): Promise<unknown> => {
-  if (numberOfTicks === 1) {
-    return Promise.resolve();
-  } else {
-    return Promise.resolve().then(() => waitForMicrotasks(numberOfTicks - 1));
-  }
-};
-
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<StatusConfigType>;
@@ -85,7 +77,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       overall$,
       plugins: {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
-        getDepsStatus$: this.pluginsStatus.getDepsStatus$.bind(this.pluginsStatus),
+        getDependenciesStatus$: this.pluginsStatus.getDependenciesStatus$.bind(this.pluginsStatus),
         getDerivedStatus$: this.pluginsStatus.getDerivedStatus$.bind(this.pluginsStatus),
       },
       isStatusPageAnonymous: () => statusConfig.allowAnonymous,

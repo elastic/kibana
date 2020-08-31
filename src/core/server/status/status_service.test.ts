@@ -34,6 +34,7 @@ describe('StatusService', () => {
     service = new StatusService(mockCoreContext.create());
   });
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -197,7 +198,6 @@ describe('StatusService', () => {
       });
 
       it('does not emit duplicate events', async () => {
-        jest.useFakeTimers();
         const elasticsearch$ = new BehaviorSubject(available);
         const savedObjects$ = new BehaviorSubject(degraded);
         const setup = await service.setup({
@@ -215,20 +215,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        jest.runAllTimers();
+        await delay(100);
         elasticsearch$.next(available);
-        jest.runAllTimers();
+        await delay(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        jest.runAllTimers();
+        await delay(100);
         savedObjects$.next(degraded);
-        jest.runAllTimers();
+        await delay(100);
         savedObjects$.next(available);
-        jest.runAllTimers();
+        await delay(100);
         savedObjects$.next(available);
-        jest.runAllTimers();
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -252,8 +252,58 @@ describe('StatusService', () => {
             },
           ]
         `);
+      });
 
-        jest.useRealTimers();
+      it('debounces events in quick succession', async () => {
+        const savedObjects$ = new BehaviorSubject(available);
+        const setup = await service.setup({
+          elasticsearch: {
+            status$: new BehaviorSubject(available),
+          },
+          savedObjects: {
+            status$: savedObjects$,
+          },
+          pluginDependencies: new Map(),
+        });
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
+
+        // All of these should debounced into a single `available` status
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        // Waiting for the debounce timeout should cut a new update
+        await delay(100);
+        savedObjects$.next(available);
+        await delay(100);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "detail": "See the status page for more information",
+              "level": degraded,
+              "meta": Object {
+                "affectedServices": Object {
+                  "savedObjects": Object {
+                    "level": degraded,
+                    "summary": "This is degraded!",
+                  },
+                },
+              },
+              "summary": "[savedObjects]: This is degraded!",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
       });
     });
   });

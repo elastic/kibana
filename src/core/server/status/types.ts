@@ -147,10 +147,10 @@ export interface StatusServiceSetup {
   set(status$: Observable<ServiceStatus>): void;
 
   /**
-   * Current status for all dependencies of the current plugin.
+   * Current status for all plugins this plugin depends on.
    * Each key of the `Record` is a plugin id.
    */
-  plugins$: Observable<Record<string, ServiceStatus>>;
+  dependencies$: Observable<Record<string, ServiceStatus>>;
 
   /**
    * The status of this plugin as derived from its dependencies.
@@ -171,7 +171,7 @@ export interface InternalStatusServiceSetup extends Pick<StatusServiceSetup, 'co
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;
-    getDepsStatus$(plugin: PluginName): Observable<Record<string, ServiceStatus>>;
+    getDependenciesStatus$(plugin: PluginName): Observable<Record<string, ServiceStatus>>;
     getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus>;
   };
 }

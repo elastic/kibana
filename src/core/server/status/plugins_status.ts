@@ -30,14 +30,6 @@ interface Deps {
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
 }
 
-const waitForMicrotasks = (numberOfTicks: number = 1): Promise<unknown> => {
-  if (numberOfTicks === 1) {
-    return Promise.resolve();
-  } else {
-    return Promise.resolve().then(() => waitForMicrotasks(numberOfTicks - 1));
-  }
-};
-
 export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
   private readonly update$ = new BehaviorSubject(true);
@@ -52,7 +44,7 @@ export class PluginsStatusService {
     return this.getPluginStatuses$([...this.deps.pluginDependencies.keys()]);
   }
 
-  public getDepsStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
+  public getDependenciesStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
     const dependencies = this.deps.pluginDependencies.get(plugin);
     if (!dependencies) {
       throw new Error(`Unknown plugin: ${plugin}`);
@@ -65,7 +57,7 @@ export class PluginsStatusService {
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
-    return combineLatest([this.deps.core$, this.getDepsStatus$(plugin)]).pipe(
+    return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
       map(([coreStatus, pluginStatuses]) => {
         return getSummaryStatus(
           [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],

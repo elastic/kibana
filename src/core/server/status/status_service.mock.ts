@@ -41,7 +41,7 @@ const createSetupContractMock = () => {
     core$: new BehaviorSubject(availableCoreStatus),
     overall$: new BehaviorSubject(available),
     set: jest.fn(),
-    plugins$: new BehaviorSubject({}),
+    dependencies$: new BehaviorSubject({}),
     derivedStatus$: new BehaviorSubject(available),
   };
 
@@ -55,7 +55,7 @@ const createInternalSetupContractMock = () => {
     isStatusPageAnonymous: jest.fn().mockReturnValue(false),
     plugins: {
       set: jest.fn(),
-      getDepsStatus$: jest.fn(),
+      getDependenciesStatus$: jest.fn(),
       getDerivedStatus$: jest.fn(),
     },
   };
