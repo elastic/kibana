@@ -64,7 +64,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
-  setStepData,
+  onSubmit,
   setForm,
   actionMessageParams,
 }) => {
@@ -83,7 +83,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields } = form;
 
   const kibanaAbsoluteUrl = useMemo(
     () =>
@@ -94,19 +94,20 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   );
 
   useEffect(() => {
-    getFields().kibanaSiemAppUrl.setValue(kibanaAbsoluteUrl);
+    const urlField = getFields().kibanaSiemAppUrl;
+    if (urlField) {
+      urlField.setValue(kibanaAbsoluteUrl);
+    }
   }, [getFields, kibanaAbsoluteUrl]);
 
-  const onSubmit = useCallback(
-    async (enabled: boolean) => {
-      if (setStepData) {
-        const { isValid, data } = await submit();
-        if (isValid) {
-          setStepData(RuleStep.ruleActions, { ...data, enabled }, isValid);
-        }
+  const handleSubmit = useCallback(
+    (enabled: boolean) => {
+      getFields().enabled.setValue(enabled);
+      if (onSubmit) {
+        onSubmit();
       }
     },
-    [setStepData, submit]
+    [getFields, onSubmit]
   );
 
   useEffect(() => {
@@ -190,7 +191,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 fill={false}
                 isDisabled={isLoading}
                 isLoading={isLoading}
-                onClick={onSubmit.bind(null, false)}
+                onClick={() => handleSubmit(false)}
               >
                 {I18n.COMPLETE_WITHOUT_ACTIVATING}
               </EuiButton>
@@ -200,7 +201,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 fill
                 isDisabled={isLoading}
                 isLoading={isLoading}
-                onClick={onSubmit.bind(null, true)}
+                onClick={() => handleSubmit(true)}
                 data-test-subj="create-activate"
               >
                 {I18n.COMPLETE_WITH_ACTIVATING}

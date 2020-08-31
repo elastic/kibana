@@ -100,8 +100,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
+  onSubmit,
   setForm,
-  setStepData,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -121,17 +121,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset, submit } = form;
+  const { getFields, reset } = form;
   const clearErrors = useCallback(() => reset({ resetValues: false }), [reset]);
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      const { isValid, data } = await submit();
-      if (isValid && setStepData) {
-        setStepData(RuleStep.defineRule, data, isValid);
-      }
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
     }
-  }, [setStepData, submit]);
+  }, [onSubmit]);
 
   useEffect(() => {
     if (setForm) {
@@ -305,7 +302,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="define-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="define-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );

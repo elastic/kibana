@@ -34,7 +34,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
-  setStepData,
+  onSubmit,
   setForm,
 }) => {
   const initialState = defaultValues ?? stepScheduleDefaultValue;
@@ -44,17 +44,12 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      // setStepData(RuleStep.scheduleRule, null, false);
-      const { isValid, data } = await submit();
-      if (isValid) {
-        setStepData(RuleStep.scheduleRule, data, isValid);
-      }
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
     }
-  }, [setStepData, submit]);
+  }, [onSubmit]);
 
   useEffect(() => {
     if (setForm) {
@@ -93,7 +88,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="schedule-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="schedule-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );

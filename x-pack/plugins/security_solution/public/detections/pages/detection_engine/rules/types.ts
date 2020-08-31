@@ -64,14 +64,10 @@ export type RuleStepsFormHooks = {
 export interface RuleStepProps {
   addPadding?: boolean;
   descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  setStepData?: <K extends keyof RuleStepsData>(
-    step: K,
-    data: RuleStepsData[K],
-    isValid: boolean
-  ) => void;
   isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
+  onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
   setForm?: <K extends keyof RuleStepsFormHooks>(step: K, form: RuleStepsFormHooks[K]) => void;
 }

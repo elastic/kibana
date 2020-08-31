@@ -68,8 +68,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isReadOnlyView,
   isUpdateView = false,
   isLoading,
+  onSubmit,
   setForm,
-  setStepData,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -86,16 +86,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields } = form;
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      const { isValid, data } = await submit();
-      if (isValid) {
-        setStepData(RuleStep.aboutRule, data, isValid);
-      }
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
     }
-  }, [setStepData, submit]);
+  }, [onSubmit]);
 
   useEffect(() => {
     if (setForm) {
@@ -321,7 +318,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="about-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="about-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );
