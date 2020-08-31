@@ -9,7 +9,7 @@ import { resetContext } from 'kea';
 jest.mock('../../../shared/http', () => ({ HttpLogic: { values: { http: { get: jest.fn() } } } }));
 import { HttpLogic } from '../../../shared/http';
 
-import { mockLogicValues } from './__mocks__';
+import { mockValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
@@ -20,7 +20,7 @@ describe('OverviewLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(OverviewLogic.values).toEqual(mockLogicValues);
+    expect(OverviewLogic.values).toEqual(mockValues);
   });
 
   describe('setServerData', () => {
