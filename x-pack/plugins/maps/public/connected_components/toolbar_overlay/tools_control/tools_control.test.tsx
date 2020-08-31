@@ -19,6 +19,7 @@ const defaultProps = {
       indexPatternId: '1',
     },
   ],
+  isDrawingFilter: false,
 };
 
 test('renders', async () => {
