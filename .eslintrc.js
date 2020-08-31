@@ -302,10 +302,7 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: [
-                  '(src|x-pack)/plugins/*/server/**/*',
-                  '!x-pack/plugins/apm/**/*', // https://github.com/elastic/kibana/issues/67210
-                ],
+                target: ['(src|x-pack)/plugins/*/server/**/*'],
                 from: ['(src|x-pack)/plugins/*/public/**/*'],
                 errorMessage: `Server code can not import from public, use a common directory.`,
               },
