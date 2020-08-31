@@ -13,7 +13,7 @@ import { ListNodesRouteResponse } from '../../../../../../common/types';
 import { LearnMoreLink } from '../learn_more_link';
 import { ErrableFormRow } from '../form_errors';
 import { NodeAttrsDetails } from './node_attrs_details';
-import { ColdPhase, Phase, Phases, WarmPhase } from '../../../../services/policies/types';
+import { PhaseWithAllocationAction, Phases } from '../../../../services/policies/types';
 import { PhaseValidationErrors, propertyof } from '../../../../services/policies/policy_validation';
 
 const learnMoreLink = (
@@ -31,11 +31,15 @@ const learnMoreLink = (
   </Fragment>
 );
 
-interface Props<T extends Phase> {
+interface Props<T extends PhaseWithAllocationAction> {
+  phase: keyof Phases & string;
+  errors?: PhaseValidationErrors<T>;
+  phaseData: T;
+  setPhaseData: (dataKey: keyof T & string, value: string) => void;
+  isShowingErrors: boolean;
   nodes: ListNodesRouteResponse['nodesByAttributes'];
 }
-
-export const NodeAllocation = <T extends WarmPhase | ColdPhase>({
+export const NodeAllocation = <T extends PhaseWithAllocationAction>({
   phase,
   setPhaseData,
   errors,
