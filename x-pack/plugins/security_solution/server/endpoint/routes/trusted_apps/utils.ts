@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { ExceptionListItemSchema } from '../../../../../lists/common/shared_exports';
 import { NewTrustedApp, TrustedApp } from '../../../../common/endpoint/types';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -56,7 +57,7 @@ export const newTrustedAppItemToExceptionItem = ({
     comments: [],
     description,
     entries,
-    itemId: '', // TODO: what should this be set to?
+    itemId: uuid.v4(),
     listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
     meta: undefined,
     name,
