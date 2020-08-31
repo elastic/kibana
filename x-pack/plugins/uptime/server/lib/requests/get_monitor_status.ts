@@ -38,7 +38,7 @@ const formatBuckets = async (
 const getLocationClause = (locations: string[]) => ({
   bool: {
     should: [
-      ...locations.map((location) => ({
+      ...locations.map(location => ({
         term: {
           'observer.geo.name': location,
         },
@@ -77,6 +77,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                   },
                 },
               },
+              // append user filters, if defined
+              ...(filters?.bool ? [filters] : []),
             ],
           },
         },
@@ -114,15 +116,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
         },
       },
     };
-
-    /**
-     * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
-     * to the bool of the parsed filters.
-     */
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
-    }
 
     /**
      * Perform a logical `and` against the selected location filters.

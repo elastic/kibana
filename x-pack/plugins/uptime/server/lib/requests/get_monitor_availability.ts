@@ -48,6 +48,11 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
 
   const gte = `now-${range}${rangeUnit}`;
 
+  let parsedFilters: any;
+  if (filters) {
+    parsedFilters = JSON.parse(filters);
+  }
+
   do {
     const esParams: any = {
       index: dynamicSettings.heartbeatIndices,
@@ -63,6 +68,8 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                   },
                 },
               },
+              // append user filters, if defined
+              ...(parsedFilters?.bool ? [parsedFilters] : []),
             ],
           },
         },
@@ -140,11 +147,6 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
         },
       },
     };
-
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = { ...esParams.body.query.bool, ...parsedFilters.bool };
-    }
 
     if (afterKey) {
       esParams.body.aggs.monitors.composite.after = afterKey;
