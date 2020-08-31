@@ -111,7 +111,7 @@ export const useRequest = <D = any, E = Error>(
         : serializedResponseData;
       setData(responseData);
     }
-    // Setting isLoading to false also acts as a semaphore for scheduling the next poll request.
+    // Setting isLoading to false also acts as a signal for scheduling the next poll request.
     setIsLoading(false);
 
     return { data: serializedResponseData, error: responseError };

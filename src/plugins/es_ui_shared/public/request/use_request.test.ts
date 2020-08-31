@@ -262,20 +262,20 @@ describe('useRequest hook', () => {
       const {
         setupSuccessRequest,
         setErrorResponse,
-        advanceTime,
+        completeRequest,
         hookResult,
         getErrorResponse,
         getSendRequestSpy,
       } = helpers;
       const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
-      // Send initial request which will have a longer round-trip time.
+      // Send initial request, which will have a longer round-trip time.
       setupSuccessRequest({}, [DOUBLE_REQUEST_TIME]);
 
-      // Send a new request which will have a shorter round-trip time.
+      // Send a new request, which will have a shorter round-trip time.
       setErrorResponse();
 
-      // Fast-forward to a point where both requests have returned.
-      await advanceTime(DOUBLE_REQUEST_TIME);
+      // Complete both requests.
+      await completeRequest();
 
       // Two requests were sent...
       expect(getSendRequestSpy().callCount).toBe(2);
@@ -285,7 +285,7 @@ describe('useRequest hook', () => {
       expect(hookResult.data).toBeUndefined();
     });
 
-    it('outdated responses are ignored by manual requests', async () => {
+    it(`outdated responses are ignored if there's a more recently-sent manual request`, async () => {
       const { setupSuccessRequest, advanceTime, hookResult, getSendRequestSpy } = helpers;
 
       const HALF_REQUEST_TIME = REQUEST_TIME * 0.5;
@@ -308,7 +308,7 @@ describe('useRequest hook', () => {
     it(`changing pollIntervalMs doesn't trigger a new request`, async () => {
       const { setupErrorRequest, setErrorResponse, completeRequest, getSendRequestSpy } = helpers;
       const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
-      // Send first request.
+      // Send initial request.
       setupErrorRequest({ pollIntervalMs: REQUEST_TIME });
 
       // Setting a new poll will schedule a second request, but not send one immediately.
@@ -331,20 +331,23 @@ describe('useRequest hook', () => {
         setErrorResponse,
         getSendRequestSpy,
       } = helpers;
+      const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
 
-      // Sned first request and schedule a request for the success path.
-      setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
+      // Sned first request and schedule a request, both with the success path.
+      setupSuccessRequest({ pollIntervalMs: DOUBLE_REQUEST_TIME });
 
       // Change the path to the error path, sending a second request. pollIntervalMs is the same
-      // so the originally scheduled poll request won't be rescheduled.
-      setErrorResponse({ pollIntervalMs: REQUEST_TIME });
+      // so the originally scheduled poll remains cheduled.
+      setErrorResponse({ pollIntervalMs: DOUBLE_REQUEST_TIME });
 
-      // Complete the initial two requests and the and one scheduled poll request.
+      // Complete the initial request, the requests by the path change, and the scheduled poll request.
       await completeRequest();
       await completeRequest();
 
-      expect(hookResult.error).toBe(getErrorResponse().error);
+      // If the scheduled poll request was sent to the success path, we wouldn't have an error result.
+      // But we do, because it was sent to the error path.
       expect(getSendRequestSpy().callCount).toBe(3);
+      expect(hookResult.error).toBe(getErrorResponse().error);
     });
   });
 });
