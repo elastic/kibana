@@ -5,26 +5,17 @@
  */
 
 import {
-  AbstractSearchRequest,
   DefaultSearchCapabilities,
   AbstractSearchStrategy,
 } from '../../../../../../src/plugins/vis_type_timeseries/server';
-import { CallWithRequestFactoryShim } from '../../types';
 import { getRollupSearchStrategy } from './rollup_search_strategy';
-import { getRollupSearchRequest } from './rollup_search_request';
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
-export const registerRollupSearchStrategy = (
-  callWithRequestFactory: CallWithRequestFactoryShim,
-  addSearchStrategy: (searchStrategy: any) => void
-) => {
-  const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
+export const registerRollupSearchStrategy = (addSearchStrategy: (searchStrategy: any) => void) => {
   const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
   const RollupSearchStrategy = getRollupSearchStrategy(
     AbstractSearchStrategy,
-    RollupSearchRequest,
-    RollupSearchCapabilities,
-    callWithRequestFactory
+    RollupSearchCapabilities
   );
 
   addSearchStrategy(new RollupSearchStrategy());

@@ -118,19 +118,8 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     if (visTypeTimeseries) {
-      // TODO: When vis_type_timeseries is fully migrated to the NP, it shouldn't require this shim.
-      const callWithRequestFactoryShim = (
-        elasticsearchServiceShim: CallWithRequestFactoryShim,
-        request: KibanaRequest
-      ): LegacyAPICaller => {
-        return async (...args: Parameters<LegacyAPICaller>) => {
-          this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-          return await this.rollupEsClient.asScoped(request).callAsCurrentUser(...args);
-        };
-      };
-
       const { addSearchStrategy } = visTypeTimeseries;
-      registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
+      registerRollupSearchStrategy(addSearchStrategy);
     }
 
     if (usageCollection) {

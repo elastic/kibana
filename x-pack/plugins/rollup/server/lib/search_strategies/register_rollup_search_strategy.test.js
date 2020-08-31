@@ -6,21 +6,14 @@
 import { registerRollupSearchStrategy } from './register_rollup_search_strategy';
 
 describe('Register Rollup Search Strategy', () => {
-  let routeDependencies;
   let addSearchStrategy;
 
   beforeEach(() => {
-    routeDependencies = {
-      router: jest.fn().mockName('router'),
-      elasticsearchService: jest.fn().mockName('elasticsearchService'),
-      elasticsearch: jest.fn().mockName('elasticsearch'),
-    };
-
     addSearchStrategy = jest.fn().mockName('addSearchStrategy');
   });
 
   test('should run initialization', () => {
-    registerRollupSearchStrategy(routeDependencies, addSearchStrategy);
+    registerRollupSearchStrategy(addSearchStrategy);
 
     expect(addSearchStrategy).toHaveBeenCalled();
   });

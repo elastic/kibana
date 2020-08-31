@@ -21,7 +21,13 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 import { VisTypeTimeseriesConfig, config as configSchema } from './config';
 import { VisTypeTimeseriesPlugin } from './plugin';
 
-export { VisTypeTimeseriesSetup, Framework } from './plugin';
+export {
+  VisTypeTimeseriesSetup,
+  Framework,
+  VisTypeTimeseriesPluginStartDependencies,
+} from './plugin';
+
+export { ReqFacade } from './lib/search_strategies/strategies/abstract_search_strategy';
 
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   deprecations: ({ unused, renameFromRoot }) => [

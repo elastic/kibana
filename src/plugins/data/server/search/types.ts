@@ -74,7 +74,7 @@ export interface ISearchStart<
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
-    request: IKibanaSearchRequest,
+    request: IEsSearchRequest,
     options: ISearchOptions
   ) => Promise<IKibanaSearchResponse>;
 }
