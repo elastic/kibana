@@ -1319,6 +1319,7 @@ export class SavedObjectsRepository {
           versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
           if (this._registry.isSingleNamespace(type)) {
+            // if `objectNamespace` is undefined, fall back to `options.namespace`
             namespaces = [getNamespaceString(objectNamespace)];
           }
           versionProperties = getExpectedVersionProperties(version);
