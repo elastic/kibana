@@ -12,8 +12,12 @@ import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
-import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
+import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+} from '../../../../common/environment_filter_values';
 
 export interface ErrorRateAlertTriggerParams {
   windowSize: number;
@@ -39,7 +43,7 @@ export function ErrorRateAlertTrigger(props: Props) {
     threshold: 25,
     windowSize: 1,
     windowUnit: 'm',
-    environment: ALL_OPTION.value,
+    environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
   const params = {
@@ -51,11 +55,7 @@ export function ErrorRateAlertTrigger(props: Props) {
 
   const fields = [
     <PopoverExpression
-      value={
-        params.environment === ALL_OPTION.value
-          ? ALL_OPTION.text
-          : params.environment
-      }
+      value={getEnvironmentLabel(params.environment)}
       title={i18n.translate('xpack.apm.errorRateAlertTrigger.environment', {
         defaultMessage: 'Environment',
       })}
