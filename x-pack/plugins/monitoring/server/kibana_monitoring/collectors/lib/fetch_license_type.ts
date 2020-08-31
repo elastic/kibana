@@ -8,7 +8,11 @@ import { get } from 'lodash';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
-export async function fetchLicenseType(callCluster: any, availableCcs: string[]) {
+export async function fetchLicenseType(
+  callCluster: any,
+  availableCcs: string[],
+  clusterUuid: string
+) {
   let index = INDEX_PATTERN_ELASTICSEARCH;
   if (availableCcs) {
     index = getCcsIndexPattern(index, availableCcs);
@@ -25,12 +29,24 @@ export async function fetchLicenseType(callCluster: any, availableCcs: string[])
           },
         },
       ],
-
       query: {
-        term: {
-          type: {
-            value: 'cluster_stats',
-          },
+        bool: {
+          must: [
+            {
+              term: {
+                cluster_uuid: {
+                  value: clusterUuid,
+                },
+              },
+            },
+            {
+              term: {
+                type: {
+                  value: 'cluster_stats',
+                },
+              },
+            },
+          ],
         },
       },
     },

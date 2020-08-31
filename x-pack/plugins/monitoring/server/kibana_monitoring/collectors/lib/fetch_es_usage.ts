@@ -6,9 +6,7 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { MonitoringConfig } from '../../../config';
-import { INDEX_PATTERN_ELASTICSEARCH, ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../lib/ccs_utils';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { StackProductUsage } from '../types';
 
 interface ESResponse {
@@ -45,10 +43,10 @@ interface ESMBResponseHits {
 export async function fetchESUsage(
   config: MonitoringConfig,
   callCluster: CallCluster,
-  clusterUuid: string
+  clusterUuid: string,
+  index: string
 ): Promise<StackProductUsage> {
   const size = config.ui.max_bucket_size;
-  const index = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, '*');
   const params = {
     index,
     size: 1,
@@ -123,6 +121,7 @@ export async function fetchESUsage(
   ]);
 
   const hit = (response as ESResponse).hits.hits[0]._source;
+  const count = hit.cluster_stats.nodes.count.total;
   const mbCount = (mbResponse as ESMBResponse).hits.hits.reduce((accum: number, mbHit) => {
     if (mbHit._index.includes('-mb-')) {
       accum++;
@@ -132,9 +131,9 @@ export async function fetchESUsage(
 
   return {
     productName: ELASTICSEARCH_SYSTEM_ID,
-    count: hit.cluster_stats.nodes.count.total,
+    count,
     versions: [hit.version],
-    clusterUuid,
     mbCount,
+    mbPercentage: mbCount / count,
   };
 }

@@ -36,14 +36,13 @@ export async function fetchStackProductUsage(
   config: MonitoringConfig,
   callCluster: CallCluster,
   clusterUuid: string,
-  indexPattern: string,
-  productName: string,
+  index: string,
   type: string,
   uuidPath: string,
-  versionPath: string
+  versionPath: string,
+  filters: any[] = []
 ): Promise<StackProductUsage> {
   const size = config.ui.max_bucket_size;
-  const index = prefixIndexPattern(config, indexPattern, '*');
   const params = {
     index,
     size: 0,
@@ -67,6 +66,7 @@ export async function fetchStackProductUsage(
                 },
               },
             },
+            ...filters,
           ],
         },
       },
@@ -98,10 +98,9 @@ export async function fetchStackProductUsage(
   const response = (await callCluster('search', params)) as ESResponse;
   if (!response.aggregations) {
     return {
-      productName,
-      clusterUuid,
       count: 0,
       mbCount: 0,
+      mbPercentage: 0,
       versions: [],
     };
   }
@@ -118,15 +117,15 @@ export async function fetchStackProductUsage(
     );
   }, 0);
 
+  const count = response.aggregations.uuids.buckets.length;
   const versions = response.aggregations.uuids.buckets.reduce((accum: string[], uuidBucket) => {
     return [...accum, ...uuidBucket.version.buckets.map((versionBucket) => versionBucket.key)];
   }, []);
 
   return {
-    productName,
-    count: response.aggregations.uuids.buckets.length,
+    count,
     versions,
     mbCount,
-    clusterUuid,
+    mbPercentage: mbCount / count,
   };
 }

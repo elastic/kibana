@@ -5,7 +5,7 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { StackProductUsage } from '../types';
+import { MonitoringClusterUsage } from '../types';
 import { fetchESUsage } from './fetch_es_usage';
 import { MonitoringConfig } from '../../../config';
 // @ts-ignore
@@ -17,56 +17,62 @@ import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
-  KIBANA_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
 } from '../../../../common/constants';
-import { fetchClusters } from '../../../lib/alerts/fetch_clusters';
 import { fetchStackProductUsage } from './fetch_stack_product_usage';
+import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export const getStackProductsUsage = async (
   config: MonitoringConfig,
-  callCluster: CallCluster
-): Promise<StackProductUsage[]> => {
-  const usage = [];
-  const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, '*');
-  const clusters = await fetchClusters(callCluster, esIndexPattern);
-  for (const cluster of clusters) {
-    const clusterUsage = await Promise.all([
-      fetchESUsage(config, callCluster, cluster.clusterUuid),
-      fetchStackProductUsage(
-        config,
-        callCluster,
-        cluster.clusterUuid,
-        INDEX_PATTERN_KIBANA,
-        KIBANA_SYSTEM_ID,
-        'kibana_stats',
-        'kibana_stats.kibana.uuid',
-        'kibana_stats.kibana.version'
-      ),
-      fetchStackProductUsage(
-        config,
-        callCluster,
-        cluster.clusterUuid,
-        INDEX_PATTERN_LOGSTASH,
-        LOGSTASH_SYSTEM_ID,
-        'logstash_stats',
-        'logstash_stats.logstash.uuid',
-        'logstash_stats.logstash.version'
-      ),
-      fetchStackProductUsage(
-        config,
-        callCluster,
-        cluster.clusterUuid,
-        INDEX_PATTERN_BEATS,
-        BEATS_SYSTEM_ID,
-        'beats_stats',
-        'beats_stats.beats.uuid',
-        'beats_stats.beats.version'
-      ),
-    ]);
+  callCluster: CallCluster,
+  availableCcs: string[],
+  clusterUuid: string
+): Promise<
+  Pick<MonitoringClusterUsage, 'elasticsearch' | 'kibana' | 'logstash' | 'beats' | 'apm'>
+> => {
+  const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
+  const kibanaIndex = getCcsIndexPattern(INDEX_PATTERN_KIBANA, availableCcs);
+  const logstashIndex = getCcsIndexPattern(INDEX_PATTERN_LOGSTASH, availableCcs);
+  const beatsIndex = getCcsIndexPattern(INDEX_PATTERN_BEATS, availableCcs);
+  const [elasticsearch, kibana, logstash, beats, apm] = await Promise.all([
+    fetchESUsage(config, callCluster, clusterUuid, elasticsearchIndex),
+    fetchStackProductUsage(
+      config,
+      callCluster,
+      clusterUuid,
+      kibanaIndex,
+      'kibana_stats',
+      'kibana_stats.kibana.uuid',
+      'kibana_stats.kibana.version'
+    ),
+    fetchStackProductUsage(
+      config,
+      callCluster,
+      clusterUuid,
+      logstashIndex,
+      'logstash_stats',
+      'logstash_stats.logstash.uuid',
+      'logstash_stats.logstash.version'
+    ),
+    fetchStackProductUsage(
+      config,
+      callCluster,
+      clusterUuid,
+      beatsIndex,
+      'beats_stats',
+      'beats_stats.beats.uuid',
+      'beats_stats.beats.version'
+    ),
+    fetchStackProductUsage(
+      config,
+      callCluster,
+      clusterUuid,
+      beatsIndex,
+      'beats_stats',
+      'beats_stats.beats.uuid',
+      'beats_stats.beats.version',
+      [{ term: { 'beats_stats.beat.type': 'apm-server' } }]
+    ),
+  ]);
 
-    usage.push(...clusterUsage);
-  }
-  return usage;
+  return { elasticsearch, kibana, logstash, beats, apm };
 };
