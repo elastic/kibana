@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { HotPhase as HotPhaseInterface, Phases } from '../../../services/policies/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
   LearnMoreLink,
@@ -112,9 +112,8 @@ const maxAgeUnits = [
     }),
   },
 ];
-const hotProperty = propertyof<Phases>('hot');
-const phaseProperty = (propertyName: keyof HotPhaseInterface) =>
-  propertyof<HotPhaseInterface>(propertyName);
+const hotProperty: keyof Phases = 'hot';
+const phaseProperty = (propertyName: keyof HotPhaseInterface) => propertyName;
 
 interface Props {
   errors?: PhaseValidationErrors<HotPhaseInterface>;
