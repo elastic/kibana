@@ -34,15 +34,16 @@ import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
+interface IndicesConfig {
+  indices?: string[] | string;
+}
+
 interface Props {
   isManagedPolicy: boolean;
   policy: SlmPolicyPayload;
   indices: string[];
   dataStreams: string[];
-  onUpdate: (
-    arg: { indices?: string[] | string },
-    validateHelperData: ValidatePolicyHelperData
-  ) => void;
+  onUpdate: (arg: IndicesConfig, validateHelperData: ValidatePolicyHelperData) => void;
   errors: PolicyValidation['errors'];
 }
 
@@ -69,7 +70,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
     !config.indices || (Array.isArray(config.indices) && config.indices.length === 0)
   );
 
-  const onUpdate: Props['onUpdate'] = (data) => {
+  const onUpdate = (data: IndicesConfig) => {
     _onUpdate(data, {
       validateIndicesCount: !isAllIndices,
     });
