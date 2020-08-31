@@ -5,7 +5,7 @@
  */
 
 import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
-import { AuditMessage } from '../../../common/types/messages';
+import { AuditMessage, TransformMessage } from '../../../common/types/messages';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
 import { RouteDependencies } from '../../types';
@@ -22,7 +22,7 @@ interface BoolQuery {
 }
 
 export function registerTransformsAuditMessagesRoutes({ router, license }: RouteDependencies) {
-  router.get(
+  router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}/messages'),
       validate: { params: transformIdParamSchema },
@@ -80,7 +80,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
           },
         });
 
-        let messages = [];
+        let messages: TransformMessage[] = [];
         if (resp.hits.total !== 0) {
           messages = resp.hits.hits.map((hit: AuditMessage) => hit._source);
           messages.reverse();

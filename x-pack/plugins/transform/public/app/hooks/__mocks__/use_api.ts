@@ -7,6 +7,7 @@
 import { HttpFetchError } from 'kibana/public';
 
 import { TransformId } from '../../../../common/types/transform';
+import type { GetTransformsAuditMessagesResponseSchema } from '../../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -107,7 +108,9 @@ const apiFactory = () => ({
       resolve({});
     });
   },
-  getTransformAuditMessages(transformId: TransformId): Promise<any> {
+  getTransformAuditMessages(
+    transformId: TransformId
+  ): Promise<GetTransformsAuditMessagesResponseSchema> {
     return new Promise((resolve, reject) => {
       resolve([]);
     });

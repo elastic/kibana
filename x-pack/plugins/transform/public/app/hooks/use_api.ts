@@ -10,6 +10,7 @@ import { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
+import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -115,7 +116,9 @@ export const useApi = () => {
           body: JSON.stringify(transformsInfo),
         });
       },
-      getTransformAuditMessages(transformId: TransformId): Promise<any> {
+      getTransformAuditMessages(
+        transformId: TransformId
+      ): Promise<GetTransformsAuditMessagesResponseSchema> {
         return http.get(`${API_BASE_PATH}transforms/${transformId}/messages`);
       },
       esSearch(payload: any): Promise<any> {
