@@ -32,6 +32,7 @@ import {
 } from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
 import { UrlDrilldown } from './drilldowns';
+import { dynamicActionEnhancement } from './embeddables/dynamic_action_enhancement';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 
 declare module '../../../../src/plugins/ui_actions/public' {
@@ -68,7 +69,7 @@ export class EmbeddableEnhancedPlugin
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
-    plugins.embeddable.registerEmbeddableEnhancement(dynamicActionEnhancement(startServices));
+    plugins.embeddable.registerEnhancement(dynamicActionEnhancement(startServices));
 
     plugins.uiActionsEnhanced.registerDrilldown(
       new UrlDrilldown({
@@ -83,7 +84,7 @@ export class EmbeddableEnhancedPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDependenciesStartDependencies): StartContract {
+  public start(core: CoreStart, plugins: StartDependencies): StartContract {
     this.uiActions = plugins.uiActionsEnhanced;
 
     return {};

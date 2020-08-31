@@ -13,7 +13,6 @@ import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
-import { SavedObjectReference } from '../../../../../src/core/types';
 import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**

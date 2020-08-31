@@ -16,7 +16,11 @@ import { ILicense } from '../../../licensing/common/types';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common/persistable_state';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
+
+export interface DynamicActionsState {
+  events: SerializedEvent[];
+}
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -25,7 +29,8 @@ export interface UiActionsServiceEnhancementsParams {
   readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
 }
 
-export class UiActionsServiceEnhancements implements PersistableStateDefinition<SerializedEvent> {
+export class UiActionsServiceEnhancements
+  implements PersistableStateDefinition<DynamicActionsState> {
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
@@ -104,7 +109,7 @@ export class UiActionsServiceEnhancements implements PersistableStateDefinition<
     licenseFeatureName,
     supportedTriggers,
     isCompatible,
-    migrate,
+    telemetry,
     extract,
     inject,
   }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
@@ -144,6 +149,12 @@ export class UiActionsServiceEnhancements implements PersistableStateDefinition<
     this.registerActionFactory(actionFactory);
   };
 
+  public telemetry(state: DynamicActionsState) {
+    return state.events.map((event: SerializedEvent) => {
+      return this.actionFactories.has(event.action.factoryId)
+        ? this.actionFactories.get(event.action.factoryId)!.telemetry(event)
+        : {};
+    });
   private registerFeatureUsage = (definition: ActionFactoryDefinition<any, any, any>): void => {
     if (!definition.minimalLicense || !definition.licenseFeatureName) return;
 
@@ -165,18 +176,30 @@ export class UiActionsServiceEnhancements implements PersistableStateDefinition<
       : {};
   }
 
-  public extract(state: SerializedEvent) {
-    return this.actionFactories.has(state.eventId)
-      ? this.actionFactories.get(state.eventId)!.extract(state)
-      : {
-          state,
-          references: [],
-        };
+  public extract(state: DynamicActionsState) {
+    const references: SavedObjectReference[] = [];
+    const newState = {
+      events: state.events.map((event: SerializedEvent) => {
+        const result = this.actionFactories.has(event.action.factoryId)
+          ? this.actionFactories.get(event.action.factoryId)!.extract(event)
+          : {
+              state: event,
+              references: [],
+            };
+        result.references.forEach((r) => references.push(r));
+        return result.state;
+      }),
+    };
+    return { state: newState, references };
   }
 
-  public inject(state: SerializedEvent, references: SavedObjectReference[]) {
-    return this.actionFactories.has(state.eventId)
-      ? this.actionFactories.get(state.eventId)!.inject(state, references)
-      : state;
+  public inject(state: DynamicActionsState, references: SavedObjectReference[]) {
+    return {
+      events: state.events.map((event: SerializedEvent) => {
+        return this.actionFactories.has(event.action.factoryId)
+          ? this.actionFactories.get(event.action.factoryId)!.inject(event, references)
+          : event;
+      }),
+    };
   }
 }

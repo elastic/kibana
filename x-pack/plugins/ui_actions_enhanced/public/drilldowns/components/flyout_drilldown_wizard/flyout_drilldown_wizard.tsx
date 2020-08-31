@@ -19,6 +19,7 @@ import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryPlaceContext } from '../types';
+import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
@@ -133,7 +134,9 @@ function useWizardConfigState(
   ];
 }
 
-export function FlyoutDrilldownWizard<CurrentActionConfig extends object = object>({
+export function FlyoutDrilldownWizard<
+  CurrentActionConfig extends SerializableState = SerializableState
+>({
   onClose,
   onBack,
   onSubmit = () => {},

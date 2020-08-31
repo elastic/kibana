@@ -16,7 +16,7 @@ import { BaseActionFactoryContext, SerializedAction, SerializedEvent } from './t
 import { ILicense, LicensingPluginStart } from '../../../licensing/public';
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import { Serializable } from '../../../../../src/plugins/kibana_utils/common/persistable_state';
+import { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
   readonly getLicense: () => ILicense;

@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition, BaseActionFactoryContext, SerializedEvent } from '../dynamic_actions';
+import {
+  ActionFactoryDefinition,
+  BaseActionFactoryContext,
+  SerializedEvent,
+} from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';

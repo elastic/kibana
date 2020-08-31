@@ -5,8 +5,9 @@
  */
 
 import { TriggerId } from '../../../../../src/plugins/ui_actions/public';
+import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
-export interface SerializedAction<Config = unknown> {
+export interface SerializedAction<Config extends SerializableState = SerializableState> {
   readonly factoryId: string;
   readonly name: string;
   readonly config: Config;

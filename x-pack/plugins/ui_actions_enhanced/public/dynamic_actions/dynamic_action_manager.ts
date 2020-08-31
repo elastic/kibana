@@ -15,6 +15,7 @@ import { defaultState, transitions, selectors, State } from './dynamic_action_ma
 import {
   StateContainer,
   createStateContainer,
+  SerializableState,
 } from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
@@ -74,7 +75,9 @@ export class DynamicActionManager {
     const actionId = this.generateActionId(eventId);
 
     const factory = uiActions.getActionFactory(event.action.factoryId);
-    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction<object>);
+    const actionDefinition: ActionDefinition = factory.create(
+      action as SerializedAction<SerializableState>
+    );
     uiActions.registerAction({
       ...actionDefinition,
       id: actionId,
@@ -196,7 +199,7 @@ export class DynamicActionManager {
    * @param triggers List of triggers to which action should react.
    */
   public async createEvent(
-    action: SerializedAction<unknown>,
+    action: SerializedAction<SerializableState>,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const event: SerializedEvent = {
@@ -231,7 +234,7 @@ export class DynamicActionManager {
    */
   public async updateEvent(
     eventId: string,
-    action: SerializedAction<unknown>,
+    action: SerializedAction<SerializableState>,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const event: SerializedEvent = {
