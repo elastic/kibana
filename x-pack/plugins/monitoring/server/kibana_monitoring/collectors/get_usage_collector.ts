@@ -19,114 +19,101 @@ export function getMonitoringUsageCollector(
   config: MonitoringConfig,
   callCluster: any
 ) {
-  return usageCollection.makeUsageCollector<Promise<MonitoringUsage>>({
+  return usageCollection.makeUsageCollector<MonitoringUsage>({
     type: 'monitoring',
     isReady: () => true,
-    // schema: {
-    //   isEnabled: {
-    //     type: 'boolean',
-    //   },
-    //   clusters: {
-    //     type: 'nested',
-    //     properties: {
-    //       license: {
-    //         type: 'keyword',
-    //       },
-    //       clusterUuid: {
-    //         type: 'keyword',
-    //       },
-    //       stackProductCount: {
-    //         type: 'long',
-    //       },
-    //       stackProductMbCount: {
-    //         type: 'long',
-    //       },
-    //       stackProductMbRatio: {
-    //         type: 'double',
-    //       },
-    //       elasticsearch: {
-    //         properties: {
-    //           count: {
-    //             type: 'long',
-    //           },
-    //           mbCount: {
-    //             type: 'long',
-    //           },
-    //           mbPercentage: {
-    //             type: 'double',
-    //           },
-    //           versions: {
-    //             type: 'keyword',
-    //           },
-    //         },
-    //       },
-    //       kibana: {
-    //         properties: {
-    //           count: {
-    //             type: 'long',
-    //           },
-    //           mbCount: {
-    //             type: 'long',
-    //           },
-    //           mbPercentage: {
-    //             type: 'double',
-    //           },
-    //           versions: {
-    //             type: 'keyword',
-    //           },
-    //         },
-    //       },
-    //       logstash: {
-    //         properties: {
-    //           count: {
-    //             type: 'long',
-    //           },
-    //           mbCount: {
-    //             type: 'long',
-    //           },
-    //           mbPercentage: {
-    //             type: 'double',
-    //           },
-    //           versions: {
-    //             type: 'keyword',
-    //           },
-    //         },
-    //       },
-    //       beats: {
-    //         properties: {
-    //           count: {
-    //             type: 'long',
-    //           },
-    //           mbCount: {
-    //             type: 'long',
-    //           },
-    //           mbPercentage: {
-    //             type: 'double',
-    //           },
-    //           versions: {
-    //             type: 'keyword',
-    //           },
-    //         },
-    //       },
-    //       apm: {
-    //         properties: {
-    //           count: {
-    //             type: 'long',
-    //           },
-    //           mbCount: {
-    //             type: 'long',
-    //           },
-    //           mbPercentage: {
-    //             type: 'double',
-    //           },
-    //           versions: {
-    //             type: 'keyword',
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
+    schema: {
+      isEnabled: {
+        type: 'boolean',
+      },
+      clusters: {
+        license: {
+          type: 'keyword',
+        },
+        clusterUuid: {
+          type: 'keyword',
+        },
+        stackProductCount: {
+          type: 'long',
+        },
+        stackProductMbCount: {
+          type: 'long',
+        },
+        stackProductMbRatio: {
+          type: 'float',
+        },
+        elasticsearch: {
+          count: {
+            type: 'long',
+          },
+          mbCount: {
+            type: 'long',
+          },
+          mbPercentage: {
+            type: 'float',
+          },
+          versions: {
+            type: 'keyword',
+          },
+        },
+        kibana: {
+          count: {
+            type: 'long',
+          },
+          mbCount: {
+            type: 'long',
+          },
+          mbPercentage: {
+            type: 'float',
+          },
+          versions: {
+            type: 'keyword',
+          },
+        },
+        logstash: {
+          count: {
+            type: 'long',
+          },
+          mbCount: {
+            type: 'long',
+          },
+          mbPercentage: {
+            type: 'float',
+          },
+          versions: {
+            type: 'keyword',
+          },
+        },
+        beats: {
+          count: {
+            type: 'long',
+          },
+          mbCount: {
+            type: 'long',
+          },
+          mbPercentage: {
+            type: 'float',
+          },
+          versions: {
+            type: 'keyword',
+          },
+        },
+        apm: {
+          count: {
+            type: 'long',
+          },
+          mbCount: {
+            type: 'long',
+          },
+          mbPercentage: {
+            type: 'float',
+          },
+          versions: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
     fetch: async () => {
       const usage = {
         isEnabled: config.ui.enabled,
