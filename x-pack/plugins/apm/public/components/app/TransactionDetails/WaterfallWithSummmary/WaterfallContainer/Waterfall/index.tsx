@@ -6,13 +6,13 @@
 
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
+import { History, Location } from 'history';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import { px } from '../../../../../../style/variables';
-import { history } from '../../../../../../utils/history';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
@@ -39,9 +39,11 @@ const TIMELINE_MARGINS = {
 };
 
 const toggleFlyout = ({
+  history,
   item,
   location,
 }: {
+  history: History;
   item?: IWaterfallItem;
   location: Location;
 }) => {
@@ -74,6 +76,7 @@ export function Waterfall({
   waterfallItemId,
   location,
 }: Props) {
+  const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
@@ -105,7 +108,7 @@ export function Waterfall({
         childrenByParentId={childrenByParentId}
         timelineMargins={TIMELINE_MARGINS}
         onClickWaterfallItem={(item: IWaterfallItem) =>
-          toggleFlyout({ item, location })
+          toggleFlyout({ history, item, location })
         }
       />
     );
