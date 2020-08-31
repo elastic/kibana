@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.9.1>>
 * <<release-notes-7.9.0>>
 * <<release-notes-7.8.1>>
 * <<release-notes-7.8.0>>
@@ -40,10 +41,21 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.9.1]]
+== {kib} 7.9.1
+
+See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+
+[float]
+[[bug-v7.9.1]]
+=== Bug fix
+Dashboard:: 
+* OriginatingApp Connection not lost after Create New {kibana-pull}74400[#74400]
+
 [[release-notes-7.9.0]]
 == {kib} 7.9.0
 
-//See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+See also <<breaking-changes-7.9,breaking changes in 7.9>>.
 
 Operations::
 * Moves kibana-keystore from data/ to config/ {kibana-pull}57856[#57856]
